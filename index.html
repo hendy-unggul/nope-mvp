@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NOPE</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
   <style>
     body {
       display: flex; flex-direction: column; align-items: center;
@@ -26,23 +27,45 @@
     .logo {
       font-size: 32px; margin-bottom: 24px; color: #FF9999;
     }
+    .hint {
+      font-size: 14px; color: #666; margin-top: 12px;
+    }
   </style>
 </head>
 <body>
   <div class="logo">NOPE</div>
   <p>Buat dua kata nama yang unik</p>
-  <input type="text" id="username" placeholder="contoh: matahari.ngilang" maxlength="30" />
+  <input type="text" id="username" placeholder="contoh: matahari terbenam" maxlength="40" />
   <br/>
   <button onclick="login()">Gaskeun!</button>
+  <div class="hint">Pakai spasi, bukan titik atau underscore</div>
 
   <script>
     function login() {
-      const username = document.getElementById('username').value.trim();
-      if (!username || username.split(' ').length > 1) {
-        alert('Nama harus satu kata atau dua kata tanpa spasi (gunakan titik atau garis bawah)');
+      const raw = document.getElementById('username').value.trim();
+      
+      // Pisahkan berdasarkan spasi dan hilangkan bagian kosong
+      const parts = raw.split(' ').filter(p => p.length > 0);
+      
+      // Harus tepat 2 kata
+      if (parts.length !== 2) {
+        alert('Kamu harus masukkan dua kata, dipisah spasi.\nContoh: "buku terbang"');
         return;
       }
+      
+      // Pastikan hanya huruf, angka, dan spasi (tidak ada . _ @ # dll)
+      if (/[^a-zA-Z0-9\s]/.test(raw)) {
+        alert('Hanya gunakan huruf, angka, dan spasi.\nTidak perlu titik atau underscore.');
+        return;
+      }
+      
+      // Ambil dua kata (abaikan spasi berlebih)
+      const username = parts[0] + ' ' + parts[1];
+      
+      // Simpan ke localStorage
       localStorage.setItem('nope_username', username);
+      
+      // Redirect ke jejak
       window.location.href = 'jejak.html';
     }
   </script>
