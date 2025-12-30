@@ -1,25 +1,140 @@
 <!-- File: frekuensi.html -->
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Frekuensi — NOPE</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .header {
+      padding: 20px 20px 12px;
+      font-size: 18px;
+      text-align: center;
+    }
+    .feed {
+      padding: 0 20px;
+    }
+    .zone-indicator {
+      display: inline-block;
+      font-size: 14px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-top: 8px;
+      background: rgba(52,61,235,0.15);
+      color: #343deb;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+      line-height: 1.6;
+    }
+    .empty-state a {
+      color: #343deb;
+      display: block;
+      margin-top: 12px;
+    }
+  </style>
 </head>
 <body>
-  <header>Se frekuensi</header>
-  <div id="feed">
+  <div class="header">
+    <div>Se frekuensi</div>
+  </div>
+
+  <div class="feed" id="feed">
     <p style="text-align:center; padding:40px; color:#666;">Memuat...</p>
   </div>
 
+  <script type="module" src="js/supabaseClient.js"></script>
   <script type="module">
-    import { loadFrekuensiFeed } from './js/feedFrekuensi.js';
+    import { supabase } from './js/supabaseClient.js';
 
     const currentUser = localStorage.getItem('nope_username');
     if (!currentUser) {
-      document.getElementById('feed').innerHTML = `<p>Kamu belum login. Kembali ke <a href="index.html">NOPE</a>.</p>`;
+      document.getElementById('feed').innerHTML = `
+        <div class="empty-state">
+          Belum login.<br>
+          <a href="index.html">Kembali ke NOPE</a>
+        </div>
+      `;
     } else {
       loadFrekuensiFeed(currentUser);
+    }
+
+    async function loadFrekuensiFeed(username) {
+      // 1. Ambil zona user
+      const { data: freq, error: fe } = await supabase
+        .from('user_frequencies')
+        .select('detected_zone')
+        .eq('username', username)
+        .single();
+
+      const feedEl = document.getElementById('feed');
+
+      if (fe || !freq) {
+        feedEl.innerHTML = `
+          <div class="empty-state">
+            Jejak 3 kali dulu.<br>
+            Nanti NOPE kasih tahu siapa yang sefrekuensi 🫶<br>
+            <a href="jejak.html">Ke Jejak</a>
+          </div>
+        `;
+        return;
+      }
+
+      // 2. Cari user lain dengan zona sama
+      const { data: peers, error: pe } = await supabase
+        .from('user_frequencies')
+        .select('username')
+        .eq('detected_zone', freq.detected_zone);
+
+      if (pe || !peers?.length) {
+        feedEl.innerHTML = `<div class="empty-state">Belum ada yang sefrekuensi.</div>`;
+        return;
+      }
+
+      const peerUsernames = peers.map(p => p.username).filter(u => u !== username);
+
+      if (peerUsernames.length === 0) {
+        feedEl.innerHTML = `<div class="empty-state">Kamu yang pertama di zona ini!<br>Nanti ada yang nyusul.</div>`;
+        return;
+      }
+
+      // 3. Ambil rant dari user sefrekuensi
+      const { data: rants, error: re } = await supabase
+        .from('rants')
+        .select('*')
+        .in('username', peerUsernames)
+        .order('created_at', { ascending: false })
+        .limit(30);
+
+      if (re || !rants?.length) {
+        feedEl.innerHTML = `<div class="empty-state">Belum ada jejak dari yang sefrekuensi.</div>`;
+        return;
+      }
+
+      // Tampilkan zona di header
+      const zoneMap = {
+        "Hype Haus": "Hype Haus",
+        "Ngusahain": "Ngusahain",
+        "Spill Zone": "Spill Zone"
+      };
+      document.querySelector('.header').innerHTML = `
+        <div>Se frekuensi</div>
+        <div class="zone-indicator">${zoneMap[freq.detected_zone] || freq.detected_zone}</div>
+      `;
+
+      // Render rant
+      feedEl.innerHTML = rants.map(rant => `
+        <div class="rant-card">
+          <div style="font-size:12px; color:#666; margin-bottom:4px;">@${rant.username}</div>
+          <div>${rant.content}</div>
+          <div style="font-size:12px; color:#666; margin-top:8px;">
+            ${new Date(rant.created_at).toLocaleDateString('id-ID')}
+          </div>
+        </div>
+      `).join('');
     }
   </script>
 </body>
