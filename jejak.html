@@ -253,12 +253,12 @@
       <div class="logo">NOPE</div>
       <div class="top-right">
         <div class="nav-mini">
-          <span onclick="goTo('jejak.html')">Jejak</span>
-          <span onclick="goTo('frekuensi.html')">Frekuensi</span>
-          <span onclick="goTo('saynope.html')">SayNOPE</span>
-          <span onclick="goTo('glitch.html')">GLITCH</span>
+          <span id="nav-jejak">Jejak</span>
+          <span id="nav-frekuensi">Frekuensi</span>
+          <span id="nav-saynope">SayNOPE</span>
+          <span id="nav-glitch">GLITCH</span>
         </div>
-        <button class="settings-btn" onclick="logout()">⋯</button>
+        <button class="settings-btn" id="settings-btn">⋯</button>
       </div>
     </header>
 
@@ -283,7 +283,6 @@
 
     <div class="diary" id="diary"></div>
 
-    <!-- Tray Artefak 3x2 -->
     <div class="tray" id="tray"></div>
 
     <div class="tagline">
@@ -295,36 +294,35 @@
 
   <input type="file" id="file-input" accept="image/*" style="display:none;">
 
- <script type="module" src="js/supabaseClient.js"></script>
-<script type="module">
-  import { supabase } from './js/supabaseClient.js';
-  import { analyzeOnboardingIfNeeded } from './js/onboarding.js';
+  <script type="module" src="js/supabaseClient.js"></script>
+  <script type="module">
+    import { supabase } from './js/supabaseClient.js';
+    import { analyzeOnboardingIfNeeded } from './js/onboarding.js';
 
-  const currentUser = localStorage.getItem('nope_username') || null;
-  if (!currentUser) {
-    window.location.href = 'index.html';
-  }
-  document.getElementById('username-display').textContent = currentUser;
-
-  let artefacts = [];
-  let rants = [];
-
-  async function ensureUserExists() {
-    const { data, error } = await supabase
-      .from('users')
-      .select('username')
-      .eq('username', currentUser)
-      .single();
-    if (error && error.code === 'PGRST116') {
-      await supabase.from('users').insert({ username: currentUser });
+    const currentUser = localStorage.getItem('nope_username') || null;
+    if (!currentUser) {
+      window.location.href = 'index.html';
     }
-  }
+    document.getElementById('username-display').textContent = currentUser;
 
-  async function loadData() {
-    await ensureUserExists();
+    let artefacts = [];
+    let rants = [];
 
-    // --- Try load from Supabase ---
-    try {
+    async function ensureUserExists() {
+      const { data, error } = await supabase
+        .from('users')
+        .select('username')
+        .eq('username', currentUser)
+        .single();
+      if (error && error.code === 'PGRST116') {
+        await supabase.from('users').insert({ username: currentUser });
+      }
+    }
+
+    async function loadData() {
+      await ensureUserExists();
+
+      // Load artefacts
       const {  artefactsData } = await supabase
         .from('artefacts')
         .select('*')
@@ -334,16 +332,8 @@
       artefacts = artefactsData || [];
       renderHero();
       renderTray();
-    } catch (e) {
-      console.warn('⚠️ Supabase API timeout — menggunakan data lokal');
-      // Fallback: ambil dari localStorage
-      const localArtefacts = JSON.parse(localStorage.getItem(`nope_artefacts_${currentUser}`) || '[]');
-      artefacts = localArtefacts;
-      renderHero();
-      renderTray();
-    }
 
-    try {
+      // Load rants
       const { data: rantsData } = await supabase
         .from('rants')
         .select('*')
@@ -352,139 +342,142 @@
         .limit(5);
       rants = rantsData || [];
       renderDiary();
+    }
+
+    function renderHero() {
+      const heroImg = document.getElementById('hero-img');
+      const heroNotation = document.getElementById('hero-notation-display');
+      const inputContainer = document.getElementById('hero-input-container');
+
+      if (artefacts.length > 0) {
+        heroImg.src = artefacts[0].image_url;
+        const notation = artefacts[0].notation || '';
+        heroNotation.textContent = notation;
+        inputContainer.style.display = notation ? 'none' : 'flex';
+      } else {
+        heroImg.src = 'https://picsum.photos/384/480?random=1';
+        heroNotation.textContent = '';
+        inputContainer.style.display = 'flex';
+      }
+    }
+
+    function renderDiary() {
+      const container = document.getElementById('diary');
+      container.innerHTML = '';
+      rants.forEach(rant => {
+        const entry = document.createElement('div');
+        entry.className = 'diary-entry';
+        const date = new Date(rant.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+        entry.innerHTML = `<time>${date}</time><p>${rant.content}</p>`;
+        container.appendChild(entry);
+      });
+    }
+
+    function renderTray() {
+      const tray = document.getElementById('tray');
+      tray.innerHTML = '';
+      artefacts.slice(0, 6).forEach(a => {
+        const div = document.createElement('div');
+        div.className = 'tray-slot';
+        div.style.backgroundImage = `url(${a.image_url})`;
+        if (a.notation) {
+          div.innerHTML = `<div class="artefak-notation">${a.notation}</div>`;
+        }
+        tray.appendChild(div);
+      });
+    }
+
+    // === Aktifkan CTA Unggah ===
+    function initUploadButton() {
+      document.getElementById('upload-btn').addEventListener('click', () => {
+        document.getElementById('file-input').click();
+      });
+
+      document.getElementById('file-input').addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const imageUrl = URL.createObjectURL(file);
+        const { error } = await supabase.from('artefacts').insert({
+          username: currentUser,
+          image_url: imageUrl,
+          notation: ''
+        });
+        if (!error) {
+          loadData();
+          showConfirmation("Artefak berhasil ditambahkan.");
+        } else {
+          alert('Gagal menyimpan artefak.');
+        }
+      });
+    }
+
+    // === Aktifkan CTA Jejakkan ===
+    function initJejakkanButton() {
+      document.getElementById('jejakkan-btn').addEventListener('click', async () => {
+        const content = document.getElementById('rant').value.trim();
+        if (!content) return;
+        if (content.length > 300) {
+          alert('Maksimal 300 huruf.');
+          return;
+        }
+
+        const { error } = await supabase.from('rants').insert({
+          username: currentUser,
+          content: content,
+          zone: 'auto'
+        });
+
+        if (!error) {
+          document.getElementById('rant').value = '';
+          showConfirmation("Jejakmu tersimpan.");
+          await loadData();
+          await analyzeOnboardingIfNeeded(supabase, currentUser);
+        } else {
+          alert('Gagal menyimpan jejak.');
+        }
+      });
+    }
+
+    // === Aktifkan Navigasi ===
+    function initNavigation() {
+      document.getElementById('nav-jejak').addEventListener('click', () => {
+        window.location.href = 'jejak.html';
+      });
+      document.getElementById('nav-frekuensi').addEventListener('click', () => {
+        window.location.href = 'frekuensi.html';
+      });
+      document.getElementById('nav-saynope').addEventListener('click', () => {
+        window.location.href = 'saynope.html';
+      });
+      document.getElementById('nav-glitch').addEventListener('click', () => {
+        window.location.href = 'glitch.html';
+      });
+      document.getElementById('settings-btn').addEventListener('click', () => {
+        if (confirm('Keluar dari akun?')) {
+          localStorage.removeItem('nope_username');
+          window.location.href = 'index.html';
+        }
+      });
+    }
+
+    function showConfirmation(msg) {
+      const el = document.getElementById('confirmation');
+      el.textContent = msg;
+      setTimeout(() => el.textContent = "", 3000);
+    }
+
+    // === Init ===
+    try {
+      console.log('🚀 Inisialisasi dimulai...');
+      loadData();
+      initUploadButton();
+      initJejakkanButton();
+      initNavigation();
+      console.log('✅ Inisialisasi selesai.');
     } catch (e) {
-      console.warn('⚠️ Supabase API timeout — menggunakan data lokal');
-      const localRants = JSON.parse(localStorage.getItem(`nope_rants_${currentUser}`) || '[]');
-      rants = localRants;
-      renderDiary();
+      console.error('❌ Inisialisasi gagal:', e);
+      alert('Gagal memuat NOPE. Coba refresh.');
     }
-  }
-
-  function renderHero() {
-    const heroImg = document.getElementById('hero-img');
-    const heroNotation = document.getElementById('hero-notation-display');
-    const inputContainer = document.getElementById('hero-input-container');
-
-    if (artefacts.length > 0) {
-      heroImg.src = artefacts[0].image_url;
-      const notation = artefacts[0].notation || '';
-      heroNotation.textContent = notation;
-      inputContainer.style.display = notation ? 'none' : 'flex';
-    } else {
-      heroImg.src = 'https://picsum.photos/384/480?random=1';
-      heroNotation.textContent = '';
-      inputContainer.style.display = 'flex';
-    }
-  }
-
-  function renderDiary() {
-    const container = document.getElementById('diary');
-    container.innerHTML = '';
-    rants.forEach(rant => {
-      const entry = document.createElement('div');
-      entry.className = 'diary-entry';
-      const date = new Date(rant.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
-      entry.innerHTML = `<time>${date}</time><p>${rant.content}</p>`;
-      container.appendChild(entry);
-    });
-  }
-
-  function renderTray() {
-    const tray = document.getElementById('tray');
-    tray.innerHTML = '';
-    artefacts.slice(0, 6).forEach(a => {
-      const div = document.createElement('div');
-      div.className = 'tray-slot';
-      div.style.backgroundImage = `url(${a.image_url})`;
-      if (a.notation) {
-        div.innerHTML = `<div class="artefak-notation">${a.notation}</div>`;
-      }
-      tray.appendChild(div);
-    });
-  }
-
-  // === Aktifkan CTA Unggah ===
-  function initUploadButton() {
-    document.getElementById('upload-btn').addEventListener('click', () => {
-      document.getElementById('file-input').click();
-    });
-
-    document.getElementById('file-input').addEventListener('change', async (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
-      const imageUrl = URL.createObjectURL(file);
-
-      // Simpan ke Supabase
-      const { error } = await supabase.from('artefacts').insert({
-        username: currentUser,
-        image_url: imageUrl,
-        notation: ''
-      });
-
-      if (!error) {
-        // Update lokal cache
-        const current = JSON.parse(localStorage.getItem(`nope_artefacts_${currentUser}`) || '[]');
-        current.unshift({ image_url: imageUrl, notation: '' });
-        localStorage.setItem(`nope_artefacts_${currentUser}`, JSON.stringify(current));
-
-        loadData();
-        showConfirmation("Artefak berhasil ditambahkan.");
-      } else {
-        alert('Gagal menyimpan artefak.');
-      }
-    });
-  }
-
-  // === Aktifkan CTA Jejakkan ===
-  function initJejakkanButton() {
-    document.getElementById('jejakkan-btn').addEventListener('click', async () => {
-      const content = document.getElementById('rant').value.trim();
-      if (!content) return;
-      if (content.length > 300) {
-        alert('Maksimal 300 huruf.');
-        return;
-      }
-
-      const { error } = await supabase.from('rants').insert({
-        username: currentUser,
-        content: content,
-        zone: 'auto'
-      });
-
-      if (!error) {
-        // Update lokal cache
-        const current = JSON.parse(localStorage.getItem(`nope_rants_${currentUser}`) || '[]');
-        current.unshift({ content: content, created_at: new Date().toISOString() });
-        localStorage.setItem(`nope_rants_${currentUser}`, JSON.stringify(current));
-
-        document.getElementById('rant').value = '';
-        showConfirmation("Jejakmu tersimpan.");
-        await loadData(); // Refresh UI
-        await analyzeOnboardingIfNeeded(supabase, currentUser);
-      } else {
-        alert('Gagal menyimpan jejak.');
-      }
-    });
-  }
-
-  function showConfirmation(msg) {
-    const el = document.getElementById('confirmation');
-    el.textContent = msg;
-    setTimeout(() => el.textContent = "", 3000);
-  }
-
-  function goTo(page) { window.location.href = page; }
-  function logout() {
-    if (confirm('Keluar dari akun?')) {
-      localStorage.removeItem('nope_username');
-      window.location.href = 'index.html';
-    }
-  }
-
-  // === Init ===
-  loadData();
-  initUploadButton();
-  initJejakkanButton();
-</script>
- </body>
+  </script>
+</body>
 </html>
