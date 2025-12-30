@@ -79,9 +79,6 @@
       cursor: pointer;
       transform: rotate(90deg);
     }
-    .greeting {
-      display: none;
-    }
     .hero {
       position: relative;
       width: 100%;
@@ -265,7 +262,6 @@
       </div>
     </header>
 
-    <!-- Hello @username pindah ke rant-box -->
     <div class="hero">
       <img id="hero-img" src="https://picsum.photos/384/480?random=1" alt="artefak">
       <div class="artefak-notation" id="hero-notation-display"></div>
@@ -275,7 +271,6 @@
       </div>
     </div>
 
-    <!-- Rant Box -->
     <div class="rant-box">
       <div class="rant-box-header">
         Hello <strong>@<span id="username-display"></span></strong><br>
@@ -286,10 +281,8 @@
       <div class="confirmation" id="confirmation"></div>
     </div>
 
-    <!-- Diary -->
     <div class="diary" id="diary"></div>
 
-    <!-- Tray Artefak -->
     <div class="tray" id="tray"></div>
 
     <div class="tagline">
@@ -299,10 +292,8 @@
     </div>
   </div>
 
-  <!-- Hidden file input -->
   <input type="file" id="file-input" accept="image/*" style="display:none;">
 
-  <!-- Supabase & modul -->
   <script type="module" src="js/supabaseClient.js"></script>
   <script type="module">
     import { supabase } from './js/supabaseClient.js';
@@ -341,7 +332,7 @@
       renderHero();
       renderTray();
 
-      const {  rantsData } = await supabase
+      const { data: rantsData } = await supabase
         .from('rants')
         .select('*')
         .eq('username', currentUser)
@@ -394,39 +385,29 @@
       });
     }
 
-    // === Aktifkan CTA Unggah ===
     function initUploadButton() {
       document.getElementById('upload-btn').addEventListener('click', () => {
         document.getElementById('file-input').click();
       });
 
-      document.getElementById('file-input').addEventListener('change', handleFileSelect);
-    }
-
-    async function handleFileSelect(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      // Simpan sebagai URL lokal (MVP)
-      const imageUrl = URL.createObjectURL(file);
-
-      // Langsung simpan ke Supabase
-      const { error } = await supabase.from('artefacts').insert({
-        username: currentUser,
-        image_url: imageUrl,
-        notation: '' // kosong, akan diisi nanti
+      document.getElementById('file-input').addEventListener('change', async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const imageUrl = URL.createObjectURL(file);
+        const { error } = await supabase.from('artefacts').insert({
+          username: currentUser,
+          image_url: imageUrl,
+          notation: ''
+        });
+        if (!error) {
+          loadData();
+          showConfirmation("Artefak berhasil ditambahkan.");
+        } else {
+          alert('Gagal menyimpan artefak.');
+        }
       });
-
-      if (!error) {
-        // Refresh data
-        loadData();
-        showConfirmation("Artefak berhasil ditambahkan.");
-      } else {
-        alert('Gagal menyimpan artefak.');
-      }
     }
 
-    // === Aktifkan CTA Jejakkan ===
     function initJejakkanButton() {
       document.getElementById('jejakkan-btn').addEventListener('click', async () => {
         const content = document.getElementById('rant').value.trim();
@@ -445,7 +426,7 @@
         if (!error) {
           document.getElementById('rant').value = '';
           showConfirmation("Jejakmu tersimpan.");
-          loadData();
+          await loadData(); // ✅ Ini yang memastikan jurnal update
           await analyzeOnboardingIfNeeded(supabase, currentUser);
         } else {
           alert('Gagal menyimpan jejak.');
@@ -467,19 +448,10 @@
       }
     }
 
-    // === Init ===
+    // Init
     loadData();
     initUploadButton();
     initJejakkanButton();
-
-    // Enter di notasi
-    document.addEventListener('keypress', (e) => {
-      if (e.target.id === 'hero-notation' && e.key === 'Enter') {
-        // Notasi tidak disimpan otomatis — biarkan user klik "Unggah" lagi
-        // Karena kita sudah simpan artefak saat pilih file
-        alert('Notasi harus diisi lalu klik Unggah lagi.');
-      }
-    });
   </script>
 </body>
 </html>
