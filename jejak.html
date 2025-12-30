@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NOPE — Jejak</title>
-  <link rel="stylesheet" href="style.css">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   <style>
     :root {
@@ -110,14 +109,29 @@
       backdrop-filter: blur(2px);
       pointer-events: none;
     }
+    .upload-artefak-btn {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      z-index: 2;
+    }
     .hero-input {
       position: absolute;
       bottom: 12px;
       left: 12px;
-      right: 12px;
-      display: flex;
+      right: 84px; /* Biar tidak tumpang tindih dengan tombol Unggah */
+      display: none;
       align-items: center;
       gap: 8px;
+      z-index: 2;
     }
     .hero-input input {
       flex: 1;
@@ -246,7 +260,6 @@
       display: block;
       margin-top: 4px;
     }
-    .hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -267,7 +280,8 @@
     <div class="hero">
       <img id="hero-img" src="https://placehold.co/384x480/111/333?text=+" alt="artefak">
       <div class="artefak-notation" id="hero-notation-display"></div>
-      <div class="hero-input" id="hero-input-container" style="display: none;">
+      <button id="upload-artefak-btn" class="upload-artefak-btn">Unggah</button>
+      <div class="hero-input" id="hero-input-container">
         <input id="hero-notation" type="text" placeholder="notasi (maks 4 kata)" maxlength="50">
         <button id="save-notation-btn">Simpan</button>
       </div>
@@ -296,12 +310,11 @@
 
   <input type="file" id="file-input" accept="image/*" style="display:none;">
 
-  <!-- Supabase Client -->
   <script type="module">
-    // === IMPORT SUPABASE ===
+    // === SUPABASE CLIENT ===
     import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-    
-    // Ganti dengan project URL & ANON KEY-mu
+
+    // 🔑 GANTI DENGAN PROJECT-MU
     const supabaseUrl = 'https://your-project.supabase.co';
     const supabaseAnonKey = 'your-anon-key-here';
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -312,68 +325,60 @@
       window.location.href = 'index.html';
     }
 
+    document.getElementById('username-display').textContent = currentUser;
+
     let artefacts = [];
     let rants = [];
 
-    // === DOM ELEMENTS ===
-    const usernameDisplay = document.getElementById('username-display');
     const heroImg = document.getElementById('hero-img');
     const heroNotationDisplay = document.getElementById('hero-notation-display');
     const heroInputContainer = document.getElementById('hero-input-container');
-    const heroNotationInput = document.getElementById('hero-notation');
-    const fileInput = document.getElementById('file-input');
-    const confirmationEl = document.getElementById('confirmation');
-
-    // === INIT ===
-    usernameDisplay.textContent = currentUser;
 
     // === UTILS ===
     function showConfirmation(msg) {
-      confirmationEl.textContent = msg;
-      setTimeout(() => confirmationEl.textContent = '', 3000);
+      const el = document.getElementById('confirmation');
+      el.textContent = msg;
+      setTimeout(() => el.textContent = '', 3000);
     }
 
     function validateNotation(text) {
-      const words = text.trim().split(/\s+/).filter(w => w.length > 0);
-      return words.length <= 4;
+      const words = text.trim().split(/\s+/).filter(w => w);
+      return words.length > 0 && words.length <= 4;
     }
 
-    // === DATABASE: Ensure user exists ===
+    // === DATABASE: pastikan user ada ===
     async function ensureUserExists() {
       const { data, error } = await supabase
         .from('users')
         .select('username')
         .eq('username', currentUser)
         .single();
-
       if (error && error.code === 'PGRST116') {
         await supabase.from('users').insert({ username: currentUser });
       }
     }
 
-    // === LOAD DATA ===
+    // === MUAT DATA ===
     async function loadData() {
       await ensureUserExists();
 
-      // Load artefacts
+      // Artefacts
       const { data: artefactsData, error: artefactsError } = await supabase
         .from('artefacts')
         .select('*')
         .eq('username', currentUser)
         .order('created_at', { ascending: false })
         .limit(6);
+      artefacts = artefactsError ? [] : artefactsData || [];
 
-      artefacts = artefactsError ? [] : (artefactsData || []);
-
-      // Load rants
+      // Rants
       const { data: rantsData, error: rantsError } = await supabase
         .from('rants')
         .select('*')
         .eq('username', currentUser)
         .order('created_at', { ascending: false })
         .limit(5);
-
-      rants = rantsError ? [] : (rantsData || []);
+      rants = rantsError ? [] : rantsData || [];
 
       renderHero();
       renderDiary();
@@ -414,20 +419,21 @@
         div.className = 'tray-slot';
         div.style.backgroundImage = `url(${a.image_url})`;
         if (a.notation) {
-          div.innerHTML = `<div class="artefak-notation">${a.notation}</div>`;
+          const notationEl = document.createElement('div');
+          notationEl.className = 'artefak-notation';
+          notationEl.textContent = a.notation;
+          div.appendChild(notationEl);
         }
         tray.appendChild(div);
       });
     }
 
-    // === UPLOAD ARTEFAK ===
+    // === UPLOAD ARTEFAK BARU ===
     async function handleFileSelect(event) {
       const file = event.target.files[0];
       if (!file) return;
 
       const fileName = `${currentUser}/${Date.now()}-${file.name}`;
-
-      // Upload ke storage
       const { error: uploadError } = await supabase.storage
         .from('artefacts')
         .upload(fileName, file);
@@ -438,35 +444,30 @@
         return;
       }
 
-      // Dapatkan public URL
       const { data } = supabase.storage.from('artefacts').getPublicUrl(fileName);
       const imageUrl = data.publicUrl;
 
-      // Simpan ke DB
       const { error: dbError } = await supabase
         .from('artefacts')
         .insert({ username: currentUser, image_url: imageUrl, notation: '' });
 
       if (dbError) {
-        console.error('DB insert error:', dbError);
+        console.error('DB error:', dbError);
         alert('Gagal menyimpan artefak.');
         return;
       }
 
       showConfirmation("Artefak diunggah! Tambahkan notasi (maks 4 kata).");
       await loadData();
-      heroNotationInput.focus();
+      document.getElementById('hero-notation').focus();
     }
 
-    // === SAVE NOTATION ===
+    // === SIMPAN NOTASI ===
     async function saveNotation() {
-      const text = heroNotationInput.value.trim();
-      if (!text) {
-        alert('Notasi tidak boleh kosong.');
-        return;
-      }
+      const input = document.getElementById('hero-notation');
+      const text = input.value.trim();
       if (!validateNotation(text)) {
-        alert('Maksimal 4 kata.');
+        alert('Notasi harus 1–4 kata.');
         return;
       }
 
@@ -477,7 +478,7 @@
         .eq('image_url', artefacts[0].image_url);
 
       if (error) {
-        console.error('Gagal simpan notasi:', error);
+        console.error('Notasi error:', error);
         alert('Gagal menyimpan notasi.');
         return;
       }
@@ -500,6 +501,7 @@
         .insert({ username: currentUser, content, zone: 'auto' });
 
       if (error) {
+        console.error('Rant error:', error);
         alert('Gagal menyimpan jejak.');
         return;
       }
@@ -509,7 +511,7 @@
       await loadData();
     }
 
-    // === NAVIGATION ===
+    // === NAVIGASI ===
     function navigateTo(page) {
       window.location.href = page;
     }
@@ -521,50 +523,35 @@
       }
     }
 
-    // === EVENT LISTENERS ===
-    document.getElementById('upload-btn-placeholder').addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', handleFileSelect);
-    document.getElementById('save-notation-btn').addEventListener('click', saveNotation);
-    document.getElementById('jejakkan-btn').addEventListener('click', postRant);
+    // === INIT LISTENERS ===
+    function initListeners() {
+      // Upload artefak
+      document.getElementById('upload-artefak-btn').addEventListener('click', () => {
+        document.getElementById('file-input').click();
+      });
+      document.getElementById('file-input').addEventListener('change', handleFileSelect);
 
-    document.getElementById('nav-jejak').addEventListener('click', () => navigateTo('jejak.html'));
-    document.getElementById('nav-frekuensi').addEventListener('click', () => navigateTo('frekuensi.html'));
-    document.getElementById('nav-saynope').addEventListener('click', () => navigateTo('saynope.html'));
-    document.getElementById('nav-glitch').addEventListener('click', () => navigateTo('glitch.html'));
-    document.getElementById('settings-btn').addEventListener('click', logout);
+      // Notasi
+      document.getElementById('save-notation-btn').addEventListener('click', saveNotation);
+      document.getElementById('hero-notation').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') saveNotation();
+      });
 
-    heroNotationInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') saveNotation();
-    });
+      // Rant
+      document.getElementById('jejakkan-btn').addEventListener('click', postRant);
+
+      // Navigasi
+      document.getElementById('nav-jejak').addEventListener('click', () => navigateTo('jejak.html'));
+      document.getElementById('nav-frekuensi').addEventListener('click', () => navigateTo('frekuensi.html'));
+      document.getElementById('nav-saynope').addEventListener('click', () => navigateTo('saynope.html'));
+      document.getElementById('nav-glitch').addEventListener('click', () => navigateTo('glitch.html'));
+      document.getElementById('settings-btn').addEventListener('click', logout);
+    }
 
     // === START ===
-    loadData();
-  </script>
-
-  <!-- Ganti tombol Unggah yang hilang -->
-  <script>
-    // Tambahkan "Unggah" button ke hero jika belum ada
     document.addEventListener('DOMContentLoaded', () => {
-      const hero = document.querySelector('.hero');
-      if (!document.getElementById('upload-btn-placeholder')) {
-        const uploadBtn = document.createElement('button');
-        uploadBtn.id = 'upload-btn-placeholder';
-        uploadBtn.textContent = 'Unggah';
-        uploadBtn.style.cssText = `
-          position: absolute;
-          bottom: 12px;
-          right: 12px;
-          background: var(--accent);
-          color: #000;
-          border: none;
-          border-radius: 6px;
-          padding: 4px 10px;
-          font-size: 12px;
-          font-weight: 600;
-          cursor: pointer;
-        `;
-        hero.appendChild(uploadBtn);
-      }
+      loadData();
+      initListeners();
     });
   </script>
 </body>
