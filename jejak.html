@@ -78,7 +78,26 @@
       window.location.href = 'index.html';
     } else {
       document.getElementById('current-username').textContent = currentUser;
-      loadUserRants(currentUser);
+      ensureUserExists(currentUser).then(() => {
+        loadUserRants(currentUser);
+      });
+    }
+
+    async function ensureUserExists(username) {
+      const { data, error } = await supabase
+        .from('users')
+        .select('username')
+        .eq('username', username)
+        .single();
+
+      if (error && error.code === 'PGRST116') {
+        // User belum ada → buat dulu
+        const { error: insertError } = await supabase.from('users').insert({ username });
+        if (insertError) {
+          console.error('❌ Gagal buat user:', insertError);
+          alert('Gagal mempersiapkan akun. Coba lagi nanti.');
+        }
+      }
     }
 
     function openModal() {
@@ -93,24 +112,31 @@
       const content = document.getElementById('rant-input').value.trim();
       if (!content) return;
 
-      const { error } = await supabase.from('rants').insert({
-        username: currentUser,
-        content: content,
-        zone: 'auto'
-      });
+      try {
+        const { error: insertError } = await supabase.from('rants').insert({
+          username: currentUser,
+          content: content,
+          zone: 'auto'
+        });
 
-      if (!error) {
+        if (insertError) {
+          console.error('❌ Gagal insert rant:', insertError);
+          alert(`Gagal menyimpan jejak.\nError: ${insertError.message}`);
+          return;
+        }
+
         document.getElementById('rant-input').value = '';
         closeModal();
         loadUserRants(currentUser);
-        // Trigger deteksi frekuensi
         await analyzeOnboardingIfNeeded(supabase, currentUser);
-      } else {
-        alert('Gagal menyimpan jejak.');
+
+      } catch (err) {
+        console.error('💥 Error tak terduga:', err);
+        alert('Terjadi kesalahan. Coba lagi nanti.');
       }
     }
 
-    // ✅ Ganti onclick="" dengan event listener
+    // Event listener
     document.getElementById('jejakkan-btn').addEventListener('click', postRant);
     document.getElementById('open-modal').addEventListener('click', openModal);
   </script>
