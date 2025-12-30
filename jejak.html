@@ -406,32 +406,23 @@
     async function handleFileSelect(event) {
       const file = event.target.files[0];
       if (!file) return;
-      const imageUrl = URL.createObjectURL(file);
-      artefacts.unshift({ image_url: imageUrl, notation: '', id: 'temp' });
-      renderHero();
-      renderTray();
-      showConfirmation("Apa yang ingin kau sematkan? (maks 4 kata)");
-      setTimeout(() => document.getElementById('hero-notation')?.focus(), 500);
-    }
 
-    async function saveNotation() {
-      const notation = document.getElementById('hero-notation')?.value.trim() || '';
-      if (notation.split(/\s+/).filter(w => w).length > 4) {
-        alert('Maksimal 4 kata.');
-        return;
-      }
-      if (artefacts[0]?.id === 'temp') {
-        const { error } = await supabase.from('artefacts').insert({
-          username: currentUser,
-          image_url: artefacts[0].image_url,
-          notation: notation || null
-        });
-        if (!error) {
-          showConfirmation("Jejakmu tersimpan.");
-          loadData();
-        } else {
-          alert('Gagal menyimpan artefak.');
-        }
+      // Simpan sebagai URL lokal (MVP)
+      const imageUrl = URL.createObjectURL(file);
+
+      // Langsung simpan ke Supabase
+      const { error } = await supabase.from('artefacts').insert({
+        username: currentUser,
+        image_url: imageUrl,
+        notation: '' // kosong, akan diisi nanti
+      });
+
+      if (!error) {
+        // Refresh data
+        loadData();
+        showConfirmation("Artefak berhasil ditambahkan.");
+      } else {
+        alert('Gagal menyimpan artefak.');
       }
     }
 
@@ -462,17 +453,13 @@
       });
     }
 
-    // === Aktifkan Navigasi ===
-    function goTo(page) {
-      window.location.href = page;
-    }
-
     function showConfirmation(msg) {
       const el = document.getElementById('confirmation');
       el.textContent = msg;
       setTimeout(() => el.textContent = "", 3000);
     }
 
+    function goTo(page) { window.location.href = page; }
     function logout() {
       if (confirm('Keluar dari akun?')) {
         localStorage.removeItem('nope_username');
@@ -488,7 +475,9 @@
     // Enter di notasi
     document.addEventListener('keypress', (e) => {
       if (e.target.id === 'hero-notation' && e.key === 'Enter') {
-        saveNotation();
+        // Notasi tidak disimpan otomatis — biarkan user klik "Unggah" lagi
+        // Karena kita sudah simpan artefak saat pilih file
+        alert('Notasi harus diisi lalu klik Unggah lagi.');
       }
     });
   </script>
