@@ -123,17 +123,20 @@
       cursor: pointer;
       z-index: 2;
     }
-    .hero-input {
-      position: absolute;
-      bottom: 12px;
-      left: 12px;
-      right: 84px; /* Biar tidak tumpang tindih dengan tombol Unggah */
-      display: none;
+    .post-upload-panel {
+      display: flex;
       align-items: center;
       gap: 8px;
-      z-index: 2;
+      padding: 8px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0 0 12px 12px;
+      margin-bottom: 16px;
     }
-    .hero-input input {
+    .post-upload-panel.hidden {
+      display: none !important;
+    }
+    .post-upload-panel input {
       flex: 1;
       background: #000000aa;
       border: 1px solid var(--border);
@@ -142,11 +145,11 @@
       color: var(--text);
       font-size: 13px;
     }
-    .hero-input input:focus {
+    .post-upload-panel input:focus {
       outline: none;
       border-color: var(--accent);
     }
-    .hero-input button {
+    .post-upload-panel button {
       background: var(--accent);
       color: #000;
       border: none;
@@ -281,10 +284,12 @@
       <img id="hero-img" src="https://placehold.co/384x480/111/333?text=+" alt="artefak">
       <div class="artefak-notation" id="hero-notation-display"></div>
       <button id="upload-artefak-btn" class="upload-artefak-btn">Unggah</button>
-      <div class="hero-input" id="hero-input-container">
-        <input id="hero-notation" type="text" placeholder="notasi (maks 4 kata)" maxlength="50">
-        <button id="save-notation-btn">Simpan</button>
-      </div>
+    </div>
+
+    <!-- Panel notasi muncul DI BAWAH hero setelah upload -->
+    <div id="post-upload-panel" class="post-upload-panel hidden">
+      <input id="hero-notation" type="text" placeholder="notasi (maks 4 kata)" maxlength="50">
+      <button id="save-notation-btn">Simpan</button>
     </div>
 
     <div class="rant-box">
@@ -332,7 +337,7 @@
 
     const heroImg = document.getElementById('hero-img');
     const heroNotationDisplay = document.getElementById('hero-notation-display');
-    const heroInputContainer = document.getElementById('hero-input-container');
+    const postUploadPanel = document.getElementById('post-upload-panel');
 
     // === UTILS ===
     function showConfirmation(msg) {
@@ -342,8 +347,18 @@
     }
 
     function validateNotation(text) {
-      const words = text.trim().split(/\s+/).filter(w => w);
-      return words.length > 0 && words.length <= 4;
+      const words = text.trim().split(/\s+/).filter(w => w.length > 0);
+      return words.length >= 1 && words.length <= 4;
+    }
+
+    function showPostUploadPanel() {
+      postUploadPanel.classList.remove('hidden');
+      document.getElementById('hero-notation').value = '';
+      document.getElementById('hero-notation').focus();
+    }
+
+    function hidePostUploadPanel() {
+      postUploadPanel.classList.add('hidden');
     }
 
     // === DATABASE: pastikan user ada ===
@@ -363,7 +378,7 @@
       await ensureUserExists();
 
       // Artefacts
-      const { data: artefactsData, error: artefactsError } = await supabase
+      const {  artefactsData, error: artefactsError } = await supabase
         .from('artefacts')
         .select('*')
         .eq('username', currentUser)
@@ -372,7 +387,7 @@
       artefacts = artefactsError ? [] : artefactsData || [];
 
       // Rants
-      const { data: rantsData, error: rantsError } = await supabase
+      const {  rantsData, error: rantsError } = await supabase
         .from('rants')
         .select('*')
         .eq('username', currentUser)
@@ -391,11 +406,10 @@
         heroImg.src = artefacts[0].image_url;
         const notation = artefacts[0].notation || '';
         heroNotationDisplay.textContent = notation;
-        heroInputContainer.style.display = notation ? 'none' : 'flex';
+        if (notation) hidePostUploadPanel();
       } else {
         heroImg.src = 'https://placehold.co/384x480/111/333?text=+';
         heroNotationDisplay.textContent = '';
-        heroInputContainer.style.display = 'flex';
       }
     }
 
@@ -433,7 +447,9 @@
       const file = event.target.files[0];
       if (!file) return;
 
+      showConfirmation("Mengunggah...");
       const fileName = `${currentUser}/${Date.now()}-${file.name}`;
+
       const { error: uploadError } = await supabase.storage
         .from('artefacts')
         .upload(fileName, file);
@@ -441,6 +457,7 @@
       if (uploadError) {
         console.error('Upload error:', uploadError);
         alert('Gagal mengunggah gambar.');
+        showConfirmation("");
         return;
       }
 
@@ -452,22 +469,28 @@
         .insert({ username: currentUser, image_url: imageUrl, notation: '' });
 
       if (dbError) {
-        console.error('DB error:', dbError);
+        console.error('DB insert error:', dbError);
         alert('Gagal menyimpan artefak.');
+        showConfirmation("");
         return;
       }
 
-      showConfirmation("Artefak diunggah! Tambahkan notasi (maks 4 kata).");
       await loadData();
-      document.getElementById('hero-notation').focus();
+      showPostUploadPanel(); // ✅ Munculkan panel notasi setelah upload
     }
 
     // === SIMPAN NOTASI ===
     async function saveNotation() {
       const input = document.getElementById('hero-notation');
       const text = input.value.trim();
+
       if (!validateNotation(text)) {
         alert('Notasi harus 1–4 kata.');
+        return;
+      }
+
+      if (artefacts.length === 0) {
+        alert('Belum ada artefak.');
         return;
       }
 
@@ -485,6 +508,7 @@
 
       showConfirmation("Notasi tersimpan.");
       await loadData();
+      hidePostUploadPanel(); // ✅ Sembunyikan panel setelah simpan
     }
 
     // === POST RANT ===
@@ -511,7 +535,7 @@
       await loadData();
     }
 
-    // === NAVIGASI ===
+    // === NAVIGASI & LOGOUT ===
     function navigateTo(page) {
       window.location.href = page;
     }
@@ -524,8 +548,8 @@
     }
 
     // === INIT LISTENERS ===
-    function initListeners() {
-      // Upload artefak
+    document.addEventListener('DOMContentLoaded', () => {
+      // Upload
       document.getElementById('upload-artefak-btn').addEventListener('click', () => {
         document.getElementById('file-input').click();
       });
@@ -546,12 +570,9 @@
       document.getElementById('nav-saynope').addEventListener('click', () => navigateTo('saynope.html'));
       document.getElementById('nav-glitch').addEventListener('click', () => navigateTo('glitch.html'));
       document.getElementById('settings-btn').addEventListener('click', logout);
-    }
 
-    // === START ===
-    document.addEventListener('DOMContentLoaded', () => {
+      // Load data
       loadData();
-      initListeners();
     });
   </script>
 </body>
