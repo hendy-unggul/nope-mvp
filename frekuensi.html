@@ -228,7 +228,7 @@
     </div>
   </div>
 
-  <!-- Load Supabase via script tag (versi stabil) -->
+  <!-- Load Supabase via script tag -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0"></script>
 
   <script>
@@ -245,46 +245,94 @@
     }
     document.getElementById('username-display').textContent = currentUser;
 
-    // Mapping zona untuk emoji & query
-    const ZONES = {
-      hype: { id: 'zone-hype', emoji: '🔥' },
-      ngusahain: { id: 'zone-ngusahain', emoji: '+1' },
-      spill: { id: 'zone-spill', emoji: '🫂' }
-    };
+    // === KATA KUNCI ZONA ===
+    const HYPE_KEYWORDS = [
+      'v!', 'v!!!!', 'v', 'kpop', 'skz', 'txt', 'bts', 'seventeen', 'enhypen',
+      'drakor', 'k-drama', 'squid game', 'crash landing', 'kim seon ho',
+      'anime', 'naruto', 'demon slayer', 'one piece', 'gintama',
+      'au', 'alternate universe', 'ship', 'otp', 'stan', 'bias', 'maknae',
+      'comeback', 'music video', 'concert', 'lightstick', 'fanart'
+    ];
 
-    // === LOAD FEED ===
+    const NGUSAHAIN_KEYWORDS = [
+      'skripsi', 'tugas', 'deadline', 'sidang', 'wisuda', 'kuliah',
+      'jualan', 'thrifting', 'preloved', 'reselling', 'online shop',
+      'crypto', 'bitcoin', 'saham', 'investasi', 'passive income',
+      'freelance', 'coding', 'belajar', 'latihan', 'progres', 'hari ke-',
+      'untung', 'rugi', 'modal', 'omzet', 'usaha', 'bisnis', 'side hustle',
+      'ui/ux', 'figma', 'blender', 'photoshop', 'canva', 'skill'
+    ];
+
+    const SPILL_KEYWORDS = [
+      'capek', 'lelah', 'sendiri', 'hujan', 'nangis', 'sedih', 'putus asa',
+      'gabisa', 'gatau', 'kenapa ya', 'berat', 'beban', 'ngeluh', 'curhat',
+      'mental health', 'anxiety', 'depresi', 'overthinking', 'burnout',
+      'gaada yang ngerti', 'rasa', 'kosong', 'hampa', 'tertekan',
+      'pengen ilang', 'pengen ngilang', 'susah', 'buntu', 'mentok'
+    ];
+
+    // === DETEKSI ZONA DARI ISI RANT ===
+    function detectZone(content) {
+      const lower = content.toLowerCase();
+      
+      // Cek Hype Haus (prioritas tinggi untuk kata seperti "v!")
+      if (HYPE_KEYWORDS.some(kw => lower.includes(kw))) return 'hype';
+      if (NGUSAHAIN_KEYWORDS.some(kw => lower.includes(kw))) return 'ngusahain';
+      if (SPILL_KEYWORDS.some(kw => lower.includes(kw))) return 'spill';
+      
+      // Jika tidak ketemu, masukkan ke Spill (safe default)
+      return 'spill';
+    }
+
+    // === LOAD SEMUA RANT & SORTIR PER ZONA ===
     async function loadFeed() {
       try {
-        // Ambil 5 rant terbaru per zona
-        for (const [zoneKey, config] of Object.entries(ZONES)) {
-          const { data, error } = await supabase
-            .from('rants')
-            .select('*')
-            .eq('zone', zoneKey)
-            .order('created_at', { ascending: false })
-            .limit(5);
+        // Ambil SEMUA rant (tanpa filter zone)
+        const { data, error } = await supabase
+          .from('rants')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50); // ambil 50 terbaru
 
-          if (error) {
-            console.error(`Gagal muat zona ${zoneKey}:`, error);
-            renderZonePosts(zoneKey, []);
-            continue;
-          }
-
-          renderZonePosts(zoneKey, data || []);
+        if (error) {
+          console.error('Gagal muat rant:', error);
+          renderAllZones([], [], []);
+          return;
         }
+
+        const hypePosts = [];
+        const ngusahainPosts = [];
+        const spillPosts = [];
+
+        (data || []).forEach(rant => {
+          const zone = detectZone(rant.content);
+          if (zone === 'hype') {
+            if (hypePosts.length < 5) hypePosts.push(rant);
+          } else if (zone === 'ngusahain') {
+            if (ngusahainPosts.length < 5) ngusahainPosts.push(rant);
+          } else {
+            if (spillPosts.length < 5) spillPosts.push(rant);
+          }
+        });
+
+        renderAllZones(hypePosts, ngusahainPosts, spillPosts);
+
       } catch (e) {
         console.error('Error saat load feed:', e);
       }
     }
 
-    // === RENDER POST PER ZONA ===
-    function renderZonePosts(zoneKey, posts) {
-      const container = document.getElementById(ZONES[zoneKey].id).querySelector('.zone-content');
-      // Cari elemen setelah zone-divider
+    function renderAllZones(hype, ngusahain, spill) {
+      renderZone('hype', hype);
+      renderZone('ngusahain', ngusahain);
+      renderZone('spill', spill);
+    }
+
+    function renderZone(zoneKey, posts) {
+      const container = document.getElementById(`zone-${zoneKey}`).querySelector('.zone-content');
       const divider = container.querySelector('.zone-divider');
       if (!divider) return;
 
-      // Kosongkan konten setelah divider
       while (divider.nextSibling) {
         divider.parentNode.removeChild(divider.nextSibling);
       }
@@ -297,13 +345,14 @@
         return;
       }
 
+      const emojis = { hype: '🔥', ngusahain: '+1', spill: '🫂' };
       posts.forEach(post => {
         const postEl = document.createElement('div');
         postEl.className = 'zone-post-container';
         postEl.innerHTML = `
           <div class="post-header">
             <span class="post-username">@${post.username}</span>
-            <span class="post-emoji">${ZONES[zoneKey].emoji}</span>
+            <span class="post-emoji">${emojis[zoneKey]}</span>
           </div>
           <div class="post-content">${post.content}</div>
         `;
@@ -325,14 +374,12 @@
 
     // === INIT ===
     document.addEventListener('DOMContentLoaded', () => {
-      // Navigasi
       document.getElementById('nav-jejak').addEventListener('click', () => navigateTo('jejak.html'));
       document.getElementById('nav-frekuensi').addEventListener('click', () => navigateTo('frekuensi.html'));
       document.getElementById('nav-saynope').addEventListener('click', () => navigateTo('saynope.html'));
       document.getElementById('nav-glitch').addEventListener('click', () => navigateTo('glitch.html'));
       document.getElementById('settings-btn').addEventListener('click', logout);
 
-      // Load feed
       loadFeed();
     });
   </script>
