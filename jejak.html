@@ -364,20 +364,41 @@
 
   <input type="file" id="file-input" accept="image/*" style="display:none;">
 
-  <!-- Load Supabase via script tag -->
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/index.min.js';
+  <!-- Load Supabase via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    const supabaseUrl = 'https://your-project.supabase.co'; // 🔁 GANTI DENGAN PROJECT-MU
-    const supabaseAnonKey = 'your-anon-key-here';           // 🔁 GANTI DENGAN ANON KEY-MU
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  <script>
+    // === SUPABASE INIT ===
+    const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU2NTM5MjUsImV4cCI6MjA1MTIyOTkyNX0.VBxGl_3LYMKkwb_q0Z4Y3gvVz2PuNr0W-d8eA_KOrSo';
+
+    let supabase;
+    
+    try {
+      if (typeof window.supabase === 'undefined') {
+        console.error('❌ Supabase library gagal dimuat!');
+        alert('Gagal memuat Supabase. Coba refresh halaman.');
+      } else {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('✅ Supabase berhasil diinisialisasi!');
+      }
+    } catch (e) {
+      console.error('❌ Error saat init Supabase:', e);
+      alert('Gagal menginisialisasi Supabase. Coba refresh halaman.');
+    }
 
     // === STATE ===
     const currentUser = localStorage.getItem('nope_username');
     if (!currentUser) {
       window.location.href = 'index.html';
     }
-    document.getElementById('username-display').textContent = currentUser;
+    
+    window.addEventListener('DOMContentLoaded', () => {
+      const usernameDisplay = document.getElementById('username-display');
+      if (usernameDisplay) {
+        usernameDisplay.textContent = currentUser;
+      }
+    });
 
     let artefacts = [];
     let rants = [];
@@ -410,6 +431,11 @@
 
     // === DATABASE: pastikan user ada ===
     async function ensureUserExists() {
+      if (!supabase) {
+        console.error('Supabase belum diinisialisasi');
+        return;
+      }
+      
       try {
         const { data, error } = await supabase
           .from('users')
@@ -427,6 +453,12 @@
 
     // === MUAT DATA ===
     async function loadData() {
+      if (!supabase) {
+        console.error('Supabase belum diinisialisasi');
+        showConfirmation("Gagal memuat data. Refresh halaman.");
+        return;
+      }
+      
       try {
         await ensureUserExists();
 
@@ -526,6 +558,11 @@
 
     // === UPLOAD ARTEFAK BARU ===
     async function handleFileSelect(event) {
+      if (!supabase) {
+        alert('Supabase belum siap. Refresh halaman.');
+        return;
+      }
+      
       const file = event.target.files[0];
       if (!file) return;
 
@@ -554,7 +591,7 @@
 
         showConfirmation("Gambar diunggah! Tambahkan notasi (maks 4 kata).");
         await loadData();
-        showPostUploadPanel(); // ✅ Munculkan panel notasi setelah upload
+        showPostUploadPanel();
 
       } catch (e) {
         console.error('Upload error:', e);
@@ -565,6 +602,11 @@
 
     // === SIMPAN NOTASI ===
     async function saveNotation() {
+      if (!supabase) {
+        alert('Supabase belum siap. Refresh halaman.');
+        return;
+      }
+      
       const input = document.getElementById('hero-notation');
       const text = input.value.trim();
 
@@ -591,7 +633,7 @@
 
         showConfirmation("Notasi tersimpan.");
         await loadData();
-        hidePostUploadPanel(); // ✅ Sembunyikan panel setelah simpan
+        hidePostUploadPanel();
 
       } catch (e) {
         console.error('Notasi error:', e);
@@ -601,6 +643,11 @@
 
     // === POST RANT ===
     async function postRant() {
+      if (!supabase) {
+        alert('Supabase belum siap. Refresh halaman.');
+        return;
+      }
+      
       const content = document.getElementById('rant').value.trim();
       if (!content) return;
       if (content.length > 300) {
@@ -611,7 +658,7 @@
       try {
         const { error } = await supabase
           .from('rants')
-          .insert({ username: currentUser, content }); // ✅ TANPA ZONE
+          .insert({ username: currentUser, content });
 
         if (error) {
           throw new Error(`Gagal simpan rant: ${error.message}`);
