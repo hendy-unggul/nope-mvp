@@ -215,6 +215,7 @@
 
     <div class="greeting">Hello @<span id="username-display"></span></div>
 
+    <!-- Hype Haus -->
     <div class="zones">
       <div class="zone-item" id="zone-hype">
         <div class="zone-icon">🎧</div>
@@ -222,24 +223,29 @@
           <h3 class="zone-title">Hype Haus</h3>
           <p class="zone-description">“Tempat nge-hype idol, drakor, atau AU tanpa takut di-spill.”</p>
           <div class="zone-divider"></div>
+          <!-- Posts will be injected here -->
         </div>
       </div>
 
+      <!-- Ngusahain -->
       <div class="zone-item" id="zone-ngusahain">
         <div class="zone-icon">💼</div>
         <div class="zone-content">
           <h3 class="zone-title">Ngusahain</h3>
           <p class="zone-description">“Cerita progress lo: dari skripsi sampe jualan thrifting.”</p>
           <div class="zone-divider"></div>
+          <!-- Posts will be injected here -->
         </div>
       </div>
 
+      <!-- Spill Zone -->
       <div class="zone-item" id="zone-spill">
         <div class="zone-icon">💬</div>
         <div class="zone-content">
           <h3 class="zone-title">Spill Zone</h3>
           <p class="zone-description">“Curhat, ngeluh, atau cuma pengin ngomong — no cap, no jaim.”</p>
           <div class="zone-divider"></div>
+          <!-- Posts will be injected here -->
         </div>
       </div>
     </div>
@@ -251,17 +257,29 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0"></script>
-
   <script>
-    if (typeof supabase === 'undefined') {
-      alert('Gagal memuat Supabase.');
-      console.error('Supabase tidak terload!');
-    }
+    // === CONFIG — GANTI INI DENGAN PROYEK & KEY-MU ===
+    const SUPABASE_URL = 'https://your-project-id.supabase.co'; // 🔁 GANTI DENGAN PROJECT ID-MU
+    const SUPABASE_KEY = 'your-anon-key-here';                 // 🔁 GANTI DENGAN ANON KEY-MU
 
-    const currentUser = localStorage.getItem('nope_username');
-    if (!currentUser) window.location.href = 'index.html';
-    document.getElementById('username-display').textContent = currentUser;
+    // === OLD FASHION WAY — MANUAL FETCH ===
+    async function supabaseFetch(table, method = 'GET', body = null) {
+      const headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      };
+
+      let url = `${SUPABASE_URL}/rest/v1/${table}`;
+      let options = { method, headers };
+
+      if (body) options.body = JSON.stringify(body);
+
+      const res = await fetch(url, options);
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+      return await res.json();
+    }
 
     // === KATA KUNCI ZONA (20-30 per zona) ===
     const HYPE_KEYWORDS = [
@@ -289,25 +307,30 @@
       'pengen ilang', 'pengen ngilang', 'susah', 'buntu', 'mentok'
     ];
 
+    // === DETEKSI ZONA DARI ISI RANT ===
     function detectZone(content) {
       const lower = content.toLowerCase();
       if (HYPE_KEYWORDS.some(kw => lower.includes(kw))) return 'hype';
       if (NGUSAHAIN_KEYWORDS.some(kw => lower.includes(kw))) return 'ngusahain';
       if (SPILL_KEYWORDS.some(kw => lower.includes(kw))) return 'spill';
-      return 'spill';
+      return 'spill'; // default
     }
 
+    // === STATE ===
+    const currentUser = localStorage.getItem('nope_username');
+    if (!currentUser) {
+      window.location.href = 'index.html';
+    }
+    document.getElementById('username-display').textContent = currentUser;
+
+    // === LOAD & SORTIR RANT ===
     async function loadFeed() {
       try {
-        const { data, error } = await supabase
-          .from('rants')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(50);
-        if (error) throw error;
+        const rantsData = await supabaseFetch('rants', 'GET', null);
+        const allRants = rantsData || [];
 
         const hype = [], ngusahain = [], spill = [];
-        (data || []).forEach(r => {
+        allRants.forEach(r => {
           const zone = detectZone(r.content);
           if (zone === 'hype' && hype.length < 5) hype.push(r);
           else if (zone === 'ngusahain' && ngusahain.length < 5) ngusahain.push(r);
@@ -356,7 +379,11 @@
       });
     }
 
-    function nav(page) { window.location.href = page; }
+    // === NAVIGASI ===
+    function navigateTo(page) {
+      window.location.href = page;
+    }
+
     function logout() {
       if (confirm('Keluar dari akun?')) {
         localStorage.removeItem('nope_username');
@@ -372,11 +399,12 @@
       setTimeout(() => pulse.remove(), 1200);
     }
 
+    // === INIT ===
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('nav-jejak').onclick = () => nav('jejak.html');
-      document.getElementById('nav-frekuensi').onclick = () => nav('frekuensi.html');
-      document.getElementById('nav-saynope').onclick = () => nav('saynope.html');
-      document.getElementById('nav-glitch').onclick = () => nav('glitch.html');
+      document.getElementById('nav-jejak').onclick = () => navigateTo('jejak.html');
+      document.getElementById('nav-frekuensi').onclick = () => navigateTo('frekuensi.html');
+      document.getElementById('nav-saynope').onclick = () => navigateTo('saynope.html');
+      document.getElementById('nav-glitch').onclick = () => navigateTo('glitch.html');
       document.getElementById('settings-btn').onclick = logout;
 
       loadFeed().then(triggerPulse);
