@@ -364,13 +364,29 @@
 
   <input type="file" id="file-input" accept="image/*" style="display:none;">
 
-  <!-- Load Supabase via script tag -->
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.0/dist/index.min.js';
+  <script>
+    // === CONFIG ===
+    const SUPABASE_URL = 'https://your-project.supabase.co'; // 🔁 GANTI DENGAN PROJECT-MU
+    const SUPABASE_KEY = 'your-anon-key-here';               // 🔁 GANTI DENGAN ANON KEY-MU
 
-    const supabaseUrl = 'https://your-project.supabase.co'; // 🔁 GANTI DENGAN PROJECT-MU
-    const supabaseAnonKey = 'your-anon-key-here';           // 🔁 GANTI DENGAN ANON KEY-MU
-    const supabase = createClient(supabaseUrl, supabaseAnonKey);
+    // === OLD FASHION WAY — MANUAL FETCH ===
+    async function supabaseFetch(table, method = 'GET', body = null) {
+      const headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      };
+
+      let url = `${SUPABASE_URL}/rest/v1/${table}`;
+      let options = { method, headers };
+
+      if (body) options.body = JSON.stringify(body);
+
+      const res = await fetch(url, options);
+      if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+      return await res.json();
+    }
 
     // === STATE ===
     const currentUser = localStorage.getItem('nope_username');
@@ -411,14 +427,11 @@
     // === DATABASE: pastikan user ada ===
     async function ensureUserExists() {
       try {
-        const { data, error } = await supabase
-          .from('users')
-          .select('username')
-          .eq('username', currentUser)
-          .single();
+        const users = await supabaseFetch('users', 'GET', null);
+        const user = users.find(u => u.username === currentUser);
 
-        if (error && error.code === 'PGRST116') {
-          await supabase.from('users').insert({ username: currentUser });
+        if (!user) {
+          await supabaseFetch('users', 'POST', { username: currentUser });
         }
       } catch (e) {
         console.error('Gagal pastikan user:', e);
@@ -431,34 +444,12 @@
         await ensureUserExists();
 
         // Load artefacts
-        const { data: artefactsData, error: artefactsError } = await supabase
-          .from('artefacts')
-          .select('*')
-          .eq('username', currentUser)
-          .order('created_at', { ascending: false })
-          .limit(6);
-
-        if (artefactsError) {
-          console.error('Gagal muat artefak:', artefactsError);
-          artefacts = [];
-        } else {
-          artefacts = artefactsData || [];
-        }
+        const artefactsData = await supabaseFetch('artefacts', 'GET', null);
+        artefacts = artefactsData.filter(a => a.username === currentUser).slice(0, 6);
 
         // Load rants
-        const { data: rantsData, error: rantsError } = await supabase
-          .from('rants')
-          .select('*')
-          .eq('username', currentUser)
-          .order('created_at', { ascending: false })
-          .limit(5);
-
-        if (rantsError) {
-          console.error('Gagal muat rant:', rantsError);
-          rants = [];
-        } else {
-          rants = rantsData || [];
-        }
+        const rantsData = await supabaseFetch('rants', 'GET', null);
+        rants = rantsData.filter(r => r.username === currentUser).slice(0, 5);
 
         renderHero();
         renderDiary();
@@ -533,24 +524,31 @@
       const fileName = `${currentUser}/${Date.now()}-${file.name}`;
 
       try {
-        const { error: uploadError } = await supabase.storage
-          .from('artefacts')
-          .upload(fileName, file);
+        // Upload ke Supabase Storage via URL
+        const formData = new FormData();
+        formData.append('file', file);
 
-        if (uploadError) {
-          throw new Error(`Upload gagal: ${uploadError.message}`);
+        const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/artefacts/${fileName}`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`
+          },
+          body: formData
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error(`Upload gagal: ${await uploadRes.text()}`);
         }
 
-        const { data } = supabase.storage.from('artefacts').getPublicUrl(fileName);
-        const imageUrl = data.publicUrl;
+        const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/artefacts/${fileName}`;
 
-        const { error: dbError } = await supabase
-          .from('artefacts')
-          .insert({ username: currentUser, image_url: imageUrl, notation: '' });
-
-        if (dbError) {
-          throw new Error(`Simpan ke DB gagal: ${dbError.message}`);
-        }
+        // Simpan ke tabel artefacts
+        await supabaseFetch('artefacts', 'POST', {
+          username: currentUser,
+          image_url: imageUrl,
+          notation: ''
+        });
 
         showConfirmation("Gambar diunggah! Tambahkan notasi (maks 4 kata).");
         await loadData();
@@ -579,15 +577,9 @@
       }
 
       try {
-        const { error } = await supabase
-          .from('artefacts')
-          .update({ notation: text })
-          .eq('username', currentUser)
-          .eq('image_url', artefacts[0].image_url);
-
-        if (error) {
-          throw new Error(`Gagal simpan notasi: ${error.message}`);
-        }
+        await supabaseFetch('artefacts', 'PATCH', {
+          notation: text
+        }, `?id=eq.${artefacts[0].id}`);
 
         showConfirmation("Notasi tersimpan.");
         await loadData();
@@ -609,13 +601,10 @@
       }
 
       try {
-        const { error } = await supabase
-          .from('rants')
-          .insert({ username: currentUser, content }); // ✅ TANPA ZONE
-
-        if (error) {
-          throw new Error(`Gagal simpan rant: ${error.message}`);
-        }
+        await supabaseFetch('rants', 'POST', {
+          username: currentUser,
+          content
+        });
 
         document.getElementById('rant').value = '';
         showConfirmation("Jejakmu tersimpan.");
