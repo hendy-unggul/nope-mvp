@@ -6,64 +6,170 @@
   <title>NOPE — GLITCH</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    /* === Override & Tambah untuk GLITCH === */
+    /* === Mobile-first Responsive + Dark Mode Support === */
+    :root {
+      --bg: #ffffff;
+      --surface: #fafafa;
+      --text: #121212;
+      --muted: #666666;
+      --border: #e0e0e0;
+      --accent: #4903fc;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0c0c0c;
+      --surface: #141414;
+      --text: #f0f0f0;
+      --muted: #a0a0a0;
+      --border: #333333;
+      --accent: #8a66ff;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    .wrapper {
+      padding: 0 16px;
+      max-width: 100%;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+    }
+
+    .theme-toggle:hover {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    .settings-btn {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: var(--text);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+    }
+
+    .settings-btn:hover {
+      background: var(--border);
+    }
+
+    .nav-mini {
+      display: none;
+    }
+
+    .greeting {
+      font-size: 18px;
+      margin: 8px 0 24px;
+      color: var(--text);
+    }
+
     .pick-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 24px;
+      padding: 18px;
+      margin-bottom: 20px;
       line-height: 1.6;
-      position: relative;
     }
 
     .pick-image {
       width: 100%;
-      height: auto;
+      aspect-ratio: 3 / 2;
+      object-fit: cover;
       border-radius: 12px;
       margin-bottom: 16px;
       display: block;
     }
 
     .pick-title {
-      font-size: 20px;
-      margin-bottom: 16px;
+      font-size: 18px;
+      margin-bottom: 12px;
       color: var(--text);
       line-height: 1.3;
+      font-weight: 700;
     }
 
     .meta {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--muted);
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       display: block;
     }
 
+    p {
+      font-size: 14px;
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+
     .quote {
-      background: rgba(73,3,252,0.15);
+      background: rgba(73, 3, 252, 0.12);
       border-left: 3px solid var(--accent);
-      padding: 16px;
-      margin: 20px 0;
+      padding: 14px;
+      margin: 16px 0;
       font-style: italic;
-      font-size: 15px;
+      border-radius: 0 8px 8px 0;
+      font-size: 14px;
       line-height: 1.5;
     }
 
+    [data-theme="dark"] .quote {
+      background: rgba(138, 102, 255, 0.15);
+    }
+
     .signature {
-      margin-top: 20px;
+      margin-top: 16px;
       font-style: italic;
       color: var(--muted);
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .tagline {
       text-align: center;
       font-size: 12px;
       color: var(--muted);
-      padding: 0 16px 20px;
+      padding: 0 0 24px;
       line-height: 1.5;
-      max-width: 320px;
-      margin: 0 auto 32px;
+      margin: 0 auto 24px;
     }
 
     .tagline strong {
@@ -72,11 +178,35 @@
       margin-top: 4px;
     }
 
-    /* === Hover micro-movement === */
-    .pick-card:hover {
-      transform: translateY(-2px);
-      transition: transform 0.2s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    @media (min-width: 768px) {
+      .nav-mini {
+        display: flex;
+        gap: 14px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      .nav-mini span {
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: background 0.2s;
+      }
+
+      .nav-mini span:hover {
+        background: var(--border);
+      }
+
+      .pick-card {
+        padding: 24px;
+        max-width: 600px;
+        margin: 0 auto 24px;
+      }
+
+      .greeting {
+        font-size: 20px;
+        margin-bottom: 32px;
+      }
     }
   </style>
 </head>
@@ -85,6 +215,7 @@
     <header>
       <div class="logo">NOPE</div>
       <div class="top-right">
+        <button class="theme-toggle" id="themeToggle">☾</button>
         <button class="settings-btn" onclick="goTo('glitch.html')">⋯</button>
         <div class="nav-mini">
           <span onclick="goTo('jejak.html')">Jejak</span>
@@ -99,165 +230,76 @@
 
     <!-- Artikel 1: Film -->
     <div class="pick-card">
-      <img src="https://placehold.co/600x400/1a1a1a/ffffff?text=Reza+Rahadian" alt="Ilustrasi Reza Rahadian" class="pick-image">
+      <img src="https://images.unsplash.com/photo-1631724315567-8a7e625d3d9a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80" alt="Reza Rahadian dalam peran dramatis" class="pick-image">
       <div class="pick-title">Reza Rahadian dan Ilusi Kesempurnaan</div>
       <span class="meta">Untuk yang lelah berakting jadi kuat</span>
-      
       <p>“Kita memuji senyumnya — tapi lupa bertanya:<br>Di mana dia menangis?”</p>
-      
-      <p>Reza Rahadian bukan aktor. Ia <strong>cermin zaman yang takut retak</strong>.<br>
-      Setiap perannya — dari Soekarno sampai pengusaha muda —<br>
-      disajikan dengan <strong>senyum yang terlalu sempurna</strong>,<br>
-      seperti kopi instan:<br>
-      <em>Hangat, tapi tak pernah benar-benar membakar tenggorokan.</em></p>
-      
-      <p>Padahal, <strong>akting yang hidup lahir dari kegagalan</strong> —<br>
-      bukan dari skenario yang rapi.<br>
-      Lihat <strong>Laura Basuki di “Istirahatlah Kata-Kata”</strong>:<br>
-      Matanya bergetar sebelum bicara.<br>
-      Tubuhnya menciut di sudut ruang.<br>
-      Ia tidak <em>berakting sedih</em> — ia <strong>menjadi sedih</strong>.</p>
-      
-      <p>Reza? Ia <strong>berakting jadi manusia</strong>,<br>
-      tapi lupa jadi manusia yang rapuh.</p>
-      
+      <p>Reza Rahadian bukan aktor. Ia <strong>cermin zaman yang takut retak</strong>. Setiap perannya — dari Soekarno sampai pengusaha muda — disajikan dengan <strong>senyum yang terlalu sempurna</strong>, seperti kopi instan: <em>Hangat, tapi tak pernah benar-benar membakar tenggorokan.</em></p>
+      <p>Padahal, <strong>akting yang hidup lahir dari kegagalan</strong> — bukan dari skenario yang rapi. Lihat <strong>Laura Basuki di “Istirahatlah Kata-Kata”</strong>: Matanya bergetar sebelum bicara. Tubuhnya menciut di sudut ruang. Ia tidak <em>berakting sedih</em> — ia <strong>menjadi sedih</strong>.</p>
+      <p>Reza? Ia <strong>berakting jadi manusia</strong>, tapi lupa jadi manusia yang rapuh.</p>
       <blockquote class="quote">
         Ini bukan kritik pada Reza —<br>
         ini teriakan untuk diri kita sendiri:<br>
         Kapan terakhir kali kita berani tampil rapuh?
       </blockquote>
-      
-      <p>Kalau kamu pernah pura-pura baik di depan keluarga,<br>
-      sambil nahan nangis di kamar mandi,<br>
-      maka kamu tahu:<br>
-      <strong>Kesempurnaan itu bukan kekuatan — itu penjara.</strong></p>
-      
-      <p>Dan mungkin,<br>
-      Reza juga butuh izin untuk<br>
-      <strong>tidak sempurna.</strong></p>
-      
+      <p>Kalau kamu pernah pura-pura baik di depan keluarga, sambil nahan nangis di kamar mandi, maka kamu tahu: <strong>Kesempurnaan itu bukan kekuatan — itu penjara.</strong></p>
+      <p>Dan mungkin, Reza juga butuh izin untuk <strong>tidak sempurna.</strong></p>
       <div class="signature">— @HD, 1% petani 99% failure...</div>
     </div>
 
     <!-- Artikel 2: Musik -->
     <div class="pick-card">
-      <img src="https://placehold.co/600x400/1a1a1a/ffffff?text=Hindia+-+Besok+Lusa+Nanti" alt="Ilustrasi Hindia" class="pick-image">
+      <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80" alt="Piano dan headphone - suasana Hindia" class="pick-image">
       <div class="pick-title">Hindia: Lagu untuk yang Lelah Menunggu</div>
       <span class="meta">Untuk yang janji “nanti” tapi hidupnya mandek</span>
-      
-      <p>“Kita terlalu sibuk mengejar ‘besok’<br>
-      sampai lupa hidup hari ini.”</p>
-      
-      <p>“Besok, Lusa, Nanti” bukan lagu.<br>
-      Ia <strong>terapi kolektif untuk generasi yang hidup di masa depan</strong>.</p>
-      
-      <p>Setiap baitnya menusuk:<br>
-      <em>“Kita janji bertemu di masa depan,<br>
-      Tapi masa depan tak pernah datang.”</em></p>
-      
-      <p>Di tengah lagu-lagu yang menyanyikan:<br>
-      <em>“Nanti kita sukses!”<br>
-      “Besok semua akan indah!”</em><br>
-      Hindia berani bilang:<br>
-      <strong>“Aku capek menunggu.”</strong></p>
-      
-      <p><strong>Musiknya</strong>?<br>
-      - Hanya piano dan vokal yang retak<br>
-      - Tidak ada synth mahal, tidak ada beat viral<br>
-      - Hanya <strong>detak jantung yang lelah</strong></p>
-      
+      <p>“Kita terlalu sibuk mengejar ‘besok’ sampai lupa hidup hari ini.”</p>
+      <p>“Besok, Lusa, Nanti” bukan lagu. Ia <strong>terapi kolektif untuk generasi yang hidup di masa depan</strong>.</p>
+      <p>Setiap baitnya menusuk: <em>“Kita janji bertemu di masa depan, Tapi masa depan tak pernah datang.”</em></p>
+      <p>Di tengah lagu-lagu yang menyanyikan: <em>“Nanti kita sukses!” “Besok semua akan indah!”</em> Hindia berani bilang: <strong>“Aku capek menunggu.”</strong></p>
+      <p><strong>Musiknya</strong>? Hanya piano dan vokal yang retak. Tidak ada synth mahal, tidak ada beat viral. Hanya <strong>detak jantung yang lelah</strong>.</p>
       <blockquote class="quote">
         Ini lagu untuk yang pernah bilang:<br>
         “Gue nungguin dia berubah.”<br>
         Tapi yang berubah justru gue — jadi lebih kosong.
       </blockquote>
-      
-      <p>Kalau kamu pernah menunda hidupmu dengan alasan:<br>
-      <em>“Nanti kalau punya duit…”<br>
-      “Nanti kalau udah lulus…”</em><br>
-      Maka dengarkan ini:<br>
-      <strong>Masa depan tidak akan pernah datang.<br>
-      Yang ada hanya hari ini —<br>
-      dan kamu sedang melewatinya sambil menunggu.</strong></p>
-      
+      <p>Kalau kamu pernah menunda hidupmu dengan alasan: <em>“Nanti kalau punya duit…” “Nanti kalau udah lulus…”</em> Maka dengarkan ini: <strong>Masa depan tidak akan pernah datang. Yang ada hanya hari ini — dan kamu sedang melewatinya sambil menunggu.</strong></p>
       <div class="signature">— @HD, 1% petani 99% failure...</div>
     </div>
 
     <!-- Artikel 3: Buku -->
     <div class="pick-card">
-      <img src="https://placehold.co/600x400/1a1a1a/ffffff?text=Madilog+Tan+Malaka" alt="Ilustrasi Buku Madilog" class="pick-image">
+      <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80" alt="Tumpukan buku klasik" class="pick-image">
       <div class="pick-title">Madilog: Senjata untuk yang Takut Berpikir</div>
       <span class="meta">Untuk yang lelah dikasih tahu “ikut aja”</span>
-      
-      <p>“Di era algoritma,<br>
-      berani berpikir sendiri adalah bentuk perlawanan.”</p>
-      
-      <p>Tan Malaka tidak menulis buku.<br>
-      Ia menulis <strong>panggilan untuk berani sendiri</strong>.</p>
-      
-      <p><strong>Madilog</strong> (Materialisme, Dialektika, Logika)<br>
-      bukan teori — tapi <strong>alat untuk menghancurkan kebohongan</strong>.</p>
-      
-      <p>Yang mengejutkan?<br>
-      Ia menulis ini di <strong>penjara kolonial</strong>,<br>
-      tempat paling tidak bebas,<br>
-      tapi justru menghasilkan <strong>pikiran paling bebas</strong>.</p>
-      
-      <p>Sementara kita?<br>
-      Diberi kebebasan,<br>
-      tapi takut berpikir,<br>
-      karena takut salah.</p>
-      
+      <p>“Di era algoritma, berani berpikir sendiri adalah bentuk perlawanan.”</p>
+      <p>Tan Malaka tidak menulis buku. Ia menulis <strong>panggilan untuk berani sendiri</strong>.</p>
+      <p><strong>Madilog</strong> (Materialisme, Dialektika, Logika) bukan teori — tapi <strong>alat untuk menghancurkan kebohongan</strong>.</p>
+      <p>Yang mengejutkan? Ia menulis ini di <strong>penjara kolonial</strong>, tempat paling tidak bebas, tapi justru menghasilkan <strong>pikiran paling bebas</strong>.</p>
+      <p>Sementara kita? Diberi kebebasan, tapi takut berpikir, karena takut salah.</p>
       <blockquote class="quote">
         “Seorang pejuang harus berani sendiri.<br>
         Karena kebenaran seringkali lahir di tempat yang sepi.”
       </blockquote>
-      
-      <p>Kalimat ini bukan puisi.<br>
-      Ini <strong>tantangan</strong>:<br>
-      Apakah kamu berani mempertanyakan apa yang dikasih orang?</p>
-      
-      <p>Kalau kamu pernah ngerasa:<br>
-      <em>“Kenapa gue harus nurut tanpa boleh nanya?”</em><br>
-      Maka Madilog bukan bacaan —<br>
-      ia <strong>senjata</strong>.</p>
-      
-      <p>Dan Tan Malaka bukan penulis —<br>
-      ia <strong>pelatih berpikir</strong>.</p>
-      
+      <p>Kalimat ini bukan puisi. Ini <strong>tantangan</strong>: Apakah kamu berani mempertanyakan apa yang dikasih orang?</p>
+      <p>Kalau kamu pernah ngerasa: <em>“Kenapa gue harus nurut tanpa boleh nanya?”</em> Maka Madilog bukan bacaan — ia <strong>senjata</strong>.</p>
+      <p>Dan Tan Malaka bukan penulis — ia <strong>pelatih berpikir</strong>.</p>
       <div class="signature">— @HD, 1% petani 99% failure...</div>
     </div>
 
-    <!-- Artikel 4: Hangouts (Konten Budaya Harian) -->
+    <!-- Artikel 4: Hangouts -->
     <div class="pick-card">
-      <img src="https://placehold.co/600x400/1a1a1a/ffffff?text=Hangouts:+Ngopi+di+Warung+Pinggir+Jalan" alt="Ilustrasi hangout santai" class="pick-image">
+      <img src="https://images.unsplash.com/photo-1517331156700-3c241d2b4d83?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80" alt="Ngopi santai di warung pinggir jalan" class="pick-image">
       <div class="pick-title">Ngopi di Warung Pinggir Jalan: Ritual Tanpa Caption</div>
       <span class="meta">Untuk yang lelah performa eksistensial</span>
-      
-      <p>Tidak ada filter. Tidak ada story.<br>
-      Hanya dua gelas kopi, rokok setengah, dan obrolan yang nyasar ke masa kecil.</p>
-      
-      <p>Ini bukan “quality time”.<br>
-      Ini <strong>ruang di mana kamu boleh diam tanpa dianggap aneh</strong>.</p>
-      
-      <p>Di media sosial, kita diminta:<br>
-      <em>“Be yourself!”</em><br>
-      Tapi di warung pinggir jalan,<br>
-      kamu <strong>tidak perlu jadi apa-apa</strong>.</p>
-      
+      <p>Tidak ada filter. Tidak ada story. Hanya dua gelas kopi, rokok setengah, dan obrolan yang nyasar ke masa kecil.</p>
+      <p>Ini bukan “quality time”. Ini <strong>ruang di mana kamu boleh diam tanpa dianggap aneh</strong>.</p>
+      <p>Di media sosial, kita diminta: <em>“Be yourself!”</em> Tapi di warung pinggir jalan, kamu <strong>tidak perlu jadi apa-apa</strong>.</p>
       <blockquote class="quote">
         Di tempat ini, kamu tidak “on brand”.<br>
         Kamu cuma… ada.
       </blockquote>
-      
-      <p>Mungkin inilah bentuk perlawanan terkecil:<br>
-      <strong>menolak jadi konten</strong><br>
-      walau cuma 15 menit sehari.</p>
-      
-      <p>Karena kadang,<br>
-      kebahagiaan itu bukan sesuatu yang bisa diarsip —<br>
-      tapi sesuatu yang <strong>hilang begitu kamu coba foto</strong>.</p>
-      
+      <p>Mungkin inilah bentuk perlawanan terkecil: <strong>menolak jadi konten</strong> walau cuma 15 menit sehari.</p>
+      <p>Karena kadang, kebahagiaan itu bukan sesuatu yang bisa diarsip — tapi sesuatu yang <strong>hilang begitu kamu coba foto</strong>.</p>
       <div class="signature">— @HD, 1% petani 99% failure...</div>
     </div>
 
@@ -269,8 +311,34 @@
   </div>
 
   <script>
+    // Tampilkan username
     document.getElementById('username-display').textContent = localStorage.getItem('nope_username') || 'kawan';
-    function goTo(page) { window.location.href = page; }
+
+    // Navigasi
+    function goTo(page) {
+      window.location.href = page;
+    }
+
+    // Dark mode toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const currentTheme = localStorage.getItem('nope_theme') || 'light';
+    if (currentTheme === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+      themeToggle.textContent = '☀';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('nope_theme', 'light');
+        themeToggle.textContent = '☾';
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        localStorage.setItem('nope_theme', 'dark');
+        themeToggle.textContent = '☀';
+      }
+    });
   </script>
 </body>
 </html>
