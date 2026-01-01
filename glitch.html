@@ -8,21 +8,19 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
   <style>
-    /* === GLITCH: HACKERS NITE CONSOLE — DEFAULT & ONLY === */
     :root {
       --bg: #0a0a0a;
       --surface: #121212;
       --text: #e6e6e6;
       --muted: #8a8a8a;
       --border: #222222;
-      --accent: #b266ff; /* ungu glitch */
+      --accent: #b266ff;
       --quote-bg: rgba(178, 102, 255, 0.12);
+      --emoji-size: 20px;
+      --paid: #4caf50;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       background-color: var(--bg);
       color: var(--text);
@@ -30,7 +28,7 @@
       font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, monospace;
       font-weight: 300;
       font-size: 15px;
-      line-height: 1.6;
+      line-height: 1.55;
       padding-bottom: 32px;
     }
 
@@ -49,7 +47,6 @@
     .logo {
       font-weight: 500;
       font-size: 20px;
-      color: var(--text);
       letter-spacing: -0.5px;
     }
 
@@ -61,11 +58,10 @@
       cursor: pointer;
       width: 28px;
       height: 28px;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 50%;
-      padding: 0;
     }
 
     .settings-btn:hover {
@@ -76,16 +72,21 @@
     .greeting {
       font-size: 18px;
       font-weight: 400;
-      margin: 4px 0 28px;
-      color: var(--text);
+      margin: 4px 0 24px;
     }
 
     .pick-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 24px;
+      padding: 18px;
+      margin-bottom: 22px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .pick-card:hover {
+      background: #161616;
     }
 
     .pick-image {
@@ -93,15 +94,14 @@
       aspect-ratio: 3 / 2;
       object-fit: cover;
       border-radius: 10px;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
       display: block;
-      filter: contrast(1.1) saturate(0.9); /* sedikit mood */
+      filter: contrast(1.1) saturate(0.9);
     }
 
     .pick-title {
       font-size: 18px;
-      margin-bottom: 14px;
-      color: var(--text);
+      margin-bottom: 12px;
       font-weight: 500;
       line-height: 1.35;
     }
@@ -109,46 +109,174 @@
     .meta {
       font-size: 12px;
       color: var(--muted);
-      margin-bottom: 16px;
-      display: block;
+      margin-bottom: 14px;
       font-style: italic;
     }
 
     p {
       font-size: 15px;
-      margin-bottom: 14px;
-      font-weight: 300;
-      line-height: 1.6;
+      margin-bottom: 12px;
+      line-height: 1.55;
     }
 
-    strong {
-      font-weight: 500;
-      color: var(--accent);
-    }
-
-    em {
-      font-style: italic;
-      color: var(--text);
-    }
+    strong { font-weight: 500; color: var(--accent); }
+    em { font-style: italic; color: var(--text); }
 
     .quote {
       background: var(--quote-bg);
       border-left: 2px solid var(--accent);
-      padding: 14px 16px;
-      margin: 18px 0;
+      padding: 12px 14px;
+      margin: 16px 0;
       font-style: italic;
-      font-weight: 300;
       border-radius: 0 6px 6px 0;
       font-size: 15px;
-      line-height: 1.55;
+      line-height: 1.5;
     }
 
     .signature {
-      margin-top: 20px;
+      margin-top: 16px;
       font-style: italic;
       color: var(--muted);
       font-size: 14px;
       font-weight: 400;
+    }
+
+    .response-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .emoji-btn {
+      background: none;
+      border: none;
+      font-size: var(--emoji-size);
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .emoji-btn:hover {
+      opacity: 1;
+      transform: scale(1.15);
+    }
+
+    .comment-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 20px;
+      cursor: pointer;
+      opacity: 0.8;
+      margin-left: auto;
+    }
+
+    .comment-btn:hover {
+      color: var(--text);
+      opacity: 1;
+    }
+
+    /* Modal Komentar */
+    .comment-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: flex-end;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .comment-modal.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal-content {
+      background: var(--surface);
+      border-radius: 16px 16px 0 0;
+      padding: 20px 16px;
+      width: 100%;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .pay-prompt {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    .pay-btn {
+      background: var(--paid);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 500;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .comment-form {
+      display: none;
+    }
+
+    .comment-form.active {
+      display: block;
+      margin-top: 12px;
+    }
+
+    textarea {
+      width: 100%;
+      background: #1a1a1a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 10px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .submit-comment {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-weight: 600;
+      margin-top: 10px;
+      cursor: pointer;
     }
 
     .tagline {
@@ -168,18 +296,11 @@
       font-weight: 500;
     }
 
-    /* Tablet+ */
     @media (min-width: 768px) {
       .pick-card {
         max-width: 580px;
-        margin: 0 auto 26px;
+        margin: 0 auto 24px;
       }
-    }
-
-    /* Micromovement: subtle glow on focus */
-    .pick-card:focus-within {
-      outline: 1px solid var(--accent);
-      outline-offset: -1px;
     }
   </style>
 </head>
@@ -192,79 +313,8 @@
 
     <div class="greeting">Hello @<span id="username-display"></span></div>
 
-    <!-- Artikel 1: Film -->
-    <div class="pick-card" tabindex="0">
-      <img src="https://images.unsplash.com/photo-1631724315567-8a7e625d3d9a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80" alt="Reza Rahadian dalam peran dramatis" class="pick-image">
-      <div class="pick-title">Reza Rahadian dan Ilusi Kesempurnaan</div>
-      <span class="meta">untuk yang lelah berakting jadi kuat</span>
-      <p>“Kita memuji senyumnya — tapi lupa bertanya:<br>Di mana dia menangis?”</p>
-      <p>Reza Rahadian bukan aktor. Ia <strong>cermin zaman yang takut retak</strong>. Setiap perannya — dari Soekarno sampai pengusaha muda — disajikan dengan <strong>senyum yang terlalu sempurna</strong>, seperti kopi instan: <em>Hangat, tapi tak pernah benar-benar membakar tenggorokan.</em></p>
-      <p>Padahal, <strong>akting yang hidup lahir dari kegagalan</strong> — bukan dari skenario yang rapi. Lihat <strong>Laura Basuki di “Istirahatlah Kata-Kata”</strong>: Matanya bergetar sebelum bicara. Tubuhnya menciut di sudut ruang. Ia tidak <em>berakting sedih</em> — ia <strong>menjadi sedih</strong>.</p>
-      <p>Reza? Ia <strong>berakting jadi manusia</strong>, tapi lupa jadi manusia yang rapuh.</p>
-      <blockquote class="quote">
-        Ini bukan kritik pada Reza —<br>
-        ini teriakan untuk diri kita sendiri:<br>
-        kapan terakhir kali kita berani tampil rapuh?
-      </blockquote>
-      <p>Kalau kamu pernah pura-pura baik di depan keluarga, sambil nahan nangis di kamar mandi, maka kamu tahu: <strong>kesempurnaan itu bukan kekuatan — itu penjara.</strong></p>
-      <p>Dan mungkin, Reza juga butuh izin untuk <strong>tidak sempurna.</strong></p>
-      <div class="signature">— @HD, 1% petani 99% failure...</div>
-    </div>
-
-    <!-- Artikel 2: Musik -->
-    <div class="pick-card" tabindex="0">
-      <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80" alt="Piano dan headphone" class="pick-image">
-      <div class="pick-title">Hindia: Lagu untuk yang Lelah Menunggu</div>
-      <span class="meta">untuk yang janji “nanti” tapi hidupnya mandek</span>
-      <p>“Kita terlalu sibuk mengejar ‘besok’ sampai lupa hidup hari ini.”</p>
-      <p>“Besok, Lusa, Nanti” bukan lagu. Ia <strong>terapi kolektif untuk generasi yang hidup di masa depan</strong>.</p>
-      <p>Setiap baitnya menusuk: <em>“Kita janji bertemu di masa depan, Tapi masa depan tak pernah datang.”</em></p>
-      <p>Di tengah lagu-lagu yang menyanyikan: <em>“Nanti kita sukses!” “Besok semua akan indah!”</em> Hindia berani bilang: <strong>“Aku capek menunggu.”</strong></p>
-      <p><strong>Musiknya</strong>? Hanya piano dan vokal yang retak. Tidak ada synth mahal, tidak ada beat viral. Hanya <strong>detak jantung yang lelah</strong>.</p>
-      <blockquote class="quote">
-        ini lagu untuk yang pernah bilang:<br>
-        “gue nungguin dia berubah.”<br>
-        tapi yang berubah justru gue — jadi lebih kosong.
-      </blockquote>
-      <p>Kalau kamu pernah menunda hidupmu dengan alasan: <em>“Nanti kalau punya duit…” “Nanti kalau udah lulus…”</em> Maka dengarkan ini: <strong>masa depan tidak akan pernah datang. Yang ada hanya hari ini — dan kamu sedang melewatinya sambil menunggu.</strong></p>
-      <div class="signature">— @HD, 1% petani 99% failure...</div>
-    </div>
-
-    <!-- Artikel 3: Buku -->
-    <div class="pick-card" tabindex="0">
-      <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80" alt="Tumpukan buku klasik" class="pick-image">
-      <div class="pick-title">Madilog: Senjata untuk yang Takut Berpikir</div>
-      <span class="meta">untuk yang lelah dikasih tahu “ikut aja”</span>
-      <p>“Di era algoritma, berani berpikir sendiri adalah bentuk perlawanan.”</p>
-      <p>Tan Malaka tidak menulis buku. Ia menulis <strong>panggilan untuk berani sendiri</strong>.</p>
-      <p><strong>Madilog</strong> (Materialisme, Dialektika, Logika) bukan teori — tapi <strong>alat untuk menghancurkan kebohongan</strong>.</p>
-      <p>Yang mengejutkan? Ia menulis ini di <strong>penjara kolonial</strong>, tempat paling tidak bebas, tapi justru menghasilkan <strong>pikiran paling bebas</strong>.</p>
-      <p>Sementara kita? Diberi kebebasan, tapi takut berpikir, karena takut salah.</p>
-      <blockquote class="quote">
-        “seorang pejuang harus berani sendiri.<br>
-        karena kebenaran seringkali lahir di tempat yang sepi.”
-      </blockquote>
-      <p>Kalimat ini bukan puisi. Ini <strong>tantangan</strong>: Apakah kamu berani mempertanyakan apa yang dikasih orang?</p>
-      <p>Kalau kamu pernah ngerasa: <em>“Kenapa gue harus nurut tanpa boleh nanya?”</em> Maka Madilog bukan bacaan — ia <strong>senjata</strong>.</p>
-      <p>Dan Tan Malaka bukan penulis — ia <strong>pelatih berpikir</strong>.</p>
-      <div class="signature">— @HD, 1% petani 99% failure...</div>
-    </div>
-
-    <!-- Artikel 4: Hangouts -->
-    <div class="pick-card" tabindex="0">
-      <img src="https://images.unsplash.com/photo-1517331156700-3c241d2b4d83?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80" alt="Ngopi di warung pinggir jalan" class="pick-image">
-      <div class="pick-title">Ngopi di Warung Pinggir Jalan: Ritual Tanpa Caption</div>
-      <span class="meta">untuk yang lelah performa eksistensial</span>
-      <p>Tidak ada filter. Tidak ada story. Hanya dua gelas kopi, rokok setengah, dan obrolan yang nyasar ke masa kecil.</p>
-      <p>Ini bukan “quality time”. Ini <strong>ruang di mana kamu boleh diam tanpa dianggap aneh</strong>.</p>
-      <p>Di media sosial, kita diminta: <em>“Be yourself!”</em> Tapi di warung pinggir jalan, kamu <strong>tidak perlu jadi apa-apa</strong>.</p>
-      <blockquote class="quote">
-        di tempat ini, kamu tidak “on brand”.<br>
-        kamu cuma… ada.
-      </blockquote>
-      <p>Mungkin inilah bentuk perlawanan terkecil: <strong>menolak jadi konten</strong> walau cuma 15 menit sehari.</p>
-      <p>Karena kadang, kebahagiaan itu bukan sesuatu yang bisa diarsip — tapi sesuatu yang <strong>hilang begitu kamu coba foto</strong>.</p>
-      <div class="signature">— @HD, 1% petani 99% failure...</div>
+    <div id="cards-container">
+      <!-- Cards di-generate via JS -->
     </div>
 
     <div class="tagline">
@@ -274,7 +324,158 @@
     </div>
   </div>
 
+  <div class="comment-modal" id="commentModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div>Komentar</div>
+        <button class="close-modal" id="closeModal">×</button>
+      </div>
+      <div id="commentContent"></div>
+    </div>
+  </div>
+
   <script>
+    const isSubscribed = localStorage.getItem('nope_subscribed') === 'true';
+
+    // Data dummy: hanya type yang cocok untuk GLITCH
+    const articles = [
+      {
+        id: 'film',
+        title: 'Reza Rahadian dan Ilusi Kesempurnaan',
+        meta: 'untuk yang lelah berakting jadi kuat',
+        image: 'https://images.unsplash.com/photo-1631724315567-8a7e625d3d9a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80',
+        content: `
+          <p>“Kita memuji senyumnya — tapi lupa bertanya:<br>Di mana dia menangis?”</p>
+          <p>Reza Rahadian bukan aktor. Ia <strong>cermin zaman yang takut retak</strong>...</p>
+          <blockquote class="quote">
+            Ini bukan kritik pada Reza —<br>
+            ini teriakan untuk diri kita sendiri:<br>
+            kapan terakhir kali kita berani tampil rapuh?
+          </blockquote>
+          <p>Dan mungkin, Reza juga butuh izin untuk <strong>tidak sempurna.</strong></p>
+          <div class="signature">— @HD, 1% petani 99% failure...</div>
+        `
+      },
+      {
+        id: 'musik',
+        title: 'Hindia: Lagu untuk yang Lelah Menunggu',
+        meta: 'untuk yang janji “nanti” tapi hidupnya mandek',
+        image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80',
+        content: `<p>“Kita terlalu sibuk mengejar ‘besok’ sampai lupa hidup hari ini.”</p>
+          <blockquote class="quote">
+            ini lagu untuk yang pernah bilang:<br>
+            “gue nungguin dia berubah.”<br>
+            tapi yang berubah justru gue — jadi lebih kosong.
+          </blockquote>
+          <p>Karena kadang, kebahagiaan itu bukan sesuatu yang bisa diarsip — tapi sesuatu yang <strong>hilang begitu kamu coba foto</strong>.</p>
+          <div class="signature">— @HD, 1% petani 99% failure...</div>`
+      },
+      {
+        id: 'buku',
+        title: 'Madilog: Senjata untuk yang Takut Berpikir',
+        meta: 'untuk yang lelah dikasih tahu “ikut aja”',
+        image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80',
+        content: `<p>“Di era algoritma, berani berpikir sendiri adalah bentuk perlawanan.”</p>
+          <blockquote class="quote">
+            “seorang pejuang harus berani sendiri.<br>
+            karena kebenaran seringkali lahir di tempat yang sepi.”
+          </blockquote>
+          <p>Dan Tan Malaka bukan penulis — ia <strong>pelatih berpikir</strong>.</p>
+          <div class="signature">— @HD, 1% petani 99% failure...</div>`
+      },
+      // ✨ GANTI HANGOUT DENGAN WAWANCARA
+      {
+        id: 'interview',
+        title: 'Wawancara: @HD — "Aku Memilih Jadi Gagal"',
+        meta: 'untuk yang takut disebut tidak cukup',
+        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80',
+        content: `<p>“Orang sukses punya roadmap. Aku punya peta kuburan mimpi.”</p>
+          <p>Di ruang kecil ber-AC, @HD menyalakan rokok — padahal di luar hujan.<br>
+          “Saya bukan gagal karena tidak mencoba. Saya gagal karena mencoba terlalu banyak versi diri.”</p>
+          <blockquote class="quote">
+            Sistem ini tidak minta kita berhasil.<br>
+            Sistem ini minta kita berhenti bertanya.
+          </blockquote>
+          <p>Maka, kegagalan saya adalah bentuk perlawanan paling sunyi.</p>
+          <div class="signature">— @HD, 1% petani 99% failure...</div>`
+      }
+    ];
+
+    let cardOrder = JSON.parse(localStorage.getItem('glitch_card_order')) || articles.map(a => a.id);
+    const sortedArticles = [...articles].sort((a, b) => cardOrder.indexOf(a.id) - cardOrder.indexOf(b.id));
+
+    const container = document.getElementById('cards-container');
+    sortedArticles.forEach(article => {
+      const card = document.createElement('div');
+      card.className = 'pick-card';
+      card.innerHTML = `
+        <img src="${article.image}" alt="${article.title}" class="pick-image">
+        <div class="pick-title">${article.title}</div>
+        <span class="meta">${article.meta}</span>
+        ${article.content}
+        <div class="response-bar">
+          <button class="emoji-btn" data-emoji="😊">😊</button>
+          <button class="emoji-btn" data-emoji="😢">😢</button>
+          <button class="emoji-btn" data-emoji="🤗">🤗</button>
+          <button class="emoji-btn" data-emoji="🔥">🔥</button>
+          <button class="comment-btn" title="Komentar">💬</button>
+        </div>
+      `;
+      
+      card.addEventListener('click', (e) => {
+        if (!e.target.closest('.emoji-btn') && !e.target.closest('.comment-btn')) {
+          const newOrder = [article.id, ...cardOrder.filter(id => id !== article.id)];
+          localStorage.setItem('glitch_card_order', JSON.stringify(newOrder));
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          setTimeout(() => location.reload(), 300);
+        }
+      });
+
+      card.querySelectorAll('.emoji-btn').forEach(btn => btn.addEventListener('click', e => e.stopPropagation()));
+
+      card.querySelector('.comment-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        openCommentModal(article.title);
+      });
+
+      container.appendChild(card);
+    });
+
+    // Modal komentar (sama seperti sebelumnya)
+    const modal = document.getElementById('commentModal');
+    const closeModal = document.getElementById('closeModal');
+    const commentContent = document.getElementById('commentContent');
+
+    function openCommentModal(title) {
+      if (isSubscribed) {
+        commentContent.innerHTML = `
+          <div><strong>${title}</strong></div>
+          <div class="comment-form active">
+            <textarea placeholder="Tulis komentarmu..."></textarea>
+            <button class="submit-comment">Kirim</button>
+          </div>
+        `;
+      } else {
+        commentContent.innerHTML = `
+          <div><strong>${title}</strong></div>
+          <div class="pay-prompt">
+            <div>Komentar hanya tersedia untuk anggota NOPE.</div>
+            <div>Bantu kami tetap glitch — bayar Rp5.000/bulan.</div>
+            <button class="pay-btn" id="payBtn">Aktifkan Komentar</button>
+          </div>
+        `;
+        document.getElementById('payBtn').addEventListener('click', () => {
+          localStorage.setItem('nope_subscribed', 'true');
+          alert('Terima kasih! Komentar sekarang aktif. 🫶\n(Demo: refresh halaman untuk melihat perubahan)');
+          modal.classList.remove('active');
+        });
+      }
+      modal.classList.add('active');
+    }
+
+    closeModal.addEventListener('click', () => modal.classList.remove('active'));
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); });
+
     document.getElementById('username-display').textContent = localStorage.getItem('nope_username') || 'kawan';
   </script>
 </body>
