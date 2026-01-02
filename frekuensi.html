@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NOPE — Frekuensi</title>
   <link rel="icon" href="favicon.ico" type="image/x-icon">
-  <!-- Inter Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -92,50 +91,19 @@
       transform: rotate(90deg);
     }
 
-    /* === MODE SELECTOR === */
-    .mode-selector {
-      display: flex;
-      gap: 12px;
-      margin: 24px 0 28px;
-    }
-
-    .mode-btn {
-      flex: 1;
-      padding: 14px;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
+    /* === SECTION HEADER === */
+    .section-title {
+      font-size: 17px;
       font-weight: 600;
-      font-size: 15px;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
+      margin: 32px 0 16px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .mode-btn.active {
-      border-color: var(--accent);
-      background: rgba(178, 102, 255, 0.08);
-    }
-
-    .mode-btn.hangouts.active {
-      border-color: var(--hangouts-color);
-      background: rgba(79, 195, 247, 0.08);
-    }
-
-    /* === CONTENT SECTIONS === */
-    .content-section {
-      display: none;
-    }
-
-    .content-section.active {
-      display: block;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+    .section-title:first-of-type {
+      margin-top: 24px;
     }
 
     /* === ZONE ITEM === */
@@ -169,27 +137,14 @@
       font-size: 14px;
       line-height: 1.45;
       margin-bottom: 16px;
-      max-width: 55ch; /* ✅ 55 karakter ideal */
-    }
-
-    /* === POST ITEM === */
-    .zone-post-container {
-      margin: 10px 0;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .zone-post-container:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
-      padding-bottom: 0;
+      max-width: 55ch;
     }
 
     .post-content {
       color: var(--text);
       font-size: 15px;
       line-height: 1.5;
-      max-width: 55ch; /* ✅ batas ideal */
+      max-width: 55ch;
     }
 
     .post-meta {
@@ -285,7 +240,7 @@
       font-weight: 600;
     }
 
-    /* === MODAL (tidak diubah) === */
+    /* === MODAL === */
     .modal {
       display: none;
       position: fixed;
@@ -359,59 +314,64 @@
       </div>
     </header>
 
-    <div class="mode-selector">
-      <div class="mode-btn active" id="btn-frekuensi">Frekuensimu</div>
-      <div class="mode-btn hangouts" id="btn-hangouts">Hangouts</div>
+    <!-- FREKUENSIMU -->
+    <div class="section-title">
+      <span>🎧</span> Frekuensimu
     </div>
 
-    <div class="content-section active" id="section-frekuensi">
-      <div class="zone-item" id="zone-hype">
-        <div class="zone-header">
-          <div class="zone-icon">🎧</div>
-          <div class="zone-title">Hype Haus</div>
-        </div>
-        <div class="zone-description">Nge-hype idol, drakor, atau AU — tanpa takut di-spill.</div>
-        <!-- Posts akan diisi via JS -->
+    <div class="zone-item" id="zone-hype">
+      <div class="zone-header">
+        <div class="zone-icon">🎧</div>
+        <div class="zone-title">Hype Haus</div>
       </div>
-
-      <div class="zone-item" id="zone-ngusahain">
-        <div class="zone-header">
-          <div class="zone-icon">💼</div>
-          <div class="zone-title">Ngusahain</div>
-        </div>
-        <div class="zone-description">Cerita progres: dari skripsi sampai jualan thrifting.</div>
-        <!-- Posts akan diisi via JS -->
-      </div>
-
-      <div class="zone-item" id="zone-spill">
-        <div class="zone-header">
-          <div class="zone-icon">💬</div>
-          <div class="zone-title">Spill Zone</div>
-        </div>
-        <div class="zone-description">Curhat, ngeluh, atau cuma pengin ngomong — no cap.</div>
-        <!-- Posts akan diisi via JS -->
-      </div>
+      <div class="zone-description">Nge-hype idol, drakor, atau AU — tanpa takut di-spill.</div>
     </div>
 
-    <div class="content-section" id="section-hangouts">
-      <div class="zone-item">
-        <div class="zone-header">
-          <div class="zone-icon">📍</div>
-          <div class="zone-title">Hangouts</div>
-        </div>
-        <div class="zone-description">Tempat nongkrong favorit — hidden gems sampai WFH spot.</div>
-
-        <h4 style="font-size: 15px; margin: 20px 0 10px; color: var(--text);">💎 Hidden Gems</h4>
-        <div id="hangouts-gems"></div>
-
-        <h4 style="font-size: 15px; margin: 20px 0 10px; color: var(--text);">☕ WFH Cafe</h4>
-        <div id="hangouts-wfh"></div>
-        <button class="add-hangout-btn" onclick="openAddHangout('wfh')">+ Tambah WFH Cafe</button>
-
-        <h4 style="font-size: 15px; margin: 20px 0 10px; color: var(--text);">🍜 Enak Under 10K</h4>
-        <div id="hangouts-food"></div>
-        <button class="add-hangout-btn" onclick="openAddHangout('food')">+ Tambah Tempat Makan</button>
+    <div class="zone-item" id="zone-ngusahain">
+      <div class="zone-header">
+        <div class="zone-icon">💼</div>
+        <div class="zone-title">Ngusahain</div>
       </div>
+      <div class="zone-description">Cerita progres: dari skripsi sampai jualan thrifting.</div>
+    </div>
+
+    <div class="zone-item" id="zone-spill">
+      <div class="zone-header">
+        <div class="zone-icon">💬</div>
+        <div class="zone-title">Spill Zone</div>
+      </div>
+      <div class="zone-description">Curhat, ngeluh, atau cuma pengin ngomong — no cap.</div>
+    </div>
+
+    <!-- HANGOUTS -->
+    <div class="section-title">
+      <span>📍</span> Hangouts
+    </div>
+
+    <div class="zone-item">
+      <div class="zone-header">
+        <div class="zone-icon">💎</div>
+        <div class="zone-title">Hidden Gems</div>
+      </div>
+      <div id="hangouts-gems"></div>
+    </div>
+
+    <div class="zone-item">
+      <div class="zone-header">
+        <div class="zone-icon">☕</div>
+        <div class="zone-title">WFH Cafe</div>
+      </div>
+      <div id="hangouts-wfh"></div>
+      <button class="add-hangout-btn" onclick="openAddHangout('wfh')">+ Tambah WFH Cafe</button>
+    </div>
+
+    <div class="zone-item">
+      <div class="zone-header">
+        <div class="zone-icon">🍜</div>
+        <div class="zone-title">Enak Under 10K</div>
+      </div>
+      <div id="hangouts-food"></div>
+      <button class="add-hangout-btn" onclick="openAddHangout('food')">+ Tambah Tempat Makan</button>
     </div>
 
     <div class="tagline">
@@ -490,23 +450,6 @@
       window.location.href = 'login.html';
     }
 
-    // === TOGGLE MODE ===
-    function switchMode(mode) {
-      document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
-
-      if (mode === 'frekuensi') {
-        document.getElementById('btn-frekuensi').classList.add('active');
-        document.getElementById('section-frekuensi').classList.add('active');
-      } else {
-        document.getElementById('btn-hangouts').classList.add('active');
-        document.getElementById('section-hangouts').classList.add('active');
-      }
-    }
-
-    document.getElementById('btn-frekuensi').addEventListener('click', () => switchMode('frekuensi'));
-    document.getElementById('btn-hangouts').addEventListener('click', () => switchMode('hangouts'));
-
     // === RENDER POST ===
     function renderZone(zoneKey, posts) {
       const container = document.getElementById(`zone-${zoneKey}`);
@@ -536,8 +479,8 @@
     }
 
     // === HANGOUTS ===
-    function renderHangouts(category, items) {
-      const container = document.getElementById(`hangouts-${category}`);
+    function renderHangouts(category, items, containerId) {
+      const container = document.getElementById(containerId);
       container.innerHTML = '';
       if (items.length === 0) {
         container.innerHTML = '<div class="empty-zone">Belum ada rekomendasi.</div>';
@@ -579,12 +522,11 @@
     async function loadHangouts() {
       try {
         const data = await supabaseFetch('hangouts', 'GET', null, '?order=created_at.desc');
-        renderHangouts('gems', data.filter(h => h.category === 'gems').slice(0, 3));
-        renderHangouts('wfh', data.filter(h => h.category === 'wfh').slice(0, 3));
-        renderHangouts('food', data.filter(h => h.category === 'food').slice(0, 3));
+        renderHangouts(data.filter(h => h.category === 'gems').slice(0, 3), 'hangouts-gems');
+        renderHangouts(data.filter(h => h.category === 'wfh').slice(0, 3), 'hangouts-wfh');
+        renderHangouts(data.filter(h => h.category === 'food').slice(0, 3), 'hangouts-food');
       } catch (e) {
         console.error(e);
-        ['gems','wfh','food'].forEach(c => renderHangouts(c, []));
       }
     }
 
