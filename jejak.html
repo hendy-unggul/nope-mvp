@@ -473,7 +473,7 @@
       }
     }
 
-function renderDiary() {
+ function renderDiary() {
   const container = document.getElementById('diary');
   container.innerHTML = '';
 
@@ -489,29 +489,36 @@ function renderDiary() {
     entry.innerHTML = `<time>${date}</time><p>${r.content}</p>`;
     container.appendChild(entry);
 
-    // --- TAMBAHKAN COUNTER DI BAWAH SETIAP JEJAK ---
+    // --- TAMBAHKAN EMOJI + COUNTER ---
     const reactionsContainer = document.createElement('div');
     reactionsContainer.style.display = 'flex';
     reactionsContainer.style.gap = '12px';
     reactionsContainer.style.marginTop = '8px';
     reactionsContainer.style.fontSize = '15px';
-    reactionsContainer.style.opacity = '0.9';
 
     fetchReactionStats(r.id).then(stats => {
       ['🤠', '😢', '🤗', '🔥'].forEach(emoji => {
         const count = stats[emoji].count;
         const users = stats[emoji].users;
+
         const item = document.createElement('div');
         item.style.display = 'flex';
         item.style.alignItems = 'center';
         item.style.gap = '4px';
-        item.style.cursor = count > 0 ? 'pointer' : 'default';
+        item.style.cursor = 'pointer';
+        item.style.opacity = count > 0 ? '1' : '0.6';
+        item.style.transition = 'all 0.2s';
+
         const emojiSpan = document.createElement('span');
         emojiSpan.textContent = emoji;
+        emojiSpan.style.fontSize = '18px';
+        emojiSpan.style.fontWeight = '600';
+
         const countSpan = document.createElement('span');
         countSpan.textContent = count;
         countSpan.style.fontSize = '13px';
         countSpan.style.color = count > 0 ? '#a0a0a0' : 'transparent';
+
         if (count > 0) {
           countSpan.style.animation = 'pulse-glow 2s infinite';
           if (!document.getElementById('pulse-style')) {
@@ -525,21 +532,40 @@ function renderDiary() {
             `;
             document.head.appendChild(style);
           }
-          item.onclick = (e) => {
-            e.stopPropagation();
-            showUserList(emoji, users);
-          };
         }
+
+        // ⚡️ KLIK EMOJI → SIMPAN REAKSI
+        item.onclick = (e) => {
+          e.stopPropagation();
+          saveReaction(r.id, emoji); // ← INI YANG PENTING!
+        };
+
+        // Hover → efek visual
+        item.onmouseenter = () => {
+          emojiSpan.style.transform = 'scale(1.2)';
+          emojiSpan.style.opacity = '1';
+        };
+        item.onmouseleave = () => {
+          emojiSpan.style.transform = 'scale(1)';
+          emojiSpan.style.opacity = count > 0 ? '1' : '0.6';
+        };
+
         item.appendChild(emojiSpan);
         item.appendChild(countSpan);
+
+        // Jika diklik, tampilkan 3 username terakhir
+        item.onclick = (e) => {
+          e.stopPropagation();
+          showUserList(emoji, users);
+        };
+
         reactionsContainer.appendChild(item);
       });
     });
 
     entry.appendChild(reactionsContainer);
   });
-}
-    function renderTray() {
+}   function renderTray() {
       const tray = document.getElementById('tray');
       tray.innerHTML = '';
 
