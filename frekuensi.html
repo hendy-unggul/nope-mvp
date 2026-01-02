@@ -204,6 +204,9 @@
       font-weight: 600;
       color: var(--text-secondary);
     }
+    .post-emoji {
+      font-size: 14px;
+    }
     .post-content {
       font-size: 14px;
       color: var(--text);
@@ -671,6 +674,9 @@
     const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
+    // === CACHE UNTUK CEK NARSISME ===
+    let rantsDataCache = [];
+
     async function supabaseFetch(table, method = 'GET', body = null, filter = '') {
       const headers = {
         'apikey': SUPABASE_KEY,
@@ -719,12 +725,12 @@
     // === LOAD ZONES ===
     async function loadFeed() {
       try {
-        // ✅ FIX: Tambahkan order by created_at DESC
+        // ✅ UPDATE CACHE
         const rantsData = await supabaseFetch('rants', 'GET', null, '?order=created_at.desc&limit=100');
-        const allRants = rantsData || [];
+        rantsDataCache = rantsData || [];
 
         const hype = [], ngusahain = [], spill = [];
-        allRants.forEach(r => {
+        rantsDataCache.forEach(r => {
           const zone = detectZone(r.content);
           if (zone === 'hype' && hype.length < 5) hype.push(r);
           else if (zone === 'ngusahain' && ngusahain.length < 5) ngusahain.push(r);
@@ -736,6 +742,37 @@
         renderZone('spill', spill);
       } catch (e) {
         console.error('Gagal muat feed:', e);
+      }
+    }
+
+    // === SIMPAN REAKSI (HANYA UNTUK ORANG LAIN) ===
+    async function saveReaction(rantId, emoji) {
+      try {
+        const rant = rantsDataCache.find(r => r.id === rantId);
+        if (rant && rant.username === currentUser) {
+          console.log('Tidak boleh merespon rant sendiri (proteksi narsistik).');
+          return;
+        }
+
+        const existing = await supabaseFetch('reactions', 'GET', null, 
+          `?rant_id=eq.${rantId}&user_id=eq.${currentUser}&emoji=eq.${encodeURIComponent(emoji)}`
+        );
+
+        if (existing.length > 0) {
+          await supabaseFetch('reactions', 'DELETE', null, 
+            `?id=eq.${existing[0].id}`
+          );
+        } else {
+          await supabaseFetch('reactions', 'POST', {
+            rant_id: rantId,
+            user_id: currentUser,
+            emoji: emoji
+          });
+        }
+
+        triggerPulse();
+      } catch (e) {
+        console.error('Gagal simpan reaksi:', e);
       }
     }
 
@@ -760,12 +797,39 @@
         el.innerHTML = `
           <div class="post-header">
             <span class="post-username">@${post.username}</span>
+            <span class="post-emoji">${emojis[zoneKey]}</span>
           </div>
           <div class="post-content">${post.content}</div>
         `;
         container.appendChild(el);
-        // ✅ TAMBAHKAN EMOJI SETELAH DIPASANG DI DOM
-        renderEmojiButtons(el, post.id);
+
+        // ✅ HANYA TAMBAHKAN EMOJI JIKA BUKAN RANT SENDIRI
+        if (post.username !== currentUser) {
+          const emojiBar = document.createElement('div');
+          emojiBar.style.display = 'flex';
+          emojiBar.style.gap = '12px';
+          emojiBar.style.marginTop = '12px';
+          emojiBar.style.fontSize = '16px';
+
+          ['🤠', '😢', '🤗', '🔥'].forEach(emoji => {
+            const span = document.createElement('span');
+            span.textContent = emoji;
+            span.style.cursor = 'pointer';
+            span.style.opacity = '0.8';
+            span.style.transition = 'all 0.2s';
+            span.onmouseenter = () => span.style.opacity = '1';
+            span.onmouseleave = () => span.style.opacity = '0.8';
+            span.onclick = (e) => {
+              e.stopPropagation();
+              saveReaction(post.id, emoji);
+              span.style.transform = 'scale(1.3)';
+              setTimeout(() => span.style.transform = 'scale(1)', 200);
+            };
+            emojiBar.appendChild(span);
+          });
+
+          el.appendChild(emojiBar);
+        }
       });
     }
 
@@ -875,150 +939,6 @@
       setTimeout(() => pulse.remove(), 1000);
     }
 
-    // === EMOJI REACTIONS ===
-    const EMOJIS = ['🤠', '😢', '🤗', '🔥'];
-    const REACTIONS_TABLE = 'reactions';
-
-    // Simpan reaksi ke Supabase
-    async function saveReaction(rantId, emoji) {
-      try {
-        // Cek apakah user sudah pernah kasih reaksi ini
-        const existing = await supabaseFetch(REACTIONS_TABLE, 'GET', null, 
-          `?rant_id=eq.${rantId}&user_id=eq.${currentUser}&emoji=eq.${encodeURIComponent(emoji)}`
-        );
-
-        if (existing.length > 0) {
-          // Batalkan (hapus)
-          await supabaseFetch(REACTIONS_TABLE, 'DELETE', null, 
-            `?id=eq.${existing[0].id}`
-          );
-        } else {
-          // Simpan baru
-          await supabaseFetch(REACTIONS_TABLE, 'POST', {
-            rant_id: rantId,
-            user_id: currentUser,
-            emoji: emoji
-          });
-        }
-      } catch (e) {
-        console.error('Gagal simpan reaksi:', e);
-      }
-    }
-
-    // Render emoji buttons dengan tooltip hover
-    function renderEmojiButtons(postEl, rantId) {
-      const emojiBar = document.createElement('div');
-      emojiBar.className = 'post-emojis';
-      emojiBar.style.display = 'flex';
-      emojiBar.style.gap = '12px';
-      emojiBar.style.marginTop = '12px';
-      emojiBar.style.fontSize = '16px'; // ✅ Ukuran 75% dari 20px
-      emojiBar.style.justifyContent = 'flex-start';
-
-      // Emoji + teks hover
-      const emojiConfig = [
-        { emoji: '🤠', label: 'Aku ngerti banget' },
-        { emoji: '😢', label: 'Nangis bareng' },
-        { emoji: '🤗', label: 'Peluk virtual' },
-        { emoji: '🔥', label: 'Ini bikin kaget' }
-      ];
-
-      emojiConfig.forEach(item => {
-        const container = document.createElement('div');
-        container.style.position = 'relative';
-        container.style.cursor = 'pointer';
-        container.style.display = 'flex';
-        container.style.flexDirection = 'column';
-        container.style.alignItems = 'center';
-
-        const emojiSpan = document.createElement('span');
-        emojiSpan.textContent = item.emoji;
-        emojiSpan.style.opacity = '0.85';
-        emojiSpan.style.transition = 'all 0.2s ease';
-
-        // Tooltip (teks hover)
-        const tooltip = document.createElement('div');
-        tooltip.textContent = item.label;
-        tooltip.style.position = 'absolute';
-        tooltip.style.bottom = '24px';
-        tooltip.style.left = '50%';
-        tooltip.style.transform = 'translateX(-50%)';
-        tooltip.style.backgroundColor = 'rgba(0,0,0,0.8)';
-        tooltip.style.color = 'white';
-        tooltip.style.fontSize = '10px';
-        tooltip.style.padding = '4px 8px';
-        tooltip.style.borderRadius = '6px';
-        tooltip.style.whiteSpace = 'nowrap';
-        tooltip.style.opacity = '0';
-        tooltip.style.pointerEvents = 'none';
-        tooltip.style.transition = 'opacity 0.2s';
-        tooltip.style.zIndex = '10';
-
-        container.appendChild(emojiSpan);
-        container.appendChild(tooltip);
-
-        // Hover effect
-        container.onmouseenter = () => {
-          emojiSpan.style.opacity = '1';
-          emojiSpan.style.transform = 'scale(1.2)';
-          tooltip.style.opacity = '1';
-        };
-        container.onmouseleave = () => {
-          emojiSpan.style.opacity = '0.85';
-          emojiSpan.style.transform = 'scale(1)';
-          tooltip.style.opacity = '0';
-        };
-
-        // Klik
-        container.onclick = (e) => {
-          e.stopPropagation();
-          saveReaction(rantId, item.emoji);
-          emojiSpan.style.transform = 'scale(1.4)';
-          setTimeout(() => emojiSpan.style.transform = 'scale(1.2)', 150);
-        };
-
-        emojiBar.appendChild(container);
-      });
-
-      postEl.appendChild(emojiBar);
-    }
-    // === SIMPAN REAKSI DI FREKUENSI ===
-async function saveReaction(rantId, emoji) {
-  try {
-    // Jangan izinkan merespon rant sendiri
-    const rant = rantsDataCache.find(r => r.id === rantId);
-    if (rant && rant.username === currentUser) {
-      console.log('Tidak boleh merespon rant sendiri.');
-      return;
-    }
-
-    // Cek apakah user sudah pernah kasih reaksi ini
-    const existing = await supabaseFetch('reactions', 'GET', null, 
-      `?rant_id=eq.${rantId}&user_id=eq.${currentUser}&emoji=eq.${encodeURIComponent(emoji)}`
-    );
-
-    if (existing.length > 0) {
-      // Batalkan (hapus)
-      await supabaseFetch('reactions', 'DELETE', null, 
-        `?id=eq.${existing[0].id}`
-      );
-    } else {
-      // Simpan baru
-      await supabaseFetch('reactions', 'POST', {
-        rant_id: rantId,
-        user_id: currentUser,
-        emoji: emoji
-      });
-    }
-
-    // Opsional: trigger pulse
-    triggerPulse();
-
-  } catch (e) {
-    console.error('Gagal simpan reaksi:', e);
-  }
-}
-
     // === INIT ===
     document.addEventListener('DOMContentLoaded', () => {
       // Navigation buttons
@@ -1029,7 +949,6 @@ async function saveReaction(rantId, emoji) {
       document.getElementById('settings-btn').onclick = logout;
 
       // Load data
-      let rantsDataCache = [];
       loadFeed();
       loadHangouts();
       setTimeout(triggerPulse, 300);
