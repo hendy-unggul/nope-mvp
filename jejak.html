@@ -267,6 +267,12 @@
       background-size: cover;
       background-position: center;
       position: relative;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tray-slot:hover {
+      border-color: var(--accent);
+      transform: scale(1.02);
     }
     .tray-slot .artefak-notation {
       top: 6px;
@@ -296,6 +302,37 @@
       border: 1px dashed var(--border);
       border-radius: 8px;
       margin: 16px 0;
+    }
+
+    /* === MODAL REAKSI === */
+    #reaction-modal {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10, 10, 10, 0.9);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      z-index: 1000;
+      font-size: 13px;
+      color: var(--text);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      max-width: 90%;
+    }
+    #reaction-modal > div {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    #reaction-modal span.emoji {
+      font-size: 18px;
+    }
+    #reaction-modal span.count {
+      font-size: 13px;
+      color: var(--text-secondary);
     }
 
     /* === RITUAL: PULSE === */
@@ -333,7 +370,7 @@
     </header>
 
     <div class="hero">
-      <img id="hero-img" src="https://placehold.co/384x480/111/333?text=+" alt="artefak">
+      <img id="hero-img" src="https://placehold.co/384x480/111/333?text=+  " alt="artefak">
       <div class="artefak-notation" id="hero-notation-display"></div>
       <button id="upload-artefak-btn" class="upload-artefak-btn">Unggah</button>
     </div>
@@ -365,43 +402,49 @@
   <input type="file" id="file-input" accept="image/*" style="display:none;">
 
   <script>
-    // === CONFIG — GANTI INI DENGAN PROYEK & KEY-MU ===
-    const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co'; // 🔁 GANTI DENGAN PROJECT ID-MU
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0'; // 🔁 GANTI DENGAN ANON KEY
-    // === OLD FASHION WAY — MANUAL FETCH ===
-    async function supabaseFetch(table, method = 'GET', body = null) {
+    // === CONFIG ===
+    const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+
+    async function supabaseFetch(table, method = 'GET', body = null, filter = '') {
       const headers = {
         'apikey': SUPABASE_KEY,
         'Authorization': `Bearer ${SUPABASE_KEY}`,
         'Content-Type': 'application/json',
         'Prefer': 'return=representation'
       };
-
-      let url = `${SUPABASE_URL}/rest/v1/${table}`;
+      let url = `${SUPABASE_URL}/rest/v1/${table}${filter}`;
       let options = { method, headers };
-
       if (body) options.body = JSON.stringify(body);
-
       const res = await fetch(url, options);
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
       return await res.json();
     }
 
     // === STATE ===
-    const currentUser = localStorage.getItem('nope_username');
-    if (!currentUser) {
-      window.location.href = 'index.html';
-    }
-    document.getElementById('username-display').textContent = currentUser;
+    const currentUser = localStorage.getItem('nope_username') || '@newglitch';
+    document.getElementById('username-display').textContent = currentUser.replace(/^@/, '');
 
     let artefacts = [];
     let rants = [];
 
+    // === KEYWORDS UNTUK AUTO-ZONASI ===
+    const HYPE_KEYWORDS = ['v!', 'v!!!!', 'v', 'kpop', 'skz', 'txt', 'bts', 'seventeen', 'enhypen', 'drakor', 'k-drama', 'squid game', 'crash landing', 'kim seon ho', 'anime', 'naruto', 'demon slayer', 'one piece', 'gintama', 'au', 'alternate universe', 'ship', 'otp', 'stan', 'bias', 'maknae', 'comeback', 'music video', 'concert', 'lightstick', 'fanart'];
+    const NGUSAHAIN_KEYWORDS = ['skripsi', 'tugas', 'deadline', 'sidang', 'wisuda', 'kuliah', 'jualan', 'thrifting', 'preloved', 'reselling', 'online shop', 'crypto', 'bitcoin', 'saham', 'investasi', 'passive income', 'freelance', 'coding', 'belajar', 'latihan', 'progres', 'hari ke-', 'untung', 'rugi', 'modal', 'omzet', 'usaha', 'bisnis', 'side hustle', 'ui/ux', 'figma', 'blender', 'photoshop', 'canva', 'skill'];
+
+    function detectArtefactZone(notation) {
+      if (!notation) return 'spill';
+      const words = notation.toLowerCase();
+      if (HYPE_KEYWORDS.some(kw => words.includes(kw))) return 'hype';
+      if (NGUSAHAIN_KEYWORDS.some(kw => words.includes(kw))) return 'ngusahain';
+      return 'spill';
+    }
+
+    // === UTILS ===
     const heroImg = document.getElementById('hero-img');
     const heroNotationDisplay = document.getElementById('hero-notation-display');
     const postUploadPanel = document.getElementById('post-upload-panel');
 
-    // === UTILS ===
     function showConfirmation(msg) {
       const el = document.getElementById('confirmation');
       el.textContent = msg;
@@ -423,12 +466,11 @@
       postUploadPanel.classList.add('hidden');
     }
 
-    // === DATABASE: pastikan user ada ===
+    // === DATABASE ===
     async function ensureUserExists() {
       try {
         const users = await supabaseFetch('users', 'GET', null);
         const user = users.find(u => u.username === currentUser);
-
         if (!user) {
           await supabaseFetch('users', 'POST', { username: currentUser });
         }
@@ -442,18 +484,15 @@
       try {
         await ensureUserExists();
 
-        // Load artefacts
-        const artefactsData = await supabaseFetch('artefacts', 'GET', null);
-        artefacts = artefactsData.filter(a => a.username === currentUser).slice(0, 6);
+        const artefactsData = await supabaseFetch('artefacts', 'GET', null, `?username=eq.${currentUser}&order=created_at.desc&limit=6`);
+        artefacts = artefactsData;
 
-        // Load rants
-        const rantsData = await supabaseFetch('rants', 'GET', null);
-        rants = rantsData.filter(r => r.username === currentUser).slice(0, 5);
+        const rantsData = await supabaseFetch('rants', 'GET', null, `?username=eq.${currentUser}&order=created_at.desc&limit=5`);
+        rants = rantsData;
 
         renderHero();
         renderDiary();
         renderTray();
-
       } catch (e) {
         console.error('Error saat load data:', e);
         showConfirmation("Gagal memuat data. Coba refresh.");
@@ -468,112 +507,61 @@
         heroNotationDisplay.textContent = notation;
         if (notation) hidePostUploadPanel();
       } else {
-        heroImg.src = 'https://placehold.co/384x480/111/333?text=+';
+        heroImg.src = 'https://placehold.co/384x480/111/333?text=+  ';
         heroNotationDisplay.textContent = '';
       }
     }
 
- function renderDiary() {
-  const container = document.getElementById('diary');
-  container.innerHTML = '';
-
-  if (rants.length === 0) {
-    container.innerHTML = '<div class="empty-state">Belum ada jejak. Tinggalkan jejak pertamamu!</div>';
-    return;
-  }
-
-  rants.forEach(r => {
-    const entry = document.createElement('div');
-    entry.className = 'diary-entry';
-    const date = new Date(r.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
-    entry.innerHTML = `<time>${date}</time><p>${r.content}</p>`;
-    container.appendChild(entry);
-
-    // --- TAMBAHKAN EMOJI + COUNTER ---
-    const reactionsContainer = document.createElement('div');
-    reactionsContainer.style.display = 'flex';
-    reactionsContainer.style.gap = '12px';
-    reactionsContainer.style.marginTop = '8px';
-    reactionsContainer.style.fontSize = '15px';
-
-    fetchReactionStats(r.id).then(stats => {
-      ['🤠', '😢', '🤗', '🔥'].forEach(emoji => {
-        const count = stats[emoji].count;
-        const users = stats[emoji].users;
-
-        const item = document.createElement('div');
-        item.style.display = 'flex';
-        item.style.alignItems = 'center';
-        item.style.gap = '4px';
-        item.style.cursor = 'pointer';
-        item.style.opacity = count > 0 ? '1' : '0.6';
-        item.style.transition = 'all 0.2s';
-
-        const emojiSpan = document.createElement('span');
-        emojiSpan.textContent = emoji;
-        emojiSpan.style.fontSize = '18px';
-        emojiSpan.style.fontWeight = '600';
-
-        const countSpan = document.createElement('span');
-        countSpan.textContent = count;
-        countSpan.style.fontSize = '13px';
-        countSpan.style.color = count > 0 ? '#a0a0a0' : 'transparent';
-
-        if (count > 0) {
-          countSpan.style.animation = 'pulse-glow 2s infinite';
-          if (!document.getElementById('pulse-style')) {
-            const style = document.createElement('style');
-            style.id = 'pulse-style';
-            style.textContent = `
-              @keyframes pulse-glow {
-                0%, 100% { opacity: 0.7; }
-                50% { opacity: 1; }
-              }
-            `;
-            document.head.appendChild(style);
-          }
-        }
-
-        // ⚡️ KLIK EMOJI → SIMPAN REAKSI
-        item.onclick = (e) => {
-          e.stopPropagation();
-          saveReaction(r.id, emoji); // ← INI YANG PENTING!
-        };
-
-        // Hover → efek visual
-        item.onmouseenter = () => {
-          emojiSpan.style.transform = 'scale(1.2)';
-          emojiSpan.style.opacity = '1';
-        };
-        item.onmouseleave = () => {
-          emojiSpan.style.transform = 'scale(1)';
-          emojiSpan.style.opacity = count > 0 ? '1' : '0.6';
-        };
-
-        item.appendChild(emojiSpan);
-        item.appendChild(countSpan);
-
-        // Jika diklik, tampilkan 3 username terakhir
-        item.onclick = (e) => {
-          e.stopPropagation();
-          showUserList(emoji, users);
-        };
-
-        reactionsContainer.appendChild(item);
+    function renderDiary() {
+      const container = document.getElementById('diary');
+      container.innerHTML = '';
+      if (rants.length === 0) {
+        container.innerHTML = '<div class="empty-state">Belum ada jejak. Tinggalkan jejak pertamamu!</div>';
+        return;
+      }
+      rants.forEach(r => {
+        const entry = document.createElement('div');
+        entry.className = 'diary-entry';
+        const date = new Date(r.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+        entry.innerHTML = `<time>${date}</time><p>${r.content}</p>`;
+        container.appendChild(entry);
+        // Reaksi emoji
+        const reactionsContainer = document.createElement('div');
+        reactionsContainer.style.display = 'flex';
+        reactionsContainer.style.gap = '12px';
+        reactionsContainer.style.marginTop = '8px';
+        reactionsContainer.style.fontSize = '15px';
+        fetchReactionStats(r.id, 'rant').then(stats => {
+          ['🤠', '😢', '🤗', '🔥'].forEach(emoji => {
+            const count = stats[emoji].count;
+            const emojiSpan = document.createElement('span');
+            emojiSpan.textContent = emoji;
+            emojiSpan.style.fontSize = '18px';
+            emojiSpan.style.fontWeight = '600';
+            emojiSpan.style.opacity = count > 0 ? '1' : '0.6';
+            emojiSpan.style.cursor = 'pointer';
+            emojiSpan.onclick = () => saveReaction(r.id, emoji, 'rant');
+            reactionsContainer.appendChild(emojiSpan);
+            if (count > 0) {
+              const countSpan = document.createElement('span');
+              countSpan.textContent = count;
+              countSpan.style.fontSize = '13px';
+              countSpan.style.color = '#a0a0a0';
+              reactionsContainer.appendChild(countSpan);
+            }
+          });
+        });
+        entry.appendChild(reactionsContainer);
       });
-    });
+    }
 
-    entry.appendChild(reactionsContainer);
-  });
-}   function renderTray() {
+    function renderTray() {
       const tray = document.getElementById('tray');
       tray.innerHTML = '';
-
       if (artefacts.length === 0) {
         tray.innerHTML = '<div class="empty-state">Belum ada artefak. Unggah gambar pertamamu!</div>';
         return;
       }
-
       artefacts.slice(0, 6).forEach(a => {
         const div = document.createElement('div');
         div.className = 'tray-slot';
@@ -584,49 +572,39 @@
           notationEl.textContent = a.notation;
           div.appendChild(notationEl);
         }
+        div.onclick = () => showArtefactReactions(a.id, a.image_url);
         tray.appendChild(div);
       });
     }
 
-    // === UPLOAD ARTEFAK BARU ===
+    // === UPLOAD ARTEFAK ===
     async function handleFileSelect(event) {
       const file = event.target.files[0];
       if (!file) return;
-
       showConfirmation("Mengunggah...");
-      const fileName = `${currentUser}/${Date.now()}-${file.name}`;
-
+      const fileName = `${currentUser.replace(/^@/, '')}/${Date.now()}-${file.name}`;
       try {
-        // Upload ke Supabase Storage via URL
         const formData = new FormData();
         formData.append('file', file);
-
         const uploadRes = await fetch(`${SUPABASE_URL}/storage/v1/object/artefacts/${fileName}`, {
           method: 'POST',
           headers: {
             'apikey': SUPABASE_KEY,
             'Authorization': `Bearer ${SUPABASE_KEY}`
           },
-          body: formData
+          body: file
         });
-
-        if (!uploadRes.ok) {
-          throw new Error(`Upload gagal: ${await uploadRes.text()}`);
-        }
-
+        if (!uploadRes.ok) throw new Error(`Upload gagal: ${await uploadRes.text()}`);
         const imageUrl = `${SUPABASE_URL}/storage/v1/object/public/artefacts/${fileName}`;
-
-        // Simpan ke tabel artefacts
         await supabaseFetch('artefacts', 'POST', {
           username: currentUser,
           image_url: imageUrl,
-          notation: ''
+          notation: '',
+          zone: 'spill' // default
         });
-
         showConfirmation("Gambar diunggah! Tambahkan notasi (maks 4 kata).");
         await loadData();
-        showPostUploadPanel(); // ✅ Munculkan panel notasi setelah upload
-
+        showPostUploadPanel();
       } catch (e) {
         console.error('Upload error:', e);
         alert(e.message || 'Gagal mengunggah gambar.');
@@ -634,31 +612,27 @@
       }
     }
 
-    // === SIMPAN NOTASI ===
+    // === SIMPAN NOTASI + AUTO-ZONASI ===
     async function saveNotation() {
       const input = document.getElementById('hero-notation');
       const text = input.value.trim();
-
       if (!validateNotation(text)) {
         alert('Notasi harus 1–4 kata.');
         return;
       }
-
       if (artefacts.length === 0) {
         alert('Belum ada artefak.');
         return;
       }
-
       try {
-        // ✅ Perbaikan: Gunakan filter di URL, bukan di parameter
+        const zone = detectArtefactZone(text);
         await supabaseFetch(`artefacts?id=eq.${artefacts[0].id}`, 'PATCH', {
-          notation: text
+          notation: text,
+          zone: zone
         });
-
         showConfirmation("Notasi tersimpan.");
         await loadData();
-        hidePostUploadPanel(); // ✅ Sembunyikan panel setelah simpan
-
+        hidePostUploadPanel();
       } catch (e) {
         console.error('Notasi error:', e);
         alert(e.message || 'Gagal menyimpan notasi.');
@@ -673,134 +647,111 @@
         alert('Maksimal 300 huruf.');
         return;
       }
-
       try {
-        // ✅ Perbaikan: Pastikan nilai "zone" sesuai constraint
-        let zone = 'neutral'; // default
-
-        // 👇 Optional: Auto-detect zone via kata kunci
-        // if (content.toLowerCase().includes('senang') || content.toLowerCase().includes('bahagia')) zone = 'positive';
-        // if (content.toLowerCase().includes('sedih') || content.toLowerCase().includes('marah')) zone = 'negative';
-
         await supabaseFetch('rants', 'POST', {
           username: currentUser,
           content,
-          zone: zone // ✅ Nilai ini HARUS sesuai constraint
+          zone: 'neutral'
         });
-
         document.getElementById('rant').value = '';
         showConfirmation("Jejakmu tersimpan.");
         await loadData();
-
       } catch (e) {
         console.error('Rant error:', e);
         alert(e.message || 'Gagal menyimpan jejak.');
       }
     }
 
-    // === NAVIGASI & LOGOUT ===
-    function navigateTo(page) {
-      window.location.href = page;
+    // === REAKSI EMOJI ===
+    async function saveReaction(targetId, emoji, type) {
+      try {
+        const reactionData = type === 'rant' 
+          ? { rant_id: targetId, user_id: currentUser, emoji }
+          : { artefact_id: targetId, user_id: currentUser, emoji };
+        await supabaseFetch('reactions', 'POST', reactionData);
+        triggerPulse();
+        await loadData();
+      } catch (e) {
+        console.error('Gagal simpan reaksi:', e);
+      }
     }
 
+    async function fetchReactionStats(targetId, type) {
+      try {
+        const filter = type === 'rant' 
+          ? `?rant_id=eq.${targetId}` 
+          : `?artefact_id=eq.${targetId}`;
+        const data = await supabaseFetch('reactions', 'GET', null, filter);
+        const stats = { '🤠': { count: 0 }, '😢': { count: 0 }, '🤗': { count: 0 }, '🔥': { count: 0 } };
+        data.forEach(r => {
+          if (stats[r.emoji]) stats[r.emoji].count++;
+        });
+        return stats;
+      } catch (e) {
+        return { '🤠': { count: 0 }, '😢': { count: 0 }, '🤗': { count: 0 }, '🔥': { count: 0 } };
+      }
+    }
+
+    // === TAMPILKAN REAKSI ARTEFAK ===
+    async function showArtefactReactions(artefactId, imageUrl) {
+      const modal = document.createElement('div');
+      modal.id = 'reaction-modal';
+      modal.innerHTML = `
+        <img src="${imageUrl}" style="width:100%; height:200px; object-fit:cover; border-radius:8px; margin-bottom:12px;">
+        <div><span class="emoji">🤠</span> <span class="count"></span></div>
+        <div><span class="emoji">😢</span> <span class="count"></span></div>
+        <div><span class="emoji">🤗</span> <span class="count"></span></div>
+        <div><span class="emoji">🔥</span> <span class="count"></span></div>
+      `;
+      document.body.appendChild(modal);
+      // Isi count
+      const stats = await fetchReactionStats(artefactId, 'artefact');
+      modal.querySelectorAll('.count').forEach((el, i) => {
+        const emoji = ['🤠','😢','🤗','🔥'][i];
+        el.textContent = stats[emoji].count || '';
+      });
+      setTimeout(() => modal.remove(), 5000);
+      modal.onclick = () => modal.remove();
+    }
+
+    // === NAVIGASI ===
+    function navigateTo(page) { window.location.href = page; }
     function logout() {
       if (confirm('Keluar dari akun?')) {
         localStorage.removeItem('nope_username');
         window.location.href = 'index.html';
       }
     }
-    // === EMOJI COUNTER UNTUK JEJAK ===
-const EMOJI_LABELS = {
-  '🤠': 'Aku ngerti banget',
-  '😢': 'Nangis bareng',
-  '🤗': 'Peluk virtual',
-  '🔥': 'Ini bikin kaget'
-};
+    function triggerPulse() {
+      const pulse = document.createElement('div');
+      pulse.className = 'pulse-animation';
+      document.body.appendChild(pulse);
+      setTimeout(() => pulse.remove(), 1200);
+    }
 
-async function fetchReactionStats(rantId) {
-  try {
-    const data = await supabaseFetch('reactions', 'GET', null);
-    const filtered = data.filter(r => r.rant_id === rantId);
-    const stats = { '🤠': { count: 0, users: [] }, '😢': { count: 0, users: [] }, '🤗': { count: 0, users: [] }, '🔥': { count: 0, users: [] } };
-    filtered.forEach(row => {
-      if (stats[row.emoji]) {
-        stats[row.emoji].count++;
-        if (stats[row.emoji].users.length < 3) {
-          stats[row.emoji].users.push(row.user_id);
-        }
-      }
-    });
-    return stats;
-  } catch (e) {
-    console.error('Gagal ambil reaksi:', e);
-    return { '🤠': { count: 0, users: [] }, '😢': { count: 0, users: [] }, '🤗': { count: 0, users: [] }, '🔥': { count: 0, users: [] } };
-  }
-}
-
-function showUserList(emoji, users) {
-  const old = document.getElementById('reaction-modal');
-  if (old) old.remove();
-  if (users.length === 0) return;
-
-  const modal = document.createElement('div');
-  modal.id = 'reaction-modal';
-  modal.style.cssText = `
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(10, 10, 10, 0.9);
-    backdrop-filter: blur(10px);
-    border: 1px solid #2a2a2a;
-    border-radius: 12px;
-    padding: 12px 16px;
-    z-index: 1000;
-    font-size: 13px;
-    color: #f5f5f5;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-    max-width: 90%;
-  `;
-  const title = document.createElement('div');
-  title.textContent = `${emoji} ${EMOJI_LABELS[emoji]}`;
-  title.style.fontSize = '14px';
-  title.style.fontWeight = '600';
-  title.style.marginBottom = '6px';
-  const userList = document.createElement('div');
-  userList.textContent = users.map(u => `@${u}`).join(', ');
-  userList.style.fontSize = '12px';
-  userList.style.color = '#a0a0a0';
-  modal.appendChild(title);
-  modal.appendChild(userList);
-  document.body.appendChild(modal);
-  setTimeout(() => { if (modal.parentNode) modal.parentNode.removeChild(modal); }, 3000);
-  modal.onclick = () => modal.remove();
-}
-
-    // === INIT LISTENERS ===
+    // === INIT ===
     document.addEventListener('DOMContentLoaded', () => {
-      // Upload
-      document.getElementById('upload-artefak-btn').addEventListener('click', () => {
-        document.getElementById('file-input').click();
-      });
-      document.getElementById('file-input').addEventListener('change', handleFileSelect);
+      // Pastikan tombol unggah bisa diklik
+      setTimeout(() => {
+        const btn = document.getElementById('upload-artefak-btn');
+        if (btn) {
+          btn.onclick = () => document.getElementById('file-input').click();
+        }
+      }, 100);
 
-      // Notasi
+      document.getElementById('file-input').addEventListener('change', handleFileSelect);
       document.getElementById('save-notation-btn').addEventListener('click', saveNotation);
       document.getElementById('hero-notation').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') saveNotation();
       });
-
-      // Rant
       document.getElementById('jejakkan-btn').addEventListener('click', postRant);
 
-      // Navigasi
       document.getElementById('nav-jejak').addEventListener('click', () => navigateTo('jejak.html'));
       document.getElementById('nav-frekuensi').addEventListener('click', () => navigateTo('frekuensi.html'));
       document.getElementById('nav-saynope').addEventListener('click', () => navigateTo('saynope.html'));
       document.getElementById('nav-glitch').addEventListener('click', () => navigateTo('glitch.html'));
       document.getElementById('settings-btn').addEventListener('click', logout);
 
-      // Load data
       loadData();
     });
   </script>
