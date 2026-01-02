@@ -33,14 +33,12 @@
       -webkit-font-smoothing: antialiased;
     }
     
-    /* === WRAPPER === */
     .wrapper {
       max-width: 480px;
       margin: 0 auto;
       padding: 0 16px;
     }
     
-    /* === HEADER (ORIGINAL STYLE) === */
     header {
       position: sticky;
       top: 0;
@@ -90,14 +88,12 @@
       transform: rotate(90deg);
     }
     
-    /* === GREETING (COMPACT) === */
     .greeting {
       font-size: 16px;
       margin: 16px 0 20px 0;
       color: var(--text);
     }
     
-    /* === TAB SYSTEM === */
     .tab-navigation {
       display: flex;
       gap: 8px;
@@ -140,7 +136,6 @@
       animation: fadeIn 0.3s ease;
     }
     
-    /* === CARDS === */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -183,12 +178,12 @@
       gap: 12px;
     }
     
-    /* === POST ITEM === */
     .post-item {
       padding: 14px;
       background: var(--surface-elevated);
       border-radius: 12px;
       transition: all 0.2s;
+      position: relative;
     }
     .post-item:hover {
       background: var(--border);
@@ -213,7 +208,43 @@
       line-height: 1.5;
     }
     
-    /* === HANGOUT ITEM === */
+    .post-emojis {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .post-emojis span {
+      opacity: 0.8;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .post-emojis span:hover {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+    /* Tooltip on hover */
+    .post-emojis span::after {
+      content: attr(data-name);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      background: rgba(0,0,0,0.8);
+      color: white;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .post-emojis span:hover::after {
+      opacity: 1;
+    }
+    
     .hangout-item {
       background: var(--surface-elevated);
       border: 1px solid var(--border);
@@ -280,7 +311,6 @@
       color: var(--muted);
     }
     
-    /* === SECTION === */
     .section {
       margin-bottom: 32px;
     }
@@ -309,7 +339,6 @@
       gap: 0;
     }
     
-    /* === ADD BUTTON === */
     .add-btn {
       width: 100%;
       padding: 16px;
@@ -333,7 +362,6 @@
       background: rgba(73, 3, 252, 0.05);
     }
     
-    /* === EMPTY STATE === */
     .empty-state {
       text-align: center;
       padding: 40px 20px;
@@ -348,7 +376,6 @@
       font-size: 14px;
     }
     
-    /* === MODAL === */
     .modal {
       display: none;
       position: fixed;
@@ -446,7 +473,6 @@
       background: var(--border);
     }
     
-    /* === FOOTER === */
     .tagline {
       text-align: center;
       padding: 40px 20px;
@@ -461,7 +487,6 @@
       margin-top: 8px;
     }
     
-    /* === ANIMATIONS === */
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
@@ -499,7 +524,6 @@
       }
     }
     
-    /* === RESPONSIVE === */
     @media (max-width: 640px) {
       .greeting {
         font-size: 15px;
@@ -512,16 +536,10 @@
         font-size: 13px;
       }
     }
-
-    /* Tooltip emoji */
-    .post-emojis {
-      user-select: none;
-    }
   </style>
 </head>
 <body>
   <div class="wrapper">
-    <!-- HEADER (ORIGINAL) -->
     <header>
       <div class="logo">NOPE</div>
       <div class="top-right">
@@ -535,10 +553,8 @@
       </div>
     </header>
 
-    <!-- GREETING (COMPACT - NO "Halo") -->
     <div class="greeting">@<span id="username-display"></span></div>
 
-    <!-- TAB NAVIGATION -->
     <div class="tab-navigation">
       <button class="tab-btn active" onclick="switchTab('zones')">
         <span>💬</span> Zones
@@ -550,7 +566,6 @@
 
     <!-- ZONES TAB -->
     <div id="tab-zones" class="tab-content active">
-      <!-- Hype Haus -->
       <div class="card">
         <div class="card-header">
           <div class="card-icon">🎧</div>
@@ -562,7 +577,6 @@
         <div class="card-content" id="zone-hype"></div>
       </div>
 
-      <!-- Ngusahain -->
       <div class="card">
         <div class="card-header">
           <div class="card-icon">💼</div>
@@ -574,7 +588,6 @@
         <div class="card-content" id="zone-ngusahain"></div>
       </div>
 
-      <!-- Spill Zone -->
       <div class="card">
         <div class="card-header">
           <div class="card-icon">💬</div>
@@ -589,7 +602,6 @@
 
     <!-- HANGOUTS TAB -->
     <div id="tab-hangouts" class="tab-content">
-      <!-- Hidden Gems -->
       <div class="section">
         <div class="section-header">
           <span class="section-icon">💎</span>
@@ -599,7 +611,6 @@
         <div class="section-content" id="hangouts-gems"></div>
       </div>
 
-      <!-- WFH Cafe -->
       <div class="section">
         <div class="section-header">
           <span class="section-icon">☕</span>
@@ -612,7 +623,6 @@
         </button>
       </div>
 
-      <!-- Enak Under 10ribu -->
       <div class="section">
         <div class="section-header">
           <span class="section-icon">🍜</span>
@@ -626,7 +636,6 @@
       </div>
     </div>
 
-    <!-- FOOTER -->
     <div class="tagline">
       Ga perlu follower.<br>
       Cuma butuh sefrekuensi.<br>
@@ -674,7 +683,6 @@
     const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-    // === CACHE UNTUK CEK NARSISME ===
     let rantsDataCache = [];
 
     async function supabaseFetch(table, method = 'GET', body = null, filter = '') {
@@ -687,11 +695,13 @@
 
       let url = `${SUPABASE_URL}/rest/v1/${table}${filter}`;
       let options = { method, headers };
-
       if (body) options.body = JSON.stringify(body);
 
       const res = await fetch(url, options);
-      if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`HTTP ${res.status}: ${errorText}`);
+      }
       return await res.json();
     }
 
@@ -708,10 +718,58 @@
       return 'spill';
     }
 
+    // === DUMMY RANT ===
+    const generateDummyRants = () => {
+      const usernames = [
+        'homie01', 'glitchqueen', 'nopeghost', 'rant_angel', 'crybaby.exe',
+        'thriftingwitch', 'stanaccount', 'overthinker99', 'burnoutbabe', 'cafelover',
+        'kpopdiary', 'skripsigoblin', 'emopunk', 'nongkrongking', 'dramaqueen',
+        'chillcoder', 'moodboarder', 'sadboi2077', 'vibesonly', 'silentobserver'
+      ];
+
+      const dummyHype = [
+        "v!!!! bias comeback tomorrow and i literally can’t function",
+        "just rewatched squid game s2 teaser — my soul left my body 🤯",
+        "skz world tour jakarta?? i’m selling a kidney",
+        "my au where jimin is a barista and i’m his regular customer... ✨☕",
+        "stan loona? more like stan LOONA. periodt."
+      ];
+
+      const dummyNgusahain = [
+        "hari ke-12 bikin skripsi. bab 2 masih kosong. help.",
+        "jualan thrifting, modal 100k, untung 300k. alhamdulillah banget 🥺",
+        "baru aja submit figma ke client. semoga ga revisi 10x lagi",
+        "crypto lagi jatuh, tapi tetep rebalance. believe in the process 💪",
+        "hari ini berhasil push 3 commit. small wins, ya kan?"
+      ];
+
+      const dummySpill = [
+        "kenapa ya rasanya kayak ga ada yang ngerti...",
+        "hujan. sendiri. lagi. gapapa sih. cuma...",
+        "capek jadi strong terus. pengen nangis aja.",
+        "hidup berasa kayak loading icon yang ga pernah selesai.",
+        "kadang pengen ilang. bukan mati. cuma... ilang."
+      ];
+
+      const attachUsernames = (contents) => {
+        return contents.map((content, i) => ({
+          id: `dummy-${Date.now()}-${i}`,
+          username: usernames[i % usernames.length],
+          content,
+          created_at: new Date(Date.now() - Math.random() * 86400000).toISOString()
+        }));
+      };
+
+      return {
+        hype: attachUsernames(dummyHype),
+        ngusahain: attachUsernames(dummyNgusahain),
+        spill: attachUsernames(dummySpill)
+      };
+    };
+
     // === STATE ===
-    const currentUser = localStorage.getItem('nope_username');
-    if (!currentUser) window.location.href = 'index.html';
-    document.getElementById('username-display').textContent = currentUser;
+    const currentUser = localStorage.getItem('nope_username') || '@newglitch';
+    document.getElementById('username-display').textContent = currentUser.replace(/^@/, '');
 
     // === TAB SYSTEM ===
     function switchTab(tab) {
@@ -722,10 +780,105 @@
       document.getElementById(`tab-${tab}`).classList.add('active');
     }
 
+    // === REACTION SYSTEM (FOKUS UTAMA) ===
+    async function saveReaction(rantId, emoji) {
+      if (!rantId || !emoji) return;
+
+      // Jika ini dummy rant, jangan simpan ke Supabase
+      if (rantId.startsWith('dummy')) {
+        triggerPulse();
+        console.log('✅ Dummy rant — reaksi hanya simulasi.');
+        return;
+      }
+
+      // Proteksi narsis: jangan izinkan reaksi ke rant sendiri
+      const rant = rantsDataCache.find(r => r.id === rantId);
+      if (rant && rant.username === currentUser) {
+        console.warn('🚫 Tidak boleh reaksi ke rant sendiri.');
+        return;
+      }
+
+      try {
+        // Cek apakah sudah pernah reaksi
+        const existing = await supabaseFetch('reactions', 'GET', null, 
+          `?rant_id=eq.${rantId}&user_id=eq.${encodeURIComponent(currentUser)}&emoji=eq.${encodeURIComponent(emoji)}`
+        );
+
+        if (existing.length > 0) {
+          // Toggle: hapus jika sudah ada
+          await supabaseFetch('reactions', 'DELETE', null, 
+            `?id=eq.${existing[0].id}`
+          );
+          console.log('🗑️ Reaksi dihapus:', emoji);
+        } else {
+          // Simpan reaksi baru
+          await supabaseFetch('reactions', 'POST', {
+            rant_id: rantId,
+            user_id: currentUser,
+            emoji: emoji
+          });
+          console.log('✅ Reaksi disimpan:', { rant_id: rantId, user_id: currentUser, emoji });
+        }
+
+        triggerPulse();
+      } catch (e) {
+        console.error('💥 Gagal simpan reaksi ke Supabase:', e.message);
+        alert('Gagal menyimpan reaksi. Coba lagi nanti.');
+      }
+    }
+
+    // === RENDER ZONE ===
+    function renderZone(zoneKey, posts) {
+      const container = document.getElementById(`zone-${zoneKey}`);
+      container.innerHTML = '';
+
+      if (posts.length === 0) {
+        const dummies = generateDummyRants();
+        posts = dummies[zoneKey] || [];
+      }
+
+      const emojis = { hype: '🔥', ngusahain: '💪', spill: '🫂' };
+      const zoneEmoji = emojis[zoneKey] || '💬';
+
+      posts.forEach(post => {
+        const el = document.createElement('div');
+        el.className = 'post-item';
+        el.innerHTML = `
+          <div class="post-header">
+            <span class="post-username">@${post.username}</span>
+            <span class="post-emoji">${zoneEmoji}</span>
+          </div>
+          <div class="post-content">${post.content}</div>
+        `;
+        container.appendChild(el);
+
+        // Hanya tampilkan emoji reaksi jika BUKAN rant sendiri
+        if (post.username !== currentUser.replace(/^@/, '')) {
+          const emojiBar = document.createElement('div');
+          emojiBar.className = 'post-emojis';
+          ['🤠', '😢', '🤗', '🔥'].forEach(emoji => {
+            const span = document.createElement('span');
+            span.textContent = emoji;
+            // Tooltip name
+            const names = { '🤠': 'cowboy', '😢': 'nangis', '🤗': 'peluk', '🔥': 'api' };
+            span.setAttribute('data-name', names[emoji]);
+            span.onclick = (e) => {
+              e.stopPropagation();
+              saveReaction(post.id, emoji);
+              // Micro-feedback visual
+              span.style.transform = 'scale(1.4)';
+              setTimeout(() => span.style.transform = 'scale(1)', 200);
+            };
+            emojiBar.appendChild(span);
+          });
+          el.appendChild(emojiBar);
+        }
+      });
+    }
+
     // === LOAD ZONES ===
     async function loadFeed() {
       try {
-        // ✅ UPDATE CACHE
         const rantsData = await supabaseFetch('rants', 'GET', null, '?order=created_at.desc&limit=100');
         rantsDataCache = rantsData || [];
 
@@ -742,106 +895,20 @@
         renderZone('spill', spill);
       } catch (e) {
         console.error('Gagal muat feed:', e);
+        const dummies = generateDummyRants();
+        renderZone('hype', dummies.hype);
+        renderZone('ngusahain', dummies.ngusahain);
+        renderZone('spill', dummies.spill);
       }
     }
 
-    // === SIMPAN REAKSI (HANYA UNTUK ORANG LAIN) ===
-    async function saveReaction(rantId, emoji) {
-      try {
-        const rant = rantsDataCache.find(r => r.id === rantId);
-        if (rant && rant.username === currentUser) {
-          console.log('Tidak boleh merespon rant sendiri (proteksi narsistik).');
-          return;
-        }
-
-        const existing = await supabaseFetch('reactions', 'GET', null, 
-          `?rant_id=eq.${rantId}&user_id=eq.${currentUser}&emoji=eq.${encodeURIComponent(emoji)}`
-        );
-
-        if (existing.length > 0) {
-          await supabaseFetch('reactions', 'DELETE', null, 
-            `?id=eq.${existing[0].id}`
-          );
-        } else {
-          await supabaseFetch('reactions', 'POST', {
-            rant_id: rantId,
-            user_id: currentUser,
-            emoji: emoji
-          });
-        }
-
-        triggerPulse();
-      } catch (e) {
-        console.error('Gagal simpan reaksi:', e);
-      }
-    }
-
-    function renderZone(zoneKey, posts) {
-      const container = document.getElementById(`zone-${zoneKey}`);
-      container.innerHTML = '';
-
-      if (posts.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-state-icon">💭</div>
-            <div class="empty-state-text">Belum ada jejak di zona ini</div>
-          </div>
-        `;
-        return;
-      }
-
-      const emojis = { hype: '🔥', ngusahain: '💪', spill: '🫂' };
-      posts.forEach(post => {
-        const el = document.createElement('div');
-        el.className = 'post-item';
-        el.innerHTML = `
-          <div class="post-header">
-            <span class="post-username">@${post.username}</span>
-            <span class="post-emoji">${emojis[zoneKey]}</span>
-          </div>
-          <div class="post-content">${post.content}</div>
-        `;
-        container.appendChild(el);
-
-        // ✅ HANYA TAMBAHKAN EMOJI JIKA BUKAN RANT SENDIRI
-        if (post.username !== currentUser) {
-          const emojiBar = document.createElement('div');
-          emojiBar.style.display = 'flex';
-          emojiBar.style.gap = '12px';
-          emojiBar.style.marginTop = '12px';
-          emojiBar.style.fontSize = '16px';
-
-          ['🤠', '😢', '🤗', '🔥'].forEach(emoji => {
-            const span = document.createElement('span');
-            span.textContent = emoji;
-            span.style.cursor = 'pointer';
-            span.style.opacity = '0.8';
-            span.style.transition = 'all 0.2s';
-            span.onmouseenter = () => span.style.opacity = '1';
-            span.onmouseleave = () => span.style.opacity = '0.8';
-            span.onclick = (e) => {
-              e.stopPropagation();
-              saveReaction(post.id, emoji);
-              span.style.transform = 'scale(1.3)';
-              setTimeout(() => span.style.transform = 'scale(1)', 200);
-            };
-            emojiBar.appendChild(span);
-          });
-
-          el.appendChild(emojiBar);
-        }
-      });
-    }
-
-    // === LOAD HANGOUTS ===
+    // === HANGOUTS (tidak diubah) ===
     async function loadHangouts() {
       try {
         const data = await supabaseFetch('hangouts', 'GET', null, '?order=created_at.desc');
-        
         const gems = data.filter(h => h.category === 'gems');
         const wfh = data.filter(h => h.category === 'wfh');
         const food = data.filter(h => h.category === 'food');
-
         renderHangouts('gems', gems);
         renderHangouts('wfh', wfh);
         renderHangouts('food', food);
@@ -849,25 +916,15 @@
         console.error('Gagal muat hangouts:', e);
       }
     }
-
     function renderHangouts(category, items) {
       const container = document.getElementById(`hangouts-${category}`);
-      container.innerHTML = '';
-
-      if (items.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-state-icon">📍</div>
-            <div class="empty-state-text">Belum ada rekomendasi</div>
-          </div>
-        `;
-        return;
-      }
-
-      items.forEach(item => {
-        const el = document.createElement('div');
-        el.className = 'hangout-item';
-        el.innerHTML = `
+      container.innerHTML = items.length === 0 ? `
+        <div class="empty-state">
+          <div class="empty-state-icon">📍</div>
+          <div class="empty-state-text">Belum ada rekomendasi</div>
+        </div>
+      ` : items.map(item => `
+        <div class="hangout-item">
           <div class="hangout-header">
             <div class="hangout-title">
               <div class="hangout-name">${item.name}</div>
@@ -879,9 +936,8 @@
           <div class="hangout-footer">
             <span class="hangout-author">oleh @${item.username}</span>
           </div>
-        `;
-        container.appendChild(el);
-      });
+        </div>
+      `.join(''));
     }
 
     // === MODAL HANGOUT ===
@@ -890,28 +946,22 @@
       document.getElementById('modal-add').classList.add('active');
       document.body.style.overflow = 'hidden';
     }
-
     function closeModal() {
       document.getElementById('modal-add').classList.remove('active');
       document.getElementById('form-hangout').reset();
       document.body.style.overflow = 'auto';
     }
-
     document.getElementById('form-hangout').addEventListener('submit', async (e) => {
       e.preventDefault();
-      
-      const name = document.getElementById('input-name').value;
-      const location = document.getElementById('input-location').value;
-      const category = document.getElementById('input-category').value;
-      const notes = document.getElementById('input-notes').value;
-
       try {
         await supabaseFetch('hangouts', 'POST', {
-          name, location, category, notes,
+          name: document.getElementById('input-name').value,
+          location: document.getElementById('input-location').value,
+          category: document.getElementById('input-category').value,
+          notes: document.getElementById('input-notes').value,
           username: currentUser,
           is_admin_curated: false
         });
-
         closeModal();
         loadHangouts();
         triggerPulse();
@@ -924,14 +974,12 @@
     function navigateTo(page) {
       window.location.href = page;
     }
-
     function logout() {
       if (confirm('Yakin mau keluar?')) {
         localStorage.removeItem('nope_username');
         window.location.href = 'index.html';
       }
     }
-
     function triggerPulse() {
       const pulse = document.createElement('div');
       pulse.className = 'pulse-animation';
@@ -941,20 +989,17 @@
 
     // === INIT ===
     document.addEventListener('DOMContentLoaded', () => {
-      // Navigation buttons
       document.getElementById('nav-jejak').onclick = () => navigateTo('jejak.html');
       document.getElementById('nav-frekuensi').onclick = () => navigateTo('frekuensi.html');
       document.getElementById('nav-saynope').onclick = () => navigateTo('saynope.html');
       document.getElementById('nav-glitch').onclick = () => navigateTo('glitch.html');
       document.getElementById('settings-btn').onclick = logout;
 
-      // Load data
       loadFeed();
       loadHangouts();
       setTimeout(triggerPulse, 300);
     });
 
-    // Close modal on outside click
     document.getElementById('modal-add').addEventListener('click', (e) => {
       if (e.target.id === 'modal-add') closeModal();
     });
