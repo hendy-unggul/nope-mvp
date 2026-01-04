@@ -233,7 +233,7 @@
       gap: 8px;
       padding: 12px 12px 0 12px;
     }
-    .artefact-notation {
+    .artefak-notation {
       padding: 12px;
       font-size: 14px;
       color: var(--text);
@@ -717,23 +717,61 @@
       return await res.json();
     }
 
-    // === KEYWORDS ===
-    const HYPE_KEYWORDS = ['v!', 'v!!!!', 'v', 'kpop', 'skz', 'txt', 'bts', 'seventeen', 'enhypen', 'drakor', 'k-drama', 'squid game', 'crash landing', 'kim seon ho', 'anime', 'naruto', 'demon slayer', 'one piece', 'gintama', 'au', 'alternate universe', 'ship', 'otp', 'stan', 'bias', 'maknae', 'comeback', 'music video', 'concert', 'lightstick', 'fanart'];
-    const NGUSAHAIN_KEYWORDS = ['skripsi', 'tugas', 'deadline', 'sidang', 'wisuda', 'kuliah', 'jualan', 'thrifting', 'preloved', 'reselling', 'online shop', 'crypto', 'bitcoin', 'saham', 'investasi', 'passive income', 'freelance', 'coding', 'belajar', 'latihan', 'progres', 'hari ke-', 'untung', 'rugi', 'modal', 'omzet', 'usaha', 'bisnis', 'side hustle', 'ui/ux', 'figma', 'blender', 'photoshop', 'canva', 'skill'];
-    const SPILL_KEYWORDS = ['capek', 'lelah', 'sendiri', 'hujan', 'nangis', 'sedih', 'putus asa', 'gabisa', 'gatau', 'kenapa ya', 'berat', 'beban', 'ngeluh', 'curhat', 'mental health', 'anxiety', 'depresi', 'overthinking', 'burnout', 'gaada yang ngerti', 'rasa', 'kosong', 'hampa', 'tertekan', 'pengen ilang', 'pengen ngilang', 'susah', 'buntu', 'mentok'];
-
-    function detectZone(content) {
-      if (!content) return 'spill';
-      const lower = content.toLowerCase();
-      if (HYPE_KEYWORDS.some(kw => lower.includes(kw))) return 'hype';
-      if (NGUSAHAIN_KEYWORDS.some(kw => lower.includes(kw))) return 'ngusahain';
-      if (SPILL_KEYWORDS.some(kw => lower.includes(kw))) return 'spill';
-      return 'spill';
-    }
-
     // === STATE ===
     const currentUser = localStorage.getItem('nope_username') || '@newglitch';
     document.getElementById('username-display').textContent = currentUser.replace(/^@/, '');
+
+    // === POPUP TEXT UNTUK EMOJI ===
+    const EMOJI_POPUPS = {
+      '🤠': 'Asik Cuy!',
+      '😢': 'Nangis bareng...',
+      '🤗': 'Peluk...',
+      '🔥': 'Menyala kaka!'
+    };
+
+    function showEmojiPopup(text) {
+      const old = document.getElementById('emoji-popup');
+      if (old) old.remove();
+
+      const popup = document.createElement('div');
+      popup.id = 'emoji-popup';
+      popup.textContent = text;
+      popup.style.cssText = `
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.85);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+        animation: fadeInOut 1.5s forwards;
+      `;
+
+      if (!document.getElementById('popup-style')) {
+        const style = document.createElement('style');
+        style.id = 'popup-style';
+        style.textContent = `
+          @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, 10px); }
+            20% { opacity: 1; transform: translate(-50%, 0); }
+            80% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -10px); }
+          }
+        `;
+        document.head.appendChild(style);
+      }
+
+      document.body.appendChild(popup);
+      setTimeout(() => {
+        if (popup.parentNode) popup.parentNode.removeChild(popup);
+      }, 1600);
+    }
 
     // === TAB SYSTEM ===
     function switchTab(tab) {
@@ -751,7 +789,6 @@
           ? { rant_id: targetId, user_id: currentUser, emoji }
           : { artefact_id: targetId, user_id: currentUser, emoji };
         
-        // Cek apakah sudah ada
         const filter = type === 'rant' 
           ? `?rant_id=eq.${targetId}&user_id=eq.${currentUser}&emoji=eq.${encodeURIComponent(emoji)}`
           : `?artefact_id=eq.${targetId}&user_id=eq.${currentUser}&emoji=eq.${encodeURIComponent(emoji)}`;
@@ -759,9 +796,10 @@
         const existing = await supabaseFetch('reactions', 'GET', null, filter);
         
         if (existing.length > 0) {
-          await supabaseFetch('reactions', 'DELETE', null, `?id=eq.${existing[0].id}`);
+          return; // Cegah double-react
         } else {
           await supabaseFetch('reactions', 'POST', payload);
+          showEmojiPopup(EMOJI_POPUPS[emoji]);
         }
         triggerPulse();
       } catch (e) {
@@ -780,7 +818,7 @@
             <span class="post-username">@${post.username}</span>
           </div>
           <img src="${post.image_url}" class="artefact-image" loading="lazy" />
-          ${post.notation ? `<div class="artefact-notation">${post.notation}</div>` : ''}
+          ${post.notation ? `<div class="artefak-notation">${post.notation}</div>` : ''}
         `;
       } else {
         el.innerHTML = `
@@ -814,19 +852,27 @@
     // === LOAD DATA ===
     async function loadFeed() {
       try {
-        // Load rants dari SEMUA user
         const rants = await supabaseFetch('rants', 'GET', null, '?order=created_at.desc&limit=100');
         rantsDataCache = rants;
 
-        // Load artefacts dari SEMUA user
         const artefacts = await supabaseFetch('artefacts', 'GET', null, '?order=created_at.desc&limit=100');
         artefactsDataCache = artefacts;
 
-        // Kelompokkan
-        const hypeRants = [], ngusahainRants = [], spillRants = [];
-        const hypeArtefacts = [], ngusahainArtefacts = [], spillArtefacts = [];
+        // Keyword tetap untuk rants (sesuai visi awal)
+        const HYPE_KEYWORDS = ['v!', 'kpop', 'drakor', 'anime', 'au', 'stan'];
+        const NGUSAHAIN_KEYWORDS = ['skripsi', 'jualan', 'progres', 'usaha'];
+        const SPILL_KEYWORDS = ['capek', 'sendiri', 'nangis', 'lelah'];
 
-        // Rants
+        function detectZone(content) {
+          if (!content) return 'spill';
+          const lower = content.toLowerCase();
+          if (HYPE_KEYWORDS.some(kw => lower.includes(kw))) return 'hype';
+          if (NGUSAHAIN_KEYWORDS.some(kw => lower.includes(kw))) return 'ngusahain';
+          if (SPILL_KEYWORDS.some(kw => lower.includes(kw))) return 'spill';
+          return 'spill';
+        }
+
+        const hypeRants = [], ngusahainRants = [], spillRants = [];
         rants.forEach(r => {
           const zone = detectZone(r.content);
           if (zone === 'hype' && hypeRants.length < 5) hypeRants.push(r);
@@ -834,18 +880,22 @@
           else if (spillRants.length < 5) spillRants.push(r);
         });
 
-        // Artefacts
+        // ARTEFAK: ACAK KE ZONA TANPA FILTER
+        const hypeArtefacts = [], ngusahainArtefacts = [], spillArtefacts = [];
+        const zones = ['hype', 'ngusahain', 'spill'];
+
         artefacts.forEach(a => {
-          const zone = a.zone || 'spill'; // ambil dari DB
+          const zone = zones[Math.floor(Math.random() * zones.length)];
           if (zone === 'hype' && hypeArtefacts.length < 5) hypeArtefacts.push(a);
           else if (zone === 'ngusahain' && ngusahainArtefacts.length < 5) ngusahainArtefacts.push(a);
           else if (spillArtefacts.length < 5) spillArtefacts.push(a);
         });
 
-        // Render
-        renderZone('hype', [...hypeRants, ...hypeArtefacts]);
-        renderZone('ngusahain', [...ngusahainRants, ...ngusahainArtefacts]);
-        renderZone('spill', [...spillRants, ...spillArtefacts]);
+        // Acak urutan dalam tiap zona agar lebih dinamis
+        const shuffle = arr => [...arr].sort(() => 0.5 - Math.random());
+        renderZone('hype', shuffle([...hypeRants, ...hypeArtefacts]));
+        renderZone('ngusahain', shuffle([...ngusahainRants, ...ngusahainArtefacts]));
+        renderZone('spill', shuffle([...spillRants, ...spillArtefacts]));
       } catch (e) {
         console.error('Gagal muat feed:', e);
       }
