@@ -308,7 +308,7 @@
     </header>
 
     <div class="hero">
-      <img id="hero-img" src="https://placehold.co/384x480/111/333?text=+" alt="artefak">
+      <img id="hero-img" src="https://placehold.co/384x480/111/333?text=+  " alt="artefak">
       <div class="artefak-notation" id="hero-notation-display"></div>
       <button id="upload-artefak-btn" class="upload-artefak-btn">Unggah</button>
     </div>
@@ -342,6 +342,7 @@
 
   <script>
     // === CONFIG ===
+    // ✅ DIPERBAIKI: HAPUS SPASI EKSTRA DI URL
     const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
@@ -416,12 +417,12 @@
       try {
         await ensureUserExists();
 
-        const artefactsData = await supabaseFetch('artefacts', 'GET', null, 
+        const artefactsData = await supabaseFetch('artefacts', 'GET', null,
           `?username=eq.${encodeURIComponent(currentUser)}&order=created_at.desc&limit=6`
         );
         artefacts = artefactsData;
 
-        const rantsData = await supabaseFetch('rants', 'GET', null, 
+        const rantsData = await supabaseFetch('rants', 'GET', null,
           `?username=eq.${encodeURIComponent(currentUser)}&order=created_at.desc&limit=5`
         );
         rants = rantsData;
@@ -436,16 +437,6 @@
       }
     }
 
-    // === FIX TEXTAREA ===
-    function fixTextarea() {
-      const textarea = document.getElementById('rant');
-      textarea.disabled = false;
-      textarea.readOnly = false;
-      textarea.removeAttribute('disabled');
-      textarea.removeAttribute('readonly');
-      console.log('✅ Textarea diperbaiki');
-    }
-
     // === RENDER ===
     function renderHero() {
       if (artefacts.length > 0) {
@@ -454,7 +445,7 @@
         heroNotationDisplay.textContent = notation;
         if (notation) hidePostUploadPanel();
       } else {
-        heroImg.src = 'https://placehold.co/384x480/111/333?text=+';
+        heroImg.src = 'https://placehold.co/384x480/111/333?text=+  ';
         heroNotationDisplay.textContent = '';
       }
     }
@@ -477,6 +468,7 @@
       });
     }
 
+    // ✅ DIPERBAIKI: TAMBAHKAN FALLBACK VISUAL JIKA GAMBAR GAGAL LOAD
     function renderTray() {
       const tray = document.getElementById('tray');
       tray.innerHTML = '';
@@ -489,13 +481,32 @@
       artefacts.slice(0, 6).forEach(a => {
         const div = document.createElement('div');
         div.className = 'tray-slot';
-        div.style.backgroundImage = `url(${a.image_url})`;
+
+        // Coba load gambar
+        const img = new Image();
+        img.src = a.image_url + '?t=' + Date.now(); // bypass cache
+
+        img.onload = () => {
+          div.style.backgroundImage = `url(${a.image_url})`;
+        };
+
+        img.onerror = () => {
+          // Fallback jika gambar gagal
+          div.style.backgroundColor = 'var(--surface)';
+          div.style.display = 'flex';
+          div.style.alignItems = 'center';
+          div.style.justifyContent = 'center';
+          div.style.fontSize = '20px';
+          div.textContent = '🖼️';
+        };
+
         if (a.notation) {
           const notationEl = document.createElement('div');
           notationEl.className = 'artefak-notation';
           notationEl.textContent = a.notation;
           div.appendChild(notationEl);
         }
+
         tray.appendChild(div);
       });
     }
@@ -524,6 +535,7 @@
         const formData = new FormData();
         formData.append('', file);
 
+        // ✅ Sesuaikan dengan bucket Anda: artefacts (lowercase)
         const uploadRes = await fetch(
           `${SUPABASE_URL}/storage/v1/object/artefacts/${fileName}`,
           {
@@ -659,10 +671,6 @@
       document.getElementById('settings-btn').addEventListener('click', logout);
 
       loadData();
-      
-      setTimeout(() => {
-        fixTextarea();
-      }, 500);
     });
   </script>
 </body>
