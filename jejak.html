@@ -683,37 +683,50 @@
 
     // === POST RANT ===
     async function postRant() {
-      const content = document.getElementById('rant').value.trim();
-      if (!content) return;
-      if (content.length > 300) {
-        alert('Maksimal 300 huruf.');
-        return;
-      }
-
-      try {
-        // ✅ Perbaikan: Pastikan nilai "zone" sesuai constraint
-        let zone = 'neutral'; // default
-
-        // 👇 Optional: Auto-detect zone via kata kunci
-        // if (content.toLowerCase().includes('senang') || content.toLowerCase().includes('bahagia')) zone = 'positive';
-        // if (content.toLowerCase().includes('sedih') || content.toLowerCase().includes('marah')) zone = 'negative';
-
-        await supabaseFetch('rants', 'POST', {
-          username: currentUser,
-          content,
-          zone: zone // ✅ Nilai ini HARUS sesuai constraint
-        });
-
-        document.getElementById('rant').value = '';
-        showConfirmation("Jejakmu tersimpan.");
-        await loadData();
-
-      } catch (e) {
-        console.error('Rant error:', e);
-        alert(e.message || 'Gagal menyimpan jejak.');
-      }
-    }
-
+  console.log('🚀 postRant() dipanggil');
+  
+  const textarea = document.getElementById('rant');
+  const content = textarea.value.trim();
+  
+  console.log('📝 Content:', content);
+  
+  if (!content) {
+    alert('Jejak tidak boleh kosong!');
+    return;
+  }
+  
+  if (content.length > 300) {
+    alert('Maksimal 300 huruf. Sekarang: ' + content.length + ' huruf.');
+    return;
+  }
+  
+  const btn = document.getElementById('jejakkan-btn');
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan...';
+  
+  try {
+    console.log('💾 Mulai simpan ke database...');
+    
+    const result = await supabaseFetch('rants', 'POST', {
+      username: currentUser,
+      content: content,
+      zone: 'neutral'
+    });
+    
+    console.log('✅ Hasil simpan:', result);
+    
+    textarea.value = '';
+    showConfirmation('✅ Jejakmu tersimpan!');
+    await loadData();
+    
+  } catch (e) {
+    console.error('❌ Error saat simpan:', e);
+    alert('Gagal menyimpan jejak: ' + e.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Jejakkan';
+  }
+}
     // === NAVIGASI & LOGOUT ===
     function navigateTo(page) {
       window.location.href = page;
