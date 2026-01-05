@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nyambat! — NOPE</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <style>
+    :root,
+    [data-theme="dark"] {
+      --bg: #000;
+      --surface: #0a0a0a;
+      --surface-light: #121212;
+      --border: #1f1f1f;
+      --text: #f5f5f5;
+      --muted: #555;
+      --accent: #4903fc;
+      --logo-color: #ff9999;
+    }
+    [data-theme="hackers"] {
+      --bg: #000;
+      --surface: #001100;
+      --border: #003300;
+      --text: #00ff00;
+      --muted: #00aa00;
+      --accent: #00ff44;
+      --logo-color: #00ff88;
+      font-family: 'Courier New', monospace !important;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: radial-gradient(ellipse at top, var(--surface), var(--bg));
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      padding-bottom: 80px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrapper {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      background: #000000cc;
+      backdrop-filter: blur(6px);
+      padding: 12px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+    .logo {
+      font-family: 'Manrope', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--logo-color);
+      margin-left: 16px;
+    }
+    .top-right {
+      display: flex;
+      align-items: center;
+      margin-right: 12px;
+    }
+    .nav-mini {
+      display: flex;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-right: 8px;
+    }
+    .nav-mini span {
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 2px;
+    }
+    .nav-mini span:hover {
+      color: var(--text);
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    /* === INPUT NYAMBAT === */
+    .input-box {
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin: 20px 0 24px;
+    }
+    textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      resize: none;
+      height: 80px;
+      outline: none;
+    }
+    .suggestion {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .post-btn {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 12px;
+      cursor: pointer;
+    }
+    .post-btn:hover {
+      opacity: 0.9;
+    }
+
+    /* === NYAMBAT CARD === */
+    .nyambat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .nyambat-header {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .nyambat-username {
+      font-weight: 600;
+      color: var(--text);
+    }
+    .nyambat-content {
+      font-size: 14px;
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+    }
+    .nyambat-hashtag {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    .nyambat-actions {
+      display: flex;
+      gap: 16px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .nyambat-actions span {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .nyambat-actions span:hover {
+      color: var(--text);
+    }
+
+    .tagline {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 20px 16px;
+      line-height: 1.5;
+    }
+
+    /* EMOTIONAL MICRO COPY */
+    .emoji-popup {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--accent);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 100;
+    }
+    .emoji-popup.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <button class="back-btn" id="back-btn">←</button>
+      <div class="logo">NOPE</div>
+      <div style="width: 28px;"></div> <!-- spacer -->
+    </header>
+
+    <div class="input-box">
+      <textarea id="nyambat-input" placeholder="Nyambat apa hari ini?&#10;Jangan lupa #... (#skripsi, #toxicboss, #galaujadian)"></textarea>
+      <div class="suggestion">💡 Satu hashtag jadi ‘hook’ sambatanmu!</div>
+      <button class="post-btn" id="post-btn">Kirim Nyambat</button>
+    </div>
+
+    <!-- Dummy Nyambat (bisa diganti dengan data dinamis nanti) -->
+    <div class="nyambat-card">
+      <div class="nyambat-header">
+        <span class="nyambat-username">@sabrina</span>
+        <span>2 jam lalu</span>
+      </div>
+      <div class="nyambat-content">
+        Deadline besok, tapi dosen belum approve outline. Udah 3x revisi, rasanya kayak ngirim CV ke hantu.<br>
+        <span class="nyambat-hashtag">#skripsiblocked</span>
+      </div>
+      <div class="nyambat-actions">
+        <span data-emoji="🫂">🫂 8</span>
+        <span data-emoji="🔥">🔥 3</span>
+        <span data-emoji="✊">✊ 12</span>
+        <span>💬 5</span>
+      </div>
+    </div>
+
+    <div class="nyambat-card">
+      <div class="nyambat-header">
+        <span class="nyambat-username">@rafi</span>
+        <span>5 jam lalu</span>
+      </div>
+      <div class="nyambat-content">
+        Temen ngegas tiap liat aku jomblo. Padahal jomblo itu pilihan, bukan kegagalan. Tapi tetep nyesek sih.<br>
+        <span class="nyambat-hashtag">#jombloan</span>
+      </div>
+      <div class="nyambat-actions">
+        <span data-emoji="🫂">🫂 42</span>
+        <span data-emoji="👁️">👁️ 7</span>
+        <span>💬 11</span>
+      </div>
+    </div>
+
+    <div class="tagline">
+      Nyambat boleh, asal jangan nyakitin.<br>
+      <strong>— Ruang aman buat suara riuh</strong>
+    </div>
+  </div>
+
+  <div class="emoji-popup" id="emoji-popup"></div>
+
+  <script>
+    const currentUser = localStorage.getItem('nope_username');
+    if (!currentUser) {
+      window.location.href = 'index.html';
+    }
+
+    // === NAVIGASI ===
+    document.getElementById('back-btn').onclick = () => history.back();
+
+    // === POST NYAMBAT ===
+    document.getElementById('post-btn').onclick = () => {
+      const input = document.getElementById('nyambat-input');
+      const text = input.value.trim();
+      if (!text) return alert('Isi dulu nyambatnya, kak!');
+
+      // Cek keberadaan hashtag
+      const hasHashtag = /#[a-zA-Z][a-zA-Z0-9]*/.test(text);
+      if (!hasHashtag) {
+        alert('Jangan lupa tambahkan satu hashtag! Contoh: #skripsi');
+        return;
+      }
+
+      // Simulasi: tambahkan ke atas daftar (dalam real app, kirim ke backend)
+      const now = new Date();
+      const timeStr = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+
+      const card = document.createElement('div');
+      card.className = 'nyambat-card';
+      card.innerHTML = `
+        <div class="nyambat-header">
+          <span class="nyambat-username">@${currentUser}</span>
+          <span>baru aja</span>
+        </div>
+        <div class="nyambat-content">${text.replace(/(#[a-zA-Z][a-zA-Z0-9]*)/g, '<span class="nyambat-hashtag">$1</span>')}</div>
+        <div class="nyambat-actions">
+          <span data-emoji="🫂">🫂 0</span>
+          <span data-emoji="🔥">🔥 0</span>
+          <span data-emoji="✊">✊ 0</span>
+          <span>💬 0</span>
+        </div>
+      `;
+      document.querySelector('.input-box').after(card);
+      input.value = '';
+
+      // Scroll ke atas
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    // === EMOJI REACTION (MICRO COPY) ===
+    const emojiMessages = {
+      '🫂': 'Peluk...',
+      '🔥': 'Menyala kaka!',
+      '✊': 'Gaskeun!',
+      '👁️': 'Aku ngeliat kamu...'
+    };
+
+    document.querySelectorAll('[data-emoji]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        const emoji = e.currentTarget.dataset.emoji;
+        const popup = document.getElementById('emoji-popup');
+        popup.textContent = emojiMessages[emoji] || 'Kirim energi!';
+        popup.classList.add('show');
+        setTimeout(() => popup.classList.remove('show'), 1500);
+        // Di app asli: kirim ke backend, update counter
+      });
+    });
+  </script>
+</body>
+</html>
