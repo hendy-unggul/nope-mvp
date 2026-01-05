@@ -230,7 +230,7 @@
     .artefact-container {
       position: relative;
       width: 100%;
-      aspect-ratio: 16 / 9; /* Landscape */
+      aspect-ratio: 16 / 9;
       overflow: hidden;
     }
     .artefact-image {
@@ -813,7 +813,6 @@
       el.className = type === 'artefact' ? 'artefact-item' : 'post-item';
       
       if (type === 'artefact') {
-        // Header: username + emoji
         const header = document.createElement('div');
         header.className = 'post-header';
         header.innerHTML = `
@@ -822,7 +821,6 @@
         `;
         el.appendChild(header);
 
-        // Container gambar + notasi overlay
         const containerDiv = document.createElement('div');
         containerDiv.className = 'artefact-container';
         containerDiv.innerHTML = `
@@ -831,7 +829,6 @@
         `;
         el.appendChild(containerDiv);
       } else {
-        // Rant biasa
         const header = document.createElement('div');
         header.className = 'post-header';
         header.innerHTML = `
@@ -848,7 +845,6 @@
 
       container.appendChild(el);
 
-      // Tambahkan emoji reaksi (jika bukan milik sendiri)
       if (post.username !== currentUser.replace(/^@/, '')) {
         const emojiBar = el.querySelector('.post-emojis');
         ['🤠', '😢', '🤗', '🔥'].forEach(emoji => {
@@ -871,7 +867,6 @@
         const rants = await supabaseFetch('rants', 'GET', null, '?order=created_at.desc&limit=100');
         const artefacts = await supabaseFetch('artefacts', 'GET', null, '?order=created_at.desc&limit=100');
 
-        // Keyword untuk rant (tetap)
         const HYPE_KEYWORDS = ['v!', 'kpop', 'drakor', 'anime', 'au', 'stan'];
         const NGUSAHAIN_KEYWORDS = ['skripsi', 'jualan', 'progres', 'usaha'];
         const SPILL_KEYWORDS = ['capek', 'sendiri', 'nangis', 'lelah'];
@@ -893,7 +888,6 @@
           else if (spillRants.length < 5) spillRants.push(r);
         });
 
-        // ARTEFAK: ACAK ke zona
         const hypeArtefacts = [], ngusahainArtefacts = [], spillArtefacts = [];
         const zones = ['hype', 'ngusahain', 'spill'];
         artefacts.forEach(a => {
@@ -932,7 +926,55 @@
       });
     }
 
-    // === HANGOUTS (tidak diubah) ===
+    // === DUMMY HANGOUTS (TERINTEGRASI) ===
+    const DUMMY_HANGOUTS = {
+      gems: [
+        {
+          name: "CoffeeBeerian Ciragil",
+          location: "Ciragil, Bandung",
+          notes: "Naik Alphard atau sepeda lipat? Di sini, semua level sama. CoffeeBeerian bukan cuma kafe—ini social lab yang berhasil. Solo flyer duduk di bar jadi magnet obrolan, barista cerita passion kayak ngobrol sahabat lama, dan nggak ada yang judge lo dari cara lo parkir.",
+          username: "nope.admin",
+          is_admin_curated: true,
+          is_dummy: true
+        }
+      ],
+      wfh: [
+        {
+          name: "Kopi Sambil Lari",
+          location: "Dago, Bandung",
+          notes: "Hidden di antara studio musik indie. WiFi stabil, colokan di bawah meja, dan yang unik: mereka punya “no-screen hour” jam 3–4 sore — waktu buat ngobrol atau mikir manual. Kopi mulai Rp20k.",
+          username: "nope.admin",
+          is_admin_curated: true,
+          is_dummy: true
+        },
+        {
+          name: "Warung Kopi Hujan",
+          location: "Botani, Bogor",
+          notes: "Di tepi Sungai Ciliwung, dengan suara hujan buatan dari atap daun. Meja kayu besar, WiFi fiber, colokan banyak. Harga: kopi Rp18k, bisa stay seharian.",
+          username: "nope.admin",
+          is_admin_curated: true,
+          is_dummy: true
+        },
+        {
+          name: "Kedai Kita",
+          location: "Pandanaran, Semarang",
+          notes: "Ruang tenang di tengah kota. Meja ergonomic, colokan + USB di tiap kursi, WiFi fiber 100 Mbps. Ada private booth kecil buat zoom call.",
+          username: "nope.admin",
+          is_admin_curated: true,
+          is_dummy: true
+        }
+      ],
+      food: [
+        { name: "Gepuk Bu Sardi", location: "Kaliurang KM 5, Yogyakarta", notes: "Gepuk empuk + sambal ijo = Rp18k. Buka jam 10, habis jam 1.", username: "nope.admin", is_dummy: true },
+        { name: "Mie Ayam Mbah Parno", location: "GM FM UGM, Yogyakarta", notes: "Porsi jumbo, kuah gurih, topping melimpah. Rp15k.", username: "nope.admin", is_dummy: true },
+        { name: "Es Doger Cak Man", location: "Jl. Prof. Soepomo, Yogyakarta", notes: "Alpukat, sagu, tape, susu kental — Rp12k.", username: "nope.admin", is_dummy: true },
+        { name: "Lontong Balap Cak Mantab", location: "Kembang Jepun, Surabaya", notes: "Lontong, tahu, lentho, kuah gurih — Rp15k.", username: "nope.admin", is_dummy: true },
+        { name: "Pisang Goreng Keju Mbok Darmi", location: "Tunjungan, Surabaya", notes: "Pisang raja krispi + keju parut + susu kental = Rp10k.", username: "nope.admin", is_dummy: true },
+        { name: "Soto Ambengan Pak Sadi", location: "Genteng, Surabaya", notes: "Soto daging + jeruk nipis + sambal — Rp18k. Legendaris sejak 1950-an.", username: "nope.admin", is_dummy: true }
+      ]
+    };
+
+    // === HANGOUTS (DENGAN DUMMY FALLBACK) ===
     async function loadHangouts() {
       try {
         const data = await supabaseFetch('hangouts', 'GET', null, '?order=created_at.desc');
@@ -944,24 +986,35 @@
         renderHangouts('food', food);
       } catch (e) {
         console.error('Gagal muat hangouts:', e);
+        // Fallback ke dummy jika error
+        renderHangouts('gems', []);
+        renderHangouts('wfh', []);
+        renderHangouts('food', []);
       }
     }
 
     function renderHangouts(category, items) {
       const container = document.getElementById(`hangouts-${category}`);
-      container.innerHTML = items.length === 0 ? `
-        <div class="empty-state">
-          <div class="empty-state-icon">📍</div>
-          <div class="empty-state-text">Belum ada rekomendasi</div>
-        </div>
-      ` : items.map(item => `
+      const finalItems = items && items.length > 0 ? items : DUMMY_HANGOUTS[category] || [];
+
+      if (finalItems.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📍</div>
+            <div class="empty-state-text">Belum ada rekomendasi</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = finalItems.map(item => `
         <div class="hangout-item">
           <div class="hangout-header">
             <div class="hangout-title">
               <div class="hangout-name">${item.name}</div>
               <div class="hangout-location">📍 ${item.location}</div>
             </div>
-            ${item.is_admin_curated ? '<span class="hangout-badge">Admin</span>' : ''}
+            ${item.is_admin_curated && !item.is_dummy ? '<span class="hangout-badge">Admin</span>' : ''}
           </div>
           ${item.notes ? `<div class="hangout-notes">${item.notes}</div>` : ''}
           <div class="hangout-footer">
@@ -971,7 +1024,7 @@
       `.join(''));
     }
 
-    // === MODAL & NAVIGATION (tidak diubah) ===
+    // === MODAL & NAVIGATION ===
     function openAddHangout(category) {
       document.getElementById('input-category').value = category;
       document.getElementById('modal-add').classList.add('active');
