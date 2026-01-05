@@ -136,41 +136,78 @@
       border-radius: 16px;
       padding: 16px;
       margin-bottom: 16px;
+      position: relative;
     }
     .nyambat-header {
       font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       display: flex;
-      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
     }
     .nyambat-username {
       font-weight: 600;
       color: var(--text);
     }
-    .nyambat-content {
-      font-size: 14px;
-      margin-bottom: 12px;
-      white-space: pre-wrap;
-    }
-    .nyambat-hashtag {
-      color: var(--accent);
-      font-weight: 600;
+    .nyambat-timestamp {
+      color: var(--muted);
     }
     .nyambat-actions {
       display: flex;
-      gap: 16px;
-      font-size: 14px;
-      color: var(--muted);
+      align-items: center;
+      gap: 12px;
+      margin-left: 4px;
     }
     .nyambat-actions span {
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 2px;
+      font-size: 13px;
+      color: var(--muted);
     }
     .nyambat-actions span:hover {
       color: var(--text);
+    }
+    .nyambat-content {
+      font-size: 14px;
+      white-space: pre-wrap;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    .nyambat-hashtag {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    /* === COMMENT FORM (INLINE) === */
+    .comment-form {
+      display: none;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .comment-form textarea {
+      width: 100%;
+      background: var(--surface-light);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 8px;
+      color: var(--text);
+      font-size: 13px;
+      height: 40px;
+      resize: none;
+    }
+    .comment-form button {
+      margin-top: 8px;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 16px;
+      padding: 4px 12px;
+      font-size: 12px;
+      cursor: pointer;
     }
 
     .tagline {
@@ -181,7 +218,6 @@
       line-height: 1.5;
     }
 
-    /* EMOTIONAL MICRO COPY */
     .emoji-popup {
       position: fixed;
       bottom: 80px;
@@ -208,48 +244,17 @@
     <header>
       <button class="back-btn" id="back-btn">←</button>
       <div class="logo">NOPE</div>
-      <div style="width: 28px;"></div> <!-- spacer -->
+      <div style="width: 28px;"></div>
     </header>
 
     <div class="input-box">
-      <textarea id="nyambat-input" placeholder="Nyambat apa hari ini?&#10;Jangan lupa #... (#skripsi, #toxicboss, #galaujadian)"></textarea>
+      <textarea id="nyambat-input" placeholder="Nyambat apa hari ini?&#10;Contoh: Udah 3 hari ga tidur #skripsiblocked"></textarea>
       <div class="suggestion">💡 Satu hashtag jadi ‘hook’ sambatanmu!</div>
       <button class="post-btn" id="post-btn">Kirim Nyambat</button>
     </div>
 
-    <!-- Dummy Nyambat (bisa diganti dengan data dinamis nanti) -->
-    <div class="nyambat-card">
-      <div class="nyambat-header">
-        <span class="nyambat-username">@sabrina</span>
-        <span>2 jam lalu</span>
-      </div>
-      <div class="nyambat-content">
-        Deadline besok, tapi dosen belum approve outline. Udah 3x revisi, rasanya kayak ngirim CV ke hantu.<br>
-        <span class="nyambat-hashtag">#skripsiblocked</span>
-      </div>
-      <div class="nyambat-actions">
-        <span data-emoji="🫂">🫂 8</span>
-        <span data-emoji="🔥">🔥 3</span>
-        <span data-emoji="✊">✊ 12</span>
-        <span>💬 5</span>
-      </div>
-    </div>
-
-    <div class="nyambat-card">
-      <div class="nyambat-header">
-        <span class="nyambat-username">@rafi</span>
-        <span>5 jam lalu</span>
-      </div>
-      <div class="nyambat-content">
-        Temen ngegas tiap liat aku jomblo. Padahal jomblo itu pilihan, bukan kegagalan. Tapi tetep nyesek sih.<br>
-        <span class="nyambat-hashtag">#jombloan</span>
-      </div>
-      <div class="nyambat-actions">
-        <span data-emoji="🫂">🫂 42</span>
-        <span data-emoji="👁️">👁️ 7</span>
-        <span>💬 11</span>
-      </div>
-    </div>
+    <!-- Dummy posts akan digantikan oleh fungsi render -->
+    <div id="nyambat-list"></div>
 
     <div class="tagline">
       Nyambat boleh, asal jangan nyakitin.<br>
@@ -265,49 +270,8 @@
       window.location.href = 'index.html';
     }
 
-    // === NAVIGASI ===
-    document.getElementById('back-btn').onclick = () => history.back();
+    let nyambatData = JSON.parse(localStorage.getItem('nyambat-posts') || '[]');
 
-    // === POST NYAMBAT ===
-    document.getElementById('post-btn').onclick = () => {
-      const input = document.getElementById('nyambat-input');
-      const text = input.value.trim();
-      if (!text) return alert('Isi dulu nyambatnya, kak!');
-
-      // Cek keberadaan hashtag
-      const hasHashtag = /#[a-zA-Z][a-zA-Z0-9]*/.test(text);
-      if (!hasHashtag) {
-        alert('Jangan lupa tambahkan satu hashtag! Contoh: #skripsi');
-        return;
-      }
-
-      // Simulasi: tambahkan ke atas daftar (dalam real app, kirim ke backend)
-      const now = new Date();
-      const timeStr = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
-
-      const card = document.createElement('div');
-      card.className = 'nyambat-card';
-      card.innerHTML = `
-        <div class="nyambat-header">
-          <span class="nyambat-username">@${currentUser}</span>
-          <span>baru aja</span>
-        </div>
-        <div class="nyambat-content">${text.replace(/(#[a-zA-Z][a-zA-Z0-9]*)/g, '<span class="nyambat-hashtag">$1</span>')}</div>
-        <div class="nyambat-actions">
-          <span data-emoji="🫂">🫂 0</span>
-          <span data-emoji="🔥">🔥 0</span>
-          <span data-emoji="✊">✊ 0</span>
-          <span>💬 0</span>
-        </div>
-      `;
-      document.querySelector('.input-box').after(card);
-      input.value = '';
-
-      // Scroll ke atas
-      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    };
-
-    // === EMOJI REACTION (MICRO COPY) ===
     const emojiMessages = {
       '🫂': 'Peluk...',
       '🔥': 'Menyala kaka!',
@@ -315,16 +279,140 @@
       '👁️': 'Aku ngeliat kamu...'
     };
 
-    document.querySelectorAll('[data-emoji]').forEach(el => {
-      el.addEventListener('click', (e) => {
-        const emoji = e.currentTarget.dataset.emoji;
-        const popup = document.getElementById('emoji-popup');
-        popup.textContent = emojiMessages[emoji] || 'Kirim energi!';
-        popup.classList.add('show');
-        setTimeout(() => popup.classList.remove('show'), 1500);
-        // Di app asli: kirim ke backend, update counter
+    // === NAVIGASI ===
+    document.getElementById('back-btn').onclick = () => history.back();
+
+    // === RENDER SEMUA NYAMBAT ===
+    function renderNyambat() {
+      const container = document.getElementById('nyambat-list');
+      container.innerHTML = '';
+
+      // Urutkan dari terbaru
+      const sorted = [...nyambatData].reverse();
+
+      sorted.forEach((post, index) => {
+        const card = document.createElement('div');
+        card.className = 'nyambat-card';
+        card.dataset.index = nyambatData.length - 1 - index; // reverse index
+
+        // Ekstrak hashtag untuk highlight
+        const hashtagRegex = /(#[a-zA-Z][a-zA-Z0-9]*)/g;
+        let contentWithHashtag = post.text.replace(hashtagRegex, '<span class="nyambat-hashtag">$1</span>');
+
+        card.innerHTML = `
+          <div class="nyambat-header">
+            <span class="nyambat-username">@${post.author}</span>
+            <span class="nyambat-timestamp">${post.timeAgo}</span>
+            <div class="nyambat-actions">
+              <span data-emoji="🫂" data-index="${index}">🫂 <span>${post.reactions.🫂}</span></span>
+              <span data-emoji="🔥" data-index="${index}">🔥 <span>${post.reactions.🔥}</span></span>
+              <span data-emoji="✊" data-index="${index}">✊ <span>${post.reactions.✊}</span></span>
+              <span data-emoji="👁️" data-index="${index}">👁️ <span>${post.reactions.👁️}</span></span>
+              <span class="comment-toggle" data-index="${index}">💬 <span>${post.comments.length}</span></span>
+            </div>
+          </div>
+          <div class="nyambat-content">${contentWithHashtag}</div>
+          <div class="comment-form" id="comment-form-${index}">
+            <textarea placeholder="Balas nyambat ini..."></textarea>
+            <button class="send-comment" data-index="${index}">Kirim</button>
+          </div>
+        `;
+        container.appendChild(card);
       });
-    });
+
+      // Pasang event listener setelah render
+      attachEventListeners();
+    }
+
+    function attachEventListeners() {
+      // Emoji reaction
+      document.querySelectorAll('[data-emoji]').forEach(el => {
+        el.removeEventListener('click', handleEmojiClick);
+        el.addEventListener('click', handleEmojiClick);
+      });
+
+      // Toggle komentar
+      document.querySelectorAll('.comment-toggle').forEach(el => {
+        el.removeEventListener('click', toggleCommentForm);
+        el.addEventListener('click', toggleCommentForm);
+      });
+
+      // Kirim komentar
+      document.querySelectorAll('.send-comment').forEach(el => {
+        el.removeEventListener('click', handleCommentSend);
+        el.addEventListener('click', handleCommentSend);
+      });
+    }
+
+    function handleEmojiClick(e) {
+      const emoji = e.currentTarget.dataset.emoji;
+      const index = parseInt(e.currentTarget.dataset.index);
+      nyambatData[index].reactions[emoji] = (nyambatData[index].reactions[emoji] || 0) + 1;
+      saveAndRender();
+
+      const popup = document.getElementById('emoji-popup');
+      popup.textContent = emojiMessages[emoji] || 'Kirim energi!';
+      popup.classList.add('show');
+      setTimeout(() => popup.classList.remove('show'), 1500);
+    }
+
+    function toggleCommentForm(e) {
+      const index = e.currentTarget.dataset.index;
+      const form = document.getElementById(`comment-form-${index}`);
+      form.style.display = form.style.display === 'block' ? 'none' : 'block';
+      if (form.style.display === 'block') {
+        form.querySelector('textarea').focus();
+      }
+    }
+
+    function handleCommentSend(e) {
+      const index = e.currentTarget.dataset.index;
+      const textarea = e.currentTarget.previousElementSibling;
+      const comment = textarea.value.trim();
+      if (!comment) return alert('Isi komentarnya dulu!');
+      
+      nyambatData[index].comments.push({
+        author: currentUser,
+        text: comment,
+        timestamp: new Date().toISOString()
+      });
+      saveAndRender();
+      textarea.value = '';
+      document.getElementById(`comment-form-${index}`).style.display = 'none';
+    }
+
+    // === POST NYAMBAT BARU ===
+    document.getElementById('post-btn').onclick = () => {
+      const input = document.getElementById('nyambat-input');
+      const text = input.value.trim();
+      if (!text) return alert('Isi dulu nyambatnya, kak!');
+
+      const hasHashtag = /#[a-zA-Z][a-zA-Z0-9]*/.test(text);
+      if (!hasHashtag) return alert('Jangan lupa tambahkan satu hashtag! Contoh: #skripsi');
+
+      const now = new Date();
+      const timeAgo = 'baru aja';
+
+      nyambatData.push({
+        author: currentUser,
+        text,
+        timeAgo,
+        reactions: { '🫂': 0, '🔥': 0, '✊': 0, '👁️': 0 },
+        comments: [],
+        timestamp: now.toISOString()
+      });
+
+      saveAndRender();
+      input.value = '';
+    };
+
+    function saveAndRender() {
+      localStorage.setItem('nyambat-posts', JSON.stringify(nyambatData));
+      renderNyambat();
+    }
+
+    // Inisialisasi
+    renderNyambat();
   </script>
 </body>
 </html>
