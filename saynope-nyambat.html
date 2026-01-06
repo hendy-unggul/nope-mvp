@@ -61,12 +61,41 @@
       color: var(--logo-color);
       margin-left: 16px;
     }
+    .top-right {
+      display: flex;
+      align-items: center;
+      margin-right: 12px;
+    }
+    .nav-mini {
+      display: flex;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--muted);
+      margin-right: 8px;
+    }
+    .nav-mini span {
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 2px;
+    }
+    .nav-mini span:hover {
+      color: var(--text);
+    }
     .back-btn {
       background: none;
       border: none;
       color: var(--muted);
       font-size: 20px;
       cursor: pointer;
+    }
+    .settings-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 20px;
+      cursor: pointer;
+      transform: rotate(90deg);
     }
 
     /* === INPUT NYAMBAT === */
@@ -223,7 +252,15 @@
     <header>
       <button class="back-btn" id="back-btn">←</button>
       <div class="logo">NOPE</div>
-      <div style="width: 28px;"></div>
+      <div class="top-right">
+        <div class="nav-mini">
+          <span id="nav-jejak">Jejak</span>
+          <span id="nav-frekuensi">Frekuensi</span>
+          <span id="nav-saynope">SayNOPE</span>
+          <span id="nav-glitch">GLITCH</span>
+        </div>
+        <button class="settings-btn" id="settings-btn">⋯</button>
+      </div>
     </header>
 
     <div class="input-box">
@@ -257,8 +294,22 @@
       '👁️': 'Aku ngeliat kamu...'
     };
 
+    // === NAVIGASI ===
     document.getElementById('back-btn').onclick = () => history.back();
 
+    document.getElementById('nav-jejak').onclick = () => window.location.href = 'jejak.html';
+    document.getElementById('nav-frekuensi').onclick = () => window.location.href = 'frekuensi.html';
+    document.getElementById('nav-saynope').onclick = () => window.location.href = 'saynope.html';
+    document.getElementById('nav-glitch').onclick = () => window.location.href = 'glitch.html';
+
+    document.getElementById('settings-btn').onclick = () => {
+      if (confirm('Keluar dari akun?')) {
+        localStorage.removeItem('nope_username');
+        window.location.href = 'index.html';
+      }
+    };
+
+    // === RENDER SEMUA NYAMBAT ===
     function renderNyambat() {
       const container = document.getElementById('nyambat-list');
       container.innerHTML = '';
@@ -278,10 +329,10 @@
             <span class="nyambat-username">@${post.author}</span>
             <span class="nyambat-timestamp">${post.timeAgo}</span>
             <div class="nyambat-actions">
-              <span data-emoji="🫂" data-index="${index}">🫂 <span>${post.reactions.🫂}</span></span>
-              <span data-emoji="🔥" data-index="${index}">🔥 <span>${post.reactions.🔥}</span></span>
-              <span data-emoji="✊" data-index="${index}">✊ <span>${post.reactions.✊}</span></span>
-              <span data-emoji="👁️" data-index="${index}">👁️ <span>${post.reactions.👁️}</span></span>
+              <span data-emoji="🫂" data-index="${index}">🫂 <span>${post.reactions['🫂']}</span></span>
+              <span data-emoji="🔥" data-index="${index}">🔥 <span>${post.reactions['🔥']}</span></span>
+              <span data-emoji="✊" data-index="${index}">✊ <span>${post.reactions['✊']}</span></span>
+              <span data-emoji="👁️" data-index="${index}">👁️ <span>${post.reactions['👁️']}</span></span>
               <span class="comment-toggle" data-index="${index}">💬 <span>${post.comments.length}</span></span>
             </div>
           </div>
