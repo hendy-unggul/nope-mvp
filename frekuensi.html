@@ -687,7 +687,7 @@
   </div>
 
   <script>
-    // === CONFIG ===
+    // === CONFIG (SESUAI DENGAN SUPABASE DASHBOARD) ===
     const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
@@ -708,12 +708,13 @@
       const res = await fetch(url, options);
       if (!res.ok) {
         const errorText = await res.text();
-        throw new Error(`HTTP ${res.status}: ${errorText}`);
+        console.error(`❌ Gagal fetch ${table}:`, res.status, errorText);
+        throw new Error(`HTTP ${res.status}`);
       }
       return await res.json();
     }
 
-    // === KEYWORDS ===
+    // === KEYWORDS (HANYA UNTUK RANT, BUKAN ARTEFAK) ===
     const HYPE_KEYWORDS = ['v!', 'v!!!!', 'v', 'kpop', 'skz', 'txt', 'bts', 'seventeen', 'enhypen', 'drakor', 'k-drama', 'squid game', 'crash landing', 'kim seon ho', 'anime', 'naruto', 'demon slayer', 'one piece', 'gintama', 'au', 'alternate universe', 'ship', 'otp', 'stan', 'bias', 'maknae', 'comeback', 'music video', 'concert', 'lightstick', 'fanart'];
     const NGUSAHAIN_KEYWORDS = ['skripsi', 'tugas', 'deadline', 'sidang', 'wisuda', 'kuliah', 'jualan', 'thrifting', 'preloved', 'reselling', 'online shop', 'crypto', 'bitcoin', 'saham', 'investasi', 'passive income', 'freelance', 'coding', 'belajar', 'latihan', 'progres', 'hari ke-', 'untung', 'rugi', 'modal', 'omzet', 'usaha', 'bisnis', 'side hustle', 'ui/ux', 'figma', 'blender', 'photoshop', 'canva', 'skill'];
     const SPILL_KEYWORDS = ['capek', 'lelah', 'sendiri', 'hujan', 'nangis', 'sedih', 'putus asa', 'gabisa', 'gatau', 'kenapa ya', 'berat', 'beban', 'ngeluh', 'curhat', 'mental health', 'anxiety', 'depresi', 'overthinking', 'burnout', 'gaada yang ngerti', 'rasa', 'kosong', 'hampa', 'tertekan', 'pengen ilang', 'pengen ngilang', 'susah', 'buntu', 'mentok'];
@@ -725,55 +726,6 @@
       if (SPILL_KEYWORDS.some(kw => lower.includes(kw))) return 'spill';
       return 'spill';
     }
-
-    // === DUMMY RANT ===
-    const generateDummyRants = () => {
-      const usernames = [
-        'homie01', 'glitchqueen', 'nopeghost', 'rant_angel', 'crybaby.exe',
-        'thriftingwitch', 'stanaccount', 'overthinker99', 'burnoutbabe', 'cafelover',
-        'kpopdiary', 'skripsigoblin', 'emopunk', 'nongkrongking', 'dramaqueen',
-        'chillcoder', 'moodboarder', 'sadboi2077', 'vibesonly', 'silentobserver'
-      ];
-
-      const dummyHype = [
-        "v!!!! bias comeback tomorrow and i literally can’t function",
-        "just rewatched squid game s2 teaser — my soul left my body 🤯",
-        "skz world tour jakarta?? i’m selling a kidney",
-        "my au where jimin is a barista and i’m his regular customer... ✨☕",
-        "stan loona? more like stan LOONA. periodt."
-      ];
-
-      const dummyNgusahain = [
-        "hari ke-12 bikin skripsi. bab 2 masih kosong. help.",
-        "jualan thrifting, modal 100k, untung 300k. alhamdulillah banget 🥺",
-        "baru aja submit figma ke client. semoga ga revisi 10x lagi",
-        "crypto lagi jatuh, tapi tetep rebalance. believe in the process 💪",
-        "hari ini berhasil push 3 commit. small wins, ya kan?"
-      ];
-
-      const dummySpill = [
-        "kenapa ya rasanya kayak ga ada yang ngerti...",
-        "hujan. sendiri. lagi. gapapa sih. cuma...",
-        "capek jadi strong terus. pengen nangis aja.",
-        "hidup berasa kayak loading icon yang ga pernah selesai.",
-        "kadang pengen ilang. bukan mati. cuma... ilang."
-      ];
-
-      const attachUsernames = (contents) => {
-        return contents.map((content, i) => ({
-          id: `dummy-${Date.now()}-${i}`,
-          username: usernames[i % usernames.length],
-          content,
-          created_at: new Date(Date.now() - Math.random() * 86400000).toISOString()
-        }));
-      };
-
-      return {
-        hype: attachUsernames(dummyHype),
-        ngusahain: attachUsernames(dummyNgusahain),
-        spill: attachUsernames(dummySpill)
-      };
-    };
 
     // === STATE ===
     const currentUser = localStorage.getItem('nope_username') || '@newglitch';
@@ -824,13 +776,14 @@
       }
     }
 
-    // === LOAD ARTEFAK ===
+    // === LOAD REAL ARTEFAK (DARI TABEL 'artefacts') ===
     async function loadArtefak() {
       try {
-        const artefakData = await supabaseFetch('artefak', 'GET', null, '?order=created_at.desc&limit=20');
+        // 🔑 Nama tabel: 'artefacts' (SESUAI DENGAN SUPABASE)
+        const artefakData = await supabaseFetch('artefacts', 'GET', null, '?order=created_at.desc&limit=20');
         return artefakData || [];
       } catch (e) {
-        console.warn('Gagal muat artefak:', e.message);
+        console.warn('⚠️ Gagal muat artefak:', e.message);
         return [];
       }
     }
@@ -846,16 +799,18 @@
       const randomArtefak = pickRandomArtefak(artefakList, 1)[0];
       const targetZone = ['hype', 'ngusahain', 'spill'][Math.floor(Math.random() * 3)];
 
+      // 🔑 Kolom teks: 'notation' (SESUAI DENGAN SUPABASE)
       const artefakPost = {
         id: `artefak-${randomArtefak.id}`,
         username: randomArtefak.username,
-        content: randomArtefak.notasi || randomArtefak.caption || 'Tanpa keterangan',
+        content: randomArtefak.notation || randomArtefak.caption || 'Tanpa keterangan',
         created_at: randomArtefak.created_at,
         is_artefak: true,
         image_url: randomArtefak.image_url
       };
 
       zones[targetZone].unshift(artefakPost);
+      console.log('🎯 Artefak dimasukkan ke zona:', targetZone);
       return zones;
     }
 
@@ -863,11 +818,6 @@
     function renderZone(zoneKey, posts) {
       const container = document.getElementById(`zone-${zoneKey}`);
       container.innerHTML = '';
-
-      if (posts.length === 0) {
-        const dummies = generateDummyRants();
-        posts = dummies[zoneKey] || [];
-      }
 
       const emojis = { hype: '🔥', ngusahain: '💪', spill: '🫂' };
       const zoneEmoji = emojis[zoneKey] || '💬';
@@ -918,9 +868,10 @@
       });
     }
 
-    // === LOAD ZONES ===
+    // === LOAD ZONES DENGAN REAL DATA ===
     async function loadFeed() {
       try {
+        // Ambil data real dari Supabase
         const [rantsData, artefakData] = await Promise.all([
           supabaseFetch('rants', 'GET', null, '?order=created_at.desc&limit=100'),
           loadArtefak()
@@ -943,11 +894,11 @@
         renderZone('ngusahain', zones.ngusahain);
         renderZone('spill', zones.spill);
       } catch (e) {
-        console.error('Gagal muat feed:', e);
-        const dummies = generateDummyRants();
-        renderZone('hype', dummies.hype);
-        renderZone('ngusahain', dummies.ngusahain);
-        renderZone('spill', dummies.spill);
+        console.error('💥 Gagal muat feed:', e);
+        // Tidak pakai dummy — biarkan kosong jika error
+        renderZone('hype', []);
+        renderZone('ngusahain', []);
+        renderZone('spill', []);
       }
     }
 
@@ -1060,8 +1011,8 @@
       document.getElementById('nav-glitch').onclick = () => navigateTo('glitch.html');
       document.getElementById('settings-btn').onclick = logout;
 
-      loadFeed();
-      loadHangouts();
+      loadFeed();          // ✅ REAL DATA
+      loadHangouts();      // ✅ REAL HANGOUTS
       setTimeout(triggerPulse, 300);
     });
 
