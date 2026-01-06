@@ -193,18 +193,26 @@
       align-items: center;
       gap: 8px;
       margin-bottom: 8px;
+      flex-wrap: wrap;
     }
     .post-username {
       font-size: 13px;
       font-weight: 600;
       color: var(--text-secondary);
     }
-    .post-emoji {
-      font-size: 16px;
+    .post-reactions {
+      display: flex;
+      gap: 8px;
+      font-size: 14px;
       opacity: 0.8;
     }
-    .post-emoji:hover {
+    .post-reactions span {
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .post-reactions span:hover {
       opacity: 1;
+      transform: scale(1.2);
     }
     .post-content {
       font-size: 14px;
@@ -219,42 +227,6 @@
       max-height: 300px;
       object-fit: cover;
       display: block;
-    }
-
-    .post-emojis {
-      display: flex;
-      gap: 12px;
-      margin-top: 12px;
-      cursor: pointer;
-    }
-    .post-emojis span {
-      font-size: 16px;
-      opacity: 0.8;
-      transition: all 0.2s;
-      position: relative;
-    }
-    .post-emojis span:hover {
-      opacity: 1;
-      transform: scale(1.2);
-    }
-    .post-emojis span::after {
-      content: attr(data-name);
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%) translateY(-8px);
-      background: rgba(0,0,0,0.8);
-      color: white;
-      font-size: 12px;
-      padding: 4px 8px;
-      border-radius: 6px;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s;
-    }
-    .post-emojis span:hover::after {
-      opacity: 1;
     }
 
     .hangout-item {
@@ -806,27 +778,30 @@
       const container = document.getElementById(`zone-${zoneKey}`);
       container.innerHTML = '';
 
-      const emojis = { hype: '🔥', ngusahain: '💪', spill: '🫂' };
-      const zoneEmoji = emojis[zoneKey] || '💬';
-
       posts.forEach(post => {
         const el = document.createElement('div');
         el.className = 'post-item';
+
+        // ✨ STRUKTUR BARU: username + 4 emoji reaksi dalam SATU BARIS
+        const reactionEmojis = ['👍', '😢', '🤗', '🔥'];
+        const reactionHtml = reactionEmojis.map(emoji => 
+          `<span data-emoji="${emoji}">${emoji}</span>`
+        ).join('');
 
         if (post.is_artefak) {
           el.innerHTML = `
             <div class="post-header">
               <span class="post-username">@${post.username}</span>
-              <span class="post-emoji">🖼️</span>
+              <div class="post-reactions">${reactionHtml}</div>
             </div>
-            ${post.image_url ? `<img src="${post.image_url}" class="artefak-image" alt="Artefak">` : ''}
             <div class="post-content">${post.content || 'Tanpa keterangan'}</div>
+            ${post.image_url ? `<img src="${post.image_url}" class="artefak-image" alt="Artefak">` : ''}
           `;
         } else {
           el.innerHTML = `
             <div class="post-header">
               <span class="post-username">@${post.username}</span>
-              <span class="post-emoji">${zoneEmoji}</span>
+              <div class="post-reactions">${reactionHtml}</div>
             </div>
             <div class="post-content">${post.content}</div>
           `;
@@ -834,23 +809,16 @@
 
         container.appendChild(el);
 
-        if (!post.is_artefak && post.username !== currentUser.replace(/^@/, '')) {
-          const emojiBar = document.createElement('div');
-          emojiBar.className = 'post-emojis';
-          ['🤠', '😢', '🤗', '🔥'].forEach(emoji => {
-            const span = document.createElement('span');
-            span.textContent = emoji;
-            const names = { '🤠': 'cowboy', '😢': 'nangis', '🤗': 'peluk', '🔥': 'api' };
-            span.setAttribute('data-name', names[emoji]);
+        // Aktifkan klik reaksi jika bukan user sendiri
+        if (post.username !== currentUser.replace(/^@/, '')) {
+          el.querySelectorAll('.post-reactions span').forEach(span => {
             span.onclick = (e) => {
               e.stopPropagation();
-              saveReaction(post.id, emoji);
+              saveReaction(post.id, span.getAttribute('data-emoji'));
               span.style.transform = 'scale(1.2)';
               setTimeout(() => span.style.transform = 'scale(1)', 200);
             };
-            emojiBar.appendChild(span);
           });
-          el.appendChild(emojiBar);
         }
       });
     }
