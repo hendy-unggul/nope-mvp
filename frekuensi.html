@@ -203,8 +203,8 @@
     }
     .post-reactions {
       display: flex;
-      gap: 14px;
-      font-size: 16px;
+      gap: 8px;
+      font-size: 14px;
       opacity: 0.9;
     }
     .post-reactions span {
@@ -213,7 +213,7 @@
     }
     .post-reactions span:hover {
       opacity: 1;
-      transform: scale(1.25);
+      transform: scale(1.2);
     }
     .post-content {
       font-size: 14px;
@@ -226,49 +226,35 @@
     .artefak-container {
       margin-bottom: 20px;
     }
-    .notasi-layer {
-      text-align: center;
+    .notasi-with-reactions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       margin-bottom: 12px;
+      flex-wrap: wrap;
     }
     .post-notasi {
-  font-size: 18px;
-  font-weight: 700;
-  color: #ff6b6b;
-  line-height: 1.3;
-  word-break: break-word;
-  margin-bottom: 6px;
-  text-align: left; /* ✅ RATA KIRI */
-}
-
-.post-reactions {
-  display: flex;
-  gap: 8px;
-  font-size: 14px;
-  opacity: 0.9;
-  align-items: center;
-}
-
-.post-reactions span {
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.post-reactions span:hover {
-  opacity: 1;
-  transform: scale(1.25);
-}
-
-/* ✨ Efek glow saat diklik */
-.post-reactions span.clicked {
-  color: #ff6b6b;
-  animation: glow 0.3s ease;
-}
-
-@keyframes glow {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.3); }
-  100% { transform: scale(1); }
-}
+      font-size: 18px;
+      font-weight: 700;
+      color: #ff6b6b;
+      line-height: 1.3;
+      word-break: break-word;
+      text-align: left;
+    }
+    .inline-reactions {
+      display: flex;
+      gap: 6px;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    .inline-reactions span {
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .inline-reactions span:hover {
+      opacity: 1;
+      transform: scale(1.2);
+    }
     .image-wrapper {
       position: relative;
       border-radius: 12px;
@@ -848,24 +834,25 @@
         el.className = 'post-item';
 
         if (post.is_artefak) {
-  const reactionEmojis = ['👍', '😢', '🤗', '🔥'];
-  const reactionHtml = reactionEmojis.map(emoji => 
-    `<span data-emoji="${emoji}">${emoji}</span>`
-  ).join('');
+          // ✨ NOTASI + EMOJI DALAM SATU BARIS — RATA KIRI
+          const reactionEmojis = ['👍', '😢', '🤗', '🔥'];
+          const reactionHtml = reactionEmojis.map(emoji => 
+            `<span data-emoji="${emoji}">${emoji}</span>`
+          ).join('');
 
-  el.innerHTML = `
-    <div class="artefak-container">
-      <div class="notasi-with-reactions">
-        <span class="post-notasi">${post.content || 'Tanpa keterangan'}</span>
-        <div class="inline-reactions">${reactionHtml}</div>
-      </div>
-      <div class="image-wrapper">
-        <img src="${post.image_url}" class="artefak-image" alt="Artefak"/>
-        <span class="subtle-username">@${post.username}</span>
-      </div>
-    </div>
-  `;
-} else {
+          el.innerHTML = `
+            <div class="artefak-container">
+              <div class="notasi-with-reactions">
+                <span class="post-notasi">${post.content || 'Tanpa keterangan'}</span>
+                <div class="inline-reactions">${reactionHtml}</div>
+              </div>
+              <div class="image-wrapper">
+                <img src="${post.image_url}" class="artefak-image" alt="Artefak"/>
+                <span class="subtle-username">@${post.username}</span>
+              </div>
+            </div>
+          `;
+        } else {
           // Rant biasa: username + reaksi
           const reactionEmojis = ['👍', '😢', '🤗', '🔥'];
           const reactionHtml = reactionEmojis.map(emoji => 
@@ -883,13 +870,35 @@
 
         container.appendChild(el);
 
+        // Aktifkan reaksi jika bukan user sendiri
         if (post.username !== currentUser.replace(/^@/, '')) {
+          el.querySelectorAll('.inline-reactions span').forEach(span => {
+            span.onclick = (e) => {
+              e.stopPropagation();
+              saveReaction(post.id, span.getAttribute('data-emoji'));
+              // ✨ Efek glow saat diklik
+              span.style.color = '#ff6b6b';
+              span.style.transform = 'scale(1.3)';
+              setTimeout(() => {
+                span.style.color = '';
+                span.style.transform = 'scale(1)';
+              }, 300);
+              triggerPulse();
+            };
+          });
+
+          // Untuk rant biasa
           el.querySelectorAll('.post-reactions span').forEach(span => {
             span.onclick = (e) => {
               e.stopPropagation();
               saveReaction(post.id, span.getAttribute('data-emoji'));
-              span.style.transform = 'scale(1.25)';
-              setTimeout(() => span.style.transform = 'scale(1)', 200);
+              span.style.color = '#ff6b6b';
+              span.style.transform = 'scale(1.3)';
+              setTimeout(() => {
+                span.style.color = '';
+                span.style.transform = 'scale(1)';
+              }, 300);
+              triggerPulse();
             };
           });
         }
