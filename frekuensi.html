@@ -32,13 +32,13 @@
       padding-bottom: 72px;
       -webkit-font-smoothing: antialiased;
     }
-    
+
     .wrapper {
       max-width: 480px;
       margin: 0 auto;
       padding: 0 16px;
     }
-    
+
     header {
       position: sticky;
       top: 0;
@@ -87,13 +87,13 @@
       cursor: pointer;
       transform: rotate(90deg);
     }
-    
+
     .greeting {
       font-size: 16px;
       margin: 16px 0 20px 0;
       color: var(--text);
     }
-    
+
     .tab-navigation {
       display: flex;
       gap: 8px;
@@ -135,7 +135,7 @@
       display: block;
       animation: fadeIn 0.3s ease;
     }
-    
+
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -177,7 +177,7 @@
       flex-direction: column;
       gap: 12px;
     }
-    
+
     .post-item {
       padding: 14px;
       background: var(--surface-elevated);
@@ -206,8 +206,17 @@
       font-size: 14px;
       color: var(--text);
       line-height: 1.5;
+      word-break: break-word;
     }
-    
+    .artefak-image {
+      width: 100%;
+      border-radius: 12px;
+      margin: 8px 0;
+      max-height: 300px;
+      object-fit: cover;
+      display: block;
+    }
+
     .post-emojis {
       display: flex;
       gap: 12px;
@@ -243,7 +252,7 @@
     .post-emojis span:hover::after {
       opacity: 1;
     }
-    
+
     .hangout-item {
       background: var(--surface-elevated);
       border: 1px solid var(--border);
@@ -309,7 +318,7 @@
       font-size: 12px;
       color: var(--muted);
     }
-    
+
     .section {
       margin-bottom: 32px;
     }
@@ -337,7 +346,7 @@
       flex-direction: column;
       gap: 0;
     }
-    
+
     .add-btn {
       width: 100%;
       padding: 16px;
@@ -360,7 +369,7 @@
       color: var(--accent);
       background: rgba(73, 3, 252, 0.05);
     }
-    
+
     .empty-state {
       text-align: center;
       padding: 40px 20px;
@@ -374,7 +383,7 @@
     .empty-state-text {
       font-size: 14px;
     }
-    
+
     .modal {
       display: none;
       position: fixed;
@@ -471,7 +480,7 @@
     .btn-secondary:hover {
       background: var(--border);
     }
-    
+
     .tagline {
       text-align: center;
       padding: 40px 20px;
@@ -485,7 +494,7 @@
       display: block;
       margin-top: 8px;
     }
-    
+
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
@@ -522,7 +531,7 @@
         opacity: 0;
       }
     }
-    
+
     @media (max-width: 640px) {
       .greeting {
         font-size: 15px;
@@ -779,19 +788,17 @@
       document.getElementById(`tab-${tab}`).classList.add('active');
     }
 
-    // === REACTION SYSTEM (FOKUS UTAMA) ===
+    // === REACTION SYSTEM ===
     async function saveReaction(rantId, emoji) {
       if (!rantId || !emoji) return;
 
       if (rantId.startsWith('dummy')) {
         triggerPulse();
-        console.log('✅ Dummy rant — reaksi hanya simulasi.');
         return;
       }
 
       const rant = rantsDataCache.find(r => r.id === rantId);
-      if (rant && rant.username === currentUser) {
-        console.warn('🚫 Tidak boleh reaksi ke rant sendiri.');
+      if (rant && rant.username === currentUser.replace(/^@/, '')) {
         return;
       }
 
@@ -804,21 +811,52 @@
           await supabaseFetch('reactions', 'DELETE', null, 
             `?id=eq.${existing[0].id}`
           );
-          console.log('🗑️ Reaksi dihapus:', emoji);
         } else {
           await supabaseFetch('reactions', 'POST', {
             rant_id: rantId,
             user_id: currentUser,
             emoji: emoji
           });
-          console.log('✅ Reaksi disimpan:', { rant_id: rantId, user_id: currentUser, emoji });
         }
-
         triggerPulse();
       } catch (e) {
-        console.error('💥 Gagal simpan reaksi ke Supabase:', e.message);
-        alert('Gagal menyimpan reaksi. Coba lagi nanti.');
+        console.error('Gagal simpan reaksi:', e.message);
       }
+    }
+
+    // === LOAD ARTEFAK ===
+    async function loadArtefak() {
+      try {
+        const artefakData = await supabaseFetch('artefak', 'GET', null, '?order=created_at.desc&limit=20');
+        return artefakData || [];
+      } catch (e) {
+        console.warn('Gagal muat artefak:', e.message);
+        return [];
+      }
+    }
+
+    function pickRandomArtefak(artefakList, count = 1) {
+      const shuffled = [...artefakList].sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, count);
+    }
+
+    function injectArtefakIntoZones(zones, artefakList) {
+      if (artefakList.length === 0) return zones;
+
+      const randomArtefak = pickRandomArtefak(artefakList, 1)[0];
+      const targetZone = ['hype', 'ngusahain', 'spill'][Math.floor(Math.random() * 3)];
+
+      const artefakPost = {
+        id: `artefak-${randomArtefak.id}`,
+        username: randomArtefak.username,
+        content: randomArtefak.notasi || randomArtefak.caption || 'Tanpa keterangan',
+        created_at: randomArtefak.created_at,
+        is_artefak: true,
+        image_url: randomArtefak.image_url
+      };
+
+      zones[targetZone].unshift(artefakPost);
+      return zones;
     }
 
     // === RENDER ZONE ===
@@ -837,16 +875,29 @@
       posts.forEach(post => {
         const el = document.createElement('div');
         el.className = 'post-item';
-        el.innerHTML = `
-          <div class="post-header">
-            <span class="post-username">@${post.username}</span>
-            <span class="post-emoji">${zoneEmoji}</span>
-          </div>
-          <div class="post-content">${post.content}</div>
-        `;
+
+        if (post.is_artefak) {
+          el.innerHTML = `
+            <div class="post-header">
+              <span class="post-username">@${post.username}</span>
+              <span class="post-emoji">🖼️</span>
+            </div>
+            ${post.image_url ? `<img src="${post.image_url}" class="artefak-image" alt="Artefak">` : ''}
+            <div class="post-content">${post.content || 'Tanpa keterangan'}</div>
+          `;
+        } else {
+          el.innerHTML = `
+            <div class="post-header">
+              <span class="post-username">@${post.username}</span>
+              <span class="post-emoji">${zoneEmoji}</span>
+            </div>
+            <div class="post-content">${post.content}</div>
+          `;
+        }
+
         container.appendChild(el);
 
-        if (post.username !== currentUser.replace(/^@/, '')) {
+        if (!post.is_artefak && post.username !== currentUser.replace(/^@/, '')) {
           const emojiBar = document.createElement('div');
           emojiBar.className = 'post-emojis';
           ['🤠', '😢', '🤗', '🔥'].forEach(emoji => {
@@ -870,20 +921,27 @@
     // === LOAD ZONES ===
     async function loadFeed() {
       try {
-        const rantsData = await supabaseFetch('rants', 'GET', null, '?order=created_at.desc&limit=100');
+        const [rantsData, artefakData] = await Promise.all([
+          supabaseFetch('rants', 'GET', null, '?order=created_at.desc&limit=100'),
+          loadArtefak()
+        ]);
+
         rantsDataCache = rantsData || [];
 
         const hype = [], ngusahain = [], spill = [];
         rantsDataCache.forEach(r => {
           const zone = detectZone(r.content);
-          if (zone === 'hype' && hype.length < 5) hype.push(r);
-          else if (zone === 'ngusahain' && ngusahain.length < 5) ngusahain.push(r);
-          else if (spill.length < 5) spill.push(r);
+          if (zone === 'hype' && hype.length < 4) hype.push(r);
+          else if (zone === 'ngusahain' && ngusahain.length < 4) ngusahain.push(r);
+          else if (spill.length < 4) spill.push(r);
         });
 
-        renderZone('hype', hype);
-        renderZone('ngusahain', ngusahain);
-        renderZone('spill', spill);
+        let zones = { hype, ngusahain, spill };
+        zones = injectArtefakIntoZones(zones, artefakData);
+
+        renderZone('hype', zones.hype);
+        renderZone('ngusahain', zones.ngusahain);
+        renderZone('spill', zones.spill);
       } catch (e) {
         console.error('Gagal muat feed:', e);
         const dummies = generateDummyRants();
@@ -893,7 +951,7 @@
       }
     }
 
-    // === HANGOUTS (DIPERBAIKI) ===
+    // === HANGOUTS ===
     async function loadHangouts() {
       try {
         const data = await supabaseFetch('hangouts', 'GET', null, '?order=created_at.desc');
@@ -911,7 +969,6 @@
     function renderHangouts(category, items) {
       const container = document.getElementById(`hangouts-${category}`);
 
-      // ✅ Tambahkan 1 dummy Hidden Gems jika kosong
       if (category === 'gems' && items.length === 0) {
         items = [{
           name: "CoffeeBeerian Ciragil",
