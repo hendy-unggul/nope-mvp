@@ -184,6 +184,7 @@
       border-radius: 12px;
       transition: all 0.2s;
       position: relative;
+      margin-bottom: 16px;
     }
     .post-item:hover {
       background: var(--border);
@@ -202,9 +203,9 @@
     }
     .post-reactions {
       display: flex;
-      gap: 8px;
-      font-size: 14px;
-      opacity: 0.8;
+      gap: 14px;
+      font-size: 16px;
+      opacity: 0.9;
     }
     .post-reactions span {
       cursor: pointer;
@@ -212,7 +213,7 @@
     }
     .post-reactions span:hover {
       opacity: 1;
-      transform: scale(1.2);
+      transform: scale(1.25);
     }
     .post-content {
       font-size: 14px;
@@ -220,13 +221,46 @@
       line-height: 1.5;
       word-break: break-word;
     }
+
+    /* === ARTEFAK LAYER === */
+    .artefak-container {
+      margin-bottom: 20px;
+    }
+    .notasi-layer {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .post-notasi {
+      font-size: 18px;
+      font-weight: 700;
+      color: #ff6b6b;
+      line-height: 1.3;
+      word-break: break-word;
+      margin-bottom: 6px;
+    }
+    .image-wrapper {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+    }
     .artefak-image {
       width: 100%;
-      border-radius: 12px;
-      margin: 8px 0;
-      max-height: 300px;
-      object-fit: cover;
       display: block;
+      max-height: 400px;
+      object-fit: cover;
+    }
+    .subtle-username {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.7);
+      background: rgba(0, 0, 0, 0.4);
+      padding: 2px 6px;
+      border-radius: 4px;
+      backdrop-filter: blur(2px);
+      z-index: 2;
+      pointer-events: none;
     }
 
     .hangout-item {
@@ -782,22 +816,32 @@
         const el = document.createElement('div');
         el.className = 'post-item';
 
-        // ✨ STRUKTUR BARU: username + 4 emoji reaksi dalam SATU BARIS
-        const reactionEmojis = ['👍', '😢', '🤗', '🔥'];
-        const reactionHtml = reactionEmojis.map(emoji => 
-          `<span data-emoji="${emoji}">${emoji}</span>`
-        ).join('');
-
         if (post.is_artefak) {
+          // ✨ ARSITEKTUR EMPATI: notasi → emoji → gambar dengan username tersembunyi
+          const reactionEmojis = ['👍', '😢', '🤗', '🔥'];
+          const reactionHtml = reactionEmojis.map(emoji => 
+            `<span data-emoji="${emoji}">${emoji}</span>`
+          ).join('');
+
           el.innerHTML = `
-            <div class="post-header">
-              <span class="post-username">@${post.username}</span>
-              <div class="post-reactions">${reactionHtml}</div>
+            <div class="artefak-container">
+              <div class="notasi-layer">
+                <div class="post-notasi">${post.content || 'Tanpa keterangan'}</div>
+                <div class="post-reactions">${reactionHtml}</div>
+              </div>
+              <div class="image-wrapper">
+                <img src="${post.image_url}" class="artefak-image" alt="Artefak"/>
+                <span class="subtle-username">@${post.username}</span>
+              </div>
             </div>
-            <div class="post-content">${post.content || 'Tanpa keterangan'}</div>
-            ${post.image_url ? `<img src="${post.image_url}" class="artefak-image" alt="Artefak">` : ''}
           `;
         } else {
+          // Rant biasa: username + reaksi
+          const reactionEmojis = ['👍', '😢', '🤗', '🔥'];
+          const reactionHtml = reactionEmojis.map(emoji => 
+            `<span data-emoji="${emoji}">${emoji}</span>`
+          ).join('');
+
           el.innerHTML = `
             <div class="post-header">
               <span class="post-username">@${post.username}</span>
@@ -809,13 +853,12 @@
 
         container.appendChild(el);
 
-        // Aktifkan klik reaksi jika bukan user sendiri
         if (post.username !== currentUser.replace(/^@/, '')) {
           el.querySelectorAll('.post-reactions span').forEach(span => {
             span.onclick = (e) => {
               e.stopPropagation();
               saveReaction(post.id, span.getAttribute('data-emoji'));
-              span.style.transform = 'scale(1.2)';
+              span.style.transform = 'scale(1.25)';
               setTimeout(() => span.style.transform = 'scale(1)', 200);
             };
           });
