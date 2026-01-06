@@ -308,7 +308,7 @@
     </header>
 
     <div class="hero">
-      <img id="hero-img" src="https://placehold.co/384x480/111/333?text=+  " alt="artefak">
+      <img id="hero-img" src="https://placehold.co/384x480/111/333?text=+    " alt="artefak">
       <div class="artefak-notation" id="hero-notation-display"></div>
       <button id="upload-artefak-btn" class="upload-artefak-btn">Unggah</button>
     </div>
@@ -444,7 +444,7 @@
         heroNotationDisplay.textContent = notation;
         if (notation) hidePostUploadPanel();
       } else {
-        heroImg.src = 'https://placehold.co/384x480/111/333?text=+  ';
+        heroImg.src = 'https://placehold.co/384x480/111/333?text=+    ';
         heroNotationDisplay.textContent = '';
       }
     }
@@ -550,12 +550,31 @@
         const div = document.createElement('div');
         div.className = 'tray-slot';
         div.style.backgroundImage = `url(${a.image_url})`;
+        div.style.backgroundSize = 'cover';
+        div.style.backgroundPosition = 'center';
+
+        // Error fallback
+        const img = new Image();
+        img.src = a.image_url;
+        img.onerror = () => {
+          div.style.background = '#1a1a1a';
+          div.innerHTML = '<div style="color: #555; font-size: 10px; text-align: center; padding: 4px;">?</div>';
+        };
+
         if (a.notation) {
           const notationEl = document.createElement('div');
           notationEl.className = 'artefak-notation';
           notationEl.textContent = a.notation;
           div.appendChild(notationEl);
         }
+
+        // Klik → pindah ke hero
+        div.onclick = () => {
+          heroImg.src = a.image_url;
+          heroNotationDisplay.textContent = a.notation || '';
+          hidePostUploadPanel();
+        };
+
         tray.appendChild(div);
       });
     }
