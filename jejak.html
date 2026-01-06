@@ -248,7 +248,7 @@
     }
     .tray-slot {
       aspect-ratio: 1;
-      background: transparent; /* ⬅️ PENTING: jangan pakai warna solid */
+      background: transparent;
       border: 1px solid var(--border);
       border-radius: 8px;
       background-size: cover;
@@ -309,7 +309,7 @@
     </header>
 
     <div class="hero">
-      <img id="hero-img" src="https://placehold.co/384x480/111/333?text=+    " alt="artefak">
+      <img id="hero-img" src="https://placehold.co/384x480/111/333?text=+      " alt="artefak">
       <div class="artefak-notation" id="hero-notation-display"></div>
       <button id="upload-artefak-btn" class="upload-artefak-btn">Unggah</button>
     </div>
@@ -323,8 +323,7 @@
       <div class="rant-box-header">
         Hello <strong>@<span id="username-display"></span></strong>
       </div>
-     
-      <textarea id="rant" maxlength="300" placeholder="Tulis jejakmu di sini..."></textarea>
+      <textarea id="rant" maxlength="300" placeholder="marah? sedih? cape? tulis aja. gak usah bener."></textarea>
       <button class="rant-cta" id="jejakkan-btn">Jejakkan</button>
       <div class="confirmation" id="confirmation"></div>
     </div>
@@ -372,6 +371,62 @@
 
     let artefacts = [];
     let rants = [];
+
+    // === DUMMY RANTS UNTUK ONBOARDING ===
+    const DUMMY_RANTS = [
+      {
+        id: 'dummy-0',
+        username: 'homie1',
+        content: "gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus. gak minta balasan sih, tapi rasanya kayak jadi tempat sampah emosi doang. capek jadi ‘temen baik’ yang cuma dipake pas dia perlu aja.",
+        created_at: new Date(Date.now() - 86400000 * 2).toISOString()
+      },
+      {
+        id: 'dummy-1',
+        username: 'homie2',
+        content: "deadline mepet, dosen gak jelas, dompet kering. rasanya pengen ijin cuti sehari buat jadi batu aja. gak perlu mikir, gak perlu ngomong, gak perlu diharapkan apa-apa.",
+        created_at: new Date(Date.now() - 86400000 * 1).toISOString()
+      },
+      {
+        id: 'dummy-2',
+        username: 'homie3',
+        content: "capek.",
+        created_at: new Date(Date.now() - 86400000 * 0.5).toISOString()
+      }
+    ];
+
+    // === DUMMY ARTEFAK UNTUK ONBOARDING ===
+    const DUMMY_ARTEFACTS = [
+      {
+        id: 'dummy-0',
+        username: 'homie1',
+        image_url: 'https://placehold.co/384x480/111/333?text=+      ',
+        notation: 'ingat puasa main ps'
+      },
+      {
+        id: 'dummy-1',
+        username: 'homie2',
+        image_url: 'https://placehold.co/384x480/ff9999/ffffff?text=Aliya',
+        notation: 'matcha dulu deh'
+      },
+      {
+        id: 'dummy-2',
+        username: 'homie3',
+        image_url: 'https://placehold.co/384x480/222/aaaaaa?text=PS2',
+        notation: 'nobar sama mantan'
+      },
+      {
+        id: 'dummy-3',
+        username: 'homie4',
+        image_url: 'https://placehold.co/384x480/eeeeee/666666?text=Tamagott',
+        notation: 'makaan'
+      },
+      {
+        id: 'dummy-4',
+        username: 'homie5',
+        image_url: 'https://placehold.co/384x480/ffffcc/333333?text=Hairbrush',
+        notation: 'capek'
+      }
+    ];
 
     // === UTILS ===
     const heroImg = document.getElementById('hero-img');
@@ -439,13 +494,15 @@
 
     // === RENDER ===
     function renderHero() {
-      if (artefacts.length > 0) {
-        heroImg.src = artefacts[0].image_url;
-        const notation = artefacts[0].notation || '';
+      let currentArtefact = artefacts.length > 0 ? artefacts[0] : DUMMY_ARTEFACTS[0];
+
+      if (currentArtefact) {
+        heroImg.src = currentArtefact.image_url;
+        const notation = currentArtefact.notation || '';
         heroNotationDisplay.textContent = notation;
         if (notation) hidePostUploadPanel();
       } else {
-        heroImg.src = 'https://placehold.co/384x480/111/333?text=+    ';
+        heroImg.src = 'https://placehold.co/384x480/111/333?text=+      ';
         heroNotationDisplay.textContent = '';
       }
     }
@@ -454,12 +511,9 @@
       const container = document.getElementById('diary');
       container.innerHTML = '';
 
-      if (rants.length === 0) {
-        container.innerHTML = '<div class="empty-state">Belum ada jejak. Tinggalkan jejak pertamamu!</div>';
-        return;
-      }
+      let displayRants = rants.length > 0 ? rants : DUMMY_RANTS;
 
-      rants.forEach(r => {
+      displayRants.forEach(r => {
         const entry = document.createElement('div');
         entry.className = 'diary-entry';
         const date = new Date(r.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
@@ -542,23 +596,22 @@
       const tray = document.getElementById('tray');
       tray.innerHTML = '';
 
-      if (artefacts.length === 0) {
+      let displayArtefacts = artefacts.length > 0 ? artefacts : DUMMY_ARTEFACTS;
+
+      if (displayArtefacts.length === 0) {
         tray.innerHTML = '<div class="empty-state">Belum ada artefak. Unggah gambar pertamamu!</div>';
         return;
       }
 
-      artefacts.slice(0, 6).forEach((a, index) => {
+      displayArtefacts.slice(0, 6).forEach((a, index) => {
         const div = document.createElement('div');
         div.className = 'tray-slot';
-        
-        // Pastikan ukuran tetap 1:1
         div.style.width = '100%';
         div.style.height = '100%';
         div.style.backgroundSize = 'cover';
         div.style.backgroundPosition = 'center';
         div.style.backgroundRepeat = 'no-repeat';
 
-        // Jika image_url ada, set background-image
         if (a.image_url) {
           div.style.backgroundImage = `url(${a.image_url})`;
         } else {
@@ -568,7 +621,6 @@
           return;
         }
 
-        // Tambahkan notasi jika ada
         if (a.notation) {
           const notationEl = document.createElement('div');
           notationEl.className = 'artefak-notation';
@@ -576,14 +628,12 @@
           div.appendChild(notationEl);
         }
 
-        // Event click → pindah ke hero
         div.onclick = () => {
           heroImg.src = a.image_url;
           heroNotationDisplay.textContent = a.notation || '';
           hidePostUploadPanel();
         };
 
-        // Debug: cek apakah gambar bisa dimuat
         const img = new Image();
         img.src = a.image_url;
         img.onload = () => {
@@ -685,7 +735,7 @@
       showConfirmation("Mengunggah...");
       const timestamp = Date.now();
       const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const cleanUsername = currentUser.replace(/^@/, '').replace(/\s+/g, '_'); // <-- FIX SPASI
+      const cleanUsername = currentUser.replace(/^@/, '').replace(/\s+/g, '_');
       const fileName = `${cleanUsername}/${timestamp}-${safeName}`;
 
       try {
