@@ -61,27 +61,6 @@
       color: var(--logo-color);
       margin-left: 16px;
     }
-    .top-right {
-      display: flex;
-      align-items: center;
-      margin-right: 12px;
-    }
-    .nav-mini {
-      display: flex;
-      gap: 6px;
-      font-size: 11px;
-      color: var(--muted);
-      margin-right: 8px;
-    }
-    .nav-mini span {
-      cursor: pointer;
-      text-decoration: underline;
-      text-decoration-style: dotted;
-      text-underline-offset: 2px;
-    }
-    .nav-mini span:hover {
-      color: var(--text);
-    }
     .back-btn {
       background: none;
       border: none;
@@ -253,7 +232,6 @@
       <button class="post-btn" id="post-btn">Kirim Nyambat</button>
     </div>
 
-    <!-- Dummy posts akan digantikan oleh fungsi render -->
     <div id="nyambat-list"></div>
 
     <div class="tagline">
@@ -279,23 +257,19 @@
       '👁️': 'Aku ngeliat kamu...'
     };
 
-    // === NAVIGASI ===
     document.getElementById('back-btn').onclick = () => history.back();
 
-    // === RENDER SEMUA NYAMBAT ===
     function renderNyambat() {
       const container = document.getElementById('nyambat-list');
       container.innerHTML = '';
 
-      // Urutkan dari terbaru
       const sorted = [...nyambatData].reverse();
 
       sorted.forEach((post, index) => {
         const card = document.createElement('div');
         card.className = 'nyambat-card';
-        card.dataset.index = nyambatData.length - 1 - index; // reverse index
+        card.dataset.index = nyambatData.length - 1 - index;
 
-        // Ekstrak hashtag untuk highlight
         const hashtagRegex = /(#[a-zA-Z][a-zA-Z0-9]*)/g;
         let contentWithHashtag = post.text.replace(hashtagRegex, '<span class="nyambat-hashtag">$1</span>');
 
@@ -320,24 +294,20 @@
         container.appendChild(card);
       });
 
-      // Pasang event listener setelah render
       attachEventListeners();
     }
 
     function attachEventListeners() {
-      // Emoji reaction
       document.querySelectorAll('[data-emoji]').forEach(el => {
         el.removeEventListener('click', handleEmojiClick);
         el.addEventListener('click', handleEmojiClick);
       });
 
-      // Toggle komentar
       document.querySelectorAll('.comment-toggle').forEach(el => {
         el.removeEventListener('click', toggleCommentForm);
         el.addEventListener('click', toggleCommentForm);
       });
 
-      // Kirim komentar
       document.querySelectorAll('.send-comment').forEach(el => {
         el.removeEventListener('click', handleCommentSend);
         el.addEventListener('click', handleCommentSend);
@@ -370,7 +340,7 @@
       const textarea = e.currentTarget.previousElementSibling;
       const comment = textarea.value.trim();
       if (!comment) return alert('Isi komentarnya dulu!');
-      
+
       nyambatData[index].comments.push({
         author: currentUser,
         text: comment,
@@ -381,7 +351,6 @@
       document.getElementById(`comment-form-${index}`).style.display = 'none';
     }
 
-    // === POST NYAMBAT BARU ===
     document.getElementById('post-btn').onclick = () => {
       const input = document.getElementById('nyambat-input');
       const text = input.value.trim();
@@ -390,16 +359,13 @@
       const hasHashtag = /#[a-zA-Z][a-zA-Z0-9]*/.test(text);
       if (!hasHashtag) return alert('Jangan lupa tambahkan satu hashtag! Contoh: #skripsi');
 
-      const now = new Date();
-      const timeAgo = 'baru aja';
-
       nyambatData.push({
         author: currentUser,
         text,
-        timeAgo,
+        timeAgo: 'baru aja',
         reactions: { '🫂': 0, '🔥': 0, '✊': 0, '👁️': 0 },
         comments: [],
-        timestamp: now.toISOString()
+        timestamp: new Date().toISOString()
       });
 
       saveAndRender();
@@ -411,7 +377,6 @@
       renderNyambat();
     }
 
-    // Inisialisasi
     renderNyambat();
   </script>
 </body>
