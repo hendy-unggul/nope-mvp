@@ -118,8 +118,8 @@
       cursor: pointer;
       margin-top: 12px;
       transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-      text-transform: none;
-      letter-spacing: 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
     .btn:hover:not(:disabled) {
       background: #c284ff;
@@ -133,19 +133,29 @@
       cursor: not-allowed;
       transform: none;
     }
+
+    /* === INFO BOX: transparan 100%, hanya ikon + teks === */
     .info {
       margin-top: 20px;
       padding: 12px;
-      background: rgba(178, 102, 255, 0.06);
-      border: 1px solid rgba(178, 102, 255, 0.2);
+      background: transparent; /* ✅ transparan 100% */
+      border: none;
       border-radius: 10px;
-      font-size: 12px;
+      font-size: 13px;
       color: var(--muted);
-      line-height: 1.5;
+      line-height: 1.4;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .info .lock-icon {
+      font-size: 20px;
+      color: var(--accent);
     }
 
-    /* === HIDE DEVICE INFO — tapi tetap berjalan di latar === */
+    /* === HIDE DEVICE INFO === */
     .device-info {
       display: none !important;
     }
@@ -193,14 +203,15 @@
           <div class="success-msg" id="success-msg"></div>
         </div>
         
-        <button type="submit" class="btn" id="login-btn">Masuk</button>
+        <button type="submit" class="btn" id="login-btn">GASKEUN! 🚀</button>
         
+        <!-- ✅ Info box revisi: transparan, hanya gembok + teks -->
         <div class="info">
-          🔒 Akun terkunci ke device ini.<br>
-          Contoh: <em>laut merah</em>, <em>langit retak</em>
+          <div class="lock-icon">🔒</div>
+          <div>STAY SAFE STAY ANONIM</div>
         </div>
 
-        <!-- ✅ Device info tetap ada di HTML — tapi disembunyikan via CSS -->
+        <!-- ✅ Tetap ada di HTML, tapi hidden -->
         <div class="device-info" id="device-info">
           Device ID: <span id="device-id-display">Generating...</span>
         </div>
@@ -208,7 +219,7 @@
     </div>
   </div>
 
-  <!-- 🔁 SEMUA JAVASCRIPT ASLI TETAP UTUH -->
+  <!-- 🔁 JAVASCRIPT TETAP 100% UTUH -->
   <script>
     const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
@@ -228,7 +239,6 @@
       return await res.json();
     }
 
-    // === DEVICE FINGERPRINTING ===
     async function generateDeviceFingerprint() {
       const components = [
         navigator.userAgent,
@@ -243,16 +253,12 @@
         !!window.localStorage,
         navigator.platform
       ];
-
       const fingerprint = components.join('|');
-      
-      // Hash fingerprint
       const encoder = new TextEncoder();
       const data = encoder.encode(fingerprint);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-      
       return hashHex;
     }
 
@@ -292,7 +298,6 @@
       return null;
     }
 
-    // Display device ID on load (still runs, just hidden)
     let currentDeviceId = '';
     (async () => {
       currentDeviceId = await generateDeviceFingerprint();
@@ -360,11 +365,10 @@
         }
       } finally {
         btn.disabled = false;
-        btn.textContent = 'Masuk';
+        btn.textContent = 'GASKEUN! 🚀';
       }
     });
 
-    // Auto-redirect if valid session
     (async () => {
       if (savedUsername) {
         const savedDeviceId = localStorage.getItem('nope_device_id');
@@ -388,7 +392,6 @@
       }
     })();
 
-    // Input cleaner
     document.getElementById('username').addEventListener('input', (e) => {
       let value = e.target.value.toLowerCase();
       value = value.replace(/[^a-z\s]/g, '');
@@ -396,7 +399,6 @@
       e.target.value = value;
     });
 
-    // === PULSE ===
     (function() {
       const pulse = document.createElement('div');
       pulse.className = 'pulse-animation';
