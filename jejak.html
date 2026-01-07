@@ -1,28 +1,32 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
+<html lang="id" data-theme="glitch">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NOPE — Jurnal</title>
   <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
   <style>
     :root,
-    [data-theme="dark"] {
-      --bg: #000;
-      --surface: #0a0a0a;
-      --border: #1f1f1f;
-      --text: #f5f5f5;
-      --muted: #555;
-      --accent: #4903fc;
+    [data-theme="glitch"] {
+      --bg: #0a0a0a;
+      --surface: #121212;
+      --border: #222222;
+      --text: #e6e6e6;
+      --muted: #8a8a8a;
+      --accent: #b266ff;
       --logo-color: #ff9999;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: radial-gradient(ellipse at top, var(--surface), var(--bg));
+      background: var(--bg);
       color: var(--text);
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      line-height: 1.5;
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, monospace;
+      font-weight: 300;
+      font-size: 15px;
+      line-height: 1.55;
       padding-bottom: 72px;
       -webkit-font-smoothing: antialiased;
     }
@@ -49,6 +53,11 @@
       letter-spacing: -0.02em;
       color: var(--logo-color);
       margin-left: 16px;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    header:hover .logo {
+      transform: scale(1.02);
+      opacity: 0.96;
     }
     .top-right {
       display: flex;
@@ -67,9 +76,19 @@
       text-decoration: underline;
       text-decoration-style: dotted;
       text-underline-offset: 2px;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: background-color 0.2s ease;
     }
-    .nav-mini span:hover {
+    .nav-mini span:hover:not(.active) {
+      background-color: rgba(178, 102, 255, 0.06);
       color: var(--text);
+    }
+    .nav-mini span.active {
+      color: var(--accent) !important;
+      text-decoration-color: var(--accent);
+      font-weight: 500;
+      background-color: rgba(178, 102, 255, 0.08);
     }
     .settings-btn {
       background: none;
@@ -101,13 +120,14 @@
       background: rgba(0,0,0,0.3);
       color: var(--text);
       font-size: 16.5px;
-      font-weight: 600;
+      font-weight: 500;
       padding: 4px 6px;
       border-radius: 4px;
       max-width: 80%;
       line-height: 1.2;
       backdrop-filter: blur(2px);
       pointer-events: none;
+      font-family: 'JetBrains Mono', monospace;
     }
     .upload-artefak-btn {
       position: absolute;
@@ -122,6 +142,11 @@
       font-weight: 600;
       cursor: pointer;
       z-index: 2;
+      transition: all 0.2s;
+    }
+    .upload-artefak-btn:hover {
+      background: #c284ff;
+      transform: translateY(-1px);
     }
     .post-upload-panel {
       display: flex;
@@ -144,6 +169,7 @@
       padding: 8px 12px;
       color: var(--text);
       font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
     }
     .post-upload-panel input:focus {
       outline: none;
@@ -162,7 +188,7 @@
     .rant-box {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 12px;
       padding: 14px 16px 24px 16px;
       margin-bottom: 16px;
       position: relative;
@@ -178,10 +204,11 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      font-family: 'JetBrains Mono', monospace;
     }
     .rant-box-header strong {
       color: var(--text);
-      font-weight: 600;
+      font-weight: 500;
       white-space: nowrap;
     }
     .rant-box textarea {
@@ -189,7 +216,7 @@
       background: transparent;
       border: none;
       color: var(--text);
-      font-family: 'Inter', sans-serif;
+      font-family: 'JetBrains Mono', monospace;
       font-size: 14px;
       line-height: 1.4;
       resize: none;
@@ -210,6 +237,11 @@
       font-size: 12px;
       font-weight: 600;
       cursor: pointer;
+      transition: all 0.2s;
+    }
+    .rant-cta:hover:not(:disabled) {
+      background: #c284ff;
+      transform: translateY(-1px);
     }
     .rant-cta:disabled {
       opacity: 0.5;
@@ -220,11 +252,12 @@
       color: var(--muted);
       text-align: center;
       margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
     }
     .diary {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
+      border-radius: 12px;
       padding: 14px;
       margin-bottom: 16px;
     }
@@ -238,6 +271,12 @@
       color: var(--muted);
       display: block;
       margin-bottom: 2px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .diary-entry p {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      line-height: 1.5;
     }
     .tray {
       display: grid;
@@ -261,6 +300,7 @@
     .tray-slot:hover {
       border-color: var(--accent);
       transform: scale(1.02);
+      background-color: rgba(178, 102, 255, 0.02);
     }
     .tray-slot .artefak-notation {
       top: 6px;
@@ -268,28 +308,42 @@
       font-size: 10px;
       padding: 3px 5px;
     }
-    .tagline {
+
+    /* === ZONE FOOTER — menggantikan tagline lama === */
+    .zone-footer {
       text-align: center;
       font-size: 12px;
       color: var(--muted);
       padding: 0 16px 20px;
       line-height: 1.5;
-      max-width: 320px;
-      margin: 0 auto;
+      letter-spacing: 0.5px;
+      font-family: 'JetBrains Mono', monospace;
     }
-    .tagline strong {
-      color: var(--accent);
-      display: block;
-      margin-top: 4px;
+
+    /* === PULSE === */
+    .pulse-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(178, 102, 255, 0.15), transparent);
+      pointer-events: none;
+      opacity: 0;
+      z-index: 999;
+      animation: pulse 1.4s cubic-bezier(0.2, 0.8, 0.4, 1);
     }
-    .empty-state {
-      text-align: center;
-      color: var(--muted);
-      font-size: 13px;
-      padding: 20px;
-      border: 1px dashed var(--border);
-      border-radius: 8px;
-      margin: 16px 0;
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.6; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   </style>
 </head>
@@ -299,7 +353,7 @@
       <div class="logo">NOPE</div>
       <div class="top-right">
         <div class="nav-mini">
-          <span id="nav-jejak">Jejak</span>
+          <span id="nav-jejak" class="active">Jejak</span>
           <span id="nav-frekuensi">Frekuensi</span>
           <span id="nav-saynope">SayNOPE</span>
           <span id="nav-glitch">GLITCH</span>
@@ -331,15 +385,13 @@
     <div class="diary" id="diary"></div>
     <div class="tray" id="tray"></div>
 
-    <div class="tagline">
-      Untuk yang memilih kejujuran<br>
-      tanpa meminta pengakuan.<br>
-      <strong>— Glitch Generation</strong>
-    </div>
+    <!-- ✨ FOOTER ZONA — menggantikan tagline lama -->
+    <div class="zone-footer">Jejak • Rant • Notasi</div>
   </div>
 
   <input type="file" id="file-input" accept="image/*" style="display:none;">
 
+  <!-- 🔁 SEMUA JAVASCRIPT ASLI TETAP UTUH DI BAWAH INI -->
   <script>
     // === CONFIG ===
     const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
@@ -876,6 +928,12 @@
       document.getElementById('nav-glitch').addEventListener('click', () => navigateTo('glitch.html'));
       document.getElementById('settings-btn').addEventListener('click', logout);
 
+      // === PULSE ===
+      const pulse = document.createElement('div');
+      pulse.className = 'pulse-animation';
+      document.body.appendChild(pulse);
+      setTimeout(() => pulse.remove(), 1000);
+      
       loadData();
     });
   </script>
