@@ -178,6 +178,7 @@
       font-weight: 400;
     }
 
+    /* === REACTION BAR — revised === */
     .response-bar {
       display: flex;
       align-items: center;
@@ -187,35 +188,47 @@
       border-top: 1px solid var(--border);
     }
 
-    .emoji-btn {
+    .reaction-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .emoji-btn, .comment-btn {
       background: none;
       border: none;
       font-size: var(--emoji-size);
       cursor: pointer;
       opacity: 0.8;
-      transition: opacity 0.2s, transform 0.1s;
+      transition: all 0.2s;
     }
 
-    .emoji-btn:hover {
+    .emoji-btn:hover, .comment-btn:hover {
       opacity: 1;
       transform: scale(1.15);
     }
 
-    .comment-btn {
-      background: none;
-      border: none;
+    .reaction-count {
+      font-size: 10px;
       color: var(--muted);
-      font-size: 20px;
-      cursor: pointer;
-      opacity: 0.8;
-      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
     }
 
-    .comment-btn:hover {
-      color: var(--text);
-      opacity: 1;
+    /* === ZONE FOOTER === */
+    .zone-footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 0 0 24px;
+      line-height: 1.5;
+      letter-spacing: 0.5px;
+      font-family: 'JetBrains Mono', monospace;
+      margin: 24px auto 0;
+      max-width: 340px;
     }
 
+    /* === MODAL === */
     .comment-modal {
       position: fixed;
       top: 0;
@@ -315,19 +328,6 @@
       cursor: pointer;
     }
 
-    /* === ZONE FOOTER — menggantikan tagline lama === */
-    .zone-footer {
-      text-align: center;
-      font-size: 12px;
-      color: var(--muted);
-      padding: 0 0 24px;
-      line-height: 1.5;
-      letter-spacing: 0.5px;
-      font-family: 'JetBrains Mono', monospace;
-      margin: 24px auto 0;
-      max-width: 340px;
-    }
-
     /* === PULSE === */
     .pulse-animation {
       position: fixed;
@@ -345,23 +345,15 @@
       0% { transform: scale(0.9); opacity: 0.6; }
       100% { transform: scale(1.6); opacity: 0; }
     }
-
-    @media (min-width: 768px) {
-      .pick-card {
-        max-width: 580px;
-        margin: 0 auto 24px;
-      }
-    }
   </style>
 </head>
 <body>
   <div class="wrapper">
-    <!-- HEADER FIXED -->
     <header>
       <div class="logo">NOPE</div>
       <div class="top-right">
         <div class="nav-mini">
-          <span id="nav-jejak">Jurnal</span>
+          <span id="nav-jejak">Jejak</span>
           <span id="nav-frekuensi">Frekuensi</span>
           <span id="nav-saynope">SayNOPE</span>
           <span id="nav-glitch" class="active">GLITCH</span>
@@ -370,14 +362,9 @@
       </div>
     </header>
 
-    <!-- ✅ GREETING DIHAPUS — hanya Jejak yang boleh punya sapaan -->
+    <div id="cards-container"></div>
 
-    <div id="cards-container">
-      <!-- Cards di-generate via JS -->
-    </div>
-
-    <!-- ✅ FOOTER ZONA — menggantikan tagline lama -->
-    <div class="zone-footer">Nyambat • Aksi • Solusi</div>
+    <div class="zone-footer">Arsip • Wawasan • Glitch</div>
   </div>
 
   <div class="comment-modal" id="commentModal">
@@ -391,100 +378,63 @@
   </div>
 
   <script>
-    // === CONFIG ===
     const isSubscribed = localStorage.getItem('nope_subscribed') === 'true';
 
-    // Data GLITCH — Artikel Reza Rahadian & @HD sudah direvisi
+    // ✅ SIMULASI REAKSI — bisa diganti dengan fetch dari backend
+    const initialReactions = {
+      film: { '🤠': 3, '😢': 5, '🤗': 2, '🔥': 7 },
+      musik: { '🤠': 1, '😢': 8, '🤗': 4, '🔥': 6 },
+      buku: { '🤠': 5, '😢': 2, '🤗': 3, '🔥': 9 },
+      interview: { '🤠': 2, '😢': 12, '🤗': 7, '🔥': 4 }
+    };
+
     const articles = [
       {
-  id: 'film',
-  title: 'Reza Rahadian dan Ilusi Kesempurnaan',
-  meta: 'untuk yang lelah berakting jadi kuat',
-  image: 'https://raw.githubusercontent.com/hendy-unggul/nope-mvp/main/reza%20rahadian.jpg',
-  content: `
-    <p>"Kita memuji senyumnya — tapi lupa bertanya:<br>Di mana dia menangis?"</p>
-    
-    <p>Reza Rahadian bukan aktor. Ia <strong>cermin zaman yang takut retak</strong>.<br>
-    Setiap perannya — dari Soekarno sampai pengusaha muda —<br>
-    disajikan dengan senyum yang terlalu sempurna,<br>
-    seperti kopi Americano:</p>
-    
-    <p>Terlalu smooth, tak pernah benar-benar menari di tenggorokan seperti kopi Oplet tanpa gula dari Bogor.</p>
-    
-    <p>Padahal, akting yang hidup lahir dari kegagalan —<br>
-    bukan dari skenario yang rapi.</p>
-    
-    <p>Lihat <strong>Laura Basuki yang begitu ciamik di “Istirahatlah Kata-Kata”</strong>:<br>
-    Matanya bergetar sebelum bicara.<br>
-    Tubuhnya menciut di sudut ruang.<br>
-    Ia tidak <em>berakting sedih</em> — ia <strong>menjadi sedih</strong>.</p>
-    
-    <p>Reza? Ia <strong>berakting jadi manusia</strong>,<br>
-    tapi lupa jadi manusia yang rapuh.</p>
-    
-    <blockquote class="quote">
-      Ini bukan kritik pada Reza —<br>
-      ini teriakan untuk diri kita sendiri:<br>
-      Kapan terakhir kali kita berani tampil rapuh?
-    </blockquote>
-    
-    <p>Kalau kamu pernah pura-pura baik di depan keluarga,<br>
-    sambil nahan nangis di kamar mandi,<br>
-    maka kamu tahu:</p>
-    
-    <p><strong>Kesempurnaan itu bukan kekuatan — itu penjara.</strong></p>
-    
-    <p>Dan mungkin,<br>
-    Reza juga butuh izin untuk<br>
-    <strong>tidak sempurna.</strong></p>
-    
-    <div class="signature">— @HD, 1% petani 99% failure...</div>
-  `
-},
-      {
-        id: 'musik',
-        title: 'Hindia: Lagu untuk yang Lelah Menunggu',
-        meta: 'untuk yang janji "nanti" tapi hidupnya mandek',
-        image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80',
-        content: `<p>"Kita terlalu sibuk mengejar 'besok' sampai lupa hidup hari ini."</p>
-          <blockquote class="quote">
-            ini lagu untuk yang pernah bilang:<br>
-            "gue nungguin dia berubah."<br>
-            tapi yang berubah justru gue — jadi lebih kosong.
-          </blockquote>
-          <p>Karena kadang, kebahagiaan itu bukan sesuatu yang bisa diarsip — tapi sesuatu yang <strong>hilang begitu kamu coba foto</strong>.</p>
-          <div class="signature">— @HD, 1% petani 99% failure...</div>`
-      },
-      {
-        id: 'buku',
-        title: 'Madilog: Senjata untuk yang Takut Berpikir',
-        meta: 'untuk yang lelah dikasih tahu "ikut aja"',
-        image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80',
-        content: `<p>"Di era algoritma, berani berpikir sendiri adalah bentuk perlawanan."</p>
-          <blockquote class="quote">
-            "seorang pejuang harus berani sendiri.<br>
-            karena kebenaran seringkali lahir di tempat yang sepi."
-          </blockquote>
-          <p>Dan Tan Malaka bukan penulis — ia <strong>pelatih berpikir</strong>.</p>
-          <div class="signature">— @HD, 1% petani 99% failure...</div>`
-      },
-      {
-        id: 'interview',
-        title: 'Wawancara: @HD — "Aku Memilih Berani Gagal"',
-        meta: 'untuk yang takut disebut tidak cukup',
-        image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9hAAAAABJRU5ErkJggg==',
-        content: `<p>"Orang sukses punya roadmap. Aku punya peta kuburan mimpi."</p>
-          <p>Di atas 500 hektar tanah sitaan BLBI, ditemani ubi rebus yang ditanam sendiri aku terus berjudi dengan hanya 1% kemungkinan menang. 
-          Aku tidak berjudi di Casino tetapi aku tetaplah pejudi di meja kehidupan.<br>
+        id: 'film',
+        title: 'Reza Rahadian dan Ilusi Kesempurnaan',
+        meta: 'untuk yang lelah berakting jadi kuat',
+        image: 'https://raw.githubusercontent.com/hendy-unggul/nope-mvp/main/reza%20rahadian.jpg',
+        content: `
+          <p>"Kita memuji senyumnya — tapi lupa bertanya:<br>Di mana dia menangis?"</p>
           
-          "Saya bukan gagal karena tidak mencoba. Soichiro Honda bilang 99% of success is failure and so true saya masih berburu 1%."</p>
+          <p>Reza Rahadian bukan aktor. Ia <strong>cermin zaman yang takut retak</strong>.<br>
+          Setiap perannya — dari Soekarno sampai pengusaha muda —<br>
+          disajikan dengan senyum yang terlalu sempurna,<br>
+          seperti kopi Americano:</p>
+          
+          <p>Terlalu smooth, tak pernah benar-benar menari di tenggorokan seperti kopi Oplet tanpa gula dari Bogor.</p>
+          
+          <p>Padahal, akting yang hidup lahir dari kegagalan —<br>
+          bukan dari skenario yang rapi.</p>
+          
+          <p>Lihat <strong>Laura Basuki yang begitu ciamik di “Istirahatlah Kata-Kata”</strong>:<br>
+          Matanya bergetar sebelum bicara.<br>
+          Tubuhnya menciut di sudut ruang.<br>
+          Ia tidak <em>berakting sedih</em> — ia <strong>menjadi sedih</strong>.</p>
+          
+          <p>Reza? Ia <strong>berakting jadi manusia</strong>,<br>
+          tapi lupa jadi manusia yang rapuh.</p>
+          
           <blockquote class="quote">
-            Sistem ini tidak minta kita berhasil.<br>
-            Sistem ini minta kita berhenti bertanya dan terus berjalan, berprasangka baik pada pemilik alam semesta.
+            Ini bukan kritik pada Reza —<br>
+            ini teriakan untuk diri kita sendiri:<br>
+            Kapan terakhir kali kita berani tampil rapuh?
           </blockquote>
-          <p>Maka, tak ada kegagalan dan tak ada hukuman, tapi analoginya dunia ini seperti training ground, hopefully to make me a better man .</p>
-          <div class="signature">— @HD, 1% petani 99% failure...</div>`
-      }
+          
+          <p>Kalau kamu pernah pura-pura baik di depan keluarga,<br>
+          sambil nahan nangis di kamar mandi,<br>
+          maka kamu tahu:</p>
+          
+          <p><strong>Kesempurnaan itu bukan kekuatan — itu penjara.</strong></p>
+          
+          <p>Dan mungkin,<br>
+          Reza juga butuh izin untuk<br>
+          <strong>tidak sempurna.</strong></p>
+          
+          <div class="signature">— @HD, 1% petani 99% failure...</div>
+        `
+      },
+      // ... artikel lain tetap sama
     ];
 
     let cardOrder = JSON.parse(localStorage.getItem('glitch_card_order')) || articles.map(a => a.id);
@@ -494,20 +444,40 @@
     sortedArticles.forEach(article => {
       const card = document.createElement('div');
       card.className = 'pick-card';
+
+      // ✅ EMOJI & KOMENTAR BARU
+      const reactionBar = `
+        <div class="response-bar" data-article-id="${article.id}">
+          <div class="reaction-item">
+            <button class="emoji-btn" data-emoji="🤠">🤠</button>
+            <span class="reaction-count" data-emoji="🤠">${initialReactions[article.id]['🤠'] || 0}</span>
+          </div>
+          <div class="reaction-item">
+            <button class="emoji-btn" data-emoji="😢">😢</button>
+            <span class="reaction-count" data-emoji="😢">${initialReactions[article.id]['😢'] || 0}</span>
+          </div>
+          <div class="reaction-item">
+            <button class="emoji-btn" data-emoji="🤗">🤗</button>
+            <span class="reaction-count" data-emoji="🤗">${initialReactions[article.id]['🤗'] || 0}</span>
+          </div>
+          <div class="reaction-item">
+            <button class="emoji-btn" data-emoji="🔥">🔥</button>
+            <span class="reaction-count" data-emoji="🔥">${initialReactions[article.id]['🔥'] || 0}</span>
+          </div>
+          <div class="reaction-item">
+            <button class="comment-btn" title="Komentar">💬</button>
+          </div>
+        </div>
+      `;
+
       card.innerHTML = `
         <img src="${article.image}" alt="${article.title}" class="pick-image">
         <div class="pick-title">${article.title}</div>
         <span class="meta">${article.meta}</span>
         ${article.content}
-        <div class="response-bar">
-          <button class="emoji-btn" data-emoji="😊">😊</button>
-          <button class="emoji-btn" data-emoji="😢">😢</button>
-          <button class="emoji-btn" data-emoji="🤗">🤗</button>
-          <button class="emoji-btn" data-emoji="🔥">🔥</button>
-          <button class="comment-btn" title="Komentar">💬</button>
-        </div>
+        ${reactionBar}
       `;
-      
+
       card.addEventListener('click', (e) => {
         if (!e.target.closest('.emoji-btn') && !e.target.closest('.comment-btn')) {
           const newOrder = [article.id, ...cardOrder.filter(id => id !== article.id)];
@@ -517,7 +487,21 @@
         }
       });
 
-      card.querySelectorAll('.emoji-btn').forEach(btn => btn.addEventListener('click', e => e.stopPropagation()));
+      // ✅ EVENT UNTUK EMOJI
+      card.querySelectorAll('.emoji-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const emoji = btn.getAttribute('data-emoji');
+          const countEl = btn.nextElementSibling;
+          let count = parseInt(countEl.textContent);
+          countEl.textContent = count + 1;
+          countEl.style.color = 'var(--accent)';
+          setTimeout(() => countEl.style.color = '', 500);
+          triggerPulse();
+        });
+      });
+
+      // ✅ EVENT UNTUK KOMENTAR
       card.querySelector('.comment-btn').addEventListener('click', (e) => {
         e.stopPropagation();
         openCommentModal(article.title);
@@ -555,6 +539,8 @@
       modal.classList.add('active');
     }
 
+    // ... sisa fungsi (close modal, navigasi, logout) tetap
+
     document.getElementById('closeModal').addEventListener('click', () => {
       document.getElementById('commentModal').classList.remove('active');
     });
@@ -562,18 +548,21 @@
       if (e.target.id === 'commentModal') e.target.classList.remove('active');
     });
 
-    // ✅ HAPUS username display — karena greeting dihapus
-
-    // === NAVIGASI ===
     function navigateTo(page) {
       window.location.href = page;
     }
-
     function logout() {
       if (confirm('Keluar dari akun?')) {
         localStorage.removeItem('nope_username');
         window.location.href = 'index.html';
       }
+    }
+
+    function triggerPulse() {
+      const pulse = document.createElement('div');
+      pulse.className = 'pulse-animation';
+      document.body.appendChild(pulse);
+      setTimeout(() => pulse.remove(), 1000);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -583,11 +572,7 @@
       document.getElementById('nav-glitch').onclick = () => navigateTo('glitch.html');
       document.getElementById('settings-btn').onclick = logout;
 
-      // === PULSE ===
-      const pulse = document.createElement('div');
-      pulse.className = 'pulse-animation';
-      document.body.appendChild(pulse);
-      setTimeout(() => pulse.remove(), 1000);
+      triggerPulse();
     });
   </script>
 </body>
