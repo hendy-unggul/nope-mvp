@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NOPE — Nyambat</title>
+  <title>NOPE — SayNOPE</title>
   <link rel="icon" href="favicon.ico" type="image/x-icon">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
   <style>
-    :root {
+    :root,
+    [data-theme="glitch"] {
       --bg: #0a0a0a;
       --surface: #121212;
       --border: #222222;
@@ -18,23 +19,27 @@
       --accent: #b266ff;
       --logo-color: #ff9999;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, monospace;
       font-weight: 300;
-      font-size: 14px;
+      font-size: 15px;
       line-height: 1.55;
       padding-bottom: 72px;
+      -webkit-font-smoothing: antialiased;
     }
+
     .wrapper {
-      max-width: 640px;
+      max-width: 480px;
       margin: 0 auto;
       padding: 0 16px;
     }
 
-    /* HEADER */
+    /* === HEADER === */
     header {
       position: sticky;
       top: 0;
@@ -45,222 +50,158 @@
       justify-content: space-between;
       align-items: center;
       z-index: 10;
-      margin-bottom: 20px;
     }
+
     .logo {
       font-family: 'Manrope', sans-serif;
       font-size: 28px;
       font-weight: 700;
+      letter-spacing: -0.02em;
       color: var(--logo-color);
-    }
-    .back-btn {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      cursor: pointer;
+      margin-left: 16px;
+      transition: transform 0.3s ease, opacity 0.3s ease;
     }
 
-    /* POST FORM */
-    .post-form {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 24px;
-    }
-    .post-form textarea {
-      width: 100%;
-      background: #0a0a0a;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px;
-      color: var(--text);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
-      resize: vertical;
-      min-height: 80px;
-      margin-bottom: 12px;
-    }
-    .post-form textarea:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    .post-form input {
-      width: 100%;
-      background: #0a0a0a;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
-      color: var(--text);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      margin-bottom: 12px;
-    }
-    .post-form input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    .post-btn {
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 20px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-    }
-    .post-btn:hover {
-      background: #c284ff;
-    }
-    .post-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    header:hover .logo {
+      transform: scale(1.02);
+      opacity: 0.96;
     }
 
-    /* THREAD */
-    .thread {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-    .thread-header {
+    .top-right {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-right: 12px;
     }
-    .thread-author {
-      font-size: 13px;
-      color: var(--accent);
-      font-weight: 500;
-    }
-    .thread-tag {
-      background: rgba(178, 102, 255, 0.15);
-      color: var(--accent);
-      padding: 3px 8px;
-      border-radius: 4px;
+
+    .nav-mini {
+      display: flex;
+      gap: 6px;
       font-size: 11px;
-      font-weight: 500;
+      color: var(--muted);
+      margin-right: 8px;
     }
-    .thread-content {
-      font-size: 14px;
-      line-height: 1.6;
-      margin-bottom: 12px;
+
+    .nav-mini span {
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-style: dotted;
+      text-underline-offset: 2px;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: background-color 0.2s ease;
+    }
+
+    .nav-mini span:hover:not(.active) {
+      background-color: rgba(178, 102, 255, 0.06);
       color: var(--text);
     }
-    .thread-actions {
-      display: flex;
-      gap: 12px;
-      font-size: 13px;
-      color: var(--muted);
+
+    .nav-mini span.active {
+      color: var(--accent) !important;
+      text-decoration-color: var(--accent);
+      font-weight: 500;
+      background-color: rgba(178, 102, 255, 0.08);
     }
-    .thread-actions button {
+
+    .settings-btn {
       background: none;
       border: none;
       color: var(--muted);
+      font-size: 20px;
       cursor: pointer;
-      font-size: 13px;
-      padding: 4px 8px;
-      border-radius: 4px;
-      transition: all 0.2s;
-    }
-    .thread-actions button:hover {
-      background: rgba(178, 102, 255, 0.1);
-      color: var(--accent);
+      transform: rotate(90deg);
     }
 
-    /* COMMENTS */
-    .comments-section {
-      margin-top: 16px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
-    }
-    .comment {
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .comment:last-child {
-      border-bottom: none;
-    }
-    .comment-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-    }
-    .comment-author {
-      font-size: 12px;
-      color: var(--accent);
-      font-weight: 500;
-    }
-    .comment-time {
-      font-size: 11px;
-      color: var(--muted);
-    }
-    .comment-content {
-      font-size: 13px;
-      line-height: 1.5;
-      color: var(--text);
-    }
-
-    /* COMMENT FORM */
-    .comment-form {
-      margin-top: 12px;
-      display: none;
-    }
-    .comment-form.active {
-      display: block;
-    }
-    .comment-form textarea {
-      width: 100%;
-      background: #0a0a0a;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
+    /* === MOOD TAGLINE — tanpa label, tanpa penutup === */
+    .mood-tagline {
+      text-align: center;
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.25; /* lebih kompak */
+      margin: 24px 0 28px;
       color: var(--text);
       font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      resize: vertical;
-      min-height: 60px;
-      margin-bottom: 8px;
-    }
-    .comment-form textarea:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    .comment-form-actions {
-      display: flex;
-      gap: 8px;
-    }
-    .comment-form-actions button {
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-    }
-    .comment-submit {
-      background: var(--accent);
-      color: #000;
-    }
-    .comment-cancel {
-      background: var(--surface);
-      border: 1px solid var(--border) !important;
-      color: var(--muted);
+      letter-spacing: -0.01em;
     }
 
-    .empty-state {
-      text-align: center;
+    /* === CARD === */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: 
+        background-color 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+        border-color 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+        transform 0.18s ease-out;
+      transform: translateZ(0);
+    }
+
+    .card:hover {
+      border-color: var(--accent);
+      background: rgba(178, 102, 255, 0.04);
+      transform: translateY(-1px);
+    }
+
+    .card h3 {
+      font-size: 17px;
+      margin-bottom: 10px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card p {
+      font-size: 14px;
       color: var(--muted);
-      padding: 40px 20px;
-      font-size: 13px;
+      line-height: 1.5;
+      font-weight: 300;
+    }
+
+    .card-icon {
+      font-size: 18px;
+    }
+
+    /* === ZONE FOOTER === */
+    .zone-footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 24px;
+      padding-bottom: 20px;
+      letter-spacing: 0.5px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* === PULSE === */
+    .pulse-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(178, 102, 255, 0.15), transparent 70%);
+      pointer-events: none;
+      opacity: 0;
+      z-index: 1000;
+      animation: pulse 1.4s cubic-bezier(0.2, 0.8, 0.4, 1);
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.6; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    /* === ACCESSIBILITY === */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
     }
   </style>
 </head>
@@ -268,225 +209,89 @@
   <div class="wrapper">
     <header>
       <div class="logo">NOPE</div>
-      <button class="back-btn" onclick="window.location.href='saynope.html'">← Kembali</button>
+      <div class="top-right">
+        <div class="nav-mini">
+          <span id="nav-jejak">Jejak</span>
+          <span id="nav-frekuensi">Frekuensi</span>
+          <span id="nav-saynope" class="active">SayNOPE</span>
+          <span id="nav-glitch">GLITCH</span>
+        </div>
+        <button class="settings-btn" id="settings-btn">⋯</button>
+      </div>
     </header>
 
-    <!-- POST FORM -->
-    <div class="post-form">
-      <textarea id="post-content" placeholder="Nyambat apa hari ini? (Contoh: Udah 3 hari ga tidur #skripsiblocked)"></textarea>
-      <input id="post-tag" type="text" placeholder="1 tag (contoh: #skripsi atau #toxicboss)" maxlength="30">
-      <button class="post-btn" id="post-btn">Kirim Nyambat!</button>
+    <!-- ✨ MOOD DRIVER — tanpa label, tanpa penutup -->
+    <div class="mood-tagline">
+      Kamu ga aneh.<br>
+      Sistemnya yang broken!
     </div>
 
-    <!-- THREADS -->
-    <div id="threads-container"></div>
+    <div class="card" id="nyambat">
+      <h3><span class="card-icon">💬</span> Nyambat!</h3>
+      <p>Buat diskusi terbuka dengan 1 tag (#skripsi, #toxicboss). Semua bisa komentar & kirim 🔥, 🫂, ✊.</p>
+    </div>
+
+    <div class="card" id="petisi">
+      <h3><span class="card-icon">✊</span> Petisi</h3>
+      <p>Mulai atau dukung gerakan nyata. Tanda tangan digital, sebar ke yang sefrekuensi.</p>
+    </div>
+
+    <div class="card" id="aksi">
+      <h3><span class="card-icon">⚡</span> Aksi</h3>
+      <p>Donasi langsung ke WWF — tanpa perantara. Hutan Sumatera butuh kita, sekarang.</p>
+    </div>
+
+    <div class="card" id="zine">
+      <h3><span class="card-icon">📓</span> Zine & Arsip</h3>
+      <p>Kontribusi tulisan, artefak, atau ide untuk arsip budaya generasi.</p>
+    </div>
+
+    <!-- ✨ ZONE IDENTITY DI BAWAH -->
+    <div class="zone-footer">Nyambat • Aksi • Solusi</div>
   </div>
 
   <script>
-    const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
-
-    const currentUser = localStorage.getItem('nope_username') || '@anon';
-
-    async function supabaseFetch(table, method = 'GET', body = null, filter = '') {
-      const headers = {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      };
-      let url = `${SUPABASE_URL}/rest/v1/${table}${filter}`;
-      let options = { method, headers };
-      if (body) options.body = JSON.stringify(body);
-      const res = await fetch(url, options);
-      if (!res.ok) throw new Error(await res.text());
-      return await res.json();
+    // === AUTH ===
+    const currentUser = localStorage.getItem('nope_username');
+    if (!currentUser) {
+      window.location.href = 'index.html';
     }
 
-    // POST NYAMBAT
-    document.getElementById('post-btn').addEventListener('click', async () => {
-      const content = document.getElementById('post-content').value.trim();
-      const tag = document.getElementById('post-tag').value.trim();
-      const btn = document.getElementById('post-btn');
+    // === NAVIGASI ===
+    function navigateTo(page) {
+      window.location.href = page;
+    }
 
-      if (!content) {
-        alert('Nyambat dulu dong!');
-        return;
+    function logout() {
+      if (confirm('Keluar dari akun?')) {
+        localStorage.removeItem('nope_username');
+        window.location.href = 'index.html';
       }
+    }
 
-      if (!tag || !tag.startsWith('#')) {
-        alert('Tag harus dimulai dengan # (contoh: #skripsi)');
-        return;
-      }
+    // === PULSE ===
+    function triggerPulse() {
+      const pulse = document.createElement('div');
+      pulse.className = 'pulse-animation';
+      document.body.appendChild(pulse);
+      setTimeout(() => pulse.remove(), 1400);
+    }
 
-      btn.disabled = true;
-      btn.textContent = 'Posting...';
+    // === INIT ===
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('nav-jejak').onclick = () => navigateTo('jejak.html');
+      document.getElementById('nav-frekuensi').onclick = () => navigateTo('frekuensi.html');
+      document.getElementById('nav-saynope').onclick = () => navigateTo('saynope.html');
+      document.getElementById('nav-glitch').onclick = () => navigateTo('glitch.html');
+      document.getElementById('settings-btn').onclick = logout;
 
-      try {
-        // Extract hashtag from content if exists
-        const contentWithTag = content.includes('#') ? content : `${content} ${tag}`;
-        
-        await supabaseFetch('rants', 'POST', {
-          username: currentUser,
-          content: contentWithTag,
-          zone: 'nyambat'
-        });
+      document.getElementById('nyambat').onclick = () => navigateTo('saynope-nyambat.html');
+      document.getElementById('petisi').onclick = () => navigateTo('saynope-petisi.html');
+      document.getElementById('aksi').onclick = () => navigateTo('saynope-aksi.html');
+      document.getElementById('zine').onclick = () => navigateTo('saynope-zine.html');
 
-        document.getElementById('post-content').value = '';
-        document.getElementById('post-tag').value = '';
-        loadThreads();
-      } catch (e) {
-        alert('Gagal post: ' + e.message);
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Kirim Nyambat!';
-      }
+      triggerPulse();
     });
-
-    // LOAD THREADS
-    async function loadThreads() {
-      try {
-        const threads = await supabaseFetch('rants', 'GET', null,
-          `?zone=eq.nyambat&order=created_at.desc&limit=20`
-        );
-
-        const container = document.getElementById('threads-container');
-        container.innerHTML = '';
-
-        if (threads.length === 0) {
-          container.innerHTML = '<div class="empty-state">Belum ada nyambat. Jadilah yang pertama!</div>';
-          return;
-        }
-
-        for (const thread of threads) {
-          const comments = await supabaseFetch('comments', 'GET', null,
-            `?rant_id=eq.${thread.id}&order=created_at.asc`
-          );
-
-          const threadEl = createThreadElement(thread, comments);
-          container.appendChild(threadEl);
-        }
-      } catch (e) {
-        console.error('Load threads error:', e);
-      }
-    }
-
-    // CREATE THREAD ELEMENT
-    function createThreadElement(thread, comments) {
-      const div = document.createElement('div');
-      div.className = 'thread';
-
-      // Extract hashtag
-      const hashtagMatch = thread.content.match(/#\w+/);
-      const hashtag = hashtagMatch ? hashtagMatch[0] : '#general';
-      const contentWithoutTag = thread.content.replace(/#\w+/g, '').trim();
-
-      div.innerHTML = `
-        <div class="thread-header">
-          <span class="thread-author">@${thread.username}</span>
-          <span class="thread-tag">${hashtag}</span>
-        </div>
-        <div class="thread-content">${contentWithoutTag}</div>
-        <div class="thread-actions">
-          <button onclick="toggleCommentForm('${thread.id}')">💬 ${comments.length} Komentar</button>
-          <button onclick="reactToThread('${thread.id}', '🔥')">🔥</button>
-          <button onclick="reactToThread('${thread.id}', '🫂')">🫂</button>
-        </div>
-        <div class="comments-section" id="comments-${thread.id}">
-          ${renderComments(comments)}
-        </div>
-        <div class="comment-form" id="comment-form-${thread.id}">
-          <textarea id="comment-text-${thread.id}" placeholder="Tulis komentar..."></textarea>
-          <div class="comment-form-actions">
-            <button class="comment-submit" onclick="postComment('${thread.id}')">Kirim</button>
-            <button class="comment-cancel" onclick="toggleCommentForm('${thread.id}')">Batal</button>
-          </div>
-        </div>
-      `;
-
-      return div;
-    }
-
-    // RENDER COMMENTS
-    function renderComments(comments) {
-      if (comments.length === 0) {
-        return '<div style="color: var(--muted); font-size: 12px; padding: 8px 0;">Belum ada komentar</div>';
-      }
-
-      return comments.map(c => `
-        <div class="comment">
-          <div class="comment-header">
-            <span class="comment-author">@${c.username}</span>
-            <span class="comment-time">${formatTime(c.created_at)}</span>
-          </div>
-          <div class="comment-content">${c.content}</div>
-        </div>
-      `).join('');
-    }
-
-    // TOGGLE COMMENT FORM
-    function toggleCommentForm(threadId) {
-      const form = document.getElementById(`comment-form-${threadId}`);
-      form.classList.toggle('active');
-    }
-
-    // POST COMMENT
-    async function postComment(threadId) {
-      const textarea = document.getElementById(`comment-text-${threadId}`);
-      const content = textarea.value.trim();
-
-      if (!content) {
-        alert('Komentar tidak boleh kosong');
-        return;
-      }
-
-      try {
-        await supabaseFetch('comments', 'POST', {
-          rant_id: threadId,
-          username: currentUser,
-          content: content
-        });
-
-        textarea.value = '';
-        toggleCommentForm(threadId);
-        loadThreads(); // Reload to show new comment
-      } catch (e) {
-        alert('Gagal post komentar: ' + e.message);
-      }
-    }
-
-    // REACT TO THREAD (placeholder)
-    async function reactToThread(threadId, emoji) {
-      try {
-        await supabaseFetch('reactions', 'POST', {
-          rant_id: threadId,
-          user_id: currentUser,
-          emoji: emoji
-        });
-        console.log(`Reacted with ${emoji}`);
-      } catch (e) {
-        console.log('Reaction error:', e);
-      }
-    }
-
-    // FORMAT TIME
-    function formatTime(timestamp) {
-      if (!timestamp) return 'baru saja';
-      const date = new Date(timestamp);
-      const now = new Date();
-      const diff = Math.floor((now - date) / 1000);
-
-      if (diff < 60) return 'baru saja';
-      if (diff < 3600) return `${Math.floor(diff / 60)}m`;
-      if (diff < 86400) return `${Math.floor(diff / 3600)}j`;
-      return `${Math.floor(diff / 86400)}h`;
-    }
-
-    // INIT
-    loadThreads();
-    
-    // Auto-refresh every 10 seconds
-    setInterval(loadThreads, 10000);
   </script>
 </body>
 </html>
