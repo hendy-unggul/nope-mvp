@@ -134,11 +134,10 @@
       transform: none;
     }
 
-    /* === INFO BOX: transparan 100%, hanya ikon + teks === */
     .info {
       margin-top: 20px;
       padding: 12px;
-      background: transparent; /* ✅ transparan 100% */
+      background: transparent;
       border: none;
       border-radius: 10px;
       font-size: 13px;
@@ -155,12 +154,10 @@
       color: var(--accent);
     }
 
-    /* === HIDE DEVICE INFO === */
     .device-info {
       display: none !important;
     }
 
-    /* === MICROMOVEMENT === */
     .pulse-animation {
       position: fixed;
       top: 0;
@@ -205,13 +202,11 @@
         
         <button type="submit" class="btn" id="login-btn">GASKEUN! 🚀</button>
         
-        <!-- ✅ Info box revisi: transparan, hanya gembok + teks -->
         <div class="info">
           <div class="lock-icon">🔒</div>
           <div>STAY SAFE STAY ANONIM</div>
         </div>
 
-        <!-- ✅ Tetap ada di HTML, tapi hidden -->
         <div class="device-info" id="device-info">
           Device ID: <span id="device-id-display">Generating...</span>
         </div>
@@ -219,11 +214,13 @@
     </div>
   </div>
 
-  <!-- 🔁 JAVASCRIPT TETAP 100% UTUH -->
   <script>
     const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
+    // ========================================
+    // SUPABASE FUNCTION - Better error handling
+    // ========================================
     async function supabaseFetch(table, method = 'GET', body = null, filter = '') {
       const headers = {
         'apikey': SUPABASE_KEY,
@@ -231,37 +228,64 @@
         'Content-Type': 'application/json',
         'Prefer': 'return=representation'
       };
+      
       let url = `${SUPABASE_URL}/rest/v1/${table}${filter}`;
       let options = { method, headers };
-      if (body) options.body = JSON.stringify(body);
-      const res = await fetch(url, options);
-      if (!res.ok) throw new Error(await res.text());
-      return await res.json();
+      
+      if (body) {
+        options.body = JSON.stringify(body);
+        console.log(`📤 ${method} ${table}:`, body);
+      }
+      
+      try {
+        const res = await fetch(url, options);
+        const text = await res.text();
+        
+        if (!res.ok) {
+          console.error('❌ Supabase error:', text);
+          throw new Error(text || `HTTP ${res.status}`);
+        }
+        
+        const data = text ? JSON.parse(text) : [];
+        console.log(`📥 ${method} ${table} response:`, data);
+        return data;
+      } catch (err) {
+        console.error('❌ Fetch error:', err);
+        throw err;
+      }
     }
 
+    // ========================================
+    // DEVICE FINGERPRINT - Stable version
+    // ========================================
     async function generateDeviceFingerprint() {
+      // Only use stable components that don't change
       const components = [
         navigator.userAgent,
         navigator.language,
-        navigator.hardwareConcurrency || 0,
-        navigator.deviceMemory || 0,
         screen.width,
         screen.height,
         screen.colorDepth,
         new Date().getTimezoneOffset(),
-        !!window.sessionStorage,
-        !!window.localStorage,
         navigator.platform
       ];
+      
       const fingerprint = components.join('|');
+      console.log('🔍 Fingerprint components:', fingerprint);
+      
       const encoder = new TextEncoder();
       const data = encoder.encode(fingerprint);
       const hashBuffer = await crypto.subtle.digest('SHA-256', data);
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      console.log('🔐 Generated fingerprint:', hashHex);
       return hashHex;
     }
 
+    // ========================================
+    // UI HELPER FUNCTIONS
+    // ========================================
     function showError(message) {
       const el = document.getElementById('error-msg');
       el.textContent = message;
@@ -280,6 +304,9 @@
       document.getElementById('error-msg').classList.remove('show');
     }
 
+    // ========================================
+    // USERNAME VALIDATION
+    // ========================================
     function normalizeUsername(input) {
       return input.trim().toLowerCase().replace(/\s+/g, ' ');
     }
@@ -298,70 +325,148 @@
       return null;
     }
 
+    // ========================================
+    // DEVICE ID MANAGEMENT - With caching
+    // ========================================
     let currentDeviceId = '';
-    (async () => {
-      currentDeviceId = await generateDeviceFingerprint();
-      document.getElementById('device-id-display').textContent = currentDeviceId.substring(0, 16) + '...';
-      console.log('🔐 Device Fingerprint:', currentDeviceId);
-    })();
+    
+    async function initDeviceId() {
+      // Check if we have cached device ID
+      const cachedId = localStorage.getItem('nope_device_id');
+      
+      if (cachedId) {
+        console.log('✅ Using cached device ID:', cachedId);
+        currentDeviceId = cachedId;
+      } else {
+        currentDeviceId = await generateDeviceFingerprint();
+        localStorage.setItem('nope_device_id', currentDeviceId);
+        console.log('✅ Generated new device ID:', currentDeviceId);
+      }
+      
+      // Display for debugging
+      const displayEl = document.getElementById('device-id-display');
+      if (displayEl) {
+        displayEl.textContent = currentDeviceId.substring(0, 16) + '...';
+      }
+      
+      return currentDeviceId;
+    }
 
+    // ========================================
+    // PRE-FILL USERNAME IF EXISTS
+    // ========================================
     const savedUsername = localStorage.getItem('nope_username');
     if (savedUsername) {
       document.getElementById('username').value = savedUsername;
     }
 
+    // ========================================
+    // LOGIN FORM SUBMIT
+    // ========================================
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
+      
       const input = document.getElementById('username').value;
       const btn = document.getElementById('login-btn');
+      
       hideError();
+      
+      // Validate input
       if (!input.trim()) {
         showError('Username tidak boleh kosong');
         return;
       }
+      
       const username = normalizeUsername(input);
       const validationError = validateUsername(username);
+      
       if (validationError) {
         showError(validationError);
         return;
       }
+      
       btn.disabled = true;
       btn.textContent = 'Verifying...';
+      
       try {
-        const deviceId = currentDeviceId || await generateDeviceFingerprint();
+        // Ensure device ID is ready
+        if (!currentDeviceId) {
+          await initDeviceId();
+        }
+        
+        console.log('🔑 Logging in with:', { username, deviceId: currentDeviceId });
+        
+        // Check if user exists
         const users = await supabaseFetch('users', 'GET', null, 
           `?username=eq.${encodeURIComponent(username)}&select=username,device_id`
         );
+        
+        console.log('👤 User query result:', users);
+        
         if (users.length === 0) {
-          await supabaseFetch('users', 'POST', {
+          // Create new user
+          console.log('➕ Creating new user...');
+          
+          const newUser = await supabaseFetch('users', 'POST', {
             username: username,
-            device_id: deviceId
+            device_id: currentDeviceId
           });
+          
+          console.log('✅ New user created:', newUser);
           showSuccess('✅ Akun baru berhasil dibuat!');
+          
         } else {
           const user = users[0];
-          if (user.device_id && user.device_id !== deviceId) {
+          console.log('👤 Existing user found:', user);
+          
+          // Check device ID match
+          if (user.device_id && user.device_id !== currentDeviceId) {
+            console.log('❌ Device mismatch:', {
+              stored: user.device_id,
+              current: currentDeviceId
+            });
             showError('⚠️ Username ini sudah terdaftar di device lain.');
+            btn.disabled = false;
+            btn.textContent = 'GASKEUN! 🚀';
             return;
           }
+          
+          // Update device ID if not set
           if (!user.device_id) {
-            await supabaseFetch(`users?username=eq.${encodeURIComponent(username)}`, 'PATCH', {
-              device_id: deviceId
-            });
+            console.log('🔄 Updating device_id for existing user...');
+            
+            await supabaseFetch('users', 'PATCH', 
+              { device_id: currentDeviceId },
+              `?username=eq.${encodeURIComponent(username)}`
+            );
+            
+            console.log('✅ Device ID updated');
           }
-          showSuccess('✅ Device verified!');
+          
+          showSuccess('✅ Login berhasil!');
         }
+        
+        // Save to localStorage
         localStorage.setItem('nope_username', username);
-        localStorage.setItem('nope_device_id', deviceId);
+        localStorage.setItem('nope_device_id', currentDeviceId);
+        
+        console.log('💾 Saved to localStorage');
+        
+        // Redirect
         setTimeout(() => {
+          console.log('🚀 Redirecting to jejak.html...');
           window.location.href = 'jejak.html';
         }, 800);
+        
       } catch (e) {
         console.error('❌ Login error:', e);
+        
         if (e.message.includes('duplicate key')) {
           showError('Username sudah dipakai di device lain');
+        } else if (e.message.includes('network')) {
+          showError('Gagal koneksi. Cek internet kamu.');
         } else {
-          showError('Gagal login. Cek koneksi internet.');
+          showError('Gagal login. Coba lagi.');
         }
       } finally {
         btn.disabled = false;
@@ -369,29 +474,53 @@
       }
     });
 
+    // ========================================
+    // AUTO-LOGIN CHECK
+    // ========================================
     (async () => {
-      if (savedUsername) {
-        const savedDeviceId = localStorage.getItem('nope_device_id');
-        const currentDeviceId = await generateDeviceFingerprint();
-        if (savedDeviceId === currentDeviceId) {
-          try {
-            const users = await supabaseFetch('users', 'GET', null, 
-              `?username=eq.${encodeURIComponent(savedUsername)}&select=username,device_id`
-            );
-            if (users.length > 0 && users[0].device_id === currentDeviceId) {
-              window.location.href = 'jejak.html';
-            } else {
-              localStorage.clear();
-            }
-          } catch (e) {
-            console.error('Auto-login check failed:', e);
+      if (!savedUsername) {
+        console.log('ℹ️ No saved username, showing login form');
+        return;
+      }
+      
+      console.log('🔍 Checking auto-login for:', savedUsername);
+      
+      try {
+        // Ensure device ID is initialized
+        await initDeviceId();
+        
+        // Verify with server
+        const users = await supabaseFetch('users', 'GET', null, 
+          `?username=eq.${encodeURIComponent(savedUsername)}&select=username,device_id`
+        );
+        
+        if (users.length > 0) {
+          const user = users[0];
+          console.log('👤 User found:', user);
+          
+          if (user.device_id === currentDeviceId) {
+            console.log('✅ Device match! Auto-logging in...');
+            window.location.href = 'jejak.html';
+            return;
+          } else {
+            console.log('❌ Device mismatch, clearing localStorage');
           }
         } else {
-          localStorage.clear();
+          console.log('❌ User not found, clearing localStorage');
         }
+        
+        // Clear if verification failed
+        localStorage.clear();
+        
+      } catch (e) {
+        console.error('❌ Auto-login check failed:', e);
+        // Don't clear localStorage on network error
       }
     })();
 
+    // ========================================
+    // INPUT SANITIZATION
+    // ========================================
     document.getElementById('username').addEventListener('input', (e) => {
       let value = e.target.value.toLowerCase();
       value = value.replace(/[^a-z\s]/g, '');
@@ -399,12 +528,20 @@
       e.target.value = value;
     });
 
+    // ========================================
+    // PULSE ANIMATION ON LOAD
+    // ========================================
     (function() {
       const pulse = document.createElement('div');
       pulse.className = 'pulse-animation';
       document.body.appendChild(pulse);
-      setTimeout(() => pulse.remove(), 1000);
+      setTimeout(() => pulse.remove(), 1400);
     })();
+
+    // ========================================
+    // INITIALIZE DEVICE ID ON PAGE LOAD
+    // ========================================
+    initDeviceId();
   </script>
 </body>
 </html>
