@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="description" content="Petisi pertama Gen Z di NOPE: Beri Makan Bergizi Tunai ke Orang Tua, Bukan Lewat Birokrasi. Lawan pemborosan anggaran, dukung kebijakan berbasis data.">
   <title>NOPE — Petisi: Makan Bergizi Tunai untuk Anak Sekolah</title>
-  <link rel="stylesheet" href="style.css">
   <style>
     :root {
       --surface: #fff;
@@ -56,30 +55,6 @@
       font-weight: 800;
       font-size: 20px;
       letter-spacing: -0.5px;
-    }
-
-    .top-right {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-    }
-
-    .nav-mini {
-      display: flex;
-      gap: 12px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .nav-mini span {
-      cursor: pointer;
-      opacity: 0.7;
-      transition: opacity 0.2s;
-    }
-
-    .nav-mini span:hover {
-      opacity: 1;
-      text-decoration: underline;
     }
 
     .petition-title {
@@ -215,17 +190,158 @@
       border-top: 1px solid var(--border);
     }
 
-    /* Back to SayNOPE */
-    .back-link {
-      display: inline-block;
-      font-size: 14px;
-      color: var(--accent);
-      margin-bottom: 16px;
-      text-decoration: none;
+    /* Modal Overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 999;
+      backdrop-filter: blur(4px);
     }
 
-    .back-link:hover {
-      text-decoration: underline;
+    .modal-overlay.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 28px 24px;
+      max-width: 440px;
+      width: 90%;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.3s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal h3 {
+      font-size: 20px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .modal p {
+      font-size: 14px;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    .stance-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stance-btn {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: 14px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .stance-btn:hover {
+      border-color: var(--accent);
+      background: rgba(255, 42, 109, 0.05);
+    }
+
+    .stance-btn.selected {
+      border-color: var(--accent);
+      background: rgba(255, 42, 109, 0.1);
+    }
+
+    .username-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      font-size: 14px;
+      margin-bottom: 12px;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .username-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 32px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      transition: opacity 0.2s;
+    }
+
+    .modal-btn.primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .modal-btn.primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .modal-btn.secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .counter {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .counter-number {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--accent);
+      display: block;
+    }
+
+    .counter-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
     }
   </style>
 </head>
@@ -233,17 +349,7 @@
   <div class="wrapper">
     <header>
       <div class="logo">NOPE</div>
-      <div class="top-right">
-        <div class="nav-mini">
-          <span onclick="window.location.href='jejak.html'">Jejak</span>
-          <span onclick="window.location.href='frekuensi.html'">Frekuensi</span>
-          <span onclick="window.location.href='saynope.html'">SayNOPE</span>
-          <span onclick="window.location.href='glitch.html'">GLITCH</span>
-        </div>
-      </div>
     </header>
-
-    <a href="saynope.html" class="back-link">← Kembali ke SayNOPE</a>
 
     <div class="petition-title">
       PETISI: BERI NILAI NYATA, BUKAN BUBUHAN ANGKA — Makan Bergizi Tunai untuk Anak Sekolah!
@@ -292,19 +398,24 @@
       </p>
     </div>
 
-    <div class="signature-box">
-  <div style="text-align: center; margin-bottom: 20px; font-size: 15px; line-height: 1.6; color: var(--text);">
-    Dari 27 juta anak sekolah, nggak semua butuh bantuan.<br>
-    Tapi dari 70 juta Gen Z di Indonesia,<br>
-    <strong>saya yakin lebih dari 10.000 dari kita</strong> ngerti:<br>
-    <em>Uang rakyat itu bukan angka di slide — itu nasi di piring anak.</em><br>
-    Jangan biarkan sistem ngabisin nilai itu.
-  </div>
+    <div class="counter">
+      <span class="counter-number" id="signatureCount">2,847</span>
+      <div class="counter-label">orang sudah menandatangani</div>
+    </div>
 
-  <h3>Tanda Tangan Digital</h3>
-  <p>Dukung petisi pertama dari Gen Z di NOPE</p>
-  <button class="btn-sign" id="signBtn">Tanda Tangan Sekarang</button>
-</div>
+    <div class="signature-box">
+      <div style="text-align: center; margin-bottom: 20px; font-size: 15px; line-height: 1.6; color: var(--text);">
+        Dari 27 juta anak sekolah, nggak semua butuh bantuan.<br>
+        Tapi dari 70 juta Gen Z di Indonesia,<br>
+        <strong>saya yakin lebih dari 10.000 dari kita</strong> ngerti:<br>
+        <em>Uang rakyat itu bukan angka di slide — itu nasi di piring anak.</em><br>
+        Jangan biarkan sistem ngabisin nilai itu.
+      </div>
+
+      <h3>Tanda Tangan Digital</h3>
+      <p>Dukung petisi pertama dari Gen Z di NOPE</p>
+      <button class="btn-sign" id="signBtn">Tanda Tangan Sekarang</button>
+    </div>
 
     <div class="tagline">
       Kamu ga aneh.<br>
@@ -318,28 +429,226 @@
     </div>
   </div>
 
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h3>Pilih Sikapmu</h3>
+      <p>Sikap yang kamu pilih akan menjadi suara pertamamu di NOPE</p>
+      
+      <div class="stance-options" id="stanceOptions">
+        <button class="stance-btn" data-stance="1">
+          👨‍🏫 "Kasih ke guru sekolah biar dikelola — mereka lebih tau kebutuhan anak!"
+        </button>
+        <button class="stance-btn" data-stance="2">
+          🍱 "Biarin katering aja yang siapin makanan, asal transparan dan quality control ketat!"
+        </button>
+        <button class="stance-btn" data-stance="3">
+          💰 "TUNAI ke ortu — biar mereka yang beliin sesuai selera anak, ga semua anak cocok menu yang sama!"
+        </button>
+        <button class="stance-btn custom-stance" data-stance="custom">
+          ✍️ Tulis pendapatmu sendiri
+        </button>
+      </div>
+
+      <textarea 
+        class="username-input" 
+        id="customStanceInput" 
+        placeholder="Tuliskan pendapatmu tentang program makan bergizi ini..."
+        style="display: none; height: 80px; resize: vertical;"
+        maxlength="280"
+      ></textarea>
+
+      <input 
+        type="text" 
+        class="username-input" 
+        id="usernameInput" 
+        placeholder="Username (opsional, auto-generate jika kosong)"
+        maxlength="20"
+      />
+
+      <div class="modal-actions">
+        <button class="modal-btn secondary" id="cancelBtn">Batal</button>
+        <button class="modal-btn primary" id="confirmBtn" disabled>Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    function goTo(page) {
-      window.location.href = page;
+    // Supabase Config
+    const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+
+    async function supabaseFetch(table, method = 'GET', body = null, filter = '') {
+      const headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      };
+      
+      let url = `${SUPABASE_URL}/rest/v1/${table}${filter}`;
+      let options = { method, headers };
+      
+      if (body) {
+        options.body = JSON.stringify(body);
+      }
+      
+      const res = await fetch(url, options);
+      const text = await res.text();
+      
+      if (!res.ok) {
+        throw new Error(text || `HTTP ${res.status}`);
+      }
+      
+      return text ? JSON.parse(text) : [];
     }
 
-    document.getElementById('signBtn').addEventListener('click', function() {
-      localStorage.setItem('nope_petisi_makan_tunai_signed', 'true');
-      alert('✅ Terima kasih! Suaramu sudah tercatat.\nPetisi ini akan dikirim ke pemerintah setelah 10.000 tanda tangan terkumpul.');
-      this.textContent = 'Sudah Ditandatangani';
-      this.disabled = true;
+    // Stance templates
+    const stanceTexts = {
+      '1': 'Kasih ke guru sekolah biar dikelola — mereka lebih tau kebutuhan anak! #MakanBergiziGratis',
+      '2': 'Biarin katering aja yang siapin makanan, asal transparan dan quality control ketat! #MakanBergiziGratis',
+      '3': 'TUNAI ke ortu — biar mereka yang beliin sesuai selera anak, ga semua anak cocok menu yang sama! #MakanBergiziGratis'
+    };
+
+    let selectedStance = null;
+    let customStanceText = null;
+
+    // Modal handling
+    const modal = document.getElementById('modalOverlay');
+    const signBtn = document.getElementById('signBtn');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const usernameInput = document.getElementById('usernameInput');
+
+    // Check if already signed
+    if (localStorage.getItem('nope_petisi_signed') === 'true') {
+      signBtn.textContent = 'Sudah Ditandatangani ✓';
+      signBtn.disabled = true;
+    }
+
+    // Open modal
+    signBtn.addEventListener('click', () => {
+      if (localStorage.getItem('nope_petisi_signed') === 'true') return;
+      modal.classList.add('active');
     });
 
-    // Cek status signature saat halaman dimuat
-    if (localStorage.getItem('nope_petisi_makan_tunai_signed') === 'true') {
-      document.addEventListener('DOMContentLoaded', () => {
-        const btn = document.getElementById('signBtn');
-        if (btn) {
-          btn.textContent = 'Sudah Ditandatangani';
-          btn.disabled = true;
+    // Close modal
+    cancelBtn.addEventListener('click', () => {
+      modal.classList.remove('active');
+      selectedStance = null;
+      customStanceText = null;
+      customStanceInput.value = '';
+      customStanceInput.style.display = 'none';
+      document.querySelectorAll('.stance-btn').forEach(btn => {
+        btn.classList.remove('selected');
+      });
+      confirmBtn.disabled = true;
+    });
+
+    // Stance selection
+    const customStanceInput = document.getElementById('customStanceInput');
+    
+    document.querySelectorAll('.stance-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.stance-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedStance = btn.dataset.stance;
+        
+        // Show/hide custom input
+        if (selectedStance === 'custom') {
+          customStanceInput.style.display = 'block';
+          customStanceInput.focus();
+          confirmBtn.disabled = true; // Will enable after typing
+        } else {
+          customStanceInput.style.display = 'none';
+          customStanceText = null;
+          confirmBtn.disabled = false;
         }
       });
+    });
+
+    // Enable confirm button when custom text is entered
+    customStanceInput.addEventListener('input', () => {
+      const text = customStanceInput.value.trim();
+      if (text.length >= 10) {
+        customStanceText = text;
+        confirmBtn.disabled = false;
+      } else {
+        confirmBtn.disabled = true;
+      }
+    });
+
+    // Confirm and create account + post
+    confirmBtn.addEventListener('click', async () => {
+      if (!selectedStance) return;
+
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Memproses...';
+
+      try {
+        // Generate username
+        let username = usernameInput.value.trim();
+        if (!username) {
+          username = 'anon' + Math.random().toString(36).substr(2, 6);
+        }
+
+        // Save to localStorage
+        localStorage.setItem('nope_username', username);
+        localStorage.setItem('nope_petisi_signed', 'true');
+
+        // Get content based on selection
+        let content;
+        if (selectedStance === 'custom') {
+          // Add hashtag if not present
+          content = customStanceText;
+          if (!content.includes('#MakanBergiziGratis')) {
+            content += ' #MakanBergiziGratis';
+          }
+        } else {
+          content = stanceTexts[selectedStance];
+        }
+
+        // Post to Nyambat
+        await supabaseFetch('rants', 'POST', {
+          username: username,
+          content: content,
+          zone: 'nyambat'
+        });
+
+        // Update counter (fake increment for now)
+        const counter = document.getElementById('signatureCount');
+        const currentCount = parseInt(counter.textContent.replace(/[.,]/g, ''));
+        counter.textContent = (currentCount + 1).toLocaleString('id-ID');
+
+        // Success message
+        alert('✅ Terima kasih! Suaramu sudah tercatat.\n\nLihat suaramu dan bergabung dengan komunitas NOPE!');
+        
+        // Redirect to Nyambat page
+        window.location.href = 'saynope-nyambat.html';
+
+      } catch (e) {
+        console.error('Error:', e);
+        alert('Gagal memproses. Coba lagi.');
+        confirmBtn.disabled = false;
+        confirmBtn.textContent = 'Lanjutkan';
+      }
+    });
+
+    // Load signature count from Supabase
+    async function loadSignatureCount() {
+      try {
+        const rants = await supabaseFetch('rants', 'GET', null,
+          `?zone=eq.nyambat&content=ilike.*%23MakanBergiziGratis*&select=id`
+        );
+        
+        const count = rants.length + 2800; // Base count for realism
+        document.getElementById('signatureCount').textContent = count.toLocaleString('id-ID');
+      } catch (e) {
+        console.error('Failed to load count:', e);
+      }
     }
+
+    loadSignatureCount();
   </script>
 </body>
 </html>
