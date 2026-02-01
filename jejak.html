@@ -54,6 +54,8 @@
       color: var(--logo-color);
       margin-left: 16px;
       transition: transform 0.3s ease, opacity 0.3s ease;
+      text-decoration: none;
+      cursor: pointer;
     }
     header:hover .logo {
       transform: scale(1.02);
@@ -79,6 +81,8 @@
       padding: 2px 4px;
       border-radius: 4px;
       transition: background-color 0.2s ease;
+      user-select: none;
+      -webkit-user-select: none;
     }
     .nav-mini span:hover:not(.active) {
       background-color: rgba(178, 102, 255, 0.06);
@@ -308,7 +312,6 @@
       font-size: 10px;
       padding: 3px 5px;
     }
-
     .zone-footer {
       text-align: center;
       font-size: 12px;
@@ -318,7 +321,6 @@
       letter-spacing: 0.5px;
       font-family: 'JetBrains Mono', monospace;
     }
-
     .pulse-animation {
       position: fixed;
       top: 0;
@@ -335,7 +337,6 @@
       0% { transform: scale(0.9); opacity: 0.6; }
       100% { transform: scale(1.6); opacity: 0; }
     }
-
     @media (prefers-reduced-motion: reduce) {
       * {
         animation-duration: 0.01ms !important;
@@ -348,13 +349,13 @@
 <body>
   <div class="wrapper">
     <header>
-      <div class="logo">NOPE</div>
+      <div class="logo" onclick="window.location.href='index.html'">NOPE</div>
       <div class="top-right">
         <div class="nav-mini">
-          <span id="nav-jejak" class="active">Jurnal</span>
-          <span id="nav-frekuensi">Frekuensi</span>
-          <span id="nav-saynope">SayNOPE</span>
-          <span id="nav-glitch">GLITCH</span>
+          <span class="active"    onclick="window.location.href='jejak.html'">Jurnal</span>
+          <span                   onclick="window.location.href='frekuensi.html'">Frekuensi</span>
+          <span                   onclick="window.location.href='sayNOPE.html'">SayNOPE</span>
+          <span                   onclick="window.location.href='glitch.html'">GLITCH</span>
         </div>
         <button class="settings-btn" id="settings-btn">⋯</button>
       </div>
@@ -389,273 +390,187 @@
   <input type="file" id="file-input" accept="image/*" style="display:none;">
 
   <script>
-    const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+  (function() {
+    'use strict';
 
-    async function supabaseFetch(table, method = 'GET', body = null, filter = '') {
-      const headers = {
+    // ─── CONFIG ───────────────────────────────────────────
+    var SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
+    var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+
+    // ─── SUPABASE HELPER ──────────────────────────────────
+    async function supabaseFetch(table, method, body, filter) {
+      var headers = {
         'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
         'Content-Type': 'application/json',
         'Prefer': 'return=representation'
       };
-
-      let url = `${SUPABASE_URL}/rest/v1/${table}${filter}`;
-      let options = { method, headers };
+      var url = SUPABASE_URL + '/rest/v1/' + table + (filter || '');
+      var options = { method: method || 'GET', headers: headers };
       if (body) options.body = JSON.stringify(body);
 
-      const res = await fetch(url, options);
+      var res = await fetch(url, options);
       if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(`HTTP ${res.status}: ${errorText}`);
+        var errorText = await res.text();
+        throw new Error('HTTP ' + res.status + ': ' + errorText);
       }
-      return await res.json();
+      return res.json();
     }
 
-    const currentUser = localStorage.getItem('nope_username') || '@newglitch';
+    // ─── STATE ────────────────────────────────────────────
+    var currentUser = localStorage.getItem('nope_username') || '@newglitch';
     document.getElementById('username-display').textContent = currentUser.replace(/^@/, '');
 
-    let artefacts = [];
-    let rants = [];
+    var artefacts = [];
+    var rants     = [];
 
-    // === DUMMY DATA UNTUK NEW USER ===
-    const DUMMY_RANTS = [
+    // ─── DUMMY DATA ───────────────────────────────────────
+    var DUMMY_RANTS = [
       {
-        id: 'dummy-0',
-        username: 'homie1',
+        id: 'dummy-0', username: 'homie1',
         content: "gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus. gak minta balasan sih, tapi rasanya kayak jadi tempat sampah emosi doang. capek jadi 'temen baik' yang cuma dipake pas dia perlu aja.",
         created_at: new Date(Date.now() - 86400000 * 2).toISOString()
       },
       {
-        id: 'dummy-1',
-        username: 'homie2',
+        id: 'dummy-1', username: 'homie2',
         content: "deadline mepet, dosen gak jelas, dompet kering. rasanya pengen ijin cuti sehari buat jadi batu aja. gak perlu mikir, gak perlu ngomong, gak perlu diharapkan apa-apa.",
-        created_at: new Date(Date.now() - 86400000 * 1).toISOString()
+        created_at: new Date(Date.now() - 86400000).toISOString()
       },
       {
-        id: 'dummy-2',
-        username: 'homie3',
+        id: 'dummy-2', username: 'homie3',
         content: "capek.",
-        created_at: new Date(Date.now() - 86400000 * 0.5).toISOString()
+        created_at: new Date(Date.now() - 43200000).toISOString()
       }
     ];
 
-    const DUMMY_ARTEFACTS = [
-      {
-        id: 'dummy-0',
-        username: 'homie1',
-        image_url: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80',
-        notation: 'ingat puasa main ps'
-      },
-      {
-        id: 'dummy-1',
-        username: 'homie2',
-        image_url: 'https://images.unsplash.com/photo-1572117644447-93c1e6d6370f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80',
-        notation: 'matcha dulu deh'
-      },
-      {
-        id: 'dummy-2',
-        username: 'homie3',
-        image_url: 'https://images.unsplash.com/photo-1583394838336-acdcb777b42a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80',
-        notation: 'nobar sama mantan'
-      },
-      {
-        id: 'dummy-3',
-        username: 'homie4',
-        image_url: 'https://images.unsplash.com/photo-1593642702821-c800c47beb39?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80',
-        notation: 'makaan'
-      },
-      {
-        id: 'dummy-4',
-        username: 'homie5',
-        image_url: 'https://images.unsplash.com/photo-1558188528-91126b887225?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80',
-        notation: 'capek'
-      },
-      {
-        id: 'dummy-5',
-        username: 'homie6',
-        image_url: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80',
-        notation: 'musik therapy'
-      }
+    var DUMMY_ARTEFACTS = [
+      { id:'dummy-0', image_url:'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80', notation:'ingat puasa main ps' },
+      { id:'dummy-1', image_url:'https://images.unsplash.com/photo-1572117644447-93c1e6d6370f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80', notation:'matcha dulu deh' },
+      { id:'dummy-2', image_url:'https://images.unsplash.com/photo-1583394838336-acdcb777b42a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80', notation:'nobar sama mantan' },
+      { id:'dummy-3', image_url:'https://images.unsplash.com/photo-1593642702821-c800c47beb39?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80', notation:'makaan' },
+      { id:'dummy-4', image_url:'https://images.unsplash.com/photo-1558188528-91126b887225?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80', notation:'capek' },
+      { id:'dummy-5', image_url:'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80', notation:'musik therapy' }
     ];
 
-    const heroImg = document.getElementById('hero-img');
-    const heroNotationDisplay = document.getElementById('hero-notation-display');
-    const postUploadPanel = document.getElementById('post-upload-panel');
+    // ─── DOM REFS ─────────────────────────────────────────
+    var heroImg             = document.getElementById('hero-img');
+    var heroNotationDisplay = document.getElementById('hero-notation-display');
+    var postUploadPanel     = document.getElementById('post-upload-panel');
+    var heroNotationInput   = document.getElementById('hero-notation');
+    var fileInput           = document.getElementById('file-input');
 
+    // ─── UTILS ────────────────────────────────────────────
     function showConfirmation(msg) {
-      const el = document.getElementById('confirmation');
+      var el = document.getElementById('confirmation');
       el.textContent = msg;
-      setTimeout(() => el.textContent = '', 3000);
+      setTimeout(function(){ el.textContent = ''; }, 3000);
     }
 
-    function validateNotation(text) {
-      const words = text.trim().split(/\s+/).filter(w => w.length > 0);
-      return words.length >= 1 && words.length <= 4;
+    function triggerPulse() {
+      var pulse = document.createElement('div');
+      pulse.className = 'pulse-animation';
+      document.body.appendChild(pulse);
+      setTimeout(function(){ if (pulse.parentNode) pulse.parentNode.removeChild(pulse); }, 1500);
     }
 
     function showPostUploadPanel() {
       postUploadPanel.classList.remove('hidden');
-      document.getElementById('hero-notation').value = '';
-      document.getElementById('hero-notation').focus();
+      heroNotationInput.value = '';
+      heroNotationInput.focus();
     }
 
     function hidePostUploadPanel() {
       postUploadPanel.classList.add('hidden');
     }
 
-    async function ensureUserExists() {
-      try {
-        const users = await supabaseFetch('users', 'GET', null);
-        const user = users.find(u => u.username === currentUser);
-        if (!user) {
-          await supabaseFetch('users', 'POST', { username: currentUser });
-        }
-      } catch (e) {
-        console.error('Gagal pastikan user:', e);
-      }
-    }
-
-    async function loadData() {
-      try {
-        await ensureUserExists();
-
-        const artefactsData = await supabaseFetch('artefacts', 'GET', null,
-          `?username=eq.${encodeURIComponent(currentUser)}&order=created_at.desc&limit=6`
-        );
-        artefacts = artefactsData;
-
-        const rantsData = await supabaseFetch('rants', 'GET', null,
-          `?username=eq.${encodeURIComponent(currentUser)}&order=created_at.desc&limit=5`
-        );
-        rants = rantsData;
-
-        renderHero();
-        renderDiary();
-        renderTray();
-
-      } catch (e) {
-        console.error('Error saat load:', e);
-        showConfirmation("Gagal memuat data. Coba refresh.");
-      }
-    }
-
-    // === RENDER HERO - Prioritas user artefak ===
+    // ─── RENDER: HERO ─────────────────────────────────────
     function renderHero() {
-      let currentArtefact = artefacts.length > 0 ? artefacts[0] : DUMMY_ARTEFACTS[0];
-
-      if (currentArtefact) {
-        heroImg.src = currentArtefact.image_url;
-        const notation = currentArtefact.notation || '';
-        heroNotationDisplay.textContent = notation;
-        
-        // Jika ini artefak user dan belum ada notasi, show panel
-        if (artefacts.length > 0 && !notation) {
+      var current = artefacts.length > 0 ? artefacts[0] : DUMMY_ARTEFACTS[0];
+      if (current) {
+        heroImg.src = current.image_url;
+        heroNotationDisplay.textContent = current.notation || '';
+        if (artefacts.length > 0 && !current.notation) {
           showPostUploadPanel();
         } else {
           hidePostUploadPanel();
         }
-      } else {
-        heroImg.src = 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80';
-        heroNotationDisplay.textContent = '';
-        hidePostUploadPanel();
       }
     }
 
-    // === RENDER DIARY - Prioritas user rants ===
+    // ─── RENDER: DIARY ────────────────────────────────────
     function renderDiary() {
-      const container = document.getElementById('diary');
+      var container = document.getElementById('diary');
       container.innerHTML = '';
+      var list = rants.length > 0 ? rants : DUMMY_RANTS;
 
-      let displayRants = rants.length > 0 ? rants : DUMMY_RANTS;
-
-      displayRants.forEach(r => {
-        const entry = document.createElement('div');
+      list.forEach(function(r) {
+        var entry = document.createElement('div');
         entry.className = 'diary-entry';
-        const date = new Date(r.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
-        entry.innerHTML = `<time>${date}</time><p>${r.content}</p>`;
+        var date = new Date(r.created_at).toLocaleDateString('id-ID', { day:'2-digit', month:'short' });
+        entry.innerHTML = '<time>' + date + '</time><p>' + r.content + '</p>';
         container.appendChild(entry);
 
-        // Emoji reactions hanya untuk rants user (bukan dummy)
-        if (!r.id.startsWith('dummy-')) {
-          const reactionsContainer = document.createElement('div');
-          reactionsContainer.style.display = 'flex';
-          reactionsContainer.style.gap = '12px';
-          reactionsContainer.style.marginTop = '8px';
-          reactionsContainer.style.fontSize = '15px';
+        // Emoji reactions — only on real (non-dummy) rants
+        if (String(r.id).indexOf('dummy-') !== 0) {
+          var reactRow = document.createElement('div');
+          reactRow.style.cssText = 'display:flex;gap:12px;margin-top:8px;font-size:15px;';
 
-          ['🤠', '😢', '🤗', '🔥'].forEach(emoji => {
-            const item = document.createElement('div');
-            item.style.display = 'flex';
-            item.style.alignItems = 'center';
-            item.style.gap = '4px';
-            item.style.cursor = 'pointer';
-            item.style.opacity = '0.6';
-            item.style.transition = 'all 0.2s';
+          ['🤠','😢','🤗','🔥'].forEach(function(emoji) {
+            var item = document.createElement('div');
+            item.style.cssText = 'display:flex;align-items:center;gap:4px;cursor:pointer;opacity:0.6;transition:all 0.2s;';
 
-            const emojiSpan = document.createElement('span');
+            var emojiSpan = document.createElement('span');
             emojiSpan.textContent = emoji;
-            emojiSpan.style.fontSize = '18px';
-            emojiSpan.style.fontWeight = '600';
+            emojiSpan.style.cssText = 'font-size:18px;font-weight:600;transition:transform 0.2s;';
 
-            const countSpan = document.createElement('span');
+            var countSpan = document.createElement('span');
             countSpan.textContent = '0';
-            countSpan.style.fontSize = '13px';
-            countSpan.style.color = 'transparent';
+            countSpan.style.cssText = 'font-size:13px;color:transparent;';
 
-            item.onmouseenter = () => {
-              emojiSpan.style.transform = 'scale(1.2)';
-              item.style.opacity = '1';
-            };
-            item.onmouseleave = () => {
-              emojiSpan.style.transform = 'scale(1)';
-              item.style.opacity = '0.6';
-            };
+            item.onmouseenter = function() { emojiSpan.style.transform='scale(1.2)'; item.style.opacity='1'; };
+            item.onmouseleave = function() { emojiSpan.style.transform='scale(1)';  item.style.opacity='0.6'; };
 
             item.appendChild(emojiSpan);
             item.appendChild(countSpan);
-            reactionsContainer.appendChild(item);
+            reactRow.appendChild(item);
           });
 
-          entry.appendChild(reactionsContainer);
+          entry.appendChild(reactRow);
         }
       });
     }
 
-    // === RENDER TRAY - Prioritas user artefak ===
+    // ─── RENDER: TRAY ─────────────────────────────────────
     function renderTray() {
-      const tray = document.getElementById('tray');
+      var tray = document.getElementById('tray');
       tray.innerHTML = '';
+      var list = artefacts.length > 0 ? artefacts.slice(0,6) : DUMMY_ARTEFACTS.slice(0,6);
 
-      // LOGIC: User artefak prioritas, dummy sebagai fallback
-      let displayArtefacts = artefacts.length > 0 ? artefacts.slice(0, 6) : DUMMY_ARTEFACTS.slice(0, 6);
-
-      if (displayArtefacts.length === 0) {
-        tray.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--muted); font-size: 13px; padding: 40px 20px;">Belum ada artefak. Unggah gambar pertamamu!</div>';
+      if (list.length === 0) {
+        tray.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding:40px 20px;">Belum ada artefak. Unggah gambar pertamamu!</div>';
         return;
       }
 
-      displayArtefacts.forEach((a) => {
-        const div = document.createElement('div');
+      list.forEach(function(a) {
+        var div = document.createElement('div');
         div.className = 'tray-slot';
 
-        if (a.image_url) {
-          div.style.backgroundImage = `url(${a.image_url})`;
-        } else {
+        if (!a.image_url) {
           div.style.backgroundColor = '#1a1a1a';
-          console.warn('Artefak image_url kosong:', a);
           tray.appendChild(div);
           return;
         }
 
+        div.style.backgroundImage = 'url(' + a.image_url + ')';
+
         if (a.notation) {
-          const notationEl = document.createElement('div');
+          var notationEl = document.createElement('div');
           notationEl.className = 'artefak-notation';
           notationEl.textContent = a.notation;
           div.appendChild(notationEl);
         }
 
-        div.onclick = () => {
+        div.onclick = function() {
           heroImg.src = a.image_url;
           heroNotationDisplay.textContent = a.notation || '';
           hidePostUploadPanel();
@@ -665,38 +580,181 @@
       });
     }
 
+    // ─── UPLOAD IMAGE ─────────────────────────────────────
     async function handleFileSelect(event) {
-      const file = event.target.files[0];
+      var file = event.target.files[0];
       if (!file) return;
 
       if (!file.type.startsWith('image/')) {
-        alert('Hanya file gambar yang diperbolehkan!');
+        showConfirmation('Hanya file gambar yang diperbolehkan!');
+        fileInput.value = '';
         return;
       }
-
       if (file.size > 5 * 1024 * 1024) {
-        alert('Ukuran file maksimal 5MB!');
+        showConfirmation('Ukuran file maksimal 5MB!');
+        fileInput.value = '';
         return;
       }
 
-      showConfirmation("Mengunggah...");
-      const timestamp = Date.now();
-      const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const cleanUsername = currentUser.replace(/^@/, '').replace(/\s+/g, '_');
-      const fileName = `${cleanUsername}/${timestamp}-${safeName}`;
+      showConfirmation('Mengunggah...');
+
+      var timestamp = Date.now();
+      var safeName  = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      var cleanUser = currentUser.replace(/^@/, '').replace(/\s+/g, '_');
+      var fileName  = cleanUser + '/' + timestamp + '-' + safeName;
 
       try {
-        const formData = new FormData();
+        var formData = new FormData();
         formData.append('', file);
 
-        const uploadRes = await fetch(
-          `${SUPABASE_URL}/storage/v1/object/artefacts/${fileName}`,
+        var uploadRes = await fetch(
+          SUPABASE_URL + '/storage/v1/object/artefacts/' + fileName,
           {
             method: 'POST',
             headers: {
               'apikey': SUPABASE_KEY,
-              'Authorization': `Bearer ${SUPABASE_KEY}`
+              'Authorization': 'Bearer ' + SUPABASE_KEY
             },
             body: formData
           }
         );
+
+        if (!uploadRes.ok) {
+          var errBody = await uploadRes.text();
+          throw new Error('Upload gagal: ' + errBody);
+        }
+
+        var publicUrl = SUPABASE_URL + '/storage/v1/object/public/artefacts/' + fileName;
+
+        // Insert new row
+        await supabaseFetch('artefacts', 'POST', {
+          username: currentUser,
+          image_url: publicUrl,
+          notation: ''
+        });
+
+        // Refresh
+        await loadData();
+        showConfirmation('Artefak berhasil diunggah!');
+        triggerPulse();
+
+      } catch (e) {
+        console.error('Upload error:', e);
+        showConfirmation('Gagal upload. Coba lagi.');
+      }
+
+      fileInput.value = '';
+    }
+
+    // ─── SAVE NOTATION ────────────────────────────────────
+    async function saveNotation() {
+      var notation = heroNotationInput.value.trim();
+      if (!notation) { showConfirmation('Tulis notasi dulu.'); return; }
+
+      var words = notation.split(/\s+/).filter(function(w){ return w.length > 0; });
+      if (words.length > 4) { showConfirmation('Maks 4 kata.'); return; }
+
+      var target = null;
+      for (var i = 0; i < artefacts.length; i++) {
+        if (!artefacts[i].notation) { target = artefacts[i]; break; }
+      }
+      if (!target) { showConfirmation('Tidak ada artefak untuk ditandai.'); return; }
+
+      try {
+        showConfirmation('Menyimpan...');
+        await supabaseFetch('artefacts', 'PATCH',
+          { notation: notation },
+          '?id=eq.' + target.id
+        );
+        await loadData();
+        showConfirmation('Notasi tersimpan.');
+        triggerPulse();
+      } catch (e) {
+        console.error('Save notation error:', e);
+        showConfirmation('Gagal simpan. Coba lagi.');
+      }
+    }
+
+    // ─── POST RANT ────────────────────────────────────────
+    async function postRant() {
+      var textarea = document.getElementById('rant');
+      var content  = textarea.value.trim();
+      if (!content) { showConfirmation('Tulis dulu.'); return; }
+
+      try {
+        showConfirmation('Posting...');
+        await supabaseFetch('rants', 'POST', {
+          username: currentUser,
+          content: content
+        });
+        textarea.value = '';
+        await loadData();
+        showConfirmation('Terkirim.');
+        triggerPulse();
+      } catch (e) {
+        console.error('Post rant error:', e);
+        showConfirmation('Gagal posting. Coba lagi.');
+      }
+    }
+
+    // ─── ENSURE USER ROW ──────────────────────────────────
+    async function ensureUserExists() {
+      try {
+        var users = await supabaseFetch('users', 'GET', null,
+          '?username=eq.' + encodeURIComponent(currentUser)
+        );
+        if (!users || users.length === 0) {
+          await supabaseFetch('users', 'POST', { username: currentUser });
+        }
+      } catch (e) {
+        console.error('ensureUserExists:', e);
+      }
+    }
+
+    // ─── LOAD ALL DATA ────────────────────────────────────
+    async function loadData() {
+      try {
+        await ensureUserExists();
+
+        var aData = await supabaseFetch('artefacts', 'GET', null,
+          '?username=eq.' + encodeURIComponent(currentUser) + '&order=created_at.desc&limit=6'
+        );
+        artefacts = aData || [];
+
+        var rData = await supabaseFetch('rants', 'GET', null,
+          '?username=eq.' + encodeURIComponent(currentUser) + '&order=created_at.desc&limit=5'
+        );
+        rants = rData || [];
+
+      } catch (e) {
+        console.error('loadData error:', e);
+        // Stay with empty arrays → renders will fall back to dummy data
+      }
+
+      renderHero();
+      renderDiary();
+      renderTray();
+    }
+
+    // ─── BIND EVENTS (once, inside IIFE — no duplicates) ─
+    document.getElementById('upload-artefak-btn').addEventListener('click', function() {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', handleFileSelect);
+
+    document.getElementById('save-notation-btn').addEventListener('click', saveNotation);
+
+    document.getElementById('jejakkan-btn').addEventListener('click', postRant);
+
+    document.getElementById('settings-btn').addEventListener('click', function() {
+      showConfirmation('Settings — coming soon.');
+    });
+
+    // ─── INIT ─────────────────────────────────────────────
+    loadData();
+
+  })();
+  </script>
+</body>
+</html>
