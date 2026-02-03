@@ -4,7 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NOPE — Jurnal</title>
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  
+  <!-- PWA / Add to Home Screen -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ff9999'/%3E%3Ctext x='50' y='70' font-size='60' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%23000'%3ENO%3C/text%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23ff9999'/%3E%3Ctext x='90' y='130' font-size='90' font-weight='900' font-family='system-ui' text-anchor='middle' fill='%23000'%3ENO%3C/text%3E%3C/svg%3E">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NOPE">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
@@ -362,7 +370,7 @@
     </header>
 
     <div class="hero">
-      <img id="hero-img" src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80" alt="artefak">
+      <img id="hero-img" src="ps2-lays.jpg" alt="artefak">
       <div class="artefak-notation" id="hero-notation-display"></div>
       <button id="upload-artefak-btn" class="upload-artefak-btn">Unggah</button>
     </div>
@@ -393,11 +401,9 @@
   (function() {
     'use strict';
 
-    // ─── CONFIG ───────────────────────────────────────────
     var SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
     var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-    // ─── SUPABASE HELPER ──────────────────────────────────
     async function supabaseFetch(table, method, body, filter) {
       var headers = {
         'apikey': SUPABASE_KEY,
@@ -417,14 +423,12 @@
       return res.json();
     }
 
-    // ─── STATE ────────────────────────────────────────────
     var currentUser = localStorage.getItem('nope_username') || '@newglitch';
     document.getElementById('username-display').textContent = currentUser.replace(/^@/, '');
 
     var artefacts = [];
     var rants     = [];
 
-    // ─── DUMMY DATA ───────────────────────────────────────
     var DUMMY_RANTS = [
       {
         id: 'dummy-0', username: 'homie1',
@@ -443,8 +447,11 @@
       }
     ];
 
+    // UPDATED: Ganti default hero image ke PS2 + Lay's
+    var DEFAULT_HERO = 'ps2-lays.jpg';
+
     var DUMMY_ARTEFACTS = [
-      { id:'dummy-0', image_url:'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80', notation:'ingat puasa main ps' },
+      { id:'dummy-0', image_url:DEFAULT_HERO, notation:'ingat puasa main ps' },
       { id:'dummy-1', image_url:'https://images.unsplash.com/photo-1572117644447-93c1e6d6370f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80', notation:'matcha dulu deh' },
       { id:'dummy-2', image_url:'https://images.unsplash.com/photo-1583394838336-acdcb777b42a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80', notation:'nobar sama mantan' },
       { id:'dummy-3', image_url:'https://images.unsplash.com/photo-1593642702821-c800c47beb39?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80', notation:'makaan' },
@@ -452,14 +459,12 @@
       { id:'dummy-5', image_url:'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80', notation:'musik therapy' }
     ];
 
-    // ─── DOM REFS ─────────────────────────────────────────
     var heroImg             = document.getElementById('hero-img');
     var heroNotationDisplay = document.getElementById('hero-notation-display');
     var postUploadPanel     = document.getElementById('post-upload-panel');
     var heroNotationInput   = document.getElementById('hero-notation');
     var fileInput           = document.getElementById('file-input');
 
-    // ─── UTILS ────────────────────────────────────────────
     function showConfirmation(msg) {
       var el = document.getElementById('confirmation');
       el.textContent = msg;
@@ -483,7 +488,6 @@
       postUploadPanel.classList.add('hidden');
     }
 
-    // ─── RENDER: HERO ─────────────────────────────────────
     function renderHero() {
       var current = artefacts.length > 0 ? artefacts[0] : DUMMY_ARTEFACTS[0];
       if (current) {
@@ -497,7 +501,6 @@
       }
     }
 
-    // ─── RENDER: DIARY ────────────────────────────────────
     function renderDiary() {
       var container = document.getElementById('diary');
       container.innerHTML = '';
@@ -510,7 +513,6 @@
         entry.innerHTML = '<time>' + date + '</time><p>' + r.content + '</p>';
         container.appendChild(entry);
 
-        // Emoji reactions — only on real (non-dummy) rants
         if (String(r.id).indexOf('dummy-') !== 0) {
           var reactRow = document.createElement('div');
           reactRow.style.cssText = 'display:flex;gap:12px;margin-top:8px;font-size:15px;';
@@ -540,7 +542,6 @@
       });
     }
 
-    // ─── RENDER: TRAY ─────────────────────────────────────
     function renderTray() {
       var tray = document.getElementById('tray');
       tray.innerHTML = '';
@@ -580,7 +581,6 @@
       });
     }
 
-    // ─── UPLOAD IMAGE ─────────────────────────────────────
     async function handleFileSelect(event) {
       var file = event.target.files[0];
       if (!file) return;
@@ -626,14 +626,12 @@
 
         var publicUrl = SUPABASE_URL + '/storage/v1/object/public/artefacts/' + fileName;
 
-        // Insert new row
         await supabaseFetch('artefacts', 'POST', {
           username: currentUser,
           image_url: publicUrl,
           notation: ''
         });
 
-        // Refresh
         await loadData();
         showConfirmation('Artefak berhasil diunggah!');
         triggerPulse();
@@ -646,7 +644,6 @@
       fileInput.value = '';
     }
 
-    // ─── SAVE NOTATION ────────────────────────────────────
     async function saveNotation() {
       var notation = heroNotationInput.value.trim();
       if (!notation) { showConfirmation('Tulis notasi dulu.'); return; }
@@ -675,7 +672,6 @@
       }
     }
 
-    // ─── POST RANT ────────────────────────────────────────
     async function postRant() {
       var textarea = document.getElementById('rant');
       var content  = textarea.value.trim();
@@ -697,7 +693,6 @@
       }
     }
 
-    // ─── ENSURE USER ROW ──────────────────────────────────
     async function ensureUserExists() {
       try {
         var users = await supabaseFetch('users', 'GET', null,
@@ -711,7 +706,6 @@
       }
     }
 
-    // ─── LOAD ALL DATA ────────────────────────────────────
     async function loadData() {
       try {
         await ensureUserExists();
@@ -728,7 +722,6 @@
 
       } catch (e) {
         console.error('loadData error:', e);
-        // Stay with empty arrays → renders will fall back to dummy data
       }
 
       renderHero();
@@ -736,7 +729,6 @@
       renderTray();
     }
 
-    // ─── BIND EVENTS (once, inside IIFE — no duplicates) ─
     document.getElementById('upload-artefak-btn').addEventListener('click', function() {
       fileInput.click();
     });
@@ -751,7 +743,6 @@
       showConfirmation('Settings — coming soon.');
     });
 
-    // ─── INIT ─────────────────────────────────────────────
     loadData();
 
   })();
