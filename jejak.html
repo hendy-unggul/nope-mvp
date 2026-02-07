@@ -308,6 +308,7 @@
       position: relative;
       cursor: pointer;
       transition: all 0.2s;
+      animation: fadeIn 0.6s ease-in;
     }
     .tray-slot:hover {
       border-color: var(--accent);
@@ -319,6 +320,23 @@
       left: 6px;
       font-size: 10px;
       padding: 3px 5px;
+    }
+    
+    /* Fade in animation for images */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    
+    /* Image loading state */
+    .hero img, .tray-slot {
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+    
+    .hero img[src=""], .tray-slot[style*="url('')"] {
+      opacity: 0.3;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
     }
     .zone-footer {
       text-align: center;
@@ -370,7 +388,7 @@
     </header>
 
     <div class="hero">
-      <img id="hero-img" src="ps2-lays.jpg" alt="artefak">
+      <img id="hero-img" src="https://picsum.photos/seed/nope-hero/800/1000" alt="artefak">
       <div class="artefak-notation" id="hero-notation-display"></div>
       <button id="upload-artefak-btn" class="upload-artefak-btn">Unggah</button>
     </div>
@@ -447,16 +465,14 @@
       }
     ];
 
-    // UPDATED: Ganti default hero image ke PS2 + Lay's
-    var DEFAULT_HERO = 'ps2-lays.jpg';
-
+    // Dummy images using reliable CDN that always loads
     var DUMMY_ARTEFACTS = [
-      { id:'dummy-0', image_url:DEFAULT_HERO, notation:'ingat puasa main ps' },
-      { id:'dummy-1', image_url:'https://images.unsplash.com/photo-1572117644447-93c1e6d6370f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80', notation:'matcha dulu deh' },
-      { id:'dummy-2', image_url:'https://images.unsplash.com/photo-1583394838336-acdcb777b42a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80', notation:'nobar sama mantan' },
-      { id:'dummy-3', image_url:'https://images.unsplash.com/photo-1593642702821-c800c47beb39?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80', notation:'makaan' },
-      { id:'dummy-4', image_url:'https://images.unsplash.com/photo-1558188528-91126b887225?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80', notation:'capek' },
-      { id:'dummy-5', image_url:'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=384&q=80', notation:'musik therapy' }
+      { id:'dummy-0', image_url:'https://picsum.photos/seed/nope1/400/500', notation:'ingat puasa main ps' },
+      { id:'dummy-1', image_url:'https://picsum.photos/seed/nope2/400/500', notation:'matcha dulu deh' },
+      { id:'dummy-2', image_url:'https://picsum.photos/seed/nope3/400/500', notation:'nobar sama mantan' },
+      { id:'dummy-3', image_url:'https://picsum.photos/seed/nope4/400/500', notation:'makaan' },
+      { id:'dummy-4', image_url:'https://picsum.photos/seed/nope5/400/500', notation:'capek' },
+      { id:'dummy-5', image_url:'https://picsum.photos/seed/nope6/400/500', notation:'musik therapy' }
     ];
 
     var heroImg             = document.getElementById('hero-img');
@@ -545,16 +561,41 @@
     function renderTray() {
       var tray = document.getElementById('tray');
       tray.innerHTML = '';
-      var list = artefacts.length > 0 ? artefacts.slice(0,6) : DUMMY_ARTEFACTS.slice(0,6);
+      
+      // Mix user artefacts with dummy artefacts (user artefacts replace dummy ones gradually)
+      var displayList = [];
+      
+      if (artefacts.length > 0) {
+        // User has uploaded artefacts - show them first
+        displayList = artefacts.slice(0, 6);
+        
+        // Fill remaining slots with dummy artefacts if needed
+        var remaining = 6 - displayList.length;
+        if (remaining > 0) {
+          // Skip first dummy (which user would replace first) and add from end
+          var dummyFillStart = artefacts.length; // How many dummies to skip
+          for (var i = dummyFillStart; i < 6 && displayList.length < 6; i++) {
+            if (DUMMY_ARTEFACTS[i]) {
+              displayList.push(DUMMY_ARTEFACTS[i]);
+            }
+          }
+        }
+      } else {
+        // No user artefacts yet - show all 6 dummies for visual guidance
+        displayList = DUMMY_ARTEFACTS.slice(0, 6);
+      }
 
-      if (list.length === 0) {
+      if (displayList.length === 0) {
         tray.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding:40px 20px;">Belum ada artefak. Unggah gambar pertamamu!</div>';
         return;
       }
 
-      list.forEach(function(a) {
+      displayList.forEach(function(a, index) {
         var div = document.createElement('div');
         div.className = 'tray-slot';
+        
+        // Add staggered animation delay for smooth appearance
+        div.style.animationDelay = (index * 0.1) + 's';
 
         if (!a.image_url) {
           div.style.backgroundColor = '#1a1a1a';
@@ -563,6 +604,12 @@
         }
 
         div.style.backgroundImage = 'url(' + a.image_url + ')';
+        
+        // Add subtle badge to indicate dummy vs user content (optional visual cue)
+        var isDummy = String(a.id).indexOf('dummy-') === 0;
+        if (isDummy) {
+          div.style.opacity = '0.85'; // Slightly dimmer to indicate it's placeholder
+        }
 
         if (a.notation) {
           var notationEl = document.createElement('div');
