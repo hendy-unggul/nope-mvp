@@ -1,11 +1,19 @@
 <script src="frekuensi-shared.js"></script>
 <script>
 // ==========================================
-// NOPE BOLA LIVE - MINIMAL WORKING VERSION
+// NOPE BOLA LIVE - SUPABASE REAL-TIME
 // ==========================================
 
-const SUPABASE_URL = 'https://fuovfrdicdhnlymacpz.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0'; // ← GANTI KEY ASLI!
+// Gunakan var untuk menghindari "already declared" error
+// atau cek apakah sudah ada di window
+if (!window.SUPABASE_URL) {
+  window.SUPABASE_URL = 'https://fuovfrdicdhnlymacpz.supabase.co';
+  window.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bWFjcHoiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczODU3NjAwMCwiZXhwIjoyMDU0MTUyMDAwfQ.XXXXXXXX'; // ← GANTI KEY ASLI!
+}
+
+// Gunakan window.variabel
+const SUPABASE_URL = window.SUPABASE_URL;
+const SUPABASE_KEY = window.SUPABASE_KEY;
 
 class NopeBolaLive {
   constructor() {
@@ -14,37 +22,12 @@ class NopeBolaLive {
     this.matchId = 'match_001';
     this.currentPrediction = null;
     this.matchTime = 67 * 60 + 32;
-    
-    // Bind methods
-    this.init = this.init.bind(this);
-    this.updateStatus = this.updateStatus.bind(this);
-    
     this.init();
   }
   
-  // UPDATE STATUS - Method ini yang hilang!
-  updateStatus(status, text) {
-    const el = document.getElementById('connection-status');
-    if (!el) return;
-    
-    const icons = {
-      connecting: '🟡',
-      online: '🟢',
-      offline: '🔴'
-    };
-    
-    el.className = `connection-status ${status}`;
-    el.innerHTML = `<span>${icons[status] || '⚪'}</span><span>${text}</span>`;
-    
-    if (status === 'online') {
-      setTimeout(() => { el.style.opacity = '0'; }, 3000);
-    }
-  }
-  
-  // INIT
   async init() {
     try {
-      this.updateStatus('connecting', 'Connecting...');
+      this.updateStatus('connecting', '🟡 Connecting...');
       
       // Check key
       if (!SUPABASE_KEY || SUPABASE_KEY.includes('XXXXXXXX')) {
@@ -65,6 +48,7 @@ class NopeBolaLive {
       this.startMatchTimer();
       this.setupPrediction();
       this.setupChat();
+      this.loadLeaderboard();
       
       this.updateStatus('online', 'Terhubung!');
       this.showNotif('🎉 Berhasil!', 'Selamat datang di NOPE Bola Live');
@@ -76,19 +60,28 @@ class NopeBolaLive {
     }
   }
   
-  // SETUP USER
+  updateStatus(status, text) {
+    const el = document.getElementById('connection-status');
+    if (!el) return;
+    
+    const icons = { connecting: '🟡', online: '🟢', offline: '🔴' };
+    el.className = `connection-status ${status}`;
+    el.innerHTML = `<span>${icons[status] || '⚪'}</span><span>${text}</span>`;
+    
+    if (status === 'online') {
+      setTimeout(() => { el.style.opacity = '0'; }, 3000);
+    }
+  }
+  
   async setupUser() {
-    // Generate device ID
     const deviceId = 'device_' + Math.random().toString(36).substr(2, 9);
     
-    // Try get existing user
     let { data: user } = await this.supabase
       .from('users')
       .select('*')
       .eq('device_id', deviceId)
       .single();
     
-    // Create new if not exists
     if (!user) {
       const names = ['TahuBulat', 'MieAyam', 'BaksoGoreng', 'SatePadang', 'KopiTubruk'];
       const username = names[Math.floor(Math.random() * names.length)] + Math.floor(Math.random() * 999);
@@ -104,7 +97,6 @@ class NopeBolaLive {
     
     this.user = user;
     
-    // Update UI
     document.getElementById('user-name').textContent = user.username;
     document.getElementById('user-avatar').textContent = user.username.substring(0, 2).toUpperCase();
     document.getElementById('user-points').textContent = (user.points || 0) + ' XP';
@@ -112,7 +104,6 @@ class NopeBolaLive {
     document.getElementById('chat-send').disabled = false;
   }
   
-  // MATCH TIMER
   startMatchTimer() {
     setInterval(() => {
       this.matchTime++;
@@ -123,68 +114,155 @@ class NopeBolaLive {
     }, 1000);
   }
   
-  // PREDICTION
   setupPrediction() {
-    // Simple prediction UI
     const container = document.getElementById('pred-options');
     if (container) {
       container.innerHTML = `
         <button class="pred-option-btn" onclick="bolaApp.vote('ya')">
           <span>Ya, ada gol!</span>
-          <span class="pred-percentage">50%</span>
+          <span class="pred-percentage" id="pct-ya">50%</span>
         </button>
         <button class="pred-option-btn" onclick="bolaApp.vote('tidak')">
           <span>Tidak ada</span>
-          <span class="pred-percentage">50%</span>
+          <span class="pred-percentage" id="pct-tidak">50%</span>
         </button>
       `;
     }
-    document.getElementById('pred-question').textContent = 'Apakah akan ada gol dalam 5 menit?';
-    document.getElementById('pred-results').style.display = 'none';
+    
+    const qEl = document.getElementById('pred-question');
+    if (qEl) qEl.textContent = 'Apakah akan ada gol dalam 5 menit?';
+    
+    const rEl = document.getElementById('pred-results');
+    if (rEl) rEl.style.display = 'none';
+    
+    // Start timer
+    this.startPredictionTimer();
+  }
+  
+  startPredictionTimer() {
+    let timeLeft = 60;
+    const timerBar = document.getElementById('pred-timer-bar');
+    const timerText = document.getElementById('next-prediction');
+    
+    const interval = setInterval(() => {
+      timeLeft--;
+      if (timerBar) timerBar.style.width = `${(timeLeft / 60) * 100}%`;
+      
+      const mins = Math.floor(timeLeft / 60);
+      const secs = timeLeft % 60;
+      if (timerText) timerText.textContent = `Waktu: ${mins}:${secs.toString().padStart(2, '0')}`;
+      
+      if (timeLeft <= 0) {
+        clearInterval(interval);
+        this.resolvePrediction();
+      }
+    }, 1000);
   }
   
   async vote(option) {
-    // Disable buttons
+    // Save to Supabase
+    if (this.currentPrediction) {
+      await this.supabase.from('prediction_votes').insert([{
+        prediction_id: this.currentPrediction.id,
+        user_id: this.user.username,
+        option_id: option
+      }]);
+    }
+    
+    // UI update
     document.querySelectorAll('.pred-option-btn').forEach(btn => btn.disabled = true);
     event.target.closest('.pred-option-btn').classList.add('voted');
     document.getElementById('pred-results').style.display = 'block';
     
     this.showNotif('Prediksi tercatat!', 'Tunggu hasilnya...');
     
-    // Simulate result after 3s
-    setTimeout(() => {
-      const won = Math.random() > 0.5;
-      if (won) {
-        this.user.points = (this.user.points || 0) + 100;
-        document.getElementById('user-points').textContent = this.user.points + ' XP';
-        this.showNotif('🎉 Benar!', '+100 XP');
-      } else {
-        this.showNotif('😅 Salah', 'Coba lagi!');
-      }
-    }, 3000);
+    // Store current vote
+    this.currentVote = option;
   }
   
-  // CHAT
+  async resolvePrediction() {
+    const winner = Math.random() > 0.5 ? 'ya' : 'tidak';
+    
+    // Highlight winner
+    const winnerBtn = document.getElementById(`pred-btn-${winner}`);
+    if (winnerBtn) winnerBtn.classList.add('correct');
+    
+    if (this.currentVote === winner) {
+      this.user.points = (this.user.points || 0) + 100;
+      
+      // Update in Supabase
+      await this.supabase.from('users').update({ points: this.user.points }).eq('id', this.user.id);
+      
+      document.getElementById('user-points').textContent = this.user.points + ' XP';
+      this.showNotif('🎉 Benar!', '+100 XP');
+      this.addChat('System', `🏆 ${this.user.username} benar! +100 XP`, true);
+    } else {
+      this.showNotif('😅 Salah', 'Coba lagi di round berikutnya!');
+    }
+    
+    // Reset after 5s
+    setTimeout(() => this.setupPrediction(), 5000);
+  }
+  
+  async loadLeaderboard() {
+    const { data: users } = await this.supabase
+      .from('users')
+      .select('username, points')
+      .order('points', { ascending: false })
+      .limit(10);
+    
+    const container = document.getElementById('leaderboard');
+    if (!container) return;
+    
+    const top3 = (users || []).slice(0, 3);
+    let html = top3.map((u, i) => `
+      <div class="leader-item ${u.username === this.user?.username ? 'you' : ''}">
+        <div class="leader-rank ${i < 3 ? 'top' : ''}">${i + 1}</div>
+        <div class="leader-name">${u.username}</div>
+        <div class="leader-points">${u.points || 0}</div>
+      </div>
+    `).join('');
+    
+    if (!top3.find(u => u.username === this.user?.username)) {
+      html += `
+        <div class="leader-item you">
+          <div class="leader-rank">?</div>
+          <div class="leader-name">${this.user.username}</div>
+          <div class="leader-points">${this.user.points || 0}</div>
+        </div>
+      `;
+    }
+    
+    container.innerHTML = html;
+  }
+  
   setupChat() {
     const container = document.getElementById('chat-messages');
     if (container) container.innerHTML = '';
     
-    // Add welcome message
     this.addChat('System', 'Selamat datang! Prediksi dan menangkan poin!', true);
     
-    // Simulate other users
-    const messages = [
-      { u: 'TahuBulat99', t: '🔥 Striker A on fire!' },
-      { u: 'MieAyamPro', t: 'Prediksi gue bener!' },
-      { u: 'BaksoGoreng', t: 'Corner kick lagi nih' }
-    ];
+    // Real-time subscription
+    this.supabase.channel('chat').on('postgres_changes', 
+      { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `match_id=eq.${this.matchId}` },
+      (payload) => {
+        this.addChat(payload.new.username, payload.new.message, payload.new.is_system);
+      }
+    ).subscribe();
     
-    let i = 0;
-    setInterval(() => {
-      const m = messages[i % messages.length];
-      this.addChat(m.u, m.t);
-      i++;
-    }, 10000);
+    // Load history
+    this.loadChatHistory();
+  }
+  
+  async loadChatHistory() {
+    const { data: messages } = await this.supabase
+      .from('chat_messages')
+      .select('*')
+      .eq('match_id', this.matchId)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    
+    (messages || []).reverse().forEach(m => this.addChat(m.username, m.message, m.is_system));
   }
   
   addChat(user, text, isSystem = false) {
@@ -209,11 +287,16 @@ class NopeBolaLive {
     const text = input.value.trim();
     if (!text || !this.user) return;
     
-    this.addChat(this.user.username, text);
+    await this.supabase.from('chat_messages').insert([{
+      match_id: this.matchId,
+      user_id: this.user.username,
+      username: this.user.username,
+      message: text
+    }]);
+    
     input.value = '';
   }
   
-  // OFFLINE MODE
   setupOffline() {
     document.getElementById('user-name').textContent = 'Guest';
     document.getElementById('user-avatar').textContent = 'G';
@@ -221,7 +304,6 @@ class NopeBolaLive {
     document.getElementById('pred-options').innerHTML = '<div style="padding:20px;text-align:center;">Periksa koneksi atau konfigurasi Supabase</div>';
   }
   
-  // NOTIFICATION
   showNotif(title, text) {
     const notif = document.getElementById('notification');
     document.getElementById('notif-title').textContent = title;
