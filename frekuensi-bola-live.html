@@ -1,71 +1,245 @@
-<!DOCTYPE html>
-<html lang="id" data-theme="glitch">
-<head>
-  <!-- ... head sama ... -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body>
-  <!-- ... body sama ... -->
+<script src="frekuensi-shared.js"></script>
+<script>
+// ==========================================
+// NOPE BOLA LIVE - MINIMAL WORKING VERSION
+// ==========================================
 
-  <script src="frekuensi-shared.js"></script>
-  <script>
-    // ==========================================
-    // NOPE BOLA LIVE - SUPABASE CONFIG
-    // ==========================================
+const SUPABASE_URL = 'https://fuovfrdicdhnlymacpz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bWFjcHoiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczODU3NjAwMCwiZXhwIjoyMDU0MTUyMDAwfQ.XXXXXXXX'; // ← GANTI KEY ASLI!
+
+class NopeBolaLive {
+  constructor() {
+    this.supabase = null;
+    this.user = null;
+    this.matchId = 'match_001';
+    this.currentPrediction = null;
+    this.matchTime = 67 * 60 + 32;
     
-    // Gunakan window. untuk avoid duplikasi
-    window.SUPABASE_CONFIG = {
-      URL: 'https://fuovfrdicdhnlymacpz.supabase.co',
-      KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bWFjcHoiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczODU3NjAwMCwiZXhwIjoyMDU0MTUyMDAwfQ.XXXXXXXX' // ← GANTI!
+    // Bind methods
+    this.init = this.init.bind(this);
+    this.updateStatus = this.updateStatus.bind(this);
+    
+    this.init();
+  }
+  
+  // UPDATE STATUS - Method ini yang hilang!
+  updateStatus(status, text) {
+    const el = document.getElementById('connection-status');
+    if (!el) return;
+    
+    const icons = {
+      connecting: '🟡',
+      online: '🟢',
+      offline: '🔴'
     };
     
-    class NopeBolaLive {
-      constructor() {
-        this.supabase = null;
-        this.user = null;
-        this.matchId = 'match_001';
-        this.currentPrediction = null;
-        this.predictionTimer = null;
-        this.init();
+    el.className = `connection-status ${status}`;
+    el.innerHTML = `<span>${icons[status] || '⚪'}</span><span>${text}</span>`;
+    
+    if (status === 'online') {
+      setTimeout(() => { el.style.opacity = '0'; }, 3000);
+    }
+  }
+  
+  // INIT
+  async init() {
+    try {
+      this.updateStatus('connecting', 'Connecting...');
+      
+      // Check key
+      if (!SUPABASE_KEY || SUPABASE_KEY.includes('XXXXXXXX')) {
+        throw new Error('Supabase Key belum diisi!');
       }
       
-      async init() {
-        try {
-          this.updateStatus('connecting', '🟡 Connecting...');
-          
-          // Check config
-          if (window.SUPABASE_CONFIG.KEY.includes('XXXXXXXX') || window.SUPABASE_CONFIG.KEY === 'eyJhbGci...') {
-            throw new Error('Please set your Supabase Anon Key in window.SUPABASE_CONFIG.KEY');
-          }
-          
-          this.supabase = window.supabase.createClient(
-            window.SUPABASE_CONFIG.URL, 
-            window.SUPABASE_CONFIG.KEY,
-            { auth: { persistSession: false } }
-          );
-          
-          await this.testConnection();
-          // ... rest of init
-          
-        } catch (err) {
-          console.error('Connection error:', err);
-          this.updateStatus('offline', '🔴 ' + (err.message || 'Connection failed'));
-          this.setupOfflineMode();
-        }
-      }
+      // Init Supabase
+      this.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: { persistSession: false }
+      });
       
-      // ... rest of class methods ...
+      // Test connection
+      const { error } = await this.supabase.from('users').select('count', { count: 'exact', head: true });
+      if (error) throw error;
+      
+      // Setup
+      await this.setupUser();
+      this.startMatchTimer();
+      this.setupPrediction();
+      this.setupChat();
+      
+      this.updateStatus('online', 'Terhubung!');
+      this.showNotif('🎉 Berhasil!', 'Selamat datang di NOPE Bola Live');
+      
+    } catch (err) {
+      console.error('Error:', err);
+      this.updateStatus('offline', err.message || 'Connection failed');
+      this.setupOffline();
+    }
+  }
+  
+  // SETUP USER
+  async setupUser() {
+    // Generate device ID
+    const deviceId = 'device_' + Math.random().toString(36).substr(2, 9);
+    
+    // Try get existing user
+    let { data: user } = await this.supabase
+      .from('users')
+      .select('*')
+      .eq('device_id', deviceId)
+      .single();
+    
+    // Create new if not exists
+    if (!user) {
+      const names = ['TahuBulat', 'MieAyam', 'BaksoGoreng', 'SatePadang', 'KopiTubruk'];
+      const username = names[Math.floor(Math.random() * names.length)] + Math.floor(Math.random() * 999);
+      
+      const { data: newUser } = await this.supabase
+        .from('users')
+        .insert([{ device_id: deviceId, username, points: 0, badge: 'NEW' }])
+        .select()
+        .single();
+      
+      user = newUser;
     }
     
-    // Initialize
-    let bolaApp;
-    document.addEventListener('DOMContentLoaded', () => { 
-      bolaApp = new NopeBolaLive(); 
-    });
+    this.user = user;
     
-    // Global functions
-    window.makePrediction = (opt) => bolaApp?.makePrediction(opt);
-    window.sendChat = () => bolaApp?.sendChat();
-  </script>
-</body>
-</html>
+    // Update UI
+    document.getElementById('user-name').textContent = user.username;
+    document.getElementById('user-avatar').textContent = user.username.substring(0, 2).toUpperCase();
+    document.getElementById('user-points').textContent = (user.points || 0) + ' XP';
+    document.getElementById('chat-input').disabled = false;
+    document.getElementById('chat-send').disabled = false;
+  }
+  
+  // MATCH TIMER
+  startMatchTimer() {
+    setInterval(() => {
+      this.matchTime++;
+      const mins = Math.floor(this.matchTime / 60);
+      const secs = this.matchTime % 60;
+      const el = document.getElementById('match-time');
+      if (el) el.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+    }, 1000);
+  }
+  
+  // PREDICTION
+  setupPrediction() {
+    // Simple prediction UI
+    const container = document.getElementById('pred-options');
+    if (container) {
+      container.innerHTML = `
+        <button class="pred-option-btn" onclick="bolaApp.vote('ya')">
+          <span>Ya, ada gol!</span>
+          <span class="pred-percentage">50%</span>
+        </button>
+        <button class="pred-option-btn" onclick="bolaApp.vote('tidak')">
+          <span>Tidak ada</span>
+          <span class="pred-percentage">50%</span>
+        </button>
+      `;
+    }
+    document.getElementById('pred-question').textContent = 'Apakah akan ada gol dalam 5 menit?';
+    document.getElementById('pred-results').style.display = 'none';
+  }
+  
+  async vote(option) {
+    // Disable buttons
+    document.querySelectorAll('.pred-option-btn').forEach(btn => btn.disabled = true);
+    event.target.closest('.pred-option-btn').classList.add('voted');
+    document.getElementById('pred-results').style.display = 'block';
+    
+    this.showNotif('Prediksi tercatat!', 'Tunggu hasilnya...');
+    
+    // Simulate result after 3s
+    setTimeout(() => {
+      const won = Math.random() > 0.5;
+      if (won) {
+        this.user.points = (this.user.points || 0) + 100;
+        document.getElementById('user-points').textContent = this.user.points + ' XP';
+        this.showNotif('🎉 Benar!', '+100 XP');
+      } else {
+        this.showNotif('😅 Salah', 'Coba lagi!');
+      }
+    }, 3000);
+  }
+  
+  // CHAT
+  setupChat() {
+    const container = document.getElementById('chat-messages');
+    if (container) container.innerHTML = '';
+    
+    // Add welcome message
+    this.addChat('System', 'Selamat datang! Prediksi dan menangkan poin!', true);
+    
+    // Simulate other users
+    const messages = [
+      { u: 'TahuBulat99', t: '🔥 Striker A on fire!' },
+      { u: 'MieAyamPro', t: 'Prediksi gue bener!' },
+      { u: 'BaksoGoreng', t: 'Corner kick lagi nih' }
+    ];
+    
+    let i = 0;
+    setInterval(() => {
+      const m = messages[i % messages.length];
+      this.addChat(m.u, m.t);
+      i++;
+    }, 10000);
+  }
+  
+  addChat(user, text, isSystem = false) {
+    const container = document.getElementById('chat-messages');
+    if (!container) return;
+    
+    const div = document.createElement('div');
+    div.className = 'chat-message';
+    
+    if (isSystem) {
+      div.innerHTML = `<span style="color:var(--accent);font-weight:700;">${text}</span>`;
+    } else {
+      div.innerHTML = `<span class="chat-user">${user}:</span>${text}`;
+    }
+    
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+  }
+  
+  async sendChat() {
+    const input = document.getElementById('chat-input');
+    const text = input.value.trim();
+    if (!text || !this.user) return;
+    
+    this.addChat(this.user.username, text);
+    input.value = '';
+  }
+  
+  // OFFLINE MODE
+  setupOffline() {
+    document.getElementById('user-name').textContent = 'Guest';
+    document.getElementById('user-avatar').textContent = 'G';
+    document.getElementById('pred-question').textContent = '⚠️ Mode Offline';
+    document.getElementById('pred-options').innerHTML = '<div style="padding:20px;text-align:center;">Periksa koneksi atau konfigurasi Supabase</div>';
+  }
+  
+  // NOTIFICATION
+  showNotif(title, text) {
+    const notif = document.getElementById('notification');
+    document.getElementById('notif-title').textContent = title;
+    document.getElementById('notif-text').textContent = text;
+    notif.classList.add('show');
+    setTimeout(() => notif.classList.remove('show'), 4000);
+  }
+}
+
+// Initialize
+let bolaApp;
+document.addEventListener('DOMContentLoaded', () => {
+  bolaApp = new NopeBolaLive();
+});
+
+// Global functions
+window.sendChat = () => bolaApp?.sendChat();
+document.getElementById('chat-input')?.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') sendChat();
+});
+</script>
