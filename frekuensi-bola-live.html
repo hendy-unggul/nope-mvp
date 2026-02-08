@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="frekuensi-shared.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+    /* CSS sama seperti sebelumnya */
     .live-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
     .match-header { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
     .match-teams { display: flex; align-items: center; gap: 20px; flex: 1; }
@@ -47,7 +48,6 @@
     .pred-option-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(178, 102, 255, 0.15); transform: translateX(4px); }
     .pred-option-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .pred-option-btn.voted { border-color: var(--accent); background: rgba(178, 102, 255, 0.25); }
-    .pred-option-btn.correct { border-color: #4ade80; background: rgba(74, 222, 128, 0.2); }
     .pred-percentage { font-weight: 700; color: var(--accent); font-size: 14px; }
     .pred-results { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
     .result-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 12px; }
@@ -55,15 +55,8 @@
     .result-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
     .result-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #ff9999); border-radius: 4px; transition: width 0.5s; }
     .result-count { width: 50px; text-align: right; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-    .poll-item { padding: 14px; background: var(--surface-elevated); border-radius: 10px; border: 1px solid var(--border); margin-bottom: 12px; }
-    .poll-question { font-size: 13px; font-weight: 500; margin-bottom: 12px; }
-    .poll-options { display: flex; flex-wrap: wrap; gap: 8px; }
-    .poll-btn { padding: 8px 16px; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 12px; cursor: pointer; transition: all 0.2s; font-family: 'JetBrains Mono', monospace; }
-    .poll-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .poll-btn.selected { background: var(--accent); color: #000; border-color: var(--accent); }
     .leaderboard-list { display: flex; flex-direction: column; gap: 8px; }
-    .leader-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--surface-elevated); border-radius: 10px; font-size: 13px; transition: all 0.2s; }
-    .leader-item:hover { background: rgba(178, 102, 255, 0.08); transform: translateX(4px); }
+    .leader-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--surface-elevated); border-radius: 10px; font-size: 13px; }
     .leader-item.you { border: 1px solid var(--accent); background: rgba(178, 102, 255, 0.15); }
     .leader-rank { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--border); border-radius: 50%; font-weight: 700; font-size: 12px; font-family: 'JetBrains Mono', monospace; }
     .leader-rank.top { background: linear-gradient(135deg, var(--accent), #ff9999); color: #000; }
@@ -88,7 +81,6 @@
     .connection-status { position: fixed; top: 20px; left: 20px; padding: 10px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; font-size: 12px; display: flex; align-items: center; gap: 8px; z-index: 1000; transition: all 0.3s; }
     .connection-status.online { border-color: #4ade80; color: #4ade80; }
     .connection-status.offline { border-color: #ef4444; color: #ef4444; }
-    .connection-status.connecting { border-color: #fbbf24; color: #fbbf24; }
     .notification { position: fixed; top: 20px; right: 20px; background: var(--surface); border: 1px solid var(--accent); border-radius: 12px; padding: 18px 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.4); transform: translateX(400px); transition: transform 0.3s; z-index: 1000; max-width: 340px; }
     .notification.show { transform: translateX(0); }
     .notification-title { font-weight: 700; margin-bottom: 6px; color: var(--accent); font-size: 15px; }
@@ -121,7 +113,6 @@
     <div class="live-container">
       <a href="frekuensi-bola.html" class="back-btn">← Kembali ke Menu Bola</a>
       
-      <!-- Match Header -->
       <div class="match-header">
         <div class="match-teams">
           <div class="team">
@@ -140,9 +131,7 @@
         </div>
       </div>
 
-      <!-- Main Layout -->
       <div class="main-layout">
-        <!-- Video Section -->
         <div class="video-section">
           <div class="video-container">
             <iframe id="youtube-player" src="https://www.youtube.com/embed/36YnV9STBqc?autoplay=1&mute=1" allowfullscreen></iframe>
@@ -164,16 +153,10 @@
               <div class="stat-value" id="stat-predictions">--</div>
               <div class="stat-label">Prediksi</div>
             </div>
-            <div class="stat-item">
-              <div class="stat-value" id="stat-online">--</div>
-              <div class="stat-label">Online</div>
-            </div>
           </div>
         </div>
 
-        <!-- Sidebar -->
         <div class="sidebar">
-          <!-- User Profile -->
           <div class="panel">
             <div class="panel-content">
               <div class="user-mini">
@@ -187,7 +170,6 @@
             </div>
           </div>
 
-          <!-- Live Prediction -->
           <div class="panel">
             <div class="panel-header">
               <div class="panel-title"><span>⚡</span> Prediksi Live</div>
@@ -195,7 +177,7 @@
             </div>
             <div class="panel-content">
               <div class="current-prediction" id="prediction-box">
-                <div class="pred-question" id="pred-question">Memuat prediksi...</div>
+                <div class="pred-question" id="pred-question">Memuat...</div>
                 <div class="pred-timer-bar">
                   <div class="pred-timer-fill" id="pred-timer-bar" style="width: 100%"></div>
                 </div>
@@ -211,21 +193,6 @@
             </div>
           </div>
 
-          <!-- Quick Polls -->
-          <div class="panel">
-            <div class="panel-header">
-              <div class="panel-title"><span>📊</span> Polling Cepat</div>
-            </div>
-            <div class="panel-content">
-              <div class="poll-list" id="poll-list">
-                <div class="poll-item">
-                  <div class="skeleton" style="height: 60px;"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Mini Leaderboard -->
           <div class="panel">
             <div class="panel-header">
               <div class="panel-title"><span>🏆</span> Top Prediktor</div>
@@ -237,7 +204,6 @@
             </div>
           </div>
 
-          <!-- Live Chat -->
           <div class="panel">
             <div class="panel-header">
               <div class="panel-title"><span>💬</span> Obrolan</div>
@@ -271,9 +237,9 @@
     // NOPE BOLA LIVE - SUPABASE REAL-TIME
     // ==========================================
     
-    // ⚠️ GANTI DENGAN KONFIGURASI ANDA!
-    const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';  // ← GANTI!
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';  // ← GANTI DARI DASHBOARD!
+    // ⚠️ GANTI DENGAN ANON KEY ANDA DARI SUPABASE DASHBOARD!
+    const SUPABASE_URL = 'https://fuovfrdicdhnlymacpz.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bWFjcHoiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczODU3NjAwMCwiZXhwIjoyMDU0MTUyMDAwfQ.XXXXXXXXXXXXXXXX'; // ← GANTI INI!
     
     class NopeBolaLive {
       constructor() {
@@ -282,8 +248,6 @@
         this.matchId = 'match_001';
         this.currentPrediction = null;
         this.predictionTimer = null;
-        this.subscriptions = [];
-        
         this.init();
       }
       
@@ -291,19 +255,19 @@
         try {
           this.updateStatus('connecting', '🟡 Connecting...');
           
-          // Init Supabase
+          // Check if key is placeholder
+          if (SUPABASE_KEY.includes('XXXXXXXX') || SUPABASE_KEY === 'eyJhbGciOiJIUzI1NiIs...') {
+            throw new Error('Please set your Supabase Anon Key');
+          }
+          
           this.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
             auth: { persistSession: false }
           });
           
-          // Test connection
           await this.testConnection();
-          
-          // Setup
           await this.setupUser();
           await this.loadMatch();
           await this.loadCurrentPrediction();
-          await this.loadPolls();
           await this.loadLeaderboard();
           await this.loadChatHistory();
           this.setupRealtime();
@@ -313,8 +277,8 @@
           this.showNotification('🎉 Terhubung!', 'Selamat datang di NOPE Bola Live!');
           
         } catch (err) {
-          console.error('Init error:', err);
-          this.updateStatus('offline', '🔴 Offline');
+          console.error('Connection error:', err);
+          this.updateStatus('offline', '🔴 ' + (err.message || 'Connection failed'));
           this.setupOfflineMode();
         }
       }
@@ -334,30 +298,19 @@
       async setupUser() {
         const deviceId = await this.getDeviceId();
         
-        let { data: user } = await this.supabase
-          .from('users')
-          .select('*')
-          .eq('device_id', deviceId)
-          .single();
+        let { data: user } = await this.supabase.from('users').select('*').eq('device_id', deviceId).single();
         
         if (!user) {
           const username = this.generateUsername();
-          const { data: newUser } = await this.supabase
-            .from('users')
-            .insert([{ device_id: deviceId, username, points: 0, badge: 'NEW' }])
-            .select()
-            .single();
+          const { data: newUser } = await this.supabase.from('users').insert([{ device_id: deviceId, username, points: 0, badge: 'NEW' }]).select().single();
           user = newUser;
           this.showNotification('Selamat datang!', `Kamu adalah ${username}`);
         }
         
-        // Update last_active
         await this.supabase.from('users').update({ last_active: new Date().toISOString() }).eq('id', user.id);
         
         this.user = user;
         this.updateUserUI();
-        
-        // Enable chat
         document.getElementById('chat-input').disabled = false;
         document.getElementById('chat-send').disabled = false;
       }
@@ -387,35 +340,18 @@
         document.getElementById('user-points').textContent = `${this.user.points} XP`;
         
         const badge = document.getElementById('user-badge');
-        badge.textContent = this.user.badge;
-        if (this.user.points >= 1000) {
-          badge.textContent = 'LEGEND';
-          badge.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
-          badge.style.color = '#000';
-        } else if (this.user.points >= 500) {
-          badge.textContent = 'PRO';
-        } else if (this.user.points >= 100) {
-          badge.textContent = 'ACTIVE';
-        }
+        if (this.user.points >= 1000) { badge.textContent = 'LEGEND'; badge.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)'; badge.style.color = '#000'; }
+        else if (this.user.points >= 500) { badge.textContent = 'PRO'; }
+        else if (this.user.points >= 100) { badge.textContent = 'ACTIVE'; }
       }
       
       async loadMatch() {
         let { data: match } = await this.supabase.from('matches').select('*').eq('id', this.matchId).single();
-        
         if (!match) {
-          const { data: newMatch } = await this.supabase.from('matches').insert([{
-            id: this.matchId, team_a: 'Tim Merah', team_b: 'Tim Biru', score_a: 0, score_b: 0,
-            match_time: 67 * 60 + 32, possession_a: 55, possession_b: 45,
-            shots_a: 8, shots_b: 3, corners_a: 4, corners_b: 2, is_live: true
-          }]).select().single();
+          const { data: newMatch } = await this.supabase.from('matches').insert([{ id: this.matchId, team_a: 'Tim Merah', team_b: 'Tim Biru', score_a: 0, score_b: 0, match_time: 67 * 60 + 32, possession_a: 55, possession_b: 45, shots_a: 8, shots_b: 3, corners_a: 4, corners_b: 2, is_live: true }]).select().single();
           match = newMatch;
         }
-        
         this.matchData = match;
-        this.updateMatchUI(match);
-      }
-      
-      updateMatchUI(match) {
         document.getElementById('stat-possession').textContent = `${match.possession_a}%`;
         document.getElementById('stat-shots').textContent = match.shots_a + match.shots_b;
         document.getElementById('stat-corners').textContent = match.corners_a + match.corners_b;
@@ -433,9 +369,7 @@
       
       async loadCurrentPrediction() {
         let { data: pred } = await this.supabase.from('predictions').select('*').eq('match_id', this.matchId).eq('is_active', true).order('created_at', { ascending: false }).limit(1).single();
-        
         if (!pred) pred = await this.createPrediction();
-        
         this.currentPrediction = pred;
         this.renderPrediction(pred);
         this.startPredictionTimer(pred);
@@ -447,19 +381,13 @@
           { q: "Siapa yang akan dapat corner berikutnya?", opts: [{id:'merah',l:'Tim Merah',p:75},{id:'biru',l:'Tim Biru',p:75}] }
         ];
         const t = templates[Math.floor(Math.random() * templates.length)];
-        
-        const { data: pred } = await this.supabase.from('predictions').insert([{
-          match_id: this.matchId, question: t.q, options: t.opts, duration: 60, is_active: true,
-          ends_at: new Date(Date.now() + 60000).toISOString()
-        }]).select().single();
-        
+        const { data: pred } = await this.supabase.from('predictions').insert([{ match_id: this.matchId, question: t.q, options: t.opts, duration: 60, is_active: true, ends_at: new Date(Date.now() + 60000).toISOString() }]).select().single();
         return pred;
       }
       
       renderPrediction(pred) {
         document.getElementById('pred-question').textContent = pred.question;
         document.getElementById('pred-round').textContent = 'Round 1';
-        
         const container = document.getElementById('pred-options');
         container.innerHTML = pred.options.map(opt => `
           <button class="pred-option-btn" onclick="bolaApp.makePrediction('${opt.id}')" id="pred-btn-${opt.id}">
@@ -467,7 +395,6 @@
             <span class="pred-percentage" id="pct-${opt.id}">0%</span>
           </button>
         `).join('');
-        
         this.checkUserVote(pred.id);
         this.loadVoteCounts(pred.id);
       }
@@ -486,14 +413,11 @@
         const counts = {};
         (votes || []).forEach(v => counts[v.option_id] = (counts[v.option_id] || 0) + 1);
         const total = votes?.length || 0;
-        
         document.getElementById('stat-predictions').textContent = total.toLocaleString();
-        
         Object.keys(counts).forEach(key => {
           const btn = document.getElementById(`pred-btn-${key}`);
           if (btn) btn.querySelector('.pred-percentage').textContent = `${Math.round((counts[key]/total)*100) || 0}%`;
         });
-        
         this.renderResultsBars(counts, total, this.currentPrediction.options);
       }
       
@@ -522,10 +446,7 @@
         const { data: existing } = await this.supabase.from('prediction_votes').select('*').eq('prediction_id', this.currentPrediction.id).eq('user_id', this.user.username).single();
         if (existing) { this.showNotification('Sudah voting!', 'Kamu sudah prediksi'); return; }
         
-        await this.supabase.from('prediction_votes').insert([{
-          prediction_id: this.currentPrediction.id, user_id: this.user.username, option_id: optionId
-        }]);
-        
+        await this.supabase.from('prediction_votes').insert([{ prediction_id: this.currentPrediction.id, user_id: this.user.username, option_id: optionId }]);
         document.querySelectorAll('.pred-option-btn').forEach(btn => btn.disabled = true);
         document.getElementById(`pred-btn-${optionId}`)?.classList.add('voted');
         document.getElementById('pred-results').style.display = 'block';
@@ -535,11 +456,9 @@
       async resolvePrediction() {
         const options = this.currentPrediction.options;
         const winner = options[Math.floor(Math.random() * options.length)].id;
-        
         await this.supabase.from('predictions').update({ is_active: false, winning_option: winner }).eq('id', this.currentPrediction.id);
         
         const { data: userVote } = await this.supabase.from('prediction_votes').select('*').eq('prediction_id', this.currentPrediction.id).eq('user_id', this.user.username).single();
-        
         if (userVote?.option_id === winner) {
           const points = options.find(o => o.id === winner).p;
           await this.supabase.from('users').update({ points: this.user.points + points }).eq('id', this.user.id);
@@ -548,41 +467,14 @@
           this.showNotification('🎉 Benar!', `+${points} XP!`);
           this.addChat('System', `🏆 ${this.user.username} benar! +${points} XP`, true);
         }
-        
         document.getElementById(`pred-btn-${winner}`)?.classList.add('correct');
         setTimeout(() => this.loadCurrentPrediction(), 5000);
-      }
-      
-      async loadPolls() {
-        const { data: polls } = await this.supabase.from('polls').select('*').eq('match_id', this.matchId).eq('is_active', true).limit(2);
-        const container = document.getElementById('poll-list');
-        
-        if (!polls?.length) {
-          container.innerHTML = `
-            <div class="poll-item"><div class="poll-question">Man of the Match?</div><div class="poll-options">
-              <button class="poll-btn" onclick="votePoll(this,'motm','a')">Pemain A</button>
-              <button class="poll-btn" onclick="votePoll(this,'motm','b')">Pemain B</button>
-            </div></div>
-            <div class="poll-item"><div class="poll-question">Prediksi skor?</div><div class="poll-options">
-              <button class="poll-btn" onclick="votePoll(this,'score','1-0')">1-0</button>
-              <button class="poll-btn" onclick="votePoll(this,'score','2-1')">2-1</button>
-              <button class="poll-btn" onclick="votePoll(this,'score','draw')">Draw</button>
-            </div></div>`;
-          return;
-        }
-        
-        container.innerHTML = polls.map(p => `
-          <div class="poll-item"><div class="poll-question">${p.question}</div><div class="poll-options">
-            ${p.options.map(o => `<button class="poll-btn" onclick="votePoll(this,'${p.id}','${o.id}')">${o.l}</button>`).join('')}
-          </div></div>
-        `).join('');
       }
       
       async loadLeaderboard() {
         const { data: users } = await this.supabase.from('users').select('username, points, badge').order('points', { ascending: false }).limit(10);
         const container = document.getElementById('leaderboard');
         const top3 = (users || []).slice(0, 3);
-        
         let html = top3.map((u, i) => `
           <div class="leader-item ${u.username === this.user?.username ? 'you' : ''}">
             <div class="leader-rank ${i < 3 ? 'top' : ''}">${i + 1}</div>
@@ -590,11 +482,9 @@
             <div class="leader-points">${u.points}</div>
           </div>
         `).join('');
-        
         if (!top3.find(u => u.username === this.user?.username)) {
           html += `<div class="leader-item you"><div class="leader-rank">?</div><div class="leader-name">${this.user.username}</div><div class="leader-points">${this.user.points}</div></div>`;
         }
-        
         container.innerHTML = html;
       }
       
@@ -606,15 +496,13 @@
       }
       
       setupRealtime() {
-        this.supabase.channel('chat').on('postgres_changes', 
-          { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `match_id=eq.${this.matchId}` },
-          (payload) => this.addChat(payload.new.username, payload.new.message, payload.new.is_system)
-        ).subscribe();
+        this.supabase.channel('chat').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages', filter: `match_id=eq.${this.matchId}` }, (payload) => {
+          this.addChat(payload.new.username, payload.new.message, payload.new.is_system);
+        }).subscribe();
         
-        this.supabase.channel('votes').on('postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'prediction_votes' },
-          () => { if (this.currentPrediction) this.loadVoteCounts(this.currentPrediction.id); }
-        ).subscribe();
+        this.supabase.channel('votes').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'prediction_votes' }, () => {
+          if (this.currentPrediction) this.loadVoteCounts(this.currentPrediction.id);
+        }).subscribe();
       }
       
       addChat(user, text, isSystem = false) {
@@ -630,18 +518,17 @@
         const input = document.getElementById('chat-input');
         const text = input.value.trim();
         if (!text) return;
-        
-        await this.supabase.from('chat_messages').insert([{
-          match_id: this.matchId, user_id: this.user.username, username: this.user.username, message: text
-        }]);
+        await this.supabase.from('chat_messages').insert([{ match_id: this.matchId, user_id: this.user.username, username: this.user.username, message: text }]);
         input.value = '';
       }
       
       setupOfflineMode() {
         this.user = { username: 'Guest_' + Math.floor(Math.random() * 1000), points: 0, badge: 'OFFLINE' };
         this.updateUserUI();
-        document.getElementById('pred-question').textContent = '⚠️ Mode Offline';
-        document.getElementById('pred-options').innerHTML = '<div style="padding:20px;text-align:center;">Hubungkan ke internet</div>';
+        document.getElementById('pred-question').textContent = '⚠️ Mode Offline - Supabase Key Belum Diisi';
+        document.getElementById('pred-options').innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">Hubungkan ke internet atau periksa konfigurasi Supabase</div>';
+        document.getElementById('chat-input').disabled = true;
+        document.getElementById('chat-send').disabled = true;
       }
       
       showNotification(title, text) {
@@ -653,19 +540,11 @@
       }
     }
     
-    // Initialize
     let bolaApp;
     document.addEventListener('DOMContentLoaded', () => { bolaApp = new NopeBolaLive(); });
-    
-    // Global functions
     window.makePrediction = (opt) => bolaApp.makePrediction(opt);
-    window.votePoll = (btn, poll, opt) => {
-      btn.parentElement.querySelectorAll('.poll-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      bolaApp.showNotification('Vote tercatat!', `Kamu memilih: ${opt}`);
-    };
     window.sendChat = () => bolaApp.sendChat();
     document.getElementById('chat-input')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendChat(); });
   </script>
 </body>
-</html>
+</html>ff
