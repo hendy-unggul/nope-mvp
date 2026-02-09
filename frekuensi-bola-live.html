@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NOPE — Bola Live</title>
+  <title>NOPE — Bola Live | Rp 15.000 Menangkan Handphone!</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ff9999'/%3E%3Ctext x='50' y='70' font-size='60' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%23000'%3ENO%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Supabase JS SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -16,13 +16,17 @@
     :root {
       --bg: #0a0a0a;
       --surface: #121212;
+      --surface-2: #1a1a1a;
       --border: #222222;
       --text: #e6e6e6;
       --muted: #8a8a8a;
       --accent: #b266ff;
       --success: #00ff88;
       --danger: #ff6b6b;
+      --warning: #ffcc00;
       --logo-color: #ff9999;
+      --im3-yellow: #ffcc00;
+      --im3-red: #ff3333;
     }
     
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -41,6 +45,7 @@
       margin: 0 auto;
     }
     
+    /* ==================== HEADER ==================== */
     .header {
       display: flex;
       justify-content: space-between;
@@ -49,6 +54,7 @@
       background: var(--surface);
       border-radius: 12px;
       margin-bottom: 20px;
+      border: 1px solid var(--border);
     }
     
     .user-info {
@@ -58,8 +64,8 @@
     }
     
     .user-avatar {
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
       background: var(--accent);
       display: flex;
@@ -67,6 +73,8 @@
       justify-content: center;
       font-weight: 700;
       color: #000;
+      font-size: 16px;
+      border: 2px solid var(--accent);
     }
     
     .user-details {
@@ -84,11 +92,24 @@
       color: var(--muted);
     }
     
+    .wallet-badge {
+      background: linear-gradient(135deg, var(--im3-yellow), var(--warning));
+      color: #000;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
     .connection-status {
       padding: 6px 12px;
       border-radius: 20px;
       font-size: 12px;
-      background: var(--surface);
+      background: var(--surface-2);
       border: 1px solid var(--border);
     }
     
@@ -97,11 +118,224 @@
       color: var(--success);
     }
     
-    .connection-status.offline {
-      border-color: var(--danger);
-      color: var(--danger);
+    /* ==================== PROMO BANNER ==================== */
+    .promo-banner {
+      background: linear-gradient(135deg, #1a0a2e 0%, #16213e 50%, #0f3460 100%);
+      border: 2px solid var(--im3-yellow);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
     }
     
+    .promo-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(255,204,0,0.1) 0%, transparent 70%);
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.1); }
+    }
+    
+    .promo-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .promo-text h2 {
+      font-family: 'Manrope', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, var(--text), var(--im3-yellow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .promo-text p {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    
+    .promo-price {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      background: rgba(255,204,0,0.1);
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--im3-yellow);
+    }
+    
+    .price-old {
+      text-decoration: line-through;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    
+    .price-new {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--im3-yellow);
+      font-family: 'Manrope', sans-serif;
+    }
+    
+    .promo-cta {
+      background: linear-gradient(135deg, var(--im3-yellow), var(--warning));
+      color: #000;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'Manrope', sans-serif;
+    }
+    
+    .promo-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255,204,0,0.3);
+    }
+    
+    .promo-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: var(--im3-red);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      animation: blink 2s infinite;
+    }
+    
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    /* ==================== PRIZE SHOWCASE ==================== */
+    .prize-showcase {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .prize-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+    
+    .prize-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+    }
+    
+    .prize-card.grand {
+      border-color: var(--im3-yellow);
+      background: linear-gradient(135deg, rgba(255,204,0,0.1), transparent);
+    }
+    
+    .prize-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    
+    .prize-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--im3-yellow);
+      font-family: 'Manrope', sans-serif;
+    }
+    
+    .prize-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    
+    .prize-winners {
+      font-size: 12px;
+      color: var(--success);
+      margin-top: 8px;
+      font-weight: 600;
+    }
+    
+    /* ==================== IM3 PARTNER BAR ==================== */
+    .partner-bar {
+      background: linear-gradient(90deg, #1a1a1a, #2a1a3e, #1a1a1a);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .partner-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .im3-badge {
+      background: linear-gradient(135deg, var(--im3-yellow), #ff9900);
+      color: #000;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 18px;
+      font-family: 'Manrope', sans-serif;
+      letter-spacing: -0.5px;
+    }
+    
+    .partner-benefit {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    
+    .partner-benefit span {
+      color: var(--im3-yellow);
+      font-weight: 600;
+    }
+    
+    .partner-cta {
+      background: transparent;
+      border: 1px solid var(--im3-yellow);
+      color: var(--im3-yellow);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .partner-cta:hover {
+      background: var(--im3-yellow);
+      color: #000;
+    }
+    
+    /* ==================== MAIN GRID ==================== */
     .grid {
       display: grid;
       grid-template-columns: 2fr 1fr;
@@ -111,6 +345,16 @@
     
     @media (max-width: 768px) {
       .grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .promo-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+      }
+      
+      .prize-showcase {
         grid-template-columns: 1fr;
       }
     }
@@ -126,260 +370,48 @@
       font-size: 16px;
       font-weight: 600;
       margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
-    /* Video Player Styles */
+    /* ==================== VIDEO CONTAINER ==================== */
+    .video-wrapper {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    
     .video-container {
       position: relative;
-      padding-bottom: 56.25%; /* 16:9 aspect ratio */
+      padding-bottom: 56.25%;
       height: 0;
       overflow: hidden;
       background: #000;
       border-radius: 12px;
-    }
-    
-    .video-container iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-    }
-    
-    .live-badge {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      background: var(--danger);
-      color: white;
-      padding: 4px 12px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      z-index: 10;
-      animation: pulse-badge 2s ease-in-out infinite;
-    }
-    
-    @keyframes pulse-badge {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-    
-    .match-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    
-    .match-time {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--accent);
-    }
-    
-    .pred-section {
-      margin-bottom: 20px;
-    }
-    
-    .pred-question {
-      font-size: 16px;
-      margin-bottom: 12px;
-      font-weight: 500;
-    }
-    
-    .pred-options {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-    
-    .pred-option-btn {
-      background: var(--surface);
       border: 2px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-      color: var(--text);
-      font-size: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
     }
     
-    .pred-option-btn:hover:not(:disabled) {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-    }
-    
-    .pred-option-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    
-    .pred-option-btn.voted {
-      border-color: var(--accent);
-      background: rgba(178, 102, 255, 0.1);
-    }
-    
-    .pred-option-btn.correct {
-      border-color: var(--success);
-      background: rgba(0, 255, 136, 0.1);
-    }
-    
-    .pred-percentage {
-      font-size: 12px;
-      color: var(--muted);
-    }
-    
-    .pred-timer {
-      height: 4px;
-      background: var(--border);
-      border-radius: 2px;
-      overflow: hidden;
-      margin-bottom: 8px;
-    }
-    
-    .pred-timer-bar {
-      height: 100%;
-      background: var(--accent);
-      width: 100%;
-      transition: width 1s linear;
-    }
-    
-    .next-prediction {
-      font-size: 12px;
-      color: var(--muted);
-      text-align: center;
-    }
-    
-    .pred-results {
-      padding: 12px;
-      background: rgba(178, 102, 255, 0.05);
-      border-radius: 8px;
-      font-size: 13px;
-      text-align: center;
-      display: none;
-    }
-    
-    .leaderboard {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    
-    .leader-item {
-      display: grid;
-      grid-template-columns: 40px 1fr auto;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      background: rgba(255, 255, 255, 0.02);
-      border-radius: 8px;
-    }
-    
-    .leader-item.you {
-      background: rgba(178, 102, 255, 0.1);
-      border: 1px solid var(--accent);
-    }
-    
-    .leader-rank {
-      font-size: 18px;
-      font-weight: 700;
-      text-align: center;
-      color: var(--muted);
-    }
-    
-    .leader-rank.top {
-      color: var(--accent);
-    }
-    
-    .leader-name {
-      font-size: 14px;
-    }
-    
-    .leader-points {
-      font-size: 13px;
-      color: var(--muted);
-    }
-    
-    .chat-section {
-      display: flex;
-      flex-direction: column;
-      height: 400px;
-    }
-    
-    .chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 12px;
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 8px;
-      margin-bottom: 12px;
-    }
-    
-    .chat-message {
-      margin-bottom: 8px;
-      font-size: 13px;
-      line-height: 1.4;
-    }
-    
-    .chat-user {
-      font-weight: 600;
-      color: var(--accent);
-      margin-right: 4px;
-    }
-    
-    .chat-input-group {
-      display: flex;
-      gap: 8px;
-    }
-    
-    /* YouTube Embed */
-    .video-container {
-      position: relative;
-      padding-bottom: 56.25%; /* 16:9 aspect ratio */
-      height: 0;
-      overflow: hidden;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      background: #000;
-    }
-    
-    .video-container iframe {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border: 0;
-      border-radius: 12px;
-    }
-    
-    /* Video Dummy Screen */
+    .video-container iframe,
     .video-dummy {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
+      border: none;
+      border-radius: 12px;
+    }
+    
+    .video-dummy {
       background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 12px;
     }
     
     .video-dummy-content {
       text-align: center;
       padding: 20px;
-      max-width: 90%;
     }
     
     .trophy-icon {
@@ -394,12 +426,11 @@
     }
     
     .event-title {
+      font-family: 'Manrope', sans-serif;
       font-size: 32px;
-      font-weight: 700;
-      color: var(--text);
+      font-weight: 800;
       margin-bottom: 16px;
       letter-spacing: -0.02em;
-      line-height: 1.2;
     }
     
     .media-badge {
@@ -410,17 +441,15 @@
       border-radius: 8px;
       font-size: 14px;
       font-weight: 700;
-      letter-spacing: 1px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
     
     .nope-logo {
-      font-size: 48px;
-      font-weight: 700;
-      color: var(--logo-color);
-      margin-bottom: 20px;
       font-family: 'Manrope', sans-serif;
-      letter-spacing: -0.02em;
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--logo-color);
+      margin-bottom: 16px;
     }
     
     .stream-info {
@@ -445,67 +474,478 @@
       50% { opacity: 0.5; transform: scale(1.2); }
     }
     
-    /* Mobile adjustments */
-    @media (max-width: 768px) {
-      .trophy-icon {
-        font-size: 60px;
-        margin-bottom: 16px;
-      }
-      
-      .event-title {
-        font-size: 24px;
-        margin-bottom: 12px;
-      }
-      
-      .media-badge {
-        font-size: 12px;
-        padding: 6px 20px;
-        margin-bottom: 20px;
-      }
-      
-      .nope-logo {
-        font-size: 36px;
-        margin-bottom: 16px;
-      }
-      
-      .stream-info {
-        font-size: 12px;
-      }
+    /* ==================== IM3 BANNER OVERLAY ==================== */
+    .im3-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(0deg, rgba(0,0,0,0.95), transparent);
+      padding: 40px 20px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      pointer-events: none;
     }
     
-    @media (max-width: 480px) {
-      .trophy-icon {
-        font-size: 48px;
-        margin-bottom: 12px;
-      }
-      
-      .event-title {
-        font-size: 20px;
-        margin-bottom: 10px;
-      }
-      
-      .media-badge {
-        font-size: 11px;
-        padding: 5px 16px;
-        margin-bottom: 16px;
-      }
-      
-      .nope-logo {
-        font-size: 32px;
-        margin-bottom: 12px;
-      }
-      
-      .stream-info {
-        font-size: 11px;
-      }
+    .im3-branding {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .im3-logo-text {
+      font-family: 'Manrope', sans-serif;
+      font-size: 36px;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--im3-yellow), #fff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .im3-tagline {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    
+    .im3-promo {
+      text-align: right;
+    }
+    
+    .im3-promo-text {
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    
+    .im3-promo-code {
+      background: var(--im3-yellow);
+      color: #000;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    
+    /* ==================== LIVE BADGE ==================== */
+    .live-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: var(--danger);
+      color: white;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      z-index: 10;
+      animation: pulse-badge 2s ease-in-out infinite;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    @keyframes pulse-badge {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(255,107,107,0.7); }
+      50% { opacity: 0.9; box-shadow: 0 0 0 10px rgba(255,107,107,0); }
+    }
+    
+    /* ==================== PREDICTION SECTION ==================== */
+    .match-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .match-info h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .match-league {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    
+    .match-time {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+      font-family: 'Manrope', sans-serif;
+    }
+    
+    .pred-section {
+      margin-bottom: 20px;
+    }
+    
+    .pred-question {
+      font-size: 16px;
+      margin-bottom: 16px;
+      font-weight: 500;
+      line-height: 1.6;
+    }
+    
+    .pred-question .highlight {
+      color: var(--im3-yellow);
+      font-weight: 700;
+    }
+    
+    .pred-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    
+    .pred-option-btn {
+      background: var(--surface-2);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+      color: var(--text);
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-align: left;
+    }
+    
+    .pred-option-btn:hover:not(:disabled) {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+      background: rgba(178, 102, 255, 0.05);
+    }
+    
+    .pred-option-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .pred-option-btn.voted {
+      border-color: var(--accent);
+      background: rgba(178, 102, 255, 0.1);
+    }
+    
+    .pred-option-btn.correct {
+      border-color: var(--success);
+      background: rgba(0, 255, 136, 0.1);
+    }
+    
+    .pred-option-btn.wrong {
+      border-color: var(--danger);
+      opacity: 0.7;
+    }
+    
+    .pred-label {
+      font-weight: 600;
+      font-size: 16px;
+    }
+    
+    .pred-odds {
+      font-size: 12px;
+      color: var(--im3-yellow);
+      font-weight: 700;
+    }
+    
+    .pred-percentage {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    
+    .pred-timer {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    
+    .pred-timer-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--im3-yellow));
+      width: 100%;
+      transition: width 1s linear;
+    }
+    
+    .pred-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    
+    .pred-pool {
+      color: var(--im3-yellow);
+      font-weight: 600;
+    }
+    
+    .pred-results {
+      padding: 16px;
+      background: rgba(0, 255, 136, 0.05);
+      border: 1px solid var(--success);
+      border-radius: 12px;
+      font-size: 14px;
+      text-align: center;
+      display: none;
+    }
+    
+    .pred-results.show {
+      display: block;
+      animation: slide-in 0.3s ease;
+    }
+    
+    @keyframes slide-in {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* ==================== ENTRY FEE MODAL ==================== */
+    .entry-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    
+    .entry-card {
+      background: var(--surface);
+      border: 2px solid var(--im3-yellow);
+      border-radius: 20px;
+      padding: 32px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+    }
+    
+    .entry-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+    
+    .entry-title {
+      font-family: 'Manrope', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    
+    .entry-desc {
+      color: var(--muted);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    
+    .entry-price {
+      font-size: 48px;
+      font-weight: 800;
+      color: var(--im3-yellow);
+      font-family: 'Manrope', sans-serif;
+      margin-bottom: 8px;
+    }
+    
+    .entry-price-note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+    
+    .entry-benefits {
+      text-align: left;
+      background: var(--surface-2);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    
+    .entry-benefit {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+    
+    .entry-benefit:last-child {
+      margin-bottom: 0;
+    }
+    
+    .entry-benefit-icon {
+      color: var(--success);
+      font-weight: 700;
+    }
+    
+    .entry-btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--im3-yellow), var(--warning));
+      color: #000;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'Manrope', sans-serif;
+      margin-bottom: 12px;
+    }
+    
+    .entry-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255,204,0,0.3);
+    }
+    
+    .entry-skip {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      width: 100%;
+    }
+    
+    /* ==================== LEADERBOARD ==================== */
+    .leaderboard {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .leader-item {
+      display: grid;
+      grid-template-columns: 36px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: var(--surface-2);
+      border-radius: 10px;
+      transition: all 0.2s;
+    }
+    
+    .leader-item:hover {
+      background: rgba(255,255,255,0.05);
+    }
+    
+    .leader-item.you {
+      background: rgba(178, 102, 255, 0.1);
+      border: 1px solid var(--accent);
+    }
+    
+    .leader-item.winner {
+      background: rgba(255,204,0,0.1);
+      border: 1px solid var(--im3-yellow);
+    }
+    
+    .leader-rank {
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+      color: var(--muted);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--surface);
+    }
+    
+    .leader-rank.top {
+      background: var(--im3-yellow);
+      color: #000;
+    }
+    
+    .leader-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .leader-prize {
+      font-size: 12px;
+      color: var(--im3-yellow);
+      font-weight: 600;
+    }
+    
+    /* ==================== CHAT ==================== */
+    .chat-section {
+      display: flex;
+      flex-direction: column;
+      height: 400px;
+    }
+    
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      background: var(--surface-2);
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .chat-message {
+      margin-bottom: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.03);
+    }
+    
+    .chat-message.system {
+      background: rgba(178, 102, 255, 0.1);
+      border-left: 3px solid var(--accent);
+    }
+    
+    .chat-message.winner {
+      background: rgba(255,204,0,0.1);
+      border-left: 3px solid var(--im3-yellow);
+      animation: highlight 2s ease;
+    }
+    
+    @keyframes highlight {
+      0% { background: rgba(255,204,0,0.3); }
+      100% { background: rgba(255,204,0,0.1); }
+    }
+    
+    .chat-user {
+      font-weight: 700;
+      color: var(--accent);
+      margin-right: 6px;
+    }
+    
+    .chat-user.winner {
+      color: var(--im3-yellow);
+    }
+    
+    .chat-input-group {
+      display: flex;
+      gap: 8px;
     }
     
     .chat-input {
       flex: 1;
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--surface-2);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
+      border-radius: 10px;
+      padding: 12px;
       color: var(--text);
       font-family: inherit;
       font-size: 13px;
@@ -519,12 +959,13 @@
     .chat-send {
       background: var(--accent);
       border: none;
-      border-radius: 8px;
-      padding: 10px 20px;
+      border-radius: 10px;
+      padding: 12px 20px;
       color: #000;
       font-weight: 600;
       cursor: pointer;
       font-family: inherit;
+      transition: all 0.2s;
     }
     
     .chat-send:hover:not(:disabled) {
@@ -536,45 +977,171 @@
       cursor: not-allowed;
     }
     
+    /* ==================== NOTIFICATION ==================== */
     .notification {
       position: fixed;
       top: 20px;
       right: 20px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px 20px;
-      min-width: 300px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      border-radius: 16px;
+      padding: 20px;
+      min-width: 320px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
       transform: translateX(400px);
-      transition: transform 0.3s ease;
-      z-index: 1000;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 1001;
     }
     
     .notification.show {
       transform: translateX(0);
     }
     
+    .notification.win {
+      border-color: var(--im3-yellow);
+      background: linear-gradient(135deg, rgba(255,204,0,0.1), var(--surface));
+    }
+    
+    .notif-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    
     .notif-title {
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 16px;
       margin-bottom: 4px;
     }
     
     .notif-text {
       font-size: 13px;
       color: var(--muted);
+      line-height: 1.5;
+    }
+    
+    .notif-prize {
+      margin-top: 12px;
+      padding: 12px;
+      background: rgba(255,204,0,0.1);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--im3-yellow);
+      font-weight: 600;
+    }
+    
+    /* ==================== BOTTOM IM3 BAR ==================== */
+    .bottom-im3-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(90deg, #1a0a2e, #0f3460, #1a0a2e);
+      border-top: 2px solid var(--im3-yellow);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+    }
+    
+    .bottom-im3-logo {
+      font-family: 'Manrope', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--im3-yellow);
+    }
+    
+    .bottom-im3-promo {
+      font-size: 13px;
+      color: var(--text);
+    }
+    
+    .bottom-im3-promo span {
+      color: var(--im3-yellow);
+      font-weight: 700;
+    }
+    
+    .bottom-im3-cta {
+      background: var(--im3-yellow);
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    
+    body {
+      padding-bottom: 80px; /* Space for bottom bar */
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
+    <!-- PROMO BANNER -->
+    <div class="promo-banner">
+      <div class="promo-badge">🔥 TERBATAS</div>
+      <div class="promo-content">
+        <div class="promo-text">
+          <h2>🏆 Menangkan Handphone!</h2>
+          <p>Prediksi 5 pertandingan, jadi top predictor, menangkan Samsung Galaxy A14 + 1 tahun internet IM3</p>
+          <div class="promo-price">
+            <span class="price-old">Rp 50.000</span>
+            <span class="price-new">Rp 15.000</span>
+            <span>/match</span>
+          </div>
+        </div>
+        <button class="promo-cta" onclick="bolaApp.showEntryModal()">
+          Ikut Sekarang
+        </button>
+      </div>
+    </div>
+    
+    <!-- PRIZE SHOWCASE -->
+    <div class="prize-showcase">
+      <div class="prize-card grand">
+        <div class="prize-icon">📱</div>
+        <div class="prize-value">Rp 2.500.000</div>
+        <div class="prize-label">Handphone + Internet 1 Tahun</div>
+        <div class="prize-winners">1 pemenang/bulan</div>
+      </div>
+      <div class="prize-card">
+        <div class="prize-icon">💎</div>
+        <div class="prize-value">Rp 500.000</div>
+        <div class="prize-label">Voucher IM3</div>
+        <div class="prize-winners">1 pemenang/match</div>
+      </div>
+      <div class="prize-card">
+        <div class="prize-icon">🎁</div>
+        <div class="prize-value">Rp 10K-100K</div>
+        <div class="prize-label">Pulsa/Internet</div>
+        <div class="prize-winners">65 pemenang/match</div>
+      </div>
+    </div>
+    
+    <!-- IM3 PARTNER BAR -->
+    <div class="partner-bar">
+      <div class="partner-logo">
+        <div class="im3-badge">IM3</div>
+        <div class="partner-benefit">
+          Official Partner <span>NOPE Bola Live</span><br>
+          <small>Voucher pulsa & internet untuk semua pemenang</small>
+        </div>
+      </div>
+      <button class="partner-cta">Cek Kuota IM3</button>
+    </div>
+    
+    <!-- HEADER -->
     <div class="header">
       <div class="user-info">
         <div class="user-avatar" id="user-avatar">?</div>
         <div class="user-details">
-          <div class="user-name" id="user-name">Loading...</div>
+          <div class="user-name" id="user-name">Guest</div>
           <div class="user-points" id="user-points">0 XP</div>
+          <div class="wallet-badge" id="wallet-badge" style="display: none;">
+            💰 Rp <span id="wallet-balance">0</span>
+          </div>
         </div>
       </div>
       <div class="connection-status" id="connection-status">
@@ -582,82 +1149,177 @@
       </div>
     </div>
     
-    <!-- Main Grid -->
+    <!-- MAIN GRID -->
     <div class="grid">
-      <!-- Left Column -->
+      <!-- LEFT COLUMN -->
       <div>
-        <!-- Live Video Stream -->
-        <div class="card" style="padding: 0; overflow: hidden; position: relative;">
-          <div class="live-badge">🔴 LIVE</div>
+        <!-- VIDEO -->
+        <div class="video-wrapper">
           <div class="video-container">
-            <!-- Mobile-friendly dummy screen -->
+            <div class="live-badge">
+              <span class="dot-pulse"></span>
+              🔴 LIVE
+            </div>
+            
             <div class="video-dummy">
               <div class="video-dummy-content">
                 <div class="trophy-icon">🏆</div>
-                <h2 class="event-title">Piala Soeratin 2026</h2>
+                <h2 class="event-title">Liga Jakarta U15</h2>
                 <div class="media-badge">MEDIA PARTNER</div>
                 <div class="nope-logo">NOPE</div>
                 <div class="stream-info">
                   <span class="dot-pulse"></span>
-                  <span>Live Streaming akan segera dimulai</span>
+                  <span>Streaming dimulai dalam 15:00</span>
                 </div>
+              </div>
+            </div>
+            
+            <!-- IM3 BANNER OVERLAY -->
+            <div class="im3-overlay">
+              <div class="im3-branding">
+                <div>
+                  <div class="im3-logo-text">IM3</div>
+                  <div class="im3-tagline">Powered by Indosat Ooredoo Hutchison</div>
+                </div>
+              </div>
+              <div class="im3-promo">
+                <div class="im3-promo-text">Kode Promo:</div>
+                <div class="im3-promo-code">NOPEIM3</div>
               </div>
             </div>
           </div>
         </div>
         
-        <!-- Match Info -->
-        <div class="card" style="margin-top: 20px;">
+        <!-- MATCH & PREDICTION -->
+        <div class="card">
           <div class="match-header">
-            <div>
-              <div style="font-size: 12px; color: var(--muted); margin-bottom: 4px;">LIVE MATCH</div>
-              <div style="font-size: 18px; font-weight: 600;">Premier League Live</div>
+            <div class="match-info">
+              <h3>Persija U15 vs Persib U15</h3>
+              <div class="match-league">Liga Jakarta U15 - Matchday 12</div>
             </div>
-            <div class="match-time" id="match-time">67:32</div>
+            <div class="match-time" id="match-time">--:--</div>
           </div>
           
-          <!-- Prediction -->
-          <div class="pred-section">
-            <div class="pred-question" id="pred-question">Loading...</div>
+          <div class="pred-section" id="pred-section" style="opacity: 0.5; pointer-events: none;">
+            <div class="pred-question">
+              🔮 <span class="highlight">Prediksi:</span> Siapa yang akan mencetak gol pertama?
+            </div>
             <div class="pred-options" id="pred-options">
-              <!-- Buttons will be inserted here -->
+              <button class="pred-option-btn" disabled>
+                <span class="pred-label">⚽ Persija U15</span>
+                <span class="pred-odds">Odds: 2.1x</span>
+                <span class="pred-percentage">45% memilih</span>
+              </button>
+              <button class="pred-option-btn" disabled>
+                <span class="pred-label">⚽ Persib U15</span>
+                <span class="pred-odds">Odds: 2.3x</span>
+                <span class="pred-percentage">40% memilih</span>
+              </button>
             </div>
             <div class="pred-timer">
-              <div class="pred-timer-bar" id="pred-timer-bar"></div>
+              <div class="pred-timer-bar" style="width: 0%"></div>
             </div>
-            <div class="next-prediction" id="next-prediction">Waktu: 1:00</div>
+            <div class="pred-meta">
+              <span>⏱️ Prediksi ditutup 5 menit sebelum kick-off</span>
+              <span class="pred-pool">💰 Pool: Rp 15.000.000</span>
+            </div>
             <div class="pred-results" id="pred-results">
-              ✅ Prediksi kamu tercatat! Tunggu hasilnya...
+              ✅ Prediksi tercatat! Tunggu hasilnya...
             </div>
+          </div>
+          
+          <div style="text-align: center; padding: 20px; background: var(--surface-2); border-radius: 12px; margin-top: 16px;">
+            <p style="color: var(--muted); margin-bottom: 12px;">🔒 Prediksi terkunci</p>
+            <button class="promo-cta" onclick="bolaApp.showEntryModal()" style="font-size: 14px; padding: 12px 24px;">
+              Bayar Rp 15.000 untuk Prediksi
+            </button>
           </div>
         </div>
         
-        <!-- Chat -->
+        <!-- CHAT -->
         <div class="card" style="margin-top: 20px;">
           <div class="card-title">💬 Live Chat</div>
           <div class="chat-section">
             <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-group">
-              <input 
-                type="text" 
-                class="chat-input" 
-                id="chat-input" 
-                placeholder="Ketik pesan..."
-                disabled
-              />
+              <input type="text" class="chat-input" id="chat-input" placeholder="Login untuk chat..." disabled/>
               <button class="chat-send" id="chat-send" disabled>Kirim</button>
             </div>
           </div>
         </div>
       </div>
       
-      <!-- Right Column - Leaderboard -->
+      <!-- RIGHT COLUMN -->
       <div>
+        <!-- LEADERBOARD -->
         <div class="card">
-          <div class="card-title">🏆 Leaderboard</div>
+          <div class="card-title">🏆 Leaderboard Bulan Ini</div>
           <div class="leaderboard" id="leaderboard">
-            <div style="text-align: center; padding: 40px 20px; color: var(--muted);">
-              Loading...
+            <div class="leader-item winner">
+              <div class="leader-rank top">1</div>
+              <div>
+                <div class="leader-name">BudiJago</div>
+                <div class="leader-prize">🎁 Samsung A14</div>
+              </div>
+            </div>
+            <div class="leader-item winner">
+              <div class="leader-rank top">2</div>
+              <div>
+                <div class="leader-name">AnaPrediksi</div>
+                <div class="leader-prize">💎 Rp 500K Voucher</div>
+              </div>
+            </div>
+            <div class="leader-item winner">
+              <div class="leader-rank top">3</div>
+              <div>
+                <div class="leader-name">TahuBulat99</div>
+                <div class="leader-prize">💎 Rp 100K Pulsa</div>
+              </div>
+            </div>
+            <div class="leader-item">
+              <div class="leader-rank">4</div>
+              <div class="leader-name">MieAyamPro</div>
+              <div class="leader-prize">Rp 50K</div>
+            </div>
+            <div class="leader-item">
+              <div class="leader-rank">5</div>
+              <div class="leader-name">BaksoGoreng</div>
+              <div class="leader-prize">Rp 50K</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- HOW IT WORKS -->
+        <div class="card" style="margin-top: 20px;">
+          <div class="card-title">📖 Cara Ikut</div>
+          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+              <span style="background: var(--accent); color: #000; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">1</span>
+              <div>
+                <strong>Bayar Rp 15.000</strong><br>
+                <span style="color: var(--muted);">Via GoPay, OVO, DANA, atau QRIS</span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+              <span style="background: var(--accent); color: #000; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">2</span>
+              <div>
+                <strong>Prediksi 5 Pertanyaan</strong><br>
+                <span style="color: var(--muted);">Skor, MVP, first goal, dll</span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+              <span style="background: var(--accent); color: #000; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">3</span>
+              <div>
+                <strong>Kumpulkan Poin</strong><br>
+                <span style="color: var(--muted);">Benar = 100 poin, exact = 500 poin</span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: flex-start;">
+              <span style="background: var(--im3-yellow); color: #000; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0;">🏆</span>
+              <div>
+                <strong>Menangkan Hadiah!</strong><br>
+                <span style="color: var(--im3-yellow);">Top 66 per match, top 3 per bulan</span>
+              </div>
             </div>
           </div>
         </div>
@@ -665,24 +1327,75 @@
     </div>
   </div>
   
-  <!-- Notification -->
-  <div class="notification" id="notification">
-    <div class="notif-title" id="notif-title"></div>
-    <div class="notif-text" id="notif-text"></div>
+  <!-- ENTRY MODAL -->
+  <div class="entry-modal" id="entry-modal" style="display: none;">
+    <div class="entry-card">
+      <div class="entry-icon">🎫</div>
+      <div class="entry-title">Masuk ke Match</div>
+      <div class="entry-desc">
+        Prediksi pertandingan ini dan menangkan voucher IM3 hingga handphone!
+      </div>
+      <div class="entry-price">Rp 15.000</div>
+      <div class="entry-price-note">Sekali bayar untuk 5 prediksi pertanyaan</div>
+      
+      <div class="entry-benefits">
+        <div class="entry-benefit">
+          <span class="entry-benefit-icon">✓</span>
+          <span>Akses 5 prediksi pertanyaan</span>
+        </div>
+        <div class="entry-benefit">
+          <span class="entry-benefit-icon">✓</span>
+          <span>Chance menang voucher Rp 10K-500K</span>
+        </div>
+        <div class="entry-benefit">
+          <span class="entry-benefit-icon">✓</span>
+          <span>Kumpulkan poin untuk grand prize handphone</span>
+        </div>
+        <div class="entry-benefit">
+          <span class="entry-benefit-icon">✓</span>
+          <span>30% donasi ke scholarship pemain muda</span>
+        </div>
+      </div>
+      
+      <button class="entry-btn" onclick="bolaApp.processPayment()">
+        Bayar Rp 15.000 & Prediksi
+      </button>
+      <button class="entry-skip" onclick="bolaApp.hideEntryModal()">
+        Nanti dulu
+      </button>
+    </div>
   </div>
   
-  <!-- JavaScript (Inline - No Module Conflicts) -->
+  <!-- NOTIFICATION -->
+  <div class="notification" id="notification">
+    <div class="notif-icon" id="notif-icon">🎉</div>
+    <div class="notif-title" id="notif-title"></div>
+    <div class="notif-text" id="notif-text"></div>
+    <div class="notif-prize" id="notif-prize" style="display: none;"></div>
+  </div>
+  
+  <!-- BOTTOM IM3 BAR -->
+  <div class="bottom-im3-bar">
+    <div class="bottom-im3-logo">IM3</div>
+    <div class="bottom-im3-promo">
+      Internetan sepuasnya dengan <span>Freedom Internet</span>
+    </div>
+    <button class="bottom-im3-cta">Cek Sekarang</button>
+  </div>
+  
+  <!-- JAVASCRIPT -->
   <script>
-    const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+    // Use window.SUPABASE_ if already defined, otherwise use these
+    const SUPABASE_URL = window.SUPABASE_URL || 'https://fuovfrdicdhnlymnacpz.supabase.co';
+    const SUPABASE_KEY = window.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
     
     class NopeBolaLive {
       constructor() {
         this.supabase = null;
         this.user = null;
-        this.matchId = 'match_001';
-        this.currentVote = null;
-        this.matchTime = 67 * 60 + 32;
+        this.hasPaid = false;
+        this.wallet = 0;
+        this.matchTime = 0;
         this.init();
       }
       
@@ -690,28 +1403,31 @@
         try {
           this.updateStatus('connecting', '🟡 Connecting...');
           
-          if (!window.supabase) {
-            throw new Error('Supabase SDK not loaded');
+          // Initialize Supabase
+          if (window.supabase) {
+            this.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
           }
           
-          this.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-          
-          const { error } = await this.supabase.from('users').select('count', { count: 'exact', head: true });
-          if (error) throw error;
-          
+          // Setup user
           await this.setupUser();
+          
+          // Start timer
           this.startMatchTimer();
-          this.setupPrediction();
+          
+          // Setup chat
           this.setupChat();
-          this.loadLeaderboard();
+          
+          // Check if already paid (from localStorage for demo)
+          this.hasPaid = localStorage.getItem('nope_paid_match_001') === 'true';
+          if (this.hasPaid) {
+            this.unlockPrediction();
+          }
           
           this.updateStatus('online', '🟢 Online');
-          this.showNotif('🎉 Connected!', 'Selamat datang di NOPE Bola Live');
           
         } catch (err) {
           console.error('Init error:', err);
-          this.updateStatus('offline', '🔴 ' + err.message);
-          this.setupOffline();
+          this.updateStatus('offline', '🔴 ' + (err.message || 'Connection failed'));
         }
       }
       
@@ -730,158 +1446,191 @@
           localStorage.setItem('nope_device_id', deviceId);
         }
         
-        let { data: user } = await this.supabase
-          .from('users')
-          .select('*')
-          .eq('device_id', deviceId)
-          .maybeSingle();
+        // Demo user
+        const names = ['TahuBulat', 'MieAyam', 'BaksoGoreng', 'SatePadang'];
+        const username = names[Math.floor(Math.random() * names.length)] + Math.floor(Math.random() * 999);
         
-        if (!user) {
-          const names = ['TahuBulat', 'MieAyam', 'BaksoGoreng', 'SatePadang', 'KopiTubruk'];
-          const username = names[Math.floor(Math.random() * names.length)] + Math.floor(Math.random() * 999);
-          
-          const { data: newUser } = await this.supabase
-            .from('users')
-            .insert([{ device_id: deviceId, username, points: 0 }])
-            .select()
-            .single();
-          
-          user = newUser;
-        }
+        this.user = {
+          username: username,
+          points: Math.floor(Math.random() * 1000),
+          wallet: 0
+        };
         
-        this.user = user;
-        document.getElementById('user-name').textContent = user.username;
-        document.getElementById('user-avatar').textContent = user.username.substring(0, 2).toUpperCase();
-        document.getElementById('user-points').textContent = (user.points || 0) + ' XP';
+        document.getElementById('user-name').textContent = this.user.username;
+        document.getElementById('user-avatar').textContent = this.user.username.substring(0, 2).toUpperCase();
+        document.getElementById('user-points').textContent = this.user.points + ' XP';
+        
+        // Enable chat
         document.getElementById('chat-input').disabled = false;
         document.getElementById('chat-send').disabled = false;
+        document.getElementById('chat-input').placeholder = 'Ketik pesan...';
       }
       
       startMatchTimer() {
-        setInterval(() => {
-          this.matchTime++;
-          const mins = Math.floor(this.matchTime / 60);
-          const secs = this.matchTime % 60;
-          document.getElementById('match-time').textContent = `${mins}:${secs.toString().padStart(2, '0')}'`;
-        }, 1000);
-      }
-      
-      setupPrediction() {
-        document.getElementById('pred-options').innerHTML = `
-          <button class="pred-option-btn" id="pred-btn-ya" onclick="bolaApp.vote('ya')">
-            <span>⚽ Ya, ada gol!</span>
-            <span class="pred-percentage">50%</span>
-          </button>
-          <button class="pred-option-btn" id="pred-btn-tidak" onclick="bolaApp.vote('tidak')">
-            <span>🚫 Tidak ada</span>
-            <span class="pred-percentage">50%</span>
-          </button>
-        `;
-        
-        document.getElementById('pred-question').textContent = 'Apakah akan ada gol dalam 5 menit?';
-        document.getElementById('pred-results').style.display = 'none';
-        this.currentVote = null;
-        this.startPredictionTimer();
-      }
-      
-      startPredictionTimer() {
-        let timeLeft = 60;
-        const interval = setInterval(() => {
-          timeLeft--;
-          document.getElementById('pred-timer-bar').style.width = `${(timeLeft / 60) * 100}%`;
-          document.getElementById('next-prediction').textContent = `Waktu: 0:${timeLeft.toString().padStart(2, '0')}`;
-          
-          if (timeLeft <= 0) {
-            clearInterval(interval);
-            this.resolvePrediction();
+        // Countdown to match
+        let timeLeft = 15 * 60; // 15 minutes
+        const updateTimer = () => {
+          const mins = Math.floor(timeLeft / 60);
+          const secs = timeLeft % 60;
+          document.getElementById('match-time').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+          if (timeLeft > 0) {
+            timeLeft--;
+            setTimeout(updateTimer, 1000);
           }
-        }, 1000);
+        };
+        updateTimer();
       }
       
-      vote(option) {
-        if (this.currentVote) return;
-        
-        this.currentVote = option;
-        document.querySelectorAll('.pred-option-btn').forEach(btn => btn.disabled = true);
-        document.getElementById(`pred-btn-${option}`).classList.add('voted');
-        document.getElementById('pred-results').style.display = 'block';
-        this.showNotif('✅ Tercatat!', `Kamu pilih: ${option === 'ya' ? 'Ada gol' : 'Tidak ada'}`);
+      showEntryModal() {
+        document.getElementById('entry-modal').style.display = 'flex';
       }
       
-      async resolvePrediction() {
-        const winner = Math.random() > 0.5 ? 'ya' : 'tidak';
-        document.getElementById(`pred-btn-${winner}`).classList.add('correct');
+      hideEntryModal() {
+        document.getElementById('entry-modal').style.display = 'none';
+      }
+      
+      async processPayment() {
+        // Simulate payment processing
+        this.showNotif('⏳ Processing...', 'Sedang memproses pembayaran Rp 15.000', false);
         
-        if (this.currentVote === winner) {
-          this.user.points += 100;
-          await this.supabase.from('users').update({ points: this.user.points }).eq('id', this.user.id);
-          document.getElementById('user-points').textContent = this.user.points + ' XP';
-          this.showNotif('🎉 Benar!', '+100 XP');
+        setTimeout(() => {
+          // Success
+          this.hasPaid = true;
+          localStorage.setItem('nope_paid_match_001', 'true');
+          this.wallet -= 15000;
+          
+          this.hideEntryModal();
+          this.unlockPrediction();
+          
+          this.showNotif('✅ Berhasil!', 'Kamu sudah terdaftar! Silakan prediksi.', true, 'Rp 15.000 masuk ke prize pool');
+          
+          // Add system message
+          this.addChat('System', `🎉 ${this.user.username} baru saja join prediksi!`, true);
+          
+        }, 1500);
+      }
+      
+      unlockPrediction() {
+        const section = document.getElementById('pred-section');
+        section.style.opacity = '1';
+        section.style.pointerEvents = 'auto';
+        
+        // Enable buttons
+        const buttons = document.querySelectorAll('.pred-option-btn');
+        buttons.forEach(btn => {
+          btn.disabled = false;
+          btn.onclick = () => this.vote(btn);
+        });
+      }
+      
+      vote(button) {
+        if (!this.hasPaid) {
+          this.showEntryModal();
+          return;
         }
         
-        this.loadLeaderboard();
-        setTimeout(() => this.setupPrediction(), 5000);
-      }
-      
-      async loadLeaderboard() {
-        const { data } = await this.supabase
-          .from('users')
-          .select('username, points')
-          .order('points', { ascending: false })
-          .limit(10);
+        // Disable all buttons
+        document.querySelectorAll('.pred-option-btn').forEach(btn => {
+          btn.disabled = true;
+        });
         
-        const html = (data || []).slice(0, 3).map((u, i) => `
-          <div class="leader-item ${u.username === this.user?.username ? 'you' : ''}">
-            <div class="leader-rank top">${i + 1}</div>
-            <div class="leader-name">${u.username}</div>
-            <div class="leader-points">${u.points || 0} XP</div>
-          </div>
-        `).join('');
+        button.classList.add('voted');
+        document.getElementById('pred-results').style.display = 'block';
+        document.getElementById('pred-results').classList.add('show');
         
-        document.getElementById('leaderboard').innerHTML = html;
+        this.showNotif('✅ Prediksi Tercatat!', 'Tunggu hasil match untuk lihat poinmu', false);
+        
+        // Simulate result after 3 seconds
+        setTimeout(() => {
+          const isCorrect = Math.random() > 0.5;
+          if (isCorrect) {
+            button.classList.add('correct');
+            this.user.points += 100;
+            document.getElementById('user-points').textContent = this.user.points + ' XP';
+            this.showNotif('🎉 Benar!', '+100 XP! Prediksimu tepat!', true, 'Lanjutkan streakmu!');
+          } else {
+            button.classList.add('wrong');
+            this.showNotif('😅 Salah', 'Coba lagi di pertandingan berikutnya', false);
+          }
+        }, 3000);
       }
       
       setupChat() {
         document.getElementById('chat-messages').innerHTML = '';
-        this.addChat('System', '⚽ Nonton bareng sambil prediksi!', true);
+        this.addChat('System', '⚽ Selamat datang di NOPE Bola Live! Prediksi dan menangkan voucher IM3 📱', true);
+        this.addChat('System', '💡 Tip: Top 66 predictor setiap match dapat voucher pulsa!', true);
+        
+        // Simulate other users
+        const messages = [
+          { user: 'BudiJago', text: 'Persija pasti menang ini!' },
+          { user: 'AnaPrediksi', text: 'Sudah bayar Rp 15K, semoga menang voucher' },
+          { user: 'IM3_Fan', text: 'Mau handphone baru dari IM3 😍' }
+        ];
+        
+        let i = 0;
+        const addRandomMessage = () => {
+          if (i < messages.length) {
+            this.addChat(messages[i].user, messages[i].text);
+            i++;
+            setTimeout(addRandomMessage, 3000);
+          }
+        };
+        setTimeout(addRandomMessage, 2000);
       }
       
       addChat(user, text, isSystem = false) {
+        const container = document.getElementById('chat-messages');
         const div = document.createElement('div');
-        div.className = 'chat-message';
-        div.innerHTML = isSystem ? 
-          `<span style="color:var(--accent);font-weight:600;">${text}</span>` :
-          `<span class="chat-user">${user}:</span> ${text}`;
-        document.getElementById('chat-messages').appendChild(div);
+        div.className = 'chat-message ' + (isSystem ? 'system' : '');
+        
+        if (isSystem) {
+          div.innerHTML = `<span style="color:var(--accent);font-weight:600;">${text}</span>`;
+        } else {
+          const isWinner = user === 'BudiJago';
+          div.innerHTML = `<span class="chat-user ${isWinner ? 'winner' : ''}">${user}:</span> ${text}`;
+        }
+        
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
       }
       
-      async sendChat() {
+      sendChat() {
         const input = document.getElementById('chat-input');
         const text = input.value.trim();
-        if (!text) return;
+        if (!text || !this.user) return;
         
         this.addChat(this.user.username, text);
         input.value = '';
       }
       
-      setupOffline() {
-        document.getElementById('user-name').textContent = 'Offline';
-        document.getElementById('pred-options').innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted);">Tidak dapat terhubung ke server</div>';
-      }
-      
-      showNotif(title, text) {
+      showNotif(title, text, isSuccess = true, prize = null) {
+        const notif = document.getElementById('notification');
         document.getElementById('notif-title').textContent = title;
         document.getElementById('notif-text').textContent = text;
-        document.getElementById('notification').classList.add('show');
-        setTimeout(() => document.getElementById('notification').classList.remove('show'), 4000);
+        document.getElementById('notif-icon').textContent = isSuccess ? '🎉' : '⏳';
+        
+        const prizeEl = document.getElementById('notif-prize');
+        if (prize) {
+          prizeEl.textContent = prize;
+          prizeEl.style.display = 'block';
+          notif.classList.add('win');
+        } else {
+          prizeEl.style.display = 'none';
+          notif.classList.remove('win');
+        }
+        
+        notif.classList.add('show');
+        setTimeout(() => notif.classList.remove('show'), 4000);
       }
     }
     
+    // Initialize
     let bolaApp;
     window.addEventListener('DOMContentLoaded', () => {
       bolaApp = new NopeBolaLive();
     });
     
+    // Chat handlers
     document.getElementById('chat-send').addEventListener('click', () => {
       if (bolaApp) bolaApp.sendChat();
     });
