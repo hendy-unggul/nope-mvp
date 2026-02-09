@@ -6,9 +6,9 @@
       margin: 0;
       height: 100vh;
       overflow: hidden;
-      cursor: none; /* Sembunyikan kursor default */
-      background: #f0f0f0;
-      font-family: Arial, sans-serif;
+      cursor: none;
+      background: #f5f7fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -19,47 +19,86 @@
       pointer-events: none;
       transform: translate(-50%, -50%);
       z-index: 9999;
-      transition: transform 0.1s;
+      transition: transform 0.08s ease-out;
     }
     
     .face {
-      width: 30px;
-      height: 30px;
-      background: #3498db;
+      width: 32px;
+      height: 32px;
+      background: #4a90e2;
       border-radius: 50%;
       position: relative;
-      box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+      box-shadow: 0 0 12px rgba(74, 144, 226, 0.4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     
     .mouth {
       position: absolute;
-      bottom: 8px;
+      bottom: 9px;
       left: 50%;
       transform: translateX(-50%);
-      width: 20px;
-      height: 10px;
-      background: white;
-      border-radius: 50% 50% 0 0;
-      transition: all 0.3s ease;
+      width: 14px;
+      height: 5px;
+      background: #ffffff;
+      border-radius: 35% 35% 0 0;
+      transition: all 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55);
     }
     
     .mouth.frown {
-      transform: translateX(-50%) scaleY(-1);
+      border-radius: 0 0 35% 35%;
+      height: 4px;
+      bottom: 10px;
     }
     
     .mouth.laugh {
-      width: 25px;
+      width: 18px;
+      height: 7px;
       border-radius: 40% 40% 0 0;
-      height: 12px;
+      bottom: 8px;
+      box-shadow: inset 0 2px 2px rgba(0,0,0,0.1);
     }
     
     .instructions {
       text-align: center;
       background: white;
-      padding: 20px;
-      border-radius: 10px;
+      padding: 25px;
+      border-radius: 12px;
       max-width: 500px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+      border: 1px solid #eaeaea;
+    }
+    
+    .expression-examples {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    
+    .example {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .example-face {
+      width: 24px;
+      height: 24px;
+      background: #4a90e2;
+      border-radius: 50%;
+      margin-bottom: 5px;
+      position: relative;
+    }
+    
+    .example-smile .mouth { border-radius: 35% 35% 0 0; }
+    .example-frown .mouth { border-radius: 0 0 35% 35%; }
+    .example-laugh .mouth { 
+      width: 16px;
+      height: 6px;
+      border-radius: 40% 40% 0 0;
     }
   </style>
 </head>
@@ -67,11 +106,30 @@
   <div class="instructions">
     <h2>Kursor Dinamis Tanpa Mata</h2>
     <p>Gerakkan kursor mouse Anda - wajah biru ini akan mengikuti dan berubah ekspresi!</p>
-    <p>Ekspresi: 😊 (Senyum) | 😞 (Cemberut) | 😂 (Tertawa)</p>
+    
+    <div class="expression-examples">
+      <div class="example">
+        <div class="example-face">
+          <div class="mouth example-smile"></div>
+        </div>
+        <span>Senyum 😊</span>
+      </div>
+      <div class="example">
+        <div class="example-face">
+          <div class="mouth example-frown"></div>
+        </div>
+        <span>Cemberut 😞</span>
+      </div>
+      <div class="example">
+        <div class="example-face">
+          <div class="mouth example-laugh"></div>
+        </div>
+        <span>Tertawa 😂</span>
+      </div>
+    </div>
   </div>
 
   <script>
-    // Buat elemen kursor dinamis
     const cursor = document.createElement('div');
     cursor.className = 'dynamic-cursor';
     cursor.innerHTML = `
@@ -90,17 +148,36 @@
       cursor.style.top = e.clientY + 'px';
     });
 
-    // Ubah ekspresi secara acak
+    // Ubah ekspresi secara acak dengan animasi lebih natural
     setInterval(() => {
-      const randomExpr = expressions[Math.floor(Math.random() * expressions.length)];
+      // Pilih ekspresi baru yang berbeda dari sekarang
+      let newExpr;
+      do {
+        newExpr = expressions[Math.floor(Math.random() * expressions.length)];
+      } while (newExpr === currentExpression);
       
-      if (randomExpr !== currentExpression) {
-        const mouth = cursor.querySelector('.mouth');
-        mouth.className = 'mouth';
-        mouth.classList.add(randomExpr);
-        currentExpression = randomExpr;
-      }
-    }, 2000);
+      const mouth = cursor.querySelector('.mouth');
+      mouth.className = 'mouth';
+      mouth.classList.add(newExpr);
+      currentExpression = newExpr;
+    }, 2500);
+
+    // Tambahkan efek saat mouse berhenti
+    let mouseMoveTimer;
+    document.addEventListener('mousemove', () => {
+      clearTimeout(mouseMoveTimer);
+      cursor.style.transition = 'transform 0.08s ease-out';
+      
+      // Kembalikan ke senyum saat mouse berhenti
+      mouseMoveTimer = setTimeout(() => {
+        if (currentExpression !== 'smile') {
+          const mouth = cursor.querySelector('.mouth');
+          mouth.className = 'mouth';
+          mouth.classList.add('smile');
+          currentExpression = 'smile';
+        }
+      }, 1500);
+    });
   </script>
 </body>
 </html>
