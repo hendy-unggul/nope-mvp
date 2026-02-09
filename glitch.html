@@ -4,32 +4,37 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>NOPE — GLITCH</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ff9999'/%3E%3Ctext x='50' y='70' font-size='60' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%23000'%3ENO%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0a0a0a;
       --surface: #121212;
-      --text: #e6e6e6;
-      --muted: #8a8a8a;
       --border: #222222;
+      --text: #e6e6e6;
+      --text-secondary: #a0a0a0;
+      --muted: #8a8a8a;
       --accent: #b266ff;
-      --quote-bg: rgba(178, 102, 255, 0.12);
-      --emoji-size: 20px;
-      --paid: #4caf50;
+      --accent-dim: rgba(178, 102, 255, 0.1);
+      --logo-color: #ff9999;
+      --success: #00ff88;
+      --danger: #ff6b6b;
+      --warning: #ffd93d;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    
     body {
-      background-color: var(--bg);
+      background: var(--bg);
       color: var(--text);
-      margin: 0;
-      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, monospace;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
       font-weight: 300;
       font-size: 15px;
       line-height: 1.55;
-      padding-bottom: 32px;
+      padding-bottom: 80px;
+      -webkit-font-smoothing: antialiased;
     }
 
     .wrapper {
@@ -38,17 +43,23 @@
       padding: 0 16px;
     }
 
-    /* === HEADER FIXED === */
+    /* === STICKY HEADER === */
     header {
       position: sticky;
       top: 0;
-      background: #000000cc;
-      backdrop-filter: blur(6px);
+      background: #000000dd;
+      backdrop-filter: blur(8px);
       padding: 12px 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 10;
+      z-index: 100;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s;
+    }
+
+    header.scrolled {
+      border-bottom-color: var(--border);
     }
 
     .logo {
@@ -56,20 +67,15 @@
       font-size: 28px;
       font-weight: 700;
       letter-spacing: -0.02em;
-      color: #ff9999;
-      margin-left: 0;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-    }
-
-    header:hover .logo {
-      transform: scale(1.02);
-      opacity: 0.96;
+      color: var(--logo-color);
+      margin-left: 16px;
+      cursor: pointer;
     }
 
     .top-right {
       display: flex;
       align-items: center;
-      margin-right: 0;
+      margin-right: 12px;
     }
 
     .nav-mini {
@@ -87,7 +93,8 @@
       text-underline-offset: 2px;
       padding: 2px 4px;
       border-radius: 4px;
-      transition: background-color 0.2s ease;
+      transition: background-color 0.2s;
+      user-select: none;
     }
 
     .nav-mini span:hover:not(.active) {
@@ -96,10 +103,10 @@
     }
 
     .nav-mini span.active {
-      color: var(--accent) !important;
+      color: var(--accent);
       text-decoration-color: var(--accent);
       font-weight: 500;
-      background-color: rgba(178, 102, 255, 0.08);
+      background-color: var(--accent-dim);
     }
 
     .settings-btn {
@@ -111,108 +118,251 @@
       transform: rotate(90deg);
     }
 
-    /* === SISA STYLE DARI GLITCH ASLI === */
-    .pick-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px;
-      margin-bottom: 22px;
-      cursor: pointer;
-      transition: background 0.2s;
+    /* === HERO SECTION === */
+    .hero {
+      text-align: center;
+      padding: 32px 0 24px;
+      border-bottom: 2px solid var(--accent);
+      margin-bottom: 32px;
+      background: linear-gradient(180deg, transparent 0%, var(--accent-dim) 100%);
     }
 
-    .pick-card:hover {
-      background: #161616;
+    .hero-title {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
-    .pick-image {
-      width: 100%;
-      aspect-ratio: 3 / 2;
-      object-fit: cover;
-      border-radius: 10px;
-      margin-bottom: 16px;
-      display: block;
-      filter: contrast(1.1) saturate(0.9);
-    }
-
-    .pick-title {
-      font-size: 18px;
-      margin-bottom: 12px;
-      font-weight: 500;
-      line-height: 1.35;
-    }
-
-    .meta {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 14px;
-      font-style: italic;
-    }
-
-    p {
-      font-size: 15px;
-      margin-bottom: 12px;
-      line-height: 1.55;
-    }
-
-    strong { font-weight: 500; color: var(--accent); }
-    em { font-style: italic; color: var(--text); }
-
-    .quote {
-      background: var(--quote-bg);
-      border-left: 2px solid var(--accent);
-      padding: 12px 14px;
-      margin: 16px 0;
-      font-style: italic;
-      border-radius: 0 6px 6px 0;
-      font-size: 15px;
-      line-height: 1.5;
-    }
-
-    .signature {
-      margin-top: 16px;
-      font-style: italic;
-      color: var(--muted);
+    .hero-subtitle {
       font-size: 14px;
+      color: var(--text-secondary);
       font-weight: 400;
+      letter-spacing: 0.5px;
     }
 
-    /* === REACTION BAR — revised === */
-    .response-bar {
+    /* === SECTION HEADERS === */
+    .section {
+      margin-bottom: 48px;
+      position: relative;
+    }
+
+    .section-header {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-top: 18px;
-      padding-top: 16px;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-number {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      color: #000;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .section-badge {
+      margin-left: auto;
+      padding: 4px 10px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--accent);
+    }
+
+    /* === ARTICLE CARD DENGAN VISUAL IDENTITY === */
+    .article-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .article-card:hover {
+      transform: translateX(4px);
+      border-left-width: 6px;
+      box-shadow: 0 4px 12px rgba(178, 102, 255, 0.15);
+    }
+
+    /* Color coding per section */
+    .section-hero .article-card { border-left-color: var(--danger); }
+    .section-picks .article-card { border-left-color: var(--accent); }
+    .section-petisi .article-card { border-left-color: var(--warning); }
+    .section-wawancara .article-card { border-left-color: var(--success); }
+
+    .article-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .article-tag {
+      padding: 3px 8px;
+      background: var(--border);
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    /* Tag colors per section */
+    .section-hero .article-tag { background: rgba(255, 107, 107, 0.15); color: var(--danger); }
+    .section-picks .article-tag { background: var(--accent-dim); color: var(--accent); }
+    .section-petisi .article-tag { background: rgba(255, 217, 61, 0.15); color: var(--warning); }
+    .section-wawancara .article-tag { background: rgba(0, 255, 136, 0.15); color: var(--success); }
+
+    .article-date {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .article-title {
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: 10px;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+
+    .article-excerpt {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .article-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 12px;
       border-top: 1px solid var(--border);
     }
 
-    .reaction-item {
+    .article-author {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
     }
 
-    .emoji-btn, .comment-btn {
+    .author-avatar {
+      width: 24px;
+      height: 24px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: #000;
+    }
+
+    .article-reactions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .article-reactions .emoji-btn {
       background: none;
       border: none;
-      font-size: var(--emoji-size);
+      font-size: 14px;
       cursor: pointer;
-      opacity: 0.8;
+      opacity: 0.7;
       transition: all 0.2s;
+      padding: 2px 4px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      border-radius: 4px;
     }
 
-    .emoji-btn:hover, .comment-btn:hover {
+    .article-reactions .emoji-btn:hover {
       opacity: 1;
-      transform: scale(1.15);
+      background: rgba(178, 102, 255, 0.1);
+      transform: scale(1.05);
     }
 
-    .reaction-count {
+    .article-reactions .emoji-btn span {
       font-size: 10px;
       color: var(--muted);
       font-family: 'JetBrains Mono', monospace;
+      min-width: 12px;
+    }
+
+    .article-read-time {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* === FEATURED HERO ARTICLE === */
+    .featured-article {
+      background: linear-gradient(135deg, #1a1a1a 0%, var(--surface) 100%);
+      border: 2px solid var(--danger);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .featured-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: var(--danger);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .featured-article .article-title {
+      font-size: 22px;
+      margin-bottom: 12px;
+    }
+
+    .featured-article .article-excerpt {
+      font-size: 15px;
+      margin-bottom: 16px;
     }
 
     /* === ZONE FOOTER === */
@@ -220,115 +370,221 @@
       text-align: center;
       font-size: 12px;
       color: var(--muted);
-      padding: 0 0 24px;
-      line-height: 1.5;
+      margin-top: 48px;
+      padding: 20px 0;
+      border-top: 1px solid var(--border);
       letter-spacing: 0.5px;
-      font-family: 'JetBrains Mono', monospace;
-      margin: 24px auto 0;
-      max-width: 340px;
     }
 
-    /* === MODAL === */
-    .comment-modal {
+    /* === SCROLL PROGRESS INDICATOR === */
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: var(--border);
+      z-index: 101;
+    }
+
+    .scroll-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent) 0%, var(--danger) 100%);
+      width: 0%;
+      transition: width 0.1s;
+    }
+
+    /* === ACCESSIBILITY & ANIMATIONS === */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* === MOBILE OPTIMIZATIONS === */
+    @media (max-width: 480px) {
+      .hero-title { font-size: 28px; }
+      .section-title { font-size: 16px; }
+      .article-title { font-size: 16px; }
+      .featured-article .article-title { font-size: 20px; }
+    }
+
+    /* Smooth fade-in animation */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .article-card {
+      animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .article-card:nth-child(1) { animation-delay: 0.1s; }
+    .article-card:nth-child(2) { animation-delay: 0.2s; }
+    .article-card:nth-child(3) { animation-delay: 0.3s; }
+    .article-card:nth-child(4) { animation-delay: 0.4s; }
+
+    /* === ARTICLE IMAGES === */
+    .pick-image {
+      width: 100%;
+      aspect-ratio: 3 / 2;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 16px;
+      display: block;
+      filter: contrast(1.05) saturate(0.95);
+    }
+
+    /* === ARTICLE MODAL === */
+    .article-modal {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0,0,0,0.7);
-      display: flex;
-      align-items: flex-end;
-      z-index: 1000;
+      z-index: 200;
+      display: none;
       opacity: 0;
-      pointer-events: none;
       transition: opacity 0.3s;
     }
 
-    .comment-modal.active {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    .modal-content {
-      background: var(--surface);
-      border-radius: 16px 16px 0 0;
-      padding: 20px 16px;
-      width: 100%;
-      max-height: 60vh;
-      overflow-y: auto;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-
-    .close-modal {
-      background: none;
-      border: none;
-      color: var(--muted);
-      font-size: 24px;
-      cursor: pointer;
-    }
-
-    .pay-prompt {
-      background: #1a1a1a;
-      border: 1px solid #333;
-      border-radius: 10px;
-      padding: 16px;
-      text-align: center;
-      margin-top: 12px;
-    }
-
-    .pay-btn {
-      background: var(--paid);
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-family: inherit;
-      font-weight: 500;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-
-    .comment-form {
-      display: none;
-    }
-
-    .comment-form.active {
+    .article-modal.active {
       display: block;
-      margin-top: 12px;
+      opacity: 1;
     }
 
-    textarea {
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
-      background: #1a1a1a;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      padding: 10px;
-      font-family: inherit;
-      font-size: 14px;
-      resize: vertical;
-      min-height: 60px;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
     }
 
-    .submit-comment {
+    .modal-article-content {
+      position: relative;
+      max-width: 680px;
+      margin: 0 auto;
+      background: var(--bg);
+      height: 100%;
+      overflow-y: auto;
+      padding: 20px;
+      animation: slideInRight 0.3s ease;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+      }
+      to {
+        transform: translateX(0);
+      }
+    }
+
+    .close-article {
+      position: sticky;
+      top: 10px;
+      right: 10px;
+      float: right;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      color: var(--text);
+      font-size: 28px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: all 0.2s;
+    }
+
+    .close-article:hover {
       background: var(--accent);
       color: #000;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-family: inherit;
-      font-weight: 600;
-      margin-top: 10px;
-      cursor: pointer;
+      transform: rotate(90deg);
     }
 
-    /* === PULSE === */
+    .modal-article-image {
+      width: 100%;
+      max-height: 400px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      margin-top: 40px;
+    }
+
+    .modal-article-title {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .modal-article-meta {
+      font-size: 14px;
+      font-style: italic;
+      color: var(--muted);
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-article-body {
+      font-size: 16px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+
+    .modal-article-body p {
+      margin-bottom: 20px;
+    }
+
+    .modal-article-body strong {
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .modal-article-body em {
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+
+    .modal-article-body .quote {
+      background: rgba(178, 102, 255, 0.12);
+      border-left: 3px solid var(--accent);
+      padding: 16px 20px;
+      margin: 24px 0;
+      font-style: italic;
+      border-radius: 0 8px 8px 0;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .modal-article-body .signature {
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-style: italic;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    /* Pulse animation */
     .pulse-animation {
       position: fixed;
       top: 0;
@@ -341,57 +597,201 @@
       z-index: 999;
       animation: pulse 1.4s cubic-bezier(0.2, 0.8, 0.4, 1);
     }
+
     @keyframes pulse {
       0% { transform: scale(0.9); opacity: 0.6; }
       100% { transform: scale(1.6); opacity: 0; }
     }
+
+    /* Mobile modal adjustments */
+    @media (max-width: 480px) {
+      .modal-article-content {
+        padding: 16px;
+      }
+
+      .modal-article-title {
+        font-size: 24px;
+      }
+
+      .modal-article-body {
+        font-size: 15px;
+      }
+    }
   </style>
 </head>
 <body>
+  <!-- Scroll Progress Bar -->
+  <div class="scroll-progress">
+    <div class="scroll-progress-bar" id="scroll-bar"></div>
+  </div>
+
   <div class="wrapper">
-    <header>
-      <div class="logo">NOPE</div>
+    <header id="header">
+      <div class="logo" onclick="window.location.href='index.html'">NOPE</div>
       <div class="top-right">
         <div class="nav-mini">
-          <span id="nav-jejak">Jurnal</span>
-          <span id="nav-frekuensi-zones.html">Frekuensi</span>
-          <span id="nav-saynope.html">SayNOPE</span>
-          <span id="nav-glitch" class="active">GLITCH</span>
+          <span onclick="window.location.href='jejak.html'">Jurnal</span>
+          <span onclick="window.location.href='frekuensi-zones.html'">Frekuensi</span>
+          <span onclick="window.location.href='saynope.html'">SayNOPE</span>
+          <span class="active">GLITCH</span>
         </div>
         <button class="settings-btn" id="settings-btn">⋯</button>
       </div>
     </header>
 
-    <div id="cards-container"></div>
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-title">GLITCH</div>
+      <div class="hero-subtitle">Editorial • Cerita • Gerakan</div>
+    </div>
+
+    <!-- Section 1: Hero Story -->
+    <div class="section section-hero">
+      <div class="section-header">
+        <div class="section-number">1</div>
+        <div class="section-title">Hero Story</div>
+        <div class="section-badge">Featured</div>
+      </div>
+      
+      <div class="featured-article" onclick="openArticle('reza')">
+        <div class="featured-badge">🔥 Trending</div>
+        <img src="https://raw.githubusercontent.com/hendy-unggul/nope-mvp/main/reza%20rahadian.jpg" alt="Reza Rahadian" class="pick-image">
+        <div class="article-meta">
+          <span class="article-tag">Film</span>
+          <span class="article-date">8 Feb 2026</span>
+        </div>
+        <div class="article-title">
+          Reza Rahadian dan Ilusi Kesempurnaan
+        </div>
+        <div class="article-excerpt">
+          untuk yang lelah berakting jadi kuat — "Kita memuji senyumnya, tapi lupa bertanya: Di mana dia menangis?"
+        </div>
+        <div class="article-footer">
+          <div class="article-author">
+            <div class="author-avatar">HD</div>
+            <span>@HD</span>
+          </div>
+          <div class="article-reactions">
+            <button class="emoji-btn" onclick="event.stopPropagation(); reactToArticle('reza', '🤠', this)">🤠 <span>3</span></button>
+            <button class="emoji-btn" onclick="event.stopPropagation(); reactToArticle('reza', '😢', this)">😢 <span>5</span></button>
+            <button class="emoji-btn" onclick="event.stopPropagation(); reactToArticle('reza', '🤗', this)">🤗 <span>2</span></button>
+            <button class="emoji-btn" onclick="event.stopPropagation(); reactToArticle('reza', '🔥', this)">🔥 <span>7</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Editorial Picks -->
+    <div class="section section-picks">
+      <div class="section-header">
+        <div class="section-number">2</div>
+        <div class="section-title">Editorial Picks</div>
+        <div class="section-badge">Curated</div>
+      </div>
+
+      <div class="article-card" onclick="openArticle('hindia')">
+        <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80" alt="Hindia" class="pick-image">
+        <div class="article-meta">
+          <span class="article-tag">Musik</span>
+          <span class="article-date">7 Feb 2026</span>
+        </div>
+        <div class="article-title">
+          Hindia: Lagu untuk yang Lelah Menunggu
+        </div>
+        <div class="article-excerpt">
+          untuk yang janji "nanti" tapi hidupnya mandek — "Kita terlalu sibuk mengejar 'besok' sampai lupa hidup hari ini."
+        </div>
+        <div class="article-footer">
+          <div class="article-author">
+            <div class="author-avatar">HD</div>
+            <span>@HD</span>
+          </div>
+          <div class="article-reactions">
+            <button class="emoji-btn" onclick="event.stopPropagation(); reactToArticle('hindia', '🤠', this)">🤠 <span>1</span></button>
+            <button class="emoji-btn" onclick="event.stopPropagation(); reactToArticle('hindia', '😢', this)">😢 <span>8</span></button>
+            <button class="emoji-btn" onclick="event.stopPropagation(); reactToArticle('hindia', '🤗', this)">🤗 <span>4</span></button>
+            <button class="emoji-btn" onclick="event.stopPropagation(); reactToArticle('hindia', '🔥', this)">🔥 <span>6</span></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="article-card" onclick="openArticle('madilog')">
+        <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80" alt="Madilog" class="pick-image">
+        <div class="article-meta">
+          <span class="article-tag">Buku</span>
+          <span class="article-date">6 Feb 2026</span>
+        </div>
+        <div class="article-title">
+          Madilog: Senjata untuk yang Takut Berpikir
+        </div>
+        <div class="article-excerpt">
+          untuk yang lelah dikasih tahu "ikut aja" — "Di era algoritma, berani berpikir sendiri adalah bentuk perlawanan."
+        </div>
+        <div class="article-footer">
+          <div class="article-author">
+            <div class="author-avatar">HD</div>
+            <span>@HD</span>
+          </div>
+          <div class="article-reactions">
+            <button class="emoji-btn" onclick="event.stopPropagation(); reactToArticle('madilog', '🤠', this)">🤠 <span>5</span></button>
+            <button class="emoji-btn" onclick="event.stopPropagation(); reactToArticle('madilog', '😢', this)">😢 <span>2</span></button>
+            <button class="emoji-btn" onclick="event.stopPropagation(); reactToArticle('madilog', '🤗', this)">🤗 <span>3</span></button>
+            <button class="emoji-btn" onclick="event.stopPropagation(); reactToArticle('madilog', '🔥', this)">🔥 <span>9</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Wawancara -->
+    <div class="section section-wawancara">
+      <div class="section-header">
+        <div class="section-number">3</div>
+        <div class="section-title">Wawancara</div>
+        <div class="section-badge">Interview</div>
+      </div>
+
+      <div class="article-card" onclick="openArticle('interview')">
+        <div class="article-meta">
+          <span class="article-tag">Inspirasi</span>
+          <span class="article-date">4 Feb 2026</span>
+        </div>
+        <div class="article-title">
+          Wawancara: @HD — "Aku Memilih Berani Gagal"
+        </div>
+        <div class="article-excerpt">
+          untuk yang takut disebut tidak cukup — "Orang sukses punya roadmap. Aku punya peta kuburan mimpi."
+        </div>
+        <div class="article-footer">
+          <div class="article-author">
+            <div class="author-avatar">HD</div>
+            <span>@HD</span>
+          </div>
+          <div class="article-reactions">
+            <button class="emoji-btn" onclick="event.stopPropagation(); reactToArticle('interview', '🤠', this)">🤠 <span>2</span></button>
+            <button class="emoji-btn" onclick="event.stopPropagation(); reactToArticle('interview', '😢', this)">😢 <span>12</span></button>
+            <button class="emoji-btn" onclick="event.stopPropagation(); reactToArticle('interview', '🤗', this)">🤗 <span>7</span></button>
+            <button class="emoji-btn" onclick="event.stopPropagation(); reactToArticle('interview', '🔥', this)">🔥 <span>4</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div class="zone-footer">Nyambat • Aksi • Solusi</div>
   </div>
 
-  <div class="comment-modal" id="commentModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div>Komentar</div>
-        <button class="close-modal" id="closeModal">×</button>
-      </div>
-      <div id="commentContent"></div>
+  <!-- Full Article Modal -->
+  <div class="article-modal" id="articleModal">
+    <div class="modal-overlay" onclick="closeArticle()"></div>
+    <div class="modal-article-content">
+      <button class="close-article" onclick="closeArticle()">×</button>
+      <div id="fullArticleContent"></div>
     </div>
   </div>
 
   <script>
-    const isSubscribed = localStorage.getItem('nope_subscribed') === 'true';
-
-    // ✅ SIMULASI REAKSI — bisa diganti dengan fetch dari backend
-    const initialReactions = {
-      film: { '🤠': 3, '😢': 5, '🤗': 2, '🔥': 7 },
-      musik: { '🤠': 1, '😢': 8, '🤗': 4, '🔥': 6 },
-      buku: { '🤠': 5, '😢': 2, '🤗': 3, '🔥': 9 },
-      interview: { '🤠': 2, '😢': 12, '🤗': 7, '🔥': 4 }
-    };
-
-    // ✅ SEMUA ARTIKEL UTUH — TIDAK ADA YANG DIHAPUS
-    const articles = [
-      {
-        id: 'film',
+    // Article full content database
+    const articles = {
+      reza: {
         title: 'Reza Rahadian dan Ilusi Kesempurnaan',
         meta: 'untuk yang lelah berakting jadi kuat',
         image: 'https://raw.githubusercontent.com/hendy-unggul/nope-mvp/main/reza%20rahadian.jpg',
@@ -408,7 +808,7 @@
           <p>Padahal, akting yang hidup lahir dari kegagalan —<br>
           bukan dari skenario yang rapi.</p>
           
-          <p>Lihat <strong>Laura Basuki yang begitu ciamik di “Istirahatlah Kata-Kata”</strong>:<br>
+          <p>Lihat <strong>Laura Basuki yang begitu ciamik di "Istirahatlah Kata-Kata"</strong>:<br>
           Matanya bergetar sebelum bicara.<br>
           Tubuhnya menciut di sudut ruang.<br>
           Ia tidak <em>berakting sedih</em> — ia <strong>menjadi sedih</strong>.</p>
@@ -435,188 +835,141 @@
           <div class="signature">— @HD, 1% petani 99% failure...</div>
         `
       },
-      {
-        id: 'musik',
+      hindia: {
         title: 'Hindia: Lagu untuk yang Lelah Menunggu',
         meta: 'untuk yang janji "nanti" tapi hidupnya mandek',
         image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80',
-        content: `<p>"Kita terlalu sibuk mengejar 'besok' sampai lupa hidup hari ini."</p>
+        content: `
+          <p>"Kita terlalu sibuk mengejar 'besok' sampai lupa hidup hari ini."</p>
+          
           <blockquote class="quote">
             ini lagu untuk yang pernah bilang:<br>
             "gue nungguin dia berubah."<br>
             tapi yang berubah justru gue — jadi lebih kosong.
           </blockquote>
+          
           <p>Karena kadang, kebahagiaan itu bukan sesuatu yang bisa diarsip — tapi sesuatu yang <strong>hilang begitu kamu coba foto</strong>.</p>
-          <div class="signature">— @HD, 1% petani 99% failure...</div>`
+          
+          <div class="signature">— @HD, 1% petani 99% failure...</div>
+        `
       },
-      {
-        id: 'buku',
+      madilog: {
         title: 'Madilog: Senjata untuk yang Takut Berpikir',
         meta: 'untuk yang lelah dikasih tahu "ikut aja"',
         image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=400&q=80',
-        content: `<p>"Di era algoritma, berani berpikir sendiri adalah bentuk perlawanan."</p>
+        content: `
+          <p>"Di era algoritma, berani berpikir sendiri adalah bentuk perlawanan."</p>
+          
           <blockquote class="quote">
             "seorang pejuang harus berani sendiri.<br>
             karena kebenaran seringkali lahir di tempat yang sepi."
           </blockquote>
+          
           <p>Dan Tan Malaka bukan penulis — ia <strong>pelatih berpikir</strong>.</p>
-          <div class="signature">— @HD, 1% petani 99% failure...</div>`
+          
+          <div class="signature">— @HD, 1% petani 99% failure...</div>
+        `
       },
-      {
-        id: 'interview',
+      interview: {
         title: 'Wawancara: @HD — "Aku Memilih Berani Gagal"',
         meta: 'untuk yang takut disebut tidak cukup',
         image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9hAAAAABJRU5ErkJggg==',
-        content: `<p>"Orang sukses punya roadmap. Aku punya peta kuburan mimpi."</p>
-          <p>Di atas 500 hektar tanah sitaan BLBI, ditemani ubi rebus yang ditanam sendiri aku terus berjudi dengan hanya 1% kemungkinan menang. 
-          Aku tidak berjudi di Casino tetapi aku tetaplah pejudi di meja kehidupan.<br>
+        content: `
+          <p>"Orang sukses punya roadmap. Aku punya peta kuburan mimpi."</p>
           
-          "Saya bukan gagal karena tidak mencoba. Soichiro Honda bilang 99% of success is failure and so true saya masih berburu 1%."</p>
+          <p>Di atas 500 hektar tanah sitaan BLBI, ditemani ubi rebus yang ditanam sendiri aku terus berjudi dengan hanya 1% kemungkinan menang. 
+          Aku tidak berjudi di Casino tetapi aku tetaplah pejudi di meja kehidupan.</p>
+          
+          <p>"Saya bukan gagal karena tidak mencoba. Soichiro Honda bilang 99% of success is failure and so true saya masih berburu 1%."</p>
+          
           <blockquote class="quote">
             Sistem ini tidak minta kita berhasil.<br>
             Sistem ini minta kita berhenti bertanya dan terus berjalan, berprasangka baik pada pemilik alam semesta.
           </blockquote>
-          <p>Maka, tak ada kegagalan dan tak ada hukuman, tapi analoginya dunia ini seperti training ground, hopefully to make me a better man .</p>
-          <div class="signature">— @HD, 1% petani 99% failure...</div>`
+          
+          <p>Maka, tak ada kegagalan dan tak ada hukuman, tapi analoginya dunia ini seperti training ground, hopefully to make me a better man.</p>
+          
+          <div class="signature">— @HD, 1% petani 99% failure...</div>
+        `
       }
-    ];
+    };
 
-    let cardOrder = JSON.parse(localStorage.getItem('glitch_card_order')) || articles.map(a => a.id);
-    const sortedArticles = [...articles].sort((a, b) => cardOrder.indexOf(a.id) - cardOrder.indexOf(b.id));
-
-    const container = document.getElementById('cards-container');
-    sortedArticles.forEach(article => {
-      const card = document.createElement('div');
-      card.className = 'pick-card';
-
-      // ✅ EMOJI & KOMENTAR BARU — sesuai permintaan
-      const reactionBar = `
-        <div class="response-bar" data-article-id="${article.id}">
-          <div class="reaction-item">
-            <button class="emoji-btn" data-emoji="🤠">🤠</button>
-            <span class="reaction-count" data-emoji="🤠">${initialReactions[article.id]['🤠'] || 0}</span>
-          </div>
-          <div class="reaction-item">
-            <button class="emoji-btn" data-emoji="😢">😢</button>
-            <span class="reaction-count" data-emoji="😢">${initialReactions[article.id]['😢'] || 0}</span>
-          </div>
-          <div class="reaction-item">
-            <button class="emoji-btn" data-emoji="🤗">🤗</button>
-            <span class="reaction-count" data-emoji="🤗">${initialReactions[article.id]['🤗'] || 0}</span>
-          </div>
-          <div class="reaction-item">
-            <button class="emoji-btn" data-emoji="🔥">🔥</button>
-            <span class="reaction-count" data-emoji="🔥">${initialReactions[article.id]['🔥'] || 0}</span>
-          </div>
-          <div class="reaction-item">
-            <button class="comment-btn" title="Komentar">💬</button>
-          </div>
-        </div>
+    // Open full article
+    function openArticle(articleId) {
+      const article = articles[articleId];
+      if (!article) return;
+      
+      const modal = document.getElementById('articleModal');
+      const content = document.getElementById('fullArticleContent');
+      
+      content.innerHTML = `
+        <img src="${article.image}" alt="${article.title}" class="modal-article-image">
+        <div class="modal-article-title">${article.title}</div>
+        <div class="modal-article-meta">${article.meta}</div>
+        <div class="modal-article-body">${article.content}</div>
       `;
-
-      card.innerHTML = `
-        <img src="${article.image}" alt="${article.title}" class="pick-image">
-        <div class="pick-title">${article.title}</div>
-        <span class="meta">${article.meta}</span>
-        ${article.content}
-        ${reactionBar}
-      `;
-
-      card.addEventListener('click', (e) => {
-        if (!e.target.closest('.emoji-btn') && !e.target.closest('.comment-btn')) {
-          const newOrder = [article.id, ...cardOrder.filter(id => id !== article.id)];
-          localStorage.setItem('glitch_card_order', JSON.stringify(newOrder));
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-          setTimeout(() => location.reload(), 300);
-        }
-      });
-
-      // ✅ EVENT UNTUK EMOJI
-      card.querySelectorAll('.emoji-btn').forEach(btn => {
-        btn.addEventListener('click', e => {
-          e.stopPropagation();
-          const emoji = btn.getAttribute('data-emoji');
-          const countEl = btn.nextElementSibling;
-          let count = parseInt(countEl.textContent);
-          countEl.textContent = count + 1;
-          countEl.style.color = 'var(--accent)';
-          setTimeout(() => countEl.style.color = '', 500);
-          triggerPulse();
-        });
-      });
-
-      // ✅ EVENT UNTUK KOMENTAR
-      card.querySelector('.comment-btn').addEventListener('click', (e) => {
-        e.stopPropagation();
-        openCommentModal(article.title);
-      });
-
-      container.appendChild(card);
-    });
-
-    function openCommentModal(title) {
-      const modal = document.getElementById('commentModal');
-      const commentContent = document.getElementById('commentContent');
-      if (isSubscribed) {
-        commentContent.innerHTML = `
-          <div><strong>${title}</strong></div>
-          <div class="comment-form active">
-            <textarea placeholder="Tulis komentarmu..."></textarea>
-            <button class="submit-comment">Kirim</button>
-          </div>
-        `;
-      } else {
-        commentContent.innerHTML = `
-          <div><strong>${title}</strong></div>
-          <div class="pay-prompt">
-            <div>Komentar hanya tersedia untuk anggota NOPE.</div>
-            <div>Bantu kami tetap glitch — bayar Rp5.000/bulan.</div>
-            <button class="pay-btn" id="payBtn">Aktifkan Komentar</button>
-          </div>
-        `;
-        document.getElementById('payBtn').addEventListener('click', () => {
-          localStorage.setItem('nope_subscribed', 'true');
-          alert('Terima kasih! Komentar sekarang aktif. 🫶\n(Demo: refresh halaman untuk melihat perubahan)');
-          modal.classList.remove('active');
-        });
-      }
+      
       modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
     }
 
-    document.getElementById('closeModal').addEventListener('click', () => {
-      document.getElementById('commentModal').classList.remove('active');
-    });
-
-    document.getElementById('commentModal').addEventListener('click', (e) => {
-      if (e.target.id === 'commentModal') e.target.classList.remove('active');
-    });
-
-    function navigateTo(page) {
-      window.location.href = page;
+    // Close article
+    function closeArticle() {
+      document.getElementById('articleModal').classList.remove('active');
+      document.body.style.overflow = 'auto';
     }
 
-    function logout() {
+    // React to article
+    function reactToArticle(articleId, emoji, button) {
+      const countSpan = button.querySelector('span');
+      let count = parseInt(countSpan.textContent);
+      countSpan.textContent = count + 1;
+      
+      // Animate
+      button.style.transform = 'scale(1.2)';
+      countSpan.style.color = 'var(--accent)';
+      
+      setTimeout(() => {
+        button.style.transform = '';
+        countSpan.style.color = '';
+      }, 300);
+      
+      triggerPulse();
+    }
+
+    // Scroll progress bar
+    window.addEventListener('scroll', () => {
+      const windowHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrolled = (window.scrollY / windowHeight) * 100;
+      document.getElementById('scroll-bar').style.width = scrolled + '%';
+      
+      const header = document.getElementById('header');
+      if (window.scrollY > 10) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+
+    // Logout
+    document.getElementById('settings-btn').onclick = () => {
       if (confirm('Keluar dari akun?')) {
         localStorage.removeItem('nope_username');
         window.location.href = 'index.html';
       }
-    }
+    };
 
+    // Pulse animation
     function triggerPulse() {
       const pulse = document.createElement('div');
       pulse.className = 'pulse-animation';
       document.body.appendChild(pulse);
-      setTimeout(() => pulse.remove(), 1000);
+      setTimeout(() => pulse.remove(), 1400);
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('nav-jejak').onclick = () => navigateTo('jejak.html');
-      document.getElementById('nav-frekuensi').onclick = () => navigateTo('frekuensi.html');
-      document.getElementById('nav-saynope').onclick = () => navigateTo('saynope.html');
-      document.getElementById('nav-glitch').onclick = () => navigateTo('glitch.html');
-      document.getElementById('settings-btn').onclick = logout;
-
-      triggerPulse();
+    // Close modal on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeArticle();
     });
   </script>
 </body>
