@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      cursor: none; /* Sembunyikan kursor default */
+      background: #f0f0f0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .dynamic-cursor {
+      position: absolute;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      transition: transform 0.1s;
+    }
+    
+    .face {
+      width: 30px;
+      height: 30px;
+      background: #3498db;
+      border-radius: 50%;
+      position: relative;
+      box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+    }
+    
+    .mouth {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 10px;
+      background: white;
+      border-radius: 50% 50% 0 0;
+      transition: all 0.3s ease;
+    }
+    
+    .mouth.frown {
+      transform: translateX(-50%) scaleY(-1);
+    }
+    
+    .mouth.laugh {
+      width: 25px;
+      border-radius: 40% 40% 0 0;
+      height: 12px;
+    }
+    
+    .instructions {
+      text-align: center;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 500px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="instructions">
+    <h2>Kursor Dinamis Tanpa Mata</h2>
+    <p>Gerakkan kursor mouse Anda - wajah biru ini akan mengikuti dan berubah ekspresi!</p>
+    <p>Ekspresi: 😊 (Senyum) | 😞 (Cemberut) | 😂 (Tertawa)</p>
+  </div>
+
+  <script>
+    // Buat elemen kursor dinamis
+    const cursor = document.createElement('div');
+    cursor.className = 'dynamic-cursor';
+    cursor.innerHTML = `
+      <div class="face">
+        <div class="mouth"></div>
+      </div>
+    `;
+    document.body.appendChild(cursor);
+
+    let currentExpression = 'smile';
+    const expressions = ['smile', 'frown', 'laugh'];
+
+    // Update posisi kursor
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+
+    // Ubah ekspresi secara acak
+    setInterval(() => {
+      const randomExpr = expressions[Math.floor(Math.random() * expressions.length)];
+      
+      if (randomExpr !== currentExpression) {
+        const mouth = cursor.querySelector('.mouth');
+        mouth.className = 'mouth';
+        mouth.classList.add(randomExpr);
+        currentExpression = randomExpr;
+      }
+    }, 2000);
+  </script>
+</body>
+</html>
