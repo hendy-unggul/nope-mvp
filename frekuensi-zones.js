@@ -26,8 +26,24 @@ async function loadArtefak() {
 
 function renderZone(posts, containerId) {
   const container = document.getElementById(containerId);
+  if (!container) {
+    console.warn(`Container ${containerId} not found`);
+    return;
+  }
+  
   container.innerHTML = '';
   const limitedPosts = posts.slice(0, 4); // Max 4 posts per zone
+
+  // Show empty state if no posts
+  if (limitedPosts.length === 0) {
+    container.innerHTML = `
+      <div class="post-item" style="text-align: center; padding: 40px 20px; color: var(--muted);">
+        <div style="font-size: 32px; margin-bottom: 12px; opacity: 0.5;">💭</div>
+        <div style="font-size: 14px;">Belum ada post di zone ini</div>
+      </div>
+    `;
+    return;
+  }
 
   limitedPosts.forEach(post => {
     const el = document.createElement('div');
@@ -98,21 +114,33 @@ function updateZoneIndicator() {
 
 async function loadFeed() {
   try {
+    // Show loading state
+    ['zone-hype-content', 'zone-ngusahain-content', 'zone-spill-content'].forEach(id => {
+      const container = document.getElementById(id);
+      if (container) {
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);">Loading...</div>';
+      }
+    });
+
     const [rantsData, artefakData] = await Promise.all([
       supabaseFetch('rants', 'GET', null, '?order=created_at.desc&limit=100'),
       loadArtefak()
     ]);
 
     const hype = [], ngusahain = [], spill = [];
-    rantsData.forEach(r => {
-      const zone = detectZone(r.content);
-      if (zone === 'hype') hype.push(r);
-      else if (zone === 'ngusahain') ngusahain.push(r);
-      else spill.push(r);
-    });
+    
+    // Safely handle rantsData
+    if (rantsData && Array.isArray(rantsData)) {
+      rantsData.forEach(r => {
+        const zone = detectZone(r.content);
+        if (zone === 'hype') hype.push(r);
+        else if (zone === 'ngusahain') ngusahain.push(r);
+        else spill.push(r);
+      });
+    }
 
     // Inject random artefak into one zone
-    if (artefakData.length > 0) {
+    if (artefakData && artefakData.length > 0) {
       const randomArtefak = artefakData[Math.floor(Math.random() * artefakData.length)];
       const artefakPost = {
         id: `artefak-${randomArtefak.id}`,
@@ -128,17 +156,81 @@ async function loadFeed() {
       else spill.unshift(artefakPost);
     }
 
+    // If no data, add dummy posts
+    if (hype.length === 0 && ngusahain.length === 0 && spill.length === 0) {
+      console.log('📝 No data from Supabase, adding dummy posts');
+      
+      // Add dummy posts for each zone
+      hype.push(
+        { id: 'dummy1', username: 'kpopper99', content: 'Comeback baru seventeen keren banget! Choreo nya insane 🔥 v!', created_at: new Date().toISOString() },
+        { id: 'dummy2', username: 'drakormania', content: 'Baru nonton squid game 2, plot twist nya bikin nangis 😭', created_at: new Date().toISOString() }
+      );
+      
+      ngusahain.push(
+        { id: 'dummy3', username: 'mahasiswa_sibuk', content: 'Hari ke-30 ngerjain skripsi, tinggal revisi dari dosen 💪', created_at: new Date().toISOString() },
+        { id: 'dummy4', username: 'thrifter_jkt', content: 'Jualan thrifting bulan ini untung 2jt! Side hustle works 📈', created_at: new Date().toISOString() }
+      );
+      
+      spill.push(
+        { id: 'dummy5', username: 'anon_capek', content: 'Capek banget rasanya jadi versi diri orang lain terus...', created_at: new Date().toISOString() },
+        { id: 'dummy6', username: 'overthinker', content: 'Kenapa ya rasanya selalu overthinking tiap malem 😔', created_at: new Date().toISOString() }
+      );
+    }
+
     renderZone(hype, 'zone-hype-content');
     renderZone(ngusahain, 'zone-ngusahain-content');
     renderZone(spill, 'zone-spill-content');
+    
+    console.log('✅ Feed loaded:', { hype: hype.length, ngusahain: ngusahain.length, spill: spill.length });
+    
   } catch (e) {
     console.error('💥 Gagal muat feed:', e);
+    
+    // Show error state with dummy data
+    const errorHype = [
+      { id: 'err1', username: 'kpopper99', content: 'Comeback baru seventeen keren banget! v!', created_at: new Date().toISOString() }
+    ];
+    const errorNgusahain = [
+      { id: 'err2', username: 'mahasiswa_sibuk', content: 'Hari ke-30 ngerjain skripsi 💪', created_at: new Date().toISOString() }
+    ];
+    const errorSpill = [
+      { id: 'err3', username: 'anon_capek', content: 'Capek banget rasanya...', created_at: new Date().toISOString() }
+    ];
+    
+    renderZone(errorHype, 'zone-hype-content');
+    renderZone(errorNgusahain, 'zone-ngusahain-content');
+    renderZone(errorSpill, 'zone-spill-content');
   }
 }
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-  loadFeed();
+  console.log('🚀 NOPE Zones initializing...');
+  
+  // Check if containers exist
+  const containers = ['zone-hype-content', 'zone-ngusahain-content', 'zone-spill-content'];
+  containers.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) console.error(`❌ Container ${id} not found!`);
+    else console.log(`✅ Container ${id} found`);
+  });
+  
+  // Load feed
+  loadFeed().then(() => {
+    console.log('✅ Feed loaded successfully');
+  }).catch(err => {
+    console.error('❌ Feed load failed:', err);
+  });
+  
+  // Setup scroll indicator
   window.addEventListener('scroll', updateZoneIndicator);
-  setTimeout(triggerPulse, 300);
+  
+  // Trigger pulse animation if available
+  if (typeof triggerPulse === 'function') {
+    setTimeout(triggerPulse, 300);
+  } else {
+    console.warn('⚠️ triggerPulse function not available');
+  }
+  
+  console.log('✅ NOPE Zones initialized');
 });
