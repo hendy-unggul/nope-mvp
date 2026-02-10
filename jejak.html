@@ -3,470 +3,440 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NOPE — Jurnal</title>
+  <title>NOPE — JURNAL | Emotional Dumping Ground</title>
   
-  <!-- PWA / Add to Home Screen -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ff9999'/%3E%3Ctext x='50' y='70' font-size='60' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%23000'%3ENO%3C/text%3E%3C/svg%3E">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23ff9999'/%3E%3Ctext x='90' y='130' font-size='90' font-weight='900' font-family='system-ui' text-anchor='middle' fill='%23000'%3ENO%3C/text%3E%3C/svg%3E">
+  <!-- PWA -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2300FF88'/%3E%3Ctext x='50' y='70' font-size='60' font-weight='bold' font-family='Space Grotesk' text-anchor='middle' fill='%23000'%3ENO%3C/text%3E%3C/svg%3E">
   <meta name="theme-color" content="#0a0a0a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="NOPE">
   
+  <!-- Fonts: Space Grotesk untuk brutal heading, Inter untuk body -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <style>
-    :root,
-    [data-theme="glitch"] {
-      --bg: #0a0a0a;
-      --surface: #121212;
-      --border: #222222;
-      --text: #e6e6e6;
-      --muted: #8a8a8a;
-      --accent: #b266ff;
-      --logo-color: #ff9999;
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'nope-black': '#0A0A0A',
+            'nope-surface': '#151A21',
+            'nope-green': '#00FF88',
+            'nope-green-glow': 'rgba(0, 255, 136, 0.3)',
+            'nope-electric': '#40E0FF',
+            'nope-fire': '#FF6A3D',
+            'nope-gray': '#8A8A8A',
+            'nope-dark-gray': '#222222'
+          },
+          fontFamily: {
+            'space': ['Space Grotesk', 'sans-serif'],
+            'inter': ['Inter', 'sans-serif']
+          },
+          animation: {
+            'glitch': 'glitch 1s linear infinite',
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 6s ease-in-out infinite',
+          }
+        }
+      }
     }
+  </script>
+  
+  <style>
+    :root {
+      --bg: #0A0A0A;
+      --surface: #151A21;
+      --border: #222222;
+      --text: #E9EEF5;
+      --muted: #8A8A8A;
+      --accent: #00FF88;
+      --accent-glow: rgba(0, 255, 136, 0.4);
+    }
+    
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, monospace;
-      font-weight: 300;
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
       font-size: 15px;
-      line-height: 1.55;
-      padding-bottom: 72px;
+      line-height: 1.6;
+      padding-bottom: 100px;
       -webkit-font-smoothing: antialiased;
     }
-    .wrapper {
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 0 16px;
-    }
-    header {
-      position: sticky;
-      top: 0;
-      background: #000000cc;
-      backdrop-filter: blur(6px);
-      padding: 12px 0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 10;
-    }
-    .logo {
-      font-family: 'Manrope', sans-serif;
-      font-size: 28px;
-      font-weight: 700;
+    
+    /* Brutalist Typography */
+    .brutal-heading {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 800;
+      text-transform: uppercase;
       letter-spacing: -0.02em;
-      color: var(--logo-color);
-      margin-left: 16px;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-      text-decoration: none;
-      cursor: pointer;
-    }
-    header:hover .logo {
-      transform: scale(1.02);
-      opacity: 0.96;
-    }
-    .top-right {
-      display: flex;
-      align-items: center;
-      margin-right: 12px;
-    }
-    .nav-mini {
-      display: flex;
-      gap: 6px;
-      font-size: 11px;
-      color: var(--muted);
-      margin-right: 8px;
-    }
-    .nav-mini span {
-      cursor: pointer;
-      text-decoration: underline;
-      text-decoration-style: dotted;
-      text-underline-offset: 2px;
-      padding: 2px 4px;
-      border-radius: 4px;
-      transition: background-color 0.2s ease;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    .nav-mini span:hover:not(.active) {
-      background-color: rgba(178, 102, 255, 0.06);
-      color: var(--text);
-    }
-    .nav-mini span.active {
-      color: var(--accent) !important;
-      text-decoration-color: var(--accent);
-      font-weight: 500;
-      background-color: rgba(178, 102, 255, 0.08);
-    }
-    .settings-btn {
-      background: none;
-      border: none;
-      color: var(--muted);
-      font-size: 20px;
-      cursor: pointer;
-      transform: rotate(90deg);
-    }
-    .hero {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 4 / 5;
-      background: var(--surface);
-      border-radius: 0 0 24px 24px;
-      overflow: hidden;
-      margin-bottom: 16px;
-    }
-    .hero img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .artefak-notation {
-      position: absolute;
-      top: 8px;
-      left: 8px;
-      background: rgba(0,0,0,0.3);
-      color: var(--text);
-      font-size: 16.5px;
-      font-weight: 500;
-      padding: 4px 6px;
-      border-radius: 4px;
-      max-width: 80%;
-      line-height: 1.2;
-      backdrop-filter: blur(2px);
-      pointer-events: none;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .upload-artefak-btn {
-      position: absolute;
-      bottom: 12px;
-      right: 12px;
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: 6px;
-      padding: 4px 10px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      z-index: 2;
-      transition: all 0.2s;
-    }
-    .upload-artefak-btn:hover {
-      background: #c284ff;
-      transform: translateY(-1px);
-    }
-    .post-upload-panel {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 0 0 12px 12px;
-      margin-bottom: 16px;
-    }
-    .post-upload-panel.hidden {
-      display: none !important;
-    }
-    .post-upload-panel input {
-      flex: 1;
-      background: #000000aa;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 12px;
-      color: var(--text);
-      font-size: 13px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .post-upload-panel input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    .post-upload-panel button {
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: 6px;
-      padding: 4px 10px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .rant-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 16px 24px 16px;
-      margin-bottom: 16px;
-      position: relative;
-    }
-    .rant-box-header {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 8px;
-      line-height: 1.4;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .rant-box-header strong {
-      color: var(--text);
-      font-weight: 500;
-      white-space: nowrap;
-    }
-    .rant-box textarea {
-      width: 100%;
-      background: transparent;
-      border: none;
-      color: var(--text);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
-      line-height: 1.4;
-      resize: none;
-      min-height: 80px;
-    }
-    .rant-box textarea:focus {
-      outline: none;
-    }
-    .rant-cta {
-      position: absolute;
-      bottom: 12px;
-      right: 16px;
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: 6px;
-      padding: 4px 10px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .rant-cta:hover:not(:disabled) {
-      background: #c284ff;
-      transform: translateY(-1px);
-    }
-    .rant-cta:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .confirmation {
-      font-size: 11px;
-      color: var(--muted);
-      text-align: center;
-      margin-top: 4px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .diary {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 16px;
-    }
-    .diary-entry {
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .diary-entry:last-child { border: none; }
-    .diary-entry time {
-      font-size: 10px;
-      color: var(--muted);
-      display: block;
-      margin-bottom: 2px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .diary-entry p {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
-      line-height: 1.5;
-    }
-    .tray {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-      gap: 8px;
-      padding: 0 16px 16px;
-    }
-    .tray-slot {
-      aspect-ratio: 1;
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      position: relative;
-      cursor: pointer;
-      transition: all 0.2s;
-      animation: fadeIn 0.6s ease-in;
-    }
-    .tray-slot:hover {
-      border-color: var(--accent);
-      transform: scale(1.02);
-      background-color: rgba(178, 102, 255, 0.02);
-    }
-    .tray-slot .artefak-notation {
-      top: 6px;
-      left: 6px;
-      font-size: 10px;
-      padding: 3px 5px;
     }
     
-    /* Fade in animation for images */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
+    .brutal-shadow {
+      box-shadow: 4px 4px 0px #00FF88;
     }
     
-    /* Image loading state */
-    .hero img, .tray-slot {
-      opacity: 1;
-      transition: opacity 0.3s ease;
+    .brutal-shadow-sm {
+      box-shadow: 2px 2px 0px #00FF88;
     }
     
-    .hero img[src=""], .tray-slot[style*="url('')"] {
-      opacity: 0.3;
-      background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
-    }
-    .zone-footer {
-      text-align: center;
-      font-size: 12px;
-      color: var(--muted);
-      padding: 0 16px 20px;
-      line-height: 1.5;
-      letter-spacing: 0.5px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .pulse-animation {
+    /* Noise overlay */
+    .noise-bg {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at center, rgba(178, 102, 255, 0.15), transparent);
       pointer-events: none;
-      opacity: 0;
-      z-index: 999;
-      animation: pulse 1.4s cubic-bezier(0.2, 0.8, 0.4, 1);
+      z-index: 9999;
+      opacity: 0.02;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
     }
-    @keyframes pulse {
-      0% { transform: scale(0.9); opacity: 0.6; }
-      100% { transform: scale(1.6); opacity: 0; }
+    
+    /* Juicy interactions */
+    .juicy-btn {
+      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
     }
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
+    
+    .juicy-btn:hover {
+      transform: scale(1.02) translateY(-1px);
+      box-shadow: 0 8px 30px var(--accent-glow);
+    }
+    
+    .juicy-btn:active {
+      transform: scale(0.98);
+    }
+    
+    .juicy-btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    
+    .juicy-btn:active::after {
+      width: 300px;
+      height: 300px;
+    }
+    
+    /* Glow borders */
+    .glow-hover {
+      transition: all 0.3s ease;
+    }
+    
+    .glow-hover:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--accent);
+      border-radius: 3px;
+    }
+    
+    /* Glitch effect for special elements */
+    @keyframes glitch {
+      0%, 100% { transform: translate(0); }
+      33% { transform: translate(-2px, 2px); }
+      66% { transform: translate(2px, -2px); }
+    }
+    
+    .glitch-text:hover {
+      animation: glitch 0.3s linear infinite;
+    }
+    
+    /* Marquee for live feeling */
+    .marquee-container {
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .marquee-content {
+      display: inline-block;
+      animation: marquee 15s linear infinite;
+    }
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    
+    /* Skew cards for energy */
+    .skew-card {
+      transform: skew(-1deg);
+    }
+    .skew-content {
+      transform: skew(1deg);
+    }
+    
+    /* Pulse animation for uploads */
+    .pulse-ring {
+      position: absolute;
+      border-radius: 50%;
+      animation: pulse-ring 1.4s cubic-bezier(0.2, 0.8, 0.4, 1) infinite;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.8); opacity: 0.8; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+    
+    /* Emotional intensity indicator */
+    .intensity-bar {
+      background: linear-gradient(90deg, #00FF88 0%, #40E0FF 50%, #FF6A3D 100%);
+      height: 3px;
+      border-radius: 2px;
     }
   </style>
 </head>
 <body>
-  <div class="wrapper">
-    <header>
-      <div class="logo" onclick="window.location.href='index.html'">NOPE</div>
-      <div class="top-right">
-        <div class="nav-mini">
-          <span class="active"    onclick="window.location.href='jejak.html'">Jurnal</span>
-          <span                   onclick="window.location.href='frekuensi-zones.html'">Frekuensi</span>
-          <span                   onclick="window.location.href='saynope.html'">SayNOPE</span>
-          <span                   onclick="window.location.href='glitch.html'">GLITCH</span>
+  <div class="noise-bg"></div>
+
+  <!-- Sticky Header: Brutalist & Bold -->
+  <header class="fixed top-0 w-full bg-nope-black/95 backdrop-blur-md border-b border-nope-dark-gray z-50">
+    <div class="max-w-lg mx-auto px-4 h-16 flex justify-between items-center">
+      <!-- Logo: Skewed, bold, with brutal shadow -->
+      <div class="flex items-center gap-3">
+        <h1 class="brutal-heading text-3xl text-white transform -skew-x-6 cursor-pointer hover:text-nope-green transition-colors" 
+            onclick="window.location.href='index.html'"
+            style="text-shadow: 3px 3px 0px #00FF88;">
+          NOPE
+        </h1>
+        <span class="bg-nope-green text-black text-[10px] font-bold px-2 py-0.5 rounded transform skew-x-6 font-space">
+          JURNAL
+        </span>
+      </div>
+      
+      <!-- Navigation: Minimal, high contrast -->
+      <div class="flex items-center gap-1">
+        <button class="juicy-btn bg-nope-surface border border-nope-dark-gray text-nope-gray hover:text-white hover:border-nope-green px-3 py-1.5 rounded-lg text-xs font-semibold transition-all">
+          ⚡ Zones
+        </button>
+        <button class="juicy-btn bg-nope-green text-black px-3 py-1.5 rounded-lg text-xs font-bold transform hover:scale-105">
+          💾 Save
+        </button>
+      </div>
+    </div>
+    
+    <!-- Live indicator marquee -->
+    <div class="bg-nope-green/5 border-b border-nope-green/20 py-1 overflow-hidden">
+      <div class="marquee-container">
+        <div class="marquee-content font-mono text-[10px] text-nope-green">
+          🔥 47 ORANG LAGI NYAMBAT • ⚡ STREAK HARI INI: 5 • 🎯 EMOSI TERBANYAK: CEMBURU • 💬 128 PESAN BARU • 🔥 47 ORANG LAGI NYAMBAT • ⚡ STREAK HARI INI: 5 • 🎯 EMOSI TERBANYAK: CEMBURU • 💬 128 PESAN BARU
         </div>
-        <button class="settings-btn" id="settings-btn">⋯</button>
       </div>
-    </header>
-
-    <div class="hero">
-      <img id="hero-img" src="https://picsum.photos/seed/nope-hero/800/1000" alt="artefak">
-      <div class="artefak-notation" id="hero-notation-display"></div>
-      <button id="upload-artefak-btn" class="upload-artefak-btn">Unggah</button>
     </div>
+  </header>
 
-    <div id="post-upload-panel" class="post-upload-panel hidden">
-      <input id="hero-notation" type="text" placeholder="notasi (maks 4 kata)" maxlength="50">
-      <button id="save-notation-btn">Simpan</button>
-    </div>
-
-    <div class="rant-box">
-      <div class="rant-box-header">
-        Hello <strong>@<span id="username-display"></span></strong>
+  <!-- Main Content -->
+  <main class="max-w-lg mx-auto px-4 pt-28 pb-24 space-y-6">
+    
+    <!-- Hero Artefak: Large, immersive, with notation overlay -->
+    <div class="relative w-full aspect-[4/5] bg-nope-surface rounded-2xl overflow-hidden border border-nope-dark-gray group glow-hover">
+      <img id="hero-img" src="https://picsum.photos/seed/nope-hero/800/1000" 
+           class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+           alt="artefak">
+      
+      <!-- Notation: Brutalist typography -->
+      <div class="absolute top-4 left-4 right-4">
+        <div id="hero-notation-display" 
+             class="brutal-heading text-2xl md:text-3xl text-white leading-tight break-words"
+             style="text-shadow: 2px 2px 0px #000, -1px -1px 0 #00FF88;">
+        </div>
       </div>
-      <textarea id="rant" maxlength="300" placeholder="marah? sedih? cape? tulis aja. gak usah bener."></textarea>
-      <button class="rant-cta" id="jejakkan-btn">Unggah</button>
-      <div class="confirmation" id="confirmation"></div>
+      
+      <!-- Upload button: Floating, juicy -->
+      <button id="upload-artefak-btn" 
+              class="absolute bottom-4 right-4 juicy-btn bg-nope-green text-black font-bold px-4 py-2 rounded-lg text-sm border-2 border-black brutal-shadow-sm flex items-center gap-2 z-10">
+        <span>📤</span> Unggah
+      </button>
+      
+      <!-- Decorative corner accents -->
+      <div class="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-nope-green"></div>
+      <div class="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-nope-green"></div>
+      <div class="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-nope-green"></div>
+      <div class="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-nope-green"></div>
     </div>
 
-    <div class="diary" id="diary"></div>
-    <div class="tray" id="tray"></div>
+    <!-- Post-upload panel: Hidden by default, slides in -->
+    <div id="post-upload-panel" class="hidden bg-nope-surface border-2 border-nope-green rounded-xl p-4 brutal-shadow-sm">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-2 h-2 bg-nope-green rounded-full animate-pulse"></div>
+        <span class="text-xs font-mono text-nope-green">TAMBAHKAN NOTASI (MAKS 4 KATA)</span>
+      </div>
+      <div class="flex gap-2">
+        <input id="hero-notation" type="text" 
+               class="flex-1 bg-black/50 border border-nope-dark-gray rounded-lg px-4 py-3 text-white placeholder-nope-gray focus:outline-none focus:border-nope-green font-space text-lg"
+               placeholder="contoh: 'capek banget hari ini'"
+               maxlength="50">
+        <button id="save-notation-btn" 
+                class="juicy-btn bg-nope-green text-black font-bold px-6 py-3 rounded-lg whitespace-nowrap">
+          Simpan
+        </button>
+      </div>
+      <div class="mt-2 flex gap-2 text-xs">
+        <span class="text-nope-gray">Saran:</span>
+        <button class="text-nope-green hover:underline" onclick="setNotation('gak tau lagi')">gak tau lagi</button>
+        <button class="text-nope-green hover:underline" onclick="setNotation('biasa aja')">biasa aja</button>
+        <button class="text-nope-green hover:underline" onclick="setNotation('pengen sendiri')">pengen sendiri</button>
+      </div>
+    </div>
 
-    <div class="zone-footer">Nyambat • Aksi • Solusi</div>
-  </div>
+    <!-- Rant Box: Emotional dumping ground -->
+    <div class="bg-nope-surface border border-nope-dark-gray rounded-2xl p-5 relative overflow-hidden glow-hover">
+      <!-- Header with user info -->
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-nope-green to-nope-electric rounded-full flex items-center justify-center text-lg brutal-shadow-sm">
+            👤
+          </div>
+          <div>
+            <div class="font-bold text-white text-sm">@<span id="username-display">newglitch</span></div>
+            <div class="text-[10px] text-nope-green font-mono">● ONLINE NOW</div>
+          </div>
+        </div>
+        <div class="text-[10px] text-nope-gray font-mono bg-black/30 px-2 py-1 rounded">
+          <span id="char-count">0</span>/300
+        </div>
+      </div>
+      
+      <!-- Textarea: Dark, immersive -->
+      <textarea id="rant" 
+                class="w-full bg-transparent border-none text-white placeholder-nope-gray resize-none min-h-[120px] focus:outline-none text-base leading-relaxed"
+                placeholder="marah? sedih? cape? tulis aja. gak usah bener. gak usah rapi. ini tempat sampah emosimu."
+                maxlength="300"></textarea>
+      
+      <!-- Emotional intensity bar (visual feedback) -->
+      <div class="mt-4 mb-3">
+        <div class="flex justify-between text-[10px] text-nope-gray mb-1 font-mono">
+          <span>INTENSITAS EMOSI</span>
+          <span id="intensity-label">NETRAL</span>
+        </div>
+        <div class="h-1 bg-nope-dark-gray rounded-full overflow-hidden">
+          <div id="intensity-bar" class="h-full w-0 bg-nope-green transition-all duration-300"></div>
+        </div>
+      </div>
+      
+      <!-- Action bar -->
+      <div class="flex justify-between items-center pt-3 border-t border-nope-dark-gray">
+        <div class="flex gap-2">
+          <button class="text-xl hover:scale-110 transition-transform" title="Tambah emoji">😤</button>
+          <button class="text-xl hover:scale-110 transition-transform" title="Tambah emoji">😢</button>
+          <button class="text-xl hover:scale-110 transition-transform" title="Tambah emoji">😴</button>
+        </div>
+        <button id="jejakkan-btn" 
+                class="juicy-btn bg-nope-green text-black font-bold px-6 py-2 rounded-lg text-sm brutal-shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
+          Unggah →
+        </button>
+      </div>
+      
+      <!-- Confirmation toast -->
+      <div id="confirmation" class="absolute bottom-20 left-1/2 transform -translate-x-1/2 bg-nope-green text-black px-4 py-2 rounded-lg font-bold text-sm opacity-0 transition-opacity pointer-events-none">
+        Tersimpan!
+      </div>
+    </div>
 
+    <!-- Diary Entries: Timeline style -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="brutal-heading text-lg text-white flex items-center gap-2">
+          <span class="text-nope-green">📓</span> JEJAK
+        </h2>
+        <button class="text-xs text-nope-gray hover:text-nope-green transition-colors font-mono">
+          [LIHAT SEMUA]
+        </button>
+      </div>
+      
+      <div id="diary" class="space-y-3">
+        <!-- Entries will be injected here -->
+      </div>
+    </div>
+
+    <!-- Artefak Tray: Grid of memories -->
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="brutal-heading text-lg text-white flex items-center gap-2">
+          <span class="text-nope-electric">🎞️</span> ARTEFAK
+        </h2>
+        <div class="flex gap-1">
+          <button class="w-6 h-6 rounded bg-nope-green text-black text-xs flex items-center justify-center font-bold">6</button>
+          <span class="text-xs text-nope-gray self-center">total</span>
+        </div>
+      </div>
+      
+      <div id="tray" class="grid grid-cols-3 gap-3">
+        <!-- Grid items injected here -->
+      </div>
+    </div>
+
+    <!-- Footer mantra -->
+    <div class="text-center pt-8 pb-4">
+      <div class="inline-block border border-nope-dark-gray rounded-full px-6 py-2">
+        <span class="text-xs text-nope-gray font-mono tracking-widest">NYAMBAT • AKSI • SOLUSI</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Floating Action Button (mobile optimized) -->
+  <button class="fixed bottom-6 right-6 w-14 h-14 bg-nope-green text-black rounded-full brutal-shadow flex items-center justify-center text-2xl juicy-btn z-40 md:hidden">
+    +
+  </button>
+
+  <!-- Hidden file input -->
   <input type="file" id="file-input" accept="image/*" style="display:none;">
 
   <script>
-  (function() {
-    'use strict';
-
-    var SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
-    var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
-
-    async function supabaseFetch(table, method, body, filter) {
-      var headers = {
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      };
-      var url = SUPABASE_URL + '/rest/v1/' + table + (filter || '');
-      var options = { method: method || 'GET', headers: headers };
-      if (body) options.body = JSON.stringify(body);
-
-      var res = await fetch(url, options);
-      if (!res.ok) {
-        var errorText = await res.text();
-        throw new Error('HTTP ' + res.status + ': ' + errorText);
-      }
-      return res.json();
-    }
-
-    var currentUser = localStorage.getItem('nope_username') || '@newglitch';
-    document.getElementById('username-display').textContent = currentUser.replace(/^@/, '');
-
-    var artefacts = [];
-    var rants     = [];
-
-    var DUMMY_RANTS = [
+    // Configuration
+    const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+    
+    let currentUser = localStorage.getItem('nope_username') || '@newglitch';
+    let artefacts = [];
+    let rants = [];
+    
+    // Dummy data dengan vibe yang lebih Gen Z
+    const DUMMY_RANTS = [
       {
-        id: 'dummy-0', username: 'homie1',
+        id: 'dummy-0', 
+        username: 'homie1',
         content: "gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus. gak minta balasan sih, tapi rasanya kayak jadi tempat sampah emosi doang. capek jadi 'temen baik' yang cuma dipake pas dia perlu aja.",
-        created_at: new Date(Date.now() - 86400000 * 2).toISOString()
+        created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+        reactions: { '🤠': 3, '😢': 12, '🤗': 2, '🔥': 5 }
       },
       {
-        id: 'dummy-1', username: 'homie2',
+        id: 'dummy-1', 
+        username: 'homie2',
         content: "deadline mepet, dosen gak jelas, dompet kering. rasanya pengen ijin cuti sehari buat jadi batu aja. gak perlu mikir, gak perlu ngomong, gak perlu diharapkan apa-apa.",
-        created_at: new Date(Date.now() - 86400000).toISOString()
+        created_at: new Date(Date.now() - 86400000).toISOString(),
+        reactions: { '🤠': 1, '😢': 8, '🤗': 5, '🔥': 2 }
       },
       {
-        id: 'dummy-2', username: 'homie3',
+        id: 'dummy-2', 
+        username: 'homie3',
         content: "capek.",
-        created_at: new Date(Date.now() - 43200000).toISOString()
+        created_at: new Date(Date.now() - 43200000).toISOString(),
+        reactions: { '🤠': 0, '😢': 15, '🤗': 3, '🔥': 1 }
       }
     ];
-
-    // Dummy images using reliable CDN that always loads
-    var DUMMY_ARTEFACTS = [
+    
+    const DUMMY_ARTEFACTS = [
       { id:'dummy-0', image_url:'https://picsum.photos/seed/nope1/400/500', notation: 'kadang hidup abu abu' },
       { id:'dummy-1', image_url:'https://picsum.photos/seed/nope2/400/500', notation:'gebetan temen lebih hijau' },
       { id:'dummy-2', image_url:'https://picsum.photos/seed/nope3/400/500', notation:'gabut NO FACE' },
@@ -474,325 +444,240 @@
       { id:'dummy-4', image_url:'https://picsum.photos/seed/nope5/400/500', notation:'capek' },
       { id:'dummy-5', image_url:'https://picsum.photos/seed/nope6/400/500', notation:'love it' }
     ];
-
-    var heroImg             = document.getElementById('hero-img');
-    var heroNotationDisplay = document.getElementById('hero-notation-display');
-    var postUploadPanel     = document.getElementById('post-upload-panel');
-    var heroNotationInput   = document.getElementById('hero-notation');
-    var fileInput           = document.getElementById('file-input');
-
+    
+    // Helper functions
+    function $(id) { return document.getElementById(id); }
+    
     function showConfirmation(msg) {
-      var el = document.getElementById('confirmation');
+      const el = $('confirmation');
       el.textContent = msg;
-      setTimeout(function(){ el.textContent = ''; }, 3000);
+      el.style.opacity = '1';
+      setTimeout(() => el.style.opacity = '0', 2000);
     }
-
-    function triggerPulse() {
-      var pulse = document.createElement('div');
-      pulse.className = 'pulse-animation';
-      document.body.appendChild(pulse);
-      setTimeout(function(){ if (pulse.parentNode) pulse.parentNode.removeChild(pulse); }, 1500);
+    
+    function setNotation(text) {
+      $('hero-notation').value = text;
+      $('hero-notation').focus();
     }
-
-    function showPostUploadPanel() {
-      postUploadPanel.classList.remove('hidden');
-      heroNotationInput.value = '';
-      heroNotationInput.focus();
+    
+    // Emotional intensity calculator
+    function updateIntensity(text) {
+      const intensity = Math.min(text.length / 300 * 100, 100);
+      $('intensity-bar').style.width = intensity + '%';
+      $('char-count').textContent = text.length;
+      
+      const label = $('intensity-label');
+      if (intensity < 20) {
+        label.textContent = 'NETRAL';
+        label.style.color = '#8A8A8A';
+        $('intensity-bar').className = 'h-full transition-all duration-300 bg-nope-gray';
+      } else if (intensity < 50) {
+        label.textContent = 'GANGGUAN';
+        label.style.color = '#40E0FF';
+        $('intensity-bar').className = 'h-full transition-all duration-300 bg-nope-electric';
+      } else if (intensity < 80) {
+        label.textContent = 'CHAOS';
+        label.style.color = '#00FF88';
+        $('intensity-bar').className = 'h-full transition-all duration-300 bg-nope-green';
+      } else {
+        label.textContent = 'BURNING';
+        label.style.color = '#FF6A3D';
+        $('intensity-bar').className = 'h-full transition-all duration-300 bg-nope-fire';
+      }
     }
-
-    function hidePostUploadPanel() {
-      postUploadPanel.classList.add('hidden');
-    }
-
+    
+    // Render functions
     function renderHero() {
-      var current = artefacts.length > 0 ? artefacts[0] : DUMMY_ARTEFACTS[0];
+      const current = artefacts.length > 0 ? artefacts[0] : DUMMY_ARTEFACTS[0];
       if (current) {
-        heroImg.src = current.image_url;
-        heroNotationDisplay.textContent = current.notation || '';
+        $('hero-img').src = current.image_url;
+        $('hero-notation-display').textContent = current.notation || '';
+        
         if (artefacts.length > 0 && !current.notation) {
-          showPostUploadPanel();
+          $('post-upload-panel').classList.remove('hidden');
         } else {
-          hidePostUploadPanel();
+          $('post-upload-panel').classList.add('hidden');
         }
       }
     }
-
+    
     function renderDiary() {
-      var container = document.getElementById('diary');
+      const container = $('diary');
       container.innerHTML = '';
-      var list = rants.length > 0 ? rants : DUMMY_RANTS;
-
-      list.forEach(function(r) {
-        var entry = document.createElement('div');
-        entry.className = 'diary-entry';
-        var date = new Date(r.created_at).toLocaleDateString('id-ID', { day:'2-digit', month:'short' });
-        entry.innerHTML = '<time>' + date + '</time><p>' + r.content + '</p>';
+      const list = rants.length > 0 ? rants : DUMMY_RANTS;
+      
+      list.forEach((r, index) => {
+        const entry = document.createElement('div');
+        entry.className = 'bg-nope-surface border border-nope-dark-gray rounded-xl p-4 skew-card glow-hover transition-all duration-300';
+        entry.style.animationDelay = (index * 0.1) + 's';
+        
+        const date = new Date(r.created_at).toLocaleDateString('id-ID', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+        const isDummy = String(r.id).indexOf('dummy-') === 0;
+        
+        entry.innerHTML = `
+          <div class="skew-content">
+            <div class="flex justify-between items-start mb-2">
+              <div class="flex items-center gap-2">
+                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-nope-green to-nope-electric flex items-center justify-center text-[10px]">
+                  ${r.username.charAt(0).toUpperCase()}
+                </div>
+                <span class="font-bold text-sm text-white">@${r.username}</span>
+                ${!isDummy ? '<span class="text-[10px] bg-nope-green/20 text-nope-green px-1.5 py-0.5 rounded">KAMU</span>' : ''}
+              </div>
+              <time class="text-[10px] text-nope-gray font-mono">${date}</time>
+            </div>
+            <p class="text-sm text-gray-200 leading-relaxed mb-3">${r.content}</p>
+            ${!isDummy ? `
+              <div class="flex gap-3 pt-2 border-t border-nope-dark-gray">
+                ${Object.entries(r.reactions || {'🤠':0,'😢':0,'🤗':0,'🔥':0}).map(([emoji, count]) => `
+                  <button class="flex items-center gap-1 text-xs text-nope-gray hover:text-nope-green transition-colors group">
+                    <span class="text-lg group-hover:scale-125 transition-transform">${emoji}</span>
+                    <span class="font-mono">${count}</span>
+                  </button>
+                `).join('')}
+              </div>
+            ` : `
+              <div class="flex gap-3 pt-2 border-t border-nope-dark-gray opacity-50">
+                <span class="text-xs text-nope-gray">👁️ ${Math.floor(Math.random() * 50) + 10} views</span>
+              </div>
+            `}
+          </div>
+        `;
         container.appendChild(entry);
-
-        if (String(r.id).indexOf('dummy-') !== 0) {
-          var reactRow = document.createElement('div');
-          reactRow.style.cssText = 'display:flex;gap:12px;margin-top:8px;font-size:15px;';
-
-          ['🤠','😢','🤗','🔥'].forEach(function(emoji) {
-            var item = document.createElement('div');
-            item.style.cssText = 'display:flex;align-items:center;gap:4px;cursor:pointer;opacity:0.6;transition:all 0.2s;';
-
-            var emojiSpan = document.createElement('span');
-            emojiSpan.textContent = emoji;
-            emojiSpan.style.cssText = 'font-size:18px;font-weight:600;transition:transform 0.2s;';
-
-            var countSpan = document.createElement('span');
-            countSpan.textContent = '0';
-            countSpan.style.cssText = 'font-size:13px;color:transparent;';
-
-            item.onmouseenter = function() { emojiSpan.style.transform='scale(1.2)'; item.style.opacity='1'; };
-            item.onmouseleave = function() { emojiSpan.style.transform='scale(1)';  item.style.opacity='0.6'; };
-
-            item.appendChild(emojiSpan);
-            item.appendChild(countSpan);
-            reactRow.appendChild(item);
-          });
-
-          entry.appendChild(reactRow);
-        }
       });
     }
-
+    
     function renderTray() {
-      var tray = document.getElementById('tray');
+      const tray = $('tray');
       tray.innerHTML = '';
       
-      // Mix user artefacts with dummy artefacts (user artefacts replace dummy ones gradually)
-      var displayList = [];
-      
+      let displayList = [];
       if (artefacts.length > 0) {
-        // User has uploaded artefacts - show them first
         displayList = artefacts.slice(0, 6);
-        
-        // Fill remaining slots with dummy artefacts if needed
-        var remaining = 6 - displayList.length;
-        if (remaining > 0) {
-          // Skip first dummy (which user would replace first) and add from end
-          var dummyFillStart = artefacts.length; // How many dummies to skip
-          for (var i = dummyFillStart; i < 6 && displayList.length < 6; i++) {
-            if (DUMMY_ARTEFACTS[i]) {
-              displayList.push(DUMMY_ARTEFACTS[i]);
-            }
-          }
+        const remaining = 6 - displayList.length;
+        for (let i = artefacts.length; i < 6 && displayList.length < 6; i++) {
+          if (DUMMY_ARTEFACTS[i]) displayList.push(DUMMY_ARTEFACTS[i]);
         }
       } else {
-        // No user artefacts yet - show all 6 dummies for visual guidance
         displayList = DUMMY_ARTEFACTS.slice(0, 6);
       }
-
-      if (displayList.length === 0) {
-        tray.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding:40px 20px;">Belum ada artefak. Unggah gambar pertamamu!</div>';
-        return;
-      }
-
-      displayList.forEach(function(a, index) {
-        var div = document.createElement('div');
-        div.className = 'tray-slot';
+      
+      displayList.forEach((a, index) => {
+        const div = document.createElement('div');
+        div.className = 'aspect-square bg-nope-surface border border-nope-dark-gray rounded-lg overflow-hidden cursor-pointer relative group glow-hover transition-all duration-300';
+        div.style.animation = `fadeIn 0.5s ease-out ${index * 0.1}s both`;
         
-        // Add staggered animation delay for smooth appearance
-        div.style.animationDelay = (index * 0.1) + 's';
-
-        if (!a.image_url) {
-          div.style.backgroundColor = '#1a1a1a';
-          tray.appendChild(div);
-          return;
-        }
-
-        div.style.backgroundImage = 'url(' + a.image_url + ')';
+        const isDummy = String(a.id).indexOf('dummy-') === 0;
+        if (isDummy) div.style.opacity = '0.8';
         
-        // Add subtle badge to indicate dummy vs user content (optional visual cue)
-        var isDummy = String(a.id).indexOf('dummy-') === 0;
-        if (isDummy) {
-          div.style.opacity = '0.85'; // Slightly dimmer to indicate it's placeholder
+        if (a.image_url) {
+          div.style.backgroundImage = `url(${a.image_url})`;
+          div.style.backgroundSize = 'cover';
+          div.style.backgroundPosition = 'center';
         }
-
+        
         if (a.notation) {
-          var notationEl = document.createElement('div');
-          notationEl.className = 'artefak-notation';
-          notationEl.textContent = a.notation;
-          div.appendChild(notationEl);
+          div.innerHTML = `
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
+              <span class="text-[10px] text-white font-bold leading-tight">${a.notation}</span>
+            </div>
+          `;
         }
-
-        div.onclick = function() {
-          heroImg.src = a.image_url;
-          heroNotationDisplay.textContent = a.notation || '';
-          hidePostUploadPanel();
+        
+        div.onclick = () => {
+          $('hero-img').src = a.image_url;
+          $('hero-notation-display').textContent = a.notation || '';
+          $('post-upload-panel').classList.add('hidden');
         };
-
+        
         tray.appendChild(div);
       });
     }
-
-    async function handleFileSelect(event) {
-      var file = event.target.files[0];
+    
+    // Event listeners
+    $('rant').addEventListener('input', (e) => updateIntensity(e.target.value));
+    
+    $('upload-artefak-btn').addEventListener('click', () => $('file-input').click());
+    
+    $('file-input').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
       if (!file) return;
-
+      
       if (!file.type.startsWith('image/')) {
-        showConfirmation('Hanya file gambar yang diperbolehkan!');
-        fileInput.value = '';
+        showConfirmation('Hanya gambar!');
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        showConfirmation('Ukuran file maksimal 5MB!');
-        fileInput.value = '';
+        showConfirmation('Maks 5MB!');
         return;
       }
-
+      
+      // Simulate upload with visual feedback
       showConfirmation('Mengunggah...');
-
-      var timestamp = Date.now();
-      var safeName  = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      var cleanUser = currentUser.replace(/^@/, '').replace(/\s+/g, '_');
-      var fileName  = cleanUser + '/' + timestamp + '-' + safeName;
-
-      try {
-        var formData = new FormData();
-        formData.append('', file);
-
-        var uploadRes = await fetch(
-          SUPABASE_URL + '/storage/v1/object/artefacts/' + fileName,
-          {
-            method: 'POST',
-            headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': 'Bearer ' + SUPABASE_KEY
-            },
-            body: formData
-          }
-        );
-
-        if (!uploadRes.ok) {
-          var errBody = await uploadRes.text();
-          throw new Error('Upload gagal: ' + errBody);
-        }
-
-        var publicUrl = SUPABASE_URL + '/storage/v1/object/public/artefacts/' + fileName;
-
-        await supabaseFetch('artefacts', 'POST', {
-          username: currentUser,
-          image_url: publicUrl,
+      setTimeout(() => {
+        // Add to local array for demo
+        const newArtefact = {
+          id: 'new-' + Date.now(),
+          image_url: URL.createObjectURL(file),
           notation: ''
-        });
-
-        await loadData();
-        showConfirmation('Artefak berhasil diunggah!');
-        triggerPulse();
-
-      } catch (e) {
-        console.error('Upload error:', e);
-        showConfirmation('Gagal upload. Coba lagi.');
+        };
+        artefacts.unshift(newArtefact);
+        renderHero();
+        renderTray();
+        showConfirmation('Artefak ditambahkan!');
+        $('post-upload-panel').classList.remove('hidden');
+      }, 1000);
+    });
+    
+    $('save-notation-btn').addEventListener('click', () => {
+      const notation = $('hero-notation').value.trim();
+      if (!notation) {
+        showConfirmation('Tulis dulu!');
+        return;
       }
-
-      fileInput.value = '';
-    }
-
-    async function saveNotation() {
-      var notation = heroNotationInput.value.trim();
-      if (!notation) { showConfirmation('Tulis notasi dulu.'); return; }
-
-      var words = notation.split(/\s+/).filter(function(w){ return w.length > 0; });
-      if (words.length > 4) { showConfirmation('Maks 4 kata.'); return; }
-
-      var target = null;
-      for (var i = 0; i < artefacts.length; i++) {
-        if (!artefacts[i].notation) { target = artefacts[i]; break; }
+      
+      const words = notation.split(/\s+/).filter(w => w.length > 0);
+      if (words.length > 4) {
+        showConfirmation('Maks 4 kata!');
+        return;
       }
-      if (!target) { showConfirmation('Tidak ada artefak untuk ditandai.'); return; }
-
-      try {
-        showConfirmation('Menyimpan...');
-        await supabaseFetch('artefacts', 'PATCH',
-          { notation: notation },
-          '?id=eq.' + target.id
-        );
-        await loadData();
-        showConfirmation('Notasi tersimpan.');
-        triggerPulse();
-      } catch (e) {
-        console.error('Save notation error:', e);
-        showConfirmation('Gagal simpan. Coba lagi.');
+      
+      if (artefacts.length > 0) {
+        artefacts[0].notation = notation;
+        renderHero();
+        showConfirmation('Notasi tersimpan!');
       }
-    }
-
-    async function postRant() {
-      var textarea = document.getElementById('rant');
-      var content  = textarea.value.trim();
-      if (!content) { showConfirmation('Tulis dulu.'); return; }
-
-      try {
-        showConfirmation('Posting...');
-        await supabaseFetch('rants', 'POST', {
-          username: currentUser,
-          content: content
-        });
-        textarea.value = '';
-        await loadData();
-        showConfirmation('Terkirim.');
-        triggerPulse();
-      } catch (e) {
-        console.error('Post rant error:', e);
-        showConfirmation('Gagal posting. Coba lagi.');
+    });
+    
+    $('jejakkan-btn').addEventListener('click', () => {
+      const content = $('rant').value.trim();
+      if (!content) {
+        showConfirmation('Tulis dulu!');
+        return;
       }
-    }
-
-    async function ensureUserExists() {
-      try {
-        var users = await supabaseFetch('users', 'GET', null,
-          '?username=eq.' + encodeURIComponent(currentUser)
-        );
-        if (!users || users.length === 0) {
-          await supabaseFetch('users', 'POST', { username: currentUser });
-        }
-      } catch (e) {
-        console.error('ensureUserExists:', e);
-      }
-    }
-
-    async function loadData() {
-      try {
-        await ensureUserExists();
-
-        var aData = await supabaseFetch('artefacts', 'GET', null,
-          '?username=eq.' + encodeURIComponent(currentUser) + '&order=created_at.desc&limit=6'
-        );
-        artefacts = aData || [];
-
-        var rData = await supabaseFetch('rants', 'GET', null,
-          '?username=eq.' + encodeURIComponent(currentUser) + '&order=created_at.desc&limit=5'
-        );
-        rants = rData || [];
-
-      } catch (e) {
-        console.error('loadData error:', e);
-      }
-
+      
+      const newRant = {
+        id: 'new-' + Date.now(),
+        username: currentUser.replace('@', ''),
+        content: content,
+        created_at: new Date().toISOString(),
+        reactions: {'🤠':0,'😢':0,'🤗':0,'🔥':0}
+      };
+      
+      rants.unshift(newRant);
+      $('rant').value = '';
+      updateIntensity('');
+      renderDiary();
+      showConfirmation('Terkirim!');
+    });
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      $('username-display').textContent = currentUser.replace('@', '');
       renderHero();
       renderDiary();
       renderTray();
-    }
-
-    document.getElementById('upload-artefak-btn').addEventListener('click', function() {
-      fileInput.click();
     });
-
-    fileInput.addEventListener('change', handleFileSelect);
-
-    document.getElementById('save-notation-btn').addEventListener('click', saveNotation);
-
-    document.getElementById('jejakkan-btn').addEventListener('click', postRant);
-
-    document.getElementById('settings-btn').addEventListener('click', function() {
-      showConfirmation('Settings — coming soon.');
-    });
-
-    loadData();
-
-  })();
   </script>
 </body>
 </html>
