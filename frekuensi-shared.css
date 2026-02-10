@@ -76,42 +76,191 @@ header:hover .logo { transform: scale(1.02); opacity: 0.96; }
 /* === MOOD TAGLINE === */
 .mood-tagline {
   text-align: center; font-size: 16px; font-weight: 400;
-  line-height: 1.25; margin: 24px 0 28px; color: var(--text);
+  line-height: 1.25; margin: 24px 0 20px; color: var(--text);
   font-family: 'JetBrains Mono', monospace; letter-spacing: -0.01em;
 }
 
-/* === TAB NAVIGATION === */
+/* === TAB NAVIGATION (REDESIGNED - COHESIVE) === */
 .tab-navigation {
-  display: flex; gap: 8px; margin-bottom: 20px;
-  overflow-x: auto; scrollbar-width: none;
+  display: flex; 
+  gap: 4px; 
+  margin-bottom: 24px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow-x: auto; 
+  scrollbar-width: none;
 }
+
 .tab-navigation::-webkit-scrollbar { display: none; }
 
 .tab-btn {
-  padding: 10px 20px; background: var(--surface);
-  border: 1px solid var(--border); border-radius: 12px;
-  color: var(--text-secondary); font-size: 14px; font-weight: 600;
-  cursor: pointer; transition: all 0.2s; white-space: nowrap;
-  display: flex; align-items: center; gap: 8px;
+  flex: 1;
+  padding: 10px 16px; 
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--muted); 
+  font-size: 13px; 
+  font-weight: 500;
+  cursor: pointer; 
+  transition: all 0.2s; 
+  white-space: nowrap;
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  gap: 6px;
   font-family: 'JetBrains Mono', monospace;
   text-decoration: none;
+  position: relative;
 }
 
-.tab-btn:hover { border-color: var(--border-hover); color: var(--text); }
+.tab-btn span {
+  font-size: 16px;
+  transition: transform 0.2s;
+}
+
+.tab-btn:hover:not(.active) { 
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+}
+
+.tab-btn:hover:not(.active) span {
+  transform: scale(1.1);
+}
 
 .tab-btn.active {
-  background: var(--accent); border-color: var(--accent); color: #000;
+  background: var(--accent); 
+  color: #000;
+  font-weight: 600;
+}
+
+.tab-btn.active span {
+  transform: scale(1.05);
+}
+
+/* Tab indicator line (subtle alternative) */
+.tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 2px;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+
+.tab-btn.active::after {
+  width: 60%;
 }
 
 /* === CARD === */
 .card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 12px; padding: 18px; margin-bottom: 16px;
-  transition: all 0.2s; position: relative;
+  background: var(--surface); 
+  border: 1px solid var(--border);
+  border-radius: 12px; 
+  padding: 18px; 
+  margin-bottom: 20px;
+  transition: all 0.2s; 
+  position: relative;
 }
 
 .card:hover {
-  border-color: var(--accent); background: rgba(178, 102, 255, 0.04);
+  border-color: var(--accent); 
+  background: rgba(178, 102, 255, 0.04);
+}
+
+/* === ZONE VISUAL DIFFERENTIATION === */
+/* Each zone gets unique color + visual identity */
+
+/* Hype Haus - Pink/Red theme (excitement) */
+#zone-hype {
+  border-left: 4px solid #ff6b9d;
+  background: linear-gradient(135deg, rgba(255, 107, 157, 0.05) 0%, var(--surface) 100%);
+}
+
+#zone-hype:hover {
+  border-left-width: 6px;
+  box-shadow: 0 0 20px rgba(255, 107, 157, 0.1);
+}
+
+#zone-hype .card-icon {
+  filter: hue-rotate(-20deg);
+}
+
+#zone-hype .card-title {
+  color: #ff6b9d;
+  font-weight: 600;
+}
+
+/* Ngusahain - Green theme (progress) */
+#zone-ngusahain {
+  border-left: 4px solid #00ff88;
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.05) 0%, var(--surface) 100%);
+}
+
+#zone-ngusahain:hover {
+  border-left-width: 6px;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+}
+
+#zone-ngusahain .card-icon {
+  filter: hue-rotate(120deg);
+}
+
+#zone-ngusahain .card-title {
+  color: #00ff88;
+  font-weight: 600;
+}
+
+/* Spill Zone - Purple theme (emotion) */
+#zone-spill {
+  border-left: 4px solid #b266ff;
+  background: linear-gradient(135deg, rgba(178, 102, 255, 0.05) 0%, var(--surface) 100%);
+}
+
+#zone-spill:hover {
+  border-left-width: 6px;
+  box-shadow: 0 0 20px rgba(178, 102, 255, 0.1);
+}
+
+#zone-spill .card-icon {
+  filter: hue-rotate(270deg);
+}
+
+#zone-spill .card-title {
+  color: #b266ff;
+  font-weight: 600;
+}
+
+/* Zone badges (optional) */
+.zone-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-left: 8px;
+}
+
+#zone-hype .zone-badge {
+  background: rgba(255, 107, 157, 0.15);
+  color: #ff6b9d;
+}
+
+#zone-ngusahain .zone-badge {
+  background: rgba(0, 255, 136, 0.15);
+  color: #00ff88;
+}
+
+#zone-spill .zone-badge {
+  background: rgba(178, 102, 255, 0.15);
+  color: #b266ff;
 }
 
 .card-header {
