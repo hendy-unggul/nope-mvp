@@ -1,17 +1,63 @@
 // ================================================
-// FREKUENSI ZONES — Mood-based feed categorization
+// FREKUENSI ZONES — SHARPENED CATEGORIZATION
 // ================================================
 
-const HYPE_KEYWORDS = ['v!', 'kpop', 'skz', 'txt', 'bts', 'seventeen', 'enhypen', 'drakor', 'squid game', 'anime', 'naruto', 'au', 'ship', 'bias', 'comeback', 'concert'];
-const NGUSAHAIN_KEYWORDS = ['skripsi', 'tugas', 'deadline', 'jualan', 'thrifting', 'crypto', 'freelance', 'coding', 'side hustle', 'figma', 'canva'];
-const SPILL_KEYWORDS = ['capek', 'lelah', 'sendiri', 'nangis', 'sedih', 'anxiety', 'burnout', 'overthinking', 'gatau', 'kenapa ya', 'beban'];
+// ==========================================
+// ZONE IDENTIFIERS - SCORING BASED
+// ==========================================
+
+const HYPE_IDENTIFIERS = {
+  strongSignals: ['comeback', 'debut', 'mv baru', 'teaser', 'lightstick', 'photocard', 'album', 'bias', 'bias wrecker', 'ult', 'stan', 'fancam', 'idol', 'member', 'episode', 'drakor', 'kdrama', 'drama korea', 'series', 'netflix', 'cliffhanger', 'plot twist', 'ending', 'villain', 'couple', 'anime', 'manga', 'chapter', 'arc', 'op', 'ed', 'waifu', 'husbando', 'au', 'fanfic', 'headcanon', 'otp', 'ship', 'canon', 'concert', 'konser', 'fanmeet', 'showcase', 'comeback stage', 'music show', 'award', 'mama', 'mma'],
+  mediumSignals: ['nonton', 'dengerin', 'playlist', 'lagu', 'nge-binge', 'marathon', 'rewatch', 'replay', 'streaming'],
+  excitementMarkers: ['v!', 'keren banget', 'gila', 'insane', 'legendary', 'masterpiece', 'iconic', 'slay', 'ate', 'serve'],
+  exclusions: ['gagal', 'nangis karena', 'sedih', 'capek nonton', 'burnout', 'anxiety', 'overthinking', 'kenapa gue']
+};
+
+const NGUSAHAIN_IDENTIFIERS = {
+  strongSignals: ['revisi', 'bab', 'skripsi', 'thesis', 'penelitian', 'data', 'dosen', 'bimbingan', 'sidang', 'lulus', 'wisuda', 'jualan', 'omzet', 'profit', 'untung', 'jual', 'beli', 'customer', 'orderan', 'closing', 'deal', 'belajar', 'kursus', 'bootcamp', 'sertifikat', 'portfolio', 'project', 'deploy', 'launch', 'rilis', 'figma', 'canva', 'notion', 'github', 'vercel', 'shopee', 'tokped', 'instagram', 'tiktok shop'],
+  progressMarkers: ['hari ke-', 'udah', 'selesai', 'done', 'progress', 'tinggal', 'hampir', 'mulai', 'coba', 'nyoba', 'berhasil', 'sukses', 'lancar', 'jalan', 'running', 'target'],
+  actionVerbs: ['ngerjain', 'bikin', 'buat', 'develop', 'design', 'coding', 'nulis', 'riset', 'analisis', 'setup', 'install', 'deploy', 'upload', 'posting', 'marketing'],
+  exclusions: ['pengen doang', 'cuma pengen', 'ga tau mulai', 'ga jadi', 'menyerah', 'hopeless', 'capek banget', 'burnout parah', 'anxiety muncul', 'overthinking', 'ga bisa tidur']
+};
+
+const SPILL_IDENTIFIERS = {
+  strongSignals: ['sedih', 'nangis', 'galau', 'bingung', 'takut', 'cemas', 'khawatir', 'panik', 'stress', 'burnout', 'anxiety', 'overthinking', 'insomnia', 'lelah', 'capek', 'exhausted', 'drained', 'sendiri', 'sendirian', 'kesepian', 'lonely', 'ditinggal', 'diabaikan', 'dilupakan', 'kenapa ya', 'kenapa gue', 'apa gunanya', 'buat apa', 'ga tau', 'gatau', 'bingung', 'lost', 'beban', 'berat', 'overwhelmed', 'terlalu banyak', 'ga kuat', 'ga sanggup'],
+  ventingPatterns: ['rasanya', 'kok gue', 'kenapa harus gue', 'cape deh', 'udah coba', 'tetep aja', 'gitu gitu aja', 'ga ada yang', 'selalu', 'terus menerus'],
+  questionMarkers: ['?', 'kenapa', 'gimana', 'kapan', 'apakah', 'apa iya', 'emang gue', 'salah gue'],
+  negativeMarkers: ['ga', 'gak', 'nggak', 'enggak', 'bukan', 'jangan', 'stop', 'cukup', 'enough']
+};
 
 function detectZone(content) {
   const lower = content.toLowerCase();
-  if (HYPE_KEYWORDS.some(kw => lower.includes(kw))) return 'hype';
-  if (NGUSAHAIN_KEYWORDS.some(kw => lower.includes(kw))) return 'ngusahain';
-  if (SPILL_KEYWORDS.some(kw => lower.includes(kw))) return 'spill';
-  return 'spill'; // Default
+  const scores = { hype: 0, ngusahain: 0, spill: 0 };
+  
+  // HYPE SCORING
+  HYPE_IDENTIFIERS.strongSignals.forEach(s => { if (lower.includes(s)) scores.hype += 10; });
+  HYPE_IDENTIFIERS.mediumSignals.forEach(s => { if (lower.includes(s)) scores.hype += 3; });
+  HYPE_IDENTIFIERS.excitementMarkers.forEach(s => { if (lower.includes(s)) scores.hype += 5; });
+  if (HYPE_IDENTIFIERS.exclusions.some(ex => lower.includes(ex))) scores.hype = 0;
+  
+  // NGUSAHAIN SCORING
+  NGUSAHAIN_IDENTIFIERS.strongSignals.forEach(s => { if (lower.includes(s)) scores.ngusahain += 8; });
+  const hasProgress = NGUSAHAIN_IDENTIFIERS.progressMarkers.some(pm => lower.includes(pm));
+  if (hasProgress) scores.ngusahain *= 2;
+  NGUSAHAIN_IDENTIFIERS.actionVerbs.forEach(v => { if (lower.includes(v)) scores.ngusahain += 5; });
+  if (NGUSAHAIN_IDENTIFIERS.exclusions.some(ex => lower.includes(ex))) scores.ngusahain *= 0.2;
+  
+  // SPILL SCORING
+  SPILL_IDENTIFIERS.strongSignals.forEach(s => { if (lower.includes(s)) scores.spill += 7; });
+  SPILL_IDENTIFIERS.ventingPatterns.forEach(p => { if (lower.includes(p)) scores.spill += 6; });
+  SPILL_IDENTIFIERS.questionMarkers.forEach(m => { if (lower.includes(m)) scores.spill += 3; });
+  SPILL_IDENTIFIERS.negativeMarkers.forEach(m => { if (lower.includes(m)) scores.spill += 2; });
+  
+  // DECISION
+  const MIN_THRESHOLD = 10;
+  const maxScore = Math.max(scores.hype, scores.ngusahain, scores.spill);
+  
+  if (maxScore < MIN_THRESHOLD) return 'spill';
+  if (scores.hype === maxScore) return 'hype';
+  if (scores.ngusahain === maxScore) return 'ngusahain';
+  return 'spill';
 }
 
 async function loadArtefak() {
