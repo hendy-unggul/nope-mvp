@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NOPE — Tes Psikometrik</title>
+  <title>NOPE — Tes Psikometrik Atlet (BFI-50)</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ff9999'/%3E%3Ctext x='50' y='70' font-size='60' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%23000'%3ENO%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,51 +11,80 @@
   <link rel="stylesheet" href="frekuensi-shared.css">
   <style>
     .psiko-full { max-width: 800px; margin: 0 auto; padding: 20px; }
-    .psiko-header { text-align: center; margin-bottom: 30px; }
-    .psiko-title { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
-    .psiko-subtitle { color: var(--muted); font-size: 15px; }
-    .progress-bar { background: var(--surface-elevated); height: 8px; border-radius: 4px; margin-bottom: 30px; overflow: hidden; }
-    .progress-fill { background: var(--accent); height: 100%; width: 0%; transition: width 0.3s; }
-    .progress-text { text-align: center; font-size: 14px; color: var(--muted); margin-top: 8px; }
+    .psiko-header { text-align: center; margin-bottom: 20px; }
+    .psiko-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+    .psiko-subtitle { color: var(--muted); font-size: 14px; }
+    .validity-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(0, 200, 83, 0.15); color: #00c853; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-top: 12px; }
     
-    .biodata-section { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 20px; padding: 30px; margin-bottom: 30px; }
-    .section-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; }
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+    .progress-section { margin-bottom: 24px; }
+    .progress-bar { background: var(--surface-elevated); height: 6px; border-radius: 3px; overflow: hidden; }
+    .progress-fill { background: var(--accent); height: 100%; width: 0%; transition: width 0.3s; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-top: 8px; }
+    
+    /* BIODATA */
+    .biodata-section { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+    .section-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
     .form-group { }
-    .form-label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
-    .form-input { width: 100%; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; font-size: 15px; color: var(--text); }
+    .form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--muted); }
+    .form-input { width: 100%; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; font-size: 14px; color: var(--text); }
     .form-input:focus { outline: none; border-color: var(--accent); }
     
+    /* QUESTION */
     .question-section { display: none; }
     .question-section.active { display: block; }
-    .question-card { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 20px; padding: 30px; margin-bottom: 20px; }
-    .question-number { font-size: 14px; color: var(--accent); font-weight: 600; margin-bottom: 10px; }
-    .question-text { font-size: 20px; font-weight: 600; margin-bottom: 24px; line-height: 1.5; }
-    .options { display: flex; flex-direction: column; gap: 12px; }
-    .option { padding: 16px 20px; background: var(--surface); border: 2px solid var(--border); border-radius: 12px; cursor: pointer; transition: all 0.2s; text-align: left; font-size: 15px; }
-    .option:hover { border-color: var(--accent); transform: translateX(4px); }
-    .option.selected { background: var(--accent); color: white; border-color: var(--accent); }
+    .dimension-indicator { text-align: center; font-size: 12px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+    .question-card { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
+    .question-counter { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .question-text { font-size: 18px; font-weight: 600; margin-bottom: 20px; line-height: 1.5; }
     
-    .nav-buttons { display: flex; justify-content: space-between; margin-top: 30px; }
-    .btn { padding: 14px 32px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; border: 1px solid var(--border); background: var(--surface-elevated); color: var(--text); }
-    .btn:hover { transform: translateY(-2px); }
+    .likert-scale { display: flex; flex-direction: column; gap: 10px; }
+    .likert-option { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--surface); border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+    .likert-option:hover { border-color: var(--accent); }
+    .likert-option.selected { background: var(--accent); border-color: var(--accent); color: white; }
+    .likert-number { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-elevated); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    .likert-option.selected .likert-number { background: rgba(255,255,255,0.2); }
+    .likert-label { font-size: 14px; }
+    
+    .nav-buttons { display: flex; justify-content: space-between; margin-top: 24px; gap: 12px; }
+    .btn { padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; border: 1px solid var(--border); background: var(--surface-elevated); color: var(--text); }
+    .btn:hover:not(:disabled) { transform: translateY(-2px); }
     .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn.secondary { background: transparent; }
     
-    .result-section { display: none; text-align: center; }
-    .result-section.active { display: block; }
-    .result-emoji { font-size: 80px; margin-bottom: 20px; }
-    .result-title { font-size: 32px; font-weight: 700; margin-bottom: 16px; }
-    .result-subtitle { font-size: 18px; color: var(--muted); margin-bottom: 30px; }
-    .strengths-result { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 30px; }
-    .strength-card { background: var(--surface-elevated); border: 2px solid var(--accent); border-radius: 16px; padding: 24px; min-width: 200px; }
-    .strength-emoji { font-size: 40px; margin-bottom: 12px; }
-    .strength-name { font-size: 18px; font-weight: 700; color: var(--accent); }
-    .strength-desc { font-size: 14px; color: var(--muted); margin-top: 8px; }
+    /* RESULT */
+    .result-section { display: none; }
+    .result-section.active { display: block; animation: fadeIn 0.5s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     
-    .back-link { color: var(--muted); text-decoration: none; font-size: 14px; margin-bottom: 20px; display: inline-block; }
+    .result-header { text-align: center; margin-bottom: 30px; }
+    .result-emoji { font-size: 60px; margin-bottom: 16px; }
+    .result-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .result-desc { color: var(--muted); font-size: 15px; }
+    
+    .big-five-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 30px; }
+    .dimension-card { background: var(--surface-elevated); border: 2px solid var(--border); border-radius: 16px; padding: 20px; text-align: center; transition: all 0.3s; }
+    .dimension-card.high { border-color: var(--accent); background: rgba(178, 102, 255, 0.05); }
+    .dimension-icon { font-size: 32px; margin-bottom: 12px; }
+    .dimension-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .dimension-full { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+    .dimension-score { font-size: 36px; font-weight: 800; color: var(--accent); }
+    .dimension-bar { height: 6px; background: var(--surface); border-radius: 3px; margin-top: 12px; overflow: hidden; }
+    .dimension-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 1s ease-out; }
+    
+    .strengths-summary { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+    .strengths-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+    .strength-tags { display: flex; flex-wrap: wrap; gap: 10px; }
+    .strength-tag { background: var(--accent); color: white; padding: 10px 18px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+    
+    .action-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    
+    .back-link { color: var(--muted); text-decoration: none; font-size: 13px; margin-bottom: 16px; display: inline-flex; align-items: center; gap: 6px; }
     .back-link:hover { color: var(--accent); }
-    .timer { text-align: center; color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+    
+    .info-box { background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 10px; padding: 16px; margin-bottom: 20px; font-size: 13px; color: var(--text); }
+    .info-box strong { color: #ffc107; }
   </style>
 </head>
 <body>
@@ -74,42 +103,54 @@
     </header>
 
     <div class="psiko-full">
-      <a href="frekuensi-bola-komunitas.html" class="back-link">← Kembali ke Komunitas</a>
+      <a href="frekuensi-bola-komunitas.html" class="back-link">← Kembali</a>
       
       <div class="psiko-header">
-        <h1 class="psiko-title">📝 Tes Psikometrik Atlet</h1>
-        <p class="psiko-subtitle">Jawab 10 pertanyaan untuk menemukan 3 keistimewaan terbaikmu</p>
+        <h1 class="psiko-title">🧠 Tes Psikometrik Atlet</h1>
+        <p class="psiko-subtitle">Big Five Inventory (BFI-50) — 50 pertanyaan • 15 menit</p>
+        <div class="validity-badge">✓ Validasi Ilmiah • IPIP-50 Standard</div>
       </div>
 
-      <div class="progress-bar">
-        <div class="progress-fill" id="progress-fill"></div>
+      <div class="progress-section">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-info">
+          <span id="progress-text">0/50 selesai</span>
+          <span id="timer">15:00</span>
+        </div>
       </div>
-      <div class="progress-text" id="progress-text">0% selesai</div>
 
       <!-- BIODATA -->
       <div class="biodata-section" id="biodata-section">
-        <div class="section-title">📋 Data Diri</div>
+        <div class="section-title">📋 Data Atlet</div>
+        <div class="info-box">
+          <strong>ℹ️ Privasi Terjaga:</strong> Nama asli hanya untuk validasi pelatih. 
+          Yang ditampilkan di database hanya username anonim.
+        </div>
         <div class="form-grid">
           <div class="form-group">
-            <label class="form-label">Nama Lengkap</label>
-            <input type="text" class="form-input" id="nama" placeholder="Contoh: Budi Santoso">
+            <label class="form-label">Nama Lengkap *</label>
+            <input type="text" class="form-input" id="nama" placeholder="Untuk validasi pelatih">
           </div>
           <div class="form-group">
-            <label class="form-label">Username</label>
+            <label class="form-label">Username *</label>
             <input type="text" class="form-input" id="username" placeholder="@bola_jkt_xxx">
           </div>
           <div class="form-group">
-            <label class="form-label">Klub</label>
+            <label class="form-label">Klub *</label>
             <select class="form-input" id="klub">
               <option value="">Pilih Klub</option>
               <option value="persija-u15">Persija U15</option>
               <option value="persija-u17">Persija U17</option>
               <option value="villa-u15">Villa U15</option>
               <option value="villa-u17">Villa U17</option>
+              <option value="bintang-timur-u15">Bintang Timur U15</option>
+              <option value="bintang-timur-u17">Bintang Timur U17</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Posisi</label>
+            <label class="form-label">Posisi *</label>
             <select class="form-input" id="posisi">
               <option value="">Pilih Posisi</option>
               <option value="GK">Kiper (GK)</option>
@@ -119,7 +160,7 @@
             </select>
           </div>
         </div>
-        <div class="nav-buttons" style="margin-top: 30px;">
+        <div class="nav-buttons" style="margin-top: 24px;">
           <div></div>
           <button class="btn primary" onclick="startTest()">Mulai Tes →</button>
         </div>
@@ -127,135 +168,198 @@
 
       <!-- QUESTIONS -->
       <div class="question-section" id="question-section">
-        <div class="timer">⏱️ Waktu: <span id="timer">12:00</span></div>
+        <div class="dimension-indicator" id="dimension-indicator">Openness to Experience</div>
         <div class="question-card">
-          <div class="question-number" id="question-number">Pertanyaan 1 dari 10</div>
+          <div class="question-counter" id="question-counter">Pertanyaan 1 dari 50</div>
           <div class="question-text" id="question-text">Loading...</div>
-          <div class="options" id="options">
-            <!-- Options will be rendered here -->
+          <div class="likert-scale" id="options">
+            <!-- Options rendered here -->
           </div>
         </div>
         <div class="nav-buttons">
-          <button class="btn" onclick="prevQuestion()" id="btn-prev">← Sebelumnya</button>
+          <button class="btn secondary" onclick="prevQuestion()" id="btn-prev" disabled>← Sebelumnya</button>
           <button class="btn primary" onclick="nextQuestion()" id="btn-next">Selanjutnya →</button>
         </div>
       </div>
 
       <!-- RESULT -->
       <div class="result-section" id="result-section">
-        <div class="result-emoji">🎉</div>
-        <h2 class="result-title">Tes Selesai!</h2>
-        <p class="result-subtitle">Berdasarkan jawabanmu, berikut 3 keistimewaan terbaikmu:</p>
-        
-        <div class="strengths-result" id="strengths-result">
-          <!-- Results will be rendered here -->
+        <div class="result-header">
+          <div class="result-emoji">🎉</div>
+          <h2 class="result-title">Tes Selesai!</h2>
+          <p class="result-desc">Berikut profil kepribadian Big Five kamu berdasarkan 50 pertanyaan</p>
         </div>
         
-        <button class="btn primary" onclick="window.location.href='frekuensi-bola-database.html'">Lihat di Database</button>
+        <div class="big-five-grid" id="big-five-grid">
+          <!-- Results rendered here -->
+        </div>
+        
+        <div class="strengths-summary">
+          <div class="strengths-title">🏆 3 Keistimewaan Utama sebagai Atlet:</div>
+          <div class="strength-tags" id="strength-tags">
+            <!-- Tags rendered here -->
+          </div>
+        </div>
+        
+        <div class="action-buttons">
+          <button class="btn secondary" onclick="location.reload()">↻ Ulangi Tes</button>
+          <button class="btn primary" onclick="window.location.href='frekuensi-bola-database.html'">📊 Lihat di Database</button>
+        </div>
       </div>
     </div>
   </div>
 
   <script src="frekuensi-shared.js"></script>
   <script>
-    // Questions data
+    // BFI-50 Questions: 10 items per dimension (O, C, E, A, N)
+    // Scoring: 1=Disagree Strongly, 2=Disagree, 3=Neutral, 4=Agree, 5=Agree Strongly
     const questions = [
-      { id: 1, text: "Gue sering coba trik baru pas latihan meski risiko gagal di depan temen", options: [{ text: "Main aman aja", value: "safe" }, { text: "Eksperimen terus", value: "risk" }, { text: "Tergantung situasi", value: "adapt" }] },
-      { id: 2, text: "Ketika tim kalah, gue biasanya...", options: [{ text: "Marah-marah sendiri", value: "emotional" }, { text: "Rally tim untuk bangkit", value: "leader" }, { text: "Analisis apa yang salah", value: "analyst" }] },
-      { id: 3, text: "Di menit akhir pertandingan dengan skor imbang, gue...", options: [{ text: "Tetap tenang dan fokus", value: "cool" }, { text: "Push lebih keras", value: "fighter" }, { text: "Cari celah lawan", value: "tactical" }] },
-      { id: 4, text: "Gue lebih nyaman bermain...", options: [{ text: "Individu, bawa bola sendiri", value: "solo" }, { text: "Team play, passing-passing", value: "team" }, { text: "Tergantung strategi coach", value: "flex" }] },
-      { id: 5, text: "Saat latihan yang sangat melelahkan, gue...", options: [{ text: "Push sampai habis", value: "grind" }, { text: "Istirahat sebentar", value: "smart" }, { text: "Semangati teman yang lain", value: "support" }] },
-      { id: 6, text: "Gue mengatasi tekanan dari penonton dengan...", options: [{ text: "Ignore, fokus ke game", value: "focus" }, { text: "Jadikan motivasi", value: "thrive" }, { text: "Tenang, biasa aja", value: "calm" }] },
-      { id: 7, text: "Ketika teman bikin kesalahan fatal, gue...", options: [{ text: "Marah dan protes", value: "critical" }, { text: "Support dan bangunin", value: "glue" }, { text: "Fokus ke perbaikan", value: "solution" }] },
-      { id: 8, text: "Gue memutuskan untuk pass atau shoot berdasarkan...", options: [{ text: "Insting", value: "instinct" }, { text: "Posisi teman", value: "vision" }, { text: "Peluang terbaik", value: "calculated" }] },
-      { id: 9, text: "Di luar lapangan, gue...", options: [{ text: "Sering research taktik", value: "student" }, { text: "Healing dan recovery", value: "balance" }, { text: "Nongkrong sama tim", value: "social" }] },
-      { id: 10, text: "Cita-cita gue sebagai atlet...", options: [{ text: "Jadi bintang dunia", value: "ambitious" }, { text: "Bawa tim juara", value: "teamfirst" }, { text: "Berkembang terus", value: "growth" }] }
+      // OPENNESS (O) - Items 1-10
+      { id: 1, dimension: 'O', text: "Saya memiliki imajinasi yang aktif", reverse: false },
+      { id: 2, dimension: 'O', text: "Saya tertarik pada ide-ide abstrak", reverse: false },
+      { id: 3, dimension: 'O', text: "Saya suka mencoba hal-hal baru", reverse: false },
+      { id: 4, dimension: 'O', text: "Saya menghargai seni dan kreativitas", reverse: false },
+      { id: 5, dimension: 'O', text: "Saya sering memikirkan konsep filosofis", reverse: false },
+      { id: 6, dimension: 'O', text: "Saya tidak suka dengan hal-hal yang rumit", reverse: true },
+      { id: 7, dimension: 'O', text: "Saya kurang tertarik pada puisi dan seni", reverse: true },
+      { id: 8, dimension: 'O', text: "Saya lebih suka hal-hal yang praktis", reverse: true },
+      { id: 9, dimension: 'O', text: "Saya jarang mengamati emosi saya", reverse: true },
+      { id: 10, dimension: 'O', text: "Saya tidak suka berimajinasi", reverse: true },
+      
+      // CONSCIENTIOUSNESS (C) - Items 11-20
+      { id: 11, dimension: 'C', text: "Saya selalu siap dan terorganisir", reverse: false },
+      { id: 12, dimension: 'C', text: "Saya sangat teliti dalam bekerja", reverse: false },
+      { id: 13, dimension: 'C', text: "Saya menyelesaikan tugas sampai selesai", reverse: false },
+      { id: 14, dimension: 'C', text: "Saya suka menjadwalkan dan merencanakan", reverse: false },
+      { id: 15, dimension: 'C', text: "Saya bekerja keras untuk mencapai tujuan", reverse: false },
+      { id: 16, dimension: 'C', text: "Saya sering meninggalkan barang berantakan", reverse: true },
+      { id: 17, dimension: 'C', text: "Saya sering lupa mengembalikan barang ke tempatnya", reverse: true },
+      { id: 18, dimension: 'C', text: "Saya tidak terlalu peduli dengan detail", reverse: true },
+      { id: 19, dimension: 'C', text: "Saya suka menunda-nunda pekerjaan", reverse: true },
+      { id: 20, dimension: 'C', text: "Saya sering bertindak tanpa berpikir", reverse: true },
+      
+      // EXTRAVERSION (E) - Items 21-30
+      { id: 21, dimension: 'E', text: "Saya suka berada di keramaian", reverse: false },
+      { id: 22, dimension: 'E', text: "Saya mudah berteman dan bersosialisasi", reverse: false },
+      { id: 23, dimension: 'E', text: "Saya penuh energi dan antusias", reverse: false },
+      { id: 24, dimension: 'E', text: "Saya suka menjadi pusat perhatian", reverse: false },
+      { id: 25, dimension: 'E', text: "Saya suka memulai percakapan", reverse: false },
+      { id: 26, dimension: 'E', text: "Saya pendiam di sekitar orang asing", reverse: true },
+      { id: 27, dimension: 'E', text: "Saya tidak suka menarik perhatian", reverse: true },
+      { id: 28, dimension: 'E', text: "Saya merasa sulit mendekati orang lain", reverse: true },
+      { id: 29, dimension: 'E', text: "Saya sering merasa tidak nyaman di pesta", reverse: true },
+      { id: 30, dimension: 'E', text: "Saya lebih suka menyendiri", reverse: true },
+      
+      // AGREEABLENESS (A) - Items 31-40
+      { id: 31, dimension: 'A', text: "Saya peduli pada perasaan orang lain", reverse: false },
+      { id: 32, dimension: 'A', text: "Saya suka membantu orang lain", reverse: false },
+      { id: 33, dimension: 'A', text: "Saya percaya pada kebaikan orang lain", reverse: false },
+      { id: 34, dimension: 'A', text: "Saya mudah memaafkan kesalahan", reverse: false },
+      { id: 35, dimension: 'A', text: "Saya menghormati perasaan orang lain", reverse: false },
+      { id: 36, dimension: 'A', text: "Saya cenderung mengkritik orang lain", reverse: true },
+      { id: 37, dimension: 'A', text: "Saya sulit mempercayai orang lain", reverse: true },
+      { id: 38, dimension: 'A', text: "Saya sering bersikap dingin dan kalkulatif", reverse: true },
+      { id: 39, dimension: 'A', text: "Saya suka berdebat dengan orang lain", reverse: true },
+      { id: 40, dimension: 'A', text: "Saya tidak terlalu peduli dengan masalah orang lain", reverse: true },
+      
+      // NEUROTICISM (N) - Items 41-50 (reverse scored for Emotional Stability)
+      { id: 41, dimension: 'N', text: "Saya sering merasa cemas", reverse: false },
+      { id: 42, dimension: 'N', text: "Saya mudah stres", reverse: false },
+      { id: 43, dimension: 'N', text: "Saya sering merasa sedih", reverse: false },
+      { id: 44, dimension: 'N', text: "Saya sulit tenang", reverse: false },
+      { id: 45, dimension: 'N', text: "Saya sering merasa tidak aman", reverse: false },
+      { id: 46, dimension: 'N', text: "Saya jarang merasa sedih", reverse: true },
+      { id: 47, dimension: 'N', text: "Saya tidak mudah khawatir", reverse: true },
+      { id: 48, dimension: 'N', text: "Saya merasa nyaman dengan diri sendiri", reverse: true },
+      { id: 49, dimension: 'N', text: "Saya jarang merasa tertekan", reverse: true },
+      { id: 50, dimension: 'N', text: "Saya tenang dalam situasi sulit", reverse: true }
     ];
+
+    const dimensions = {
+      'O': { name: 'Openness', full: 'Openness to Experience', icon: '🎨', desc: 'Kreativitas, imajinasi, apresiasi seni' },
+      'C': { name: 'Conscientiousness', full: 'Conscientiousness', icon: '📋', desc: 'Kedisiplinan, organisasi, ketekunan' },
+      'E': { name: 'Extraversion', full: 'Extraversion', icon: '⚡', desc: 'Energi sosial, antusiasme, assertiveness' },
+      'A': { name: 'Agreeableness', full: 'Agreeableness', icon: '🤝', desc: 'Kerja sama, empati, kepercayaan' },
+      'N': { name: 'Emotional Stability', full: 'Emotional Stability', icon: '🧘', desc: 'Kestabilan emosi, ketenangan (reverse Neuroticism)' }
+    };
 
     let currentQuestion = 0;
     let answers = {};
-    let startTime;
+    let timerInterval;
 
     function startTest() {
-      // Validate biodata
-      const nama = document.getElementById('nama').value;
-      const username = document.getElementById('username').value;
-      const klub = document.getElementById('klub').value;
-      const posisi = document.getElementById('posisi').value;
-      
-      if (!nama || !username || !klub || !posisi) {
-        alert('Lengkapi data diri dulu ya!');
-        return;
+      // Validate
+      const fields = ['nama', 'username', 'klub', 'posisi'];
+      for (let f of fields) {
+        if (!document.getElementById(f).value) {
+          alert('Lengkapi semua data diri dulu ya!');
+          return;
+        }
       }
       
       document.getElementById('biodata-section').style.display = 'none';
       document.getElementById('question-section').classList.add('active');
-      startTime = Date.now();
-      startTimer();
+      startTimer(15);
       renderQuestion();
       updateProgress();
     }
 
-    function startTimer() {
-      let minutes = 12;
-      let seconds = 0;
-      
-      const timerInterval = setInterval(() => {
-        if (document.getElementById('result-section').classList.contains('active')) {
-          clearInterval(timerInterval);
-          return;
-        }
-        
-        seconds--;
-        if (seconds < 0) {
-          seconds = 59;
-          minutes--;
-        }
-        
-        if (minutes < 0) {
+    function startTimer(minutes) {
+      let secs = minutes * 60;
+      timerInterval = setInterval(() => {
+        secs--;
+        if (secs <= 0) {
           clearInterval(timerInterval);
           finishTest();
           return;
         }
-        
-        document.getElementById('timer').textContent = 
-          `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        const m = Math.floor(secs / 60).toString().padStart(2, '0');
+        const s = (secs % 60).toString().padStart(2, '0');
+        document.getElementById('timer').textContent = `${m}:${s}`;
       }, 1000);
     }
 
     function renderQuestion() {
       const q = questions[currentQuestion];
-      document.getElementById('question-number').textContent = `Pertanyaan ${currentQuestion + 1} dari ${questions.length}`;
+      const dim = dimensions[q.dimension];
+      
+      document.getElementById('dimension-indicator').textContent = `${dim.full} (${currentQuestion + 1}/50)`;
+      document.getElementById('question-counter').textContent = `Pertanyaan ${currentQuestion + 1} dari 50`;
       document.getElementById('question-text').textContent = q.text;
       
-      const optionsHtml = q.options.map((opt, idx) => `
-        <button class="option ${answers[q.id] === opt.value ? 'selected' : ''}" 
-                onclick="selectOption(${q.id}, '${opt.value}', this)">
-          ${opt.text}
-        </button>
+      const scale = [
+        { val: 1, label: 'Sangat Tidak Setuju' },
+        { val: 2, label: 'Tidak Setuju' },
+        { val: 3, label: 'Netral' },
+        { val: 4, label: 'Setuju' },
+        { val: 5, label: 'Sangat Setuju' }
+      ];
+      
+      document.getElementById('options').innerHTML = scale.map(s => `
+        <div class="likert-option ${answers[q.id] === s.val ? 'selected' : ''}" 
+             onclick="selectAnswer(${s.val})">
+          <div class="likert-number">${s.val}</div>
+          <div class="likert-label">${s.label}</div>
+        </div>
       `).join('');
       
-      document.getElementById('options').innerHTML = optionsHtml;
-      
-      // Update buttons
       document.getElementById('btn-prev').disabled = currentQuestion === 0;
       document.getElementById('btn-next').textContent = 
-        currentQuestion === questions.length - 1 ? 'Selesai ✓' : 'Selanjutnya →';
+        currentQuestion === 49 ? 'Selesai ✓' : 'Selanjutnya →';
     }
 
-    function selectOption(qid, value, element) {
-      answers[qid] = value;
+    function selectAnswer(val) {
+      answers[questions[currentQuestion].id] = val;
+      renderQuestion();
       
-      // Update UI
-      document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
-      element.classList.add('selected');
-      
-      // Auto next after 300ms
+      // Auto advance after 400ms
       setTimeout(() => {
-        if (currentQuestion < questions.length - 1) {
+        if (currentQuestion < 49) {
           nextQuestion();
+        } else {
+          document.getElementById('btn-next').textContent = 'Selesai ✓';
         }
-      }, 300);
+      }, 400);
     }
 
     function nextQuestion() {
@@ -264,7 +368,7 @@
         return;
       }
       
-      if (currentQuestion < questions.length - 1) {
+      if (currentQuestion < 49) {
         currentQuestion++;
         renderQuestion();
         updateProgress();
@@ -282,55 +386,92 @@
     }
 
     function updateProgress() {
-      const progress = ((currentQuestion + 1) / questions.length) * 100;
-      document.getElementById('progress-fill').style.width = `${progress}%`;
-      document.getElementById('progress-text').textContent = `${Math.round(progress)}% selesai`;
+      const pct = ((currentQuestion + 1) / 50) * 100;
+      document.getElementById('progress-fill').style.width = `${pct}%`;
+      document.getElementById('progress-text').textContent = `${currentQuestion + 1}/50 selesai`;
     }
 
     function finishTest() {
+      clearInterval(timerInterval);
       document.getElementById('question-section').classList.remove('active');
       document.getElementById('result-section').classList.add('active');
       document.getElementById('progress-fill').style.width = '100%';
-      document.getElementById('progress-text').textContent = '100% selesai';
+      document.getElementById('progress-text').textContent = '50/50 selesai';
       
-      // Calculate strengths based on answers
-      const strengths = calculateStrengths();
-      
-      const strengthsHtml = strengths.map(s => `
-        <div class="strength-card">
-          <div class="strength-emoji">${s.emoji}</div>
-          <div class="strength-name">${s.name}</div>
-          <div class="strength-desc">${s.desc}</div>
-        </div>
-      `).join('');
-      
-      document.getElementById('strengths-result').innerHTML = strengthsHtml;
+      const scores = calculateScores();
+      renderResults(scores);
     }
 
-    function calculateStrengths() {
-      // Simple algorithm to determine strengths based on answers
-      const counts = {};
-      Object.values(answers).forEach(v => {
-        counts[v] = (counts[v] || 0) + 1;
+    function calculateScores() {
+      const scores = { O: 0, C: 0, E: 0, A: 0, N: 0 };
+      const counts = { O: 0, C: 0, E: 0, A: 0, N: 0 };
+      
+      questions.forEach(q => {
+        let val = answers[q.id];
+        if (q.reverse) val = 6 - val; // Reverse scoring
+        scores[q.dimension] += val;
+        counts[q.dimension]++;
       });
       
-      // Map to strengths
-      const strengthMap = {
-        'risk': { name: 'Risk Taker', emoji: '🎲', desc: 'Berani mengambil risiko dan inovatif' },
-        'leader': { name: 'Natural Leader', emoji: '👑', desc: 'Mampu memimpin dan menginspirasi tim' },
-        'cool': { name: 'Ice Veins', emoji: '🧊', desc: 'Tenang di bawah tekanan' },
-        'team': { name: 'Team Player', emoji: '🤝', desc: 'Unggul dalam kerja sama tim' },
-        'grind': { name: 'Grind Mode', emoji: '💪', desc: 'Pekerja keras dan tidak mudah menyerah' },
-        'focus': { name: 'Laser Focus', emoji: '🎯', desc: 'Fokus tinggi dan tidak mudah teralihkan' },
-        'glue': { name: 'Team Glue', emoji: '🔗', desc: 'Menyatukan dan membangun chemistry tim' },
-        'vision': { name: 'Field Vision', emoji: '👁️', desc: 'Panduan luas dan reading game bagus' },
-        'student': { name: 'Tactical Mind', emoji: '🧠', desc: 'Cerdas secara taktis dan selalu belajar' },
-        'ambitious': { name: 'High Achiever', emoji: '🚀', desc: 'Ambisius dan selalu ingin lebih' }
-      };
+      // Convert to percentage (10-50 scale to 0-100)
+      const percentages = {};
+      for (let d in scores) {
+        percentages[d] = Math.round(((scores[d] - 10) / 40) * 100);
+      }
       
-      // Get top 3
-      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3);
-      return sorted.map(([key]) => strengthMap[key] || { name: 'Versatile', emoji: '⭐', desc: 'Adaptif di berbagai situasi' });
+      return percentages;
+    }
+
+    function renderResults(scores) {
+      // Big Five Cards
+      const cardsHtml = Object.entries(scores).map(([dim, score]) => {
+        const info = dimensions[dim];
+        const isHigh = score >= 60;
+        return `
+          <div class="dimension-card ${isHigh ? 'high' : ''}">
+            <div class="dimension-icon">${info.icon}</div>
+            <div class="dimension-name">${info.name}</div>
+            <div class="dimension-full">${info.desc}</div>
+            <div class="dimension-score">${score}%</div>
+            <div class="dimension-bar">
+              <div class="dimension-fill" style="width: ${score}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      document.getElementById('big-five-grid').innerHTML = cardsHtml;
+      
+      // Calculate top 3 strengths for athlete
+      const strengths = calculateAthleteStrengths(scores);
+      document.getElementById('strength-tags').innerHTML = strengths.map(s => 
+        `<span class="strength-tag">${s}</span>`
+      ).join('');
+    }
+
+    function calculateAthleteStrengths(scores) {
+      // Map Big Five to football-specific strengths
+      const mapping = [];
+      
+      if (scores.O >= 70) mapping.push('🎨 Kreatif & Inovatif');
+      if (scores.C >= 70) mapping.push('💪 Disiplin & Konsisten');
+      if (scores.E >= 70) mapping.push('⚡ Energik & Dominan');
+      if (scores.A >= 70) mapping.push('🤝 Team Player');
+      if (scores.N >= 70) mapping.push('🧘 Tenang di Tekanan');
+      
+      if (scores.O >= 60 && scores.C >= 60) mapping.push('🧠 Taktikal');
+      if (scores.E >= 60 && scores.A >= 60) mapping.push('👑 Kapten Tim');
+      if (scores.C >= 60 && scores.N >= 60) mapping.push('🎯 Clutch Performer');
+      if (scores.O >= 60 && scores.E >= 60) mapping.push('🔥 Playmaker');
+      
+      // Default if few high scores
+      if (mapping.length < 3) {
+        if (scores.C >= 50) mapping.push('📋 Profesional');
+        if (scores.A >= 50) mapping.push('💙 Loyal');
+        if (scores.E >= 50) mapping.push('🌟 Charismatik');
+      }
+      
+      return mapping.slice(0, 3);
     }
   </script>
 </body>
