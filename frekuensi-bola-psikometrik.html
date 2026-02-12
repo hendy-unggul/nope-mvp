@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="frekuensi-shared.css">
   <style>
-    .psiko-full { max-width: 800px; margin: 0 auto; padding: 20px; }
+    .psiko-full { max-width: 700px; margin: 0 auto; padding: 20px; }
     .psiko-header { text-align: center; margin-bottom: 20px; }
     .psiko-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
     .psiko-subtitle { color: var(--muted); font-size: 14px; }
@@ -21,14 +21,22 @@
     .progress-fill { background: var(--accent); height: 100%; width: 0%; transition: width 0.3s; }
     .progress-info { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-top: 8px; }
     
-    /* BIODATA */
+    /* USER INFO BAR */
+    .user-bar { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
+    .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; }
+    .user-details { flex: 1; }
+    .user-name { font-weight: 600; }
+    .user-meta { font-size: 13px; color: var(--muted); }
+    
+    /* BIODATA - Simplified */
     .biodata-section { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
-    .section-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .section-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
     .form-group { }
     .form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--muted); }
-    .form-input { width: 100%; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; font-size: 14px; color: var(--text); }
-    .form-input:focus { outline: none; border-color: var(--accent); }
+    .form-input, .form-select { width: 100%; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; font-size: 14px; color: var(--text); }
+    .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent); }
     
     /* QUESTION */
     .question-section { display: none; }
@@ -63,7 +71,7 @@
     .result-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
     .result-desc { color: var(--muted); font-size: 15px; }
     
-    .big-five-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 30px; }
+    .big-five-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px; }
     .dimension-card { background: var(--surface-elevated); border: 2px solid var(--border); border-radius: 16px; padding: 20px; text-align: center; transition: all 0.3s; }
     .dimension-card.high { border-color: var(--accent); background: rgba(178, 102, 255, 0.05); }
     .dimension-icon { font-size: 32px; margin-bottom: 12px; }
@@ -82,9 +90,6 @@
     
     .back-link { color: var(--muted); text-decoration: none; font-size: 13px; margin-bottom: 16px; display: inline-flex; align-items: center; gap: 6px; }
     .back-link:hover { color: var(--accent); }
-    
-    .info-box { background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 10px; padding: 16px; margin-bottom: 20px; font-size: 13px; color: var(--text); }
-    .info-box strong { color: #ffc107; }
   </style>
 </head>
 <body>
@@ -121,43 +126,46 @@
         </div>
       </div>
 
-      <!-- BIODATA -->
+      <!-- USER INFO (dari login) -->
+      <div class="user-bar">
+        <div class="user-avatar">F</div>
+        <div class="user-details">
+          <div class="user-name">@fajar_atlet_7a3f</div>
+          <div class="user-meta">Atlet Terdaftar</div>
+        </div>
+      </div>
+
+      <!-- BIODATA - Simplified Hierarchy -->
       <div class="biodata-section" id="biodata-section">
         <div class="section-title">📋 Data Atlet</div>
-        <div class="info-box">
-          <strong>ℹ️ Privasi Terjaga:</strong> Nama asli hanya untuk validasi pelatih. 
-          Yang ditampilkan di database hanya username anonim.
-        </div>
         <div class="form-grid">
           <div class="form-group">
-            <label class="form-label">Nama Lengkap *</label>
-            <input type="text" class="form-input" id="nama" placeholder="Untuk validasi pelatih">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Username *</label>
-            <input type="text" class="form-input" id="username" placeholder="@bola_jkt_xxx">
+            <label class="form-label">Liga *</label>
+            <select class="form-select" id="liga" onchange="updateKlub()">
+              <option value="">Pilih Liga</option>
+              <option value="U15">U15 (13-15 tahun)</option>
+              <option value="U17">U17 (16-17 tahun)</option>
+            </select>
           </div>
           <div class="form-group">
             <label class="form-label">Klub *</label>
-            <select class="form-input" id="klub">
+            <select class="form-select" id="klub" disabled>
               <option value="">Pilih Klub</option>
-              <option value="persija-u15">Persija U15</option>
-              <option value="persija-u17">Persija U17</option>
-              <option value="villa-u15">Villa U15</option>
-              <option value="villa-u17">Villa U17</option>
-              <option value="bintang-timur-u15">Bintang Timur U15</option>
-              <option value="bintang-timur-u17">Bintang Timur U17</option>
             </select>
           </div>
           <div class="form-group">
             <label class="form-label">Posisi *</label>
-            <select class="form-input" id="posisi">
+            <select class="form-select" id="posisi">
               <option value="">Pilih Posisi</option>
               <option value="GK">Kiper (GK)</option>
               <option value="DF">Bek (DF)</option>
               <option value="MF">Gelandang (MF)</option>
               <option value="FW">Penyerang (FW)</option>
             </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tinggi Badan (cm) *</label>
+            <input type="number" class="form-input" id="tinggi" placeholder="Contoh: 165">
           </div>
         </div>
         <div class="nav-buttons" style="margin-top: 24px;">
@@ -172,9 +180,7 @@
         <div class="question-card">
           <div class="question-counter" id="question-counter">Pertanyaan 1 dari 50</div>
           <div class="question-text" id="question-text">Loading...</div>
-          <div class="likert-scale" id="options">
-            <!-- Options rendered here -->
-          </div>
+          <div class="likert-scale" id="options"></div>
         </div>
         <div class="nav-buttons">
           <button class="btn secondary" onclick="prevQuestion()" id="btn-prev" disabled>← Sebelumnya</button>
@@ -187,18 +193,14 @@
         <div class="result-header">
           <div class="result-emoji">🎉</div>
           <h2 class="result-title">Tes Selesai!</h2>
-          <p class="result-desc">Berikut profil kepribadian Big Five kamu berdasarkan 50 pertanyaan</p>
+          <p class="result-desc">Berikut profil kepribadian Big Five kamu</p>
         </div>
         
-        <div class="big-five-grid" id="big-five-grid">
-          <!-- Results rendered here -->
-        </div>
+        <div class="big-five-grid" id="big-five-grid"></div>
         
         <div class="strengths-summary">
           <div class="strengths-title">🏆 3 Keistimewaan Utama sebagai Atlet:</div>
-          <div class="strength-tags" id="strength-tags">
-            <!-- Tags rendered here -->
-          </div>
+          <div class="strength-tags" id="strength-tags"></div>
         </div>
         
         <div class="action-buttons">
@@ -211,8 +213,32 @@
 
   <script src="frekuensi-shared.js"></script>
   <script>
-    // BFI-50 Questions: 10 items per dimension (O, C, E, A, N)
-    // Scoring: 1=Disagree Strongly, 2=Disagree, 3=Neutral, 4=Agree, 5=Agree Strongly
+    // Data klub berdasarkan liga
+    const klubData = {
+      'U15': ['Persija U15', 'Villa U15', 'Bintang Timur U15', 'Arsenal U15', 'Chelsea U15'],
+      'U17': ['Persija U17', 'Villa U17', 'Bintang Timur U17', 'Arsenal U17', 'Chelsea U17']
+    };
+
+    function updateKlub() {
+      const liga = document.getElementById('liga').value;
+      const klubSelect = document.getElementById('klub');
+      
+      klubSelect.innerHTML = '<option value="">Pilih Klub</option>';
+      
+      if (liga && klubData[liga]) {
+        klubData[liga].forEach(klub => {
+          const option = document.createElement('option');
+          option.value = klub.toLowerCase().replace(/\s+/g, '-');
+          option.textContent = klub;
+          klubSelect.appendChild(option);
+        });
+        klubSelect.disabled = false;
+      } else {
+        klubSelect.disabled = true;
+      }
+    }
+
+    // BFI-50 Questions (sama seperti sebelumnya)
     const questions = [
       // OPENNESS (O) - Items 1-10
       { id: 1, dimension: 'O', text: "Saya memiliki imajinasi yang aktif", reverse: false },
@@ -262,7 +288,7 @@
       { id: 39, dimension: 'A', text: "Saya suka berdebat dengan orang lain", reverse: true },
       { id: 40, dimension: 'A', text: "Saya tidak terlalu peduli dengan masalah orang lain", reverse: true },
       
-      // NEUROTICISM (N) - Items 41-50 (reverse scored for Emotional Stability)
+      // NEUROTICISM (N) - Items 41-50
       { id: 41, dimension: 'N', text: "Saya sering merasa cemas", reverse: false },
       { id: 42, dimension: 'N', text: "Saya mudah stres", reverse: false },
       { id: 43, dimension: 'N', text: "Saya sering merasa sedih", reverse: false },
@@ -276,11 +302,11 @@
     ];
 
     const dimensions = {
-      'O': { name: 'Openness', full: 'Openness to Experience', icon: '🎨', desc: 'Kreativitas, imajinasi, apresiasi seni' },
-      'C': { name: 'Conscientiousness', full: 'Conscientiousness', icon: '📋', desc: 'Kedisiplinan, organisasi, ketekunan' },
-      'E': { name: 'Extraversion', full: 'Extraversion', icon: '⚡', desc: 'Energi sosial, antusiasme, assertiveness' },
-      'A': { name: 'Agreeableness', full: 'Agreeableness', icon: '🤝', desc: 'Kerja sama, empati, kepercayaan' },
-      'N': { name: 'Emotional Stability', full: 'Emotional Stability', icon: '🧘', desc: 'Kestabilan emosi, ketenangan (reverse Neuroticism)' }
+      'O': { name: 'Openness', full: 'Openness to Experience', icon: '🎨', desc: 'Kreativitas, imajinasi' },
+      'C': { name: 'Conscientiousness', full: 'Conscientiousness', icon: '📋', desc: 'Kedisiplinan, organisasi' },
+      'E': { name: 'Extraversion', full: 'Extraversion', icon: '⚡', desc: 'Energi sosial, antusiasme' },
+      'A': { name: 'Agreeableness', full: 'Agreeableness', icon: '🤝', desc: 'Kerja sama, empati' },
+      'N': { name: 'Emotional Stability', full: 'Emotional Stability', icon: '🧘', desc: 'Kestabilan emosi' }
     };
 
     let currentQuestion = 0;
@@ -288,11 +314,12 @@
     let timerInterval;
 
     function startTest() {
-      // Validate
-      const fields = ['nama', 'username', 'klub', 'posisi'];
+      // Validate - hanya 4 field
+      const fields = ['liga', 'klub', 'posisi', 'tinggi'];
       for (let f of fields) {
-        if (!document.getElementById(f).value) {
-          alert('Lengkapi semua data diri dulu ya!');
+        const val = document.getElementById(f).value;
+        if (!val) {
+          alert(`Lengkapi ${f === 'tinggi' ? 'tinggi badan' : f} dulu ya!`);
           return;
         }
       }
@@ -352,12 +379,9 @@
       answers[questions[currentQuestion].id] = val;
       renderQuestion();
       
-      // Auto advance after 400ms
       setTimeout(() => {
         if (currentQuestion < 49) {
           nextQuestion();
-        } else {
-          document.getElementById('btn-next').textContent = 'Selesai ✓';
         }
       }, 400);
     }
@@ -404,16 +428,13 @@
 
     function calculateScores() {
       const scores = { O: 0, C: 0, E: 0, A: 0, N: 0 };
-      const counts = { O: 0, C: 0, E: 0, A: 0, N: 0 };
       
       questions.forEach(q => {
         let val = answers[q.id];
-        if (q.reverse) val = 6 - val; // Reverse scoring
+        if (q.reverse) val = 6 - val;
         scores[q.dimension] += val;
-        counts[q.dimension]++;
       });
       
-      // Convert to percentage (10-50 scale to 0-100)
       const percentages = {};
       for (let d in scores) {
         percentages[d] = Math.round(((scores[d] - 10) / 40) * 100);
@@ -423,7 +444,6 @@
     }
 
     function renderResults(scores) {
-      // Big Five Cards
       const cardsHtml = Object.entries(scores).map(([dim, score]) => {
         const info = dimensions[dim];
         const isHigh = score >= 60;
@@ -442,7 +462,6 @@
       
       document.getElementById('big-five-grid').innerHTML = cardsHtml;
       
-      // Calculate top 3 strengths for athlete
       const strengths = calculateAthleteStrengths(scores);
       document.getElementById('strength-tags').innerHTML = strengths.map(s => 
         `<span class="strength-tag">${s}</span>`
@@ -450,7 +469,6 @@
     }
 
     function calculateAthleteStrengths(scores) {
-      // Map Big Five to football-specific strengths
       const mapping = [];
       
       if (scores.O >= 70) mapping.push('🎨 Kreatif & Inovatif');
@@ -464,7 +482,6 @@
       if (scores.C >= 60 && scores.N >= 60) mapping.push('🎯 Clutch Performer');
       if (scores.O >= 60 && scores.E >= 60) mapping.push('🔥 Playmaker');
       
-      // Default if few high scores
       if (mapping.length < 3) {
         if (scores.C >= 50) mapping.push('📋 Profesional');
         if (scores.A >= 50) mapping.push('💙 Loyal');
@@ -473,6 +490,9 @@
       
       return mapping.slice(0, 3);
     }
+
+    // Auto-fill username dari session
+    // document.querySelector('.user-name').textContent = sessionStorage.getItem('username') || '@guest';
   </script>
 </body>
 </html>
