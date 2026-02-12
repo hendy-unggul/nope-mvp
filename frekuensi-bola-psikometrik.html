@@ -3,93 +3,155 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NOPE — Tes Psikometrik Atlet (BFI-50)</title>
+  <title>NOPE — Database Klub & Atlet</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ff9999'/%3E%3Ctext x='50' y='70' font-size='60' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%23000'%3ENO%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="frekuensi-shared.css">
   <style>
-    .psiko-full { max-width: 700px; margin: 0 auto; padding: 20px; }
-    .psiko-header { text-align: center; margin-bottom: 20px; }
-    .psiko-title { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
-    .psiko-subtitle { color: var(--muted); font-size: 14px; }
-    .validity-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(0, 200, 83, 0.15); color: #00c853; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-top: 12px; }
+    .database-container { max-width: 1200px; margin: 0 auto; padding: 20px; }
     
-    .progress-section { margin-bottom: 24px; }
-    .progress-bar { background: var(--surface-elevated); height: 6px; border-radius: 3px; overflow: hidden; }
-    .progress-fill { background: var(--accent); height: 100%; width: 0%; transition: width 0.3s; }
-    .progress-info { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); margin-top: 8px; }
+    /* ACCESS CONTROL BAR */
+    .access-bar { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .access-info { display: flex; align-items: center; gap: 12px; }
+    .access-badge { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+    .access-badge.coach { background: rgba(0, 200, 83, 0.15); color: #00c853; }
+    .access-badge.athlete { background: rgba(33, 150, 243, 0.15); color: #2196f3; }
+    .access-badge.viewer { background: rgba(158, 158, 158, 0.15); color: #9e9e9e; }
+    .switch-role { font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; }
+    .switch-role:hover { color: var(--accent); }
     
-    /* USER INFO BAR */
-    .user-bar { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; }
-    .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; }
-    .user-details { flex: 1; }
-    .user-name { font-weight: 600; }
-    .user-meta { font-size: 13px; color: var(--muted); }
+    /* SELECTOR VIEW */
+    .selector-view { max-width: 600px; margin: 40px auto; }
+    .selector-card { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 20px; padding: 40px; }
+    .selector-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; text-align: center; }
+    .form-group { margin-bottom: 20px; }
+    .form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--muted); text-transform: uppercase; }
+    .form-select { width: 100%; padding: 16px; background: var(--surface); border: 2px solid var(--border); border-radius: 12px; font-size: 16px; color: var(--text); cursor: pointer; transition: all 0.3s; }
+    .form-select:focus { outline: none; border-color: var(--accent); }
+    .form-select:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-full { width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 10px; }
+    .btn-full:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(178, 102, 255, 0.3); }
+    .btn-full:disabled { opacity: 0.5; cursor: not-allowed; }
     
-    /* BIODATA - Simplified */
-    .biodata-section { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
-    .section-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
-    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
-    .form-group { }
-    .form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--muted); }
-    .form-input, .form-select { width: 100%; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; font-size: 14px; color: var(--text); }
-    .form-input:focus, .form-select:focus { outline: none; border-color: var(--accent); }
+    /* KLUB VIEW */
+    .klub-view { display: none; }
+    .klub-view.active { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     
-    /* QUESTION */
-    .question-section { display: none; }
-    .question-section.active { display: block; }
-    .dimension-indicator { text-align: center; font-size: 12px; color: var(--accent); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
-    .question-card { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 16px; padding: 24px; }
-    .question-counter { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-    .question-text { font-size: 18px; font-weight: 600; margin-bottom: 20px; line-height: 1.5; }
+    .klub-header { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 20px; padding: 30px; margin-bottom: 30px; }
+    .klub-top { display: flex; justify-content: space-between; align-items: start; margin-bottom: 24px; flex-wrap: wrap; gap: 20px; }
+    .klub-name { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+    .klub-liga { display: inline-block; background: var(--accent); color: white; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; }
+    .klub-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+    .detail-label { font-size: 12px; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
+    .detail-value { font-size: 16px; font-weight: 600; }
     
-    .likert-scale { display: flex; flex-direction: column; gap: 10px; }
-    .likert-option { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--surface); border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; }
-    .likert-option:hover { border-color: var(--accent); }
-    .likert-option.selected { background: var(--accent); border-color: var(--accent); color: white; }
-    .likert-number { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-elevated); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
-    .likert-option.selected .likert-number { background: rgba(255,255,255,0.2); }
-    .likert-label { font-size: 14px; }
+    .back-btn { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 20px; color: var(--muted); text-decoration: none; font-size: 14px; cursor: pointer; }
+    .back-btn:hover { color: var(--accent); }
     
-    .nav-buttons { display: flex; justify-content: space-between; margin-top: 24px; gap: 12px; }
-    .btn { padding: 12px 24px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; border: 1px solid var(--border); background: var(--surface-elevated); color: var(--text); }
-    .btn:hover:not(:disabled) { transform: translateY(-2px); }
-    .btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
-    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn.secondary { background: transparent; }
+    /* TABLE */
+    .athletes-section { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 20px; padding: 24px; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .athletes-table { width: 100%; border-collapse: collapse; }
+    .athletes-table th { text-align: left; padding: 14px; font-size: 12px; color: var(--muted); text-transform: uppercase; border-bottom: 2px solid var(--border); }
+    .athletes-table td { padding: 16px 14px; border-bottom: 1px solid var(--border); }
+    .athletes-table tr:hover { background: rgba(178, 102, 255, 0.05); cursor: pointer; }
+    .athlete-info { display: flex; align-items: center; gap: 12px; }
+    .athlete-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+    .position-badge { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; background: rgba(178, 102, 255, 0.15); color: var(--accent); }
+    .position-badge.GK { background: rgba(255, 193, 7, 0.15); color: #ffc107; }
+    .position-badge.DF { background: rgba(33, 150, 243, 0.15); color: #2196f3; }
+    .position-badge.MF { background: rgba(76, 175, 80, 0.15); color: #4caf50; }
+    .position-badge.FW { background: rgba(244, 67, 54, 0.15); color: #f44336; }
+    .psiko-badge { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .psiko-badge.done { background: rgba(0, 200, 83, 0.15); color: #00c853; }
+    .psiko-badge.pending { background: rgba(158, 158, 158, 0.15); color: #9e9e9e; }
+    .coachmetric-indicator { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; margin-left: 8px; }
+    .coachmetric-indicator.has-data { color: #00c853; }
+    .coachmetric-indicator.no-data { color: var(--muted); }
     
-    /* RESULT */
-    .result-section { display: none; }
-    .result-section.active { display: block; animation: fadeIn 0.5s; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
+    .modal-overlay.active { display: flex; }
+    .modal-content { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative; }
+    .modal-close { position: absolute; top: 20px; right: 20px; width: 40px; height: 40px; border-radius: 50%; background: var(--surface-elevated); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 20px; color: var(--muted); z-index: 10; }
+    .modal-close:hover { background: var(--accent); color: white; }
     
-    .result-header { text-align: center; margin-bottom: 30px; }
-    .result-emoji { font-size: 60px; margin-bottom: 16px; }
-    .result-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
-    .result-desc { color: var(--muted); font-size: 15px; }
+    .modal-header { padding: 30px; border-bottom: 1px solid var(--border); }
+    .modal-athlete { display: flex; align-items: center; gap: 20px; }
+    .modal-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; }
+    .modal-name { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .modal-meta { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
     
-    .big-five-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px; }
-    .dimension-card { background: var(--surface-elevated); border: 2px solid var(--border); border-radius: 16px; padding: 20px; text-align: center; transition: all 0.3s; }
-    .dimension-card.high { border-color: var(--accent); background: rgba(178, 102, 255, 0.05); }
-    .dimension-icon { font-size: 32px; margin-bottom: 12px; }
-    .dimension-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .dimension-full { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
-    .dimension-score { font-size: 36px; font-weight: 800; color: var(--accent); }
-    .dimension-bar { height: 6px; background: var(--surface); border-radius: 3px; margin-top: 12px; overflow: hidden; }
-    .dimension-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 1s ease-out; }
+    .modal-body { padding: 30px; }
+    .big-five-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
+    @media (max-width: 768px) { .big-five-grid { grid-template-columns: repeat(2, 1fr); } }
+    .dimension-mini { text-align: center; padding: 16px; background: var(--surface-elevated); border-radius: 12px; border: 2px solid var(--border); }
+    .dimension-mini.high { border-color: var(--accent); }
+    .dim-icon { font-size: 24px; margin-bottom: 4px; }
+    .dim-name { font-size: 11px; font-weight: 600; text-transform: uppercase; }
+    .dim-score { font-size: 20px; font-weight: 800; color: var(--accent); }
     
-    .strengths-summary { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
-    .strengths-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
-    .strength-tags { display: flex; flex-wrap: wrap; gap: 10px; }
-    .strength-tag { background: var(--accent); color: white; padding: 10px 18px; border-radius: 20px; font-size: 14px; font-weight: 600; }
+    .strengths-box { background: var(--surface-elevated); border-radius: 16px; padding: 20px; margin-bottom: 24px; }
+    .strengths-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+    .strength-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .strength-chip { background: var(--accent); color: white; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; }
     
-    .action-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .heatmap-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+    .heatmap-container { display: grid; grid-template-columns: 100px 1fr; gap: 16px; }
+    .heatmap-label { height: 32px; display: flex; align-items: center; font-size: 12px; color: var(--muted); }
+    .heatmap-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; }
+    .heatmap-cell { aspect-ratio: 1; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: white; }
+    .heatmap-cell.low { background: #37474f; }
+    .heatmap-cell.med { background: #546e7a; }
+    .heatmap-cell.high { background: var(--accent); }
     
-    .back-link { color: var(--muted); text-decoration: none; font-size: 13px; margin-bottom: 16px; display: inline-flex; align-items: center; gap: 6px; }
-    .back-link:hover { color: var(--accent); }
+    /* COACHMETRIC SECTION */
+    .coachmetric-section { margin-top: 30px; padding-top: 30px; border-top: 2px solid var(--border); }
+    .coachmetric-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .coachmetric-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .coachmetric-badge.editable { background: rgba(0, 200, 83, 0.15); color: #00c853; }
+    .coachmetric-badge.readonly { background: rgba(158, 158, 158, 0.15); color: #9e9e9e; }
+    
+    .coachmetric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 20px; }
+    @media (max-width: 768px) { .coachmetric-grid { grid-template-columns: 1fr; } }
+    
+    .metric-card { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+    .metric-card.readonly { opacity: 0.7; }
+    .metric-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .metric-name { font-weight: 600; }
+    .metric-score { font-size: 28px; font-weight: 800; color: var(--accent); }
+    .metric-score.empty { color: var(--muted); }
+    
+    .metric-slider { width: 100%; height: 8px; border-radius: 4px; background: var(--surface); outline: none; -webkit-appearance: none; cursor: pointer; }
+    .metric-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: transform 0.2s; }
+    .metric-slider::-webkit-slider-thumb:hover { transform: scale(1.1); }
+    .metric-slider:disabled { cursor: not-allowed; opacity: 0.5; }
+    .metric-slider:disabled::-webkit-slider-thumb { background: var(--muted); }
+    
+    .metric-labels { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--muted); }
+    .metric-desc { margin-top: 12px; padding: 12px; background: var(--surface); border-radius: 8px; font-size: 13px; color: var(--muted); min-height: 50px; }
+    
+    .integrated-score { background: linear-gradient(135deg, var(--accent), #7c4dff); border-radius: 16px; padding: 24px; text-align: center; color: white; margin-bottom: 20px; }
+    .integrated-label { font-size: 14px; opacity: 0.9; margin-bottom: 8px; }
+    .integrated-value { font-size: 48px; font-weight: 800; }
+    .integrated-status { font-size: 14px; opacity: 0.9; margin-top: 8px; }
+    
+    .save-btn { width: 100%; padding: 16px; background: #00c853; color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .save-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0, 200, 83, 0.3); }
+    .save-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    
+    /* TOAST */
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); padding: 16px 32px; border-radius: 30px; font-weight: 600; opacity: 0; transition: all 0.3s; z-index: 3000; }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.success { background: #00c853; color: white; }
+    .toast.error { background: #f44336; color: white; }
+    
+    .login-prompt { background: var(--surface-elevated); border: 2px dashed var(--border); border-radius: 16px; padding: 30px; text-align: center; margin-top: 20px; }
+    .login-prompt-icon { font-size: 48px; margin-bottom: 16px; }
+    .login-prompt-text { font-size: 16px; color: var(--muted); margin-bottom: 20px; }
   </style>
 </head>
 <body>
@@ -107,392 +169,647 @@
       </div>
     </header>
 
-    <div class="psiko-full">
-      <a href="frekuensi-bola-komunitas.html" class="back-link">← Kembali</a>
+    <div class="database-container">
       
-      <div class="psiko-header">
-        <h1 class="psiko-title">🧠 Tes Psikometrik Atlet</h1>
-        <p class="psiko-subtitle">Big Five Inventory (BFI-50) — 50 pertanyaan • 15 menit</p>
-        <div class="validity-badge">✓ Validasi Ilmiah • IPIP-50 Standard</div>
+      <!-- ACCESS CONTROL BAR -->
+      <div class="access-bar">
+        <div class="access-info">
+          <span>Mode Akses:</span>
+          <span class="access-badge coach" id="access-badge">Coach</span>
+          <span id="access-name">Coach Ahmad Yani</span>
+        </div>
+        <span class="switch-role" onclick="toggleRole()">← Ganti Role (Demo)</span>
       </div>
 
-      <div class="progress-section">
-        <div class="progress-bar">
-          <div class="progress-fill" id="progress-fill"></div>
-        </div>
-        <div class="progress-info">
-          <span id="progress-text">0/50 selesai</span>
-          <span id="timer">15:00</span>
-        </div>
-      </div>
-
-      <!-- USER INFO (dari login) -->
-      <div class="user-bar">
-        <div class="user-avatar">F</div>
-        <div class="user-details">
-          <div class="user-name">@fajar_atlet_7a3f</div>
-          <div class="user-meta">Atlet Terdaftar</div>
-        </div>
-      </div>
-
-      <!-- BIODATA - Simplified Hierarchy -->
-      <div class="biodata-section" id="biodata-section">
-        <div class="section-title">📋 Data Atlet</div>
-        <div class="form-grid">
+      <!-- VIEW 1: SELECTOR -->
+      <div class="selector-view" id="selector-view">
+        <a href="frekuensi-bola-komunitas.html" style="color: var(--muted); text-decoration: none; font-size: 14px; margin-bottom: 20px; display: inline-block;">← Kembali ke Komunitas</a>
+        
+        <div class="selector-card">
+          <div class="selector-title">📊 Pilih Klub</div>
+          
           <div class="form-group">
-            <label class="form-label">Liga *</label>
-            <select class="form-select" id="liga" onchange="updateKlub()">
-              <option value="">Pilih Liga</option>
-              <option value="U15">U15 (13-15 tahun)</option>
-              <option value="U17">U17 (16-17 tahun)</option>
+            <label class="form-label">Liga</label>
+            <select class="form-select" id="liga-select" onchange="updateKlub()">
+              <option value="">Pilih Liga...</option>
+              <option value="U15">Liga U15 (13-15 tahun)</option>
+              <option value="U17">Liga U17 (16-17 tahun)</option>
             </select>
           </div>
+          
           <div class="form-group">
-            <label class="form-label">Klub *</label>
-            <select class="form-select" id="klub" disabled>
-              <option value="">Pilih Klub</option>
+            <label class="form-label">Nama Klub</label>
+            <select class="form-select" id="klub-select" disabled onchange="enableButton()">
+              <option value="">Pilih Klub...</option>
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Posisi *</label>
-            <select class="form-select" id="posisi">
-              <option value="">Pilih Posisi</option>
-              <option value="GK">Kiper (GK)</option>
-              <option value="DF">Bek (DF)</option>
-              <option value="MF">Gelandang (MF)</option>
-              <option value="FW">Penyerang (FW)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Tinggi Badan (cm) *</label>
-            <input type="number" class="form-input" id="tinggi" placeholder="Contoh: 165">
-          </div>
-        </div>
-        <div class="nav-buttons" style="margin-top: 24px;">
-          <div></div>
-          <button class="btn primary" onclick="startTest()">Mulai Tes →</button>
+          
+          <button class="btn-full" id="btn-lihat" disabled onclick="showKlub()">
+            Lihat Detail Klub →
+          </button>
         </div>
       </div>
 
-      <!-- QUESTIONS -->
-      <div class="question-section" id="question-section">
-        <div class="dimension-indicator" id="dimension-indicator">Openness to Experience</div>
-        <div class="question-card">
-          <div class="question-counter" id="question-counter">Pertanyaan 1 dari 50</div>
-          <div class="question-text" id="question-text">Loading...</div>
-          <div class="likert-scale" id="options"></div>
+      <!-- VIEW 2: KLUB DETAIL -->
+      <div class="klub-view" id="klub-view">
+        <div class="back-btn" onclick="backToSelector()">← Kembali ke Pencarian</div>
+        
+        <div class="klub-header">
+          <div class="klub-top">
+            <div>
+              <h1 class="klub-name" id="klub-nama">Persija Jakarta U15</h1>
+              <span class="klub-liga" id="klub-liga">LIGA U15</span>
+            </div>
+          </div>
+          
+          <div class="klub-details">
+            <div>
+              <div class="detail-label">Pelatih Kepala</div>
+              <div class="detail-value" id="klub-pelatih">-</div>
+            </div>
+            <div>
+              <div class="detail-label">Alamat</div>
+              <div class="detail-value" id="klub-alamat">-</div>
+            </div>
+            <div>
+              <div class="detail-label">Telepon</div>
+              <div class="detail-value" id="klub-telepon">-</div>
+            </div>
+            <div>
+              <div class="detail-label">Jumlah Atlet</div>
+              <div class="detail-value">20 Pemain</div>
+            </div>
+          </div>
         </div>
-        <div class="nav-buttons">
-          <button class="btn secondary" onclick="prevQuestion()" id="btn-prev" disabled>← Sebelumnya</button>
-          <button class="btn primary" onclick="nextQuestion()" id="btn-next">Selanjutnya →</button>
+
+        <div class="athletes-section">
+          <div class="section-header">
+            <h2 style="font-size: 20px; font-weight: 700;">Daftar Atlet</h2>
+            <span style="font-size: 13px; color: var(--muted);">Klik nama untuk detail lengkap</span>
+          </div>
+          
+          <table class="athletes-table">
+            <thead>
+              <tr>
+                <th>Nama Atlet</th>
+                <th>Posisi</th>
+                <th>Umur</th>
+                <th>Tinggi</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="athletes-tbody">
+              <!-- Generated by JS -->
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <!-- RESULT -->
-      <div class="result-section" id="result-section">
-        <div class="result-header">
-          <div class="result-emoji">🎉</div>
-          <h2 class="result-title">Tes Selesai!</h2>
-          <p class="result-desc">Berikut profil kepribadian Big Five kamu</p>
+    </div>
+  </div>
+
+  <!-- MODAL PSIKOMETRIK + COACHMETRIC -->
+  <div class="modal-overlay" id="modal-psikometrik" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      
+      <div class="modal-header">
+        <div class="modal-athlete">
+          <div class="modal-avatar" id="modal-avatar">F</div>
+          <div>
+            <div class="modal-name" id="modal-nama">-</div>
+            <div class="modal-meta">
+              <span>📍 <strong id="modal-posisi">-</strong></span>
+              <span>🎂 <strong id="modal-umur">-</strong></span>
+              <span>📏 <strong id="modal-tinggi">-</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-body">
+        <!-- Big Five -->
+        <div class="big-five-grid" id="modal-bigfive"></div>
+        
+        <!-- Strengths -->
+        <div class="strengths-box">
+          <div class="strengths-title">🏆 Profil Keistimewaan (Psikometrik)</div>
+          <div class="strength-chips" id="modal-strengths"></div>
         </div>
         
-        <div class="big-five-grid" id="big-five-grid"></div>
-        
-        <div class="strengths-summary">
-          <div class="strengths-title">🏆 3 Keistimewaan Utama sebagai Atlet:</div>
-          <div class="strength-tags" id="strength-tags"></div>
+        <!-- Heatmap -->
+        <div class="heatmap-title">🔥 Heatmap Karakter Permainan</div>
+        <div class="heatmap-container">
+          <div>
+            <div class="heatmap-label">Kreativitas (O)</div>
+            <div class="heatmap-label">Disiplin (C)</div>
+            <div class="heatmap-label">Leadership (E)</div>
+            <div class="heatmap-label">Kerja Sama (A)</div>
+            <div class="heatmap-label">Ketenangan (N)</div>
+          </div>
+          <div class="heatmap-grid" id="heatmap-grid"></div>
         </div>
         
-        <div class="action-buttons">
-          <button class="btn secondary" onclick="location.reload()">↻ Ulangi Tes</button>
-          <button class="btn primary" onclick="window.location.href='frekuensi-bola-database.html'">📊 Lihat di Database</button>
+        <!-- COACHMETRIC SECTION -->
+        <div class="coachmetric-section" id="coachmetric-section">
+          <div class="coachmetric-header">
+            <div class="heatmap-title" style="margin: 0;">🎯 Coachmetric</div>
+            <span class="coachmetric-badge editable" id="coachmetric-badge">✓ Edit Mode (Coach)</span>
+          </div>
+          
+          <div class="coachmetric-grid" id="coachmetric-grid">
+            <!-- Technical Rating -->
+            <div class="metric-card" id="tech-card">
+              <div class="metric-header">
+                <span class="metric-name">Technical Rating</span>
+                <span class="metric-score empty" id="tech-score">-</span>
+              </div>
+              <input type="range" min="1" max="10" step="0.5" value="5" class="metric-slider" 
+                     id="tech-slider" oninput="updateMetric('tech', this.value)">
+              <div class="metric-labels">
+                <span>Perlu latihan</span>
+                <span>Elite</span>
+              </div>
+              <div class="metric-desc" id="tech-desc">
+                Belum dinilai
+              </div>
+            </div>
+            
+            <!-- Tactical Rating -->
+            <div class="metric-card" id="tact-card">
+              <div class="metric-header">
+                <span class="metric-name">Tactical Rating</span>
+                <span class="metric-score empty" id="tact-score">-</span>
+              </div>
+              <input type="range" min="1" max="10" step="0.5" value="5" class="metric-slider" 
+                     id="tact-slider" oninput="updateMetric('tact', this.value)">
+              <div class="metric-labels">
+                <span>Perlu latihan</span>
+                <span>Elite</span>
+              </div>
+              <div class="metric-desc" id="tact-desc">
+                Belum dinilai
+              </div>
+            </div>
+          </div>
+          
+          <!-- Integrated Score -->
+          <div class="integrated-score" id="integrated-score-box" style="display: none;">
+            <div class="integrated-label">Integrated Performance Score</div>
+            <div class="integrated-value" id="integrated-value">-</div>
+            <div class="integrated-status" id="integrated-status">-</div>
+          </div>
+          
+          <!-- Save Button (Coach Only) -->
+          <button class="save-btn" id="save-btn" onclick="saveCoachmetric()">
+            💾 Simpan Penilaian Coach
+          </button>
+          
+          <!-- Login Prompt (Non-Coach) -->
+          <div class="login-prompt" id="login-prompt" style="display: none;">
+            <div class="login-prompt-icon">🔒</div>
+            <div class="login-prompt-text">Hanya pelatih yang dapat memberikan penilaian Coachmetric</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
   <script src="frekuensi-shared.js"></script>
   <script>
-    // Data klub berdasarkan liga
-    const klubData = {
-      'U15': ['Persija U15', 'Villa U15', 'Bintang Timur U15', 'Arsenal U15', 'Chelsea U15'],
-      'U17': ['Persija U17', 'Villa U17', 'Bintang Timur U17', 'Arsenal U17', 'Chelsea U17']
+    // ==================== ACCESS CONTROL ====================
+    let currentRole = 'coach'; // 'coach', 'athlete', 'viewer'
+    let currentCoachName = 'Coach Ahmad Yani';
+    
+    function toggleRole() {
+      const roles = ['coach', 'athlete', 'viewer'];
+      const names = ['Coach Ahmad Yani', '@fajar_atlet_7a3f', 'Suporter'];
+      const currentIdx = roles.indexOf(currentRole);
+      const nextIdx = (currentIdx + 1) % roles.length;
+      
+      currentRole = roles[nextIdx];
+      currentCoachName = names[nextIdx];
+      updateAccessUI();
+    }
+    
+    function updateAccessUI() {
+      const badge = document.getElementById('access-badge');
+      const name = document.getElementById('access-name');
+      
+      badge.className = 'access-badge ' + currentRole;
+      badge.textContent = currentRole === 'coach' ? 'Coach' : currentRole === 'athlete' ? 'Atlet' : 'Viewer';
+      name.textContent = currentCoachName;
+    }
+    
+    function isCoach() {
+      return currentRole === 'coach';
+    }
+    
+    // ==================== DATA ====================
+    const klubDatabase = {
+      'U15': [
+        { id: 'persija-u15', name: 'Persija Jakarta U15', pelatih: 'Coach Ahmad Yani', alamat: 'Stadion Patriot, Bekasi', telepon: '0812-3456-7890' },
+        { id: 'villa-u15', name: 'Villa U15', pelatih: 'Coach Budi Santoso', alamat: 'Lapangan Villa, Depok', telepon: '0813-4567-8901' },
+        { id: 'bintang-timur-u15', name: 'Bintang Timur U15', pelatih: 'Coach Candra Wijaya', alamat: 'SSB Bintang Timur, Jakarta Timur', telepon: '0814-5678-9012' }
+      ],
+      'U17': [
+        { id: 'persija-u17', name: 'Persija Jakarta U17', pelatih: 'Coach Eko Purwanto', alamat: 'Stadion Patriot, Bekasi', telepon: '0812-3456-7891' },
+        { id: 'villa-u17', name: 'Villa U17', pelatih: 'Coach Fajar Hidayat', alamat: 'Lapangan Villa, Depok', telepon: '0813-4567-8902' }
+      ]
     };
-
+    
+    let currentKlub = null;
+    let currentAthletes = [];
+    let currentModalAthleteId = null;
+    let currentCoachmetric = { technical: null, tactical: null };
+    
+    // ==================== SELECTOR FUNCTIONS ====================
     function updateKlub() {
-      const liga = document.getElementById('liga').value;
-      const klubSelect = document.getElementById('klub');
+      const liga = document.getElementById('liga-select').value;
+      const klubSelect = document.getElementById('klub-select');
       
-      klubSelect.innerHTML = '<option value="">Pilih Klub</option>';
+      klubSelect.innerHTML = '<option value="">Pilih Klub...</option>';
+      document.getElementById('btn-lihat').disabled = true;
       
-      if (liga && klubData[liga]) {
-        klubData[liga].forEach(klub => {
-          const option = document.createElement('option');
-          option.value = klub.toLowerCase().replace(/\s+/g, '-');
-          option.textContent = klub;
-          klubSelect.appendChild(option);
+      if (liga && klubDatabase[liga]) {
+        klubDatabase[liga].forEach(k => {
+          const opt = document.createElement('option');
+          opt.value = k.id;
+          opt.textContent = k.name;
+          klubSelect.appendChild(opt);
         });
         klubSelect.disabled = false;
       } else {
         klubSelect.disabled = true;
       }
     }
-
-    // BFI-50 Questions (sama seperti sebelumnya)
-    const questions = [
-      // OPENNESS (O) - Items 1-10
-      { id: 1, dimension: 'O', text: "Saya memiliki imajinasi yang aktif", reverse: false },
-      { id: 2, dimension: 'O', text: "Saya tertarik pada ide-ide abstrak", reverse: false },
-      { id: 3, dimension: 'O', text: "Saya suka mencoba hal-hal baru", reverse: false },
-      { id: 4, dimension: 'O', text: "Saya menghargai seni dan kreativitas", reverse: false },
-      { id: 5, dimension: 'O', text: "Saya sering memikirkan konsep filosofis", reverse: false },
-      { id: 6, dimension: 'O', text: "Saya tidak suka dengan hal-hal yang rumit", reverse: true },
-      { id: 7, dimension: 'O', text: "Saya kurang tertarik pada puisi dan seni", reverse: true },
-      { id: 8, dimension: 'O', text: "Saya lebih suka hal-hal yang praktis", reverse: true },
-      { id: 9, dimension: 'O', text: "Saya jarang mengamati emosi saya", reverse: true },
-      { id: 10, dimension: 'O', text: "Saya tidak suka berimajinasi", reverse: true },
+    
+    function enableButton() {
+      document.getElementById('btn-lihat').disabled = !document.getElementById('klub-select').value;
+    }
+    
+    function showKlub() {
+      const klubId = document.getElementById('klub-select').value;
+      const liga = document.getElementById('liga-select').value;
       
-      // CONSCIENTIOUSNESS (C) - Items 11-20
-      { id: 11, dimension: 'C', text: "Saya selalu siap dan terorganisir", reverse: false },
-      { id: 12, dimension: 'C', text: "Saya sangat teliti dalam bekerja", reverse: false },
-      { id: 13, dimension: 'C', text: "Saya menyelesaikan tugas sampai selesai", reverse: false },
-      { id: 14, dimension: 'C', text: "Saya suka menjadwalkan dan merencanakan", reverse: false },
-      { id: 15, dimension: 'C', text: "Saya bekerja keras untuk mencapai tujuan", reverse: false },
-      { id: 16, dimension: 'C', text: "Saya sering meninggalkan barang berantakan", reverse: true },
-      { id: 17, dimension: 'C', text: "Saya sering lupa mengembalikan barang ke tempatnya", reverse: true },
-      { id: 18, dimension: 'C', text: "Saya tidak terlalu peduli dengan detail", reverse: true },
-      { id: 19, dimension: 'C', text: "Saya suka menunda-nunda pekerjaan", reverse: true },
-      { id: 20, dimension: 'C', text: "Saya sering bertindak tanpa berpikir", reverse: true },
+      const klub = klubDatabase[liga].find(k => k.id === klubId);
+      currentKlub = klub;
       
-      // EXTRAVERSION (E) - Items 21-30
-      { id: 21, dimension: 'E', text: "Saya suka berada di keramaian", reverse: false },
-      { id: 22, dimension: 'E', text: "Saya mudah berteman dan bersosialisasi", reverse: false },
-      { id: 23, dimension: 'E', text: "Saya penuh energi dan antusias", reverse: false },
-      { id: 24, dimension: 'E', text: "Saya suka menjadi pusat perhatian", reverse: false },
-      { id: 25, dimension: 'E', text: "Saya suka memulai percakapan", reverse: false },
-      { id: 26, dimension: 'E', text: "Saya pendiam di sekitar orang asing", reverse: true },
-      { id: 27, dimension: 'E', text: "Saya tidak suka menarik perhatian", reverse: true },
-      { id: 28, dimension: 'E', text: "Saya merasa sulit mendekati orang lain", reverse: true },
-      { id: 29, dimension: 'E', text: "Saya sering merasa tidak nyaman di pesta", reverse: true },
-      { id: 30, dimension: 'E', text: "Saya lebih suka menyendiri", reverse: true },
+      document.getElementById('klub-nama').textContent = klub.name;
+      document.getElementById('klub-liga').textContent = 'LIGA ' + liga;
+      document.getElementById('klub-pelatih').textContent = klub.pelatih;
+      document.getElementById('klub-alamat').textContent = klub.alamat;
+      document.getElementById('klub-telepon').textContent = klub.telepon;
       
-      // AGREEABLENESS (A) - Items 31-40
-      { id: 31, dimension: 'A', text: "Saya peduli pada perasaan orang lain", reverse: false },
-      { id: 32, dimension: 'A', text: "Saya suka membantu orang lain", reverse: false },
-      { id: 33, dimension: 'A', text: "Saya percaya pada kebaikan orang lain", reverse: false },
-      { id: 34, dimension: 'A', text: "Saya mudah memaafkan kesalahan", reverse: false },
-      { id: 35, dimension: 'A', text: "Saya menghormati perasaan orang lain", reverse: false },
-      { id: 36, dimension: 'A', text: "Saya cenderung mengkritik orang lain", reverse: true },
-      { id: 37, dimension: 'A', text: "Saya sulit mempercayai orang lain", reverse: true },
-      { id: 38, dimension: 'A', text: "Saya sering bersikap dingin dan kalkulatif", reverse: true },
-      { id: 39, dimension: 'A', text: "Saya suka berdebat dengan orang lain", reverse: true },
-      { id: 40, dimension: 'A', text: "Saya tidak terlalu peduli dengan masalah orang lain", reverse: true },
+      currentAthletes = generateAthletes(klubId, liga);
+      renderAthletes();
       
-      // NEUROTICISM (N) - Items 41-50
-      { id: 41, dimension: 'N', text: "Saya sering merasa cemas", reverse: false },
-      { id: 42, dimension: 'N', text: "Saya mudah stres", reverse: false },
-      { id: 43, dimension: 'N', text: "Saya sering merasa sedih", reverse: false },
-      { id: 44, dimension: 'N', text: "Saya sulit tenang", reverse: false },
-      { id: 45, dimension: 'N', text: "Saya sering merasa tidak aman", reverse: false },
-      { id: 46, dimension: 'N', text: "Saya jarang merasa sedih", reverse: true },
-      { id: 47, dimension: 'N', text: "Saya tidak mudah khawatir", reverse: true },
-      { id: 48, dimension: 'N', text: "Saya merasa nyaman dengan diri sendiri", reverse: true },
-      { id: 49, dimension: 'N', text: "Saya jarang merasa tertekan", reverse: true },
-      { id: 50, dimension: 'N', text: "Saya tenang dalam situasi sulit", reverse: true }
-    ];
-
-    const dimensions = {
-      'O': { name: 'Openness', full: 'Openness to Experience', icon: '🎨', desc: 'Kreativitas, imajinasi' },
-      'C': { name: 'Conscientiousness', full: 'Conscientiousness', icon: '📋', desc: 'Kedisiplinan, organisasi' },
-      'E': { name: 'Extraversion', full: 'Extraversion', icon: '⚡', desc: 'Energi sosial, antusiasme' },
-      'A': { name: 'Agreeableness', full: 'Agreeableness', icon: '🤝', desc: 'Kerja sama, empati' },
-      'N': { name: 'Emotional Stability', full: 'Emotional Stability', icon: '🧘', desc: 'Kestabilan emosi' }
-    };
-
-    let currentQuestion = 0;
-    let answers = {};
-    let timerInterval;
-
-    function startTest() {
-      // Validate - hanya 4 field
-      const fields = ['liga', 'klub', 'posisi', 'tinggi'];
-      for (let f of fields) {
-        const val = document.getElementById(f).value;
-        if (!val) {
-          alert(`Lengkapi ${f === 'tinggi' ? 'tinggi badan' : f} dulu ya!`);
-          return;
+      document.getElementById('selector-view').style.display = 'none';
+      document.getElementById('klub-view').classList.add('active');
+    }
+    
+    function backToSelector() {
+      document.getElementById('klub-view').classList.remove('active');
+      document.getElementById('selector-view').style.display = 'block';
+    }
+    
+    // ==================== ATHLETES ====================
+    function generateAthletes(klubId, liga) {
+      const positions = ['GK', 'DF', 'MF', 'FW'];
+      const posCount = [2, 6, 7, 5];
+      const athletes = [];
+      let id = 1;
+      
+      positions.forEach((pos, idx) => {
+        for (let i = 0; i < posCount[idx]; i++) {
+          const hasPsiko = Math.random() > 0.3;
+          const hasCoachmetric = Math.random() > 0.5; // 50% sudah dinilai coach
+          
+          athletes.push({
+            id: id,
+            nama: `Atlet ${klubId.split('-')[0].charAt(0).toUpperCase() + klubId.split('-')[0].slice(1)} ${String.fromCharCode(65 + id - 1)}`,
+            username: `@${klubId.replace('-', '_')}_${id.toString().padStart(3, '0')}`,
+            posisi: pos,
+            umur: liga === 'U15' ? 13 + Math.floor(Math.random() * 3) : 16 + Math.floor(Math.random() * 2),
+            tinggi: 155 + Math.floor(Math.random() * 25),
+            psikometrik: hasPsiko,
+            scores: hasPsiko ? {
+              O: 40 + Math.floor(Math.random() * 50),
+              C: 40 + Math.floor(Math.random() * 50),
+              E: 40 + Math.floor(Math.random() * 50),
+              A: 40 + Math.floor(Math.random() * 50),
+              N: 40 + Math.floor(Math.random() * 50)
+            } : null,
+            coachmetric: hasCoachmetric ? {
+              technical: 4 + Math.random() * 5,
+              tactical: 4 + Math.random() * 5,
+              coach: 'Coach Ahmad Yani',
+              date: '2026-02-10'
+            } : null
+          });
+          id++;
         }
+      });
+      
+      return athletes.sort((a, b) => positions.indexOf(a.posisi) - positions.indexOf(b.posisi));
+    }
+    
+    function renderAthletes() {
+      const tbody = document.getElementById('athletes-tbody');
+      tbody.innerHTML = currentAthletes.map(a => {
+        const coachIndicator = a.coachmetric 
+          ? '<span class="coachmetric-indicator has-data" title="Sudah dinilai coach">●</span>' 
+          : '<span class="coachmetric-indicator no-data" title="Belum dinilai">○</span>';
+        
+        return `
+          <tr onclick="openModal(${a.id})">
+            <td>
+              <div class="athlete-info">
+                <div class="athlete-avatar">${a.nama.charAt(0)}</div>
+                <div>
+                  <div style="font-weight: 600;">${a.nama} ${coachIndicator}</div>
+                  <div style="font-size: 12px; color: var(--muted);">${a.username}</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="position-badge ${a.posisi}">${a.posisi}</span></td>
+            <td>${a.umur} th</td>
+            <td>${a.tinggi} cm</td>
+            <td>
+              ${a.psikometrik 
+                ? '<span class="psiko-badge done">✓ Psikometrik</span>' 
+                : '<span class="psiko-badge pending">○ Belum</span>'}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+    
+    // ==================== MODAL & COACHMETRIC ====================
+    function openModal(athleteId) {
+      currentModalAthleteId = athleteId;
+      const a = currentAthletes.find(x => x.id === athleteId);
+      if (!a) return;
+      
+      // Basic Info
+      document.getElementById('modal-avatar').textContent = a.nama.charAt(0);
+      document.getElementById('modal-nama').textContent = a.nama;
+      document.getElementById('modal-posisi').textContent = 
+        a.posisi === 'GK' ? 'Kiper' : a.posisi === 'DF' ? 'Bek' : a.posisi === 'MF' ? 'Gelandang' : 'Penyerang';
+      document.getElementById('modal-umur').textContent = a.umur + ' tahun';
+      document.getElementById('modal-tinggi').textContent = a.tinggi + ' cm';
+      
+      // Psikometrik (if available)
+      if (a.psikometrik) {
+        const dims = [
+          { key: 'O', name: 'Openness', icon: '🎨' },
+          { key: 'C', name: 'Conscientiousness', icon: '📋' },
+          { key: 'E', name: 'Extraversion', icon: '⚡' },
+          { key: 'A', name: 'Agreeableness', icon: '🤝' },
+          { key: 'N', name: 'Stability', icon: '🧘' }
+        ];
+        
+        document.getElementById('modal-bigfive').innerHTML = dims.map(d => `
+          <div class="dimension-mini ${a.scores[d.key] >= 60 ? 'high' : ''}">
+            <div class="dim-icon">${d.icon}</div>
+            <div class="dim-name">${d.name}</div>
+            <div class="dim-score">${a.scores[d.key]}%</div>
+          </div>
+        `).join('');
+        
+        // Strengths
+        const strengths = calculateStrengths(a.scores);
+        document.getElementById('modal-strengths').innerHTML = strengths.map(s => 
+          `<span class="strength-chip">${s}</span>`
+        ).join('');
+        
+        // Heatmap
+        renderHeatmap(a.scores);
+      } else {
+        document.getElementById('modal-bigfive').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 20px; color: var(--muted);">Belum ada data psikometrik</div>';
+        document.getElementById('modal-strengths').innerHTML = '<span style="color: var(--muted);">Belum tersedia</span>';
+        document.getElementById('heatmap-grid').innerHTML = '';
       }
       
-      document.getElementById('biodata-section').style.display = 'none';
-      document.getElementById('question-section').classList.add('active');
-      startTimer(15);
-      renderQuestion();
-      updateProgress();
+      // Setup Coachmetric based on role
+      setupCoachmetric(a);
+      
+      document.getElementById('modal-psikometrik').classList.add('active');
     }
-
-    function startTimer(minutes) {
-      let secs = minutes * 60;
-      timerInterval = setInterval(() => {
-        secs--;
-        if (secs <= 0) {
-          clearInterval(timerInterval);
-          finishTest();
-          return;
+    
+    function calculateStrengths(scores) {
+      const s = [];
+      if (scores.O >= 65) s.push('🎨 Kreatif');
+      if (scores.C >= 65) s.push('💪 Disiplin');
+      if (scores.E >= 65) s.push('⚡ Energik');
+      if (scores.A >= 65) s.push('🤝 Team Player');
+      if (scores.N >= 65) s.push('🧘 Tenang');
+      if (scores.C >= 60 && scores.N >= 60) s.push('🎯 Clutch');
+      if (scores.O >= 60 && scores.E >= 60) s.push('🔥 Playmaker');
+      if (scores.E >= 60 && scores.A >= 60) s.push('👑 Leader');
+      return s.slice(0, 3);
+    }
+    
+    function renderHeatmap(scores) {
+      const grid = document.getElementById('heatmap-grid');
+      let html = '';
+      ['O', 'C', 'E', 'A', 'N'].forEach(dim => {
+        const score = scores[dim];
+        for (let i = 0; i < 10; i++) {
+          const active = score >= (i + 1) * 10;
+          const intensity = active ? (score >= 70 ? 'high' : score >= 40 ? 'med' : 'low') : 'low';
+          html += `<div class="heatmap-cell ${intensity}">${active ? '●' : ''}</div>`;
         }
-        const m = Math.floor(secs / 60).toString().padStart(2, '0');
-        const s = (secs % 60).toString().padStart(2, '0');
-        document.getElementById('timer').textContent = `${m}:${s}`;
-      }, 1000);
+      });
+      grid.innerHTML = html;
     }
-
-    function renderQuestion() {
-      const q = questions[currentQuestion];
-      const dim = dimensions[q.dimension];
+    
+    // ==================== COACHMETRIC LOGIC ====================
+    function setupCoachmetric(athlete) {
+      const badge = document.getElementById('coachmetric-badge');
+      const saveBtn = document.getElementById('save-btn');
+      const loginPrompt = document.getElementById('login-prompt');
+      const techSlider = document.getElementById('tech-slider');
+      const tactSlider = document.getElementById('tact-slider');
+      const techCard = document.getElementById('tech-card');
+      const tactCard = document.getElementById('tact-card');
       
-      document.getElementById('dimension-indicator').textContent = `${dim.full} (${currentQuestion + 1}/50)`;
-      document.getElementById('question-counter').textContent = `Pertanyaan ${currentQuestion + 1} dari 50`;
-      document.getElementById('question-text').textContent = q.text;
+      // Reset
+      currentCoachmetric = { technical: null, tactical: null };
       
-      const scale = [
-        { val: 1, label: 'Sangat Tidak Setuju' },
-        { val: 2, label: 'Tidak Setuju' },
-        { val: 3, label: 'Netral' },
-        { val: 4, label: 'Setuju' },
-        { val: 5, label: 'Sangat Setuju' }
-      ];
-      
-      document.getElementById('options').innerHTML = scale.map(s => `
-        <div class="likert-option ${answers[q.id] === s.val ? 'selected' : ''}" 
-             onclick="selectAnswer(${s.val})">
-          <div class="likert-number">${s.val}</div>
-          <div class="likert-label">${s.label}</div>
-        </div>
-      `).join('');
-      
-      document.getElementById('btn-prev').disabled = currentQuestion === 0;
-      document.getElementById('btn-next').textContent = 
-        currentQuestion === 49 ? 'Selesai ✓' : 'Selanjutnya →';
-    }
-
-    function selectAnswer(val) {
-      answers[questions[currentQuestion].id] = val;
-      renderQuestion();
-      
-      setTimeout(() => {
-        if (currentQuestion < 49) {
-          nextQuestion();
+      if (isCoach()) {
+        // COACH MODE: Can edit
+        badge.className = 'coachmetric-badge editable';
+        badge.textContent = '✓ Edit Mode (Coach)';
+        saveBtn.style.display = 'flex';
+        loginPrompt.style.display = 'none';
+        techCard.classList.remove('readonly');
+        tactCard.classList.remove('readonly');
+        
+        techSlider.disabled = false;
+        tactSlider.disabled = false;
+        
+        // Load existing data if any
+        if (athlete.coachmetric) {
+          techSlider.value = athlete.coachmetric.technical;
+          tactSlider.value = athlete.coachmetric.tactical;
+          updateMetric('tech', athlete.coachmetric.technical);
+          updateMetric('tact', athlete.coachmetric.tactical);
+        } else {
+          techSlider.value = 5;
+          tactSlider.value = 5;
+          updateMetric('tech', 5);
+          updateMetric('tact', 5);
         }
-      }, 400);
+      } else {
+        // ATHLETE/VIEWER MODE: Read only
+        badge.className = 'coachmetric-badge readonly';
+        badge.textContent = '👁 View Only';
+        saveBtn.style.display = 'none';
+        loginPrompt.style.display = 'block';
+        techCard.classList.add('readonly');
+        tactCard.classList.add('readonly');
+        
+        techSlider.disabled = true;
+        tactSlider.disabled = true;
+        
+        // Show existing data or empty
+        if (athlete.coachmetric) {
+          techSlider.value = athlete.coachmetric.technical;
+          tactSlider.value = athlete.coachmetric.tactical;
+          updateMetric('tech', athlete.coachmetric.technical, true);
+          updateMetric('tact', athlete.coachmetric.tactical, true);
+        } else {
+          document.getElementById('tech-score').textContent = '-';
+          document.getElementById('tact-score').textContent = '-';
+          document.getElementById('tech-score').classList.add('empty');
+          document.getElementById('tact-score').classList.add('empty');
+          document.getElementById('tech-desc').textContent = 'Belum dinilai oleh pelatih';
+          document.getElementById('tact-desc').textContent = 'Belum dinilai oleh pelatih';
+          document.getElementById('integrated-score-box').style.display = 'none';
+        }
+      }
     }
-
-    function nextQuestion() {
-      if (!answers[questions[currentQuestion].id]) {
-        alert('Pilih jawaban dulu ya!');
+    
+    function updateMetric(type, value, readonly = false) {
+      const numVal = parseFloat(value);
+      currentCoachmetric[type === 'tech' ? 'technical' : 'tactical'] = numVal;
+      
+      const scoreEl = document.getElementById(`${type}-score`);
+      const descEl = document.getElementById(`${type}-desc`);
+      
+      scoreEl.textContent = numVal.toFixed(1);
+      scoreEl.classList.remove('empty');
+      
+      // Description
+      if (!readonly) {
+        if (numVal <= 3) {
+          descEl.textContent = type === 'tech' 
+            ? '⚠️ Perlu pengembangan fundamental: kontrol bola, passing dasar'
+            : '⚠️ Perlu pemahaman: positioning dasar, awareness';
+        } else if (numVal <= 6) {
+          descEl.textContent = type === 'tech'
+            ? '⭐ Berkembang: teknik stabil, perlu konsistensi'
+            : '⭐ Berkembang: mengerti sistem, perlu kecepatan decision';
+        } else if (numVal <= 8) {
+          descEl.textContent = type === 'tech'
+            ? '💪 Kuat: teknik matang, siap kompetisi'
+            : '💪 Kuat: reading game bagus, adaptif';
+        } else {
+          descEl.textContent = type === 'tech'
+            ? '🔥 Elite: teknik superior, role model tim'
+            : '🔥 Elite: vision superior, leader taktikal';
+        }
+      } else {
+        descEl.textContent = type === 'tech'
+          ? `✓ Dinilai oleh ${currentAthletes.find(a => a.id === currentModalAthleteId)?.coachmetric?.coach || 'Coach'}`
+          : `✓ Dinilai oleh ${currentAthletes.find(a => a.id === currentModalAthleteId)?.coachmetric?.coach || 'Coach'}`;
+      }
+      
+      if (!readonly) {
+        calculateIntegratedScore();
+      }
+    }
+    
+    function calculateIntegratedScore() {
+      const athlete = currentAthletes.find(a => a.id === currentModalAthleteId);
+      if (!athlete || !athlete.psikometrik) {
+        document.getElementById('integrated-score-box').style.display = 'none';
         return;
       }
       
-      if (currentQuestion < 49) {
-        currentQuestion++;
-        renderQuestion();
-        updateProgress();
+      const psikoAvg = (athlete.scores.O + athlete.scores.C + athlete.scores.E + athlete.scores.A + athlete.scores.N) / 5;
+      const tech = currentCoachmetric.technical || 5;
+      const tact = currentCoachmetric.tactical || 5;
+      const coachAvg = ((tech + tact) / 2) * 10; // Scale to 0-100
+      
+      // Weighted: 60% Psikometrik + 40% Coachmetric
+      const integrated = Math.round((psikoAvg * 0.6) + (coachAvg * 0.4));
+      
+      document.getElementById('integrated-score-box').style.display = 'block';
+      document.getElementById('integrated-value').textContent = integrated + '%';
+      
+      const statusEl = document.getElementById('integrated-status');
+      if (integrated >= 80) {
+        statusEl.textContent = '🌟 Elite Prospect';
+        statusEl.style.color = '#ffd700';
+      } else if (integrated >= 65) {
+        statusEl.textContent = '💪 Core Player';
+        statusEl.style.color = '#00c853';
+      } else if (integrated >= 50) {
+        statusEl.textContent = '⭐ Development';
+        statusEl.style.color = '#ff9800';
       } else {
-        finishTest();
+        statusEl.textContent = '📚 Fundamental';
+        statusEl.style.color = '#f44336';
       }
     }
-
-    function prevQuestion() {
-      if (currentQuestion > 0) {
-        currentQuestion--;
-        renderQuestion();
-        updateProgress();
-      }
-    }
-
-    function updateProgress() {
-      const pct = ((currentQuestion + 1) / 50) * 100;
-      document.getElementById('progress-fill').style.width = `${pct}%`;
-      document.getElementById('progress-text').textContent = `${currentQuestion + 1}/50 selesai`;
-    }
-
-    function finishTest() {
-      clearInterval(timerInterval);
-      document.getElementById('question-section').classList.remove('active');
-      document.getElementById('result-section').classList.add('active');
-      document.getElementById('progress-fill').style.width = '100%';
-      document.getElementById('progress-text').textContent = '50/50 selesai';
-      
-      const scores = calculateScores();
-      renderResults(scores);
-    }
-
-    function calculateScores() {
-      const scores = { O: 0, C: 0, E: 0, A: 0, N: 0 };
-      
-      questions.forEach(q => {
-        let val = answers[q.id];
-        if (q.reverse) val = 6 - val;
-        scores[q.dimension] += val;
-      });
-      
-      const percentages = {};
-      for (let d in scores) {
-        percentages[d] = Math.round(((scores[d] - 10) / 40) * 100);
+    
+    function saveCoachmetric() {
+      if (!isCoach()) {
+        showToast('Hanya pelatih yang dapat menyimpan penilaian', 'error');
+        return;
       }
       
-      return percentages;
+      const athlete = currentAthletes.find(a => a.id === currentModalAthleteId);
+      if (!athlete) return;
+      
+      // Save to athlete data
+      athlete.coachmetric = {
+        technical: currentCoachmetric.technical,
+        tactical: currentCoachmetric.tactical,
+        coach: currentCoachName,
+        date: new Date().toISOString().split('T')[0]
+      };
+      
+      showToast('✓ Penilaian berhasil disimpan!', 'success');
+      
+      // Refresh table to show indicator
+      renderAthletes();
     }
-
-    function renderResults(scores) {
-      const cardsHtml = Object.entries(scores).map(([dim, score]) => {
-        const info = dimensions[dim];
-        const isHigh = score >= 60;
-        return `
-          <div class="dimension-card ${isHigh ? 'high' : ''}">
-            <div class="dimension-icon">${info.icon}</div>
-            <div class="dimension-name">${info.name}</div>
-            <div class="dimension-full">${info.desc}</div>
-            <div class="dimension-score">${score}%</div>
-            <div class="dimension-bar">
-              <div class="dimension-fill" style="width: ${score}%"></div>
-            </div>
-          </div>
-        `;
-      }).join('');
-      
-      document.getElementById('big-five-grid').innerHTML = cardsHtml;
-      
-      const strengths = calculateAthleteStrengths(scores);
-      document.getElementById('strength-tags').innerHTML = strengths.map(s => 
-        `<span class="strength-tag">${s}</span>`
-      ).join('');
-    }
-
-    function calculateAthleteStrengths(scores) {
-      const mapping = [];
-      
-      if (scores.O >= 70) mapping.push('🎨 Kreatif & Inovatif');
-      if (scores.C >= 70) mapping.push('💪 Disiplin & Konsisten');
-      if (scores.E >= 70) mapping.push('⚡ Energik & Dominan');
-      if (scores.A >= 70) mapping.push('🤝 Team Player');
-      if (scores.N >= 70) mapping.push('🧘 Tenang di Tekanan');
-      
-      if (scores.O >= 60 && scores.C >= 60) mapping.push('🧠 Taktikal');
-      if (scores.E >= 60 && scores.A >= 60) mapping.push('👑 Kapten Tim');
-      if (scores.C >= 60 && scores.N >= 60) mapping.push('🎯 Clutch Performer');
-      if (scores.O >= 60 && scores.E >= 60) mapping.push('🔥 Playmaker');
-      
-      if (mapping.length < 3) {
-        if (scores.C >= 50) mapping.push('📋 Profesional');
-        if (scores.A >= 50) mapping.push('💙 Loyal');
-        if (scores.E >= 50) mapping.push('🌟 Charismatik');
+    
+    // ==================== UTILS ====================
+    function closeModal(e) {
+      if (!e || e.target.id === 'modal-psikometrik') {
+        document.getElementById('modal-psikometrik').classList.remove('active');
+        currentModalAthleteId = null;
       }
-      
-      return mapping.slice(0, 3);
     }
-
-    // Auto-fill username dari session
-    // document.querySelector('.user-name').textContent = sessionStorage.getItem('username') || '@guest';
+    
+    function showToast(message, type) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast ' + type;
+      
+      setTimeout(() => toast.classList.add('show'), 100);
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    
+    // Init
+    updateAccessUI();
   </script>
 </body>
 </html>
