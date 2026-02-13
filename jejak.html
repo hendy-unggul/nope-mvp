@@ -302,15 +302,21 @@
       transform: rotate(0.5deg);
     }
     
+    /* FIXED: Header sejajar dengan mood badge di kanan */
     .rant-box-header {
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
       font-size: 14px;
       color: var(--muted);
       margin-bottom: 12px;
       font-family: 'Space Grotesk', sans-serif;
-      flex-wrap: wrap;
+    }
+    
+    .rant-box-header .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
     .rant-box-header strong {
@@ -319,13 +325,13 @@
     }
     
     .rant-box-header .mood-badge {
-      margin-left: auto;
       font-family: 'Caveat', cursive;
       font-size: 18px;
       color: var(--accent);
       transform: rotate(-2deg);
       cursor: pointer;
       white-space: nowrap;
+      position: relative;
     }
     
     .rant-box textarea {
@@ -465,7 +471,7 @@
       transform: rotate(-1deg);
     }
     
-    /* COMPACT Vibe Reaction System */
+    /* COMPACT Vibe Reaction System - FIXED TOOLTIP */
     .vibe-reactions {
       display: flex;
       flex-wrap: nowrap;
@@ -475,6 +481,8 @@
       overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
+      position: relative;
+      padding-bottom: 4px; /* Space untuk tooltip */
     }
     
     .vibe-reactions::-webkit-scrollbar {
@@ -553,12 +561,12 @@
       animation: vibePulse 0.3s ease;
     }
     
-    /* TOOLTIP - Gen Z Slang */
+    /* FIXED TOOLTIP - Positioned above with proper z-index */
     .vibe-tooltip {
       position: absolute;
-      bottom: 100%;
+      bottom: calc(100% + 8px);
       left: 50%;
-      transform: translateX(-50%) translateY(-8px);
+      transform: translateX(-50%);
       background: var(--text);
       color: var(--bg);
       padding: 8px 12px;
@@ -570,8 +578,8 @@
       visibility: hidden;
       transition: all 0.2s ease;
       pointer-events: none;
-      z-index: 10;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
     
     .vibe-tooltip::after {
@@ -739,17 +747,16 @@
       100% { transform: scale(1.4); opacity: 0; }
     }
     
-    /* Mood popup */
+    /* Mood popup - FIXED POSITION */
     .mood-popup {
       display: none;
       position: absolute;
-      top: 100%;
+      top: calc(100% + 8px);
       right: 0;
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 12px;
-      margin-top: 8px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
       z-index: 100;
       min-width: 200px;
@@ -812,6 +819,19 @@
       .vibe-tooltip {
         font-size: 10px;
         padding: 6px 10px;
+      }
+      
+      /* Mobile: tooltip di bawah untuk menghindari terpotong */
+      .vibe-tooltip {
+        bottom: auto;
+        top: calc(100% + 8px);
+      }
+      
+      .vibe-tooltip::after {
+        top: auto;
+        bottom: 100%;
+        border-top-color: transparent;
+        border-bottom-color: var(--text);
       }
     }
     
@@ -876,9 +896,12 @@
     </div>
 
     <div class="rant-box">
+      <!-- FIXED: Header dengan layout sejajar -->
       <div class="rant-box-header">
-        <span>Hello <strong id="username-display">@you</strong></span>
-        <span class="mood-badge" id="current-mood" onclick="toggleMoodPopup()">✦ surviving</span>
+        <div class="header-left">
+          <span>Hello <strong id="username-display">@you</strong></span>
+        </div>
+        <span class="mood-badge" id="current-mood" onclick="toggleMoodPopup(event)">✦ surviving</span>
         <div class="mood-popup" id="mood-popup">
           <div class="mood-option" onclick="selectMood('surviving')"><span class="emoji">😮‍💨</span> surviving</div>
           <div class="mood-option" onclick="selectMood('thriving')"><span class="emoji">✨</span> thriving (fake it)</div>
@@ -887,6 +910,7 @@
           <div class="mood-option" onclick="selectMood('existential')"><span class="emoji">🎭</span> existential dread</div>
         </div>
       </div>
+
       <textarea id="rant" placeholder="What's the tea today? Overshare here... unfiltered thoughts only ☕"></textarea>
       <button class="rant-cta" id="jejakkan-btn">Jejakkan</button>
       <div class="confirmation" id="confirmation"></div>
@@ -914,7 +938,7 @@
     var SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
     var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-    // COMPACT VIBE REACTION SYSTEM - Gen Z Optimized with Tooltips
+    // COMPACT VIBE REACTION SYSTEM - Gen Z Optimized with Fixed Tooltips
     const VIBE_REACTIONS = {
       'relatable': { 
         emoji: '😭', 
@@ -1095,7 +1119,7 @@
       return labels[mood] || '✦ surviving';
     }
 
-    // Generate Compact Vibe Reaction HTML with Tooltip
+    // Generate Compact Vibe Reaction HTML with Fixed Tooltip
     function generateVibeReactions(entryId, vibes) {
       vibes = vibes || {};
       var html = '<div class="vibe-reactions">';
@@ -1374,7 +1398,9 @@
       }
     }
 
-    window.toggleMoodPopup = function() {
+    // FIXED: Toggle mood popup with event parameter
+    window.toggleMoodPopup = function(event) {
+      event.stopPropagation();
       var popup = document.getElementById('mood-popup');
       popup.classList.toggle('show');
     };
@@ -1385,6 +1411,7 @@
       document.getElementById('mood-popup').classList.remove('show');
     };
 
+    // Close mood popup when clicking outside
     document.addEventListener('click', function(e) {
       var moodBadge = document.getElementById('current-mood');
       var moodPopup = document.getElementById('mood-popup');
