@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NOPE — Spill the Tea</title>
+  <title>NOPE — SayNOPE</title>
   
   <!-- PWA -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23E85D4E'/%3E%3Ctext x='50' y='70' font-size='50' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%23F5F2ED'%3E🍵%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23E85D4E'/%3E%3Ctext x='50' y='70' font-size='50' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%23F5F2ED'%3E✦%3C/text%3E%3C/svg%3E">
   <meta name="theme-color" content="#F5F2ED">
   
   <!-- Fonts -->
@@ -30,6 +30,10 @@
       --energy: #F4C542;
       --premium: #6B4EE6;
       --premium-soft: #E8E4FF;
+      --nyambat: #4A90A4;
+      --petisi: #E85D4E;
+      --aksi: #F4C542;
+      --tea: #8B5CF6;
       
       --radius: 16px;
       --radius-sm: 12px;
@@ -91,12 +95,6 @@
 
     .logo:hover {
       transform: rotate(0deg) scale(1.02);
-    }
-
-    .user-status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
     .nav-mini {
@@ -200,7 +198,6 @@
       font-weight: 500;
     }
 
-    /* === PREMIUM CTA === */
     .premium-cta {
       background: linear-gradient(135deg, var(--premium) 0%, #8B5CF6 100%);
       color: white;
@@ -231,7 +228,7 @@
     /* === PAGE HEADER === */
     .page-header {
       text-align: center;
-      margin: 16px 0 24px;
+      margin: 16px 0 32px;
     }
 
     .page-title {
@@ -250,37 +247,107 @@
       margin-top: 8px;
     }
 
-    .ambient-hint {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 12px;
-      font-size: 12px;
-      color: var(--text-secondary);
-      background: var(--surface-warm);
-      padding: 8px 16px;
-      border-radius: 20px;
-    }
-
-    .presence-dots {
+    /* === MAIN CARDS (Nyambat, Petisi, Aksi) === */
+    .main-cards {
       display: flex;
-      gap: 3px;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 32px;
     }
 
-    .presence-dots .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--border);
+    .main-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .main-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
       transition: all 0.3s;
     }
 
-    .presence-dots .dot.active {
-      background: var(--accent);
-      animation: pulse-dot 1.5s infinite;
+    .main-card.nyambat::before { background: var(--nyambat); }
+    .main-card.petisi::before { background: var(--petisi); }
+    .main-card.aksi::before { background: var(--aksi); }
+
+    .main-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
     }
 
-    /* === TEA CARDS === */
+    .main-card.nyambat:hover { border-color: var(--nyambat); }
+    .main-card.petisi:hover { border-color: var(--petisi); }
+    .main-card.aksi:hover { border-color: var(--aksi); }
+
+    .main-card h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .main-card.nyambat h3 { color: var(--nyambat); }
+    .main-card.petisi h3 { color: var(--petisi); }
+    .main-card.aksi h3 { color: var(--aksi); }
+
+    .main-card p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .main-card .card-icon {
+      font-size: 24px;
+    }
+
+    .main-card .card-meta {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--muted);
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    /* === SECTION DIVIDER === */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 32px 0 24px;
+    }
+
+    .section-divider::before,
+    .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .section-title {
+      font-family: 'Caveat', cursive;
+      font-size: 24px;
+      color: var(--tea);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* === SPILL THE TEA CARDS === */
     .tea-container {
       display: flex;
       flex-direction: column;
@@ -298,8 +365,24 @@
     }
 
     .tea-card:hover {
-      border-color: var(--accent-soft);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      border-color: var(--tea);
+      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
+    }
+
+    .tea-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--tea);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .tea-card:hover::before {
+      opacity: 1;
     }
 
     .ambient-wave {
@@ -310,9 +393,8 @@
       height: 3px;
       background: linear-gradient(90deg, 
         transparent 0%, 
-        var(--accent-soft) 20%, 
-        var(--accent) 50%, 
-        var(--accent-soft) 80%, 
+        var(--tea) 20%, 
+        var(--tea) 80%, 
         transparent 100%
       );
       opacity: 0;
@@ -347,8 +429,8 @@
 
     .activity-badge.pulse {
       animation: badge-pulse 2s infinite;
-      border-color: var(--accent-soft);
-      color: var(--accent);
+      border-color: var(--tea);
+      color: var(--tea);
     }
 
     .tea-header {
@@ -362,7 +444,7 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background: var(--accent-soft);
+      background: var(--tea);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -389,7 +471,7 @@
     .tea-mood {
       font-family: 'Caveat', cursive;
       font-size: 16px;
-      color: var(--accent);
+      color: var(--tea);
       transform: rotate(-2deg);
     }
 
@@ -402,8 +484,8 @@
     }
 
     .tea-content::selection {
-      background: var(--accent-soft);
-      color: var(--text);
+      background: var(--tea);
+      color: white;
     }
 
     .highlight-tooltip {
@@ -457,7 +539,7 @@
 
     .vibe-energy-hint {
       font-size: 11px;
-      color: var(--accent);
+      color: var(--tea);
       font-family: 'Caveat', cursive;
     }
 
@@ -484,7 +566,7 @@
 
     .vibe-btn:hover {
       background: var(--surface-warm);
-      border-color: var(--accent-soft);
+      border-color: var(--tea);
       transform: translateY(-2px);
     }
 
@@ -505,8 +587,8 @@
     }
 
     .vibe-btn.used {
-      background: var(--accent-soft);
-      border-color: var(--accent);
+      background: var(--premium-soft);
+      border-color: var(--tea);
       color: var(--text);
     }
 
@@ -516,7 +598,7 @@
       left: 0;
       right: 0;
       height: 3px;
-      background: var(--accent);
+      background: var(--tea);
       border-radius: 0 0 20px 20px;
       transform: scaleX(0);
       transform-origin: left;
@@ -577,7 +659,7 @@
 
     .quick-btn:hover {
       background: var(--surface-warm);
-      border-color: var(--accent-soft);
+      border-color: var(--tea);
       color: var(--text);
     }
 
@@ -621,7 +703,7 @@
     .peek-title {
       font-family: 'Caveat', cursive;
       font-size: 28px;
-      color: var(--accent);
+      color: var(--tea);
     }
 
     .peek-timer {
@@ -635,7 +717,7 @@
     .countdown {
       font-size: 24px;
       font-weight: 700;
-      color: var(--accent);
+      color: var(--tea);
       font-family: 'Space Grotesk', sans-serif;
     }
 
@@ -705,13 +787,13 @@
     }
 
     .peek-btn.primary {
-      background: var(--accent);
+      background: var(--tea);
       color: white;
       border: none;
     }
 
     .peek-btn.primary:hover {
-      background: #D94A3E;
+      background: #7C3AED;
       transform: translateY(-2px);
     }
 
@@ -723,11 +805,6 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-    }
-
-    .peek-btn.premium-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(107, 78, 230, 0.3);
     }
 
     .peek-btn.secondary {
@@ -802,10 +879,6 @@
       font-size: 14px;
     }
 
-    .premium-feature .emoji {
-      font-size: 20px;
-    }
-
     .pricing-options {
       display: flex;
       flex-direction: column;
@@ -829,18 +902,18 @@
       background: var(--premium-soft);
     }
 
-    .pricing-option .plan-name {
+    .plan-name {
       font-family: 'Space Grotesk', sans-serif;
       font-weight: 600;
     }
 
-    .pricing-option .plan-price {
+    .plan-price {
       font-size: 20px;
       font-weight: 700;
       color: var(--premium);
     }
 
-    .pricing-option .plan-save {
+    .plan-save {
       font-size: 11px;
       color: var(--accent);
       background: var(--accent-soft);
@@ -862,11 +935,6 @@
       transition: all 0.2s;
     }
 
-    .pay-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(107, 78, 230, 0.3);
-    }
-
     .close-modal {
       margin-top: 16px;
       font-size: 13px;
@@ -876,32 +944,15 @@
       border: none;
     }
 
-    /* === REFRESH === */
-    .refresh-container {
+    /* === FOOTER === */
+    .zone-footer {
       text-align: center;
-      margin: 40px 0;
-    }
-
-    .refresh-btn {
-      background: var(--surface);
-      border: 2px solid var(--accent);
-      color: var(--accent);
-      border-radius: 30px;
-      padding: 14px 32px;
-      font-size: 15px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      transition: all 0.3s;
-    }
-
-    .refresh-btn:hover {
-      background: var(--accent);
-      color: white;
-      transform: translateY(-2px);
+      font-family: 'Caveat', cursive;
+      font-size: 18px;
+      color: var(--muted);
+      margin-top: 40px;
+      padding: 40px 20px;
+      transform: rotate(-1deg);
     }
 
     /* === NOTIFICATION === */
@@ -927,712 +978,271 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* === FOOTER === */
-    .zone-footer {
-      text-align: center;
-      font-family: 'Caveat', cursive;
-      font-size: 18px;
-      color: var(--muted);
-      margin-top: 40px;
-      padding: 40px 20px;
-      transform: rotate(-1deg);
-    }
-
     @media (max-width: 480px) {
       .wrapper { padding: 0 16px; }
       .page-title { font-size: 32px; }
       .energy-bar { padding: 6px 12px; }
-      .energy-ring { width: 36px; height: 36px; }
+      .main-card h3 { font-size: 16px; }
       .premium-content { padding: 24px; }
     }
   </style>
 </head>
 <body>
   <div class="wrapper">
-    <!-- ENERGY BAR with Premium CTA -->
+    <!-- ENERGY BAR -->
     <div class="energy-bar-container">
-      <div class="energy-bar">
-        <div class="energy-ring">
-          <svg viewBox="0 0 36 36">
-            <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-            <path class="ring-progress" id="energy-progress" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-          </svg>
-          <span class="energy-text" id="energy-text">0</span>
-        </div>
-        <div class="energy-info">
-          <div class="energy-label">Vibe Energy</div>
-          <div class="energy-next" id="energy-next">Kumpulin 25 energy buat peek</div>
-        </div>
-        <button class="premium-cta" id="premium-cta" onclick="showPremiumModal()">
-          <span>💎</span> Upgrade
-        </button>
-      </div>
-    </div>
+      <!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Energy Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <header>
-      <div class="logo" onclick="window.location.href='index.html'">nope</div>
-      <div class="user-status" id="user-status">
-        <div class="nav-mini">
-          <span onclick="window.location.href='jejak.html'">Jurnal</span>
-          <span onclick="window.location.href='frekuensi-zones.html'">Frekuensi</span>
-          <span onclick="window.location.href='saynope.html'">SayNOPE</span>
-          <span class="active">🍵 Tea</span>
-        </div>
-      </div>
-    </header>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
 
-    <div class="page-header">
-      <h1 class="page-title">🍵 Spill the Tea</h1>
-      <p class="page-subtitle">Curhatan random dari komunitas. Anonymous. Real. No cap.</p>
-      
-      <div class="ambient-hint">
-        <div class="presence-dots">
-          <span class="dot active"></span>
-          <span class="dot active"></span>
-          <span class="dot"></span>
-        </div>
-        <span id="ambient-text">12 orang lagi baca ini</span>
-      </div>
-    </div>
+        .wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
 
-    <div class="tea-container" id="tea-container"></div>
+        /* ENERGY BAR */
+        .energy-bar-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
 
-    <div class="refresh-container">
-      <button class="refresh-btn" onclick="loadNewTea()">
-        <span class="emoji">🔄</span> Seduh Teh Baru
-      </button>
-    </div>
+        .energy-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 8px 16px;
+        }
 
-    <div class="zone-footer">Nyambat • Aksi • Solusi</div>
-  </div>
+        .energy-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
 
-  <!-- PEEK OVERLAY -->
-  <div class="peek-overlay" id="peek-overlay">
-    <div class="peek-header">
-      <h2 class="peek-title">👁️ Peeking...</h2>
-      <div class="peek-timer">
-        <span>Auto close in</span>
-        <span class="countdown" id="countdown">5</span>
-        <span>detik</span>
-      </div>
-    </div>
-    
-    <div class="peek-content" id="peek-content"></div>
-    
-    <div class="peek-actions">
-      <button class="peek-btn secondary" onclick="closePeek()">Tutup</button>
-      <button class="peek-btn premium-btn" onclick="showPremiumModal('dm')">
-        <span>💎</span> DM (Premium)
-      </button>
-    </div>
-  </div>
+        .energy-info {
+            flex: 1;
+        }
 
-  <!-- PREMIUM MODAL -->
-  <div class="premium-modal" id="premium-modal" onclick="closePremiumModal(event)">
-    <div class="premium-content" onclick="event.stopPropagation()">
-      <div class="premium-icon">💎</div>
-      <h2 class="premium-title">NOPE Premium</h2>
-      <p class="premium-desc">
-        Unlock fitur eksklusif untuk koneksi lebih dalam dengan komunitas yang sefrekuensi.
-      </p>
-      
-      <div class="premium-features">
-        <div class="premium-feature">
-          <span class="emoji">💌</span>
-          <span><strong>Unlimited DM</strong> — Kirim & terima pesan tanpa batas</span>
-        </div>
-        <div class="premium-feature">
-          <span class="emoji">👁️</span>
-          <span><strong>Extended Peek</strong> — Lihat jurnal 30 detik (bukan 5)</span>
-        </div>
-        <div class="premium-feature">
-          <span class="emoji">🔔</span>
-          <span><strong>DM Requests</strong> — Terima permintaan chat dari yang relate</span>
-        </div>
-        <div class="premium-feature">
-          <span class="emoji">✨</span>
-          <span><strong>Badge Premium</strong> — Tanda eksklusif di profil</span>
-        </div>
-      </div>
-      
-      <div class="pricing-options">
-        <div class="pricing-option selected" onclick="selectPlan(this, 'monthly')">
-          <div>
-            <div class="plan-name">Bulanan</div>
-            <div style="font-size: 12px; color: var(--muted);">Bebas cancel kapan aja</div>
-          </div>
-          <div class="plan-price">Rp20rb</div>
-        </div>
-        <div class="pricing-option" onclick="selectPlan(this, 'yearly')">
-          <div>
-            <div class="plan-name">Tahunan</div>
-            <span class="plan-save">Save 58%</span>
-          </div>
-          <div class="plan-price">Rp100rb</div>
-        </div>
-      </div>
-      
-      <button class="pay-btn" onclick="processPayment()">
-        💳 Bayar Sekarang
-      </button>
-      
-      <button class="close-modal" onclick="closePremiumModal()">
-        Nanti dulu, masih mau lihat-lihat
-      </button>
-    </div>
-  </div>
+        .energy-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+        }
 
-  <!-- NOTIFICATION -->
-  <div class="notification" id="notification"></div>
+        .energy-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+        }
 
-  <script>
-    // === CONFIG ===
-    const VIBE_REACTIONS = {
-      'relatable': { emoji: '😭', label: 'literally me', energy: 2, slang: 'Sama, aku juga' },
-      'same': { emoji: '🛋️', label: 'big mood', energy: 2, slang: 'Mood banget' },
-      'hug': { emoji: '🫂', label: 'virtual hug', energy: 3, slang: 'Peluk jauh' },
-      'tea': { emoji: '🍵', label: 'the tea', energy: 3, slang: 'Spill the tea' },
-      'stay': { emoji: '✊', label: 'stay strong', energy: 3, slang: 'Tetap jaya' },
-      'real': { emoji: '🫡', label: 'no cap', energy: 4, slang: 'Real talk' },
-      'slay': { emoji: '💅', label: 'slay', energy: 4, slang: 'Gokil/slay' },
-      'ghost': { emoji: '👻', label: 'ghosting', energy: 2, slang: 'Di-ghosting' }
-    };
+        .energy-progress {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
 
-    const ENERGY_UNLOCKS = [
-      { threshold: 10, reward: 'peek_3sec', label: 'Peek 3 detik' },
-      { threshold: 25, reward: 'peek_5sec', label: 'Peek 5 detik' },
-      { threshold: 50, reward: 'peek_10sec', label: 'Peek 10 detik' }
-    ];
+        .energy-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            width: 75%;
+        }
 
-    // === STATE ===
-    let currentTea = [];
-    let userEnergy = 0;
-    let isPremium = false; // Check from localStorage or API
-    let selectedPlan = 'monthly';
-    let currentPeekTea = null;
-    let peekTimer = null;
+        /* MAIN CARD */
+        .main-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            overflow: hidden;
+            margin: 24px 0;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
 
-    // === TEA POOL (10 items) ===
-    const TEA_POOL = [
-      {
-        id: 'tea-1',
-        user: '@overthinker_3am',
-        avatar: '🧠',
-        mood: '🛌 doomscrolling',
-        content: "kenapa ya tiap kali mau tidur malah jadi overthinking? padahal besok ada ujian tapi otakku malah playback moment cringe dari 5 tahun lalu 💀",
-        time: '20 menit lalu',
-        vibes: { relatable: 45, hug: 23, same: 18 },
-        hasImage: false,
-        journal: [
-          { time: '3:42 AM', content: "masih scrolling tiktok padahal mata udah ngantuk banget" },
-          { time: '2:15 AM', content: "coba tidur tapi kepikiran typo yang gue kirim ke grup kantor" },
-          { time: '11:30 PM', content: "besok ujian tapi gue masih di sini 🙃" }
-        ],
-        artefacts: ['https://images.unsplash.com/photo-1519681393784-d120267933ba?w=200&q=80']
-      },
-      {
-        id: 'tea-2',
-        user: '@anakpertama_capek',
-        avatar: '👤',
-        mood: '😮‍💨 surviving',
-        content: "capek banget jadi anak pertama, semua ekspektasi ditimpa ke gue padahal gue juga lagi struggling. mau ngeluh ke ortu takut dianggap lemah 😭",
-        time: '1 jam lalu',
-        vibes: { relatable: 67, hug: 34, stay: 12 },
-        hasImage: false,
-        journal: [
-          { time: '8:00 PM', content: "adik gue minta duit lagi, gue sendiri udah hemat banget" },
-          { time: '6:30 PM', content: "mama bilang 'kamu kan kakak, harus kuat' — gue pengen bilang gue juga capek" },
-          { time: 'Minggu lalu', content: "transfer buat adik, tabungan gue minus lagi" }
-        ],
-        artefacts: []
-      },
-      {
-        id: 'tea-3',
-        user: '@ghosted_again',
-        avatar: '👻',
-        mood: '✨ thriving (fake it)',
-        content: "read 10:42 pm. read 10:43 pm. read 10:45 pm. online. typing... then gone. story update tapi chat gue dibiarin 🙃",
-        time: '2 jam lalu',
-        vibes: { ghost: 89, relatable: 56, same: 34 },
-        hasImage: true,
-        image: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80',
-        journal: [
-          { time: '11:00 PM', content: "masih checking chat tiap 5 menit, hopeless" },
-          { time: '10:46 PM', content: "dia online tapi ga bales, apa gue terlalu needy?" },
-          { time: 'Kemarin', content: "kenapa selalu gue yang kena ghosting?" }
-        ],
-        artefacts: ['https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=200&q=80']
-      },
-      {
-        id: 'tea-4',
-        user: '@burnout_resigned',
-        avatar: '🔥',
-        mood: '🎭 existential dread',
-        content: "resign dari kerjaan pertama setelah 6 bulan. toxic workplace, gaslighting boss, gaji kecil. no regrets, mental health first ✨",
-        time: '3 jam lalu',
-        vibes: { slay: 92, stay: 45, real: 38 },
-        hasImage: false,
-        journal: [
-          { time: 'Hari ini', content: "FINALLY FREE! 🎉 tapi juga takut unemployed" },
-          { time: 'Kemarin', content: "last day, boss masih gaslighting sampe akhir" },
-          { time: 'Minggu lalu', content: "apply 20+ lowongan, belum ada yang callback" }
-        ],
-        artefacts: []
-      },
-      {
-        id: 'tea-5',
-        user: '@skripsipusing',
-        avatar: '📚',
-        mood: '🌀 chaotic good',
-        content: "dosen pembimbing ngilang 3 minggu. deadline seminar proposal minggu depan. gue belum bab 1. send help 😭🙏",
-        time: '4 jam lalu',
-        vibes: { relatable: 78, hug: 45, same: 23 },
-        hasImage: false,
-        journal: [
-          { time: '2:00 AM', content: "nangis di perpus karena stuck di latar belakang" },
-          { time: 'Kemarin', content: "chat dosen ga dibaca, wa ceklis 1 doang" },
-          { time: 'Minggu lalu', content: "temen-temen udah seminar, gue masih di bab 1" }
-        ],
-        artefacts: ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80']
-      },
-      {
-        id: 'tea-6',
-        user: '@savingstruggle',
-        avatar: '💸',
-        mood: '😮‍💨 surviving',
-        content: "gaji 5jt, kos 2jt, pulsa 200k, makan 1.5jt, transport 500k. sisanya? 0. literally living paycheck to paycheck 💀",
-        time: '5 jam lalu',
-        vibes: { relatable: 103, same: 67, real: 45 },
-        hasImage: false,
-        journal: [
-          { time: 'Tadi malam', content: "nabung 50k doang minggu ini, progress?" },
-          { time: 'Awal bulan', content: "gajian! tapi udah habis buat bayar ini itu" },
-          { time: 'Minggu lalu', content: "pengen beli skincare tapi liat dompet, gajadi" }
-        ],
-        artefacts: []
-      },
-      {
-        id: 'tea-7',
-        user: '@situationship',
-        avatar: '💔',
-        mood: '🛌 doomscrolling',
-        content: "3 bulan 'hangout'. ga pernah dibilang pacar tapi behave like one. tanya 'kita apa?' dijawab 'yaudah jalanin aja'. cowo semua sama 🙃",
-        time: '6 jam lalu',
-        vibes: { relatable: 134, ghost: 78, same: 56 },
-        hasImage: true,
-        image: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80',
-        journal: [
-          { time: '1:00 AM', content: "overthinking label hubungan, lagi" },
-          { time: 'Kemarin', content: "dia bilang 'aku sayang kamu' tapi ga mau commit" },
-          { time: 'Bulan lalu', content: "kenalan di dating app, sekarang udah kayak pacaran tapi ga pacaran" }
-        ],
-        artefacts: ['https://images.unsplash.com/photo-1517842645767-c639042777db?w=200&q=80']
-      },
-      {
-        id: 'tea-8',
-        user: '@toxicfriend_lelah',
-        avatar: '🎭',
-        mood: '🎭 existential dread',
-        content: "temen dari SD cuma ngehubungin pas butuh. pas gue butuh? ilang. 15 tahun pertemanan tapi gue cuma tempat curhat gratis 🙂",
-        time: '8 jam lalu',
-        vibes: { relatable: 89, hug: 67, real: 34 },
-        hasImage: false,
-        journal: [
-          { time: 'Tadi sore', content: "dia chat minta pinjem duit, gue bales lambat 10 menit langsung dicall" },
-          { time: 'Minggu lalu', content: "gue down, chat dia, dibales 'semangat' doang terus ilang" },
-          { time: 'Bulan lalu', content: "ultah gue, dia ga inget. ultah dia, gue yang ngasih kado" }
-        ],
-        artefacts: []
-      },
-      {
-        id: 'tea-9',
-        user: '@impostor_syndrome',
-        avatar: '🎪',
-        mood: '✨ thriving (fake it)',
-        content: "dapat kerjaan impian tapi tiap hari takut ketauan 'ga becus'. padahal interview 5 stage, pasti ada yang lihat potensi di gue kan? 🥲",
-        time: '10 jam lalu',
-        vibes: { relatable: 56, stay: 45, hug: 34 },
-        hasImage: false,
-        journal: [
-          { time: 'Hari ini', content: "meeting sama CEO, deg-degan banget takut ditanya sesuatu gue ga tau" },
-          { time: 'Kemarin', content: "nangis di toilet karena bikin error di production" },
-          { time: 'Minggu lalu', content: "seneng dapet offer tapi takut ga bisa perform" }
-        ],
-        artefacts: ['https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&q=80']
-      },
-      {
-        id: 'tea-10',
-        user: '@adulting_sucks',
-        avatar: '📉',
-        mood: '🌀 chaotic good',
-        content: "pajak, iuran bpjs, tagihan listrik, cicilan motor, tabungan, investasi, asuransi. dulu pengen cepet dewasa, sekarang pengen balik jadi bayi 👶",
-        time: '12 jam lalu',
-        vibes: { relatable: 156, same: 89, hug: 67 },
-        hasImage: false,
-        journal: [
-          { time: 'Tadi pagi', content: "liat tagihan listrik naik 40%, mau nangis" },
-          { time: 'Kemarin', content: "coba belajar investasi, pusing liat candlestick" },
-          { time: 'Minggu lalu', content: "bayar pajak motor, duit habis seketika" }
-        ],
-        artefacts: []
-      }
-    ];
+        .main-card h3 {
+            font-size: 20px;
+            padding: 24px 24px 0;
+            color: #333;
+        }
 
-    // === INIT ===
-    document.addEventListener('DOMContentLoaded', () => {
-      checkPremiumStatus();
-      loadNewTea();
-      updateEnergyBar();
-    });
+        .premium-content {
+            padding: 32px;
+        }
 
-    // === PREMIUM STATUS ===
-    function checkPremiumStatus() {
-      // Check from localStorage or API
-      const premiumUntil = localStorage.getItem('nope_premium_until');
-      if (premiumUntil && new Date(premiumUntil) > new Date()) {
-        isPremium = true;
-        document.getElementById('premium-cta').innerHTML = '<span>💎</span> Premium';
-        document.getElementById('premium-cta').style.background = 'linear-gradient(135deg, #10B981 0%, #059669 100%)';
-      }
-    }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
 
-    // === ENERGY SYSTEM ===
-    function addEnergy(amount) {
-      userEnergy += amount;
-      updateEnergyBar();
-      showNotification(`+${amount} energy! Total: ${userEnergy}`);
-    }
+        .stat-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            transition: transform 0.2s ease;
+        }
 
-    function updateEnergyBar() {
-      const progress = document.getElementById('energy-progress');
-      const text = document.getElementById('energy-text');
-      const next = document.getElementById('energy-next');
-      
-      const percentage = Math.min((userEnergy / 100) * 100, 100);
-      progress.style.strokeDasharray = `${percentage}, 100`;
-      text.textContent = userEnergy;
-      
-      const nextUnlock = ENERGY_UNLOCKS.find(u => userEnergy < u.threshold);
-      if (nextUnlock) {
-        next.textContent = `Butuh ${nextUnlock.threshold - userEnergy} lagi buat ${nextUnlock.label}`;
-      } else {
-        next.textContent = isPremium ? 'Max energy! DM unlocked' : 'Max energy! Upgrade untuk DM';
-      }
-    }
+        .stat-item:hover {
+            transform: translateY(-4px);
+        }
 
-    // === LOAD TEA ===
-    function loadNewTea() {
-      const shuffled = [...TEA_POOL].sort(() => 0.5 - Math.random());
-      currentTea = shuffled.slice(0, 3);
-      renderTea();
-      
-      const activeUsers = Math.floor(Math.random() * 20) + 8;
-      document.getElementById('ambient-text').textContent = `${activeUsers} orang lagi baca ini`;
-    }
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+        }
 
-    // === RENDER TEA ===
-    function renderTea() {
-      const container = document.getElementById('tea-container');
-      container.innerHTML = '';
-      
-      currentTea.forEach((tea) => {
-        const card = document.createElement('div');
-        card.className = 'tea-card';
-        card.id = tea.id;
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        /* ANIMATIONS */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 480px) {
+            .wrapper { padding: 0 16px; }
+            .page-title { font-size: 32px; }
+            .energy-bar { padding: 6px 12px; }
+            .main-card h3 { font-size: 16px; }
+            .premium-content { padding: 24px; }
+        }
+
+        .page-title {
+            font-size: 48px;
+            font-weight: 800;
+            color: white;
+            text-align: center;
+            padding: 40px 0 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <h1 class="page-title">⚡ Energy Dashboard</h1>
         
-        let vibesHtml = '';
-        Object.keys(VIBE_REACTIONS).forEach(key => {
-          const vibe = VIBE_REACTIONS[key];
-          const count = tea.vibes[key] || 0;
-          
-          vibesHtml += `
-            <button class="vibe-btn" 
-              onmousedown="startHold(this, '${tea.id}', '${key}')"
-              onmouseup="endHold(this)"
-              onmouseleave="endHold(this)"
-              ontouchstart="startHold(this, '${tea.id}', '${key}')"
-              ontouchend="endHold(this)">
-              <span class="emoji">${vibe.emoji}</span>
-              <span class="count">${count}</span>
-              <span class="hold-progress"></span>
-              <span class="vibe-tooltip">${vibe.slang} (+${vibe.energy} energy)</span>
-            </button>
-          `;
+        <!-- ENERGY BAR -->
+        <div class="energy-bar-container">
+            <div class="energy-bar">
+                <div class="energy-icon">⚡</div>
+                <div class="energy-info">
+                    <div class="energy-label">Total Energy Generated</div>
+                    <div class="energy-value">2,450 kWh</div>
+                    <div class="energy-progress">
+                        <div class="energy-progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN CARD -->
+        <div class="main-card">
+            <h3>📊 Daily Statistics</h3>
+            <div class="premium-content">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">85%</div>
+                        <div class="stat-label">Efficiency</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">12.5</div>
+                        <div class="stat-label">Peak Hours</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">$340</div>
+                        <div class="stat-label">Savings</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">0.8</div>
+                        <div class="stat-label">CO₂ Saved (tons)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Animasi progress bar saat load
+        window.addEventListener('load', () => {
+            const progressFill = document.querySelector('.energy-progress-fill');
+            setTimeout(() => {
+                progressFill.style.width = '75%';
+            }, 300);
         });
-        
-        card.innerHTML = `
-          <div class="activity-badge pulse">
-            <span class="dot active"></span>
-            ${Math.floor(Math.random() * 5) + 2} vibes baru
-          </div>
-          
-          <div class="ambient-wave"></div>
-          
-          <div class="tea-header">
-            <div class="tea-avatar">${tea.avatar}</div>
-            <div class="tea-meta">
-              <div class="tea-user">${tea.user}</div>
-              <div class="tea-time">${tea.time}</div>
-            </div>
-            <div class="tea-mood">${tea.mood}</div>
-          </div>
-          
-          <div class="tea-content" id="content-${tea.id}">
-            ${tea.content}
-            <div class="highlight-tooltip" id="tooltip-${tea.id}">
-              <span>💔</span> Felt this (+5 energy)
-            </div>
-          </div>
-          
-          ${tea.hasImage ? `<img src="${tea.image}" class="tea-image" alt="tea">` : ''}
-          
-          <div class="vibe-section">
-            <div class="vibe-header">
-              <span class="vibe-label">Kasih vibe & kumpulin energy</span>
-              <span class="vibe-energy-hint">Hold 2 detik = bonus energy!</span>
-            </div>
-            <div class="vibe-reactions">
-              ${vibesHtml}
-            </div>
-          </div>
-          
-          <div class="quick-actions">
-            <button class="quick-btn" onclick="saveTea('${tea.id}')">
-              <span>🔖</span> Simpan
-            </button>
-            <button class="quick-btn" onclick="shareTea('${tea.id}')">
-              <span>📤</span> Share Anon
-            </button>
-            <button class="quick-btn ${isPremium ? '' : 'premium'}" onclick="startPeekByEnergy('${tea.id}')">
-              <span>${isPremium ? '👁️' : '💎'}</span> ${isPremium ? 'Peek' : 'Peek (25 energy)'}
-            </button>
-          </div>
-        `;
-        
-        setupHighlight(card, tea.id);
-        container.appendChild(card);
-      });
-    }
 
-    // === HOLD TO VIBE ===
-    let holdTimer = null;
-    let holdStartTime = null;
+        // Counter animation untuk statistik
+        const animateValue = (element, start, end, duration) => {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                element.textContent = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        };
 
-    function startHold(btn, teaId, vibeKey) {
-      holdStartTime = Date.now();
-      btn.classList.add('holding');
-      
-      holdTimer = setTimeout(() => {
-        const vibe = VIBE_REACTIONS[vibeKey];
-        addEnergy(vibe.energy + 2);
-        
-        const countEl = btn.querySelector('.count');
-        countEl.textContent = parseInt(countEl.textContent) + 1;
-        
-        btn.classList.add('used');
-        btn.classList.remove('holding');
-        
-        showNotification(`${vibe.slang} with hold bonus! +${vibe.energy + 2} energy`);
-      }, 2000);
-    }
-
-    function endHold(btn) {
-      if (holdTimer) {
-        clearTimeout(holdTimer);
-        holdTimer = null;
-        
-        if (Date.now() - holdStartTime < 2000) {
-          const matches = btn.getAttribute('onmousedown').match(/'([^']+)'/g);
-          const vibeKey = matches[1].slice(1, -1);
-          const vibe = VIBE_REACTIONS[vibeKey];
-          
-          addEnergy(vibe.energy);
-          
-          const countEl = btn.querySelector('.count');
-          countEl.textContent = parseInt(countEl.textContent) + 1;
-          
-          btn.classList.add('used');
-          showNotification(`${vibe.slang}! +${vibe.energy} energy`);
-        }
-        
-        btn.classList.remove('holding');
-      }
-    }
-
-    // === HIGHLIGHT ===
-    function setupHighlight(card, teaId) {
-      const content = card.querySelector('.tea-content');
-      const tooltip = card.querySelector('.highlight-tooltip');
-      
-      content.addEventListener('mouseup', () => {
-        const selection = window.getSelection();
-        if (selection.toString().length > 3) {
-          tooltip.classList.add('show');
-          
-          setTimeout(() => {
-            tooltip.classList.remove('show');
-          }, 3000);
-          
-          tooltip.onclick = () => {
-            addEnergy(5);
-            tooltip.classList.remove('show');
-            selection.removeAllRanges();
-            showNotification('💔 Felt this! +5 energy');
-          };
-        }
-      });
-    }
-
-    // === QUICK ACTIONS ===
-    function saveTea(teaId) {
-      addEnergy(5);
-      showNotification('🔖 Disimpan ke "pernah gue rasain" +5 energy');
-    }
-
-    function shareTea(teaId) {
-      addEnergy(8);
-      showNotification('📤 Shared anonymously! +8 energy');
-    }
-
-    // === PEEK SYSTEM ===
-    function startPeekByEnergy(teaId) {
-      const tea = TEA_POOL.find(t => t.id === teaId);
-      
-      if (isPremium) {
-        // Premium: unlimited peek, 30 seconds
-        startPeek(tea, 30);
-      } else if (userEnergy >= 25) {
-        // Free: spend 25 energy for 5 seconds
-        startPeek(tea, 5);
-        userEnergy -= 25;
-        updateEnergyBar();
-      } else {
-        showNotification(`Butuh 25 energy! Kamu punya ${userEnergy}`);
-      }
-    }
-
-    function startPeek(tea, duration) {
-      currentPeekTea = tea;
-      const overlay = document.getElementById('peek-overlay');
-      const content = document.getElementById('peek-content');
-      const countdownEl = document.getElementById('countdown');
-      
-      let html = `
-        <div class="peek-journal">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px dashed var(--border);">
-            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; font-size: 24px;">
-              ${tea.avatar}
-            </div>
-            <div>
-              <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 600;">${tea.user}</div>
-              <div style="font-size: 12px; color: var(--muted);">${tea.journal.length} entries • ${isPremium ? 'Premium Peek' : 'Free Peek'}</div>
-            </div>
-            ${isPremium ? '<span class="premium-badge">💎 Premium</span>' : ''}
-          </div>
-      `;
-      
-      tea.journal.forEach(entry => {
-        html += `
-          <div class="peek-entry">
-            <div class="peek-entry-time">${entry.time}</div>
-            <div class="peek-entry-content">${entry.content}</div>
-          </div>
-        `;
-      });
-      
-      html += '</div>';
-      
-      if (tea.artefacts.length > 0) {
-        html += '<div class="peek-artefak">';
-        tea.artefacts.forEach(img => {
-          html += `<img src="${img}" alt="artefak">`;
+        // Trigger animations when in view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
         });
-        html += '</div>';
-      }
-      
-      content.innerHTML = html;
-      overlay.classList.add('show');
-      
-      let seconds = duration;
-      countdownEl.textContent = seconds;
-      
-      peekTimer = setInterval(() => {
-        seconds--;
-        countdownEl.textContent = seconds;
-        
-        if (seconds <= 0) {
-          closePeek();
-        }
-      }, 1000);
-    }
 
-    function closePeek() {
-      if (peekTimer) {
-        clearInterval(peekTimer);
-        peekTimer = null;
-      }
-      document.getElementById('peek-overlay').classList.remove('show');
-    }
-
-    // === PREMIUM MODAL ===
-    function showPremiumModal(source = 'header') {
-      document.getElementById('premium-modal').classList.add('show');
-      
-      // Track source for analytics
-      console.log('Premium modal opened from:', source);
-    }
-
-    function closePremiumModal(event) {
-      if (!event || event.target === document.getElementById('premium-modal')) {
-        document.getElementById('premium-modal').classList.remove('show');
-      }
-    }
-
-    function selectPlan(element, plan) {
-      document.querySelectorAll('.pricing-option').forEach(el => el.classList.remove('selected'));
-      element.classList.add('selected');
-      selectedPlan = plan;
-    }
-
-    function processPayment() {
-      const price = selectedPlan === 'monthly' ? 20000 : 100000;
-      const duration = selectedPlan === 'monthly' ? 30 : 365;
-      
-      // Simulate payment processing
-      showNotification('🔄 Memproses pembayaran...');
-      
-      setTimeout(() => {
-        // Set premium status
-        const expiry = new Date();
-        expiry.setDate(expiry.getDate() + duration);
-        localStorage.setItem('nope_premium_until', expiry.toISOString());
-        
-        isPremium = true;
-        checkPremiumStatus();
-        closePremiumModal();
-        
-        showNotification(`💎 Premium ${selectedPlan} activated! Selamat datang di klub eksklusif!`);
-        
-        // Re-render to update peek buttons
-        renderTea();
-      }, 2000);
-    }
-
-    // === NOTIFICATION ===
-    function showNotification(message) {
-      const notif = document.getElementById('notification');
-      notif.textContent = message;
-      notif.classList.add('show');
-      
-      setTimeout(() => {
-        notif.classList.remove('show');
-      }, 2500);
-    }
-
-    // === NAVIGATION ===
-    function navigateTo(page) {
-      window.location.href = page;
-    }
-  </script>
+        document.querySelectorAll('.stat-item').forEach((item) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(20px)';
+            item.style.transition = 'all 0.6s ease';
+            observer.observe(item);
+        });
+    </script>
 </body>
 </html>
