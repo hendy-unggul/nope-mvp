@@ -1,368 +1,651 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="glitch">
+<html lang="id" data-theme="realtea">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NOPE — Jurnal</title>
+  <title>NOPE — Jejak</title>
   
   <!-- PWA / Add to Home Screen -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ff9999'/%3E%3Ctext x='50' y='70' font-size='60' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%23000'%3ENO%3C/text%3E%3C/svg%3E">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23ff9999'/%3E%3Ctext x='90' y='130' font-size='90' font-weight='900' font-family='system-ui' text-anchor='middle' fill='%23000'%3ENO%3C/text%3E%3C/svg%3E">
-  <meta name="theme-color" content="#0a0a0a">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23E85D4E'/%3E%3Ctext x='50' y='70' font-size='50' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%23F5F2ED'%3E✦%3C/text%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23E85D4E'/%3E%3Ctext x='90' y='130' font-size='90' font-weight='900' font-family='system-ui' text-anchor='middle' fill='%23F5F2ED'%3E✦%3C/text%3E%3C/svg%3E">
+  <meta name="theme-color" content="#F5F2ED">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="NOPE">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Jejak">
   
+  <!-- Fonts: Space Grotesk + Caveat for handwritten moments -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Caveat:wght@400;500;600&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  
   <style>
     :root,
-    [data-theme="glitch"] {
-      --bg: #0a0a0a;
-      --surface: #121212;
-      --border: #222222;
-      --text: #e6e6e6;
-      --muted: #8a8a8a;
-      --accent: #b266ff;
-      --logo-color: #ff9999;
+    [data-theme="realtea"] {
+      /* Washed-Out Realness Palette */
+      --bg: #F5F2ED;
+      --surface: #FFFFFF;
+      --surface-warm: #FAF8F5;
+      --border: #E8E4DE;
+      --border-accent: #D4CFC7;
+      --text: #2C2C2C;
+      --text-secondary: #6B6560;
+      --muted: #8B8680;
+      --accent: #E85D4E;
+      --accent-soft: #F4A5A0;
+      --accent-secondary: #4A90A4;
+      --accent-warm: #F4C542;
+      --handwritten: #4A4A4A;
+      
+      /* Spacing */
+      --radius: 16px;
+      --radius-sm: 8px;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+    }
+    
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, monospace;
-      font-weight: 300;
+      font-family: 'DM Sans', 'Space Grotesk', system-ui, sans-serif;
+      font-weight: 400;
       font-size: 15px;
-      line-height: 1.55;
-      padding-bottom: 72px;
+      line-height: 1.6;
+      padding-bottom: 100px;
       -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
     }
+    
+    /* Anti-grid asymmetry */
     .wrapper {
-      max-width: 480px;
+      max-width: 520px;
       margin: 0 auto;
-      padding: 0 16px;
+      padding: 0 20px;
     }
+    
+    /* Header: Soft, not sticky-heavy */
     header {
-      position: sticky;
-      top: 0;
-      background: #000000cc;
-      backdrop-filter: blur(6px);
-      padding: 12px 0;
+      padding: 20px 0 16px;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      z-index: 10;
+      align-items: flex-start;
+      position: relative;
     }
+    
     .logo {
-      font-family: 'Manrope', sans-serif;
-      font-size: 28px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px;
       font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--logo-color);
-      margin-left: 16px;
-      transition: transform 0.3s ease, opacity 0.3s ease;
+      letter-spacing: -0.03em;
+      color: var(--accent);
       text-decoration: none;
       cursor: pointer;
+      transform: rotate(-2deg);
+      display: inline-block;
+      transition: transform 0.3s ease;
     }
-    header:hover .logo {
-      transform: scale(1.02);
-      opacity: 0.96;
+    
+    .logo:hover {
+      transform: rotate(0deg) scale(1.02);
     }
+    
+    .date-header {
+      font-family: 'Caveat', cursive;
+      font-size: 24px;
+      color: var(--text-secondary);
+      margin-top: -8px;
+      transform: rotate(1deg);
+    }
+    
     .top-right {
       display: flex;
-      align-items: center;
-      margin-right: 12px;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
     }
+    
     .nav-mini {
       display: flex;
-      gap: 6px;
-      font-size: 11px;
-      color: var(--muted);
-      margin-right: 8px;
+      gap: 8px;
+      font-size: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 500;
     }
+    
     .nav-mini span {
       cursor: pointer;
-      text-decoration: underline;
-      text-decoration-style: dotted;
-      text-underline-offset: 2px;
-      padding: 2px 4px;
-      border-radius: 4px;
-      transition: background-color 0.2s ease;
-      user-select: none;
-      -webkit-user-select: none;
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
     }
+    
     .nav-mini span:hover:not(.active) {
-      background-color: rgba(178, 102, 255, 0.06);
+      background: var(--surface-warm);
       color: var(--text);
     }
+    
     .nav-mini span.active {
-      color: var(--accent) !important;
-      text-decoration-color: var(--accent);
-      font-weight: 500;
-      background-color: rgba(178, 102, 255, 0.08);
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
     }
+    
     .settings-btn {
       background: none;
       border: none;
       color: var(--muted);
       font-size: 20px;
       cursor: pointer;
-      transform: rotate(90deg);
+      padding: 4px;
+      border-radius: 8px;
+      transition: all 0.2s;
     }
+    
+    .settings-btn:hover {
+      background: var(--surface-warm);
+      color: var(--text);
+    }
+    
+    /* Hero: Polaroid-style, imperfect */
     .hero {
       position: relative;
       width: 100%;
-      aspect-ratio: 4 / 5;
       background: var(--surface);
-      border-radius: 0 0 24px 24px;
+      border-radius: var(--radius);
       overflow: hidden;
-      margin-bottom: 16px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      transform: rotate(-1deg);
+      transition: transform 0.3s ease;
     }
+    
+    .hero:hover {
+      transform: rotate(0deg);
+    }
+    
     .hero img {
       width: 100%;
-      height: 100%;
+      aspect-ratio: 4 / 5;
       object-fit: cover;
       display: block;
+      filter: contrast(0.95) saturate(0.9);
     }
+    
+    /* Polaroid frame effect */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
     .artefak-notation {
       position: absolute;
-      top: 8px;
-      left: 8px;
-      background: rgba(0,0,0,0.3);
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      background: rgba(245, 242, 237, 0.95);
       color: var(--text);
-      font-size: 16.5px;
+      font-family: 'Caveat', cursive;
+      font-size: 22px;
       font-weight: 500;
-      padding: 4px 6px;
-      border-radius: 4px;
-      max-width: 80%;
-      line-height: 1.2;
-      backdrop-filter: blur(2px);
-      pointer-events: none;
-      font-family: 'JetBrains Mono', monospace;
+      padding: 12px 16px;
+      border-radius: 8px;
+      line-height: 1.3;
+      backdrop-filter: blur(4px);
+      transform: rotate(-1deg);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
+    
     .upload-artefak-btn {
       position: absolute;
-      bottom: 12px;
-      right: 12px;
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: 6px;
-      padding: 4px 10px;
-      font-size: 12px;
-      font-weight: 600;
+      top: 20px;
+      right: 20px;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 8px 16px;
+      font-size: 13px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 500;
       cursor: pointer;
       z-index: 2;
       transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
+    
     .upload-artefak-btn:hover {
-      background: #c284ff;
-      transform: translateY(-1px);
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      transform: translateY(-2px);
     }
+    
+    /* Post upload panel */
     .post-upload-panel {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 0 0 12px 12px;
-      margin-bottom: 16px;
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      transform: rotate(0.5deg);
     }
+    
     .post-upload-panel.hidden {
       display: none !important;
     }
-    .post-upload-panel input {
-      flex: 1;
-      background: #000000aa;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 12px;
-      color: var(--text);
-      font-size: 13px;
-      font-family: 'JetBrains Mono', monospace;
+    
+    .post-upload-panel label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
+    
+    .post-upload-panel input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: 15px;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+    
     .post-upload-panel input:focus {
       outline: none;
       border-color: var(--accent);
+      background: var(--surface);
     }
+    
+    .post-upload-panel .panel-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    
     .post-upload-panel button {
-      background: var(--accent);
-      color: #000;
+      background: var(--text);
+      color: var(--bg);
       border: none;
-      border-radius: 6px;
-      padding: 4px 10px;
-      font-size: 12px;
+      border-radius: 20px;
+      padding: 8px 20px;
+      font-size: 13px;
+      font-family: 'Space Grotesk', sans-serif;
       font-weight: 600;
       cursor: pointer;
+      transition: all 0.2s;
     }
+    
+    .post-upload-panel button:hover {
+      background: var(--accent);
+      transform: translateY(-1px);
+    }
+    
+    /* Rant box: Stream of consciousness */
     .rant-box {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 16px 24px 16px;
-      margin-bottom: 16px;
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 24px;
       position: relative;
+      transform: rotate(0.5deg);
     }
+    
     .rant-box-header {
       display: flex;
       align-items: center;
-      gap: 4px;
-      font-size: 13px;
+      gap: 8px;
+      font-size: 14px;
       color: var(--muted);
-      margin-bottom: 8px;
-      line-height: 1.4;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 12px;
+      font-family: 'Space Grotesk', sans-serif;
     }
+    
     .rant-box-header strong {
       color: var(--text);
-      font-weight: 500;
-      white-space: nowrap;
+      font-weight: 600;
     }
+    
+    .rant-box-header .mood-badge {
+      margin-left: auto;
+      font-family: 'Caveat', cursive;
+      font-size: 18px;
+      color: var(--accent);
+      transform: rotate(-2deg);
+    }
+    
     .rant-box textarea {
       width: 100%;
       background: transparent;
       border: none;
       color: var(--text);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
-      line-height: 1.4;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
       resize: none;
-      min-height: 80px;
+      min-height: 120px;
     }
+    
     .rant-box textarea:focus {
       outline: none;
     }
+    
+    .rant-box textarea::placeholder {
+      color: var(--border-accent);
+      font-style: italic;
+    }
+    
     .rant-cta {
       position: absolute;
-      bottom: 12px;
+      bottom: 16px;
       right: 16px;
       background: var(--accent);
-      color: #000;
+      color: white;
       border: none;
-      border-radius: 6px;
-      padding: 4px 10px;
-      font-size: 12px;
+      border-radius: 24px;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-family: 'Space Grotesk', sans-serif;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(232, 93, 78, 0.3);
     }
+    
     .rant-cta:hover:not(:disabled) {
-      background: #c284ff;
-      transform: translateY(-1px);
+      background: #D94A3E;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(232, 93, 78, 0.4);
     }
+    
     .rant-cta:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
+    
     .confirmation {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--muted);
       text-align: center;
-      margin-top: 4px;
-      font-family: 'JetBrains Mono', monospace;
+      margin-top: 8px;
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 18px;
     }
+    
+    /* Diary entries: Messy timeline */
     .diary {
+      margin-bottom: 24px;
+    }
+    
+    .diary-header {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .diary-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    
+    .diary-entry {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 16px;
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      position: relative;
+      transition: all 0.2s;
     }
-    .diary-entry {
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
+    
+    .diary-entry:hover {
+      border-color: var(--border-accent);
+      transform: translateX(4px);
     }
-    .diary-entry:last-child { border: none; }
+    
     .diary-entry time {
-      font-size: 10px;
+      font-size: 11px;
       color: var(--muted);
-      display: block;
-      margin-bottom: 2px;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'Space Grotesk', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
     }
+    
+    .diary-entry time::before {
+      content: '•';
+      color: var(--accent);
+    }
+    
     .diary-entry p {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
-      line-height: 1.5;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text);
     }
+    
+    .diary-entry .entry-meta {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    
+    .diary-entry .entry-tag {
+      font-family: 'Caveat', cursive;
+      font-size: 16px;
+      color: var(--accent-secondary);
+      transform: rotate(-1deg);
+    }
+    
+    /* Tray: Constellation grid */
+    .tray-section {
+      margin-bottom: 24px;
+    }
+    
+    .tray-header {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .tray-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    
     .tray {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-      gap: 8px;
-      padding: 0 16px 16px;
+      gap: 12px;
     }
+    
     .tray-slot {
       aspect-ratio: 1;
-      background: transparent;
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: var(--radius-sm);
       background-size: cover;
       background-position: center;
-      background-repeat: no-repeat;
       position: relative;
       cursor: pointer;
-      transition: all 0.2s;
-      animation: fadeIn 0.6s ease-in;
+      transition: all 0.3s ease;
+      overflow: hidden;
     }
+    
+    .tray-slot::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.4));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
     .tray-slot:hover {
+      transform: scale(1.05) rotate(-1deg);
       border-color: var(--accent);
-      transform: scale(1.02);
-      background-color: rgba(178, 102, 255, 0.02);
-    }
-    .tray-slot .artefak-notation {
-      top: 6px;
-      left: 6px;
-      font-size: 10px;
-      padding: 3px 5px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 2;
     }
     
-    /* Fade in animation for images */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    
-    /* Image loading state */
-    .hero img, .tray-slot {
+    .tray-slot:hover::before {
       opacity: 1;
-      transition: opacity 0.3s ease;
     }
     
-    .hero img[src=""], .tray-slot[style*="url('')"] {
-      opacity: 0.3;
-      background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+    .tray-slot .artefak-notation {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      right: 8px;
+      font-size: 14px;
+      padding: 6px 8px;
+      background: rgba(255,255,255,0.95);
+      color: var(--text);
+      transform: rotate(-1deg);
+      opacity: 0;
+      transition: opacity 0.3s;
     }
+    
+    .tray-slot:hover .artefak-notation {
+      opacity: 1;
+    }
+    
+    .tray-slot.empty {
+      background: var(--surface-warm);
+      border-style: dashed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--border-accent);
+      font-size: 24px;
+    }
+    
+    /* Footer */
     .zone-footer {
       text-align: center;
       font-size: 12px;
       color: var(--muted);
-      padding: 0 16px 20px;
-      line-height: 1.5;
-      letter-spacing: 0.5px;
-      font-family: 'JetBrains Mono', monospace;
+      padding: 40px 20px;
+      font-family: 'Caveat', cursive;
+      font-size: 18px;
+      transform: rotate(-1deg);
     }
+    
+    /* Pulse animation: Softer */
     .pulse-animation {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at center, rgba(178, 102, 255, 0.15), transparent);
+      background: radial-gradient(circle at center, rgba(232, 93, 78, 0.1), transparent);
       pointer-events: none;
       opacity: 0;
       z-index: 999;
-      animation: pulse 1.4s cubic-bezier(0.2, 0.8, 0.4, 1);
+      animation: pulse 1.2s ease-out;
     }
+    
     @keyframes pulse {
-      0% { transform: scale(0.9); opacity: 0.6; }
-      100% { transform: scale(1.6); opacity: 0; }
+      0% { transform: scale(0.9); opacity: 0.4; }
+      100% { transform: scale(1.4); opacity: 0; }
     }
+    
+    /* Mood selector popup */
+    .mood-popup {
+      display: none;
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-top: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      z-index: 100;
+      min-width: 200px;
+    }
+    
+    .mood-popup.show {
+      display: block;
+    }
+    
+    .mood-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 14px;
+    }
+    
+    .mood-option:hover {
+      background: var(--bg);
+    }
+    
+    .mood-option .emoji {
+      font-size: 18px;
+    }
+    
+    /* Responsive */
+    @media (max-width: 480px) {
+      .wrapper {
+        padding: 0 16px;
+      }
+      
+      .hero {
+        transform: rotate(-0.5deg);
+      }
+      
+      .tray {
+        gap: 8px;
+      }
+    }
+    
     @media (prefers-reduced-motion: reduce) {
       * {
         animation-duration: 0.01ms !important;
@@ -370,45 +653,85 @@
         transition-duration: 0.01ms !important;
       }
     }
+    
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+    
+    .empty-state .emoji {
+      font-size: 48px;
+      margin-bottom: 12px;
+      display: block;
+    }
+    
+    .empty-state p {
+      font-family: 'Caveat', cursive;
+      font-size: 20px;
+      transform: rotate(-1deg);
+    }
   </style>
 </head>
 <body>
   <div class="wrapper">
     <header>
-      <div class="logo" onclick="window.location.href='index.html'">NOPE</div>
+      <div>
+        <div class="logo" onclick="window.location.href='index.html'">jejak</div>
+        <div class="date-header" id="current-date"></div>
+      </div>
       <div class="top-right">
         <div class="nav-mini">
-          <span class="active"    onclick="window.location.href='jejak.html'">Jurnal</span>
-          <span                   onclick="window.location.href='frekuensi-zones.html'">Frekuensi</span>
-          <span                   onclick="window.location.href='saynope.html'">SayNOPE</span>
-          <span                   onclick="window.location.href='glitch.html'">GLITCH</span>
+          <span class="active" onclick="window.location.href='jejak.html'">Jurnal</span>
+          <span onclick="window.location.href='frekuensi-zones.html'">Frekuensi</span>
+          <span onclick="window.location.href='saynope.html'">SayNOPE</span>
         </div>
         <button class="settings-btn" id="settings-btn">⋯</button>
       </div>
     </header>
 
     <div class="hero">
-      <img id="hero-img" src="https://picsum.photos/seed/nope-hero/800/1000" alt="artefak">
-      <div class="artefak-notation" id="hero-notation-display"></div>
-      <button id="upload-artefak-btn" class="upload-artefak-btn">Unggah</button>
+      <img id="hero-img" src="https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80" alt="artefak">
+      <div class="artefak-notation" id="hero-notation-display">kadang hidup butuh jeda</div>
+      <button id="upload-artefak-btn" class="upload-artefak-btn">+ Unggah</button>
     </div>
 
     <div id="post-upload-panel" class="post-upload-panel hidden">
-      <input id="hero-notation" type="text" placeholder="notasi (maks 4 kata)" maxlength="50">
-      <button id="save-notation-btn">Simpan</button>
+      <label>Notasi (maks 4 kata)</label>
+      <input id="hero-notation" type="text" placeholder="contoh: capek tapi hidup" maxlength="50">
+      <div class="panel-actions">
+        <button onclick="hidePostUploadPanel()" style="background: transparent; color: var(--muted);">Lewati</button>
+        <button id="save-notation-btn">Simpan</button>
+      </div>
     </div>
 
     <div class="rant-box">
       <div class="rant-box-header">
-        Hello <strong>@<span id="username-display"></span></strong>
+        <span>Hello <strong id="username-display">@you</strong></span>
+        <span class="mood-badge" id="current-mood" onclick="toggleMoodPopup()">✦ surviving</span>
+        <div class="mood-popup" id="mood-popup">
+          <div class="mood-option" onclick="selectMood('surviving')"><span class="emoji">😮‍💨</span> surviving</div>
+          <div class="mood-option" onclick="selectMood('thriving')"><span class="emoji">✨</span> thriving (fake it)</div>
+          <div class="mood-option" onclick="selectMood('chaotic')"><span class="emoji">🌀</span> chaotic good</div>
+          <div class="mood-option" onclick="selectMood('doom')"><span class="emoji">🛌</span> doomscrolling</div>
+          <div class="mood-option" onclick="selectMood('existential')"><span class="emoji">🎭</span> existential dread</div>
+        </div>
       </div>
-      <textarea id="rant" maxlength="300" placeholder="marah? sedih? cape? tulis aja. gak usah bener."></textarea>
-      <button class="rant-cta" id="jejakkan-btn">Unggah</button>
+      <textarea id="rant" placeholder="What's the tea today? Overshare here... unfiltered thoughts only ☕"></textarea>
+      <button class="rant-cta" id="jejakkan-btn">Jejakkan</button>
       <div class="confirmation" id="confirmation"></div>
     </div>
 
-    <div class="diary" id="diary"></div>
-    <div class="tray" id="tray"></div>
+    <div class="diary" id="diary">
+      <div class="diary-header">Riwayat Jejak</div>
+      <!-- Entries will be rendered here -->
+    </div>
+
+    <div class="tray-section">
+      <div class="tray-header">Memori</div>
+      <div class="tray" id="tray"></div>
+    </div>
 
     <div class="zone-footer">Nyambat • Aksi • Solusi</div>
   </div>
@@ -442,67 +765,78 @@
     }
 
     var currentUser = localStorage.getItem('nope_username') || '@newglitch';
+    var currentMood = 'surviving';
     document.getElementById('username-display').textContent = currentUser.replace(/^@/, '');
 
     var artefacts = [];
-    var rants     = [];
+    var rants = [];
+
+    // Set current date
+    var now = new Date();
+    var dateOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+    document.getElementById('current-date').textContent = now.toLocaleDateString('id-ID', dateOptions);
 
     var DUMMY_RANTS = [
       {
-        id: 'dummy-0', username: 'homie1',
-        content: "gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus. gak minta balasan sih, tapi rasanya kayak jadi tempat sampah emosi doang. capek jadi 'temen baik' yang cuma dipake pas dia perlu aja.",
-        created_at: new Date(Date.now() - 86400000 * 2).toISOString()
+        id: 'dummy-0',
+        username: 'homie1',
+        content: "gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus. gak minta balasan sih, tapi rasanya kayak jadi tempat sampah emosi doang.",
+        created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+        mood: 'surviving'
       },
       {
-        id: 'dummy-1', username: 'homie2',
-        content: "deadline mepet, dosen gak jelas, dompet kering. rasanya pengen ijin cuti sehari buat jadi batu aja. gak perlu mikir, gak perlu ngomong, gak perlu diharapkan apa-apa.",
-        created_at: new Date(Date.now() - 86400000).toISOString()
+        id: 'dummy-1',
+        username: 'homie2',
+        content: "deadline mepet, dosen gak jelas, dompet kering. rasanya pengen ijin cuti sehari buat jadi batu aja.",
+        created_at: new Date(Date.now() - 86400000).toISOString(),
+        mood: 'doom'
       },
       {
-        id: 'dummy-2', username: 'homie3',
+        id: 'dummy-2',
+        username: 'homie3',
         content: "capek.",
-        created_at: new Date(Date.now() - 43200000).toISOString()
+        created_at: new Date(Date.now() - 43200000).toISOString(),
+        mood: 'existential'
       }
     ];
 
-    // Dummy images using reliable CDN that always loads
     var DUMMY_ARTEFACTS = [
-      { id:'dummy-0', image_url:'https://picsum.photos/seed/nope1/400/500', notation: 'kadang hidup abu abu' },
-      { id:'dummy-1', image_url:'https://picsum.photos/seed/nope2/400/500', notation:'gebetan temen lebih hijau' },
-      { id:'dummy-2', image_url:'https://picsum.photos/seed/nope3/400/500', notation:'gabut NO FACE' },
-      { id:'dummy-3', image_url:'https://picsum.photos/seed/nope4/400/500', notation:'lonelyness my hiding place' },
-      { id:'dummy-4', image_url:'https://picsum.photos/seed/nope5/400/500', notation:'capek' },
-      { id:'dummy-5', image_url:'https://picsum.photos/seed/nope6/400/500', notation:'love it' }
+      { id: 'dummy-0', image_url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80', notation: 'kadang hidup butuh jeda' },
+      { id: 'dummy-1', image_url: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80', notation: 'gebetan temen lebih hijau' },
+      { id: 'dummy-2', image_url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=80', notation: 'gabut NO FACE' },
+      { id: 'dummy-3', image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80', notation: 'lonelyness my hiding place' },
+      { id: 'dummy-4', image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80', notation: 'capek' },
+      { id: 'dummy-5', image_url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80', notation: 'love it' }
     ];
 
-    var heroImg             = document.getElementById('hero-img');
+    var heroImg = document.getElementById('hero-img');
     var heroNotationDisplay = document.getElementById('hero-notation-display');
-    var postUploadPanel     = document.getElementById('post-upload-panel');
-    var heroNotationInput   = document.getElementById('hero-notation');
-    var fileInput           = document.getElementById('file-input');
+    var postUploadPanel = document.getElementById('post-upload-panel');
+    var heroNotationInput = document.getElementById('hero-notation');
+    var fileInput = document.getElementById('file-input');
 
     function showConfirmation(msg) {
       var el = document.getElementById('confirmation');
       el.textContent = msg;
-      setTimeout(function(){ el.textContent = ''; }, 3000);
+      setTimeout(function() { el.textContent = ''; }, 3000);
     }
 
     function triggerPulse() {
       var pulse = document.createElement('div');
       pulse.className = 'pulse-animation';
       document.body.appendChild(pulse);
-      setTimeout(function(){ if (pulse.parentNode) pulse.parentNode.removeChild(pulse); }, 1500);
+      setTimeout(function() { if (pulse.parentNode) pulse.parentNode.removeChild(pulse); }, 1200);
     }
 
     function showPostUploadPanel() {
       postUploadPanel.classList.remove('hidden');
       heroNotationInput.value = '';
-      heroNotationInput.focus();
+      setTimeout(function() { heroNotationInput.focus(); }, 100);
     }
 
-    function hidePostUploadPanel() {
+    window.hidePostUploadPanel = function() {
       postUploadPanel.classList.add('hidden');
-    }
+    };
 
     function renderHero() {
       var current = artefacts.length > 0 ? artefacts[0] : DUMMY_ARTEFACTS[0];
@@ -517,63 +851,64 @@
       }
     }
 
+    function getMoodLabel(mood) {
+      var labels = {
+        'surviving': '✦ surviving',
+        'thriving': '✨ thriving',
+        'chaotic': '🌀 chaotic',
+        'doom': '🛌 doomscrolling',
+        'existential': '🎭 existential'
+      };
+      return labels[mood] || '✦ surviving';
+    }
+
     function renderDiary() {
       var container = document.getElementById('diary');
+      // Keep header
+      var header = container.querySelector('.diary-header');
       container.innerHTML = '';
+      container.appendChild(header);
+
       var list = rants.length > 0 ? rants : DUMMY_RANTS;
+
+      if (list.length === 0) {
+        var empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.innerHTML = '<span class="emoji">🍃</span><p>Belum ada jejak. Mulai tulis yang sebenarnya.</p>';
+        container.appendChild(empty);
+        return;
+      }
 
       list.forEach(function(r) {
         var entry = document.createElement('div');
         entry.className = 'diary-entry';
-        var date = new Date(r.created_at).toLocaleDateString('id-ID', { day:'2-digit', month:'short' });
-        entry.innerHTML = '<time>' + date + '</time><p>' + r.content + '</p>';
+        
+        var date = new Date(r.created_at);
+        var dateStr = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+        var timeStr = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        
+        var moodTag = r.mood ? '<span class="entry-tag">' + getMoodLabel(r.mood) + '</span>' : '';
+        
+        entry.innerHTML = 
+          '<time>' + dateStr + ' · ' + timeStr + '</time>' +
+          '<p>' + r.content + '</p>' +
+          '<div class="entry-meta">' + moodTag + '</div>';
+        
         container.appendChild(entry);
-
-        if (String(r.id).indexOf('dummy-') !== 0) {
-          var reactRow = document.createElement('div');
-          reactRow.style.cssText = 'display:flex;gap:12px;margin-top:8px;font-size:15px;';
-
-          ['🤠','😢','🤗','🔥'].forEach(function(emoji) {
-            var item = document.createElement('div');
-            item.style.cssText = 'display:flex;align-items:center;gap:4px;cursor:pointer;opacity:0.6;transition:all 0.2s;';
-
-            var emojiSpan = document.createElement('span');
-            emojiSpan.textContent = emoji;
-            emojiSpan.style.cssText = 'font-size:18px;font-weight:600;transition:transform 0.2s;';
-
-            var countSpan = document.createElement('span');
-            countSpan.textContent = '0';
-            countSpan.style.cssText = 'font-size:13px;color:transparent;';
-
-            item.onmouseenter = function() { emojiSpan.style.transform='scale(1.2)'; item.style.opacity='1'; };
-            item.onmouseleave = function() { emojiSpan.style.transform='scale(1)';  item.style.opacity='0.6'; };
-
-            item.appendChild(emojiSpan);
-            item.appendChild(countSpan);
-            reactRow.appendChild(item);
-          });
-
-          entry.appendChild(reactRow);
-        }
       });
     }
 
     function renderTray() {
       var tray = document.getElementById('tray');
       tray.innerHTML = '';
-      
-      // Mix user artefacts with dummy artefacts (user artefacts replace dummy ones gradually)
+
       var displayList = [];
       
       if (artefacts.length > 0) {
-        // User has uploaded artefacts - show them first
         displayList = artefacts.slice(0, 6);
-        
-        // Fill remaining slots with dummy artefacts if needed
         var remaining = 6 - displayList.length;
         if (remaining > 0) {
-          // Skip first dummy (which user would replace first) and add from end
-          var dummyFillStart = artefacts.length; // How many dummies to skip
+          var dummyFillStart = artefacts.length;
           for (var i = dummyFillStart; i < 6 && displayList.length < 6; i++) {
             if (DUMMY_ARTEFACTS[i]) {
               displayList.push(DUMMY_ARTEFACTS[i]);
@@ -581,12 +916,11 @@
           }
         }
       } else {
-        // No user artefacts yet - show all 6 dummies for visual guidance
         displayList = DUMMY_ARTEFACTS.slice(0, 6);
       }
 
       if (displayList.length === 0) {
-        tray.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:13px;padding:40px 20px;">Belum ada artefak. Unggah gambar pertamamu!</div>';
+        tray.innerHTML = '<div class="tray-slot empty">+</div>'.repeat(6);
         return;
       }
 
@@ -594,22 +928,19 @@
         var div = document.createElement('div');
         div.className = 'tray-slot';
         
-        // Add staggered animation delay for smooth appearance
-        div.style.animationDelay = (index * 0.1) + 's';
+        var isDummy = String(a.id).indexOf('dummy-') === 0;
+        if (isDummy) {
+          div.style.opacity = '0.85';
+        }
 
         if (!a.image_url) {
-          div.style.backgroundColor = '#1a1a1a';
+          div.classList.add('empty');
+          div.textContent = '+';
           tray.appendChild(div);
           return;
         }
 
         div.style.backgroundImage = 'url(' + a.image_url + ')';
-        
-        // Add subtle badge to indicate dummy vs user content (optional visual cue)
-        var isDummy = String(a.id).indexOf('dummy-') === 0;
-        if (isDummy) {
-          div.style.opacity = '0.85'; // Slightly dimmer to indicate it's placeholder
-        }
 
         if (a.notation) {
           var notationEl = document.createElement('div');
@@ -646,9 +977,9 @@
       showConfirmation('Mengunggah...');
 
       var timestamp = Date.now();
-      var safeName  = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      var safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
       var cleanUser = currentUser.replace(/^@/, '').replace(/\s+/g, '_');
-      var fileName  = cleanUser + '/' + timestamp + '-' + safeName;
+      var fileName = cleanUser + '/' + timestamp + '-' + safeName;
 
       try {
         var formData = new FormData();
@@ -695,7 +1026,7 @@
       var notation = heroNotationInput.value.trim();
       if (!notation) { showConfirmation('Tulis notasi dulu.'); return; }
 
-      var words = notation.split(/\s+/).filter(function(w){ return w.length > 0; });
+      var words = notation.split(/\s+/).filter(function(w) { return w.length > 0; });
       if (words.length > 4) { showConfirmation('Maks 4 kata.'); return; }
 
       var target = null;
@@ -706,7 +1037,7 @@
 
       try {
         showConfirmation('Menyimpan...');
-        await supabaseFetch('artefacts', 'PATCH',
+        await supabaseFetch('artefaks', 'PATCH',
           { notation: notation },
           '?id=eq.' + target.id
         );
@@ -721,24 +1052,46 @@
 
     async function postRant() {
       var textarea = document.getElementById('rant');
-      var content  = textarea.value.trim();
+      var content = textarea.value.trim();
       if (!content) { showConfirmation('Tulis dulu.'); return; }
 
       try {
-        showConfirmation('Posting...');
+        showConfirmation('Menyimpan...');
         await supabaseFetch('rants', 'POST', {
           username: currentUser,
-          content: content
+          content: content,
+          mood: currentMood,
+          created_at: new Date().toISOString()
         });
         textarea.value = '';
         await loadData();
-        showConfirmation('Terkirim.');
+        showConfirmation('Tersimpan.');
         triggerPulse();
       } catch (e) {
         console.error('Post rant error:', e);
-        showConfirmation('Gagal posting. Coba lagi.');
+        showConfirmation('Gagal menyimpan. Coba lagi.');
       }
     }
+
+    window.toggleMoodPopup = function() {
+      var popup = document.getElementById('mood-popup');
+      popup.classList.toggle('show');
+    };
+
+    window.selectMood = function(mood) {
+      currentMood = mood;
+      document.getElementById('current-mood').textContent = getMoodLabel(mood);
+      document.getElementById('mood-popup').classList.remove('show');
+    };
+
+    // Close mood popup when clicking outside
+    document.addEventListener('click', function(e) {
+      var moodBadge = document.getElementById('current-mood');
+      var moodPopup = document.getElementById('mood-popup');
+      if (!moodBadge.contains(e.target) && !moodPopup.contains(e.target)) {
+        moodPopup.classList.remove('show');
+      }
+    });
 
     async function ensureUserExists() {
       try {
@@ -763,7 +1116,7 @@
         artefacts = aData || [];
 
         var rData = await supabaseFetch('rants', 'GET', null,
-          '?username=eq.' + encodeURIComponent(currentUser) + '&order=created_at.desc&limit=5'
+          '?username=eq.' + encodeURIComponent(currentUser) + '&order=created_at.desc&limit=10'
         );
         rants = rData || [];
 
