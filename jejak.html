@@ -386,7 +386,7 @@
       min-height: 18px;
     }
     
-    /* Diary entries with Vibe Reactions */
+    /* Diary entries with Compact Vibe Reactions */
     .diary {
       margin-bottom: 24px;
     }
@@ -465,30 +465,38 @@
       transform: rotate(-1deg);
     }
     
-    /* Vibe Reaction System */
+    /* COMPACT Vibe Reaction System */
     .vibe-reactions {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+      flex-wrap: nowrap;
+      gap: 6px;
       padding-top: 12px;
       border-top: 1px dashed var(--border);
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    
+    .vibe-reactions::-webkit-scrollbar {
+      display: none;
     }
     
     .vibe-btn {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
+      gap: 4px;
+      padding: 6px 10px;
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 20px;
+      border-radius: 16px;
       cursor: pointer;
       transition: all 0.2s ease;
       font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
+      font-size: 12px;
       color: var(--text-secondary);
       position: relative;
-      overflow: hidden;
+      flex-shrink: 0;
+      white-space: nowrap;
     }
     
     .vibe-btn:hover {
@@ -502,21 +510,21 @@
     }
     
     .vibe-btn .emoji {
-      font-size: 18px;
+      font-size: 14px;
       filter: grayscale(30%);
       transition: all 0.2s;
     }
     
     .vibe-btn:hover .emoji {
       filter: grayscale(0%);
-      transform: scale(1.2);
+      transform: scale(1.15);
     }
     
     .vibe-btn .count {
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       color: var(--muted);
-      min-width: 16px;
+      min-width: 14px;
       text-align: center;
     }
     
@@ -537,24 +545,73 @@
     /* Vibe Animation */
     @keyframes vibePulse {
       0% { transform: scale(1); }
-      50% { transform: scale(1.3); }
+      50% { transform: scale(1.2); }
       100% { transform: scale(1); }
     }
     
     .vibe-btn.animating .emoji {
-      animation: vibePulse 0.4s ease;
+      animation: vibePulse 0.3s ease;
+    }
+    
+    /* TOOLTIP - Gen Z Slang */
+    .vibe-tooltip {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      background: var(--text);
+      color: var(--bg);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-family: 'Space Grotesk', sans-serif;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      pointer-events: none;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .vibe-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: var(--text);
+    }
+    
+    .vibe-tooltip .slang-id {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    
+    .vibe-tooltip .slang-en {
+      display: block;
+      opacity: 0.8;
+      font-size: 10px;
+    }
+    
+    .vibe-btn:hover .vibe-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(-4px);
     }
     
     /* Vibe Summary */
     .vibe-summary {
-      margin-top: 12px;
-      padding: 10px 14px;
+      margin-top: 10px;
+      padding: 8px 12px;
       background: var(--surface-warm);
-      border-radius: 12px;
-      font-size: 12px;
+      border-radius: 10px;
+      font-size: 11px;
       color: var(--text-secondary);
       font-family: 'Caveat', cursive;
-      font-size: 15px;
+      font-size: 14px;
       transform: rotate(-0.5deg);
     }
     
@@ -744,12 +801,17 @@
       }
       
       .vibe-btn {
-        padding: 6px 10px;
-        font-size: 12px;
+        padding: 5px 8px;
+        font-size: 11px;
       }
       
       .vibe-btn .emoji {
-        font-size: 16px;
+        font-size: 13px;
+      }
+      
+      .vibe-tooltip {
+        font-size: 10px;
+        padding: 6px 10px;
       }
     }
     
@@ -852,43 +914,63 @@
     var SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
     var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-    // VIBE REACTION SYSTEM - Gen Z Optimized
+    // COMPACT VIBE REACTION SYSTEM - Gen Z Optimized with Tooltips
     const VIBE_REACTIONS = {
       'relatable': { 
         emoji: '😭', 
-        label: 'literally me', 
-        description: 'Sama, aku juga',
-        color: '#4A90A4'
+        label: 'literally me',
+        slangId: 'literally me',
+        slangEn: 'literally me',
+        desc: 'Sama, aku juga'
       },
       'same': { 
         emoji: '🛋️', 
-        label: 'big mood', 
-        description: 'Mood banget',
-        color: '#F4C542'
+        label: 'big mood',
+        slangId: 'mood banget',
+        slangEn: 'big mood',
+        desc: 'Ini representasiku'
       },
       'hug': { 
         emoji: '🫂', 
-        label: 'virtual hug', 
-        description: 'Peluk virtual',
-        color: '#E85D4E'
+        label: 'virtual hug',
+        slangId: 'peluk jauh',
+        slangEn: 'sending hugs',
+        desc: 'Peluk virtual buatmu'
       },
       'tea': { 
         emoji: '🍵', 
-        label: 'the tea', 
-        description: 'Spill the tea',
-        color: '#8B9A46'
+        label: 'the tea',
+        slangId: 'spill the tea',
+        slangEn: 'that\'s the tea',
+        desc: 'Juicy banget ini'
       },
       'stay': { 
         emoji: '✊', 
-        label: 'stay strong', 
-        description: 'Tetap kuat',
-        color: '#6B4EE6'
+        label: 'stay strong',
+        slangId: 'tetap jaya',
+        slangEn: 'you got this',
+        desc: 'Semangat terus'
       },
       'real': { 
         emoji: '🫡', 
-        label: 'no cap', 
-        description: 'Real talk',
-        color: '#2C2C2C'
+        label: 'no cap',
+        slangId: 'no cap / real',
+        slangEn: 'no cap fr fr',
+        desc: 'Real talk, no lie'
+      },
+      'slay': {
+        emoji: '💅',
+        label: 'slay',
+        slangId: 'gokil / slay',
+        slangEn: 'slay queen/king',
+        desc: 'You\'re killing it'
+      },
+      'ghost': {
+        emoji: '👻',
+        label: 'ghosting',
+        slangId: 'di-ghosting',
+        slangEn: 'left on read',
+        desc: 'Been there'
       }
     };
 
@@ -917,7 +999,6 @@
 
     var artefacts = [];
     var rants = [];
-    // Store user reactions in memory (ephemeral)
     var userReactions = new Set();
 
     // Set current date
@@ -932,7 +1013,7 @@
         content: "gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus. gak minta balasan sih, tapi rasanya kayak jadi tempat sampah emosi doang.",
         created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
         mood: 'surviving',
-        vibes: { relatable: 12, hug: 8, same: 5 }
+        vibes: { relatable: 12, hug: 8, same: 5, ghost: 3 }
       },
       {
         id: 'dummy-1',
@@ -1014,7 +1095,7 @@
       return labels[mood] || '✦ surviving';
     }
 
-    // Generate Vibe Reaction HTML
+    // Generate Compact Vibe Reaction HTML with Tooltip
     function generateVibeReactions(entryId, vibes) {
       vibes = vibes || {};
       var html = '<div class="vibe-reactions">';
@@ -1028,9 +1109,13 @@
         html += 
           '<button class="vibe-btn ' + vibedClass + '" ' +
           'onclick="sendVibe(\'' + entryId + '\', \'' + key + '\', this)" ' +
-          'title="' + vibe.description + '">' +
+          'aria-label="' + vibe.desc + '">' +
           '<span class="emoji">' + vibe.emoji + '</span>' +
           '<span class="count">' + count + '</span>' +
+          '<span class="vibe-tooltip">' +
+          '<span class="slang-id">' + vibe.slangId + '</span>' +
+          '<span class="slang-en">' + vibe.slangEn + '</span>' +
+          '</span>' +
           '</button>';
       });
       
@@ -1044,7 +1129,7 @@
         html += 
           '<div class="vibe-summary">' +
           '<span class="highlight">' + totalVibes + ' orang</span> merasakan ini · ' +
-          'banyak yang <span class="highlight">' + topVibeData.label + '</span> ' + topVibeData.emoji +
+          'banyak yang <span class="highlight">' + topVibeData.slangId + '</span> ' + topVibeData.emoji +
           '</div>';
       }
       
@@ -1055,11 +1140,9 @@
     window.sendVibe = function(entryId, vibeKey, btnElement) {
       var reactionKey = entryId + '-' + vibeKey;
       
-      // Toggle reaction
       if (userReactions.has(reactionKey)) {
         userReactions.delete(reactionKey);
         btnElement.classList.remove('vibed');
-        // Decrease count visually
         var countEl = btnElement.querySelector('.count');
         countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1);
       } else {
@@ -1067,27 +1150,20 @@
         btnElement.classList.add('vibed');
         btnElement.classList.add('animating');
         
-        // Increase count visually
         var countEl = btnElement.querySelector('.count');
         countEl.textContent = parseInt(countEl.textContent) + 1;
         
-        // Remove animating class after animation
         setTimeout(function() {
           btnElement.classList.remove('animating');
-        }, 400);
+        }, 300);
         
-        // Show gentle confirmation
         var vibe = VIBE_REACTIONS[vibeKey];
-        showConfirmation('Vibe sent: ' + vibe.label + ' ' + vibe.emoji);
+        showConfirmation(vibe.slangId + ' sent! ' + vibe.emoji);
       }
-      
-      // In real implementation, send to server here
-      // supabaseFetch('vibes', 'POST', { entry_id: entryId, vibe: vibeKey });
     };
 
     function renderDiary() {
       var container = document.getElementById('diary');
-      // Keep header
       var header = container.querySelector('.diary-header');
       container.innerHTML = '';
       container.appendChild(header);
@@ -1309,7 +1385,6 @@
       document.getElementById('mood-popup').classList.remove('show');
     };
 
-    // Close mood popup when clicking outside
     document.addEventListener('click', function(e) {
       var moodBadge = document.getElementById('current-mood');
       var moodPopup = document.getElementById('mood-popup');
