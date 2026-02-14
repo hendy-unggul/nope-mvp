@@ -946,9 +946,9 @@
         <div class="nav-mini">
           <span class="active" onclick="window.location.href='jejak.html'">JEJAK</span>
           <span onclick="window.location.href='frekuensi-bola.html'">GERAK</span>
-          <span onclick="window.location.href='saynope.html'">SPILL</span>
           <span onclick="window.location.href='glitch.html'">GLITCH</span>
-                  </div>
+          <span onclick="window.location.href='komunitas.html'">CIRCLE</span>
+        </div>
         <button class="settings-btn" id="settings-btn">⋯</button>
       </div>
     </header>
@@ -1032,8 +1032,11 @@
     
     var currentUser = localStorage.getItem('nope_username') || '@newglitch';
     var currentMood = 'surviving';
+    
+    // FIX 2: Ensure dummy data is initialized in the main arrays so they render
     var artefacts = [];
     var rants = [];
+    
     var userReactions = new Set();
     var vibeMatches = new Map();
 
@@ -1042,7 +1045,7 @@
     var lastUploadTime = localStorage.getItem('nope_last_upload');
 
     // ============================================
-    // DUMMY DATA
+    // DUMMY DATA (Initialized directly into state arrays)
     // ============================================
     
     var DUMMY_RANTS = [
@@ -1081,6 +1084,10 @@
       { id: 'dummy-5', image_url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80', notation: 'love it' }
     ];
 
+    // Initialize state with dummy data
+    rants = [...DUMMY_RANTS];
+    artefacts = [...DUMMY_ARTEFACTS];
+
     // ============================================
     // UTILS
     // ============================================
@@ -1107,7 +1114,8 @@
             const diffTime = Math.abs(now - parseInt(lastUploadTime));
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
             
-            if (diffDays < QUOTA_DOTA_DAYS) {
+            // FIX: Corrected variable name from QUOTA_DOTA_DAYS to QUOTA_DAYS
+            if (diffDays < QUOTA_DAYS) {
                 const daysLeft = QUOTA_DAYS - diffDays;
                 btn.disabled = true;
                 btn.textContent = `⏳ ${daysLeft}h`;
@@ -1297,7 +1305,8 @@
       container.innerHTML = '';
       container.appendChild(header);
 
-      var list = rants.length > 0 ? rants : DUMMY_RANTS;
+      // FIX: Now rants is populated with DUMMY_RANTS by default
+      var list = rants;
 
       if (list.length === 0) {
         var empty = document.createElement('div');
@@ -1368,14 +1377,17 @@
     };
 
     function renderHero() {
-      var current = artefacts.length > 0 ? artefacts[0] : DUMMY_ARTEFACTS[0];
+      // FIX: Now artefacts is populated with DUMMY_ARTEFACTS by default
+      var current = artefacts.length > 0 ? artefacts[0] : null;
       if (current) {
         heroImg.src = current.image_url;
         heroNotationDisplay.textContent = current.notation || '';
-        if (artefacts.length > 0 && !current.notation) {
-          showPostUploadPanel();
+        
+        // Only show upload panel if it's a user upload without notation
+        if (String(current.id).startsWith('user-') && !current.notation) {
+             showPostUploadPanel();
         } else {
-          hidePostUploadPanel();
+             hidePostUploadPanel();
         }
       }
     }
@@ -1384,29 +1396,22 @@
       var tray = document.getElementById('tray');
       tray.innerHTML = '';
 
-      var displayList = [];
-      
-      if (artefacts.length > 0) {
-        displayList = artefacts.slice(0, 6);
-        var remaining = 6 - displayList.length;
-        if (remaining > 0) {
-          var dummyFillStart = artefacts.length;
-          for (var i = dummyFillStart; i < 6 && displayList.length < 6; i++) {
-            if (DUMMY_ARTEFACTS[i]) {
-              displayList.push(DUMMY_ARTEFACTS[i]);
-            }
-          }
-        }
-      } else {
-        displayList = DUMMY_ARTEFACTS.slice(0, 6);
+      // FIX: Use artefacts array directly which now contains dummy data
+      var displayList = artefacts.slice(0, 6);
+
+      // Fill remaining slots with empty placeholders if needed
+      while (displayList.length < 6) {
+          displayList.push({ id: 'empty-' + displayList.length, image_url: null });
       }
 
       displayList.forEach(function(a) {
         var div = document.createElement('div');
         div.className = 'tray-slot';
         
-        var isDummy = String(a.id).indexOf('dummy-') === 0;
-        if (isDummy) div.style.opacity = '0.85';
+        // Dim dummy items slightly for visual distinction if needed, 
+        // but user requested they be present, so we keep them bright.
+        // var isDummy = String(a.id).indexOf('dummy-') === 0;
+        // if (isDummy) div.style.opacity = '0.9';
 
         if (!a.image_url) {
           div.classList.add('empty');
@@ -1522,12 +1527,7 @@
         };
         
         // Add to beginning of list
-        if (rants.length === 0) {
-            // If we were using dummy data, switch to real data array
-            rants = [newRant];
-        } else {
-            rants.unshift(newRant);
-        }
+        rants.unshift(newRant);
         
         renderDiary();
         textarea.value = '';
