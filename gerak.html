@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="realtea">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NOPE — Gerak</title>
+  
+  <!-- PWA -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%234A90A4'/%3E%3Ctext x='50' y='70' font-size='50' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%23F5F2ED'%3E🌊%3C/text%3E%3C/svg%3E">
+  <meta name="theme-color" content="#F5F2ED">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Caveat:wght@400;500;600&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  
+  <style>
+    :root,
+    [data-theme="realtea"] {
+      --bg: #F5F2ED;
+      --surface: #FFFFFF;
+      --surface-warm: #FAF8F5;
+      --border: #E8E4DE;
+      --border-accent: #D4CFC7;
+      --text: #2C2C2C;
+      --text-secondary: #6B6560;
+      --muted: #8B8680;
+      --accent: #E85D4E;
+      --accent-soft: #F4A5A0;
+      --accent-secondary: #4A90A4;
+      --accent-warm: #F4C542;
+      
+      --radius: 14px;
+      --radius-sm: 8px;
+      --space-xs: 6px;
+      --space-sm: 10px;
+      --space-md: 14px;
+      --space-lg: 18px;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', 'Space Grotesk', system-ui, sans-serif;
+      font-weight: 400;
+      font-size: 14px;
+      line-height: 1.5;
+      padding-bottom: 40px;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    
+    .wrapper {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    
+    /* HEADER */
+    header {
+      padding: 16px 0 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    
+    .logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 33px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--accent-secondary);
+      text-decoration: none;
+      cursor: pointer;
+      transform: rotate(-2deg);
+      display: inline-block;
+      transition: transform 0.3s ease;
+      line-height: 1;
+    }
+    
+    .logo:hover {
+      transform: rotate(0deg) scale(1.02);
+    }
+    
+    .date-header {
+      font-family: 'Caveat', cursive;
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+      transform: rotate(1deg);
+      line-height: 1.2;
+    }
+    
+    .top-right {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .nav-mini {
+      display: flex;
+      gap: 4px;
+      font-size: 10px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 500;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    
+    .nav-mini span {
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 16px;
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+    
+    .nav-mini span:hover:not(.active) {
+      background: var(--surface-warm);
+      color: var(--text);
+    }
+    
+    .nav-mini span.active {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border-accent);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .settings-btn {
+      background: var(--surface-warm);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 16px;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 16px;
+      transition: all 0.2s;
+      line-height: 1;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    
+    .settings-btn:hover {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border-accent);
+    }
+    
+    /* GERAK HEADER */
+    .gerak-header {
+      text-align: center;
+      padding: 20px 0 24px;
+      position: relative;
+    }
+    
+    .gerak-icon {
+      font-size: 48px;
+      margin-bottom: 8px;
+      display: block;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    
+    .gerak-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    
+    .gerak-subtitle {
+      font-family: 'Caveat', cursive;
+      font-size: 18px;
+      color: var(--muted);
+      transform: rotate(-1deg);
+    }
+    
+    /* ARUS SECTION */
+    .arus-section {
+      margin-bottom: var(--space-lg);
+    }
+    
+    .section-header {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .section-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    
+    /* ARUS CARD */
+    .arus-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .arus-card:hover {
+      border-color: var(--accent-secondary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(74, 144, 164, 0.1);
+    }
+    
+    .arus-card.active {
+      border-color: var(--accent-secondary);
+      background: linear-gradient(135deg, var(--surface) 0%, rgba(74, 144, 164, 0.05) 100%);
+    }
+    
+    .arus-visual {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-secondary), var(--accent-warm), var(--accent-secondary));
+      background-size: 200% 100%;
+      animation: wave 3s linear infinite;
+    }
+    
+    @keyframes wave {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+    
+    .arus-content {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .arus-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .arus-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+    
+    .arus-rhythm {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    
+    .rhythm-dots {
+      display: flex;
+      gap: 4px;
+    }
+    
+    .rhythm-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: all 0.3s;
+    }
+    
+    .rhythm-dot.active {
+      background: var(--accent-secondary);
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.9); }
+    }
+    
+    .arus-pulse {
+      font-style: italic;
+    }
+    
+    .arus-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    
+    .btn-float {
+      flex: 1;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-float:hover {
+      background: var(--surface-warm);
+      border-color: var(--border-accent);
+    }
+    
+    .btn-join {
+      flex: 1;
+      background: var(--accent-secondary);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-join:hover {
+      background: #3a7a8a;
+      transform: translateY(-1px);
+    }
+    
+    /* DETEKSI SECTION */
+    .deteksi-section {
+      margin-bottom: var(--space-lg);
+    }
+    
+    .deteksi-item {
+      background: var(--surface);
+      border: 1px dashed var(--border-accent);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-bottom: 12px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      transition: all 0.3s;
+    }
+    
+    .deteksi-item:hover {
+      border-color: var(--accent-secondary);
+      background: var(--surface-warm);
+    }
+    
+    .vibe-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .vibe-emoji {
+      font-size: 28px;
+      filter: grayscale(20%);
+    }
+    
+    .vibe-pattern {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 24px;
+    }
+    
+    .vibe-bar {
+      width: 4px;
+      background: var(--accent-secondary);
+      border-radius: 2px;
+      opacity: 0.6;
+      animation: vibe-dance 2s ease-in-out infinite;
+    }
+    
+    .vibe-bar:nth-child(1) { height: 40%; animation-delay: 0s; }
+    .vibe-bar:nth-child(2) { height: 70%; animation-delay: 0.2s; }
+    .vibe-bar:nth-child(3) { height: 50%; animation-delay: 0.4s; }
+    .vibe-bar:nth-child(4) { height: 80%; animation-delay: 0.1s; }
+    
+    @keyframes vibe-dance {
+      0%, 100% { opacity: 0.4; transform: scaleY(0.9); }
+      50% { opacity: 0.9; transform: scaleY(1.1); }
+    }
+    
+    .deteksi-info {
+      flex: 1;
+    }
+    
+    .deteksi-text {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    
+    .match-reason {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'Space Grotesk', sans-serif;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .match-reason span {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .match-reason .check {
+      color: var(--accent-secondary);
+    }
+    
+    .deteksi-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    
+    .btn-text {
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      cursor: pointer;
+      padding: 6px 12px;
+      transition: color 0.2s;
+    }
+    
+    .btn-text:hover {
+      color: var(--text);
+    }
+    
+    .btn-primary {
+      background: var(--text);
+      border: none;
+      color: var(--bg);
+      padding: 6px 16px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary:hover {
+      background: var(--accent);
+      transform: translateY(-1px);
+    }
+    
+    /* RIUWAYAT ARUS */
+    .riwayat-section {
+      margin-bottom: var(--space-lg);
+    }
+    
+    .riwayat-empty {
+      text-align: center;
+      padding: 32px 20px;
+      color: var(--muted);
+      font-family: 'Caveat', cursive;
+      font-size: 16px;
+      transform: rotate(-1deg);
+    }
+    
+    .riwayat-empty .emoji {
+      font-size: 32px;
+      display: block;
+      margin-bottom: 8px;
+      filter: grayscale(30%);
+    }
+    
+    /* NOTIFIKASI TAWARAN */
+    .notif-tawaran {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      z-index: 1000;
+      max-width: 90%;
+      width: 400px;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .notif-tawaran.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    
+    .notif-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .notif-icon {
+      font-size: 24px;
+    }
+    
+    .notif-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .notif-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+    
+    .notif-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .notif-actions button {
+      flex: 1;
+      padding: 8px 16px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-skip {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    
+    .btn-skip:hover {
+      background: var(--surface-warm);
+      color: var(--text);
+    }
+    
+    .btn-accept {
+      background: var(--accent-secondary);
+      border: none;
+      color: white;
+    }
+    
+    .btn-accept:hover {
+      background: #3a7a8a;
+    }
+    
+    /* FOOTER */
+    .zone-footer {
+      text-align: center;
+      font-size: 14px;
+      color: var(--muted);
+      padding: 20px 16px 40px;
+      font-family: 'Caveat', cursive;
+      transform: rotate(-1deg);
+    }
+    
+    /* MOOD POPUP */
+    .mood-popup {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      z-index: 100;
+      min-width: 180px;
+    }
+    
+    .mood-popup.show {
+      display: block;
+    }
+    
+    .mood-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 13px;
+    }
+    
+    .mood-option:hover {
+      background: var(--bg);
+    }
+    
+    .mood-option .emoji {
+      font-size: 16px;
+    }
+    
+    @media (max-width: 480px) {
+      .wrapper {
+        padding: 0 14px;
+      }
+      
+      .logo {
+        font-size: 30px;
+      }
+      
+      .nav-mini span {
+        padding: 4px 8px;
+        font-size: 9px;
+      }
+      
+      .top-right {
+        gap: 6px;
+      }
+      
+      .settings-btn {
+        padding: 4px 8px;
+        font-size: 14px;
+      }
+      
+      .gerak-icon {
+        font-size: 40px;
+      }
+      
+      .gerak-title {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <header>
+      <div>
+        <div class="logo" onclick="window.location.href='index.html'">gerak</div>
+        <div class="date-header" id="current-date">ikuti vibrasi</div>
+      </div>
+      <div class="top-right">
+        <div class="nav-mini">
+          <span onclick="window.location.href='jejak.html'">JEJAK</span>
+          <span class="active" onclick="window.location.href='gerak.html'">GERAK</span>
+          <span onclick="window.location.href='saynope.html'">SPILL</span>
+          <span onclick="window.location.href='glitch.html'">GLITCH</span>
+        </div>
+        <button class="settings-btn" id="settings-btn">⋯</button>
+      </div>
+    </header>
+
+    <div class="gerak-header">
+      <span class="gerak-icon">🌊</span>
+      <h1 class="gerak-title">Arus yang Mengalir</h1>
+      <p class="gerak-subtitle">Bukan komunitas. Hanya vibrasi yang sementara sefrekuensi.</p>
+    </div>
+
+    <!-- Arus Aktif -->
+    <section class="arus-section">
+      <div class="section-header">Arus yang mengalir sama</div>
+      
+      <div class="arus-card" data-arus="larut">
+        <div class="arus-visual"></div>
+        <div class="arus-content">
+          <div class="arus-name">
+            <span>Arus Larut</span>
+            <span style="font-size: 11px; color: var(--muted); font-weight: 400;">~aktif</span>
+          </div>
+          <p class="arus-desc">
+            Aktif saat dunia tidur. Biasanya pendek, kadang gambar. 
+            Tidak perlu sapa, cukup hadir.
+          </p>
+          <div class="arus-rhythm">
+            <div class="rhythm-dots">
+              <div class="rhythm-dot active"></div>
+              <div class="rhythm-dot active"></div>
+              <div class="rhythm-dot"></div>
+            </div>
+            <span class="arus-pulse">beriak lemah • 3 vibrasi</span>
+          </div>
+          <div class="arus-actions">
+            <button class="btn-float" onclick="intipArus('larut')">Intip dulu</button>
+            <button class="btn-join" onclick="ikutiArus('larut')">Ikuti arus</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="arus-card" data-arus="gila">
+        <div class="arus-visual" style="background: linear-gradient(90deg, var(--accent-warm), var(--accent), var(--accent-warm));"></div>
+        <div class="arus-content">
+          <div class="arus-name">
+            <span>Gelombang Gila</span>
+            <span style="font-size: 11px; color: var(--muted); font-weight: 400;">~ramai</span>
+          </div>
+          <p class="arus-desc">
+            Random, absurdist, chaotic good. Meme sebagai bahasa cinta. 
+            Tidak ada yang terlalu serius di sini.
+          </p>
+          <div class="arus-rhythm">
+            <div class="rhythm-dots">
+              <div class="rhythm-dot active"></div>
+              <div class="rhythm-dot active"></div>
+              <div class="rhythm-dot active"></div>
+              <div class="rhythm-dot active"></div>
+            </div>
+            <span class="arus-pulse">beriak kencang • 8 vibrasi</span>
+          </div>
+          <div class="arus-actions">
+            <button class="btn-float" onclick="intipArus('gila')">Intip dulu</button>
+            <button class="btn-join" onclick="ikutiArus('gila')">Ikuti arus</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Deteksi Baru -->
+    <section class="deteksi-section">
+      <div class="section-header">Getaran yang cocok</div>
+      
+      <div class="deteksi-item">
+        <div class="vibe-preview">
+          <span class="vibe-emoji">🌀</span>
+          <div class="vibe-pattern">
+            <div class="vibe-bar"></div>
+            <div class="vibe-bar"></div>
+            <div class="vibe-bar"></div>
+            <div class="vibe-bar"></div>
+          </div>
+        </div>
+        <div class="deteksi-info">
+          <p class="deteksi-text">
+            Seseorang dengan pola "chaotic good" sering muncul di timeline kamu.
+          </p>
+          <div class="match-reason">
+            <span><span class="check">✓</span> Sama-sama aktif jam aneh</span>
+            <span><span class="check">✓</span> Sama-sama react 🍵 tapi jarang post</span>
+            <span><span class="check">✓</span> Sama-sama "surviving" mode</span>
+          </div>
+          <div class="deteksi-actions">
+            <button class="btn-text" onclick="abaikanDeteksi(this)">Lewati</button>
+            <button class="btn-primary" onclick="beriIsyarat(this)">Beri isyarat</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="deteksi-item">
+        <div class="vibe-preview">
+          <span class="vibe-emoji">🫂</span>
+          <div class="vibe-pattern">
+            <div class="vibe-bar" style="background: var(--accent);"></div>
+            <div class="vibe-bar" style="background: var(--accent);"></div>
+            <div class="vibe-bar" style="background: var(--accent);"></div>
+          </div>
+        </div>
+        <div class="deteksi-info">
+          <p class="deteksi-text">
+            Ada yang sering kasih hug ke curhatanmu, tapi jarang cerita balik.
+          </p>
+          <div class="match-reason">
+            <span><span class="check">✓</span> Pola "caregiver" yang sama</span>
+            <span><span class="check">✓</span> Sama-sama burnout tapi diam</span>
+          </div>
+          <div class="deteksi-actions">
+            <button class="btn-text" onclick="abaikanDeteksi(this)">Lewati</button>
+            <button class="btn-primary" onclick="beriIsyarat(this)">Beri isyarat</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Riwayat -->
+    <section class="riwayat-section">
+      <div class="section-header">Yang pernah mengalir</div>
+      <div class="riwayat-empty" id="riwayat-empty">
+        <span class="emoji">🍃</span>
+        <p>Belum ada. Vibrasi masih mencari.</p>
+      </div>
+      <div id="riwayat-list" style="display: none;">
+        <!-- Riwayat arus akan muncul di sini -->
+      </div>
+    </section>
+
+    <div class="zone-footer">Ikuti • Resonansi • Lepas</div>
+  </div>
+
+  <!-- Notifikasi Tawaran -->
+  <div class="notif-tawaran" id="notif-tawaran">
+    <div class="notif-header">
+      <span class="notif-icon">🌊</span>
+      <span class="notif-title">Ada yang bergerak sama</span>
+    </div>
+    <p class="notif-desc" id="notif-desc">
+      "Arus Larut" mengalir ke arah yang sama denganmu. 
+      Ikuti arus ini?
+    </p>
+    <div class="notif-actions">
+      <button class="btn-skip" onclick="tolakTawaran()">Abaikan</button>
+      <button class="btn-accept" onclick="terimaTawaran()">Ikuti arus</button>
+    </div>
+  </div>
+
+  <script>
+    // Data arus
+    const ARUS_DATA = {
+      larut: {
+        nama: 'Arus Larut',
+        deskripsi: 'Aktif saat dunia tidur. Biasanya pendek, kadang gambar.',
+        vibrasi: ['3am', 'short', 'quiet'],
+        ritme: 'lemah'
+      },
+      gila: {
+        nama: 'Gelombang Gila', 
+        deskripsi: 'Random, absurdist, chaotic good. Meme sebagai bahasa cinta.',
+        vibrasi: ['chaotic', 'meme', 'reactive'],
+        ritme: 'kencang'
+      },
+      peluk: {
+        nama: 'Peluk Jauh',
+        deskripsi: 'Caregiver burnout. Sering kasih 🫂, jarang minta balik.',
+        vibrasi: ['caregiver', 'hug', 'silent'],
+        ritme: 'sedang'
+      },
+      remang: {
+        nama: 'Remang-remang',
+        deskripsi: 'Poetic, melancholic, art-heavy. Eksistensial tapi aesthetic.',
+        vibrasi: ['art', 'slow', 'existential'],
+        ritme: 'pelan'
+      }
+    };
+
+    // State
+    let arusAktif = [];
+    let riwayatArus = [];
+    let deteksiAktif = true;
+
+    // Init
+    document.addEventListener('DOMContentLoaded', () => {
+      // Simulasi tawaran setelah 5 detik
+      setTimeout(() => {
+        tampilkanTawaran('larut');
+      }, 5000);
+
+      // Settings
+      document.getElementById('settings-btn').addEventListener('click', () => {
+        alert('Settings: Privasi arus • Notifikasi • Hapus jejak');
+      });
+    });
+
+    // Tampilkan notifikasi tawaran
+    function tampilkanTawaran(arusKey) {
+      const arus = ARUS_DATA[arusKey];
+      const notif = document.getElementById('notif-tawaran');
+      const desc = document.getElementById('notif-desc');
+      
+      desc.innerHTML = `"<strong>${arus.nama}</strong>" mengalir ke arah yang sama denganmu. ${arus.deskripsi} Ikuti arus ini?`;
+      
+      notif.classList.add('show');
+      
+      // Auto hide setelah 10 detik jika tidak interaksi
+      setTimeout(() => {
+        if (notif.classList.contains('show')) {
+          notif.classList.remove('show');
+        }
+      }, 10000);
+    }
+
+    function tolakTawaran() {
+      document.getElementById('notif-tawaran').classList.remove('show');
+      // Tidak ada guilt, tidak ada trace
+      console.log('Tawaran diabaikan. Vibrasi terus mengalir.');
+    }
+
+    function terimaTawaran() {
+      document.getElementById('notif-tawaran').classList.remove('show');
+      tambahRiwayat('larut');
+      alert('Kamu mengikuti arus. Tidak ada komitmen, hanya resonansi.');
+    }
+
+    // Intip arus (preview tanpa join)
+    function intipArus(arusKey) {
+      const arus = ARUS_DATA[arusKey];
+      // Di implementasi nyata: show modal dengan vibe-vibe dalam arus
+      alert(`Mengintip ${arus.nama}...\n\nVibrasi terdeteksi:\n${arus.vibrasi.map(v => `• ${v}`).join('\n')}\n\n(Preview mode - tidak terlihat oleh yang di dalam)`);
+    }
+
+    // Ikuti arus (join)
+    function ikutiArus(arusKey) {
+      const arus = ARUS_DATA[arusKey];
+      tambahRiwayat(arusKey);
+      
+      // Update UI
+      const card = document.querySelector(`[data-arus="${arusKey}"]`);
+      card.classList.add('active');
+      card.querySelector('.btn-join').textContent = 'Mengalir';
+      card.querySelector('.btn-join').disabled = true;
+      
+      console.log(`Mengikuti ${arus.nama}. Arus bisa berubah kapan saja.`);
+    }
+
+    // Beri isyarat (like tapi lebih subtle)
+    function beriIsyarat(btn) {
+      btn.textContent = 'Isyarat terkirim 🌊';
+      btn.style.background = 'var(--accent-secondary)';
+      btn.style.color = 'white';
+      
+      setTimeout(() => {
+        // Jika cocok, sistem akan kirim tawaran
+        if (Math.random() > 0.5) {
+          setTimeout(() => tampilkanTawaran('peluk'), 2000);
+        }
+      }, 1000);
+    }
+
+    // Abaikan deteksi
+    function abaikanDeteksi(btn) {
+      const item = btn.closest('.deteksi-item');
+      item.style.opacity = '0.5';
+      item.style.transform = 'translateX(-10px)';
+      setTimeout(() => {
+        item.style.display = 'none';
+      }, 300);
+    }
+
+    // Tambah ke riwayat
+    function tambahRiwayat(arusKey) {
+      const arus = ARUS_DATA[arusKey];
+      riwayatArus.push({
+        ...arus,
+        joinedAt: new Date(),
+        id: Date.now()
+      });
+      
+      updateRiwayatUI();
+    }
+
+    function updateRiwayatUI() {
+      const empty = document.getElementById('riwayat-empty');
+      const list = document.getElementById('riwayat-list');
+      
+      if (riwayatArus.length > 0) {
+        empty.style.display = 'none';
+        list.style.display = 'block';
+        
+        list.innerHTML = riwayatArus.map(a => `
+          <div class="arus-card" style="opacity: 0.8; margin-bottom: 8px;">
+            <div class="arus-content">
+              <div class="arus-name" style="font-size: 14px;">${a.nama}</div>
+              <p class="arus-desc" style="font-size: 12px; margin-bottom: 8px;">${a.deskripsi}</p>
+              <div class="arus-rhythm" style="font-size: 10px;">
+                <span style="color: var(--accent-secondary);">✓ Sedang mengalir</span>
+                <span style="margin-left: auto; color: var(--muted);">
+                  ${new Date(a.joinedAt).toLocaleDateString('id-ID', {day:'numeric', month:'short'})}
+                </span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Simulasi: Auto-tawaran berdasarkan "same" count
+    // Dalam implementasi nyata, ini dari backend
+    window.addEventListener('message', (e) => {
+      // Menerima data dari jejak.html jika same >= 8
+      if (e.data.type === 'VIBE_MATCH' && e.data.count >= 8) {
+        tampilkanTawaran(e.data.arus);
+      }
+    });
+  </script>
+</body>
+</html>
