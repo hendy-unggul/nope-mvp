@@ -1,881 +1,634 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="realtea">
+<html lang="id" data-theme="brutalgenz">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NOPE — Jejak</title>
-  
-  <!-- PWA / Add to Home Screen -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23E85D4E'/%3E%3Ctext x='50' y='70' font-size='50' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%23F5F2ED'%3E✦%3C/text%3E%3C/svg%3E">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23E85D4E'/%3E%3Ctext x='90' y='130' font-size='90' font-weight='900' font-family='system-ui' text-anchor='middle' fill='%23F5F2ED'%3E✦%3C/text%3E%3C/svg%3E">
-  <meta name="theme-color" content="#F5F2ED">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Jejak">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>JEJAK — Spill Your Truth</title>
   
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Caveat:wght@400;500;600&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <style>
-    :root,
-    [data-theme="realtea"] {
-      --bg: #F5F2ED;
-      --surface: #FFFFFF;
-      --surface-warm: #FAF8F5;
-      --border: #E8E4DE;
-      --border-accent: #D4CFC7;
-      --text: #2C2C2C;
-      --text-secondary: #6B6560;
-      --muted: #8B8680;
-      --accent: #E85D4E;
-      --accent-soft: #F4A5A0;
-      --accent-secondary: #4A90A4;
-      --accent-warm: #F4C542;
-      --handwritten: #4A4A4A;
+    :root {
+      --bg: #0A0A0A;
+      --surface: #141414;
+      --surface-elevated: #1E1E1E;
+      --border: #2A2A2A;
+      --border-accent: #FF4D00;
       
-      --radius: 14px;
-      --radius-sm: 8px;
-      --space-xs: 8px;
-      --space-sm: 12px;
+      --text: #FFFFFF;
+      --text-secondary: #888888;
+      --text-muted: #555555;
+      
+      --accent-primary: #FF4D00;
+      --accent-secondary: #00F0FF;
+      --accent-tertiary: #FF006E;
+      --accent-quaternary: #39FF14;
+      --accent-warm: #FFD700;
+      
+      /* Mood Colors */
+      --mood-surviving: #FF9500;
+      --mood-thriving: #39FF14;
+      --mood-chaotic: #00F0FF;
+      --mood-doom: #8B5CF6;
+      --mood-existential: #FF006E;
+      
+      --radius: 0px;
+      --radius-sm: 4px;
+      --space-xs: 4px;
+      --space-sm: 8px;
       --space-md: 16px;
-      --space-lg: 20px;
+      --space-lg: 24px;
+      --space-xl: 32px;
     }
     
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    html { scroll-behavior: smooth; }
     
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'DM Sans', 'Space Grotesk', system-ui, sans-serif;
-      font-weight: 400;
-      font-size: 14px;
-      line-height: 1.5;
-      padding-bottom: 40px;
-      -webkit-font-smoothing: antialiased;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-weight: 500;
+      font-size: 15px;
+      line-height: 1.4;
       min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* Noise texture */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
     }
     
     .wrapper {
       max-width: 480px;
       margin: 0 auto;
-      padding: 0 16px;
+      padding: 0 var(--space-md);
     }
     
     /* HEADER */
     header {
-      padding: 16px 0 12px;
+      padding: var(--space-lg) 0 var(--space-md);
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
     }
     
     .logo {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 33px;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      color: var(--accent);
-      text-decoration: none;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--text);
       cursor: pointer;
-      transform: rotate(-2deg);
-      display: inline-block;
-      transition: transform 0.3s ease;
-      line-height: 1;
+      line-height: 0.9;
+      position: relative;
     }
     
-    .logo:hover {
-      transform: rotate(0deg) scale(1.02);
+    .logo::before, .logo::after {
+      content: 'JEJAK';
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+    .logo::before { color: var(--accent-secondary); transform: translate(-2px, 0); }
+    .logo::after { color: var(--accent-tertiary); transform: translate(2px, 0); }
+    .logo:hover::before { opacity: 0.8; animation: glitch 0.3s infinite; }
+    
+    @keyframes glitch {
+      0%, 100% { transform: translate(-2px, 0); }
+      25% { transform: translate(2px, 2px); }
+      50% { transform: translate(-2px, -2px); }
+      75% { transform: translate(2px, 0); }
     }
     
-    .date-header {
-      font-family: 'Caveat', cursive;
-      font-size: 20px;
+    .tagline {
+      font-family: 'Instrument Serif', serif;
+      font-size: 13px;
       color: var(--text-secondary);
-      margin-top: 2px;
-      transform: rotate(1deg);
-      line-height: 1.2;
+      font-style: italic;
+      margin-top: var(--space-xs);
     }
     
     .top-right {
       display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 8px;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--space-sm);
     }
     
-    .nav-mini {
-      display: flex;
-      gap: 4px;
-      font-size: 10px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 500;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-    
-    .nav-mini span {
-      cursor: pointer;
-      padding: 5px 10px;
-      border-radius: 16px;
-      background: transparent;
-      color: var(--muted);
-      transition: all 0.2s ease;
-      border: 1px solid transparent;
-      white-space: nowrap;
-    }
-    
-    .nav-mini span:hover:not(.active) {
-      background: var(--surface-warm);
-      color: var(--text);
-    }
-    
-    .nav-mini span.active {
-      background: var(--surface);
-      color: var(--text);
-      border-color: var(--border-accent);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    
-    .settings-btn {
-      background: var(--surface-warm);
+    .nav-pills { display: flex; gap: var(--space-xs); }
+    .nav-pill {
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 16px;
+      background: transparent;
+      color: var(--text-secondary);
       cursor: pointer;
-      padding: 5px 10px;
-      border-radius: 16px;
-      transition: all 0.2s;
-      line-height: 1;
-      font-family: 'Space Grotesk', sans-serif;
+      transition: all 0.15s;
     }
+    .nav-pill:hover { border-color: var(--accent-primary); color: var(--accent-primary); transform: translateY(-2px); }
+    .nav-pill.active { background: var(--accent-primary); border-color: var(--accent-primary); color: var(--bg); }
     
-    .settings-btn:hover {
-      background: var(--surface);
-      color: var(--text);
-      border-color: var(--border-accent);
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
     }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-quaternary);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     
     /* HERO */
+    .hero-section {
+      position: relative;
+      margin: 0 calc(-1 * var(--space-md));
+      margin-bottom: var(--space-lg);
+    }
     .hero {
       position: relative;
       width: 100%;
-      background: var(--surface);
-      border-radius: var(--radius);
+      aspect-ratio: 1 / 1;
       overflow: hidden;
-      margin-bottom: var(--space-md);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
-      transform: rotate(-1deg);
-      transition: transform 0.3s ease;
+      border-top: 2px solid var(--border);
+      border-bottom: 2px solid var(--border);
     }
-    
-    .hero:hover {
-      transform: rotate(0deg);
-    }
-    
     .hero img {
       width: 100%;
-      aspect-ratio: 4 / 5;
+      height: 100%;
       object-fit: cover;
-      display: block;
-      filter: contrast(0.95) saturate(0.9);
+      filter: contrast(1.1) saturate(0.9);
+      transition: transform 0.6s;
     }
-    
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      right: 10px;
-      bottom: 10px;
-      border: 1px solid rgba(255,255,255,0.3);
-      border-radius: 8px;
-      pointer-events: none;
-      z-index: 1;
-    }
-    
-    .artefak-notation {
-      position: absolute;
-      bottom: 16px;
-      left: 16px;
-      right: 16px;
-      background: rgba(245, 242, 237, 0.95);
-      color: var(--text);
-      font-family: 'Caveat', cursive;
-      font-size: 18px;
-      font-weight: 500;
-      padding: 10px 14px;
-      border-radius: 8px;
-      line-height: 1.3;
-      backdrop-filter: blur(4px);
-      transform: rotate(-1deg);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    
-    .upload-artefak-btn {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 12px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 500;
-      cursor: pointer;
-      z-index: 2;
-      transition: all 0.2s;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-    
-    .upload-artefak-btn:hover {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
-      transform: translateY(-1px);
-    }
-
-    .upload-artefak-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      background: var(--border);
-      color: var(--muted);
-      border-color: var(--border);
-    }
-    
-    /* POST UPLOAD PANEL */
-    .post-upload-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      padding: 14px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      margin-bottom: var(--space-md);
-      transform: rotate(0.5deg);
-    }
-    
-    .post-upload-panel.hidden {
-      display: none !important;
-    }
-    
-    .post-upload-panel label {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 11px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .post-upload-panel input {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 10px 14px;
-      color: var(--text);
-      font-size: 14px;
-      font-family: 'DM Sans', sans-serif;
-      transition: all 0.2s;
-    }
-    
-    .post-upload-panel input:focus {
-      outline: none;
-      border-color: var(--accent);
-      background: var(--surface);
-    }
-    
-    .post-upload-panel .panel-actions {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-    }
-    
-    .post-upload-panel button {
-      background: var(--text);
-      color: var(--bg);
-      border: none;
-      border-radius: 16px;
-      padding: 6px 16px;
-      font-size: 12px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .post-upload-panel button:hover {
-      background: var(--accent);
-      transform: translateY(-1px);
-    }
-    
-    /* RANT BOX - CORRECTED STYLES */
-    .rant-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 12px; 
-      margin-bottom: var(--space-md);
-      position: relative;
-      transform: rotate(0.5deg);
-    }
-    
-    .rant-box-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 8px; 
-      font-family: 'Space Grotesk', sans-serif;
-      line-height: 1;
-    }
-    
-    .rant-box-header .header-left {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    
-    .rant-box-header strong {
-      color: var(--text);
-      font-weight: 600;
-    }
-    
-    .rant-box textarea {
-      width: 100%;
-      background: transparent;
-      border: none;
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      line-height: 1.5;
-      resize: none;
-      min-height: 80px; 
-      padding: 0;
-      margin-bottom: 8px;
-    }
-    
-    .rant-box textarea:focus {
-      outline: none;
-    }
-    
-    .rant-box textarea::placeholder {
-      color: var(--border-accent);
-      font-style: italic;
-    }
-    
-    /* FIX 2 & 3: Smaller, proportional CTA and less bottom gap */
-    .rant-cta {
-      background: var(--accent);
-      color: white;
-      border: none;
-      border-radius: 18px;
-      padding: 6px 16px; 
-      font-size: 12px; 
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 2px 6px rgba(232, 93, 78, 0.3);
-      float: right;
-      margin-bottom: 4px; 
-    }
-    
-    .rant-cta:hover:not(:disabled) {
-      background: #D94A3E;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(232, 93, 78, 0.4);
-    }
-    
-    .rant-cta:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    
-    .confirmation {
-      font-size: 11px;
-      color: var(--muted);
-      text-align: center;
-      margin-top: 4px; 
-      font-family: 'Space Grotesk', sans-serif;
-      min-height: 16px;
-      clear: both;
-    }
-    
-    /* DIARY ENTRIES */
-    .diary {
-      margin-bottom: var(--space-md);
-    }
-    
-    .diary-header {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 11px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .diary-header::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-    
-    .diary-entry {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      margin-bottom: 12px;
-      position: relative;
-      transition: all 0.2s;
-    }
-    
-    .diary-entry:hover {
-      border-color: var(--border-accent);
-    }
-    
-    .entry-time-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-    
-    .diary-entry time {
-      font-size: 10px;
-      color: var(--muted);
-      font-family: 'Space Grotesk', sans-serif;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    
-    .diary-entry time::before {
-      content: '•';
-      color: var(--accent);
-    }
-    
-    .entry-mood-badge {
-      font-family: 'Caveat', cursive;
-      font-size: 14px;
-      color: var(--accent);
-      transform: rotate(-1deg);
-      cursor: pointer;
-      position: relative;
-      line-height: 1;
-    }
-    
-    .diary-entry p {
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      line-height: 1.5;
-      color: var(--text);
-      margin-bottom: 10px;
-    }
-    
-    .diary-entry .entry-meta {
-      display: none;
-    }
-    
-    /* VIBE REACTIONS */
-    .vibe-reactions {
-      display: flex;
-      flex-wrap: nowrap;
-      gap: 6px;
-      padding-top: 10px;
-      border-top: 1px dashed var(--border);
-      overflow-x: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-      position: relative;
-      padding-bottom: 4px;
-    }
-    
-    .vibe-reactions::-webkit-scrollbar {
-      display: none;
-    }
-    
-    .vibe-btn {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 5px 10px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 11px;
-      color: var(--text-secondary);
-      position: relative;
-      flex-shrink: 0;
-      white-space: nowrap;
-    }
-    
-    .vibe-btn:hover {
-      background: var(--surface-warm);
-      border-color: var(--accent-soft);
-      transform: translateY(-1px);
-    }
-    
-    .vibe-btn:active {
-      transform: scale(0.95);
-    }
-    
-    .vibe-btn .emoji {
-      font-size: 13px;
-      filter: grayscale(30%);
-      transition: all 0.2s;
-    }
-    
-    .vibe-btn:hover .emoji {
-      filter: grayscale(0%);
-      transform: scale(1.1);
-    }
-    
-    .vibe-btn .count {
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--muted);
-      min-width: 12px;
-      text-align: center;
-    }
-    
-    .vibe-btn.vibed {
-      background: var(--accent-soft);
-      border-color: var(--accent);
-      color: var(--text);
-    }
-    
-    .vibe-btn.vibed .emoji {
-      filter: grayscale(0%);
-    }
-    
-    .vibe-btn.vibed .count {
-      color: var(--accent);
-    }
-    
-    @keyframes vibePulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-    
-    .vibe-btn.animating .emoji {
-      animation: vibePulse 0.3s ease;
-    }
-    
-    /* TOOLTIP */
-    .vibe-tooltip {
-      position: absolute;
-      bottom: calc(100% + 6px);
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--text);
-      color: var(--bg);
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 10px;
-      font-family: 'Space Grotesk', sans-serif;
-      white-space: nowrap;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.2s ease;
-      pointer-events: none;
-      z-index: 1000;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    
-    .vibe-tooltip::after {
-      content: '';
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      border: 5px solid transparent;
-      border-top-color: var(--text);
-    }
-    
-    .vibe-tooltip .slang-id {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 1px;
-    }
-    
-    .vibe-tooltip .slang-en {
-      display: block;
-      opacity: 0.8;
-      font-size: 9px;
-    }
-    
-    .vibe-btn:hover .vibe-tooltip {
-      opacity: 1;
-      visibility: visible;
-      transform: translateX(-50%) translateY(-2px);
-    }
-    
-    /* VIBE SUMMARY */
-    .vibe-summary {
-      margin-top: 8px;
-      padding: 6px 10px;
-      background: var(--surface-warm);
-      border-radius: 8px;
-      font-size: 10px;
-      color: var(--text-secondary);
-      font-family: 'Caveat', cursive;
-      font-size: 13px;
-      transform: rotate(-0.5deg);
-    }
-    
-    .vibe-summary .highlight {
-      color: var(--accent);
-      font-weight: 600;
-    }
-    
-    /* TRAY */
-    .tray-section {
-      margin-bottom: var(--space-md);
-    }
-    
-    .tray-header {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 11px;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .tray-header::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-    
-    .tray {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-    
-    .tray-slot {
-      aspect-ratio: 1;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      background-size: cover;
-      background-position: center;
-      position: relative;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      overflow: hidden;
-    }
-    
-    .tray-slot::before {
+    .hero:hover img { transform: scale(1.03); }
+    .hero::after {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.4));
-      opacity: 0;
-      transition: opacity 0.3s;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+      pointer-events: none;
     }
-    
-    .tray-slot:hover {
-      transform: scale(1.03) rotate(-1deg);
-      border-color: var(--accent);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      z-index: 2;
-    }
-    
-    .tray-slot:hover::before {
-      opacity: 1;
-    }
-    
-    .tray-slot .artefak-notation {
+    .hero-notation {
       position: absolute;
-      bottom: 6px;
-      left: 6px;
-      right: 6px;
-      font-size: 12px;
-      padding: 4px 6px;
-      background: rgba(255,255,255,0.95);
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: var(--space-md);
+      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+      font-family: 'Instrument Serif', serif;
+      font-size: 24px;
+      font-style: italic;
       color: var(--text);
-      transform: rotate(-1deg);
-      opacity: 0;
-      transition: opacity 0.3s;
+      line-height: 1.2;
     }
-    
-    .tray-slot:hover .artefak-notation {
-      opacity: 1;
-    }
-    
-    .tray-slot.empty {
-      background: var(--surface-warm);
-      border-style: dashed;
+    .upload-btn {
+      position: absolute;
+      top: var(--space-md);
+      right: var(--space-md);
+      width: 48px;
+      height: 48px;
+      background: var(--accent-primary);
+      border: none;
+      color: var(--bg);
+      font-size: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--border-accent);
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 4px 4px 0 var(--bg), 4px 4px 0 2px var(--accent-primary);
+    }
+    .upload-btn:hover:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 var(--bg), 2px 2px 0 2px var(--accent-primary);
+    }
+    .upload-btn:disabled {
+      background: var(--text-muted);
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    .upload-counter {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--accent-tertiary);
+      color: var(--text);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      min-width: 20px;
+      text-align: center;
+    }
+    
+    /* INPUT SECTION */
+    .input-section { margin-bottom: var(--space-xl); }
+    .input-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-sm);
+    }
+    .input-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+    }
+    .char-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .rant-input {
+      width: 100%;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: var(--space-md);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      resize: none;
+      min-height: 120px;
+      transition: all 0.2s;
+    }
+    .rant-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      background: var(--surface-elevated);
+    }
+    .rant-input::placeholder { color: var(--text-muted); }
+    
+    /* ============================================
+       MANUAL MOOD SELECTOR — Visual & Interactive
+       ============================================ */
+    .mood-section {
+      margin: var(--space-md) 0;
+    }
+    .mood-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-sm);
+    }
+    .mood-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-sm);
+    }
+    .mood-card {
+      position: relative;
+      padding: var(--space-md);
+      background: var(--surface);
+      border: 2px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .mood-card:hover {
+      border-color: var(--text-secondary);
+      transform: translateY(-2px);
+    }
+    .mood-card.active {
+      border-color: currentColor;
+      background: var(--surface-elevated);
+    }
+    .mood-card.active::before {
+      content: '✓';
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .mood-emoji {
+      font-size: 28px;
+      line-height: 1;
+    }
+    .mood-name {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .mood-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    
+    /* Mood-specific colors */
+    .mood-card[data-mood="surviving"] { color: var(--mood-surviving); }
+    .mood-card[data-mood="thriving"] { color: var(--mood-thriving); }
+    .mood-card[data-mood="chaotic"] { color: var(--mood-chaotic); }
+    .mood-card[data-mood="doom"] { color: var(--mood-doom); }
+    
+    .input-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: var(--space-md);
+    }
+    .submit-btn {
+      padding: 14px 32px;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: var(--accent-primary);
+      border: none;
+      color: var(--bg);
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 4px 4px 0 var(--surface-elevated), 4px 4px 0 2px var(--accent-primary);
+    }
+    .submit-btn:hover:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 var(--surface-elevated), 2px 2px 0 2px var(--accent-primary);
+    }
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    
+    /* ENTRIES */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid var(--border);
+    }
+    .section-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text);
+    }
+    .section-line { flex: 1; height: 2px; background: var(--border); }
+    
+    .entry {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      margin-bottom: var(--space-md);
+      position: relative;
+      animation: slideIn 0.4s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .entry:hover { border-color: var(--border-accent); }
+    .entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-elevated);
+    }
+    .entry-meta { display: flex; align-items: center; gap: var(--space-sm); }
+    .entry-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+    .entry-mood {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 4px 8px;
+      border: 1px solid currentColor;
+    }
+    .entry-mood.surviving { color: var(--mood-surviving); }
+    .entry-mood.thriving { color: var(--mood-thriving); }
+    .entry-mood.chaotic { color: var(--mood-chaotic); }
+    .entry-mood.doom { color: var(--mood-doom); }
+    
+    .entry-content {
+      padding: var(--space-md);
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    
+    /* ============================================
+       VIBE BAR — 6 JERNIH EMOJI (Unicode Stabil)
+       ============================================ */
+    .vibe-bar {
+      display: flex;
+      border-top: 1px solid var(--border);
+      background: var(--surface-elevated);
+    }
+    .vibe-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: var(--space-sm) 4px;
+      background: transparent;
+      border: none;
+      border-right: 1px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .vibe-btn:last-child { border-right: none; }
+    .vibe-btn:hover { background: var(--surface); color: var(--text); }
+    .vibe-btn.vibed { background: var(--surface); }
+    .vibe-btn.vibed .vibe-emoji {
+      filter: none;
+      transform: scale(1.15);
+      text-shadow: 0 0 10px currentColor;
+    }
+    .vibe-btn.vibed .vibe-count {
+      color: var(--text);
+      font-weight: 700;
+    }
+    .vibe-emoji {
+      font-size: 24px;
+      line-height: 1;
+      filter: grayscale(0.4);
+      transition: all 0.2s;
+      /* Force color emoji rendering */
+      font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+    }
+    .vibe-btn:hover .vibe-emoji {
+      filter: none;
+      transform: scale(1.1);
+    }
+    .vibe-count {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      min-width: 20px;
+      text-align: center;
+    }
+    .vibe-label {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      background: var(--text);
+      color: var(--bg);
+      padding: 6px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s;
+      pointer-events: none;
+    }
+    .vibe-btn:hover .vibe-label {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+    
+    /* TRAY */
+    .tray-section { margin-bottom: var(--space-xl); }
+    .tray-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: var(--border);
+      border: 2px solid var(--border);
+    }
+    .tray-item {
+      aspect-ratio: 1;
+      background: var(--surface);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .tray-item.empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
       font-size: 20px;
     }
-    
-    /* FOOTER */
-    .zone-footer {
-      text-align: center;
-      font-size: 14px;
-      color: var(--muted);
-      padding: 20px 16px 40px;
-      font-family: 'Caveat', cursive;
-      transform: rotate(-1deg);
-      margin-top: -8px;
-    }
-    
-    /* PULSE */
-    .pulse-animation {
-      position: fixed;
-      top: 0;
-      left: 0;
+    .tray-item img {
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at center, rgba(232, 93, 78, 0.1), transparent);
-      pointer-events: none;
+      object-fit: cover;
+      transition: all 0.3s;
+      filter: grayscale(0.3);
+    }
+    .tray-item:hover img { filter: none; transform: scale(1.1); }
+    .tray-item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent-primary);
       opacity: 0;
-      z-index: 999;
-      animation: pulse 1.2s ease-out;
+      transition: opacity 0.2s;
+      mix-blend-mode: multiply;
     }
-    
-    @keyframes pulse {
-      0% { transform: scale(0.9); opacity: 0.4; }
-      100% { transform: scale(1.4); opacity: 0; }
-    }
+    .tray-item:hover::after { opacity: 0.3; }
     
     /* EMPTY STATE */
     .empty-state {
+      padding: var(--space-xl) var(--space-md);
       text-align: center;
-      padding: 32px 20px;
-      color: var(--muted);
+      border: 2px dashed var(--border);
     }
-    
-    .empty-state .emoji {
-      font-size: 40px;
-      margin-bottom: 10px;
+    .empty-emoji {
+      font-size: 48px;
+      margin-bottom: var(--space-md);
       display: block;
+      animation: float 3s ease-in-out infinite;
     }
-    
-    .empty-state p {
-      font-family: 'Caveat', cursive;
-      font-size: 18px;
-      transform: rotate(-1deg);
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
-    
-    /* MOOD POPUP */
-    .mood-popup {
-      display: none;
-      position: absolute;
-      top: calc(100% + 6px);
-      right: 0;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      z-index: 100;
-      min-width: 180px;
+    .empty-text {
+      font-family: 'Instrument Serif', serif;
+      font-size: 20px;
+      font-style: italic;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-sm);
     }
-    
-    .mood-popup.show {
-      display: block;
-    }
-    
-    .mood-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 10px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background 0.2s;
+    .empty-subtext {
       font-size: 13px;
+      color: var(--text-muted);
     }
     
-    .mood-option:hover {
-      background: var(--bg);
+    /* FOOTER */
+    footer {
+      padding: var(--space-xl) 0;
+      text-align: center;
+      border-top: 2px solid var(--border);
+    }
+    .footer-text {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
     }
     
-    .mood-option .emoji {
-      font-size: 16px;
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: var(--space-lg);
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--text);
+      color: var(--bg);
+      padding: var(--space-sm) var(--space-md);
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 10000;
+      opacity: 0;
+      transition: all 0.3s;
     }
-    
-    @media (max-width: 480px) {
-      .wrapper {
-        padding: 0 14px;
-      }
-      
-      .logo {
-        font-size: 30px;
-      }
-      
-      .nav-mini span {
-        padding: 4px 8px;
-        font-size: 9px;
-      }
-      
-      .top-right {
-        gap: 6px;
-      }
-      
-      .settings-btn {
-        padding: 4px 8px;
-        font-size: 14px;
-      }
-      
-      .vibe-btn {
-        padding: 4px 8px;
-        font-size: 10px;
-      }
-      
-      .vibe-btn .emoji {
-        font-size: 12px;
-      }
-      
-      .vibe-tooltip {
-        font-size: 9px;
-        padding: 5px 8px;
-        bottom: auto;
-        top: calc(100% + 6px);
-      }
-      
-      .vibe-tooltip::after {
-        top: auto;
-        bottom: 100%;
-        border-top-color: transparent;
-        border-bottom-color: var(--text);
-      }
-    }
-    
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-      }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
     }
   </style>
 </head>
@@ -884,527 +637,405 @@
     <!-- HEADER -->
     <header>
       <div>
-        <div class="logo" onclick="window.location.href='index.html'">jejak</div>
-        <div class="date-header" id="current-date"></div>
+        <div class="logo" onclick="window.location.reload()">JEJAK</div>
+        <div class="tagline">no filter, just truth</div>
       </div>
       <div class="top-right">
-        <div class="nav-mini">
-          <span class="active" onclick="window.location.href='jejak.html'">JEJAK</span>
-          <span onclick="window.location.href='frekuensi-bola.html'">GERAK</span>
-          <span onclick="window.location.href='glitch.html'">GLITCH</span>
-          <span onclick="window.location.href='komunitas.html'">CIRCLE</span>
+        <div class="nav-pills">
+          <button class="nav-pill active">Jejak</button>
+          <button class="nav-pill">Arsip</button>
         </div>
-        <button class="settings-btn" id="settings-btn">⋯</button>
+        <div class="status-indicator">
+          <span class="status-dot"></span>
+          <span>2.4k online</span>
+        </div>
       </div>
     </header>
 
     <!-- HERO -->
-    <div class="hero">
-      <img id="hero-img" src="https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80" alt="artefak">
-      <div class="artefak-notation" id="hero-notation-display">kadang hidup butuh jeda</div>
-      <button id="upload-artefak-btn" class="upload-artefak-btn">+ Unggah</button>
-    </div>
-
-    <!-- POST UPLOAD PANEL -->
-    <div id="post-upload-panel" class="post-upload-panel hidden">
-      <label>Notasi (maks 4 kata)</label>
-      <input id="hero-notation" type="text" placeholder="contoh: capek tapi hidup" maxlength="50">
-      <div class="panel-actions">
-        <button onclick="hidePostUploadPanel()" style="background: transparent; color: var(--muted);">Lewati</button>
-        <button id="save-notation-btn">Simpan</button>
+    <section class="hero-section">
+      <div class="hero">
+        <img id="hero-img" src="https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80" alt="artefak">
+        <div class="hero-notation" id="hero-notation">"kadang hidup butuh jeda"</div>
+        <button class="upload-btn" id="upload-btn" title="Upload artefak (30d cooldown)">
+          +
+          <span class="upload-counter" id="upload-counter" style="display: none;"></span>
+        </button>
       </div>
-    </div>
+    </section>
 
-    <!-- RANT BOX -->
-    <div class="rant-box">
-      <div class="rant-box-header">
-        <div class="header-left">
-          <span>Hello <strong id="username-display">@you</strong></span>
+    <!-- INPUT -->
+    <section class="input-section">
+      <div class="input-header">
+        <span class="input-label">Spill your truth</span>
+        <span class="char-count" id="char-count">0/500</span>
+      </div>
+      <textarea 
+        class="rant-input" 
+        id="rant-input" 
+        placeholder="What's eating you alive right now? No cap, no filter..."
+        maxlength="500"
+      ></textarea>
+      
+      <!-- ============================================
+           MANUAL MOOD SELECTOR — 4 Cards Visual
+           ============================================ -->
+      <div class="mood-section">
+        <div class="mood-label">Pilih mood-mu sekarang</div>
+        <div class="mood-grid" id="mood-grid">
+          <div class="mood-card active" data-mood="surviving" onclick="selectMood('surviving')">
+            <span class="mood-emoji">😮‍💨</span>
+            <span class="mood-name" style="color: var(--mood-surviving)">Surviving</span>
+            <span class="mood-desc">Hidup tapi barely</span>
+          </div>
+          <div class="mood-card" data-mood="thriving" onclick="selectMood('thriving')">
+            <span class="mood-emoji">✨</span>
+            <span class="mood-name" style="color: var(--mood-thriving)">Thriving</span>
+            <span class="mood-desc">On top of my game</span>
+          </div>
+          <div class="mood-card" data-mood="chaotic" onclick="selectMood('chaotic')">
+            <span class="mood-emoji">🌀</span>
+            <span class="mood-name" style="color: var(--mood-chaotic)">Chaotic</span>
+            <span class="mood-desc">Everything is on fire</span>
+          </div>
+          <div class="mood-card" data-mood="doom" onclick="selectMood('doom')">
+            <span class="mood-emoji">🛌</span>
+            <span class="mood-name" style="color: var(--mood-doom)">Doom</span>
+            <span class="mood-desc">Just wanna disappear</span>
+          </div>
         </div>
       </div>
-      <textarea id="rant" placeholder="What's the tea today? Overshare here... unfiltered thoughts only ☕"></textarea>
-      <button class="rant-cta" id="jejakkan-btn">Jejakkan</button>
-      <div class="confirmation" id="confirmation"></div>
-    </div>
+      
+      <div class="input-actions">
+        <button class="submit-btn" id="submit-btn">Jejakkan</button>
+      </div>
+    </section>
 
-    <!-- DIARY -->
-    <div class="diary" id="diary">
-      <div class="diary-header">Riwayat Jejak</div>
-    </div>
+    <!-- ENTRIES -->
+    <section class="entries-section">
+      <div class="section-header">
+        <span class="section-title">Riwayat</span>
+        <div class="section-line"></div>
+      </div>
+      <div id="entries-container"></div>
+    </section>
 
     <!-- TRAY -->
-    <div class="tray-section">
-      <div class="tray-header">Memori</div>
-      <div class="tray" id="tray"></div>
-    </div>
+    <section class="tray-section">
+      <div class="section-header">
+        <span class="section-title">Memori</span>
+        <div class="section-line"></div>
+      </div>
+      <div class="tray-grid" id="tray-grid"></div>
+    </section>
 
-    <div class="zone-footer">Nyambat • Aksi • Solusi</div>
+    <footer>
+      <p class="footer-text">Nyambat • Aksi • Solusi</p>
+    </footer>
   </div>
 
-  <input type="file" id="file-input" accept="image/*" style="display:none;">
+  <div class="toast" id="toast"></div>
+  <input type="file" id="file-input" accept="image/*" style="display: none;">
 
   <script>
-  (function() {
-    'use strict';
-
-    // ============================================
-    // CONFIG & DATA
-    // ============================================
-    
-    var SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
-    var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
-
-    // FIX 2: Kurasi ulang emoji Gen Z (Hanya 6)
-    const VIBE_REACTIONS = {
-      'relatable': { emoji: '😭', label: 'literally me', slangId: 'literally me', slangEn: 'literally me', desc: 'Sama, aku juga' },
-      'mood':      { emoji: '🛋️', label: 'big mood', slangId: 'big mood', slangEn: 'big mood', desc: 'Ini representasiku' },
-      'tea':       { emoji: '🍵', label: 'spill the tea', slangId: 'spill the tea', slangEn: 'that\'s the tea', desc: 'Juicy banget ini' },
-      'hug':       { emoji: '🫂', label: 'virtual hug', slangId: 'peluk jauh', slangEn: 'sending hugs', desc: 'Peluk virtual buatmu' },
-      'real':      { emoji: '🫡', label: 'no cap', slangId: 'no cap', slangEn: 'no cap fr fr', desc: 'Real talk, no lie' },
-      'dead':      { emoji: '💀', label: 'i\'m dead', slangId: 'rip me', slangEn: 'i\'m dead', desc: 'That\'s so funny/sad' }
-    };
-
     // ============================================
     // STATE
     // ============================================
-    
-    var currentUser = localStorage.getItem('nope_username') || '@newglitch';
-    var currentMood = 'surviving';
-    var artefacts = [];
-    var rants = [];
-    var userReactions = new Set();
-    // FIX 1: Removed vibeMatches map as Gerak invite is removed
+    const state = {
+      currentUser: localStorage.getItem('jejak_user') || '@anon',
+      currentMood: 'surviving',
+      entries: [],
+      artefacts: [],
+      userVibes: new Set(),
+      lastUpload: localStorage.getItem('jejak_last_upload')
+    };
 
-    const QUOTA_DAYS = 30;
-    var lastUploadTime = localStorage.getItem('nope_last_upload');
+    // ============================================
+    // 6 EMOJI JERNIH — Unicode yang stabil di semua platform
+    // ============================================
+    const VIBES = {
+      relatable: { emoji: '💯', label: 'literally me' },  // 100% — jernih & universal
+      mood:      { emoji: '🛋️', label: 'big mood' },      // Couch — Gen Z icon
+      tea:       { emoji: '🐸', label: 'spill tea' },      // Frog — "that's none of my business"
+      hug:       { emoji: '🤗', label: 'virtual hug' },    // Hugging face — clear
+      real:      { emoji: '🎯', label: 'no cap' },         // Target — on point
+      dead:      { emoji: '⚰️', label: 'rip me' }          // Coffin — crystal clear
+    };
+
+    const MOODS = {
+      surviving: { emoji: '😮‍💨', color: '#FF9500', label: 'surviving' },
+      thriving:  { emoji: '✨', color: '#39FF14', label: 'thriving' },
+      chaotic:   { emoji: '🌀', color: '#00F0FF', label: 'chaotic' },
+      doom:      { emoji: '🛌', color: '#8B5CF6', label: 'doom' }
+    };
 
     // ============================================
     // DUMMY DATA
     // ============================================
-    
-    var DUMMY_RANTS = [
+    const dummyEntries = [
       {
-        id: 'dummy-0',
-        username: 'homie1',
-        content: "gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus. gak minta balasan sih, tapi rasanya kayak jadi tempat sampah emosi doang.",
-        created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+        id: 'd1',
+        content: "gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus.",
         mood: 'surviving',
-        // FIX 2: Updated dummy vibes to match new 6 emoji set
-        vibes: { relatable: 12, hug: 8, tea: 3, mood: 9 } 
+        timestamp: Date.now() - 172800000,
+        vibes: { relatable: 12, mood: 9, hug: 8, tea: 3, real: 5, dead: 2 }
       },
       {
-        id: 'dummy-1',
-        username: 'homie2',
+        id: 'd2',
         content: "deadline mepet, dosen gak jelas, dompet kering. rasanya pengen ijin cuti sehari buat jadi batu aja.",
-        created_at: new Date(Date.now() - 86400000).toISOString(),
         mood: 'doom',
-        vibes: { mood: 5, relatable: 9, real: 3 } 
+        timestamp: Date.now() - 86400000,
+        vibes: { relatable: 9, mood: 5, dead: 7, real: 3, hug: 2, tea: 1 }
       },
       {
-        id: 'dummy-2',
-        username: 'homie3',
+        id: 'd3',
         content: "capek.",
-        created_at: new Date(Date.now() - 43200000).toISOString(),
-        mood: 'existential',
-        vibes: { hug: 20, relatable: 18, real: 7, dead: 10 } 
+        mood: 'surviving',
+        timestamp: Date.now() - 43200000,
+        vibes: { hug: 20, relatable: 18, dead: 10, real: 7, mood: 3, tea: 0 }
       }
     ];
 
-    var DUMMY_ARTEFACTS = [
-      { id: 'dummy-0', image_url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80', notation: 'kadang hidup butuh jeda' },
-      { id: 'dummy-1', image_url: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80', notation: 'gebetan temen lebih hijau' },
-      { id: 'dummy-2', image_url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=80', notation: 'gabut NO FACE' },
-      { id: 'dummy-3', image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80', notation: 'lonelyness my hiding place' },
-      { id: 'dummy-4', image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80', notation: 'capek' },
-      { id: 'dummy-5', image_url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80', notation: 'love it' }
+    const dummyArtefacts = [
+      { id: 'a1', url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80', note: 'jeda' },
+      { id: 'a2', url: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80', note: 'hijau' },
+      { id: 'a3', url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=80', note: 'gabut' },
+      { id: 'a4', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80', note: 'sendiri' },
+      { id: 'a5', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80', note: 'capek' },
+      { id: 'a6', url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80', note: 'love' }
     ];
-
-    // Initialize state with dummy data
-    rants = [...DUMMY_RANTS];
-    artefacts = [...DUMMY_ARTEFACTS];
 
     // ============================================
     // UTILS
     // ============================================
-    
-    function showConfirmation(msg) {
-      var el = document.getElementById('confirmation');
-      el.textContent = msg;
-      setTimeout(function() { el.textContent = ''; }, 3000);
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
     }
 
-    function triggerPulse() {
-      var pulse = document.createElement('div');
-      pulse.className = 'pulse-animation';
-      document.body.appendChild(pulse);
-      setTimeout(function() { if (pulse.parentNode) pulse.parentNode.removeChild(pulse); }, 1200);
+    function formatTime(ts) {
+      const diff = Date.now() - ts;
+      const hours = Math.floor(diff / 3600000);
+      if (hours < 1) return 'baru saja';
+      if (hours < 24) return `${hours}j`;
+      const days = Math.floor(hours / 24);
+      return `${days}h`;
     }
 
     function checkUploadQuota() {
-        const now = new Date().getTime();
-        const btn = document.getElementById('upload-artefak-btn');
-        
-        if (lastUploadTime) {
-            const diffTime = Math.abs(now - parseInt(lastUploadTime));
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-            
-            if (diffDays < QUOTA_DAYS) {
-                const daysLeft = QUOTA_DAYS - diffDays;
-                btn.disabled = true;
-                btn.textContent = `⏳ ${daysLeft}h`;
-                btn.title = `Upload quota reached. Try again in ${daysLeft} days.`;
-                return false;
-            }
-        }
-        btn.disabled = false;
-        btn.textContent = "+ Unggah";
-        return true;
-    }
-
-    // ============================================
-    // RENDER FUNCTIONS
-    // ============================================
-    
-    function getMoodLabel(mood) {
-      var labels = {
-        'surviving': '✦ surviving',
-        'thriving': '✨ thriving',
-        'chaotic': '🌀 chaotic',
-        'doom': '🛌 doomscrolling',
-        'existential': '🎭 existential'
-      };
-      return labels[mood] || '✦ surviving';
-    }
-
-    function generateVibeReactions(entryId, vibes) {
-      vibes = vibes || {};
-      var html = '<div class="vibe-reactions">';
+      const btn = document.getElementById('upload-btn');
+      const counter = document.getElementById('upload-counter');
       
-      // FIX 2: Loop through the new 6-item VIBE_REACTIONS
-      Object.keys(VIBE_REACTIONS).forEach(function(key) {
-        var vibe = VIBE_REACTIONS[key];
-        var count = vibes[key] || 0;
-        var isVibed = userReactions.has(entryId + '-' + key);
-        var vibedClass = isVibed ? 'vibed' : '';
-        
-        html += 
-          '<button class="vibe-btn ' + vibedClass + '" ' +
-          'onclick="sendVibe(\'' + entryId + '\', \'' + key + '\', this)" ' +
-          'aria-label="' + vibe.desc + '">' +
-          '<span class="emoji">' + vibe.emoji + '</span>' +
-          '<span class="count">' + count + '</span>' +
-          '<span class="vibe-tooltip">' +
-          '<span class="slang-id">' + vibe.slangId + '</span>' +
-          '<span class="slang-en">' + vibe.slangEn + '</span>' +
-          '</span>' +
-          '</button>';
+      if (!state.lastUpload) {
+        btn.disabled = false;
+        counter.style.display = 'none';
+        return true;
+      }
+      
+      const daysSince = Math.floor((Date.now() - parseInt(state.lastUpload)) / 86400000);
+      const daysLeft = 30 - daysSince;
+      
+      if (daysLeft > 0) {
+        btn.disabled = true;
+        counter.textContent = daysLeft;
+        counter.style.display = 'block';
+        return false;
+      }
+      
+      btn.disabled = false;
+      counter.style.display = 'none';
+      return true;
+    }
+
+    // ============================================
+    // MANUAL MOOD SELECTOR
+    // ============================================
+    window.selectMood = function(mood) {
+      state.currentMood = mood;
+      
+      // Update visual selection
+      document.querySelectorAll('.mood-card').forEach(card => {
+        card.classList.remove('active');
+        if (card.dataset.mood === mood) {
+          card.classList.add('active');
+        }
       });
       
-      html += '</div>';
-      
-      // FIX 1: Removed Gerak Invite Logic (checkVibeMatch call)
-      
-      // Vibe summary
-      var totalVibes = Object.values(vibes).reduce(function(a, b) { return a + b; }, 0);
-      if (totalVibes > 0) {
-        var topVibe = Object.entries(vibes).sort(function(a, b) { return b[1] - a[1]; })[0];
-        var topVibeData = VIBE_REACTIONS[topVibe[0]];
-        html += 
-          '<div class="vibe-summary">' +
-          '<span class="highlight">' + totalVibes + ' orang</span> merasakan ini · ' +
-          'banyak yang <span class="highlight">' + topVibeData.slangId + '</span> ' + topVibeData.emoji +
-          '</div>';
-      }
-      
-      return html;
-    }
-
-    window.sendVibe = function(entryId, vibeKey, btnElement) {
-      var reactionKey = entryId + '-' + vibeKey;
-      
-      if (userReactions.has(reactionKey)) {
-        userReactions.delete(reactionKey);
-        btnElement.classList.remove('vibed');
-        var countEl = btnElement.querySelector('.count');
-        var newCount = Math.max(0, parseInt(countEl.textContent) - 1);
-        countEl.textContent = newCount;
-      } else {
-        userReactions.add(reactionKey);
-        btnElement.classList.add('vibed');
-        btnElement.classList.add('animating');
-        
-        var countEl = btnElement.querySelector('.count');
-        var newCount = parseInt(countEl.textContent) + 1;
-        countEl.textContent = newCount;
-        
-        setTimeout(function() {
-          btnElement.classList.remove('animating');
-        }, 300);
-        
-        var vibe = VIBE_REACTIONS[vibeKey];
-        showConfirmation(vibe.slangId + ' sent! ' + vibe.emoji);
-        
-        // FIX 1: Removed Gerak trigger logic
-      }
+      // Haptic feedback
+      if (navigator.vibrate) navigator.vibrate(10);
     };
 
-    function renderDiary() {
-      var container = document.getElementById('diary');
-      var header = container.querySelector('.diary-header');
-      container.innerHTML = '';
-      container.appendChild(header);
-
-      var list = rants;
-
-      if (list.length === 0) {
-        var empty = document.createElement('div');
-        empty.className = 'empty-state';
-        empty.innerHTML = '<span class="emoji">🍃</span><p>Belum ada jejak. Mulai tulis yang sebenarnya.</p>';
-        container.appendChild(empty);
+    // ============================================
+    // RENDER
+    // ============================================
+    function renderEntries() {
+      const container = document.getElementById('entries-container');
+      const entries = state.entries.length ? state.entries : dummyEntries;
+      
+      if (!entries.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <span class="empty-emoji">🍃</span>
+            <p class="empty-text">"Belum ada yang berani spill"</p>
+            <p class="empty-subtext">Jadilah yang pertama. No judgment.</p>
+          </div>
+        `;
         return;
       }
-
-      list.forEach(function(r) {
-        var entry = document.createElement('div');
-        entry.className = 'diary-entry';
-        entry.id = 'entry-' + r.id;
-        
-        var date = new Date(r.created_at);
-        var dateStr = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
-        var timeStr = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-        
-        var moodHtml = r.mood ? 
-          '<span class="entry-mood-badge" onclick="toggleEntryMood(event, \'' + r.id + '\')">' + getMoodLabel(r.mood) + '</span>' +
-          '<div class="mood-popup" id="mood-popup-' + r.id + '">' +
-          '<div class="mood-option" onclick="selectEntryMood(\'' + r.id + '\', \'surviving\')"><span class="emoji">😮‍💨</span> surviving</div>' +
-          '<div class="mood-option" onclick="selectEntryMood(\'' + r.id + '\', \'thriving\')"><span class="emoji">✨</span> thriving</div>' +
-          '<div class="mood-option" onclick="selectEntryMood(\'' + r.id + '\', \'chaotic\')"><span class="emoji">🌀</span> chaotic</div>' +
-          '<div class="mood-option" onclick="selectEntryMood(\'' + r.id + '\', \'doom\')"><span class="emoji">🛌</span> doomscrolling</div>' +
-          '<div class="mood-option" onclick="selectEntryMood(\'' + r.id + '\', \'existential\')"><span class="emoji">🎭</span> existential</div>' +
-          '</div>' : '';
-        
-        entry.innerHTML = 
-          '<div class="entry-time-row">' +
-          '<time>' + dateStr + ' · ' + timeStr + '</time>' +
-          moodHtml +
-          '</div>' +
-          '<p>' + r.content + '</p>' +
-          generateVibeReactions(r.id, r.vibes);
-        
-        container.appendChild(entry);
-      });
-    }
-
-    window.toggleEntryMood = function(event, entryId) {
-      event.stopPropagation();
-      document.querySelectorAll('.mood-popup').forEach(function(popup) {
-        if (popup.id !== 'mood-popup-' + entryId) popup.classList.remove('show');
-      });
-      var popup = document.getElementById('mood-popup-' + entryId);
-      if (popup) popup.classList.toggle('show');
-    };
-
-    // ============================================
-    // HERO & TRAY
-    // ============================================
-    
-    var heroImg = document.getElementById('hero-img');
-    var heroNotationDisplay = document.getElementById('hero-notation-display');
-    var postUploadPanel = document.getElementById('post-upload-panel');
-    var heroNotationInput = document.getElementById('hero-notation');
-    var fileInput = document.getElementById('file-input');
-
-    function showPostUploadPanel() {
-      postUploadPanel.classList.remove('hidden');
-      heroNotationInput.value = '';
-      setTimeout(function() { heroNotationInput.focus(); }, 100);
-    }
-
-    window.hidePostUploadPanel = function() {
-      postUploadPanel.classList.add('hidden');
-    };
-
-    function renderHero() {
-      var current = artefacts.length > 0 ? artefacts[0] : null;
-      if (current) {
-        heroImg.src = current.image_url;
-        heroNotationDisplay.textContent = current.notation || '';
-        
-        if (String(current.id).startsWith('user-') && !current.notation) {
-             showPostUploadPanel();
-        } else {
-             hidePostUploadPanel();
-        }
-      }
+      
+      container.innerHTML = entries.map(entry => `
+        <article class="entry">
+          <div class="entry-header">
+            <div class="entry-meta">
+              <span class="entry-time">${formatTime(entry.timestamp)}</span>
+              <span class="entry-mood ${entry.mood}">${MOODS[entry.mood].label}</span>
+            </div>
+          </div>
+          <div class="entry-content">
+            <p>${entry.content}</p>
+          </div>
+          <div class="vibe-bar">
+            ${Object.entries(VIBES).map(([key, vibe]) => {
+              const count = entry.vibes?.[key] || 0;
+              const isVibed = state.userVibes.has(`${entry.id}-${key}`);
+              return `
+                <button class="vibe-btn ${isVibed ? 'vibed' : ''}" 
+                        onclick="toggleVibe('${entry.id}', '${key}', this)"
+                        aria-label="${vibe.label}">
+                  <span class="vibe-emoji">${vibe.emoji}</span>
+                  <span class="vibe-count">${count}</span>
+                  <span class="vibe-label">${vibe.label}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </article>
+      `).join('');
     }
 
     function renderTray() {
-      var tray = document.getElementById('tray');
-      tray.innerHTML = '';
-
-      var displayList = artefacts.slice(0, 6);
-
-      while (displayList.length < 6) {
-          displayList.push({ id: 'empty-' + displayList.length, image_url: null });
+      const grid = document.getElementById('tray-grid');
+      const items = state.artefacts.length ? state.artefacts : dummyArtefacts;
+      
+      grid.innerHTML = items.map(item => `
+        <div class="tray-item" onclick="setHero('${item.url}', '${item.note}')">
+          <img src="${item.url}" alt="${item.note}" loading="lazy">
+        </div>
+      `).join('');
+      
+      const emptySlots = 6 - items.length;
+      for (let i = 0; i < emptySlots; i++) {
+        grid.innerHTML += `<div class="tray-item empty">+</div>`;
       }
-
-      displayList.forEach(function(a) {
-        var div = document.createElement('div');
-        div.className = 'tray-slot';
-        
-        if (!a.image_url) {
-          div.classList.add('empty');
-          div.textContent = '+';
-          tray.appendChild(div);
-          return;
-        }
-
-        div.style.backgroundImage = 'url(' + a.image_url + ')';
-
-        if (a.notation) {
-          var notationEl = document.createElement('div');
-          notationEl.className = 'artefak-notation';
-          notationEl.textContent = a.notation;
-          div.appendChild(notationEl);
-        }
-
-        div.onclick = function() {
-          heroImg.src = a.image_url;
-          heroNotationDisplay.textContent = a.notation || '';
-          hidePostUploadPanel();
-        };
-
-        tray.appendChild(div);
-      });
     }
 
     // ============================================
-    // EVENT HANDLERS
+    // ACTIONS
     // ============================================
-    
-    async function handleFileSelect(event) {
-      if (!checkUploadQuota()) {
-          showConfirmation("Kuota upload habis. Coba lagi dalam 30 hari.");
-          return;
+    window.toggleVibe = function(entryId, vibeKey, btn) {
+      const key = `${entryId}-${vibeKey}`;
+      const countEl = btn.querySelector('.vibe-count');
+      let count = parseInt(countEl.textContent);
+      
+      if (state.userVibes.has(key)) {
+        state.userVibes.delete(key);
+        btn.classList.remove('vibed');
+        countEl.textContent = Math.max(0, count - 1);
+      } else {
+        state.userVibes.add(key);
+        btn.classList.add('vibed');
+        countEl.textContent = count + 1;
+        
+        // Spring animation
+        btn.style.transform = 'scale(0.9)';
+        setTimeout(() => btn.style.transform = '', 150);
+        
+        showToast(`${VIBES[vibeKey].label}!`);
       }
+    };
 
-      var file = event.target.files[0];
-      if (!file) return;
+    window.setHero = function(url, note) {
+      document.getElementById('hero-img').src = url;
+      document.getElementById('hero-notation').textContent = `"${note}"`;
+    };
 
-      if (!file.type.startsWith('image/')) {
-        showConfirmation('Hanya file gambar yang diperbolehkan!');
-        fileInput.value = '';
+    // ============================================
+    // EVENTS
+    // ============================================
+    document.getElementById('rant-input').addEventListener('input', function() {
+      document.getElementById('char-count').textContent = `${this.value.length}/500`;
+    });
+
+    document.getElementById('submit-btn').addEventListener('click', function() {
+      const input = document.getElementById('rant-input');
+      const content = input.value.trim();
+      
+      if (!content) {
+        showToast('Tulis dulu, bestie');
+        input.focus();
         return;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        showConfirmation('Ukuran file maksimal 5MB!');
-        fileInput.value = '';
-        return;
-      }
-
-      showConfirmation('Mengunggah...');
       
-      var imageUrl = URL.createObjectURL(file);
-      
-      var newArtefact = {
-          id: 'user-' + Date.now(),
-          image_url: imageUrl,
-          notation: ''
+      const newEntry = {
+        id: 'u' + Date.now(),
+        content,
+        mood: state.currentMood,
+        timestamp: Date.now(),
+        vibes: { relatable: 0, mood: 0, tea: 0, hug: 0, real: 0, dead: 0 }
       };
       
-      artefacts.unshift(newArtefact);
+      state.entries.unshift(newEntry);
+      input.value = '';
+      document.getElementById('char-count').textContent = '0/500';
       
-      localStorage.setItem('nope_last_upload', new Date().getTime().toString());
+      renderEntries();
+      showToast(`Jejak ${MOODS[state.currentMood].label} tersimpan!`);
       
-      renderHero();
+      // Scroll to entries
+      document.querySelector('.entries-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    document.getElementById('upload-btn').addEventListener('click', function() {
+      if (!checkUploadQuota()) {
+        showToast('Cooldown aktif. Sabar ya.');
+        return;
+      }
+      document.getElementById('file-input').click();
+    });
+
+    document.getElementById('file-input').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('Max 5MB, bestie');
+        return;
+      }
+      
+      const url = URL.createObjectURL(file);
+      state.artefacts.unshift({
+        id: 'u' + Date.now(),
+        url,
+        note: 'new drop'
+      });
+      
+      state.lastUpload = Date.now().toString();
+      localStorage.setItem('jejak_last_upload', state.lastUpload);
+      
+      setHero(url, 'new drop');
       renderTray();
-      showPostUploadPanel(); 
-      checkUploadQuota(); 
-      
-      fileInput.value = '';
-    }
-
-    async function saveNotation() {
-      var notation = heroNotationInput.value.trim();
-      if (!notation) { showConfirmation('Tulis notasi dulu.'); return; }
-
-      var words = notation.split(/\s+/).filter(function(w) { return w.length > 0; });
-      if (words.length > 4) { showConfirmation('Maks 4 kata.'); return; }
-
-      if (artefacts.length > 0) {
-          artefacts[0].notation = notation;
-          renderHero();
-          renderTray();
-      }
-      
-      showConfirmation('Notasi tersimpan.');
-      triggerPulse();
-      hidePostUploadPanel();
-    }
-
-    async function postRant() {
-      var textarea = document.getElementById('rant');
-      var content = textarea.value.trim();
-      if (!content) { showConfirmation('Tulis dulu.'); return; }
-
-      try {
-        showConfirmation('Menyimpan...');
-        
-        var newRant = {
-            id: 'user-' + Date.now(),
-            username: currentUser,
-            content: content,
-            created_at: new Date().toISOString(),
-            mood: currentMood,
-            vibes: {}
-        };
-        
-        rants.unshift(newRant);
-        
-        renderDiary();
-        textarea.value = '';
-        triggerPulse();
-        showConfirmation('Tersimpan.');
-      } catch (e) {
-        showConfirmation('Gagal menyimpan. Coba lagi.');
-      }
-    }
+      checkUploadQuota();
+      showToast('Artefak ditambahkan!');
+    });
 
     // ============================================
     // INIT
     // ============================================
-    
-    document.getElementById('username-display').textContent = currentUser.replace(/^@/, '');
-    
-    var now = new Date();
-    document.getElementById('current-date').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' });
-
-    document.getElementById('upload-artefak-btn').addEventListener('click', function() {
-      fileInput.click();
-    });
-
-    fileInput.addEventListener('change', handleFileSelect);
-    document.getElementById('save-notation-btn').addEventListener('click', saveNotation);
-    document.getElementById('jejakkan-btn').addEventListener('click', postRant);
-    document.getElementById('settings-btn').addEventListener('click', function() {
-      showConfirmation('Settings — coming soon.');
-    });
-
-    document.addEventListener('click', function(e) {
-      if (!e.target.closest('.entry-mood-badge') && !e.target.closest('.mood-popup')) {
-        document.querySelectorAll('.mood-popup').forEach(function(popup) {
-          popup.classList.remove('show');
-        });
-      }
-    });
-
-    // Render
-    checkUploadQuota(); 
-    renderHero();
-    renderDiary();
+    checkUploadQuota();
+    renderEntries();
     renderTray();
-
-  })();
   </script>
 </body>
 </html>
