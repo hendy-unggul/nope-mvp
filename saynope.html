@@ -29,6 +29,11 @@
       --accent-secondary: #4A90A4;
       --gold: #D4AF37;
       --gold-soft: #F4E8C1;
+      --vibe-chaotic: #8B5CF6;
+      --vibe-calm: #10B981;
+      --vibe-melancholy: #64748B;
+      --vibe-angry: #EF4444;
+      --vibe-hopeful: #F59E0B;
       
       --radius: 12px;
       --radius-sm: 8px;
@@ -101,6 +106,108 @@
       color: var(--bg);
     }
 
+    /* === VIBE SYNC STATUS === */
+    .vibe-sync-status {
+      background: linear-gradient(135deg, var(--surface) 0%, var(--surface-warm) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .vibe-sync-status::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--accent);
+      transition: background 0.3s ease;
+    }
+
+    .vibe-sync-status.synced::before {
+      background: var(--vibe-calm);
+    }
+
+    .vibe-sync-status.syncing::before {
+      background: var(--vibe-hopeful);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .vibe-indicator {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      transition: all 0.3s ease;
+    }
+
+    .vibe-sync-status.synced .vibe-indicator {
+      border-color: var(--vibe-calm);
+      background: rgba(16, 185, 129, 0.1);
+    }
+
+    .vibe-info {
+      flex: 1;
+    }
+
+    .vibe-label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .vibe-value {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      margin-top: 2px;
+    }
+
+    .vibe-match-count {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .sync-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: var(--text-secondary);
+    }
+
+    .sync-btn:hover {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
     /* === PAGE HEADER === */
     .page-header {
       text-align: center;
@@ -135,7 +242,68 @@
       letter-spacing: 0.3px;
     }
 
-    /* === TEA CARDS - KOMPAK === */
+    /* === RESONANCE FILTER BAR === */
+    .resonance-filter {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+
+    .filter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .filter-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .filter-toggle {
+      font-size: 11px;
+      color: var(--accent);
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .resonance-slider {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--bg);
+      outline: none;
+      -webkit-appearance: none;
+      margin: 8px 0;
+    }
+
+    .resonance-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid white;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .resonance-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* === TEA CARDS === */
     .tea-container {
       display: flex;
       flex-direction: column;
@@ -148,12 +316,49 @@
       border-radius: var(--radius);
       padding: 14px;
       position: relative;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .tea-card:hover {
       border-color: var(--accent-soft);
       box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+
+    .tea-card.dimmed {
+      opacity: 0.4;
+      filter: grayscale(0.5);
+    }
+
+    .tea-card.highlighted {
+      border-color: var(--accent);
+      box-shadow: 0 4px 20px rgba(232, 93, 78, 0.15);
+      transform: scale(1.01);
+    }
+
+    .resonance-badge {
+      position: absolute;
+      top: -8px;
+      right: 12px;
+      background: var(--accent);
+      color: white;
+      font-size: 9px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: none;
+    }
+
+    .tea-card.highlighted .resonance-badge {
+      display: block;
     }
 
     .tea-header {
@@ -254,7 +459,7 @@
       cursor: pointer;
     }
 
-    /* === VIBE REACTIONS - KOMPAK === */
+    /* === VIBE REACTIONS === */
     .vibe-section {
       padding-left: 42px;
       border-top: 1px solid var(--border);
@@ -342,7 +547,56 @@
       border-top-color: var(--text);
     }
 
-    /* === GETARAN CARDS (NEW) === */
+    /* === HOMIE EMPTY STATE === */
+    .homie-empty {
+      text-align: center;
+      padding: 40px 20px;
+      background: var(--surface);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      margin: 20px 0;
+    }
+
+    .homie-empty-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    .homie-empty-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .homie-empty-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .homie-empty-btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 20px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .homie-empty-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(232, 93, 78, 0.3);
+    }
+
+    /* === GETARAN CARDS === */
     .getaran-section {
       margin-top: 32px;
       margin-bottom: 24px;
@@ -1060,6 +1314,10 @@
         height: 36px;
         font-size: 16px;
       }
+      
+      .vibe-sync-status {
+        flex-wrap: wrap;
+      }
     }
   </style>
 </head>
@@ -1070,19 +1328,55 @@
       <div class="nav-mini">
         <span onclick="window.location.href='jejak.html'">JEJAK</span>
         <span onclick="window.location.href='frekuensi-zones.html'">GERAK</span>
-        <span onclick="window.location.href='saynope.html'">SPILL</span>
+        <span onclick="window.location.href='saynope.html'" class="active">SPILL</span>
         <span onclick="window.location.href='glitch.html'">GLITCH</span>
-              </div>
+      </div>
     </header>
+
+    <!-- VIBE SYNC STATUS BAR -->
+    <div class="vibe-sync-status" id="vibe-sync-status">
+      <div class="vibe-indicator" id="vibe-indicator">🌀</div>
+      <div class="vibe-info">
+        <div class="vibe-label">Vibrasi JEJAK-mu Hari Ini</div>
+        <div class="vibe-value" id="vibe-value">Menyinkronkan...</div>
+        <div class="vibe-match-count" id="vibe-match-count">Mencari getaran selaras...</div>
+      </div>
+      <button class="sync-btn" onclick="syncWithJejak()">🔄 Sinkron</button>
+    </div>
+
+    <!-- RESONANCE FILTER -->
+    <div class="resonance-filter" id="resonance-filter" style="display: none;">
+      <div class="filter-header">
+        <span class="filter-title">Tingkat Resonansi</span>
+        <span class="filter-toggle" onclick="resetFilter()">Reset</span>
+      </div>
+      <input type="range" class="resonance-slider" id="resonance-slider" min="0" max="100" value="80" oninput="adjustResonance(this.value)">
+      <div class="resonance-labels">
+        <span>Homie Only</span>
+        <span>Semi-Selaras</span>
+        <span>Semua</span>
+      </div>
+    </div>
 
     <div class="page-header">
       <h1 class="page-title">🍵 Spill the Tea</h1>
-      <p class="page-subtitle">Curhatan random dari komunitas. Anonymous. Real. No cap.</p>
+      <p class="page-subtitle">Curhatan dari komunitas yang selaras dengan vibrasimu</p>
       <div class="page-tagline">Give your vibe and start your journey...</div>
     </div>
 
     <div class="tea-container" id="tea-container">
       <!-- Tea cards will be rendered here -->
+    </div>
+
+    <!-- HOMIE EMPTY STATE -->
+    <div class="homie-empty" id="homie-empty" style="display: none;">
+      <div class="homie-empty-icon">🌌</div>
+      <div class="homie-empty-title">Belum Ada yang Selaras</div>
+      <div class="homie-empty-text">
+        Vibrasimu hari ini unik! Belum ada yang spill dengan energi serupa. 
+        Coba turunkan tingkat resonansi atau tulis di JEJAK dulu.
+      </div>
+      <button class="homie-empty-btn" onclick="adjustResonance(50)">Buka Filter Lebar</button>
     </div>
 
     <div class="refresh-container">
@@ -1091,7 +1385,7 @@
       </button>
     </div>
 
-    <!-- GETARAN CARDS SECTION (NEW) -->
+    <!-- GETARAN CARDS SECTION -->
     <div class="getaran-section">
       <div class="getaran-header">Getaran yang Cocok</div>
       
@@ -1233,24 +1527,54 @@
   </div>
 
   <script>
-    const VIBE_REACTIONS = {
-      'relatable': { emoji: '😭', label: 'literally me', slang: 'Sama' },
-      'same': { emoji: '🛋️', label: 'big mood', slang: 'Mood' },
-      'hug': { emoji: '🫂', label: 'virtual hug', slang: 'Peluk' },
-      'tea': { emoji: '🍵', label: 'the tea', slang: 'Tea' },
-      'stay': { emoji: '✊', label: 'stay strong', slang: 'Kuat' },
-      'real': { emoji: '🫡', label: 'no cap', slang: 'Real' },
-      'slay': { emoji: '💅', label: 'slay', slang: 'Slay' },
-      'ghost': { emoji: '👻', label: 'ghosting', slang: 'Ghost' }
+    // === VIBRATIONAL MATCHING SYSTEM ===
+    
+    // User's current vibe from JEJAK (simulated - in real app, fetch from localStorage/API)
+    let userVibe = {
+      emotion: 'chaotic',
+      intensity: 0.7,
+      timestamp: null,
+      keywords: ['overthinking', 'anxiety', 'night']
     };
 
-    const MOCK_REACTORS = [
-      { username: '@random_user1', avatar: '🎭', emoji: '😭' },
-      { username: '@anonymouse', avatar: '🐭', emoji: '🛋️' },
-      { username: '@tea_lover', avatar: '🍵', emoji: '🫂' },
-      { username: '@late_night', avatar: '🌙', emoji: '✊' }
-    ];
+    // Resonance threshold (0-100)
+    let resonanceThreshold = 80;
 
+    // Vibe taxonomy for matching
+    const VIBE_TAXONOMY = {
+      chaotic: {
+        emotions: ['chaotic', 'anxious', 'overwhelmed', 'doomscrolling'],
+        keywords: ['overthinking', '3am', 'capek', 'pusing', 'stress', 'deadline', 'skripsi'],
+        emoji: '🌀',
+        color: '#8B5CF6'
+      },
+      melancholy: {
+        emotions: ['sad', 'lonely', 'burnout', 'empty'],
+        keywords: ['sendirian', 'crying', 'hurt', 'ghosted', 'missing', 'regret'],
+        emoji: '🌧️',
+        color: '#64748B'
+      },
+      angry: {
+        emotions: ['angry', 'frustrated', 'betrayed', 'toxic'],
+        keywords: ['marah', 'kesel', 'toxic', 'fake', 'backstab', 'unfair'],
+        emoji: '🔥',
+        color: '#EF4444'
+      },
+      calm: {
+        emotions: ['calm', 'grateful', 'peaceful', 'healing'],
+        keywords: ['alhamdulillah', 'healing', 'grateful', 'peace', 'better'],
+        emoji: '🌿',
+        color: '#10B981'
+      },
+      hopeful: {
+        emotions: ['hopeful', 'excited', 'motivated', 'new beginnings'],
+        keywords: ['baru', 'start', 'semangat', 'growth', 'resign', 'freedom'],
+        emoji: '✨',
+        color: '#F59E0B'
+      }
+    };
+
+    // Enhanced TEA_POOL with vibe signatures
     const TEA_POOL = [
       {
         id: 'tea-1',
@@ -1261,10 +1585,14 @@
         time: '20m',
         vibes: { relatable: 45, hug: 23, same: 18 },
         hasImage: false,
+        vibeSignature: {
+          primary: 'chaotic',
+          intensity: 0.85,
+          keywords: ['overthinking', '3am', 'cringe', 'anxiety']
+        },
         journal: [
           { time: '3:42 AM', mood: '😴', content: "masih scrolling tiktok padahal mata udah ngantuk", reactions: { relatable: 12, same: 8 } },
-          { time: '2:15 AM', mood: '😰', content: "coba tidur tapi kepikiran typo ke grup kantor", reactions: { relatable: 5 } },
-          { time: '11:30 PM', mood: '📚', content: "besok ujian tapi gue masih di sini 🙃", reactions: { hug: 3, same: 7 } }
+          { time: '2:15 AM', mood: '😰', content: "coba tidur tapi kepikiran typo ke grup kantor", reactions: { relatable: 5 } }
         ]
       },
       {
@@ -1276,9 +1604,13 @@
         time: '1j',
         vibes: { relatable: 67, hug: 34, stay: 12 },
         hasImage: false,
+        vibeSignature: {
+          primary: 'melancholy',
+          intensity: 0.75,
+          keywords: ['capek', 'struggling', 'pressure', 'family']
+        },
         journal: [
-          { time: '8:00 PM', mood: '💸', content: "adik minta duit lagi, gue sendiri udah hemat", reactions: { relatable: 15 } },
-          { time: '6:30 PM', mood: '😔', content: "mama bilang 'kamu kan kakak, harus kuat'", reactions: { hug: 20, relatable: 30 } }
+          { time: '8:00 PM', mood: '💸', content: "adik minta duit lagi, gue sendiri udah hemat", reactions: { relatable: 15 } }
         ]
       },
       {
@@ -1291,9 +1623,13 @@
         vibes: { ghost: 89, relatable: 56, same: 34 },
         hasImage: true,
         image: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=300&q=80',
+        vibeSignature: {
+          primary: 'melancholy',
+          intensity: 0.6,
+          keywords: ['ghosted', 'ignored', 'sad', 'confused']
+        },
         journal: [
-          { time: '11:00 PM', mood: '📱', content: "checking chat tiap 5 menit", reactions: { ghost: 25 } },
-          { time: '10:46 PM', mood: '🤡', content: "dia online tapi ga bales", reactions: { relatable: 18 } }
+          { time: '11:00 PM', mood: '📱', content: "checking chat tiap 5 menit", reactions: { ghost: 25 } }
         ]
       },
       {
@@ -1305,9 +1641,13 @@
         time: '3j',
         vibes: { slay: 92, stay: 45, real: 38 },
         hasImage: false,
+        vibeSignature: {
+          primary: 'hopeful',
+          intensity: 0.8,
+          keywords: ['resign', 'freedom', 'toxic', 'growth', 'new']
+        },
         journal: [
-          { time: 'Hari ini', mood: '🎉', content: "FINALLY FREE! 🎉", reactions: { slay: 40, stay: 15 } },
-          { time: 'Kemarin', mood: '😤', content: "last day, boss gaslighting sampe akhir", reactions: { real: 22 } }
+          { time: 'Hari ini', mood: '🎉', content: "FINALLY FREE! 🎉", reactions: { slay: 40, stay: 15 } }
         ]
       },
       {
@@ -1319,43 +1659,211 @@
         time: '4j',
         vibes: { relatable: 78, hug: 45, same: 23 },
         hasImage: false,
+        vibeSignature: {
+          primary: 'chaotic',
+          intensity: 0.9,
+          keywords: ['deadline', 'stress', 'skripsi', 'panic', 'dosen']
+        },
         journal: [
-          { time: '2:00 AM', mood: '😭', content: "nangis di perpus stuck latar belakang", reactions: { relatable: 33, hug: 15 } },
-          { time: 'Kemarin', mood: '📵', content: "chat dosen ga dibaca", reactions: { same: 20 } }
+          { time: '2:00 AM', mood: '😭', content: "nangis di perpus stuck latar belakang", reactions: { relatable: 33, hug: 15 } }
+        ]
+      },
+      {
+        id: 'tea-6',
+        user: '@healing_journey',
+        avatar: '🌱',
+        mood: '🌿 growing',
+        content: "hari ini cuma tidur, baca buku, minum teh. no productivity guilt. just existing and it's enough 💚",
+        time: '5j',
+        vibes: { calm: 65, relatable: 34, hug: 12 },
+        hasImage: false,
+        vibeSignature: {
+          primary: 'calm',
+          intensity: 0.7,
+          keywords: ['healing', 'rest', 'peace', 'grateful', 'slow']
+        },
+        journal: [
+          { time: '4:00 PM', mood: '🍵', content: "tea time sendirian, finally peace", reactions: { calm: 20 } }
+        ]
+      },
+      {
+        id: 'tea-7',
+        user: '@toxic_ex',
+        avatar: '😤',
+        mood: '🔥 rage',
+        content: "baru tau selama ini dighosting karena dia udah punya pacar baru. 6 bulan gue nunggu explaination taunya gue jadi badut 🎪",
+        time: '30m',
+        vibes: { angry: 88, relatable: 45, hug: 23 },
+        hasImage: false,
+        vibeSignature: {
+          primary: 'angry',
+          intensity: 0.95,
+          keywords: ['betrayed', 'angry', 'toxic', 'liar', 'hurt']
+        },
+        journal: [
+          { time: 'Baru saja', mood: '🤬', content: "BLOCK SEMUA SOSMED!", reactions: { angry: 30 } }
         ]
       }
+    ];
+
+    const VIBE_REACTIONS = {
+      'relatable': { emoji: '😭', label: 'literally me', slang: 'Sama' },
+      'same': { emoji: '🛋️', label: 'big mood', slang: 'Mood' },
+      'hug': { emoji: '🫂', label: 'virtual hug', slang: 'Peluk' },
+      'tea': { emoji: '🍵', label: 'the tea', slang: 'Tea' },
+      'stay': { emoji: '✊', label: 'stay strong', slang: 'Kuat' },
+      'real': { emoji: '🫡', label: 'no cap', slang: 'Real' },
+      'slay': { emoji: '💅', label: 'slay', slang: 'Slay' },
+      'ghost': { emoji: '👻', label: 'ghosting', slang: 'Ghost' },
+      'calm': { emoji: '🌿', label: 'peaceful', slang: 'Tenang' },
+      'angry': { emoji: '🔥', label: 'valid anger', slang: 'Valid' }
+    };
+
+    const MOCK_REACTORS = [
+      { username: '@random_user1', avatar: '🎭', emoji: '😭' },
+      { username: '@anonymouse', avatar: '🐭', emoji: '🛋️' },
+      { username: '@tea_lover', avatar: '🍵', emoji: '🫂' },
+      { username: '@late_night', avatar: '🌙', emoji: '✊' }
     ];
 
     let currentTea = [];
     let currentJournalUser = null;
     let isSubscribed = false;
     let selectedPlan = 'yearly';
+    let isSynced = false;
 
-    document.addEventListener('DOMContentLoaded', () => {
-      loadNewTea();
-    });
-
-    function loadNewTea() {
-      const btn = document.getElementById('refresh-btn');
-      btn.classList.add('spinning');
+    // === VIBRATIONAL MATCHING ALGORITHM ===
+    
+    function calculateVibeMatch(userVibe, teaVibe) {
+      // Primary emotion match (40% weight)
+      const emotionMatch = userVibe.emotion === teaVibe.primary ? 1 : 0;
       
-      const shuffled = [...TEA_POOL].sort(() => 0.5 - Math.random());
-      currentTea = shuffled.slice(0, 5); // 5 venting per load
+      // Intensity similarity (30% weight) - closer intensity = higher match
+      const intensityDiff = Math.abs(userVibe.intensity - teaVibe.intensity);
+      const intensityMatch = 1 - intensityDiff;
       
-      setTimeout(() => {
-        renderTea();
-        btn.classList.remove('spinning');
-      }, 400);
+      // Keyword overlap (30% weight)
+      const userKeywords = new Set(userVibe.keywords);
+      const teaKeywords = new Set(teaVibe.keywords);
+      const intersection = new Set([...userKeywords].filter(x => teaKeywords.has(x)));
+      const keywordMatch = intersection.size / Math.max(userKeywords.size, teaKeywords.size);
+      
+      // Weighted average
+      const matchScore = (emotionMatch * 0.4) + (intensityMatch * 0.3) + (keywordMatch * 0.3);
+      
+      return Math.round(matchScore * 100);
     }
 
-    function renderTea() {
+    function getVibeFromJejak() {
+      // Simulate fetching from JEJAK page
+      // In real implementation, this would read from localStorage or API
+      const savedVibe = localStorage.getItem('jejak_current_vibe');
+      
+      if (savedVibe) {
+        return JSON.parse(savedVibe);
+      }
+      
+      // Default vibe if no JEJAK data
+      return {
+        emotion: 'chaotic',
+        intensity: 0.7,
+        timestamp: new Date().toISOString(),
+        keywords: ['overthinking', 'anxiety', 'night']
+      };
+    }
+
+    function syncWithJejak() {
+      const statusEl = document.getElementById('vibe-sync-status');
+      const indicatorEl = document.getElementById('vibe-indicator');
+      const valueEl = document.getElementById('vibe-value');
+      const countEl = document.getElementById('vibe-match-count');
+      
+      statusEl.classList.remove('synced');
+      statusEl.classList.add('syncing');
+      indicatorEl.textContent = '🔄';
+      
+      // Simulate API call
+      setTimeout(() => {
+        userVibe = getVibeFromJejak();
+        const vibeData = VIBE_TAXONOMY[userVibe.emotion];
+        
+        statusEl.classList.remove('syncing');
+        statusEl.classList.add('synced');
+        
+        indicatorEl.textContent = vibeData.emoji;
+        valueEl.textContent = `${userVibe.emotion.charAt(0).toUpperCase() + userVibe.emotion.slice(1)} (${Math.round(userVibe.intensity * 100)}%)`;
+        
+        // Filter and display matched tea
+        const matchedTea = filterTeaByVibe();
+        countEl.textContent = `${matchedTea.length} getaran selaras ditemukan`;
+        
+        document.getElementById('resonance-filter').style.display = 'block';
+        
+        renderTea(matchedTea);
+        
+        showNotification('Vibrasi tersinkron! 🎯');
+      }, 1200);
+    }
+
+    function filterTeaByVibe() {
+      if (!isSynced) return TEA_POOL;
+      
+      const matched = TEA_POOL.map(tea => {
+        const matchScore = calculateVibeMatch(userVibe, tea.vibeSignature);
+        return { ...tea, matchScore };
+      }).filter(tea => tea.matchScore >= resonanceThreshold);
+      
+      // Sort by match score
+      return matched.sort((a, b) => b.matchScore - a.matchScore);
+    }
+
+    function adjustResonance(value) {
+      resonanceThreshold = 100 - value; // Invert: higher slider = lower threshold (more inclusive)
+      const matchedTea = filterTeaByVibe();
+      renderTea(matchedTea);
+      
+      const countEl = document.getElementById('vibe-match-count');
+      if (matchedTea.length === 0) {
+        document.getElementById('homie-empty').style.display = 'block';
+        countEl.textContent = 'Tidak ada yang selaras';
+      } else {
+        document.getElementById('homie-empty').style.display = 'none';
+        countEl.textContent = `${matchedTea.length} getaran selaras`;
+      }
+    }
+
+    function resetFilter() {
+      document.getElementById('resonance-slider').value = 80;
+      resonanceThreshold = 20;
+      adjustResonance(80);
+    }
+
+    // === TEA RENDERING ===
+
+    function renderTea(teaList = null) {
       const container = document.getElementById('tea-container');
       container.innerHTML = '';
       
-      currentTea.forEach((tea) => {
+      const teaToRender = teaList || TEA_POOL;
+      
+      if (teaToRender.length === 0 && isSynced) {
+        document.getElementById('homie-empty').style.display = 'block';
+        return;
+      } else {
+        document.getElementById('homie-empty').style.display = 'none';
+      }
+      
+      teaToRender.forEach((tea, index) => {
         const card = document.createElement('div');
         card.className = 'tea-card';
         card.id = tea.id;
+        
+        // Highlight high resonance matches
+        if (tea.matchScore >= 85) {
+          card.classList.add('highlighted');
+        } else if (tea.matchScore < 50 && isSynced) {
+          card.classList.add('dimmed');
+        }
         
         let vibesHtml = '';
         Object.keys(VIBE_REACTIONS).forEach(key => {
@@ -1373,7 +1881,10 @@
         
         const readMore = tea.content.length > 120 ? `<span class="read-more" onclick="toggleReadMore(this)">Baca selengkapnya</span>` : '';
         
+        const matchBadge = tea.matchScore ? `<div class="resonance-badge">${tea.matchScore}% Match</div>` : '';
+        
         card.innerHTML = `
+          ${matchBadge}
           <div class="tea-header">
             <div class="tea-avatar" onclick="openJournal('${tea.id}')">${tea.avatar}</div>
             <div class="tea-meta">
@@ -1399,6 +1910,17 @@
       });
     }
 
+    function loadNewTea() {
+      const btn = document.getElementById('refresh-btn');
+      btn.classList.add('spinning');
+      
+      setTimeout(() => {
+        const matchedTea = isSynced ? filterTeaByVibe() : [...TEA_POOL].sort(() => 0.5 - Math.random());
+        renderTea(matchedTea);
+        btn.classList.remove('spinning');
+      }, 400);
+    }
+
     function toggleReadMore(el) {
       const content = el.previousElementSibling;
       content.classList.toggle('expanded');
@@ -1418,6 +1940,8 @@
         openJournal(teaId);
       }, 150);
     }
+
+    // === JOURNAL OVERLAY FUNCTIONS ===
 
     function openJournal(teaId) {
       const tea = TEA_POOL.find(t => t.id === teaId);
@@ -1579,7 +2103,6 @@
       }, 2000);
     }
 
-    // Getaran Card Functions
     function skipGetaran(btn) {
       const card = btn.closest('.getaran-card');
       card.style.opacity = '0.5';
@@ -1595,6 +2118,18 @@
       btn.style.background = 'var(--accent)';
       showNotification('Isyarat terkirim! Mereka akan tahu 💫');
     }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check if there's JEJAK data
+      const savedVibe = localStorage.getItem('jejak_current_vibe');
+      if (savedVibe) {
+        isSynced = true;
+        syncWithJejak();
+      } else {
+        renderTea();
+      }
+    });
   </script>
 </body>
 </html>
