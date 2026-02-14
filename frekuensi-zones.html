@@ -1,193 +1,1478 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="gerak">
+<html lang="id" data-theme="realtea">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>JEJAK — GERAK</title>
+  <title>NOPE — Jejak</title>
   
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%234A90A4'/%3E%3Ctext x='50' y='70' font-size='50' font-weight='bold' font-family='Caveat' text-anchor='middle' fill='%23F5F2ED'%3EJ%3C/text%3E%3C/svg%3E">
-  <meta name="theme-color" content="#00ff88">
+  <!-- PWA / Add to Home Screen -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23E85D4E'/%3E%3Ctext x='50' y='70' font-size='50' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%23F5F2ED'%3E✦%3C/text%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23E85D4E'/%3E%3Ctext x='90' y='130' font-size='90' font-weight='900' font-family='system-ui' text-anchor='middle' fill='%23F5F2ED'%3E✦%3C/text%3E%3C/svg%3E">
+  <meta name="theme-color" content="#F5F2ED">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Jejak">
   
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Space+Grotesk:wght@400;500;600;700&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Caveat:wght@400;500;600&family=DM+Sans:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
   
   <style>
-    :root {
-      --bg: #0a0a0a;
-      --surface: #121212;
-      --surface-elevated: #1a1a1a;
-      --border: #222222;
-      --text: #e6e6e6;
-      --text-secondary: #a0a0a0;
-      --muted: #8a8a8a;
-      --accent: #00ff88;
-      --accent-dim: rgba(0, 255, 136, 0.1);
-      --brand: #4A90A4;
+    :root,
+    [data-theme="realtea"] {
+      --bg: #F5F2ED;
+      --surface: #FFFFFF;
+      --surface-warm: #FAF8F5;
+      --border: #E8E4DE;
+      --border-accent: #D4CFC7;
+      --text: #2C2C2C;
+      --text-secondary: #6B6560;
+      --muted: #8B8680;
+      --accent: #E85D4E;
+      --accent-soft: #F4A5A0;
+      --accent-secondary: #4A90A4;
+      --accent-warm: #F4C542;
+      --handwritten: #4A4A4A;
+      
+      --radius: 16px;
+      --radius-sm: 8px;
     }
-
+    
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
+    
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-weight: 300;
-      font-size: 14px;
-      line-height: 1.5;
+      font-family: 'DM Sans', 'Space Grotesk', system-ui, sans-serif;
+      font-weight: 400;
+      font-size: 15px;
+      line-height: 1.6;
+      padding-bottom: 100px;
       -webkit-font-smoothing: antialiased;
-      overflow-x: hidden;
-    }
-
-    .wrapper {
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 0;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
     }
-
-    /* === LOGO JEJAK === */
-    .logo-container {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
+    
+    .wrapper {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0 20px;
     }
-
-    .logo-icon {
-      width: 40px;
-      height: 40px;
-      background: var(--brand);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Caveat', cursive;
-      font-size: 28px;
-      font-weight: 700;
-      color: #F5F2ED;
-      transform: rotate(-3deg);
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(74, 144, 164, 0.3);
-    }
-
-    .logo-container:hover .logo-icon {
-      transform: rotate(0deg) scale(1.05);
-    }
-
-    .logo-text {
-      font-family: 'Caveat', cursive;
-      font-size: 36px;
-      font-weight: 700;
-      color: var(--brand);
-      transform: rotate(-2deg);
-      line-height: 1;
-    }
-
-    /* === HEADER === */
+    
     header {
-      position: sticky;
-      top: 0;
-      background: #000000ee;
-      backdrop-filter: blur(12px);
-      padding: 12px 16px;
+      padding: 20px 0 16px;
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      z-index: 100;
-      border-bottom: 1px solid var(--border);
+      align-items: flex-start;
+      position: relative;
     }
-
+    
+    .logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+      transform: rotate(-2deg);
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+    
+    .logo:hover {
+      transform: rotate(0deg) scale(1.02);
+    }
+    
+    .date-header {
+      font-family: 'Caveat', cursive;
+      font-size: 24px;
+      color: var(--text-secondary);
+      margin-top: -8px;
+      transform: rotate(1deg);
+    }
+    
     .top-right {
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      align-items: flex-end;
       gap: 8px;
     }
-
+    
     .nav-mini {
       display: flex;
       gap: 6px;
       font-size: 11px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 500;
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
-
+    
     .nav-mini span {
       cursor: pointer;
       padding: 6px 10px;
       border-radius: 20px;
+      background: transparent;
       color: var(--muted);
-      transition: all 0.2s;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-weight: 600;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      white-space: nowrap;
     }
-
+    
     .nav-mini span:hover:not(.active) {
-      background: rgba(255, 255, 255, 0.05);
+      background: var(--surface-warm);
       color: var(--text);
     }
-
+    
     .nav-mini span.active {
-      background: var(--accent);
-      color: #000;
+      background: var(--text);
+      color: var(--bg);
+      border-color: var(--text);
     }
-
-    /* === GERAK HEADER === */
-    .gerak-header {
-      text-align: center;
-      padding: 24px 16px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 20px;
+    
+    .settings-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 8px;
+      transition: all 0.2s;
     }
-
-    .gerak-title {
+    
+    .settings-btn:hover {
+      background: var(--surface-warm);
+      color: var(--text);
+    }
+    
+    .hero {
+      position: relative;
+      width: 100%;
+      background: var(--surface);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      transform: rotate(-1deg);
+      transition: transform 0.3s ease;
+    }
+    
+    .hero:hover {
+      transform: rotate(0deg);
+    }
+    
+    .hero img {
+      width: 100%;
+      aspect-ratio: 4 / 5;
+      object-fit: cover;
+      display: block;
+      filter: contrast(0.95) saturate(0.9);
+    }
+    
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .artefak-notation {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      background: rgba(245, 242, 237, 0.95);
+      color: var(--text);
       font-family: 'Caveat', cursive;
-      font-size: 48px;
-      font-weight: 700;
-      color: var(--accent);
-      transform: rotate(-3deg);
-      margin-bottom: 8px;
-      text-shadow: 2px 2px 0 rgba(0, 255, 136, 0.2);
+      font-size: 22px;
+      font-weight: 500;
+      padding: 12px 16px;
+      border-radius: 8px;
+      line-height: 1.3;
+      backdrop-filter: blur(4px);
+      transform: rotate(-1deg);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
-
-    .gerak-subtitle {
-      font-size: 14px;
-      color: var(--text-secondary);
+    
+    .upload-artefak-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 8px 16px;
+      font-size: 13px;
       font-family: 'Space Grotesk', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      z-index: 2;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .upload-artefak-btn:hover {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    
+    .post-upload-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 24px;
+      transform: rotate(0.5deg);
+    }
+    
+    .post-upload-panel.hidden {
+      display: none !important;
+    }
+    
+    .post-upload-panel label {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
       letter-spacing: 0.5px;
     }
-
-    .gerak-tagline {
+    
+    .post-upload-panel input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: 15px;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.2s;
+    }
+    
+    .post-upload-panel input:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: var(--surface);
+    }
+    
+    .post-upload-panel .panel-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+    
+    .post-upload-panel button {
+      background: var(--text);
+      color: var(--bg);
+      border: none;
+      border-radius: 20px;
+      padding: 8px 20px;
+      font-size: 13px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .post-upload-panel button:hover {
+      background: var(--accent);
+      transform: translateY(-1px);
+    }
+    
+    .rant-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 24px;
+      position: relative;
+      transform: rotate(0.5deg);
+    }
+    
+    /* FIXED: Header sejajar dengan mood badge di kanan */
+    .rant-box-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    
+    .rant-box-header .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .rant-box-header strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    
+    .rant-box-header .mood-badge {
       font-family: 'Caveat', cursive;
-      font-size: 24px;
+      font-size: 18px;
       color: var(--accent);
+      transform: rotate(-2deg);
+      cursor: pointer;
+      white-space: nowrap;
+      position: relative;
+    }
+    
+    .rant-box textarea {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      resize: none;
+      min-height: 120px;
+    }
+    
+    .rant-box textarea:focus {
+      outline: none;
+    }
+    
+    .rant-box textarea::placeholder {
+      color: var(--border-accent);
+      font-style: italic;
+    }
+    
+    .rant-cta {
+      position: absolute;
+      bottom: 16px;
+      right: 16px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 24px;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(232, 93, 78, 0.3);
+    }
+    
+    .rant-cta:hover:not(:disabled) {
+      background: #D94A3E;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(232, 93, 78, 0.4);
+    }
+    
+    .rant-cta:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .confirmation {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
       margin-top: 8px;
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 18px;
+    }
+    
+    /* Diary entries with Compact Vibe Reactions */
+    .diary {
+      margin-bottom: 24px;
+    }
+    
+    .diary-header {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .diary-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    
+    .diary-entry {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      position: relative;
+      transition: all 0.2s;
+    }
+    
+    .diary-entry:hover {
+      border-color: var(--border-accent);
+    }
+    
+    .diary-entry time {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: 'Space Grotesk', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    
+    .diary-entry time::before {
+      content: '•';
+      color: var(--accent);
+    }
+    
+    .diary-entry p {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    
+    .diary-entry .entry-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    
+    .diary-entry .entry-tag {
+      font-family: 'Caveat', cursive;
+      font-size: 16px;
+      color: var(--accent-secondary);
       transform: rotate(-1deg);
     }
-
-    /* [Sisa CSS sama...] */
+    
+    /* COMPACT Vibe Reaction System - FIXED TOOLTIP */
+    .vibe-reactions {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 6px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border);
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      position: relative;
+      padding-bottom: 4px; /* Space untuk tooltip */
+    }
+    
+    .vibe-reactions::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .vibe-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      color: var(--text-secondary);
+      position: relative;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+    
+    .vibe-btn:hover {
+      background: var(--surface-warm);
+      border-color: var(--accent-soft);
+      transform: translateY(-2px);
+    }
+    
+    .vibe-btn:active {
+      transform: scale(0.95);
+    }
+    
+    .vibe-btn .emoji {
+      font-size: 14px;
+      filter: grayscale(30%);
+      transition: all 0.2s;
+    }
+    
+    .vibe-btn:hover .emoji {
+      filter: grayscale(0%);
+      transform: scale(1.15);
+    }
+    
+    .vibe-btn .count {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      min-width: 14px;
+      text-align: center;
+    }
+    
+    .vibe-btn.vibed {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--text);
+    }
+    
+    .vibe-btn.vibed .emoji {
+      filter: grayscale(0%);
+    }
+    
+    .vibe-btn.vibed .count {
+      color: var(--accent);
+    }
+    
+    /* Vibe Animation */
+    @keyframes vibePulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    
+    .vibe-btn.animating .emoji {
+      animation: vibePulse 0.3s ease;
+    }
+    
+    /* FIXED TOOLTIP - Positioned above with proper z-index */
+    .vibe-tooltip {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text);
+      color: var(--bg);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-family: 'Space Grotesk', sans-serif;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s ease;
+      pointer-events: none;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .vibe-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: var(--text);
+    }
+    
+    .vibe-tooltip .slang-id {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    
+    .vibe-tooltip .slang-en {
+      display: block;
+      opacity: 0.8;
+      font-size: 10px;
+    }
+    
+    .vibe-btn:hover .vibe-tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(-4px);
+    }
+    
+    /* Vibe Summary */
+    .vibe-summary {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: var(--surface-warm);
+      border-radius: 10px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-family: 'Caveat', cursive;
+      font-size: 14px;
+      transform: rotate(-0.5deg);
+    }
+    
+    .vibe-summary .highlight {
+      color: var(--accent);
+      font-weight: 600;
+    }
+    
+    /* Tray */
+    .tray-section {
+      margin-bottom: 24px;
+    }
+    
+    .tray-header {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .tray-header::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    
+    .tray {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    
+    .tray-slot {
+      aspect-ratio: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    
+    .tray-slot::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.4));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .tray-slot:hover {
+      transform: scale(1.05) rotate(-1deg);
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 2;
+    }
+    
+    .tray-slot:hover::before {
+      opacity: 1;
+    }
+    
+    .tray-slot .artefak-notation {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      right: 8px;
+      font-size: 14px;
+      padding: 6px 8px;
+      background: rgba(255,255,255,0.95);
+      color: var(--text);
+      transform: rotate(-1deg);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .tray-slot:hover .artefak-notation {
+      opacity: 1;
+    }
+    
+    .tray-slot.empty {
+      background: var(--surface-warm);
+      border-style: dashed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--border-accent);
+      font-size: 24px;
+    }
+    
+    .zone-footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 40px 20px;
+      font-family: 'Caveat', cursive;
+      font-size: 18px;
+      transform: rotate(-1deg);
+    }
+    
+    .pulse-animation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(232, 93, 78, 0.1), transparent);
+      pointer-events: none;
+      opacity: 0;
+      z-index: 999;
+      animation: pulse 1.2s ease-out;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.4; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+    
+    /* Mood popup - FIXED POSITION */
+    .mood-popup {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      z-index: 100;
+      min-width: 200px;
+    }
+    
+    .mood-popup.show {
+      display: block;
+    }
+    
+    .mood-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 14px;
+    }
+    
+    .mood-option:hover {
+      background: var(--bg);
+    }
+    
+    .mood-option .emoji {
+      font-size: 18px;
+    }
+    
+    @media (max-width: 480px) {
+      .wrapper {
+        padding: 0 16px;
+      }
+      
+      .hero {
+        transform: rotate(-0.5deg);
+      }
+      
+      .tray {
+        gap: 8px;
+      }
+      
+      .nav-mini {
+        gap: 4px;
+      }
+      
+      .nav-mini span {
+        padding: 5px 8px;
+        font-size: 10px;
+      }
+      
+      .vibe-btn {
+        padding: 5px 8px;
+        font-size: 11px;
+      }
+      
+      .vibe-btn .emoji {
+        font-size: 13px;
+      }
+      
+      .vibe-tooltip {
+        font-size: 10px;
+        padding: 6px 10px;
+      }
+      
+      /* Mobile: tooltip di bawah untuk menghindari terpotong */
+      .vibe-tooltip {
+        bottom: auto;
+        top: calc(100% + 8px);
+      }
+      
+      .vibe-tooltip::after {
+        top: auto;
+        bottom: 100%;
+        border-top-color: transparent;
+        border-bottom-color: var(--text);
+      }
+    }
+    
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+    }
+    
+    .empty-state .emoji {
+      font-size: 48px;
+      margin-bottom: 12px;
+      display: block;
+    }
+    
+    .empty-state p {
+      font-family: 'Caveat', cursive;
+      font-size: 20px;
+      transform: rotate(-1deg);
+    }
   </style>
 </head>
 <body>
   <div class="wrapper">
     <header>
-      <div class="logo-container" onclick="window.location.href='index.html'">
-        <div class="logo-icon">J</div>
-        <div class="logo-text">JEJAK</div>
+      <div>
+        <div class="logo" onclick="window.location.href='index.html'">jejak</div>
+        <div class="date-header" id="current-date"></div>
       </div>
       <div class="top-right">
         <div class="nav-mini">
-          <span onclick="window.location.href='jejak.html'">JEJAK</span>
-          <span onclick="window.location.href='saynope.html'">SPILL</span>
-          <span class="active">GERAK</span>
+          <span class="active" onclick="window.location.href='jejak.html'">Jurnal</span>
+          <span onclick="window.location.href='frekuensi-zones.html'">Frekuensi</span>
+          <span onclick="window.location.href='saynope.html'">SayNOPE</span>
           <span onclick="window.location.href='glitch.html'">GLITCH</span>
         </div>
-        <button class="settings-btn" id="settings-btn">⚙️</button>
+        <button class="settings-btn" id="settings-btn">⋯</button>
       </div>
     </header>
 
-    <!-- [Sisa konten sama...] -->
+    <div class="hero">
+      <img id="hero-img" src="https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80" alt="artefak">
+      <div class="artefak-notation" id="hero-notation-display">kadang hidup butuh jeda</div>
+      <button id="upload-artefak-btn" class="upload-artefak-btn">+ Unggah</button>
+    </div>
+
+    <div id="post-upload-panel" class="post-upload-panel hidden">
+      <label>Notasi (maks 4 kata)</label>
+      <input id="hero-notation" type="text" placeholder="contoh: capek tapi hidup" maxlength="50">
+      <div class="panel-actions">
+        <button onclick="hidePostUploadPanel()" style="background: transparent; color: var(--muted);">Lewati</button>
+        <button id="save-notation-btn">Simpan</button>
+      </div>
+    </div>
+
+    <div class="rant-box">
+      <!-- FIXED: Header dengan layout sejajar -->
+      <div class="rant-box-header">
+        <div class="header-left">
+          <span>Hello <strong id="username-display">@you</strong></span>
+        </div>
+        <span class="mood-badge" id="current-mood" onclick="toggleMoodPopup(event)">✦ surviving</span>
+        <div class="mood-popup" id="mood-popup">
+          <div class="mood-option" onclick="selectMood('surviving')"><span class="emoji">😮‍💨</span> surviving</div>
+          <div class="mood-option" onclick="selectMood('thriving')"><span class="emoji">✨</span> thriving (fake it)</div>
+          <div class="mood-option" onclick="selectMood('chaotic')"><span class="emoji">🌀</span> chaotic good</div>
+          <div class="mood-option" onclick="selectMood('doom')"><span class="emoji">🛌</span> doomscrolling</div>
+          <div class="mood-option" onclick="selectMood('existential')"><span class="emoji">🎭</span> existential dread</div>
+        </div>
+      </div>
+
+      <textarea id="rant" placeholder="What's the tea today? Overshare here... unfiltered thoughts only ☕"></textarea>
+      <button class="rant-cta" id="jejakkan-btn">Jejakkan</button>
+      <div class="confirmation" id="confirmation"></div>
+    </div>
+
+    <div class="diary" id="diary">
+      <div class="diary-header">Riwayat Jejak</div>
+      <!-- Entries will be rendered here -->
+    </div>
+
+    <div class="tray-section">
+      <div class="tray-header">Memori</div>
+      <div class="tray" id="tray"></div>
+    </div>
+
+    <div class="zone-footer">Nyambat • Aksi • Solusi</div>
   </div>
+
+  <input type="file" id="file-input" accept="image/*" style="display:none;">
+
+  <script>
+  (function() {
+    'use strict';
+
+    var SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
+    var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+
+    // COMPACT VIBE REACTION SYSTEM - Gen Z Optimized with Fixed Tooltips
+    const VIBE_REACTIONS = {
+      'relatable': { 
+        emoji: '😭', 
+        label: 'literally me',
+        slangId: 'literally me',
+        slangEn: 'literally me',
+        desc: 'Sama, aku juga'
+      },
+      'same': { 
+        emoji: '🛋️', 
+        label: 'big mood',
+        slangId: 'mood banget',
+        slangEn: 'big mood',
+        desc: 'Ini representasiku'
+      },
+      'hug': { 
+        emoji: '🫂', 
+        label: 'virtual hug',
+        slangId: 'peluk jauh',
+        slangEn: 'sending hugs',
+        desc: 'Peluk virtual buatmu'
+      },
+      'tea': { 
+        emoji: '🍵', 
+        label: 'the tea',
+        slangId: 'spill the tea',
+        slangEn: 'that\'s the tea',
+        desc: 'Juicy banget ini'
+      },
+      'stay': { 
+        emoji: '✊', 
+        label: 'stay strong',
+        slangId: 'tetap jaya',
+        slangEn: 'you got this',
+        desc: 'Semangat terus'
+      },
+      'real': { 
+        emoji: '🫡', 
+        label: 'no cap',
+        slangId: 'no cap / real',
+        slangEn: 'no cap fr fr',
+        desc: 'Real talk, no lie'
+      },
+      'slay': {
+        emoji: '💅',
+        label: 'slay',
+        slangId: 'gokil / slay',
+        slangEn: 'slay queen/king',
+        desc: 'You\'re killing it'
+      },
+      'ghost': {
+        emoji: '👻',
+        label: 'ghosting',
+        slangId: 'di-ghosting',
+        slangEn: 'left on read',
+        desc: 'Been there'
+      }
+    };
+
+    async function supabaseFetch(table, method, body, filter) {
+      var headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      };
+      var url = SUPABASE_URL + '/rest/v1/' + table + (filter || '');
+      var options = { method: method || 'GET', headers: headers };
+      if (body) options.body = JSON.stringify(body);
+
+      var res = await fetch(url, options);
+      if (!res.ok) {
+        var errorText = await res.text();
+        throw new Error('HTTP ' + res.status + ': ' + errorText);
+      }
+      return res.json();
+    }
+
+    var currentUser = localStorage.getItem('nope_username') || '@newglitch';
+    var currentMood = 'surviving';
+    document.getElementById('username-display').textContent = currentUser.replace(/^@/, '');
+
+    var artefacts = [];
+    var rants = [];
+    var userReactions = new Set();
+
+    // Set current date
+    var now = new Date();
+    var dateOptions = { weekday: 'long', day: 'numeric', month: 'long' };
+    document.getElementById('current-date').textContent = now.toLocaleDateString('id-ID', dateOptions);
+
+    var DUMMY_RANTS = [
+      {
+        id: 'dummy-0',
+        username: 'homie1',
+        content: "gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus. gak minta balasan sih, tapi rasanya kayak jadi tempat sampah emosi doang.",
+        created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
+        mood: 'surviving',
+        vibes: { relatable: 12, hug: 8, same: 5, ghost: 3 }
+      },
+      {
+        id: 'dummy-1',
+        username: 'homie2',
+        content: "deadline mepet, dosen gak jelas, dompet kering. rasanya pengen ijin cuti sehari buat jadi batu aja.",
+        created_at: new Date(Date.now() - 86400000).toISOString(),
+        mood: 'doom',
+        vibes: { same: 15, relatable: 9, stay: 3 }
+      },
+      {
+        id: 'dummy-2',
+        username: 'homie3',
+        content: "capek.",
+        created_at: new Date(Date.now() - 43200000).toISOString(),
+        mood: 'existential',
+        vibes: { hug: 20, relatable: 18, real: 7 }
+      }
+    ];
+
+    var DUMMY_ARTEFACTS = [
+      { id: 'dummy-0', image_url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80', notation: 'kadang hidup butuh jeda' },
+      { id: 'dummy-1', image_url: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80', notation: 'gebetan temen lebih hijau' },
+      { id: 'dummy-2', image_url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=80', notation: 'gabut NO FACE' },
+      { id: 'dummy-3', image_url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80', notation: 'lonelyness my hiding place' },
+      { id: 'dummy-4', image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80', notation: 'capek' },
+      { id: 'dummy-5', image_url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80', notation: 'love it' }
+    ];
+
+    var heroImg = document.getElementById('hero-img');
+    var heroNotationDisplay = document.getElementById('hero-notation-display');
+    var postUploadPanel = document.getElementById('post-upload-panel');
+    var heroNotationInput = document.getElementById('hero-notation');
+    var fileInput = document.getElementById('file-input');
+
+    function showConfirmation(msg) {
+      var el = document.getElementById('confirmation');
+      el.textContent = msg;
+      setTimeout(function() { el.textContent = ''; }, 3000);
+    }
+
+    function triggerPulse() {
+      var pulse = document.createElement('div');
+      pulse.className = 'pulse-animation';
+      document.body.appendChild(pulse);
+      setTimeout(function() { if (pulse.parentNode) pulse.parentNode.removeChild(pulse); }, 1200);
+    }
+
+    function showPostUploadPanel() {
+      postUploadPanel.classList.remove('hidden');
+      heroNotationInput.value = '';
+      setTimeout(function() { heroNotationInput.focus(); }, 100);
+    }
+
+    window.hidePostUploadPanel = function() {
+      postUploadPanel.classList.add('hidden');
+    };
+
+    function renderHero() {
+      var current = artefacts.length > 0 ? artefacts[0] : DUMMY_ARTEFACTS[0];
+      if (current) {
+        heroImg.src = current.image_url;
+        heroNotationDisplay.textContent = current.notation || '';
+        if (artefacts.length > 0 && !current.notation) {
+          showPostUploadPanel();
+        } else {
+          hidePostUploadPanel();
+        }
+      }
+    }
+
+    function getMoodLabel(mood) {
+      var labels = {
+        'surviving': '✦ surviving',
+        'thriving': '✨ thriving',
+        'chaotic': '🌀 chaotic',
+        'doom': '🛌 doomscrolling',
+        'existential': '🎭 existential'
+      };
+      return labels[mood] || '✦ surviving';
+    }
+
+    // Generate Compact Vibe Reaction HTML with Fixed Tooltip
+    function generateVibeReactions(entryId, vibes) {
+      vibes = vibes || {};
+      var html = '<div class="vibe-reactions">';
+      
+      Object.keys(VIBE_REACTIONS).forEach(function(key) {
+        var vibe = VIBE_REACTIONS[key];
+        var count = vibes[key] || 0;
+        var isVibed = userReactions.has(entryId + '-' + key);
+        var vibedClass = isVibed ? 'vibed' : '';
+        
+        html += 
+          '<button class="vibe-btn ' + vibedClass + '" ' +
+          'onclick="sendVibe(\'' + entryId + '\', \'' + key + '\', this)" ' +
+          'aria-label="' + vibe.desc + '">' +
+          '<span class="emoji">' + vibe.emoji + '</span>' +
+          '<span class="count">' + count + '</span>' +
+          '<span class="vibe-tooltip">' +
+          '<span class="slang-id">' + vibe.slangId + '</span>' +
+          '<span class="slang-en">' + vibe.slangEn + '</span>' +
+          '</span>' +
+          '</button>';
+      });
+      
+      html += '</div>';
+      
+      // Add summary if has vibes
+      var totalVibes = Object.values(vibes).reduce(function(a, b) { return a + b; }, 0);
+      if (totalVibes > 0) {
+        var topVibe = Object.entries(vibes).sort(function(a, b) { return b[1] - a[1]; })[0];
+        var topVibeData = VIBE_REACTIONS[topVibe[0]];
+        html += 
+          '<div class="vibe-summary">' +
+          '<span class="highlight">' + totalVibes + ' orang</span> merasakan ini · ' +
+          'banyak yang <span class="highlight">' + topVibeData.slangId + '</span> ' + topVibeData.emoji +
+          '</div>';
+      }
+      
+      return html;
+    }
+
+    // Send Vibe Function
+    window.sendVibe = function(entryId, vibeKey, btnElement) {
+      var reactionKey = entryId + '-' + vibeKey;
+      
+      if (userReactions.has(reactionKey)) {
+        userReactions.delete(reactionKey);
+        btnElement.classList.remove('vibed');
+        var countEl = btnElement.querySelector('.count');
+        countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1);
+      } else {
+        userReactions.add(reactionKey);
+        btnElement.classList.add('vibed');
+        btnElement.classList.add('animating');
+        
+        var countEl = btnElement.querySelector('.count');
+        countEl.textContent = parseInt(countEl.textContent) + 1;
+        
+        setTimeout(function() {
+          btnElement.classList.remove('animating');
+        }, 300);
+        
+        var vibe = VIBE_REACTIONS[vibeKey];
+        showConfirmation(vibe.slangId + ' sent! ' + vibe.emoji);
+      }
+    };
+
+    function renderDiary() {
+      var container = document.getElementById('diary');
+      var header = container.querySelector('.diary-header');
+      container.innerHTML = '';
+      container.appendChild(header);
+
+      var list = rants.length > 0 ? rants : DUMMY_RANTS;
+
+      if (list.length === 0) {
+        var empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.innerHTML = '<span class="emoji">🍃</span><p>Belum ada jejak. Mulai tulis yang sebenarnya.</p>';
+        container.appendChild(empty);
+        return;
+      }
+
+      list.forEach(function(r) {
+        var entry = document.createElement('div');
+        entry.className = 'diary-entry';
+        entry.id = 'entry-' + r.id;
+        
+        var date = new Date(r.created_at);
+        var dateStr = date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+        var timeStr = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        
+        var moodTag = r.mood ? '<span class="entry-tag">' + getMoodLabel(r.mood) + '</span>' : '';
+        
+        entry.innerHTML = 
+          '<time>' + dateStr + ' · ' + timeStr + '</time>' +
+          '<p>' + r.content + '</p>' +
+          '<div class="entry-meta">' + moodTag + '</div>' +
+          generateVibeReactions(r.id, r.vibes);
+        
+        container.appendChild(entry);
+      });
+    }
+
+    function renderTray() {
+      var tray = document.getElementById('tray');
+      tray.innerHTML = '';
+
+      var displayList = [];
+      
+      if (artefacts.length > 0) {
+        displayList = artefacts.slice(0, 6);
+        var remaining = 6 - displayList.length;
+        if (remaining > 0) {
+          var dummyFillStart = artefacts.length;
+          for (var i = dummyFillStart; i < 6 && displayList.length < 6; i++) {
+            if (DUMMY_ARTEFACTS[i]) {
+              displayList.push(DUMMY_ARTEFACTS[i]);
+            }
+          }
+        }
+      } else {
+        displayList = DUMMY_ARTEFACTS.slice(0, 6);
+      }
+
+      if (displayList.length === 0) {
+        tray.innerHTML = '<div class="tray-slot empty">+</div>'.repeat(6);
+        return;
+      }
+
+      displayList.forEach(function(a, index) {
+        var div = document.createElement('div');
+        div.className = 'tray-slot';
+        
+        var isDummy = String(a.id).indexOf('dummy-') === 0;
+        if (isDummy) {
+          div.style.opacity = '0.85';
+        }
+
+        if (!a.image_url) {
+          div.classList.add('empty');
+          div.textContent = '+';
+          tray.appendChild(div);
+          return;
+        }
+
+        div.style.backgroundImage = 'url(' + a.image_url + ')';
+
+        if (a.notation) {
+          var notationEl = document.createElement('div');
+          notationEl.className = 'artefak-notation';
+          notationEl.textContent = a.notation;
+          div.appendChild(notationEl);
+        }
+
+        div.onclick = function() {
+          heroImg.src = a.image_url;
+          heroNotationDisplay.textContent = a.notation || '';
+          hidePostUploadPanel();
+        };
+
+        tray.appendChild(div);
+      });
+    }
+
+    async function handleFileSelect(event) {
+      var file = event.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        showConfirmation('Hanya file gambar yang diperbolehkan!');
+        fileInput.value = '';
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        showConfirmation('Ukuran file maksimal 5MB!');
+        fileInput.value = '';
+        return;
+      }
+
+      showConfirmation('Mengunggah...');
+
+      var timestamp = Date.now();
+      var safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      var cleanUser = currentUser.replace(/^@/, '').replace(/\s+/g, '_');
+      var fileName = cleanUser + '/' + timestamp + '-' + safeName;
+
+      try {
+        var formData = new FormData();
+        formData.append('', file);
+
+        var uploadRes = await fetch(
+          SUPABASE_URL + '/storage/v1/object/artefacts/' + fileName,
+          {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_KEY,
+              'Authorization': 'Bearer ' + SUPABASE_KEY
+            },
+            body: formData
+          }
+        );
+
+        if (!uploadRes.ok) {
+          var errBody = await uploadRes.text();
+          throw new Error('Upload gagal: ' + errBody);
+        }
+
+        var publicUrl = SUPABASE_URL + '/storage/v1/object/public/artefacts/' + fileName;
+
+        await supabaseFetch('artefacts', 'POST', {
+          username: currentUser,
+          image_url: publicUrl,
+          notation: ''
+        });
+
+        await loadData();
+        showConfirmation('Artefak berhasil diunggah!');
+        triggerPulse();
+
+      } catch (e) {
+        console.error('Upload error:', e);
+        showConfirmation('Gagal upload. Coba lagi.');
+      }
+
+      fileInput.value = '';
+    }
+
+    async function saveNotation() {
+      var notation = heroNotationInput.value.trim();
+      if (!notation) { showConfirmation('Tulis notasi dulu.'); return; }
+
+      var words = notation.split(/\s+/).filter(function(w) { return w.length > 0; });
+      if (words.length > 4) { showConfirmation('Maks 4 kata.'); return; }
+
+      var target = null;
+      for (var i = 0; i < artefacts.length; i++) {
+        if (!artefacts[i].notation) { target = artefacts[i]; break; }
+      }
+      if (!target) { showConfirmation('Tidak ada artefak untuk ditandai.'); return; }
+
+      try {
+        showConfirmation('Menyimpan...');
+        await supabaseFetch('artefacts', 'PATCH',
+          { notation: notation },
+          '?id=eq.' + target.id
+        );
+        await loadData();
+        showConfirmation('Notasi tersimpan.');
+        triggerPulse();
+      } catch (e) {
+        console.error('Save notation error:', e);
+        showConfirmation('Gagal simpan. Coba lagi.');
+      }
+    }
+
+    async function postRant() {
+      var textarea = document.getElementById('rant');
+      var content = textarea.value.trim();
+      if (!content) { showConfirmation('Tulis dulu.'); return; }
+
+      try {
+        showConfirmation('Menyimpan...');
+        await supabaseFetch('rants', 'POST', {
+          username: currentUser,
+          content: content,
+          mood: currentMood,
+          created_at: new Date().toISOString()
+        });
+        textarea.value = '';
+        await loadData();
+        showConfirmation('Tersimpan.');
+        triggerPulse();
+      } catch (e) {
+        console.error('Post rant error:', e);
+        showConfirmation('Gagal menyimpan. Coba lagi.');
+      }
+    }
+
+    // FIXED: Toggle mood popup with event parameter
+    window.toggleMoodPopup = function(event) {
+      event.stopPropagation();
+      var popup = document.getElementById('mood-popup');
+      popup.classList.toggle('show');
+    };
+
+    window.selectMood = function(mood) {
+      currentMood = mood;
+      document.getElementById('current-mood').textContent = getMoodLabel(mood);
+      document.getElementById('mood-popup').classList.remove('show');
+    };
+
+    // Close mood popup when clicking outside
+    document.addEventListener('click', function(e) {
+      var moodBadge = document.getElementById('current-mood');
+      var moodPopup = document.getElementById('mood-popup');
+      if (!moodBadge.contains(e.target) && !moodPopup.contains(e.target)) {
+        moodPopup.classList.remove('show');
+      }
+    });
+
+    async function ensureUserExists() {
+      try {
+        var users = await supabaseFetch('users', 'GET', null,
+          '?username=eq.' + encodeURIComponent(currentUser)
+        );
+        if (!users || users.length === 0) {
+          await supabaseFetch('users', 'POST', { username: currentUser });
+        }
+      } catch (e) {
+        console.error('ensureUserExists:', e);
+      }
+    }
+
+    async function loadData() {
+      try {
+        await ensureUserExists();
+
+        var aData = await supabaseFetch('artefacts', 'GET', null,
+          '?username=eq.' + encodeURIComponent(currentUser) + '&order=created_at.desc&limit=6'
+        );
+        artefacts = aData || [];
+
+        var rData = await supabaseFetch('rants', 'GET', null,
+          '?username=eq.' + encodeURIComponent(currentUser) + '&order=created_at.desc&limit=10'
+        );
+        rants = rData || [];
+
+      } catch (e) {
+        console.error('loadData error:', e);
+      }
+
+      renderHero();
+      renderDiary();
+      renderTray();
+    }
+
+    document.getElementById('upload-artefak-btn').addEventListener('click', function() {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', handleFileSelect);
+
+    document.getElementById('save-notation-btn').addEventListener('click', saveNotation);
+
+    document.getElementById('jejakkan-btn').addEventListener('click', postRant);
+
+    document.getElementById('settings-btn').addEventListener('click', function() {
+      showConfirmation('Settings — coming soon.');
+    });
+
+    loadData();
+
+  })();
+  </script>
 </body>
 </html>
