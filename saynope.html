@@ -27,6 +27,8 @@
       --accent: #E85D4E;
       --accent-soft: #F4A5A0;
       --accent-secondary: #4A90A4;
+      --gold: #D4AF37;
+      --gold-soft: #F4E8C1;
       
       --radius: 16px;
       --radius-sm: 12px;
@@ -167,11 +169,6 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.06);
     }
 
-    .tea-card.peeked {
-      border-color: var(--accent);
-      background: linear-gradient(135deg, var(--surface) 0%, #FFF5F5 100%);
-    }
-
     .tea-header {
       display: flex;
       align-items: center;
@@ -189,6 +186,12 @@
       justify-content: center;
       font-size: 20px;
       flex-shrink: 0;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .tea-avatar:hover {
+      transform: scale(1.1);
     }
 
     .tea-meta {
@@ -200,6 +203,25 @@
       font-size: 13px;
       font-weight: 600;
       color: var(--text);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tea-user:hover {
+      color: var(--accent);
+    }
+
+    .tea-user::after {
+      content: '👁️';
+      font-size: 11px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .tea-user:hover::after {
+      opacity: 1;
     }
 
     .tea-time {
@@ -284,22 +306,6 @@
       opacity: 0.8;
     }
 
-    .vibe-btn.used::after {
-      content: '👁️';
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      font-size: 14px;
-      background: var(--surface);
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid var(--border);
-    }
-
     .vibe-btn .emoji {
       font-size: 16px;
     }
@@ -346,136 +352,466 @@
       border-top-color: var(--text);
     }
 
-    /* === PEEK OVERLAY === */
-    .peek-overlay {
+    /* === JOURNAL OVERLAY (PROFILE PAGE) === */
+    .journal-overlay {
       position: fixed;
       inset: 0;
       background: var(--bg);
       z-index: 9999;
       display: none;
       flex-direction: column;
-      padding: 20px;
       overflow-y: auto;
+      animation: slideUp 0.3s ease;
     }
 
-    .peek-overlay.show {
+    .journal-overlay.show {
       display: flex;
-      animation: peekIn 0.3s ease;
     }
 
-    @keyframes peekIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
     }
 
-    .peek-header {
+    .journal-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .journal-nav {
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px dashed var(--border);
+      margin-bottom: 20px;
     }
 
-    .peek-title {
-      font-family: 'Caveat', cursive;
-      font-size: 28px;
-      color: var(--accent);
+    .back-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      transition: background 0.2s;
     }
 
-    .peek-timer {
+    .back-btn:hover {
+      background: var(--bg);
+    }
+
+    .journal-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .dm-btn {
+      background: var(--gold);
+      color: var(--text);
+      border: none;
+      border-radius: 20px;
+      padding: 10px 20px;
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 14px;
-      color: var(--muted);
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      transition: all 0.2s;
+      position: relative;
     }
 
-    .peek-timer .countdown {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--accent);
+    .dm-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.3);
     }
 
-    .peek-content {
-      flex: 1;
+    .dm-btn.locked::after {
+      content: '🔒';
+      font-size: 12px;
     }
 
-    .peek-warning {
-      background: var(--accent-soft);
-      border: 1px solid var(--accent);
-      border-radius: var(--radius-sm);
-      padding: 12px 16px;
-      margin-bottom: 20px;
-      font-size: 13px;
-      color: var(--text);
+    .profile-section {
       text-align: center;
-      font-family: 'Space Grotesk', sans-serif;
+      padding: 20px 0;
     }
 
-    .peek-journal {
+    .profile-avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-soft), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin: 0 auto 16px;
+      border: 4px solid var(--surface);
+      box-shadow: 0 4px 20px rgba(232, 93, 78, 0.2);
+    }
+
+    .profile-username {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .profile-stats {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      display: block;
+    }
+
+    .journal-content {
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .journal-entry {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 20px;
       margin-bottom: 16px;
+      position: relative;
     }
 
-    .peek-entry {
-      padding: 16px 0;
-      border-bottom: 1px solid var(--border);
+    .journal-entry::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 20px;
+      bottom: 20px;
+      width: 3px;
+      background: var(--accent-soft);
+      border-radius: 0 2px 2px 0;
     }
 
-    .peek-entry:last-child {
-      border-bottom: none;
+    .entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
     }
 
-    .peek-entry-time {
+    .entry-mood {
+      font-family: 'Caveat', cursive;
+      font-size: 18px;
+      color: var(--accent);
+    }
+
+    .entry-time {
       font-size: 11px;
       color: var(--muted);
       font-family: 'Space Grotesk', sans-serif;
-      margin-bottom: 6px;
     }
 
-    .peek-entry-content {
-      font-size: 14px;
-      line-height: 1.6;
-      color: var(--text);
-    }
-
-    .peek-artefak {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    .peek-artefak img {
-      width: 100%;
-      aspect-ratio: 1;
-      object-fit: cover;
-      border-radius: var(--radius-sm);
-      filter: contrast(0.95) saturate(0.9);
-    }
-
-    .peek-close-btn {
-      background: var(--text);
-      color: var(--bg);
-      border: none;
-      border-radius: 24px;
-      padding: 14px 32px;
+    .entry-content {
       font-size: 15px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 600;
+      line-height: 1.7;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    .entry-reactions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .entry-vibe-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
       cursor: pointer;
-      margin-top: 24px;
+      font-size: 12px;
+      color: var(--text-secondary);
       transition: all 0.2s;
     }
 
-    .peek-close-btn:hover {
+    .entry-vibe-btn:hover {
+      background: var(--surface-warm);
+      border-color: var(--accent-soft);
+    }
+
+    .entry-vibe-btn.given {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    /* === REACTORS MODAL === */
+    .reactors-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .reactors-modal.show {
+      display: flex;
+    }
+
+    .reactors-content {
+      background: var(--surface);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 400px;
+      max-height: 80vh;
+      overflow: hidden;
+      animation: scaleIn 0.2s ease;
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .reactors-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .reactors-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .reactors-list {
+      overflow-y: auto;
+      max-height: 50vh;
+      padding: 12px;
+    }
+
+    .reactor-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .reactor-item:hover {
+      background: var(--bg);
+    }
+
+    .reactor-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .reactor-info {
+      flex: 1;
+    }
+
+    .reactor-name {
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .reactor-emoji {
+      font-size: 14px;
+    }
+
+    .poke-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 6px 14px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .poke-btn:hover {
       background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    /* === PAYWALL MODAL === */
+    .paywall-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 10001;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .paywall-modal.show {
+      display: flex;
+    }
+
+    .paywall-content {
+      background: var(--surface);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 360px;
+      padding: 32px 24px;
+      text-align: center;
+      animation: scaleIn 0.3s ease;
+      border: 2px solid var(--gold);
+    }
+
+    .paywall-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .paywall-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .paywall-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .pricing-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .pricing-card {
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .pricing-card:hover {
+      border-color: var(--gold);
       transform: translateY(-2px);
+    }
+
+    .pricing-card.recommended {
+      border-color: var(--gold);
+      background: var(--gold-soft);
+    }
+
+    .pricing-card.recommended::before {
+      content: 'RECOMMENDED';
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--gold);
+      color: var(--text);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .pricing-price {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .pricing-period {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .pricing-save {
+      font-size: 11px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .paywall-btn {
+      width: 100%;
+      background: var(--gold);
+      color: var(--text);
+      border: none;
+      border-radius: 24px;
+      padding: 14px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .paywall-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+    }
+
+    .paywall-skip {
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: inherit;
+    }
+
+    .paywall-skip:hover {
+      color: var(--text);
     }
 
     /* === REFRESH BUTTON === */
@@ -527,6 +863,27 @@
       transform: rotate(-1deg);
     }
 
+    /* === NOTIFICATION === */
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text);
+      color: var(--bg);
+      padding: 12px 24px;
+      border-radius: 24px;
+      font-size: 13px;
+      font-family: 'Space Grotesk', sans-serif;
+      z-index: 10002;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from { transform: translate(-50%, -100%); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
+
     @media (max-width: 480px) {
       .wrapper {
         padding: 0 16px;
@@ -550,10 +907,6 @@
         padding: 6px 12px;
         font-size: 12px;
       }
-
-      .peek-title {
-        font-size: 22px;
-      }
     }
   </style>
 </head>
@@ -575,8 +928,8 @@
       
       <div class="game-hint">
         <strong>🎮 MAININ GAME NYA!</strong>
-        Kasih vibe (😭 🛋️ 🫂 🍵 ✊ 🫡 💅 👻) buat unlock "Peaking" — intip jurnal mereka selama 5 detik!
-        <br><small>1 vibe = 1 kesempatan peek. Choose wisely!</small>
+        Kasih vibe (😭 🛋️ 🫂 🍵 ✊ 🫡 💅 👻) buat unlock profil mereka!
+        <br><small>Klik emoji → Lihat jurnal lengkap → DM berbayar untuk connect</small>
       </div>
     </div>
 
@@ -593,28 +946,87 @@
     <div class="zone-footer">Nyambat • Aksi • Solusi</div>
   </div>
 
-  <!-- PEEK OVERLAY -->
-  <div class="peek-overlay" id="peek-overlay">
-    <div class="peek-header">
-      <h2 class="peek-title">👁️ Peaking...</h2>
-      <div class="peek-timer">
-        <span>Auto close in</span>
-        <span class="countdown" id="countdown">5</span>
-        <span>detik</span>
+  <!-- JOURNAL OVERLAY (PROFILE PAGE) -->
+  <div class="journal-overlay" id="journal-overlay">
+    <div class="journal-header">
+      <div class="journal-nav">
+        <button class="back-btn" onclick="closeJournal()">←</button>
+        <div class="journal-actions">
+          <button class="dm-btn locked" id="dm-btn" onclick="initiateDM()">
+            <span>💬</span> DM
+          </button>
+        </div>
+      </div>
+      
+      <div class="profile-section">
+        <div class="profile-avatar" id="profile-avatar">👤</div>
+        <div class="profile-username" id="profile-username">@username</div>
+        <div style="font-size: 13px; color: var(--muted); margin-top: 4px;">
+          <span id="profile-mood">🛋️ chill mode</span>
+        </div>
+        
+        <div class="profile-stats">
+          <div class="stat">
+            <span class="stat-value" id="stat-entries">12</span>
+            <span>Entries</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="stat-vibes">48</span>
+            <span>Vibes</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="stat-tea">3</span>
+            <span>Tea Spilled</span>
+          </div>
+        </div>
       </div>
     </div>
     
-    <div class="peek-warning">
-      ⚠️ Ini adalah <strong>ONE-TIME PEEK</strong>. Kamu ga bisa lihat ini lagi setelah timer habis!
+    <div class="journal-content" id="journal-content">
+      <!-- Journal entries rendered here -->
     </div>
-    
-    <div class="peek-content" id="peek-content">
-      <!-- Journal content will be rendered here -->
+  </div>
+
+  <!-- REACTORS MODAL -->
+  <div class="reactors-modal" id="reactors-modal" onclick="closeReactors(event)">
+    <div class="reactors-content" onclick="event.stopPropagation()">
+      <div class="reactors-header">
+        <div class="reactors-title">Yang kasih vibe 👀</div>
+        <button class="back-btn" onclick="closeReactors()" style="font-size: 20px;">✕</button>
+      </div>
+      <div class="reactors-list" id="reactors-list">
+        <!-- Reactors rendered here -->
+      </div>
     </div>
-    
-    <button class="peek-close-btn" onclick="closePeek()">
-      Tutup Peek (atau tunggu timer)
-    </button>
+  </div>
+
+  <!-- PAYWALL MODAL -->
+  <div class="paywall-modal" id="paywall-modal" onclick="closePaywall(event)">
+    <div class="paywall-content" onclick="event.stopPropagation()">
+      <div class="paywall-icon">🔐</div>
+      <div class="paywall-title">Unlock Direct Messages</div>
+      <div class="paywall-desc">
+        Kirim pesan langsung ke pemilik jurnal dan connect dengan komunitas NOPE lebih dalam.
+      </div>
+      
+      <div class="pricing-options">
+        <div class="pricing-card" onclick="selectPlan('monthly')">
+          <div class="pricing-price">Rp20.000</div>
+          <div class="pricing-period">/bulan</div>
+          <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">Akses unlimited DM</div>
+        </div>
+        
+        <div class="pricing-card recommended" onclick="selectPlan('yearly')">
+          <div class="pricing-price">Rp100.000</div>
+          <div class="pricing-period">/tahun</div>
+          <div class="pricing-save">Hemat 58%</div>
+          <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">Akses unlimited DM + Badge eksklusif</div>
+        </div>
+      </div>
+      
+      <button class="paywall-btn" onclick="subscribe()">Langganan Sekarang</button>
+      <button class="paywall-skip" onclick="closePaywall()">Nanti dulu</button>
+    </div>
   </div>
 
   <script>
@@ -630,6 +1042,15 @@
       'ghost': { emoji: '👻', label: 'ghosting', slang: 'Di-ghosting' }
     };
 
+    // Mock data untuk reactors (siapa yang kasih emoji)
+    const MOCK_REACTORS = [
+      { username: '@random_user1', avatar: '🎭', emoji: '😭' },
+      { username: '@anonymouse', avatar: '🐭', emoji: '🛋️' },
+      { username: '@tea_lover', avatar: '🍵', emoji: '🫂' },
+      { username: '@late_night', avatar: '🌙', emoji: '✊' },
+      { username: '@overthinker', avatar: '🧠', emoji: '😭' }
+    ];
+
     // === 10 RANDOM VENTING ===
     const TEA_POOL = [
       {
@@ -641,11 +1062,10 @@
         time: '20 menit lalu',
         vibes: { relatable: 45, hug: 23, same: 18 },
         hasImage: false,
-        // Data untuk peek
         journal: [
-          { time: '3:42 AM', content: "masih scrolling tiktok padahal mata udah ngantuk banget" },
-          { time: '2:15 AM', content: "coba tidur tapi kepikiran typo yang gue kirim ke grup kantor" },
-          { time: '11:30 PM', content: "besok ujian tapi gue masih di sini 🙃" }
+          { time: '3:42 AM', mood: '😴', content: "masih scrolling tiktok padahal mata udah ngantuk banget", reactions: { relatable: 12, same: 8 } },
+          { time: '2:15 AM', mood: '😰', content: "coba tidur tapi kepikiran typo yang gue kirim ke grup kantor", reactions: { relatable: 5 } },
+          { time: '11:30 PM', mood: '📚', content: "besok ujian tapi gue masih di sini 🙃", reactions: { hug: 3, same: 7 } }
         ],
         artefacts: ['https://images.unsplash.com/photo-1519681393784-d120267933ba?w=200&q=80']
       },
@@ -659,9 +1079,9 @@
         vibes: { relatable: 67, hug: 34, stay: 12 },
         hasImage: false,
         journal: [
-          { time: '8:00 PM', content: "adik gue minta duit lagi, gue sendiri udah hemat banget" },
-          { time: '6:30 PM', content: "mama bilang 'kamu kan kakak, harus kuat' — gue pengen bilang gue juga capek" },
-          { time: 'Minggu lalu', content: "transfer buat adik, tabungan gue minus lagi" }
+          { time: '8:00 PM', mood: '💸', content: "adik gue minta duit lagi, gue sendiri udah hemat banget", reactions: { relatable: 15 } },
+          { time: '6:30 PM', mood: '😔', content: "mama bilang 'kamu kan kakak, harus kuat' — gue pengen bilang gue juga capek", reactions: { hug: 20, relatable: 30 } },
+          { time: 'Minggu lalu', mood: '🏦', content: "transfer buat adik, tabungan gue minus lagi", reactions: { same: 10 } }
         ],
         artefacts: []
       },
@@ -676,9 +1096,9 @@
         hasImage: true,
         image: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80',
         journal: [
-          { time: '11:00 PM', content: "masih checking chat tiap 5 menit, hopeless" },
-          { time: '10:46 PM', content: "dia online tapi ga bales, apa gue terlalu needy?" },
-          { time: 'Kemarin', content: "kenapa selalu gue yang kena ghosting?" }
+          { time: '11:00 PM', mood: '📱', content: "masih checking chat tiap 5 menit, hopeless", reactions: { ghost: 25 } },
+          { time: '10:46 PM', mood: '🤡', content: "dia online tapi ga bales, apa gue terlalu needy?", reactions: { relatable: 18 } },
+          { time: 'Kemarin', mood: '💔', content: "kenapa selalu gue yang kena ghosting?", reactions: { hug: 12, same: 8 } }
         ],
         artefacts: ['https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=200&q=80']
       },
@@ -692,9 +1112,9 @@
         vibes: { slay: 92, stay: 45, real: 38 },
         hasImage: false,
         journal: [
-          { time: 'Hari ini', content: "FINALLY FREE! 🎉 tapi juga takut unemployed" },
-          { time: 'Kemarin', content: "last day, boss masih gaslighting sampe akhir" },
-          { time: 'Minggu lalu', content: "apply 20+ lowongan, belum ada yang callback" }
+          { time: 'Hari ini', mood: '🎉', content: "FINALLY FREE! 🎉 tapi juga takut unemployed", reactions: { slay: 40, stay: 15 } },
+          { time: 'Kemarin', mood: '😤', content: "last day, boss masih gaslighting sampe akhir", reactions: { real: 22 } },
+          { time: 'Minggu lalu', mood: '📄', content: "apply 20+ lowongan, belum ada yang callback", reactions: { hug: 8 } }
         ],
         artefacts: []
       },
@@ -708,9 +1128,9 @@
         vibes: { relatable: 78, hug: 45, same: 23 },
         hasImage: false,
         journal: [
-          { time: '2:00 AM', content: "nangis di perpus karena stuck di latar belakang" },
-          { time: 'Kemarin', content: "chat dosen ga dibaca, wa ceklis 1 doang" },
-          { time: 'Minggu lalu', content: "temen-temen udah seminar, gue masih di bab 1" }
+          { time: '2:00 AM', mood: '😭', content: "nangis di perpus karena stuck di latar belakang", reactions: { relatable: 33, hug: 15 } },
+          { time: 'Kemarin', mood: '📵', content: "chat dosen ga dibaca, wa ceklis 1 doang", reactions: { same: 20 } },
+          { time: 'Minggu lalu', mood: '😰', content: "temen-temen udah seminar, gue masih di bab 1", reactions: { relatable: 28 } }
         ],
         artefacts: ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80']
       },
@@ -724,9 +1144,9 @@
         vibes: { relatable: 103, same: 67, real: 45 },
         hasImage: false,
         journal: [
-          { time: 'Tadi malam', content: "nabung 50k doang minggu ini, progress?" },
-          { time: 'Awal bulan', content: "gajian! tapi udah habis buat bayar ini itu" },
-          { time: 'Minggu lalu', content: "pengen beli skincare tapi liat dompet, gajadi" }
+          { time: 'Tadi malam', mood: '🏦', content: "nabung 50k doang minggu ini, progress?", reactions: { same: 25 } },
+          { time: 'Awal bulan', mood: '💳', content: "gajian! tapi udah habis buat bayar ini itu", reactions: { relatable: 45 } },
+          { time: 'Minggu lalu', mood: '🧴', content: "pengen beli skincare tapi liat dompet, gajadi", reactions: { real: 12 } }
         ],
         artefacts: []
       },
@@ -741,9 +1161,9 @@
         hasImage: true,
         image: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80',
         journal: [
-          { time: '1:00 AM', content: "overthinking label hubungan, lagi" },
-          { time: 'Kemarin', content: "dia bilang 'aku sayang kamu' tapi ga mau commit" },
-          { time: 'Bulan lalu', content: "kenalan di dating app, sekarang udah kayak pacaran tapi ga pacaran" }
+          { time: '1:00 AM', mood: '🤡', content: "overthinking label hubungan, lagi", reactions: { relatable: 50 } },
+          { time: 'Kemarin', mood: '💬', content: "dia bilang 'aku sayang kamu' tapi ga mau commit", reactions: { ghost: 30, same: 20 } },
+          { time: 'Bulan lalu', mood: '🆕', content: "kenalan di dating app, sekarang udah kayak pacaran tapi ga pacaran", reactions: { relatable: 40 } }
         ],
         artefacts: ['https://images.unsplash.com/photo-1517842645767-c639042777db?w=200&q=80']
       },
@@ -757,9 +1177,9 @@
         vibes: { relatable: 89, hug: 67, real: 34 },
         hasImage: false,
         journal: [
-          { time: 'Tadi sore', content: "dia chat minta pinjem duit, gue bales lambat 10 menit langsung dicall" },
-          { time: 'Minggu lalu', content: "gue down, chat dia, dibales 'semangat' doang terus ilang" },
-          { time: 'Bulan lalu', content: "ultah gue, dia ga inget. ultah dia, gue yang ngasih kado" }
+          { time: 'Tadi sore', mood: '😤', content: "dia chat minta pinjem duit, gue bales lambat 10 menit langsung dicall", reactions: { relatable: 35 } },
+          { time: 'Minggu lalu', mood: '😔', content: "gue down, chat dia, dibales 'semangat' doang terus ilang", reactions: { hug: 25 } },
+          { time: 'Bulan lalu', mood: '🎂', content: "ultah gue, dia ga inget. ultah dia, gue yang ngasih kado", reactions: { real: 18, same: 22 } }
         ],
         artefacts: []
       },
@@ -773,9 +1193,9 @@
         vibes: { relatable: 56, stay: 45, hug: 34 },
         hasImage: false,
         journal: [
-          { time: 'Hari ini', content: "meeting sama CEO, deg-degan banget takut ditanya sesuatu gue ga tau" },
-          { time: 'Kemarin', content: "nangis di toilet karena bikin error di production" },
-          { time: 'Minggu lalu', content: "seneng dapet offer tapi takut ga bisa perform" }
+          { time: 'Hari ini', mood: '😰', content: "meeting sama CEO, deg-degan banget takut ditanya sesuatu gue ga tau", reactions: { relatable: 20 } },
+          { time: 'Kemarin', mood: '😭', content: "nangis di toilet karena bikin error di production", reactions: { hug: 30, stay: 15 } },
+          { time: 'Minggu lalu', mood: '🎉', content: "seneng dapet offer tapi takut ga bisa perform", reactions: { relatable: 25 } }
         ],
         artefacts: ['https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&q=80']
       },
@@ -789,9 +1209,9 @@
         vibes: { relatable: 156, same: 89, hug: 67 },
         hasImage: false,
         journal: [
-          { time: 'Tadi pagi', content: "liat tagihan listrik naik 40%, mau nangis" },
-          { time: 'Kemarin', content: "coba belajar investasi, pusing liat candlestick" },
-          { time: 'Minggu lalu', content: "bayar pajak motor, duit habis seketika" }
+          { time: 'Tadi pagi', mood: '💡', content: "liat tagihan listrik naik 40%, mau nangis", reactions: { same: 40, relatable: 55 } },
+          { time: 'Kemarin', mood: '📊', content: "coba belajar investasi, pusing liat candlestick", reactions: { relatable: 30 } },
+          { time: 'Minggu lalu', mood: '🏍️', content: "bayar pajak motor, duit habis seketika", reactions: { same: 35, hug: 10 } }
         ],
         artefacts: []
       }
@@ -799,8 +1219,9 @@
 
     // === STATE ===
     let currentTea = [];
-    let usedReactions = new Set(); // Track which reactions have been used for peeking
-    let peekTimer = null;
+    let currentJournalUser = null;
+    let isSubscribed = false; // Simulasi status subscription
+    let selectedPlan = 'yearly';
 
     // === INIT ===
     document.addEventListener('DOMContentLoaded', () => {
@@ -812,12 +1233,8 @@
       const btn = document.getElementById('refresh-btn');
       btn.classList.add('spinning');
       
-      // Shuffle and pick 3 random tea
       const shuffled = [...TEA_POOL].sort(() => 0.5 - Math.random());
       currentTea = shuffled.slice(0, 3);
-      
-      // Reset used reactions for new batch
-      usedReactions.clear();
       
       setTimeout(() => {
         renderTea();
@@ -830,24 +1247,20 @@
       const container = document.getElementById('tea-container');
       container.innerHTML = '';
       
-      currentTea.forEach((tea, index) => {
+      currentTea.forEach((tea) => {
         const card = document.createElement('div');
         card.className = 'tea-card';
         card.id = tea.id;
         
-        // Build vibe buttons
         let vibesHtml = '';
         Object.keys(VIBE_REACTIONS).forEach(key => {
           const vibe = VIBE_REACTIONS[key];
           const count = tea.vibes[key] || 0;
-          const isUsed = usedReactions.has(`${tea.id}-${key}`);
           
           vibesHtml += `
-            <button class="vibe-btn ${isUsed ? 'used' : ''}" 
-              onclick="${isUsed ? '' : `sendVibe('${tea.id}', '${key}', this)`}"
-              ${isUsed ? 'disabled' : ''}>
+            <button class="vibe-btn" onclick="handleVibeClick('${tea.id}', '${key}', this)">
               <span class="emoji">${vibe.emoji}</span>
-              <span class="count">${count + (isUsed ? 1 : 0)}</span>
+              <span class="count">${count}</span>
               <span class="vibe-tooltip">${vibe.slang}</span>
             </button>
           `;
@@ -855,9 +1268,9 @@
         
         card.innerHTML = `
           <div class="tea-header">
-            <div class="tea-avatar">${tea.avatar}</div>
+            <div class="tea-avatar" onclick="openJournal('${tea.id}')">${tea.avatar}</div>
             <div class="tea-meta">
-              <div class="tea-user">${tea.user}</div>
+              <div class="tea-user" onclick="openJournal('${tea.id}')">${tea.user}</div>
               <div class="tea-time">${tea.time}</div>
             </div>
             <div class="tea-mood">${tea.mood}</div>
@@ -865,10 +1278,10 @@
           
           <div class="tea-content">${tea.content}</div>
           
-          ${tea.hasImage ? `<img src="${tea.image}" class="tea-image" alt="tea">` : ''}
+          ${tea.hasImage ? `<img src="${tea.image}" class="tea-image" alt="tea" onclick="openJournal('${tea.id}')">` : ''}
           
           <div class="vibe-section">
-            <div class="vibe-label">Kasih vibe buat unlock peek 👁️</div>
+            <div class="vibe-label">Kasih vibe & lihat profil 👁️</div>
             <div class="vibe-reactions">
               ${vibesHtml}
             </div>
@@ -879,12 +1292,8 @@
       });
     }
 
-    // === SEND VIBE & UNLOCK PEEK ===
-    function sendVibe(teaId, vibeKey, btnElement) {
-      // Mark as used
-      const reactionKey = `${teaId}-${vibeKey}`;
-      usedReactions.add(reactionKey);
-      
+    // === HANDLE VIBE CLICK (PROFILING FLOW) ===
+    function handleVibeClick(teaId, vibeKey, btnElement) {
       // Update UI
       btnElement.classList.add('used');
       btnElement.disabled = true;
@@ -892,125 +1301,197 @@
       const countEl = btnElement.querySelector('.count');
       countEl.textContent = parseInt(countEl.textContent) + 1;
       
-      // Show animation
-      btnElement.style.animation = 'pulse 0.3s ease';
+      // Animasi
+      btnElement.style.transform = 'scale(1.1)';
       setTimeout(() => {
-        btnElement.style.animation = '';
+        btnElement.style.transform = '';
+      }, 200);
+      
+      // Redirect ke jurnal
+      setTimeout(() => {
+        openJournal(teaId);
       }, 300);
-      
-      // Get tea data
-      const tea = TEA_POOL.find(t => t.id === teaId);
-      
-      // Show peek notification
-      showNotification(`🔓 Peek unlocked! Lihat jurnal ${tea.user} selama 5 detik...`);
-      
-      // Start peek after short delay
-      setTimeout(() => {
-        startPeek(tea);
-      }, 800);
     }
 
-    // === START PEEK ===
-    function startPeek(tea) {
-      const overlay = document.getElementById('peek-overlay');
-      const content = document.getElementById('peek-content');
-      const countdownEl = document.getElementById('countdown');
+    // === OPEN JOURNAL (PROFILE PAGE) ===
+    function openJournal(teaId) {
+      const tea = TEA_POOL.find(t => t.id === teaId);
+      if (!tea) return;
       
-      // Build journal content
-      let journalHtml = `
-        <div class="peek-journal">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px dashed var(--border);">
-            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; font-size: 24px;">
-              ${tea.avatar}
-            </div>
-            <div>
-              <div style="font-family: 'Space Grotesk', sans-serif; font-weight: 600;">${tea.user}</div>
-              <div style="font-size: 12px; color: var(--muted);">Anonymous Journal • ${tea.journal.length} entries</div>
-            </div>
+      currentJournalUser = tea;
+      
+      // Update profile header
+      document.getElementById('profile-avatar').textContent = tea.avatar;
+      document.getElementById('profile-username').textContent = tea.user;
+      document.getElementById('profile-mood').textContent = tea.mood;
+      
+      // Update stats
+      document.getElementById('stat-entries').textContent = tea.journal.length;
+      const totalVibes = Object.values(tea.vibes).reduce((a, b) => a + b, 0);
+      document.getElementById('stat-vibes').textContent = totalVibes;
+      document.getElementById('stat-tea').textContent = Math.floor(Math.random() * 5) + 1;
+      
+      // Render journal entries
+      const content = document.getElementById('journal-content');
+      content.innerHTML = '';
+      
+      tea.journal.forEach((entry, index) => {
+        const entryDiv = document.createElement('div');
+        entryDiv.className = 'journal-entry';
+        
+        let reactionsHtml = '';
+        Object.keys(entry.reactions || {}).forEach(key => {
+          const vibe = VIBE_REACTIONS[key];
+          const count = entry.reactions[key];
+          reactionsHtml += `
+            <button class="entry-vibe-btn" onclick="showReactors('${key}')">
+              <span>${vibe.emoji}</span>
+              <span>${count}</span>
+            </button>
+          `;
+        });
+        
+        entryDiv.innerHTML = `
+          <div class="entry-header">
+            <span class="entry-mood">${entry.mood}</span>
+            <span class="entry-time">${entry.time}</span>
           </div>
-      `;
-      
-      tea.journal.forEach(entry => {
-        journalHtml += `
-          <div class="peek-entry">
-            <div class="peek-entry-time">${entry.time}</div>
-            <div class="peek-entry-content">${entry.content}</div>
+          <div class="entry-content">${entry.content}</div>
+          <div class="entry-reactions">
+            ${reactionsHtml}
+            <button class="entry-vibe-btn" onclick="giveVibeToEntry(${index})">
+              <span>+</span> Kasih vibe
+            </button>
           </div>
         `;
+        
+        content.appendChild(entryDiv);
       });
       
-      journalHtml += '</div>';
-      
-      // Add artefacts if any
-      if (tea.artefacts.length > 0) {
-        journalHtml += '<div class="peek-artefak">';
-        tea.artefacts.forEach(img => {
-          journalHtml += `<img src="${img}" alt="artefak">`;
-        });
-        journalHtml += '</div>';
-      }
-      
-      content.innerHTML = journalHtml;
-      
       // Show overlay
-      overlay.classList.add('show');
-      
-      // Start countdown
-      let seconds = 5;
-      countdownEl.textContent = seconds;
-      
-      peekTimer = setInterval(() => {
-        seconds--;
-        countdownEl.textContent = seconds;
-        
-        if (seconds <= 0) {
-          closePeek();
-        }
-      }, 1000);
+      document.getElementById('journal-overlay').classList.add('show');
+      document.body.style.overflow = 'hidden';
     }
 
-    // === CLOSE PEEK ===
-    function closePeek() {
-      const overlay = document.getElementById('peek-overlay');
+    // === CLOSE JOURNAL ===
+    function closeJournal() {
+      document.getElementById('journal-overlay').classList.remove('show');
+      document.body.style.overflow = '';
+      currentJournalUser = null;
+    }
+
+    // === GIVE VIBE TO ENTRY ===
+    function giveVibeToEntry(entryIndex) {
+      if (!currentJournalUser) return;
       
-      if (peekTimer) {
-        clearInterval(peekTimer);
-        peekTimer = null;
+      // Simulasi kasih vibe (bisa dikembangkan dengan picker emoji)
+      showNotification('Vibe dikirim! 💝');
+    }
+
+    // === SHOW REACTORS (SIAPA YANG KASIH EMOJI) ===
+    function showReactors(vibeKey) {
+      const list = document.getElementById('reactors-list');
+      list.innerHTML = '';
+      
+      // Generate random reactors
+      const shuffled = [...MOCK_REACTORS].sort(() => 0.5 - Math.random()).slice(0, 4);
+      
+      shuffled.forEach(reactor => {
+        const item = document.createElement('div');
+        item.className = 'reactor-item';
+        item.innerHTML = `
+          <div class="reactor-avatar">${reactor.avatar}</div>
+          <div class="reactor-info">
+            <div class="reactor-name">
+              ${reactor.username}
+              <span class="reactor-emoji">${VIBE_REACTIONS[vibeKey].emoji}</span>
+            </div>
+            <div style="font-size: 12px; color: var(--muted);">Baru saja</div>
+          </div>
+          <button class="poke-btn" onclick="pokeUser('${reactor.username}')">Poke 👉</button>
+        `;
+        list.appendChild(item);
+      });
+      
+      document.getElementById('reactors-modal').classList.add('show');
+    }
+
+    // === CLOSE REACTORS ===
+    function closeReactors(event) {
+      if (!event || event.target.id === 'reactors-modal') {
+        document.getElementById('reactors-modal').classList.remove('show');
       }
+    }
+
+    // === POKE USER (TRIGGER DM PAYWALL) ===
+    function pokeUser(username) {
+      closeReactors();
+      if (!isSubscribed) {
+        showPaywall();
+      } else {
+        showNotification(`Poke terkirim ke ${username}! 📲`);
+      }
+    }
+
+    // === INITIATE DM ===
+    function initiateDM() {
+      if (!isSubscribed) {
+        showPaywall();
+      } else {
+        showNotification('DM terbuka! 💬');
+      }
+    }
+
+    // === SHOW PAYWALL ===
+    function showPaywall() {
+      document.getElementById('paywall-modal').classList.add('show');
+    }
+
+    // === CLOSE PAYWALL ===
+    function closePaywall(event) {
+      if (!event || event.target.id === 'paywall-modal') {
+        document.getElementById('paywall-modal').classList.remove('show');
+      }
+    }
+
+    // === SELECT PLAN ===
+    function selectPlan(plan) {
+      selectedPlan = plan;
+      document.querySelectorAll('.pricing-card').forEach(card => {
+        card.classList.remove('recommended');
+      });
+      event.currentTarget.classList.add('recommended');
+    }
+
+    // === SUBSCRIBE ===
+    function subscribe() {
+      isSubscribed = true;
+      closePaywall();
       
-      overlay.classList.remove('show');
+      const price = selectedPlan === 'monthly' ? '20k/bulan' : '100k/tahun';
+      showNotification(`Berlangganan ${price}! DM unlocked 🔓`);
+      
+      // Update DM button
+      const dmBtn = document.getElementById('dm-btn');
+      dmBtn.classList.remove('locked');
+      dmBtn.innerHTML = '<span>💬</span> DM Aktif';
     }
 
     // === NOTIFICATION ===
     function showNotification(message) {
+      const existing = document.querySelector('.notification');
+      if (existing) existing.remove();
+      
       const notif = document.createElement('div');
-      notif.style.cssText = `
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: var(--text);
-        color: var(--bg);
-        padding: 12px 24px;
-        border-radius: 24px;
-        font-size: 13px;
-        font-family: 'Space Grotesk', sans-serif;
-        z-index: 10000;
-        animation: slideDown 0.3s ease;
-      `;
+      notif.className = 'notification';
       notif.textContent = message;
       
       document.body.appendChild(notif);
       
       setTimeout(() => {
-        notif.style.animation = 'slideUp 0.3s ease';
-        setTimeout(() => notif.remove(), 300);
+        notif.style.opacity = '0';
+        notTimeout(() => notif.remove(), 300);
       }, 2500);
-    }
-
-    // === NAVIGATION ===
-    function navigateTo(page) {
-      window.location.href = page;
     }
   </script>
 </body>
