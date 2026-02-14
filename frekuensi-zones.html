@@ -1,83 +1,900 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="glitch">
+<html lang="id" data-theme="gerak">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NOPE — Bola</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ff9999'/%3E%3Ctext x='50' y='70' font-size='60' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%23000'%3ENO%3C/text%3E%3C/svg%3E">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>GERAK — Arus</title>
+  
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="frekuensi-shared.css">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
-    .bola-menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; max-width: 900px; margin: 40px auto; padding: 20px; }
-    .bola-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 40px 32px; text-align: center; cursor: pointer; transition: all 0.3s; text-decoration: none; color: var(--text); display: block; }
-    .bola-card:hover { border-color: var(--accent); transform: translateY(-8px); box-shadow: 0 30px 60px rgba(178, 102, 255, 0.2); }
-    .bola-icon { font-size: 72px; margin-bottom: 20px; display: block; }
-    .bola-title { font-size: 28px; font-weight: 700; margin-bottom: 12px; }
-    .bola-desc { font-size: 15px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
-    .live-badge { display: inline-flex; align-items: center; gap: 8px; background: #ff4444; color: white; padding: 10px 20px; border-radius: 30px; font-size: 14px; font-weight: 700; animation: pulse 2s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-    .live-badge::before { content: ''; width: 10px; height: 10px; background: white; border-radius: 50%; animation: blink 1s infinite; }
-    @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-    .access-badge { display: inline-flex; align-items: center; gap: 8px; background: var(--accent); color: white; padding: 10px 20px; border-radius: 30px; font-size: 14px; font-weight: 700; }
+    :root {
+      /* GERAK THEME — Cyan/Flow */
+      --bg: #0A0A0A;
+      --surface: #141414;
+      --surface-elevated: #1E1E1E;
+      --border: #2A2A2A;
+      
+      --text: #FFFFFF;
+      --text-secondary: #888888;
+      --text-muted: #555555;
+      
+      /* Cyan Primary — Flow, water, movement */
+      --accent-primary: #00F0FF;
+      --accent-secondary: #0080FF;
+      --accent-tertiary: #39FF14;
+      --accent-warm: #FF4D00;
+      
+      /* Zone Colors — Different "currents" */
+      --zone-larut: #00F0FF;      /* Cyan — Default flow */
+      --zone-gila: #FF006E;       /* Pink — Chaotic */
+      --zone-peluk: #39FF14;      /* Green — Support */
+      --zone-diam: #FFD700;       /* Gold — Silent */
+      
+      --radius: 0px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+    }
+    
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    html { scroll-behavior: smooth; }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-weight: 500;
+      font-size: 15px;
+      line-height: 1.4;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 100px;
+    }
+    
+    /* Noise + Flow texture */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+    
+    /* Animated wave overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 240, 255, 0.08), transparent),
+        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(0, 128, 255, 0.05), transparent);
+      pointer-events: none;
+      z-index: 1;
+      animation: flow 8s ease-in-out infinite;
+    }
+    
+    @keyframes flow {
+      0%, 100% { transform: translateX(0) scale(1); opacity: 0.6; }
+      50% { transform: translateX(-20px) scale(1.05); opacity: 0.8; }
+    }
+    
+    .wrapper {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 var(--space-md);
+      position: relative;
+      z-index: 2;
+    }
+    
+    /* HEADER */
+    header {
+      padding: var(--space-lg) 0 var(--space-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    
+    .logo {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--text);
+      cursor: pointer;
+      line-height: 0.9;
+      position: relative;
+    }
+    
+    /* Cyan glitch effect */
+    .logo::before, .logo::after {
+      content: 'GERAK';
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+    .logo::before { color: var(--accent-primary); transform: translate(-3px, 0); }
+    .logo::after { color: var(--accent-secondary); transform: translate(3px, 0); }
+    .logo:hover::before { opacity: 0.8; animation: glitch-cyan 0.4s infinite; }
+    
+    @keyframes glitch-cyan {
+      0%, 100% { transform: translate(-3px, 0); }
+      25% { transform: translate(3px, 2px); }
+      50% { transform: translate(-3px, -2px); }
+      75% { transform: translate(3px, 0); }
+    }
+    
+    .tagline {
+      font-family: 'Instrument Serif', serif;
+      font-size: 13px;
+      color: var(--text-secondary);
+      font-style: italic;
+      margin-top: var(--space-xs);
+    }
+    
+    .top-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--space-sm);
+    }
+    
+    .flow-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--accent-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 700;
+    }
+    
+    .flow-wave {
+      display: flex;
+      gap: 2px;
+      height: 12px;
+      align-items: flex-end;
+    }
+    
+    .flow-bar {
+      width: 3px;
+      background: var(--accent-primary);
+      animation: wave 1.2s ease-in-out infinite;
+    }
+    
+    .flow-bar:nth-child(1) { height: 40%; animation-delay: 0s; }
+    .flow-bar:nth-child(2) { height: 70%; animation-delay: 0.1s; }
+    .flow-bar:nth-child(3) { height: 100%; animation-delay: 0.2s; }
+    .flow-bar:nth-child(4) { height: 60%; animation-delay: 0.3s; }
+    .flow-bar:nth-child(5) { height: 30%; animation-delay: 0.4s; }
+    
+    @keyframes wave {
+      0%, 100% { transform: scaleY(0.5); opacity: 0.5; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+    
+    /* ============================================
+       ZONE SELECTOR — The Core of Gerak
+       ============================================ */
+    .zone-hero {
+      margin: 0 calc(-1 * var(--space-md));
+      margin-bottom: var(--space-lg);
+      position: relative;
+      height: 200px;
+      overflow: hidden;
+      border-top: 2px solid var(--border);
+      border-bottom: 2px solid var(--border);
+    }
+    
+    .zone-visual {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 120px;
+      opacity: 0.1;
+      filter: blur(2px);
+      animation: drift 6s ease-in-out infinite;
+    }
+    
+    @keyframes drift {
+      0%, 100% { transform: translateX(-10px); }
+      50% { transform: translateX(10px); }
+    }
+    
+    .zone-content {
+      position: relative;
+      z-index: 2;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: var(--space-md);
+      background: linear-gradient(90deg, var(--bg) 0%, transparent 50%, var(--bg) 100%);
+    }
+    
+    .zone-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      margin-bottom: var(--space-xs);
+    }
+    
+    .zone-name {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .zone-desc {
+      font-family: 'Instrument Serif', serif;
+      font-size: 16px;
+      font-style: italic;
+      color: var(--text-secondary);
+    }
+    
+    .zone-tabs {
+      display: flex;
+      gap: var(--space-xs);
+      margin-top: var(--space-md);
+    }
+    
+    .zone-tab {
+      flex: 1;
+      padding: var(--space-sm);
+      background: var(--surface);
+      border: 2px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    
+    .zone-tab:hover {
+      border-color: var(--text-secondary);
+      color: var(--text);
+    }
+    
+    .zone-tab.active {
+      border-color: currentColor;
+      background: var(--surface-elevated);
+    }
+    
+    .zone-tab[data-zone="larut"] { color: var(--zone-larut); }
+    .zone-tab[data-zone="gila"] { color: var(--zone-gila); }
+    .zone-tab[data-zone="peluk"] { color: var(--zone-peluk); }
+    .zone-tab[data-zone="diam"] { color: var(--zone-diam); }
+    
+    /* ============================================
+       FREQUENCY STREAM — Live Feed
+       ============================================ */
+    .stream-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid var(--border);
+    }
+    
+    .stream-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    .stream-live {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-primary);
+      border-radius: 50%;
+      animation: pulse-live 1.5s infinite;
+      box-shadow: 0 0 10px var(--accent-primary);
+    }
+    
+    @keyframes pulse-live {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    
+    .stream-filter {
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    
+    .stream-filter:hover {
+      color: var(--accent-primary);
+    }
+    
+    /* Frequency Cards */
+    .freq-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      margin-bottom: var(--space-md);
+      position: relative;
+      overflow: hidden;
+      animation: slideIn 0.4s ease;
+      transition: all 0.2s;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    
+    .freq-card:hover {
+      border-color: var(--accent-primary);
+    }
+    
+    .freq-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: var(--zone-larut);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    
+    .freq-card:hover::before {
+      opacity: 1;
+    }
+    
+    .freq-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-elevated);
+    }
+    
+    .freq-user {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    .freq-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    
+    .freq-meta {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .freq-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    
+    .freq-zone {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--zone-larut);
+    }
+    
+    .freq-time {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    
+    .freq-content {
+      padding: var(--space-md);
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    
+    .freq-waveform {
+      height: 40px;
+      margin: 0 var(--space-md) var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      opacity: 0.6;
+    }
+    
+    .wave-bar {
+      flex: 1;
+      background: var(--accent-primary);
+      border-radius: 1px;
+      animation: soundwave 0.8s ease-in-out infinite;
+    }
+    
+    @keyframes soundwave {
+      0%, 100% { height: 20%; }
+      50% { height: 100%; }
+    }
+    
+    /* Random heights for visual variety */
+    .wave-bar:nth-child(1) { animation-delay: 0s; }
+    .wave-bar:nth-child(2) { animation-delay: 0.05s; }
+    .wave-bar:nth-child(3) { animation-delay: 0.1s; }
+    .wave-bar:nth-child(4) { animation-delay: 0.15s; }
+    .wave-bar:nth-child(5) { animation-delay: 0.2s; }
+    .wave-bar:nth-child(6) { animation-delay: 0.25s; }
+    .wave-bar:nth-child(7) { animation-delay: 0.3s; }
+    .wave-bar:nth-child(8) { animation-delay: 0.35s; }
+    
+    .freq-actions {
+      display: flex;
+      border-top: 1px solid var(--border);
+    }
+    
+    .freq-action {
+      flex: 1;
+      padding: var(--space-sm);
+      background: transparent;
+      border: none;
+      border-right: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-xs);
+    }
+    
+    .freq-action:last-child {
+      border-right: none;
+    }
+    
+    .freq-action:hover {
+      color: var(--accent-primary);
+      background: var(--surface-elevated);
+    }
+    
+    /* Match Button */
+    .match-btn {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 16px 32px;
+      background: var(--accent-primary);
+      color: var(--bg);
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 0 30px rgba(0, 240, 255, 0.3);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    .match-btn:hover {
+      transform: translateX(-50%) scale(1.05);
+      box-shadow: 0 0 50px rgba(0, 240, 255, 0.5);
+    }
+    
+    .match-btn::before {
+      content: '〜';
+      font-size: 18px;
+      animation: flow-icon 2s ease-in-out infinite;
+    }
+    
+    @keyframes flow-icon {
+      0%, 100% { transform: translateX(-3px); }
+      50% { transform: translateX(3px); }
+    }
+    
+    /* ============================================
+       BOTTOM NAV — Consistent with JEJAK
+       ============================================ */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 2px solid var(--border);
+      z-index: 1000;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    .nav-container {
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 64px;
+    }
+    
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: 100%;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background: var(--accent-primary);
+      transition: width 0.2s;
+    }
+    
+    .nav-item:hover {
+      color: var(--text-secondary);
+      background: var(--surface-elevated);
+    }
+    
+    .nav-item.active {
+      color: var(--accent-primary);
+    }
+    
+    .nav-item.active::before {
+      width: 100%;
+    }
+    
+    .nav-icon {
+      font-size: 20px;
+      line-height: 1;
+    }
+    
+    /* FOOTER */
+    footer {
+      padding: var(--space-xl) 0;
+      text-align: center;
+      margin-bottom: 80px;
+    }
+    
+    .footer-text {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+    }
+    
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--text);
+      color: var(--bg);
+      padding: var(--space-sm) var(--space-md);
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 10000;
+      opacity: 0;
+      transition: all 0.3s;
+    }
+    
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
   </style>
 </head>
 <body>
   <div class="wrapper">
+    <!-- HEADER -->
     <header>
-      <div class="logo" onclick="window.location.href='index.html'">NOPE</div>
+      <div>
+        <div class="logo" onclick="window.location.href='index.html'">GERAK</div>
+        <div class="tagline">go with the flow</div>
+      </div>
       <div class="top-right">
-        <div class="nav-mini">
-          <span onclick="window.location.href='jejak.html'">JEJAK</span>
-          <span class="active">GERAK</span>
-          <span onclick="window.location.href='saynope.html'">SPILL</span>
-          <span onclick="window.location.href='glitch.html'">GLITCH</span>
+        <div class="flow-indicator">
+          <div class="flow-wave">
+            <div class="flow-bar"></div>
+            <div class="flow-bar"></div>
+            <div class="flow-bar"></div>
+            <div class="flow-bar"></div>
+            <div class="flow-bar"></div>
+          </div>
+          <span>Live Flow</span>
         </div>
-        <button class="settings-btn" id="settings-btn">⋯</button>
       </div>
     </header>
 
-    <div class="mood-tagline">
-      Pilih pengalaman bola:<br>
-      Live streaming atau komunitas?
-    </div>
-
-    <div class="tab-navigation">
-      <a href="frekuensi-bola.html" class="tab-btn active"><span>⚽</span> Bola</a>
-      <a href="frekuensi-zones.html" class="tab-btn"><span>💬</span> Komunitas</a>
-      <a href="frekuensi-hangouts.html" class="tab-btn"><span>📍</span> Hangouts</a>
-      
-    </div>
-
-    <div class="bola-menu">
-      <!-- Live Streaming -->
-      <a href="frekuensi-bola-live.html" class="bola-card">
-        <span class="bola-icon">📺</span>
-        <div class="bola-title">Live Streaming</div>
-        <div class="bola-desc">
-          Nonton pertandingan LIVE dengan prediksi real-time, 
-          polling interaktif, dan chat komunitas. Menangkan XP!
+    <!-- ZONE HERO -->
+    <section class="zone-hero">
+      <div class="zone-visual">〜</div>
+      <div class="zone-content">
+        <div class="zone-label">Arus Saat Ini</div>
+        <div class="zone-name" id="zone-name" style="color: var(--zone-larut)">LARUT</div>
+        <div class="zone-desc">Mengalir tanpa arah yang pasti, tapi tetap bergerak</div>
+        
+        <div class="zone-tabs">
+          <button class="zone-tab active" data-zone="larut" onclick="selectZone('larut')">Larut</button>
+          <button class="zone-tab" data-zone="gila" onclick="selectZone('gila')">Gila</button>
+          <button class="zone-tab" data-zone="peluk" onclick="selectZone('peluk')">Peluk</button>
+          <button class="zone-tab" data-zone="diam" onclick="selectZone('diam')">Diam</button>
         </div>
-        <div class="live-badge">🔴 LIVE NOW</div>
-      </a>
-      
-      <!-- Komunitas Bola - SUDAH AKTIF -->
-      <!-- ✅ PERBAIKAN: Ganti href ke nama file yang benar -->
-      <a href="frekuensi-bola-komunitas.html" class="bola-card">
-        <span class="bola-icon">👥</span>
-        <div class="bola-title">Komunitas Bola CocoMeo</div>
-        <div class="bola-desc">
-          Temukan circle fans tim favoritmu. 
-          Diskusi taktik, cari teman nobar, dan berbagi info.
-        </div>
-        <div class="access-badge">🚀 Akses Sekarang</div>
-      </a>
-    </div>
+      </div>
+    </section>
 
-    <div class="zone-footer">Nyambat • Aksi • Solusi</div>
+    <!-- STREAM -->
+    <section class="stream-section">
+      <div class="stream-header">
+        <div class="stream-title">
+          <span class="stream-live"></span>
+          Frekuensi Langsung
+        </div>
+        <div class="stream-filter">Filter 〜</div>
+      </div>
+      
+      <div id="stream-container">
+        <!-- Freq cards injected here -->
+      </div>
+    </section>
+
+    <footer>
+      <p class="footer-text">Mengalir • Bertemu • Berubah</p>
+    </footer>
   </div>
 
-  <script src="frekuensi-shared.js"></script>
+  <!-- MATCH BUTTON -->
+  <button class="match-btn" onclick="findMatch()">
+    Temukan Resonansi
+  </button>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <div class="nav-container">
+      <a href="jejak.html" class="nav-item">
+        <span class="nav-icon">✦</span>
+        <span>Jejak</span>
+      </a>
+      <a href="frekuensi-zones.html" class="nav-item active">
+        <span class="nav-icon">〜</span>
+        <span>Gerak</span>
+      </a>
+      <a href="saynope.html" class="nav-item">
+        <span class="nav-icon">✕</span>
+        <span>Spill</span>
+      </a>
+      <a href="glitch.html" class="nav-item">
+        <span class="nav-icon">⚡</span>
+        <span>Glitch</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ============================================
+    // ZONE DATA
+    // ============================================
+    const ZONES = {
+      larut: {
+        name: 'LARUT',
+        color: '#00F0FF',
+        desc: 'Mengalir tanpa arah yang pasti, tapi tetap bergerak',
+        icon: '〜'
+      },
+      gila: {
+        name: 'GILA',
+        color: '#FF006E',
+        desc: 'Chaotic energy, tidak bisa diprediksi, pure intensity',
+        icon: '⚡'
+      },
+      peluk: {
+        name: 'PELU',
+        color: '#39FF14',
+        desc: 'Supportive flow, warmth dalam kebersamaan',
+        icon: '🫂'
+      },
+      diam: {
+        name: 'DIAM',
+        color: '#FFD700',
+        desc: 'Silent presence, ada tanpa harus bersuara',
+        icon: '◐'
+      }
+    };
+
+    let currentZone = 'larut';
+
+    // ============================================
+    // DUMMY STREAM DATA
+    // ============================================
+    const streamData = [
+      {
+        id: 1,
+        user: 'A',
+        zone: 'larut',
+        content: 'hari ini rasanya kayak ngapain aja salah. tapi yaudah, lanjut aja.',
+        time: '2m',
+        resonance: 12
+      },
+      {
+        id: 2,
+        user: 'M',
+        zone: 'gila',
+        content: 'BARU BANGUN DAN UDAH DAPAT 3 MASALAH. SENIN EMANG GAK ADA OBAT.',
+        time: '5m',
+        resonance: 28
+      },
+      {
+        id: 3,
+        user: 'K',
+        zone: 'peluk',
+        content: 'buat yang lagi struggle hari ini, virtual hug dulu yuk. kita kuat bareng.',
+        time: '8m',
+        resonance: 45
+      },
+      {
+        id: 4,
+        user: 'S',
+        zone: 'diam',
+        content: '...',
+        time: '12m',
+        resonance: 8
+      }
+    ];
+
+    // ============================================
+    // FUNCTIONS
+    // ============================================
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function selectZone(zone) {
+      currentZone = zone;
+      const data = ZONES[zone];
+      
+      // Update visual
+      document.getElementById('zone-name').textContent = data.name;
+      document.getElementById('zone-name').style.color = data.color;
+      document.querySelector('.zone-desc').textContent = data.desc;
+      document.querySelector('.zone-visual').textContent = data.icon;
+      
+      // Update tabs
+      document.querySelectorAll('.zone-tab').forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.dataset.zone === zone) tab.classList.add('active');
+      });
+      
+      // Update card accents
+      document.querySelectorAll('.freq-card::before').forEach(el => {
+        el.style.background = data.color;
+      });
+      
+      if (navigator.vibrate) navigator.vibrate(20);
+      showToast(`Beralih ke Arus ${data.name}`);
+      
+      renderStream();
+    }
+
+    function renderStream() {
+      const container = document.getElementById('stream-container');
+      const filtered = streamData.filter(s => currentZone === 'larut' || s.zone === currentZone);
+      
+      container.innerHTML = filtered.map(item => {
+        const zoneData = ZONES[item.zone];
+        return `
+          <article class="freq-card" style="--zone-color: ${zoneData.color}">
+            <div class="freq-header">
+              <div class="freq-user">
+                <div class="freq-avatar" style="background: ${zoneData.color}">${item.user}</div>
+                <div class="freq-meta">
+                  <span class="freq-name">Anonymous</span>
+                  <span class="freq-zone" style="color: ${zoneData.color}">${zoneData.name}</span>
+                </div>
+              </div>
+              <span class="freq-time">${item.time}</span>
+            </div>
+            <div class="freq-content">${item.content}</div>
+            <div class="freq-waveform">
+              ${Array(8).fill(0).map(() => `<div class="wave-bar" style="background: ${zoneData.color}; height: ${Math.random() * 80 + 20}%"></div>`).join('')}
+            </div>
+            <div class="freq-actions">
+              <button class="freq-action" onclick="resonate(${item.id})">
+                〜 Resonansi (${item.resonance})
+              </button>
+              <button class="freq-action" onclick="flowTogether(${item.id})">
+                Flow Together
+              </button>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function resonate(id) {
+      showToast('Resonansi terkirim! 〜');
+    }
+
+    function flowTogether(id) {
+      showToast('Mencari aliran yang selaras...');
+    }
+
+    function findMatch() {
+      const zones = Object.keys(ZONES);
+      const random = zones[Math.floor(Math.random() * zones.length)];
+      showToast(`Match ditemukan di Arus ${ZONES[random].name}!`);
+    }
+
+    // ============================================
+    // INIT
+    // ============================================
+    renderStream();
+  </script>
 </body>
 </html>
