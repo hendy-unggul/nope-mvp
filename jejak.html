@@ -62,6 +62,7 @@
       line-height: 1.4;
       min-height: 100vh;
       overflow-x: hidden;
+      padding-bottom: 100px; /* Space for bottom nav */
     }
     
     /* Noise texture */
@@ -137,22 +138,6 @@
       gap: var(--space-sm);
     }
     
-    .nav-pills { display: flex; gap: var(--space-xs); }
-    .nav-pill {
-      padding: 6px 12px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .nav-pill:hover { border-color: var(--accent-primary); color: var(--accent-primary); transform: translateY(-2px); }
-    .nav-pill.active { background: var(--accent-primary); border-color: var(--accent-primary); color: var(--bg); }
-    
     .status-indicator {
       display: flex;
       align-items: center;
@@ -168,6 +153,78 @@
       animation: pulse 2s infinite;
     }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    
+    /* ============================================
+       BOTTOM NAVIGATION — 4 Tabs Restored
+       ============================================ */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 2px solid var(--border);
+      z-index: 1000;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    .nav-container {
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 64px;
+    }
+    
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: 100%;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background: var(--accent-primary);
+      transition: width 0.2s;
+    }
+    
+    .nav-item:hover {
+      color: var(--text-secondary);
+      background: var(--surface-elevated);
+    }
+    
+    .nav-item.active {
+      color: var(--accent-primary);
+    }
+    
+    .nav-item.active::before {
+      width: 100%;
+    }
+    
+    .nav-icon {
+      font-size: 20px;
+      line-height: 1;
+    }
     
     /* HERO */
     .hero-section {
@@ -290,9 +347,7 @@
     }
     .rant-input::placeholder { color: var(--text-muted); }
     
-    /* ============================================
-       MANUAL MOOD SELECTOR — Visual & Interactive
-       ============================================ */
+    /* MANUAL MOOD SELECTOR */
     .mood-section {
       margin: var(--space-md) 0;
     }
@@ -351,7 +406,6 @@
       color: var(--text-secondary);
     }
     
-    /* Mood-specific colors */
     .mood-card[data-mood="surviving"] { color: var(--mood-surviving); }
     .mood-card[data-mood="thriving"] { color: var(--mood-thriving); }
     .mood-card[data-mood="chaotic"] { color: var(--mood-chaotic); }
@@ -451,7 +505,7 @@
     }
     
     /* ============================================
-       VIBE BAR — 6 JERNIH EMOJI (Unicode Stabil)
+       VIBE BAR — 6 EMOJI dengan 💀 SKULL
        ============================================ */
     .vibe-bar {
       display: flex;
@@ -490,7 +544,6 @@
       line-height: 1;
       filter: grayscale(0.4);
       transition: all 0.2s;
-      /* Force color emoji rendering */
       font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
     }
     .vibe-btn:hover .vibe-emoji {
@@ -603,6 +656,7 @@
       padding: var(--space-xl) 0;
       text-align: center;
       border-top: 2px solid var(--border);
+      margin-bottom: 80px; /* Space for bottom nav */
     }
     .footer-text {
       font-size: 11px;
@@ -614,7 +668,7 @@
     /* TOAST */
     .toast {
       position: fixed;
-      bottom: var(--space-lg);
+      bottom: 80px; /* Above bottom nav */
       left: 50%;
       transform: translateX(-50%) translateY(100px);
       background: var(--text);
@@ -641,10 +695,6 @@
         <div class="tagline">no filter, just truth</div>
       </div>
       <div class="top-right">
-        <div class="nav-pills">
-          <button class="nav-pill active">Jejak</button>
-          <button class="nav-pill">Arsip</button>
-        </div>
         <div class="status-indicator">
           <span class="status-dot"></span>
           <span>2.4k online</span>
@@ -677,9 +727,7 @@
         maxlength="500"
       ></textarea>
       
-      <!-- ============================================
-           MANUAL MOOD SELECTOR — 4 Cards Visual
-           ============================================ -->
+      <!-- MANUAL MOOD SELECTOR -->
       <div class="mood-section">
         <div class="mood-label">Pilih mood-mu sekarang</div>
         <div class="mood-grid" id="mood-grid">
@@ -734,6 +782,30 @@
     </footer>
   </div>
 
+  <!-- ============================================
+       BOTTOM NAVIGATION — 4 TABS RESTORED
+       ============================================ -->
+  <nav class="bottom-nav">
+    <div class="nav-container">
+      <a href="jejak.html" class="nav-item active">
+        <span class="nav-icon">✦</span>
+        <span>Jejak</span>
+      </a>
+      <a href="frekuensi-bola.html" class="nav-item">
+        <span class="nav-icon">〜</span>
+        <span>Gerak</span>
+      </a>
+      <a href="saynope.html" class="nav-item">
+        <span class="nav-icon">✕</span>
+        <span>Spill</span>
+      </a>
+      <a href="glitch.html" class="nav-item">
+        <span class="nav-icon">⚡</span>
+        <span>Glitch</span>
+      </a>
+    </div>
+  </nav>
+
   <div class="toast" id="toast"></div>
   <input type="file" id="file-input" accept="image/*" style="display: none;">
 
@@ -751,15 +823,15 @@
     };
 
     // ============================================
-    // 6 EMOJI JERNIH — Unicode yang stabil di semua platform
+    // 6 EMOJI dengan 💀 SKULL (jernih & universal)
     // ============================================
     const VIBES = {
-      relatable: { emoji: '💯', label: 'literally me' },  // 100% — jernih & universal
-      mood:      { emoji: '🛋️', label: 'big mood' },      // Couch — Gen Z icon
-      tea:       { emoji: '🐸', label: 'spill tea' },      // Frog — "that's none of my business"
-      hug:       { emoji: '🤗', label: 'virtual hug' },    // Hugging face — clear
-      real:      { emoji: '🎯', label: 'no cap' },         // Target — on point
-      dead:      { emoji: '⚰️', label: 'rip me' }          // Coffin — crystal clear
+      relatable: { emoji: '💯', label: 'literally me' },  // 100%
+      mood:      { emoji: '🛋️', label: 'big mood' },      // Couch
+      tea:       { emoji: '🐸', label: 'spill tea' },      // Tea frog
+      hug:       { emoji: '🤗', label: 'virtual hug' },    // Hug
+      real:      { emoji: '🎯', label: 'no cap' },         // Target
+      dead:      { emoji: '💀', label: 'rip me' }          // SKULL — jernih & iconic
     };
 
     const MOODS = {
@@ -855,7 +927,6 @@
     window.selectMood = function(mood) {
       state.currentMood = mood;
       
-      // Update visual selection
       document.querySelectorAll('.mood-card').forEach(card => {
         card.classList.remove('active');
         if (card.dataset.mood === mood) {
@@ -863,7 +934,6 @@
         }
       });
       
-      // Haptic feedback
       if (navigator.vibrate) navigator.vibrate(10);
     };
 
@@ -948,7 +1018,6 @@
         btn.classList.add('vibed');
         countEl.textContent = count + 1;
         
-        // Spring animation
         btn.style.transform = 'scale(0.9)';
         setTimeout(() => btn.style.transform = '', 150);
         
@@ -993,7 +1062,6 @@
       renderEntries();
       showToast(`Jejak ${MOODS[state.currentMood].label} tersimpan!`);
       
-      // Scroll to entries
       document.querySelector('.entries-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
