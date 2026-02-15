@@ -1,20 +1,43 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="glitch">
+<html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NOPE — Bola Live + Komunitas</title>
-  <!-- ... keep existing fonts and styles ... -->
-  
+  <title>NOPE — Bola Live</title>
   <style>
-    /* === ADDITIONAL STYLES FOR HYBRID STRUCTURE === */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     
-    /* Head CTA Tabs */
+    body {
+      background: #0a0a0a;
+      color: #e6e6e6;
+      font-family: system-ui, -apple-system, sans-serif;
+      padding-bottom: 80px;
+    }
+    
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      background: rgba(0,0,0,0.9);
+      backdrop-filter: blur(8px);
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #222;
+      z-index: 100;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      color: #ff9999;
+      cursor: pointer;
+    }
+    
     .head-cta {
       display: flex;
       gap: 8px;
-      margin-left: auto;
-      margin-right: 12px;
     }
     
     .head-cta-btn {
@@ -23,22 +46,206 @@
       font-size: 13px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s;
-      border: 1px solid var(--border);
+      border: 1px solid #333;
       background: transparent;
-      color: var(--text);
-      font-family: inherit;
-    }
-    
-    .head-cta-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
+      color: #e6e6e6;
     }
     
     .head-cta-btn.active {
-      background: var(--accent);
+      background: #b266ff;
       color: #000;
-      border-color: var(--accent);
+      border-color: #b266ff;
+    }
+    
+    /* Main Content */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Video Stream */
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    
+    .live-badge {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: #ff6b6b;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 16px;
+      font-size: 11px;
+      font-weight: 700;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .dot-pulse {
+      width: 6px;
+      height: 6px;
+      background: white;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    /* Cards */
+    .card {
+      background: #121212;
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    
+    .card-title {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    /* Quiz Section */
+    .quiz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    
+    .quiz-option {
+      background: #1a1a1a;
+      border: 2px solid #333;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .quiz-option:hover {
+      border-color: #b266ff;
+    }
+    
+    .quiz-option.selected {
+      border-color: #b266ff;
+      background: rgba(178, 102, 255, 0.1);
+    }
+    
+    .quiz-icon {
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+    
+    .quiz-label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    .quiz-team {
+      font-size: 11px;
+      color: #888;
+    }
+    
+    /* Submit Button */
+    .submit-btn {
+      width: 100%;
+      background: #b266ff;
+      color: #000;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* Komunitas */
+    .komunitas-item {
+      background: #1a1a1a;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+    
+    .komunitas-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    
+    .komunitas-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #b266ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    
+    .komunitas-author {
+      font-weight: 600;
+    }
+    
+    .komunitas-time {
+      font-size: 12px;
+      color: #888;
+    }
+    
+    .komunitas-content {
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+    
+    .komunitas-actions {
+      display: flex;
+      gap: 16px;
+      font-size: 13px;
+      color: #888;
     }
     
     /* Lower Nav */
@@ -49,11 +256,11 @@
       right: 0;
       background: rgba(10, 10, 10, 0.95);
       backdrop-filter: blur(12px);
-      border-top: 1px solid var(--border);
-      padding: 12px 20px;
+      border-top: 1px solid #222;
+      padding: 12px;
       display: flex;
       justify-content: center;
-      gap: 40px;
+      gap: 60px;
       z-index: 100;
     }
     
@@ -64,382 +271,218 @@
       gap: 4px;
       background: none;
       border: none;
-      color: var(--muted);
+      color: #888;
       cursor: pointer;
-      font-family: inherit;
       font-size: 11px;
-      transition: all 0.2s;
     }
     
     .lower-nav-btn:hover {
-      color: var(--accent);
+      color: #b266ff;
     }
     
     .lower-nav-btn .icon {
-      font-size: 20px;
+      font-size: 24px;
     }
     
-    /* Tab Content */
-    .tab-content {
-      display: none;
-    }
-    
-    .tab-content.active {
-      display: block;
-      animation: fadeIn 0.3s ease;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    /* Komunitas Tab Specific */
-    .komunitas-feed {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    
-    .komunitas-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-    }
-    
-    .komunitas-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-    
-    .komunitas-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: var(--accent-dim);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-    }
-    
-    .komunitas-meta {
-      flex: 1;
-    }
-    
-    .komunitas-author {
-      font-weight: 600;
-      font-size: 14px;
-    }
-    
-    .komunitas-time {
-      font-size: 12px;
-      color: var(--muted);
-    }
-    
-    .komunitas-content {
-      font-size: 14px;
-      line-height: 1.6;
-      margin-bottom: 12px;
-    }
-    
-    .komunitas-actions {
-      display: flex;
-      gap: 16px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-    
-    .komunitas-actions span {
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-    
-    .komunitas-actions span:hover {
-      color: var(--accent);
-    }
-    
-    /* Klub Communities Grid */
-    .klub-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 12px;
-      margin-top: 16px;
-    }
-    
-    .klub-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .klub-item:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-    }
-    
-    .klub-logo {
-      font-size: 32px;
-      margin-bottom: 8px;
-    }
-    
-    .klub-name {
-      font-size: 12px;
-      font-weight: 600;
-    }
-    
-    .klub-members {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-    
-    /* Adjust main content for lower nav */
-    body {
-      padding-bottom: 100px; /* Space for lower nav */
+    /* Responsive */
+    @media (max-width: 768px) {
+      .head-cta-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+      
+      .quiz-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
   </style>
 </head>
 <body>
-  <div class="wrapper">
-    <!-- HEADER: Logo + Head CTA (Bola Live | Komunitas) -->
-    <header id="header">
-      <div class="logo" onclick="window.location.href='index.html'">NOPE</div>
+  <!-- HEADER -->
+  <header>
+    <div class="logo" onclick="location.href='index.html'">NOPE</div>
+    
+    <div class="head-cta">
+      <button class="head-cta-btn active" onclick="showTab('bola')">🔴 Bola Live</button>
+      <button class="head-cta-btn" onclick="showTab('komunitas')">👥 Komunitas</button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <div class="container">
+    
+    <!-- TAB BOLA LIVE -->
+    <div id="tab-bola" class="tab-content active">
       
-      <div class="head-cta">
-        <button class="head-cta-btn active" onclick="switchTab('bola')" id="tab-bola">
-          🔴 Bola Live
-        </button>
-        <button class="head-cta-btn" onclick="switchTab('komunitas')" id="tab-komunitas">
-          👥 Komunitas
-        </button>
+      <!-- VIDEO STREAM -->
+      <div class="video-container">
+        <div class="live-badge">
+          <span class="dot-pulse"></span>
+          LIVE
+        </div>
+        <iframe 
+          src="https://www.youtube.com/embed/_O35-eJe8BY?autoplay=1&mute=1" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+          allowfullscreen>
+        </iframe>
       </div>
       
-      <button class="settings-btn" id="settings-btn">⋯</button>
-    </header>
-    
-    <!-- TAB BOLA LIVE (Default) -->
-    <div id="content-bola" class="tab-content active">
-      <div class="grid">
-        <!-- LEFT COLUMN -->
-        <div>
-          <!-- VIDEO STREAM -->
-          <div class="video-container">
-            <div class="live-badge">
-              <span class="dot-pulse"></span>
-              LIVE
-            </div>
-            <iframe 
-              width="100%" 
-              height="100%" 
-              src="https://www.youtube.com/embed/_O35-eJe8BY?start=72&autoplay=1&mute=1" 
-              title="YouTube Live Stream" 
-              frameborder="0" 
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-              allowfullscreen
-              style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
-            </iframe>
+      <!-- QUIZ CARD -->
+      <div class="card">
+        <div class="card-title">⚡ Quiz: Prediksi First Goal Scorer</div>
+        <div class="quiz-grid">
+          <div class="quiz-option" onclick="selectOption(this)">
+            <div class="quiz-icon">⚽</div>
+            <div class="quiz-label">Raka</div>
+            <div class="quiz-team">Persija</div>
           </div>
-          
-          <!-- QUIZ SECTION -->
-          <div class="card">
-            <div class="card-title">⚡ Quiz Live: 5 Prediksi</div>
-            <!-- ... existing prediction items ... -->
+          <div class="quiz-option" onclick="selectOption(this)">
+            <div class="quiz-icon">⚽</div>
+            <div class="quiz-label">Dika</div>
+            <div class="quiz-team">Persija</div>
           </div>
-          
-          <!-- MINI KOMUNITAS (Match Thread Preview) -->
-          <div class="card">
-            <div class="card-title" style="display: flex; justify-content: space-between;">
-              <span>💬 Match Thread</span>
-              <span style="font-size: 12px; color: var(--accent); cursor: pointer;" onclick="switchTab('komunitas')">
-                Lihat Semua →
-              </span>
-            </div>
-            <div class="chat-section" style="height: 200px;">
-              <div class="chat-messages" id="chat-messages-mini"></div>
-            </div>
+          <div class="quiz-option" onclick="selectOption(this)">
+            <div class="quiz-icon">⚽</div>
+            <div class="quiz-label">Bima</div>
+            <div class="quiz-team">Persib</div>
+          </div>
+          <div class="quiz-option" onclick="selectOption(this)">
+            <div class="quiz-icon">⚽</div>
+            <div class="quiz-label">Rehan</div>
+            <div class="quiz-team">Persib</div>
           </div>
         </div>
-        
-        <!-- RIGHT COLUMN -->
-        <div>
-          <!-- LEADERBOARD -->
-          <div class="card">
-            <div class="card-title">🏆 Leaderboard Match Ini</div>
-            <!-- ... existing leaderboard ... -->
+        <button class="submit-btn" id="submit-btn" onclick="submitQuiz()" disabled>Kirim Prediksi</button>
+      </div>
+      
+      <!-- LEADERBOARD -->
+      <div class="card">
+        <div class="card-title">🏆 Leaderboard</div>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; padding: 10px; background: rgba(178,102,255,0.1); border-radius: 8px; border: 1px solid #b266ff;">
+            <span>1. BudiJago</span>
+            <span style="color: #b266ff; font-weight: 600;">185 pts</span>
           </div>
-          
-          <!-- CARA MAIN -->
-          <div class="card">
-            <div class="card-title">📖 Cara Main</div>
-            <!-- ... existing cara main ... -->
+          <div style="display: flex; justify-content: space-between; padding: 10px; background: #1a1a1a; border-radius: 8px;">
+            <span>2. AnaPrediksi</span>
+            <span style="color: #888;">170 pts</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 10px; background: #1a1a1a; border-radius: 8px;">
+            <span>3. TahuBulat99</span>
+            <span style="color: #888;">150 pts</span>
           </div>
         </div>
       </div>
     </div>
     
     <!-- TAB KOMUNITAS -->
-    <div id="content-komunitas" class="tab-content">
-      <!-- KLUB COMMUNITIES -->
+    <div id="tab-komunitas" class="tab-content">
       <div class="card">
-        <div class="card-title">🏠 Klub Communities U15/U17</div>
-        <div class="klub-grid">
-          <div class="klub-item" onclick="openKlub('persija')">
-            <div class="klub-logo">🐯</div>
-            <div class="klub-name">Persija</div>
-            <div class="klub-members">234 member</div>
+        <div class="card-title">🔥 Diskusi Match Hari Ini</div>
+        
+        <div class="komunitas-item">
+          <div class="komunitas-header">
+            <div class="komunitas-avatar">👤</div>
+            <div>
+              <div class="komunitas-author">BudiJago</div>
+              <div class="komunitas-time">5 menit lalu</div>
+            </div>
           </div>
-          <div class="klub-item" onclick="openKlub('persib')">
-            <div class="klub-logo">🔵</div>
-            <div class="klub-name">Persib</div>
-            <div class="klub-members">189 member</div>
+          <div class="komunitas-content">
+            Raka hari ini on fire! Prediksi FGS + MVP dia. Mentalnya kuat banget! 🧠⚽
           </div>
-          <div class="klub-item" onclick="openKlub('arema')">
-            <div class="klub-logo">🦁</div>
-            <div class="klub-name">Arema</div>
-            <div class="klub-members">156 member</div>
+          <div class="komunitas-actions">
+            <span>👍 12</span>
+            <span>💬 4</span>
           </div>
-          <div class="klub-item" onclick="openKlub('persebaya')">
-            <div class="klub-logo">🐊</div>
-            <div class="klub-name">Persebaya</div>
-            <div class="klub-members">142 member</div>
+        </div>
+        
+        <div class="komunitas-item">
+          <div class="komunitas-header">
+            <div class="komunitas-avatar">👤</div>
+            <div>
+              <div class="komunitas-author">AnaPrediksi</div>
+              <div class="komunitas-time">12 menit lalu</div>
+            </div>
+          </div>
+          <div class="komunitas-content">
+            Siapa yang udah isi IPIP-50? Kaget liat hasil anak saya high Conscientiousness! 🧠✨
+          </div>
+          <div class="komunitas-actions">
+            <span>👍 24</span>
+            <span>💬 8</span>
           </div>
         </div>
       </div>
-      
-      <!-- FEED DISKUSI -->
-      <div class="card">
-        <div class="card-title">🔥 Diskusi Panas</div>
-        <div class="komunitas-feed">
-          <div class="komunitas-card">
-            <div class="komunitas-header">
-              <div class="komunitas-avatar">👤</div>
-              <div class="komunitas-meta">
-                <div class="komunitas-author">BudiJago</div>
-                <div class="komunitas-time">5 menit lalu • Persija U17</div>
-              </div>
-            </div>
-            <div class="komunitas-content">
-              Raka hari ini on fire! Prediksi FGS + MVP dia. Mentalnya kuat banget dari data psikometrik minggu lalu. 🧠⚽
-            </div>
-            <div class="komunitas-actions">
-              <span>👍 12</span>
-              <span>💬 4</span>
-              <span>🔗 Share</span>
-            </div>
-          </div>
-          
-          <div class="komunitas-card">
-            <div class="komunitas-header">
-              <div class="komunitas-avatar">👤</div>
-              <div class="komunitas-meta">
-                <div class="komunitas-author">AnaPrediksi</div>
-                <div class="komunitas-time">12 menit lalu • Umum</div>
-              </div>
-            </div>
-            <div class="komunitas-content">
-              Siapa yang udah isi IPIP-50? Kaget liat hasilnya, ternyata anak saya high Conscientiousness! Cocok jadi kapten tim. 🧠✨
-            </div>
-            <div class="komunitas-actions">
-              <span>👍 24</span>
-              <span>💬 8</span>
-              <span>🔗 Share</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- LEADERBOARD KOMUNITAS -->
-      <div class="card">
-        <div class="card-title">🏅 Top Kontributor Minggu Ini</div>
-        <div class="leaderboard">
-          <div class="leader-item">
-            <div class="leader-rank top">1</div>
-            <div class="leader-name">BudiJago</div>
-            <div class="leader-score">45 posts</div>
-          </div>
-          <div class="leader-item">
-            <div class="leader-rank top">2</div>
-            <div class="leader-name">AnaPrediksi</div>
-            <div class="leader-score">38 posts</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- FOOTER -->
-    <div class="zone-footer">
-      NOPE Bola • U15/U17 Liga Jakarta • Quiz + Psikometrik + Komunitas
     </div>
   </div>
-  
-  <!-- LOWER NAV: Database & Psikometrik -->
+
+  <!-- LOWER NAV -->
   <nav class="lower-nav">
-    <button class="lower-nav-btn" onclick="openDatabase()">
+    <button class="lower-nav-btn" onclick="goTo('database')">
       <span class="icon">📊</span>
       <span>Database</span>
     </button>
-    <button class="lower-nav-btn" onclick="openPsikometrik()">
+    <button class="lower-nav-btn" onclick="goTo('psikometrik')">
       <span class="icon">🧠</span>
       <span>Psikometrik</span>
     </button>
   </nav>
-  
-  <!-- JAVASCRIPT -->
+
+  <!-- SIMPLE JAVASCRIPT -->
   <script>
-    // Tab Switching Logic
-    function switchTab(tab) {
+    // Tab switching
+    function showTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show selected tab
+      document.getElementById('tab-' + tabName).classList.add('active');
+      
       // Update buttons
-      document.querySelectorAll('.head-cta-btn').forEach(btn => btn.classList.remove('active'));
-      document.getElementById('tab-' + tab).classList.add('active');
+      document.querySelectorAll('.head-cta-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+    }
+    
+    // Quiz selection
+    let selected = false;
+    function selectOption(element) {
+      // Remove selected from all
+      document.querySelectorAll('.quiz-option').forEach(opt => {
+        opt.classList.remove('selected');
+      });
       
-      // Update content
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      document.getElementById('content-' + tab).classList.add('active');
+      // Add selected to clicked
+      element.classList.add('selected');
+      selected = true;
       
-      // Scroll to top
-      window.scrollTo(0, 0);
+      // Enable submit
+      document.getElementById('submit-btn').disabled = false;
+      document.getElementById('submit-btn').textContent = '✓ Kirim Prediksi';
     }
     
-    // Lower Nav Functions
-    function openDatabase() {
-      // Navigate to database page or open modal
-      window.location.href = 'frekuensi-bola-database.html';
-      // Or: showNotification('Database', 'Klasemen, jadwal, dan statistik lengkap');
+    // Submit quiz
+    function submitQuiz() {
+      if (!selected) return;
+      
+      document.getElementById('submit-btn').textContent = '✓ Terkirim!';
+      document.getElementById('submit-btn').disabled = true;
+      
+      alert('Prediksi terkirim! Tunggu hasil match.');
     }
     
-    function openPsikometrik() {
-      // Navigate to psikometrik page or open modal
-      window.location.href = 'frekuensi-bola-psikometrik.html';
-      // Or: showNotification('Psikometrik', 'IPIP-50 Test dan hasil analisis');
+    // Lower nav navigation
+    function goTo(page) {
+      if (page === 'database') {
+        window.location.href = 'frekuensi-bola-database.html';
+      } else if (page === 'psikometrik') {
+        window.location.href = 'frekuensi-bola-psikometrik.html';
+      }
     }
-    
-    function openKlub(klubName) {
-      showNotification('Klub', 'Membuka komunitas ' + klubName + '...');
-      // Navigate to klub specific page
-    }
-    
-    // Notification helper
-    function showNotification(title, text) {
-      // Implementation using existing notification system
-      const notif = document.getElementById('notification');
-      document.getElementById('notif-title').textContent = title;
-      document.getElementById('notif-text').textContent = text;
-      notif.classList.add('show');
-      setTimeout(() => notif.classList.remove('show'), 3000);
-    }
-    
-    // Initialize
-    window.addEventListener('DOMContentLoaded', () => {
-      // Existing initialization code...
-    });
   </script>
 </body>
 </html>
