@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="brutalgenz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>COCOMEO</title>
+  
+  <!-- PWA -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2300F0FF'/%3E%3Ctext x='50' y='70' font-size='40' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%230A0A0A'%3ECC%3C/text%3E%3C/svg%3E">
+  <meta name="theme-color" content="#0A0A0A">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #0A0A0A;
+      --surface: #141414;
+      --surface-elevated: #1E1E1E;
+      --border: #2A2A2A;
+      --border-accent: #FF4D00;
+      
+      --text: #FFFFFF;
+      --text-secondary: #888888;
+      --text-muted: #555555;
+      
+      --accent-primary: #FF4D00;
+      --accent-secondary: #00F0FF;
+      --accent-tertiary: #FF006E;
+      --accent-quaternary: #39FF14;
+      --accent-warm: #FFD700;
+      
+      /* Channel Colors */
+      --channel-bola: #FF3B30;
+      --channel-musik: #8B5CF6;
+      --channel-gaming: #39FF14;
+      --channel-kuliner: #F59E0B;
+      --channel-tech: #00F0FF;
+      --channel-random: #EC4899;
+      
+      --radius: 0px;
+      --radius-sm: 4px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+    }
+
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    html { scroll-behavior: smooth; }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-weight: 500;
+      font-size: 15px;
+      line-height: 1.4;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 100px;
+    }
+    
+    /* Noise texture */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+    
+    .wrapper {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* === COCOMEO HEADER === */
+    header {
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      border-bottom: 3px solid var(--border);
+      padding: var(--space-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      overflow: hidden;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 20%;
+      width: 8px;
+      height: 12px;
+      background: var(--accent-secondary);
+      border-radius: 0 0 50% 50%;
+      animation: drip 3s ease-in-out infinite;
+    }
+
+    @keyframes drip {
+      0%, 100% { height: 12px; opacity: 1; }
+      50% { height: 20px; opacity: 0.7; }
+    }
+
+    .logo-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .logo {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: var(--text);
+      cursor: pointer;
+      line-height: 0.9;
+      position: relative;
+      text-transform: uppercase;
+      transform: skew(-5deg);
+    }
+
+    .logo::before, .logo::after {
+      content: 'COCOMEO';
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+    .logo::before { 
+      color: var(--accent-secondary); 
+      transform: translate(-3px, -2px);
+      clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    }
+    .logo::after { 
+      color: var(--accent-tertiary); 
+      transform: translate(3px, 2px);
+      clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
+    }
+    
+    .logo:hover::before { 
+      opacity: 0.9; 
+      animation: glitchTop 0.3s infinite;
+    }
+    .logo:hover::after { 
+      opacity: 0.9; 
+      animation: glitchBottom 0.3s infinite;
+    }
+    
+    @keyframes glitchTop {
+      0%, 100% { transform: translate(-3px, -2px); }
+      25% { transform: translate(2px, -3px); }
+      50% { transform: translate(-2px, -1px); }
+      75% { transform: translate(3px, -2px); }
+    }
+    
+    @keyframes glitchBottom {
+      0%, 100% { transform: translate(3px, 2px); }
+      25% { transform: translate(-2px, 3px); }
+      50% { transform: translate(2px, 1px); }
+      75% { transform: translate(-3px, 2px); }
+    }
+
+    .tagline {
+      font-family: 'Instrument Serif', serif;
+      font-size: 11px;
+      font-style: italic;
+      color: var(--accent-secondary);
+      border: 1px solid var(--accent-secondary);
+      padding: 2px 8px;
+      transform: rotate(-3deg);
+      margin-left: var(--space-xs);
+    }
+
+    /* === COCOMEO LANDING === */
+    .cocomeo-landing {
+      padding: var(--space-md);
+    }
+
+    /* Welcome: Minimal */
+    .welcome-section {
+      margin-bottom: var(--space-xl);
+      padding-bottom: var(--space-lg);
+      border-bottom: 2px solid var(--border);
+    }
+
+    .welcome-text {
+      font-family: 'Instrument Serif', serif;
+      font-size: 16px;
+      font-style: italic;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Rooms */
+    .rooms-section {
+      margin-bottom: var(--space-xl);
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: var(--space-md);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-md);
+    }
+
+    .room-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: var(--space-lg);
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+      text-decoration: none;
+      display: block;
+      color: var(--text);
+    }
+
+    .room-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--border);
+      transition: all 0.2s;
+    }
+
+    .room-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--text-secondary);
+    }
+
+    .room-card:hover::before {
+      width: 8px;
+    }
+
+    /* Bola specific styling */
+    .room-card.bola-card::before {
+      background: var(--channel-bola);
+      width: 4px;
+    }
+
+    .room-card.bola-card:hover::before {
+      width: 8px;
+    }
+
+    .room-card.bola-card:hover {
+      border-color: var(--channel-bola);
+    }
+
+    .room-activity {
+      position: absolute;
+      top: var(--space-sm);
+      right: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .room-activity.live {
+      color: var(--channel-bola);
+    }
+
+    .activity-dot {
+      width: 6px;
+      height: 6px;
+      background: currentColor;
+      border-radius: 50%;
+    }
+
+    .activity-dot.pulse {
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+
+    .room-icon {
+      font-size: 32px;
+      margin-bottom: var(--space-sm);
+      display: block;
+    }
+
+    .room-name {
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .room-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Create Post */
+    .create-section {
+      margin-bottom: var(--space-xl);
+    }
+
+    .create-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: var(--space-md);
+    }
+
+    .create-prompt {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-md);
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+    }
+
+    .create-input {
+      width: 100%;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      padding: var(--space-md);
+      color: var(--text);
+      font-size: 15px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      resize: none;
+      min-height: 100px;
+      margin-bottom: var(--space-sm);
+    }
+
+    .create-input:focus {
+      outline: none;
+      border-color: var(--accent-secondary);
+    }
+
+    .create-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .create-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: var(--space-md);
+      font-weight: 600;
+    }
+
+    .create-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: var(--space-sm);
+    }
+
+    .room-selector {
+      display: flex;
+      gap: var(--space-xs);
+      flex-wrap: wrap;
+    }
+
+    .room-pill {
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: var(--surface-elevated);
+      border: 2px solid var(--border);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .room-pill:hover {
+      border-color: var(--text-secondary);
+      color: var(--text);
+    }
+
+    .room-pill.selected {
+      background: var(--accent-secondary);
+      border-color: var(--accent-secondary);
+      color: var(--bg);
+    }
+
+    .send-btn {
+      padding: 10px 24px;
+      background: var(--accent-secondary);
+      border: 2px solid var(--accent-secondary);
+      color: var(--bg);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .send-btn:hover {
+      background: var(--text);
+      border-color: var(--text);
+    }
+
+    /* Feed */
+    .feed-section {
+      margin-bottom: var(--space-xl);
+    }
+
+    .feed-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-md);
+    }
+
+    .feed-title {
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .feed-filter {
+      display: flex;
+      gap: var(--space-xs);
+    }
+
+    .filter-btn {
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: transparent;
+      border: 2px solid transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--border);
+      color: var(--text-secondary);
+    }
+
+    .filter-btn.active {
+      border-color: var(--text);
+      color: var(--text);
+    }
+
+    /* Post Cards */
+    .post-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      margin-bottom: var(--space-md);
+      transition: all 0.2s;
+    }
+
+    .post-card:hover {
+      border-color: var(--text-secondary);
+      transform: translateX(4px);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-md);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .post-avatar {
+      width: 40px;
+      height: 40px;
+      background: var(--accent-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      border: 2px solid var(--border);
+    }
+
+    .post-meta {
+      flex: 1;
+    }
+
+    .post-author {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .post-room {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .post-room.bola { color: var(--channel-bola); }
+    .post-room.musik { color: var(--channel-musik); }
+    .post-room.gaming { color: var(--channel-gaming); }
+    .post-room.kuliner { color: var(--channel-kuliner); }
+    .post-room.tech { color: var(--channel-tech); }
+
+    .post-time {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .post-content {
+      padding: var(--space-md);
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--text);
+    }
+
+    .post-footer {
+      display: flex;
+      gap: var(--space-lg);
+      padding: var(--space-sm) var(--space-md) var(--space-md);
+    }
+
+    .post-action {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .post-action:hover {
+      color: var(--accent-secondary);
+    }
+
+    /* Discovery */
+    .discovery-section {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: var(--space-lg);
+      text-align: center;
+    }
+
+    .discovery-icon {
+      font-size: 48px;
+      margin-bottom: var(--space-md);
+      opacity: 0.5;
+    }
+
+    .discovery-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: var(--space-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .discovery-text {
+      font-family: 'Instrument Serif', serif;
+      font-size: 14px;
+      font-style: italic;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-md);
+    }
+
+    .discovery-btn {
+      display: inline-block;
+      padding: 12px 24px;
+      background: var(--surface-elevated);
+      border: 2px solid var(--border);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .discovery-btn:hover {
+      border-color: var(--accent-secondary);
+      color: var(--accent-secondary);
+    }
+
+    /* === BOTTOM NAV === */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 2px solid var(--border);
+      z-index: 1000;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .nav-container {
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 64px;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: 100%;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+      position: relative;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background: var(--accent-secondary);
+      transition: width 0.2s;
+    }
+
+    .nav-item:hover {
+      color: var(--text-secondary);
+      background: var(--surface-elevated);
+    }
+
+    .nav-item.active {
+      color: var(--accent-secondary);
+    }
+
+    .nav-item.active::before {
+      width: 100%;
+    }
+
+    .nav-icon {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    /* === MOBILE === */
+    @media (max-width: 480px) {
+      .rooms-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-sm);
+      }
+      
+      .room-card {
+        padding: var(--space-md);
+      }
+      
+      .logo {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <!-- Header: COCOMEO Only -->
+    <header>
+      <div class="logo-container">
+        <div class="logo" onclick="window.location.href='index.html'">COCOMEO</div>
+        <span class="tagline">coba-coba</span>
+      </div>
+    </header>
+
+    <!-- Cocomeo Landing -->
+    <div class="cocomeo-landing">
+      
+      <!-- Welcome: Minimal, no big title -->
+      <div class="welcome-section">
+        <p class="welcome-text">
+          Masuk ruang obrolan, lurk dulu kalau malu, ngobrol kalau mau. Dari bola sampai bonsai, dari curhat sampai debat.
+        </p>
+      </div>
+
+      <!-- Rooms -->
+      <div class="rooms-section">
+        <div class="section-label">Pilih Ruang</div>
+        
+        <div class="rooms-grid">
+          <!-- Bola: Direct link to frekuensi-bola.html -->
+          <a href="frekuensi-bola.html" class="room-card bola-card">
+            <div class="room-activity live">
+              <span class="activity-dot pulse"></span>
+              LIVE
+            </div>
+            <span class="room-icon">⚽</span>
+            <div class="room-name">Bola</div>
+            <div class="room-desc">240 online • Persija vs Persib</div>
+          </a>
+          
+          <!-- Other rooms: placeholder links -->
+          <a href="#" class="room-card" onclick="alert('Ruang musik coming soon!'); return false;">
+            <div class="room-activity">
+              <span class="activity-dot"></span>
+              89
+            </div>
+            <span class="room-icon">🎵</span>
+            <div class="room-name">Musik</div>
+            <div class="room-desc">Indie lokal & playlist</div>
+          </a>
+          
+          <a href="#" class="room-card" onclick="alert('Ruang gaming coming soon!'); return false;">
+            <div class="room-activity">
+              <span class="activity-dot"></span>
+              156
+            </div>
+            <span class="room-icon">🎮</span>
+            <div class="room-name">Gaming</div>
+            <div class="room-desc">ML, Valo, & party</div>
+          </a>
+          
+          <a href="#" class="room-card" onclick="alert('Ruang kuliner coming soon!'); return false;">
+            <div class="room-activity">
+              <span class="activity-dot"></span>
+              67
+            </div>
+            <span class="room-icon">🍜</span>
+            <div class="room-name">Kuliner</div>
+            <div class="room-desc">Street food & resep</div>
+          </a>
+          
+          <a href="#" class="room-card" onclick="alert('Ruang tech coming soon!'); return false;">
+            <div class="room-activity">
+              <span class="activity-dot"></span>
+              203
+            </div>
+            <span class="room-icon">💻</span>
+            <div class="room-name">Tech</div>
+            <div class="room-desc">Startup & coding</div>
+          </a>
+          
+          <a href="#" class="room-card" onclick="alert('Ruang random coming soon!'); return false;">
+            <div class="room-activity">
+              <span class="activity-dot"></span>
+              412
+            </div>
+            <span class="room-icon">🌀</span>
+            <div class="room-name">Random</div>
+            <div class="room-desc">Curhat & bebas</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- NO LIVE PREVIEW HERE - DELETED -->
+
+      <!-- Create Post -->
+      <div class="create-section">
+        <div class="section-label">Mulai Obrolan</div>
+        <div class="create-card">
+          <div class="create-prompt">"Gak perlu kenal dulu untuk ngobrol. Gak perlu setuju untuk diskusi."</div>
+          <textarea class="create-input" placeholder="Apa yang pengen kamu omongin? Bisa soal bola, musik, atau curhat aja..."></textarea>
+          <div class="create-hint">💡 Tips: Lurk dulu di ruang yang menarik, baru deh ngobrol</div>
+          <div class="create-actions">
+            <div class="room-selector">
+              <span class="room-pill selected" onclick="selectRoom(this)">#bola</span>
+              <span class="room-pill" onclick="selectRoom(this)">#musik</span>
+              <span class="room-pill" onclick="selectRoom(this)">#random</span>
+            </div>
+            <button class="send-btn">Kirim</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feed -->
+      <div class="feed-section">
+        <div class="feed-header">
+          <div class="feed-title">🔥 Obrolan Hangat</div>
+          <div class="feed-filter">
+            <button class="filter-btn active">Terbaru</button>
+            <button class="filter-btn">Populer</button>
+          </div>
+        </div>
+
+        <!-- Posts -->
+        <div class="post-card">
+          <div class="post-header">
+            <div class="post-avatar">👤</div>
+            <div class="post-meta">
+              <div class="post-author">BudiJago</div>
+              <div class="post-room bola">#bola • Persija U17</div>
+            </div>
+            <div class="post-time">5m</div>
+          </div>
+          <div class="post-content">
+            Raka hari ini on fire! Prediksi FGS + MVP dia. Mentalnya kuat banget dari data psikometrik minggu lalu. Yang mau ikut prediksi bisa ke ruang Bola, lagi ada quiz live! 🧠⚽
+          </div>
+          <div class="post-footer">
+            <div class="post-action">👍 12</div>
+            <div class="post-action">💬 4</div>
+            <div class="post-action">🔗 Share</div>
+          </div>
+        </div>
+
+        <div class="post-card">
+          <div class="post-header">
+            <div class="post-avatar" style="background: var(--channel-musik);">🎵</div>
+            <div class="post-meta">
+              <div class="post-author">AnaIndie</div>
+              <div class="post-room musik">#musik</div>
+            </div>
+            <div class="post-time">12m</div>
+          </div>
+          <div class="post-content">
+            Baru nemu band lokal dari Bandung, namanya "Hujan Biru". Vokalisnya suaranya mirip Chris Martin tapi liriknya dalam bahasa Sunda. Ada yang pernah denger? 🎸
+          </div>
+          <div class="post-footer">
+            <div class="post-action">👍 45</div>
+            <div class="post-action">💬 18</div>
+            <div class="post-action">🔗 Share</div>
+          </div>
+        </div>
+
+        <div class="post-card">
+          <div class="post-header">
+            <div class="post-avatar" style="background: var(--channel-tech);">💻</div>
+            <div class="post-meta">
+              <div class="post-author">DevMuda</div>
+              <div class="post-room tech">#tech</div>
+            </div>
+            <div class="post-time">25m</div>
+          </div>
+          <div class="post-content">
+            Tips buat yang mau mulai belajar coding: Jangan mulai dari JavaScript dulu, mulai dari logika. Main chess, rubik, atau bahkan catur banteng. Logic building itu fondasi. 💡
+          </div>
+          <div class="post-footer">
+            <div class="post-action">👍 89</div>
+            <div class="post-action">💬 23</div>
+            <div class="post-action">🔗 Share</div>
+          </div>
+        </div>
+
+        <div class="post-card">
+          <div class="post-header">
+            <div class="post-avatar" style="background: var(--accent-tertiary);">🌀</div>
+            <div class="post-meta">
+              <div class="post-author">MalamMinggu</div>
+              <div class="post-room">#random</div>
+            </div>
+            <div class="post-time">1j</div>
+          </div>
+          <div class="post-content">
+            Ada yang ngerasa gak sih, makin dewasa makin susah nemu temen ngobrol yang bener-bener dengerin? Bukan nunggu giliran ngomong, tapi bener-bener dengerin. Kangen masa SMP sih. 😔
+          </div>
+          <div class="post-footer">
+            <div class="post-action">👍 234</div>
+            <div class="post-action">💬 67</div>
+            <div class="post-action">🔗 Share</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Discovery -->
+      <div class="discovery-section">
+        <div class="discovery-icon">🧭</div>
+        <div class="discovery-title">Masih Cari-Cari?</div>
+        <div class="discovery-text">Cocomeo itu coba-coba. Gak cocok di satu ruang? Pindah aja. Gak ada yang marah.</div>
+        <button class="discovery-btn" onclick="scrollToTop()">Lihat Semua Ruang</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <div class="nav-container">
+      <button class="nav-item" onclick="goTo('jejak')">
+        <span class="nav-icon">✦</span>
+        <span>Jejak</span>
+      </button>
+      <button class="nav-item active" onclick="goTo('cocomeo')">
+        <span class="nav-icon">〜</span>
+        <span>Cocomeo</span>
+      </button>
+      <button class="nav-item" onclick="goTo('spill')">
+        <span class="nav-icon">✕</span>
+        <span>Spill</span>
+      </button>
+      <button class="nav-item" onclick="goTo('glitch')">
+        <span class="nav-icon">⚡</span>
+        <span>Glitch</span>
+      </button>
+    </div>
+  </nav>
+
+  <script>
+    // Select room pill
+    function selectRoom(el) {
+      document.querySelectorAll('.room-pill').forEach(p => p.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    // Scroll to top
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Navigation
+    function goTo(page) {
+      const pages = {
+        'jejak': 'jejak.html',
+        'cocomeo': 'cocomeo.html',
+        'spill': 'saynope.html',
+        'glitch': 'glitch.html'
+      };
+      if (pages[page]) window.location.href = pages[page];
+    }
+  </script>
+</body>
+</html>
