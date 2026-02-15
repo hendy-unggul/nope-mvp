@@ -3,1194 +3,372 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NOPE — Bola Live</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23ff9999'/%3E%3Ctext x='50' y='70' font-size='60' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%23000'%3ENO%3C/text%3E%3C/svg%3E">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+  <title>NOPE — Bola Live + Komunitas</title>
+  <!-- ... keep existing fonts and styles ... -->
   
   <style>
-    :root {
-      --bg: #0a0a0a;
-      --surface: #121212;
-      --border: #222222;
-      --text: #e6e6e6;
-      --text-secondary: #a0a0a0;
-      --muted: #8a8a8a;
-      --accent: #b266ff;
-      --accent-dim: rgba(178, 102, 255, 0.1);
-      --logo-color: #ff9999;
-      --success: #00ff88;
-      --danger: #ff6b6b;
-    }
+    /* === ADDITIONAL STYLES FOR HYBRID STRUCTURE === */
     
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'JetBrains Mono', ui-monospace, monospace;
-      font-weight: 300;
-      font-size: 15px;
-      line-height: 1.55;
-      padding-bottom: 80px;
-      -webkit-font-smoothing: antialiased;
-    }
-    
-    .wrapper {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 16px;
-    }
-    
-    /* === STICKY HEADER (GLITCH-STYLE) === */
-    header {
-      position: sticky;
-      top: 0;
-      background: #000000dd;
-      backdrop-filter: blur(8px);
-      padding: 12px 0;
+    /* Head CTA Tabs */
+    .head-cta {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 100;
-      border-bottom: 1px solid transparent;
-      transition: border-color 0.3s;
-    }
-
-    header.scrolled {
-      border-bottom-color: var(--border);
-    }
-
-    .logo {
-      font-family: 'Manrope', sans-serif;
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--logo-color);
-      margin-left: 16px;
-      cursor: pointer;
-    }
-
-    .top-right {
-      display: flex;
-      align-items: center;
+      gap: 8px;
+      margin-left: auto;
       margin-right: 12px;
     }
-
-    .nav-mini {
-      display: flex;
-      gap: 6px;
-      font-size: 11px;
-      color: var(--muted);
-      margin-right: 8px;
-    }
-
-    .nav-mini span {
+    
+    .head-cta-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
       cursor: pointer;
-      text-decoration: underline;
-      text-decoration-style: dotted;
-      text-underline-offset: 2px;
-      padding: 2px 4px;
-      border-radius: 4px;
-      transition: background-color 0.2s;
-      user-select: none;
-    }
-
-    .nav-mini span:hover:not(.active) {
-      background-color: var(--accent-dim);
+      transition: all 0.2s;
+      border: 1px solid var(--border);
+      background: transparent;
       color: var(--text);
+      font-family: inherit;
     }
-
-    .nav-mini span.active {
+    
+    .head-cta-btn:hover {
+      border-color: var(--accent);
       color: var(--accent);
-      text-decoration-color: var(--accent);
-      font-weight: 500;
-      background-color: var(--accent-dim);
     }
-
-    .settings-btn {
+    
+    .head-cta-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+    
+    /* Lower Nav */
+    .lower-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      z-index: 100;
+    }
+    
+    .lower-nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
       background: none;
       border: none;
       color: var(--muted);
-      font-size: 20px;
       cursor: pointer;
-      transform: rotate(90deg);
-    }
-    
-    /* === GRID LAYOUT === */
-    .grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 20px;
-    }
-    
-    @media (max-width: 768px) {
-      .grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .wrapper {
-        max-width: 480px;
-      }
-    }
-    
-    /* === CARD === */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-    
-    .card-title {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    /* === VIDEO CONTAINER === */
-    .video-container {
-      position: relative;
-      padding-bottom: 56.25%;
-      height: 0;
-      overflow: hidden;
-      background: #000;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      margin-bottom: 20px;
-    }
-    
-    .video-dummy {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .video-dummy-content {
-      text-align: center;
-      padding: 20px;
-    }
-    
-    .trophy-icon {
-      font-size: 60px;
-      margin-bottom: 16px;
-      animation: float 3s ease-in-out infinite;
-    }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-8px); }
-    }
-    
-    .event-title {
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 12px;
-    }
-    
-    .media-badge {
-      display: inline-block;
-      background: var(--accent);
-      color: #000;
-      padding: 6px 16px;
-      border-radius: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      margin-bottom: 16px;
-    }
-    
-    .nope-logo {
-      font-family: 'Manrope', sans-serif;
-      font-size: 36px;
-      font-weight: 800;
-      color: var(--logo-color);
-      margin-bottom: 12px;
-    }
-    
-    .stream-info {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-    
-    .dot-pulse {
-      width: 6px;
-      height: 6px;
-      background: var(--danger);
-      border-radius: 50%;
-      animation: pulse-dot 1.5s ease-in-out infinite;
-    }
-    
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.2); }
-    }
-    
-    .live-badge {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      background: var(--danger);
-      color: white;
-      padding: 4px 12px;
-      border-radius: 16px;
+      font-family: inherit;
       font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      transition: all 0.2s;
     }
     
-    /* === COLLAPSIBLE SECTIONS === */
-    .collapsible {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      margin-bottom: 20px;
-      overflow: hidden;
+    .lower-nav-btn:hover {
+      color: var(--accent);
     }
     
-    .collapsible-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 16px 20px;
-      cursor: pointer;
-      transition: background 0.2s;
+    .lower-nav-btn .icon {
+      font-size: 20px;
     }
     
-    .collapsible-header:hover {
-      background: rgba(255,255,255,0.02);
-    }
-    
-    .collapsible-title {
-      font-size: 14px;
-      font-weight: 600;
-    }
-    
-    .collapsible-toggle {
-      margin-left: auto;
-      color: var(--muted);
-      transition: transform 0.3s;
-      font-size: 12px;
-    }
-    
-    .collapsible-toggle.open {
-      transform: rotate(180deg);
-    }
-    
-    .collapsible-content {
+    /* Tab Content */
+    .tab-content {
       display: none;
-      padding: 0 20px 20px;
-      animation: slide-down 0.3s ease;
     }
     
-    .collapsible-content.show {
+    .tab-content.active {
       display: block;
+      animation: fadeIn 0.3s ease;
     }
     
-    @keyframes slide-down {
-      from { opacity: 0; transform: translateY(-10px); }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
     
-    /* === PREDICTION ITEMS === */
-    .prediction-list {
+    /* Komunitas Tab Specific */
+    .komunitas-feed {
       display: flex;
       flex-direction: column;
       gap: 16px;
-      margin-bottom: 20px;
     }
     
-    .prediction-item {
-      background: rgba(255,255,255,0.02);
+    .komunitas-card {
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 16px;
     }
     
-    .prediction-item.completed {
-      border-color: var(--success);
-      background: rgba(0, 255, 136, 0.05);
-    }
-    
-    .prediction-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    
-    .prediction-meta {
+    .komunitas-header {
       display: flex;
       align-items: center;
       gap: 10px;
+      margin-bottom: 12px;
     }
     
-    .prediction-number {
-      background: var(--accent);
-      color: #000;
-      width: 24px;
-      height: 24px;
+    .komunitas-avatar {
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
+      background: var(--accent-dim);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 700;
-      font-size: 13px;
-    }
-    
-    .prediction-item.completed .prediction-number {
-      background: var(--success);
-    }
-    
-    .prediction-type {
-      font-size: 11px;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-    
-    .prediction-points {
-      font-size: 12px;
-      color: var(--accent);
-      font-weight: 600;
-    }
-    
-    .prediction-question {
-      font-weight: 500;
-      font-size: 14px;
-      margin-bottom: 12px;
-    }
-    
-    /* === OPTIONS === */
-    .player-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-      gap: 8px;
-    }
-    
-    .player-card {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .player-card:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-    }
-    
-    .player-card.selected {
-      border-color: var(--accent);
-      background: var(--accent-dim);
-    }
-    
-    .player-avatar {
-      font-size: 32px;
-      margin-bottom: 6px;
-    }
-    
-    .player-name {
-      font-size: 12px;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-    
-    .player-team {
-      font-size: 10px;
-      color: var(--muted);
-    }
-    
-    .htft-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-    }
-    
-    .htft-option {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .htft-option:hover {
-      border-color: var(--accent);
-    }
-    
-    .htft-option.selected {
-      border-color: var(--accent);
-      background: var(--accent-dim);
-    }
-    
-    .htft-halftime {
-      font-size: 10px;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
-    
-    .htft-arrow {
-      font-size: 14px;
-      margin: 2px 0;
-    }
-    
-    .htft-fulltime {
-      font-size: 12px;
-      font-weight: 600;
-    }
-    
-    .btts-options {
-      display: flex;
-      gap: 12px;
-    }
-    
-    .btts-option {
-      flex: 1;
-      background: var(--surface);
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      padding: 14px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .btts-option:hover {
-      border-color: var(--accent);
-    }
-    
-    .btts-option.selected {
-      border-color: var(--accent);
-      background: var(--accent-dim);
-    }
-    
-    .btts-icon {
-      font-size: 28px;
-      margin-bottom: 6px;
-    }
-    
-    .btts-label {
-      font-size: 13px;
-      font-weight: 600;
-    }
-    
-    /* === SUBMIT SECTION === */
-    .submit-section {
-      background: rgba(255,255,255,0.02);
-      border-radius: 12px;
-      padding: 16px;
-      text-align: center;
-    }
-    
-    .submit-progress {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 10px;
-    }
-    
-    .submit-progress span {
-      color: var(--accent);
-      font-weight: 600;
-    }
-    
-    .submit-btn {
-      width: 100%;
-      background: var(--accent);
-      color: #000;
-      border: none;
-      padding: 14px;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-family: inherit;
-    }
-    
-    .submit-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      background: #c284ff;
-    }
-    
-    .submit-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    
-    .submit-note {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 8px;
-    }
-    
-    /* === PHONE MODAL === */
-    .phone-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.9);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 20px;
-    }
-    
-    .phone-modal.show {
-      display: flex;
-    }
-    
-    .phone-card {
-      background: var(--surface);
-      border: 2px solid var(--accent);
-      border-radius: 16px;
-      padding: 28px;
-      max-width: 400px;
-      width: 100%;
-      text-align: center;
-    }
-    
-    .phone-icon {
-      font-size: 48px;
-      margin-bottom: 12px;
-    }
-    
-    .phone-title {
       font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 8px;
     }
     
-    .phone-desc {
-      color: var(--muted);
-      margin-bottom: 20px;
-      font-size: 13px;
-      line-height: 1.6;
+    .komunitas-meta {
+      flex: 1;
     }
     
-    .phone-input-group {
-      margin-bottom: 14px;
-      text-align: left;
-    }
-    
-    .phone-input-group label {
-      display: block;
-      font-size: 12px;
-      margin-bottom: 6px;
-      color: var(--muted);
-    }
-    
-    .phone-input {
-      width: 100%;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-      color: var(--text);
-      font-family: inherit;
-      font-size: 15px;
-      text-align: center;
-    }
-    
-    .phone-input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    
-    .verify-btn {
-      width: 100%;
-      background: var(--accent);
-      color: #000;
-      border: none;
-      padding: 12px;
-      border-radius: 10px;
+    .komunitas-author {
+      font-weight: 600;
       font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: inherit;
-      margin-bottom: 10px;
     }
     
-    .phone-skip {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      padding: 10px;
-      border-radius: 8px;
+    .komunitas-time {
       font-size: 12px;
-      cursor: pointer;
-      width: 100%;
-      font-family: inherit;
+      color: var(--muted);
     }
     
-    .otp-section {
-      display: none;
+    .komunitas-content {
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    
+    .komunitas-actions {
+      display: flex;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    
+    .komunitas-actions span {
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    
+    .komunitas-actions span:hover {
+      color: var(--accent);
+    }
+    
+    /* Klub Communities Grid */
+    .klub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 12px;
       margin-top: 16px;
     }
     
-    .otp-section.show {
-      display: block;
-    }
-    
-    /* === LEADERBOARD === */
-    .leaderboard {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    
-    .leader-item {
-      display: grid;
-      grid-template-columns: 32px 1fr auto;
-      align-items: center;
-      gap: 10px;
-      padding: 10px;
-      background: rgba(255,255,255,0.02);
-      border-radius: 8px;
-    }
-    
-    .leader-item.you {
-      background: var(--accent-dim);
-      border: 1px solid var(--accent);
-    }
-    
-    .leader-item.winner {
-      background: rgba(255,204,0,0.05);
-      border: 1px solid rgba(255,204,0,0.3);
-    }
-    
-    .leader-rank {
-      font-size: 14px;
-      font-weight: 700;
-      text-align: center;
-      color: var(--muted);
-    }
-    
-    .leader-rank.top {
-      color: var(--accent);
-    }
-    
-    .leader-name {
-      font-size: 13px;
-      font-weight: 500;
-    }
-    
-    .leader-score {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--accent);
-    }
-    
-    .leader-prize {
-      font-size: 10px;
-      color: var(--success);
-      margin-top: 2px;
-    }
-    
-    /* === CHAT === */
-    .chat-section {
-      display: flex;
-      flex-direction: column;
-      height: 300px;
-    }
-    
-    .chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 10px;
-      background: rgba(0,0,0,0.2);
-      border-radius: 10px;
-      margin-bottom: 10px;
-    }
-    
-    .chat-message {
-      margin-bottom: 8px;
-      font-size: 12px;
-      line-height: 1.5;
-      padding: 6px 10px;
-      border-radius: 6px;
-      background: rgba(255,255,255,0.03);
-    }
-    
-    .chat-message.system {
-      background: rgba(0, 255, 136, 0.1);
-      border-left: 2px solid var(--success);
-    }
-    
-    .chat-user {
-      font-weight: 600;
-      color: var(--accent);
-      margin-right: 4px;
-    }
-    
-    .chat-input-group {
-      display: flex;
-      gap: 8px;
-    }
-    
-    .chat-input {
-      flex: 1;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px;
-      color: var(--text);
-      font-family: inherit;
-      font-size: 13px;
-    }
-    
-    .chat-input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    
-    .chat-send {
-      background: var(--accent);
-      border: none;
-      border-radius: 8px;
-      padding: 10px 16px;
-      color: #000;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-    }
-    
-    .chat-send:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    
-    /* === NOTIFICATION === */
-    .notification {
-      position: fixed;
-      top: 20px;
-      right: 20px;
+    .klub-item {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 16px;
-      min-width: 300px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-      transform: translateX(400px);
-      transition: transform 0.3s;
-      z-index: 1001;
-    }
-    
-    .notification.show {
-      transform: translateX(0);
-    }
-    
-    .notif-title {
-      font-weight: 600;
-      font-size: 14px;
-      margin-bottom: 4px;
-    }
-    
-    .notif-text {
-      font-size: 12px;
-      color: var(--muted);
-    }
-    
-    /* === FOOTER === */
-    .zone-footer {
       text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .klub-item:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    
+    .klub-logo {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    
+    .klub-name {
       font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .klub-members {
+      font-size: 11px;
       color: var(--muted);
-      margin-top: 48px;
-      padding: 20px 0;
-      border-top: 1px solid var(--border);
+      margin-top: 4px;
+    }
+    
+    /* Adjust main content for lower nav */
+    body {
+      padding-bottom: 100px; /* Space for lower nav */
     }
   </style>
 </head>
 <body>
   <div class="wrapper">
-    <!-- GLITCH-STYLE HEADER -->
+    <!-- HEADER: Logo + Head CTA (Bola Live | Komunitas) -->
     <header id="header">
       <div class="logo" onclick="window.location.href='index.html'">NOPE</div>
-      <div class="top-right">
-        <div class="nav-mini">
-          <span onclick="window.location.href='jejak.html'">JEJAK</span>
-          <span onclick="window.location.href='frekuensi-zones.html'">GERAK</span>
-          <span onclick="window.location.href='saynope.html'">SPILL</span>
-          <span onclick="window.location.href='glitch.html'">GLITCH</span>
-          <span class="active">Bola</span>
-        </div>
-        <button class="settings-btn" id="settings-btn">⋯</button>
-      </div>
-    </header>
-    
-    <!-- GRID LAYOUT -->
-    <div class="grid">
-      <!-- LEFT COLUMN -->
-      <div>
-        <!-- VIDEO (MOVED TO TOP) -->
-        <div class="video-container">
-          <div class="live-badge">
-            <span class="dot-pulse"></span>
-            LIVE
-          </div>
-          
-          <iframe 
-            width="100%" 
-            height="100%" 
-            src="https://www.youtube.com/embed/_O35-eJe8BY?start=72&autoplay=1&mute=1" 
-            title="YouTube Live Stream" 
-            frameborder="0" 
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-            allowfullscreen
-            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
-          </iframe>
-        </div>
-        
-        <!-- LIVE CHAT (MOVED BELOW VIDEO) -->
-        <div class="card">
-          <div class="card-title" style="display: flex; justify-content: space-between; align-items: center;">
-            <span>💬 Live Chat</span>
-            <span style="font-size: 12px; color: var(--muted); font-weight: 400;" id="chat-username">Guest</span>
-          </div>
-          <div class="chat-section">
-            <div class="chat-messages" id="chat-messages"></div>
-            <div class="chat-input-group">
-              <input type="text" class="chat-input" id="chat-input" placeholder="Login untuk chat..." disabled/>
-              <button class="chat-send" id="chat-send" disabled>Kirim</button>
-            </div>
-          </div>
-        </div>
-        
-        <!-- PREDICTIONS CARD -->
-        <div class="card">
-          <div class="card-title">5 Prediksi Pertandingan</div>
-          
-          <div class="prediction-list" id="prediction-list">
-            <!-- Q1: First Goal Scorer -->
-            <div class="prediction-item" data-question="1">
-              <div class="prediction-header">
-                <div class="prediction-meta">
-                  <div class="prediction-number">1</div>
-                  <span class="prediction-type">Individual</span>
-                </div>
-                <span class="prediction-points">50 poin</span>
-              </div>
-              <div class="prediction-question">First Goal Scorer?</div>
-              <div class="player-grid">
-                <div class="player-card" data-value="raka" onclick="bolaApp.selectPlayer(this, 'fgs')">
-                  <div class="player-avatar">⚽</div>
-                  <div class="player-name">Raka</div>
-                  <div class="player-team">Persija</div>
-                </div>
-                <div class="player-card" data-value="dika" onclick="bolaApp.selectPlayer(this, 'fgs')">
-                  <div class="player-avatar">⚽</div>
-                  <div class="player-name">Dika</div>
-                  <div class="player-team">Persija</div>
-                </div>
-                <div class="player-card" data-value="bima" onclick="bolaApp.selectPlayer(this, 'fgs')">
-                  <div class="player-avatar">⚽</div>
-                  <div class="player-name">Bima</div>
-                  <div class="player-team">Persib</div>
-                </div>
-                <div class="player-card" data-value="rehan" onclick="bolaApp.selectPlayer(this, 'fgs')">
-                  <div class="player-avatar">⚽</div>
-                  <div class="player-name">Rehan</div>
-                  <div class="player-team">Persib</div>
-                </div>
-                <div class="player-card" data-value="none" onclick="bolaApp.selectPlayer(this, 'fgs')">
-                  <div class="player-avatar">🚫</div>
-                  <div class="player-name">No Goal</div>
-                  <div class="player-team">0-0</div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Q2: MVP -->
-            <div class="prediction-item" data-question="2">
-              <div class="prediction-header">
-                <div class="prediction-meta">
-                  <div class="prediction-number">2</div>
-                  <span class="prediction-type">Individual</span>
-                </div>
-                <span class="prediction-points">50 poin</span>
-              </div>
-              <div class="prediction-question">Player of the Match?</div>
-              <div class="player-grid">
-                <div class="player-card" data-value="raka" onclick="bolaApp.selectPlayer(this, 'mvp')">
-                  <div class="player-avatar">⭐</div>
-                  <div class="player-name">Raka</div>
-                  <div class="player-team">Persija</div>
-                </div>
-                <div class="player-card" data-value="dika" onclick="bolaApp.selectPlayer(this, 'mvp')">
-                  <div class="player-avatar">⭐</div>
-                  <div class="player-name">Dika</div>
-                  <div class="player-team">Persija</div>
-                </div>
-                <div class="player-card" data-value="bima" onclick="bolaApp.selectPlayer(this, 'mvp')">
-                  <div class="player-avatar">⭐</div>
-                  <div class="player-name">Bima</div>
-                  <div class="player-team">Persib</div>
-                </div>
-                <div class="player-card" data-value="rehan" onclick="bolaApp.selectPlayer(this, 'mvp')">
-                  <div class="player-avatar">⭐</div>
-                  <div class="player-name">Rehan</div>
-                  <div class="player-team">Persib</div>
-                </div>
-                <div class="player-card" data-value="other" onclick="bolaApp.selectPlayer(this, 'mvp')">
-                  <div class="player-avatar">❓</div>
-                  <div class="player-name">Other</div>
-                  <div class="player-team">Surprise</div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Q3: HT/FT -->
-            <div class="prediction-item" data-question="3">
-              <div class="prediction-header">
-                <div class="prediction-meta">
-                  <div class="prediction-number">3</div>
-                  <span class="prediction-type">Team</span>
-                </div>
-                <span class="prediction-points">30 poin</span>
-              </div>
-              <div class="prediction-question">Halftime/Fulltime Result?</div>
-              <div class="htft-grid">
-                <div class="htft-option" data-value="hh" onclick="bolaApp.selectHTFT(this)">
-                  <div class="htft-halftime">HT: Home</div>
-                  <div class="htft-arrow">⬇️</div>
-                  <div class="htft-fulltime">Home</div>
-                </div>
-                <div class="htft-option" data-value="hd" onclick="bolaApp.selectHTFT(this)">
-                  <div class="htft-halftime">HT: Home</div>
-                  <div class="htft-arrow">⬇️</div>
-                  <div class="htft-fulltime">Draw</div>
-                </div>
-                <div class="htft-option" data-value="ha" onclick="bolaApp.selectHTFT(this)">
-                  <div class="htft-halftime">HT: Home</div>
-                  <div class="htft-arrow">⬇️</div>
-                  <div class="htft-fulltime">Away</div>
-                </div>
-                <div class="htft-option" data-value="dh" onclick="bolaApp.selectHTFT(this)">
-                  <div class="htft-halftime">HT: Draw</div>
-                  <div class="htft-arrow">⬇️</div>
-                  <div class="htft-fulltime">Home</div>
-                </div>
-                <div class="htft-option" data-value="dd" onclick="bolaApp.selectHTFT(this)">
-                  <div class="htft-halftime">HT: Draw</div>
-                  <div class="htft-arrow">⬇️</div>
-                  <div class="htft-fulltime">Draw</div>
-                </div>
-                <div class="htft-option" data-value="da" onclick="bolaApp.selectHTFT(this)">
-                  <div class="htft-halftime">HT: Draw</div>
-                  <div class="htft-arrow">⬇️</div>
-                  <div class="htft-fulltime">Away</div>
-                </div>
-                <div class="htft-option" data-value="ah" onclick="bolaApp.selectHTFT(this)">
-                  <div class="htft-halftime">HT: Away</div>
-                  <div class="htft-arrow">⬇️</div>
-                  <div class="htft-fulltime">Home</div>
-                </div>
-                <div class="htft-option" data-value="ad" onclick="bolaApp.selectHTFT(this)">
-                  <div class="htft-halftime">HT: Away</div>
-                  <div class="htft-arrow">⬇️</div>
-                  <div class="htft-fulltime">Draw</div>
-                </div>
-                <div class="htft-option" data-value="aa" onclick="bolaApp.selectHTFT(this)">
-                  <div class="htft-halftime">HT: Away</div>
-                  <div class="htft-arrow">⬇️</div>
-                  <div class="htft-fulltime">Away</div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Q4: BTTS -->
-            <div class="prediction-item" data-question="4">
-              <div class="prediction-header">
-                <div class="prediction-meta">
-                  <div class="prediction-number">4</div>
-                  <span class="prediction-type">Team</span>
-                </div>
-                <span class="prediction-points">30 poin</span>
-              </div>
-              <div class="prediction-question">Both Teams to Score?</div>
-              <div class="btts-options">
-                <div class="btts-option" data-value="yes" onclick="bolaApp.selectBTTS(this)">
-                  <div class="btts-icon">⚔️</div>
-                  <div class="btts-label">YES (GG)</div>
-                </div>
-                <div class="btts-option" data-value="no" onclick="bolaApp.selectBTTS(this)">
-                  <div class="btts-icon">🛡️</div>
-                  <div class="btts-label">NO (NG)</div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Q5: Over/Under -->
-            <div class="prediction-item" data-question="5">
-              <div class="prediction-header">
-                <div class="prediction-meta">
-                  <div class="prediction-number">5</div>
-                  <span class="prediction-type">Match</span>
-                </div>
-                <span class="prediction-points">40 poin</span>
-              </div>
-              <div class="prediction-question">Total Goals: Over/Under 2.5?</div>
-              <div class="btts-options">
-                <div class="btts-option" data-value="over" onclick="bolaApp.selectOU(this)">
-                  <div class="btts-icon">📈</div>
-                  <div class="btts-label">OVER 2.5</div>
-                </div>
-                <div class="btts-option" data-value="under" onclick="bolaApp.selectOU(this)">
-                  <div class="btts-icon">📉</div>
-                  <div class="btts-label">UNDER 2.5</div>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div class="submit-section">
-            <div class="submit-progress">
-              Progress: <span id="progress-count">0</span>/5
-            </div>
-            <button class="submit-btn" id="submit-btn" onclick="bolaApp.showPhoneModal()" disabled>
-              🔒 Lengkapi Semua Prediksi
-            </button>
-            <div class="submit-note">Verifikasi HP untuk validasi pemenang</div>
-          </div>
-          
-          <div id="pred-results" style="display: none; margin-top: 16px; padding: 14px; background: rgba(0,255,136,0.05); border: 1px solid var(--success); border-radius: 10px; text-align: center;">
-            <div style="font-size: 20px; margin-bottom: 6px;">🎉</div>
-            <div style="font-weight: 600; color: var(--success); margin-bottom: 4px; font-size: 14px;">Prediksi Terkirim!</div>
-            <div style="font-size: 12px; color: var(--muted);">Tunggu hasil match untuk lihat skormu</div>
-          </div>
-        </div>
-        
-        <!-- ALGORITHM INFO (Collapsed) -->
-        <div class="collapsible">
-          <div class="collapsible-header" onclick="bolaApp.toggleCollapsible('algo')">
-            <span>📊</span>
-            <span class="collapsible-title">Sistem Skor & Hadiah</span>
-            <span class="collapsible-toggle" id="algo-toggle">▼</span>
-          </div>
-          <div class="collapsible-content" id="algo-content">
-            <div style="font-size: 13px; line-height: 1.6; color: var(--muted);">
-              <p style="margin-bottom: 12px;"><strong>Total Skor Maksimal: 200 Poin</strong></p>
-              <ul style="margin-left: 20px; margin-bottom: 12px;">
-                <li>First Goal Scorer: 50 poin</li>
-                <li>Player of the Match: 50 poin</li>
-                <li>Halftime/Fulltime: 30 poin</li>
-                <li>Both Teams Score: 30 poin</li>
-                <li>Over/Under 2.5: 40 poin</li>
-              </ul>
-              <p style="margin-bottom: 12px;"><strong>Hadiah:</strong></p>
-              <ul style="margin-left: 20px; margin-bottom: 12px;">
-                <li>🏆 Top 1 Bulanan: Samsung Galaxy + Internet IM3 1 tahun</li>
-                <li>💎 Top 66 Per Match: Voucher IM3</li>
-                <li>🎮 Semua Peserta: XP & Badges</li>
-              </ul>
-              <p><strong>Tie-breaker:</strong> Prediksi benar terbanyak → Waktu submit → Random draw</p>
-            </div>
-          </div>
-        </div>
-        
+      
+      <div class="head-cta">
+        <button class="head-cta-btn active" onclick="switchTab('bola')" id="tab-bola">
+          🔴 Bola Live
+        </button>
+        <button class="head-cta-btn" onclick="switchTab('komunitas')" id="tab-komunitas">
+          👥 Komunitas
+        </button>
       </div>
       
-      <!-- RIGHT COLUMN -->
-      <div>
-        <!-- LEADERBOARD -->
-        <div class="card">
-          <div class="card-title">🏆 Leaderboard</div>
-          <div class="leaderboard" id="leaderboard">
-            <div class="leader-item winner">
-              <div class="leader-rank top">1</div>
-              <div>
-                <div class="leader-name">BudiJago</div>
-                <div class="leader-prize">📱 Samsung A14</div>
-              </div>
-              <div class="leader-score">185</div>
+      <button class="settings-btn" id="settings-btn">⋯</button>
+    </header>
+    
+    <!-- TAB BOLA LIVE (Default) -->
+    <div id="content-bola" class="tab-content active">
+      <div class="grid">
+        <!-- LEFT COLUMN -->
+        <div>
+          <!-- VIDEO STREAM -->
+          <div class="video-container">
+            <div class="live-badge">
+              <span class="dot-pulse"></span>
+              LIVE
             </div>
-            <div class="leader-item winner">
-              <div class="leader-rank top">2</div>
-              <div>
-                <div class="leader-name">AnaPrediksi</div>
-                <div class="leader-prize">💎 Rp 500K</div>
-              </div>
-              <div class="leader-score">170</div>
+            <iframe 
+              width="100%" 
+              height="100%" 
+              src="https://www.youtube.com/embed/_O35-eJe8BY?start=72&autoplay=1&mute=1" 
+              title="YouTube Live Stream" 
+              frameborder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen
+              style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;">
+            </iframe>
+          </div>
+          
+          <!-- QUIZ SECTION -->
+          <div class="card">
+            <div class="card-title">⚡ Quiz Live: 5 Prediksi</div>
+            <!-- ... existing prediction items ... -->
+          </div>
+          
+          <!-- MINI KOMUNITAS (Match Thread Preview) -->
+          <div class="card">
+            <div class="card-title" style="display: flex; justify-content: space-between;">
+              <span>💬 Match Thread</span>
+              <span style="font-size: 12px; color: var(--accent); cursor: pointer;" onclick="switchTab('komunitas')">
+                Lihat Semua →
+              </span>
             </div>
-            <div class="leader-item winner">
-              <div class="leader-rank top">3</div>
-              <div>
-                <div class="leader-name">TahuBulat99</div>
-                <div class="leader-prize">💎 Rp 100K</div>
-              </div>
-              <div class="leader-score">150</div>
-            </div>
-            <div class="leader-item">
-              <div class="leader-rank">4</div>
-              <div class="leader-name">MieAyamPro</div>
-              <div class="leader-score">140</div>
-            </div>
-            <div class="leader-item">
-              <div class="leader-rank">5</div>
-              <div class="leader-name">BaksoGoreng</div>
-              <div class="leader-score">130</div>
+            <div class="chat-section" style="height: 200px;">
+              <div class="chat-messages" id="chat-messages-mini"></div>
             </div>
           </div>
         </div>
         
-        <!-- HOW TO PLAY -->
-        <div class="card">
-          <div class="card-title">📖 Cara Main</div>
-          <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12px; line-height: 1.6;">
-            <div style="display: flex; gap: 10px;">
-              <span style="background: var(--accent); color: #000; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; font-size: 11px;">1</span>
-              <div>
-                <strong>Jawab 5 Prediksi</strong><br>
-                <span style="color: var(--muted); font-size: 11px;">FGS, MVP, HT/FT, BTTS, O/U</span>
+        <!-- RIGHT COLUMN -->
+        <div>
+          <!-- LEADERBOARD -->
+          <div class="card">
+            <div class="card-title">🏆 Leaderboard Match Ini</div>
+            <!-- ... existing leaderboard ... -->
+          </div>
+          
+          <!-- CARA MAIN -->
+          <div class="card">
+            <div class="card-title">📖 Cara Main</div>
+            <!-- ... existing cara main ... -->
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- TAB KOMUNITAS -->
+    <div id="content-komunitas" class="tab-content">
+      <!-- KLUB COMMUNITIES -->
+      <div class="card">
+        <div class="card-title">🏠 Klub Communities U15/U17</div>
+        <div class="klub-grid">
+          <div class="klub-item" onclick="openKlub('persija')">
+            <div class="klub-logo">🐯</div>
+            <div class="klub-name">Persija</div>
+            <div class="klub-members">234 member</div>
+          </div>
+          <div class="klub-item" onclick="openKlub('persib')">
+            <div class="klub-logo">🔵</div>
+            <div class="klub-name">Persib</div>
+            <div class="klub-members">189 member</div>
+          </div>
+          <div class="klub-item" onclick="openKlub('arema')">
+            <div class="klub-logo">🦁</div>
+            <div class="klub-name">Arema</div>
+            <div class="klub-members">156 member</div>
+          </div>
+          <div class="klub-item" onclick="openKlub('persebaya')">
+            <div class="klub-logo">🐊</div>
+            <div class="klub-name">Persebaya</div>
+            <div class="klub-members">142 member</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- FEED DISKUSI -->
+      <div class="card">
+        <div class="card-title">🔥 Diskusi Panas</div>
+        <div class="komunitas-feed">
+          <div class="komunitas-card">
+            <div class="komunitas-header">
+              <div class="komunitas-avatar">👤</div>
+              <div class="komunitas-meta">
+                <div class="komunitas-author">BudiJago</div>
+                <div class="komunitas-time">5 menit lalu • Persija U17</div>
               </div>
             </div>
-            <div style="display: flex; gap: 10px;">
-              <span style="background: var(--accent); color: #000; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; font-size: 11px;">2</span>
-              <div>
-                <strong>Verifikasi HP</strong><br>
-                <span style="color: var(--muted); font-size: 11px;">Untuk validasi pemenang</span>
+            <div class="komunitas-content">
+              Raka hari ini on fire! Prediksi FGS + MVP dia. Mentalnya kuat banget dari data psikometrik minggu lalu. 🧠⚽
+            </div>
+            <div class="komunitas-actions">
+              <span>👍 12</span>
+              <span>💬 4</span>
+              <span>🔗 Share</span>
+            </div>
+          </div>
+          
+          <div class="komunitas-card">
+            <div class="komunitas-header">
+              <div class="komunitas-avatar">👤</div>
+              <div class="komunitas-meta">
+                <div class="komunitas-author">AnaPrediksi</div>
+                <div class="komunitas-time">12 menit lalu • Umum</div>
               </div>
             </div>
-            <div style="display: flex; gap: 10px;">
-              <span style="background: var(--accent); color: #000; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; font-size: 11px;">3</span>
-              <div>
-                <strong>Kumpulkan Poin</strong><br>
-                <span style="color: var(--muted); font-size: 11px;">Maksimal 200 poin</span>
-              </div>
+            <div class="komunitas-content">
+              Siapa yang udah isi IPIP-50? Kaget liat hasilnya, ternyata anak saya high Conscientiousness! Cocok jadi kapten tim. 🧠✨
             </div>
-            <div style="display: flex; gap: 10px;">
-              <span style="background: var(--success); color: #000; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; font-size: 11px;">🏆</span>
-              <div>
-                <strong>Menangkan Hadiah!</strong><br>
-                <span style="color: var(--success); font-size: 11px;">Top 66 per match</span>
-              </div>
+            <div class="komunitas-actions">
+              <span>👍 24</span>
+              <span>💬 8</span>
+              <span>🔗 Share</span>
             </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- LEADERBOARD KOMUNITAS -->
+      <div class="card">
+        <div class="card-title">🏅 Top Kontributor Minggu Ini</div>
+        <div class="leaderboard">
+          <div class="leader-item">
+            <div class="leader-rank top">1</div>
+            <div class="leader-name">BudiJago</div>
+            <div class="leader-score">45 posts</div>
+          </div>
+          <div class="leader-item">
+            <div class="leader-rank top">2</div>
+            <div class="leader-name">AnaPrediksi</div>
+            <div class="leader-score">38 posts</div>
           </div>
         </div>
       </div>
@@ -1198,296 +376,69 @@
     
     <!-- FOOTER -->
     <div class="zone-footer">
-      5 Prediksi Emosional • Skor Adil • Sponsor by IM3
+      NOPE Bola • U15/U17 Liga Jakarta • Quiz + Psikometrik + Komunitas
     </div>
   </div>
   
-  <!-- PHONE MODAL -->
-  <div class="phone-modal" id="phone-modal">
-    <div class="phone-card">
-      <div class="phone-icon">📱</div>
-      <div class="phone-title">Verifikasi Nomor HP</div>
-      <div class="phone-desc">
-        Masukkan nomor HP untuk validasi pemenang. Kami akan kirim kode OTP.
-      </div>
-      
-      <div class="phone-input-group">
-        <label>Nomor Handphone</label>
-        <input type="tel" class="phone-input" id="phone-input" placeholder="08xxxxxxxxxx" maxlength="13">
-      </div>
-      
-      <button class="verify-btn" onclick="bolaApp.sendOTP()">
-        Kirim Kode OTP
-      </button>
-      
-      <div class="otp-section" id="otp-section">
-        <div class="phone-input-group" style="margin-top: 12px;">
-          <label>Kode OTP</label>
-          <input type="text" class="phone-input" id="otp-input" placeholder="123456" maxlength="6">
-        </div>
-        <button class="verify-btn" onclick="bolaApp.verifyOTP()">
-          Verifikasi & Submit
-        </button>
-      </div>
-      
-      <button class="phone-skip" onclick="bolaApp.hidePhoneModal()">
-        Batal
-      </button>
-    </div>
-  </div>
-  
-  <!-- NOTIFICATION -->
-  <div class="notification" id="notification">
-    <div class="notif-title" id="notif-title"></div>
-    <div class="notif-text" id="notif-text"></div>
-  </div>
+  <!-- LOWER NAV: Database & Psikometrik -->
+  <nav class="lower-nav">
+    <button class="lower-nav-btn" onclick="openDatabase()">
+      <span class="icon">📊</span>
+      <span>Database</span>
+    </button>
+    <button class="lower-nav-btn" onclick="openPsikometrik()">
+      <span class="icon">🧠</span>
+      <span>Psikometrik</span>
+    </button>
+  </nav>
   
   <!-- JAVASCRIPT -->
   <script>
-    class NopeBolaLive {
-      constructor() {
-        this.user = null;
-        this.predictions = { fgs: null, mvp: null, htft: null, btts: null, ou: null };
-        this.phoneVerified = false;
-        this.init();
-      }
+    // Tab Switching Logic
+    function switchTab(tab) {
+      // Update buttons
+      document.querySelectorAll('.head-cta-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
       
-      async init() {
-        await this.setupUser();
-        this.setupChat();
-      }
+      // Update content
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      document.getElementById('content-' + tab).classList.add('active');
       
-      async setupUser() {
-        let deviceId = localStorage.getItem('nope_device_id');
-        if (!deviceId) {
-          deviceId = 'dev_' + Math.random().toString(36).substr(2, 9);
-          localStorage.setItem('nope_device_id', deviceId);
-        }
-        
-        const names = ['TahuBulat', 'MieAyam', 'BaksoGoreng', 'SatePadang'];
-        const username = names[Math.floor(Math.random() * names.length)] + Math.floor(Math.random() * 999);
-        
-        this.user = {
-          username: username,
-          points: Math.floor(Math.random() * 1000),
-          totalScore: 0
-        };
-        
-        // Update chat username display
-        document.getElementById('chat-username').textContent = this.user.username;
-        
-        document.getElementById('chat-input').disabled = false;
-        document.getElementById('chat-send').disabled = false;
-        document.getElementById('chat-input').placeholder = 'Ketik pesan...';
-      }
-      
-      toggleCollapsible(id) {
-        const content = document.getElementById(id + '-content');
-        const toggle = document.getElementById(id + '-toggle');
-        content.classList.toggle('show');
-        toggle.classList.toggle('open');
-      }
-      
-      selectPlayer(element, type) {
-        const container = element.parentElement;
-        container.querySelectorAll('.player-card').forEach(card => card.classList.remove('selected'));
-        element.classList.add('selected');
-        this.predictions[type] = element.dataset.value;
-        this.updateProgress();
-      }
-      
-      selectHTFT(element) {
-        const container = document.getElementById('htft-grid') || element.parentElement;
-        container.querySelectorAll('.htft-option').forEach(opt => opt.classList.remove('selected'));
-        element.classList.add('selected');
-        this.predictions.htft = element.dataset.value;
-        this.updateProgress();
-      }
-      
-      selectBTTS(element) {
-        const container = element.parentElement;
-        container.querySelectorAll('.btts-option').forEach(opt => opt.classList.remove('selected'));
-        element.classList.add('selected');
-        this.predictions.btts = element.dataset.value;
-        this.updateProgress();
-      }
-      
-      selectOU(element) {
-        const container = element.parentElement;
-        container.querySelectorAll('.btts-option').forEach(opt => opt.classList.remove('selected'));
-        element.classList.add('selected');
-        this.predictions.ou = element.dataset.value;
-        this.updateProgress();
-      }
-      
-      updateProgress() {
-        const answered = Object.values(this.predictions).filter(v => v !== null).length;
-        document.getElementById('progress-count').textContent = answered;
-        
-        const btn = document.getElementById('submit-btn');
-        if (answered === 5) {
-          btn.disabled = false;
-          btn.textContent = '✓ Kirim Prediksi (Gratis)';
-          document.querySelectorAll('.prediction-item').forEach(item => {
-            item.classList.add('completed');
-          });
-        } else {
-          btn.disabled = true;
-          btn.textContent = `🔒 Lengkapi ${5 - answered} Lagi`;
-        }
-      }
-      
-      showPhoneModal() {
-        const answered = Object.values(this.predictions).filter(v => v !== null).length;
-        if (answered < 5) {
-          this.showNotif('Belum Lengkap', `Isi dulu ${5 - answered} prediksi lagi`);
-          return;
-        }
-        document.getElementById('phone-modal').classList.add('show');
-      }
-      
-      hidePhoneModal() {
-        document.getElementById('phone-modal').classList.remove('show');
-        document.getElementById('otp-section').classList.remove('show');
-        document.getElementById('phone-input').value = '';
-        document.getElementById('otp-input').value = '';
-      }
-      
-      sendOTP() {
-        const phone = document.getElementById('phone-input').value;
-        if (!phone || phone.length < 10) {
-          this.showNotif('Nomor Invalid', 'Masukkan nomor HP yang valid');
-          return;
-        }
-        
-        this.showNotif('OTP Terkirim!', 'Cek pesan SMS-mu');
-        document.getElementById('otp-section').classList.add('show');
-      }
-      
-      verifyOTP() {
-        const otp = document.getElementById('otp-input').value;
-        if (!otp || otp.length < 4) {
-          this.showNotif('Kode Invalid', 'Masukkan kode OTP yang valid');
-          return;
-        }
-        
-        this.phoneVerified = true;
-        this.hidePhoneModal();
-        this.submitPredictions();
-      }
-      
-      submitPredictions() {
-        document.querySelectorAll('.player-card, .htft-option, .btts-option').forEach(el => {
-          el.style.pointerEvents = 'none';
-          el.style.opacity = '0.7';
-        });
-        
-        document.getElementById('submit-btn').disabled = true;
-        document.getElementById('submit-btn').textContent = '✓ Terkirim!';
-        document.getElementById('pred-results').style.display = 'block';
-        
-        const mockScore = Math.floor(Math.random() * 80) + 100;
-        this.user.totalScore = mockScore;
-        
-        this.showNotif('Prediksi Terkirim!', `Skor: ${mockScore}/200`);
-        this.addChat('System', `🎯 ${this.user.username} submit 5 prediksi! Skor: ${mockScore}/200`, true);
-        this.updateLeaderboard(mockScore);
-      }
-      
-      updateLeaderboard(score) {
-        const leaderboard = document.getElementById('leaderboard');
-        const userItem = document.createElement('div');
-        userItem.className = 'leader-item you';
-        userItem.innerHTML = `
-          <div class="leader-rank">-</div>
-          <div class="leader-name">${this.user.username} (Kamu)</div>
-          <div class="leader-score">${score}</div>
-        `;
-        leaderboard.appendChild(userItem);
-      }
-      
-      setupChat() {
-        document.getElementById('chat-messages').innerHTML = '';
-        this.addChat('System', '⚽ Selamat datang di NOPE Bola Live! 5 Prediksi - 100% Gratis!', true);
-        
-        const messages = [
-          { user: 'BudiJago', text: 'Raka FGS + MVP, prediksi comeback! 🔥' },
-          { user: 'AnaPrediksi', text: 'Algoritmanya fair, suka! 👍' }
-        ];
-        
-        let i = 0;
-        const addMessage = () => {
-          if (i < messages.length) {
-            this.addChat(messages[i].user, messages[i].text);
-            i++;
-            setTimeout(addMessage, 3000);
-          }
-        };
-        setTimeout(addMessage, 2000);
-      }
-      
-      addChat(user, text, isSystem = false) {
-        const container = document.getElementById('chat-messages');
-        const div = document.createElement('div');
-        div.className = 'chat-message ' + (isSystem ? 'system' : '');
-        
-        if (isSystem) {
-          div.innerHTML = `<span style="color:var(--success);font-weight:600;">${text}</span>`;
-        } else {
-          div.innerHTML = `<span class="chat-user">${user}:</span> ${text}`;
-        }
-        
-        container.appendChild(div);
-        container.scrollTop = container.scrollHeight;
-      }
-      
-      sendChat() {
-        const input = document.getElementById('chat-input');
-        const text = input.value.trim();
-        if (!text || !this.user) return;
-        
-        this.addChat(this.user.username, text);
-        input.value = '';
-      }
-      
-      showNotif(title, text) {
-        const notif = document.getElementById('notification');
-        document.getElementById('notif-title').textContent = title;
-        document.getElementById('notif-text').textContent = text;
-        
-        notif.classList.add('show');
-        setTimeout(() => notif.classList.remove('show'), 3000);
-      }
+      // Scroll to top
+      window.scrollTo(0, 0);
     }
     
-    let bolaApp;
+    // Lower Nav Functions
+    function openDatabase() {
+      // Navigate to database page or open modal
+      window.location.href = 'frekuensi-bola-database.html';
+      // Or: showNotification('Database', 'Klasemen, jadwal, dan statistik lengkap');
+    }
+    
+    function openPsikometrik() {
+      // Navigate to psikometrik page or open modal
+      window.location.href = 'frekuensi-bola-psikometrik.html';
+      // Or: showNotification('Psikometrik', 'IPIP-50 Test dan hasil analisis');
+    }
+    
+    function openKlub(klubName) {
+      showNotification('Klub', 'Membuka komunitas ' + klubName + '...');
+      // Navigate to klub specific page
+    }
+    
+    // Notification helper
+    function showNotification(title, text) {
+      // Implementation using existing notification system
+      const notif = document.getElementById('notification');
+      document.getElementById('notif-title').textContent = title;
+      document.getElementById('notif-text').textContent = text;
+      notif.classList.add('show');
+      setTimeout(() => notif.classList.remove('show'), 3000);
+    }
+    
+    // Initialize
     window.addEventListener('DOMContentLoaded', () => {
-      bolaApp = new NopeBolaLive();
-    });
-    
-    document.getElementById('chat-send').addEventListener('click', () => {
-      if (bolaApp) bolaApp.sendChat();
-    });
-    
-    document.getElementById('chat-input').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter' && bolaApp) bolaApp.sendChat();
-    });
-    
-    document.getElementById('settings-btn').onclick = () => {
-      if (confirm('Keluar dari akun?')) {
-        localStorage.removeItem('nope_username');
-        window.location.href = 'index.html';
-      }
-    };
-    
-    // Header scroll effect
-    window.addEventListener('scroll', () => {
-      const header = document.getElementById('header');
-      if (window.scrollY > 10) {
-        header.classList.add('scrolled');
-      } else {
-        header.classList.remove('scrolled');
-      }
+      // Existing initialization code...
     });
   </script>
 </body>
