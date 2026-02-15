@@ -28,18 +28,13 @@
       --accent-soft: rgba(0, 240, 255, 0.2);
       --accent-secondary: #0080FF;
       
-      /* Zone colors */
-      --zone-larut: #00F0FF;
-      --zone-gila: #FF006E;
-      --zone-peluk: #39FF14;
-      --zone-diam: #FFD700;
-      
       --radius: 0px;
       --radius-sm: 4px;
       --space-xs: 4px;
       --space-sm: 8px;
       --space-md: 16px;
       --space-lg: 20px;
+      --space-xl: 32px;
     }
     
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -209,87 +204,6 @@
       margin-bottom: var(--space-md);
       line-height: 1.4;
     }
-    
-    /* ============================================
-       ZONE CARDS — Style JEJAK (rant-box style)
-       ============================================ */
-    .zone-hero {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      padding: var(--space-md);
-      margin-bottom: var(--space-md);
-      position: relative;
-    }
-    
-    .zone-hero::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: var(--accent);
-    }
-    
-    .zone-label {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-muted);
-      margin-bottom: var(--space-xs);
-    }
-    
-    .zone-name {
-      font-size: 28px;
-      font-weight: 700;
-      color: var(--accent);
-      margin-bottom: var(--space-xs);
-      letter-spacing: -0.02em;
-    }
-    
-    .zone-desc {
-      font-family: 'Instrument Serif', serif;
-      font-size: 15px;
-      font-style: italic;
-      color: var(--text-secondary);
-      margin-bottom: var(--space-md);
-    }
-    
-    /* Zone selector pills */
-    .zone-selector {
-      display: flex;
-      gap: var(--space-xs);
-      flex-wrap: wrap;
-    }
-    
-    .zone-pill {
-      padding: 6px 14px;
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border: 1px solid var(--border);
-      background: transparent;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .zone-pill:hover {
-      border-color: currentColor;
-      color: var(--text);
-    }
-    
-    .zone-pill.active {
-      border-color: currentColor;
-      background: var(--surface-warm);
-    }
-    
-    .zone-pill[data-zone="larut"] { color: var(--zone-larut); }
-    .zone-pill[data-zone="gila"] { color: var(--zone-gila); }
-    .zone-pill[data-zone="peluk"] { color: var(--zone-peluk); }
-    .zone-pill[data-zone="diam"] { color: var(--zone-diam); }
     
     /* ============================================
        BOLA MENU — Style JEJAK (entry cards)
@@ -503,9 +417,9 @@
     /* Mobile */
     @media (max-width: 480px) {
       .logo { font-size: 30px; }
-      .zone-name { font-size: 24px; }
     }
   </style>
+<base target="_blank">
 </head>
 <body>
   <div class="wrapper">
@@ -532,22 +446,8 @@
 
     <div class="tab-navigation">
       <a href="frekuensi-bola.html" class="tab-btn active">Bola</a>
-      <a href="frekuensi-zones.html" class="tab-btn">Zones</a>
+      <a href="frekuensi-zones.html" class="tab-btn">Circle</a>
       <a href="frekuensi-hangouts.html" class="tab-btn">Hangouts</a>
-    </div>
-
-    <!-- ZONE HERO -->
-    <div class="zone-hero">
-      <div class="zone-label">Arus Saat Ini</div>
-      <div class="zone-name" id="current-zone">LARUT</div>
-      <div class="zone-desc">Mengalir tanpa arah yang pasti, tapi tetap bergerak</div>
-      
-      <div class="zone-selector">
-        <button class="zone-pill active" data-zone="larut" onclick="selectZone('larut')">Larut</button>
-        <button class="zone-pill" data-zone="gila" onclick="selectZone('gila')">Gila</button>
-        <button class="zone-pill" data-zone="peluk" onclick="selectZone('peluk')">Peluk</button>
-        <button class="zone-pill" data-zone="diam" onclick="selectZone('diam')">Diam</button>
-      </div>
     </div>
 
     <!-- BOLA MENU -->
@@ -601,32 +501,11 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    const ZONES = {
-      larut: { name: 'LARUT', desc: 'Mengalir tanpa arah yang pasti, tapi tetap bergerak' },
-      gila: { name: 'GILA', desc: 'Chaotic energy, tidak bisa diprediksi, pure intensity' },
-      peluk: { name: 'PELU', desc: 'Supportive flow, warmth dalam kebersamaan' },
-      diam: { name: 'DIAM', desc: 'Silent presence, ada tanpa harus bersuara' }
-    };
-
     function showToast(msg) {
       const toast = document.getElementById('toast');
       toast.textContent = msg;
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 2500);
-    }
-
-    function selectZone(zone) {
-      const data = ZONES[zone];
-      document.getElementById('current-zone').textContent = data.name;
-      document.querySelector('.zone-desc').textContent = data.desc;
-      
-      document.querySelectorAll('.zone-pill').forEach(pill => {
-        pill.classList.remove('active');
-        if (pill.dataset.zone === zone) pill.classList.add('active');
-      });
-      
-      if (navigator.vibrate) navigator.vibrate(10);
-      showToast(`Beralih ke Arus ${data.name}`);
     }
 
     document.getElementById('settings-btn').addEventListener('click', () => {
