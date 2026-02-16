@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>JEJAK — Spill Your Truth</title>
   
-  <!-- Face Detection API -->
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+  
+  <!-- Face Detection -->
   <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/dist/face-api.min.js"></script>
   
   <!-- Fonts -->
@@ -156,6 +159,30 @@
       animation: pulse 2s infinite;
     }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    
+    /* SYNC STATUS */
+    .sync-status {
+      font-size: 10px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .sync-status.syncing::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border: 1px solid var(--text-muted);
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    .sync-status.synced {
+      color: var(--accent-quaternary);
+    }
+    .sync-status.error {
+      color: var(--accent-tertiary);
+    }
     
     /* FILTER CONTROLS */
     .filter-controls {
@@ -330,7 +357,7 @@
       z-index: 20;
     }
     
-    /* FACE SCRIBBLE OVERLAY */
+    /* FACE SCRIBBLE */
     .face-scribble {
       position: absolute;
       background: rgba(0,0,0,0.95);
@@ -338,7 +365,6 @@
       z-index: 15;
       overflow: hidden;
     }
-    
     .face-scribble::before {
       content: '';
       position: absolute;
@@ -347,17 +373,6 @@
         repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px),
         repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.05) 2px, rgba(255,255,255,0.05) 4px);
     }
-    
-    .face-scribble::after {
-      content: '';
-      position: absolute;
-      inset: -3px;
-      border: 3px solid #000;
-      box-shadow: 
-        inset 0 0 20px rgba(0,0,0,0.8),
-        0 0 10px rgba(0,0,0,0.5);
-    }
-    
     .marker-lines {
       position: absolute;
       inset: 0;
@@ -381,7 +396,6 @@
       align-items: flex-end;
       z-index: 20;
     }
-    
     .upload-btn {
       width: 48px;
       height: 48px;
@@ -419,7 +433,6 @@
       min-width: 20px;
       text-align: center;
     }
-    
     .quota-timer {
       background: var(--surface);
       border: 2px solid var(--border);
@@ -429,13 +442,11 @@
       max-width: 200px;
       text-align: right;
     }
-    
     .quota-timer.urgent {
       border-color: var(--accent-tertiary);
       color: var(--accent-tertiary);
       animation: pulse-border 2s infinite;
     }
-    
     @keyframes pulse-border {
       0%, 100% { border-color: var(--accent-tertiary); }
       50% { border-color: var(--text-muted); }
@@ -481,10 +492,8 @@
     }
     .rant-input::placeholder { color: var(--text-muted); }
     
-    /* MANUAL MOOD SELECTOR */
-    .mood-section {
-      margin: var(--space-md) 0;
-    }
+    /* MOOD SELECTOR */
+    .mood-section { margin: var(--space-md) 0; }
     .mood-label {
       font-size: 11px;
       font-weight: 700;
@@ -525,10 +534,7 @@
       font-size: 12px;
       font-weight: 700;
     }
-    .mood-emoji {
-      font-size: 28px;
-      line-height: 1;
-    }
+    .mood-emoji { font-size: 28px; line-height: 1; }
     .mood-name {
       font-size: 13px;
       font-weight: 700;
@@ -539,7 +545,6 @@
       font-size: 11px;
       color: var(--text-secondary);
     }
-    
     .mood-card[data-mood="surviving"] { color: var(--mood-surviving); }
     .mood-card[data-mood="thriving"] { color: var(--mood-thriving); }
     .mood-card[data-mood="chaotic"] { color: var(--mood-chaotic); }
@@ -638,6 +643,23 @@
       color: var(--text);
     }
     
+    /* SPILL STATUS */
+    .spill-status {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: var(--space-xs);
+    }
+    .spill-status.spilled {
+      color: var(--accent-secondary);
+    }
+    .spill-status::before {
+      content: '•';
+      margin-right: 4px;
+    }
+    
     /* VIBE BAR */
     .vibe-bar {
       display: flex;
@@ -676,7 +698,6 @@
       line-height: 1;
       filter: grayscale(0.4);
       transition: all 0.2s;
-      font-family: "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
     }
     .vibe-btn:hover .vibe-emoji {
       filter: none;
@@ -754,11 +775,6 @@
       mix-blend-mode: multiply;
     }
     .tray-item:hover::after { opacity: 0.3; }
-    
-    .tray-item {
-      position: relative;
-    }
-    
     .tray-item .face-scribble {
       position: absolute;
       z-index: 5;
@@ -866,11 +882,7 @@
       justify-content: center;
       gap: var(--space-md);
     }
-    
-    .processing-overlay.active {
-      display: flex;
-    }
-    
+    .processing-overlay.active { display: flex; }
     .processing-spinner {
       width: 48px;
       height: 48px;
@@ -879,21 +891,13 @@
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
-    
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
-    
     .processing-text {
       font-size: 14px;
       color: var(--text-secondary);
       text-align: center;
-    }
-    
-    .processing-status {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: var(--space-sm);
     }
     
     /* MODAL */
@@ -909,11 +913,7 @@
       padding: var(--space-md);
       overflow-y: auto;
     }
-    
-    .modal.active {
-      display: block;
-    }
-    
+    .modal.active { display: block; }
     .modal-content {
       max-width: 480px;
       margin: 0 auto;
@@ -921,7 +921,6 @@
       border: 2px solid var(--border);
       padding: var(--space-lg);
     }
-    
     .modal-header {
       display: flex;
       justify-content: space-between;
@@ -930,14 +929,12 @@
       padding-bottom: var(--space-md);
       border-bottom: 2px solid var(--border);
     }
-    
     .modal-title {
       font-size: 18px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    
     .modal-close {
       background: none;
       border: none;
@@ -945,13 +942,11 @@
       font-size: 24px;
       cursor: pointer;
     }
-    
     .gallery-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: var(--space-sm);
     }
-    
     .gallery-item {
       aspect-ratio: 1;
       background: var(--surface-elevated);
@@ -960,23 +955,17 @@
       overflow: hidden;
       position: relative;
     }
-    
     .gallery-item img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       transition: all 0.2s;
     }
-    
-    .gallery-item:hover img {
-      transform: scale(1.05);
-    }
-    
+    .gallery-item:hover img { transform: scale(1.05); }
     .gallery-item.selected {
       border-color: var(--accent-primary);
       box-shadow: 0 0 0 2px var(--accent-primary);
     }
-    
     .gallery-item.selected::after {
       content: '✓';
       position: absolute;
@@ -992,14 +981,12 @@
       font-size: 12px;
       font-weight: 700;
     }
-    
     .modal-actions {
       margin-top: var(--space-md);
       display: flex;
       justify-content: flex-end;
       gap: var(--space-sm);
     }
-    
     .modal-btn {
       padding: 12px 24px;
       font-size: 12px;
@@ -1012,18 +999,14 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    
     .modal-btn.primary {
       background: var(--accent-primary);
       border-color: var(--accent-primary);
       color: var(--bg);
     }
+    .modal-btn:hover { transform: translateY(-2px); }
     
-    .modal-btn:hover {
-      transform: translateY(-2px);
-    }
-    
-    /* GALERY WARNING - Muncul saat upload */
+    /* GALLERY WARNING */
     .gallery-warning {
       background: var(--accent-tertiary);
       color: var(--text);
@@ -1037,16 +1020,13 @@
       border: 2px solid var(--accent-tertiary);
       animation: pulse-warning 2s infinite;
     }
-    
     @keyframes pulse-warning {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.8; }
     }
-    
     .gallery-warning::before {
       content: '🚫 ';
     }
-    
     .detection-badge {
       position: absolute;
       top: 4px;
@@ -1070,6 +1050,7 @@
         <div class="tagline">no filter, just truth</div>
       </div>
       <div class="top-right">
+        <div class="sync-status" id="sync-status">Menyambungkan...</div>
         <div class="status-indicator">
           <span class="status-dot"></span>
           <span>2.4k online</span>
@@ -1120,7 +1101,7 @@
         maxlength="500"
       ></textarea>
       
-      <!-- MANUAL MOOD SELECTOR -->
+      <!-- MOOD SELECTOR -->
       <div class="mood-section">
         <div class="mood-label">Pilih mood-mu sekarang</div>
         <div class="mood-grid" id="mood-grid">
@@ -1148,7 +1129,7 @@
       </div>
       
       <div class="input-actions">
-        <button class="submit-btn" id="submit-btn">Jejakkan</button>
+        <button class="submit-btn" id="submit-btn">Jejakkan & Spill</button>
       </div>
     </section>
 
@@ -1202,7 +1183,6 @@
   <div class="processing-overlay" id="processing">
     <div class="processing-spinner"></div>
     <div class="processing-text">Scanning untuk wajah...<br><small>AI Privacy Shield Active</small></div>
-    <div class="processing-status" id="processing-status">Memuat model...</div>
   </div>
 
   <!-- GALLERY MODAL -->
@@ -1213,7 +1193,6 @@
         <button class="modal-close" onclick="closeGallery()">×</button>
       </div>
       
-      <!-- WARNING MUNCUL SAAT UPLOAD -->
       <div class="gallery-warning">
         DILARANG UPLOAD FOTO WAJAH!
       </div>
@@ -1244,7 +1223,11 @@
       maxSelection: 6,
       maxArtefacts: 6,
       faceThreshold: 0.6,
-      inputSize: 416
+      inputSize: 416,
+      
+      // Supabase Config - GANTI DENGAN KREDENSIAL ANDA
+      supabaseUrl: 'https://your-project.supabase.co',
+      supabaseKey: 'your-anon-key'
     };
 
     const MONTHLY_THEMES = [
@@ -1263,7 +1246,7 @@
     ];
 
     // ============================================
-    // VIBES & MOODS (DEFINE SEBELUM STATE)
+    // CONSTANTS
     // ============================================
     const VIBES = {
       relatable: { emoji: '💯', label: 'literally me' },
@@ -1282,7 +1265,7 @@
     };
 
     // ============================================
-    // DUMMY DATA (DEFINE SEBELUM STATE)
+    // DUMMY DATA
     // ============================================
     const dummyArtefacts = [
       { 
@@ -1338,21 +1321,27 @@
         content: "gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus.",
         mood: 'surviving',
         timestamp: Date.now() - 172800000,
-        vibes: { relatable: 12, mood: 9, hug: 8, tea: 3, real: 5, dead: 2 }
+        vibes: { relatable: 12, mood: 9, hug: 8, tea: 3, real: 5, dead: 2 },
+        isSpilled: true,
+        spillId: 'spill_d1'
       },
       {
         id: 'd2',
         content: "deadline mepet, dosen gak jelas, dompet kering. rasanya pengen ijin cuti sehari buat jadi batu aja.",
         mood: 'doom',
         timestamp: Date.now() - 86400000,
-        vibes: { relatable: 9, mood: 5, dead: 7, real: 3, hug: 2, tea: 1 }
+        vibes: { relatable: 9, mood: 5, dead: 7, real: 3, hug: 2, tea: 1 },
+        isSpilled: true,
+        spillId: 'spill_d2'
       },
       {
         id: 'd3',
         content: "capek.",
         mood: 'surviving',
         timestamp: Date.now() - 43200000,
-        vibes: { hug: 20, relatable: 18, dead: 10, real: 7, mood: 3, tea: 0 }
+        vibes: { hug: 20, relatable: 18, dead: 10, real: 7, mood: 3, tea: 0 },
+        isSpilled: true,
+        spillId: 'spill_d3'
       }
     ];
 
@@ -1360,35 +1349,195 @@
     // STATE
     // ============================================
     const state = {
-      currentUser: localStorage.getItem('jejak_user') || '@anon',
+      currentUser: localStorage.getItem('jejak_user') || '@anon_' + Math.random().toString(36).substr(2, 6),
       currentMood: 'surviving',
-      entries: [],
+      entries: [], // User entries (LIFO - newest first)
       artefacts: [],
       userVibes: new Set(),
       selectedFiles: new Set(),
       colorMode: false,
       faceApiLoaded: false,
+      supabase: null,
+      isOnline: false,
       
       quotaStart: localStorage.getItem('jejak_quota_start') || null,
       uploadsThisWindow: parseInt(localStorage.getItem('jejak_uploads_count') || '0')
     };
 
+    // Save user
+    localStorage.setItem('jejak_user', state.currentUser);
+
+    // ============================================
+    // SUPABASE SETUP
+    // ============================================
+    function initSupabase() {
+      try {
+        state.supabase = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+        state.isOnline = true;
+        updateSyncStatus('synced', 'Terhubung');
+        return true;
+      } catch (e) {
+        console.error('Supabase init failed:', e);
+        state.isOnline = false;
+        updateSyncStatus('error', 'Offline mode');
+        return false;
+      }
+    }
+
+    function updateSyncStatus(status, text) {
+      const el = document.getElementById('sync-status');
+      el.className = 'sync-status ' + status;
+      el.textContent = text;
+    }
+
+    // ============================================
+    // RANT SYSTEM - CORE ALGORITHM
+    // ============================================
+    
+    /**
+     * ALGORITMA RANT:
+     * 1. User submit rant
+     * 2. Simpan ke state.entries (LIFO - unshift ke array)
+     * 3. Kirim ke Supabase (table: rants)
+     * 4. Broadcast ke "Spill the Tea" (table: spills)
+     * 5. Render entries (user entries + dummy di bawah)
+     */
+    async function submitRant(content, mood) {
+      const timestamp = Date.now();
+      const rantId = 'rant_' + timestamp + '_' + Math.random().toString(36).substr(2, 5);
+      
+      // 1. Create rant object
+      const newRant = {
+        id: rantId,
+        content: content,
+        mood: mood,
+        timestamp: timestamp,
+        vibes: { relatable: 0, mood: 0, tea: 0, hug: 0, real: 0, dead: 0 },
+        isSpilled: false,
+        author: state.currentUser,
+        created_at: new Date(timestamp).toISOString()
+      };
+      
+      // 2. Add to state (LIFO - newest first)
+      // Unshift = tambah di depan array
+      state.entries.unshift(newRant);
+      
+      // 3. Save to localStorage (backup)
+      saveEntriesToLocal();
+      
+      // 4. Render immediately (optimistic UI)
+      renderEntries();
+      
+      // 5. Send to Supabase (async)
+      if (state.isOnline) {
+        try {
+          updateSyncStatus('syncing', 'Menyimpan...');
+          
+          // Insert to rants table
+          const { data: rantData, error: rantError } = await state.supabase
+            .from('rants')
+            .insert([{
+              id: rantId,
+              content: content,
+              mood: mood,
+              author: state.currentUser,
+              created_at: new Date(timestamp).toISOString(),
+              vibes: newRant.vibes
+            }]);
+          
+          if (rantError) throw rantError;
+          
+          // 6. Broadcast to Spill the Tea
+          await broadcastToSpillTea(newRant);
+          
+          updateSyncStatus('synced', 'Tersimpan');
+          showToast('Jejak tersimpan & di-spill!');
+          
+        } catch (error) {
+          console.error('Save failed:', error);
+          updateSyncStatus('error', 'Gagal menyimpan');
+          showToast('Tersimpan lokal (sync pending)');
+          
+          // Queue for retry
+          queueForRetry(newRant);
+        }
+      } else {
+        showToast('Tersimpan lokal (offline)');
+        queueForRetry(newRant);
+      }
+      
+      return newRant;
+    }
+
+    async function broadcastToSpillTea(rant) {
+      /**
+       * Kirim ke "Spill the Tea" untuk dapat respon emoji dari user lain
+       * Table: spills (public, bisa dilihat semua user)
+       */
+      try {
+        const { data, error } = await state.supabase
+          .from('spills')
+          .insert([{
+            id: 'spill_' + rant.id,
+            rant_id: rant.id,
+            content: rant.content,
+            mood: rant.mood,
+            author: state.currentUser,
+            created_at: rant.created_at,
+            is_anonymous: true,
+            response_count: 0
+          }]);
+        
+        if (error) throw error;
+        
+        // Update local state
+        const entry = state.entries.find(e => e.id === rant.id);
+        if (entry) {
+          entry.isSpilled = true;
+          entry.spillId = 'spill_' + rant.id;
+        }
+        
+        return data;
+      } catch (error) {
+        console.error('Broadcast failed:', error);
+        throw error;
+      }
+    }
+
+    function saveEntriesToLocal() {
+      // Simpan hanya user entries (bukan dummy)
+      localStorage.setItem('jejak_user_entries', JSON.stringify(state.entries));
+    }
+
+    function loadEntriesFromLocal() {
+      const saved = localStorage.getItem('jejak_user_entries');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          return [];
+        }
+      }
+      return [];
+    }
+
+    function queueForRetry(entry) {
+      const queue = JSON.parse(localStorage.getItem('jejak_sync_queue') || '[]');
+      queue.push(entry);
+      localStorage.setItem('jejak_sync_queue', JSON.stringify(queue));
+    }
+
     // ============================================
     // FACE DETECTION
     // ============================================
     async function loadFaceApi() {
-      const statusEl = document.getElementById('processing-status');
       try {
-        statusEl.textContent = 'Memuat TinyFaceDetector...';
         await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model');
-        
-        statusEl.textContent = 'Memuat landmarks...';
         await faceapi.nets.faceLandmark68TinyNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model');
-        
         state.faceApiLoaded = true;
-        console.log('Face API loaded successfully');
+        console.log('Face API loaded');
       } catch (e) {
-        console.error('Face API load failed, using fallback:', e);
+        console.error('Face API failed:', e);
         state.faceApiLoaded = false;
       }
     }
@@ -1415,7 +1564,6 @@
         
         return validDetections;
       } catch (e) {
-        console.error('Detection error:', e);
         return simulateAccurateDetection(imageElement);
       }
     }
@@ -1423,32 +1571,18 @@
     function simulateAccurateDetection(img) {
       return new Promise((resolve) => {
         setTimeout(() => {
-          const hasFace = shouldSimulateFace(img);
-          
-          if (hasFace) {
+          if (img.src && img.src.includes('1507003211169')) {
             const w = img.naturalWidth || 400;
             const h = img.naturalHeight || 400;
-            const box = {
-              x: w * 0.25,
-              y: h * 0.15,
-              width: w * 0.5,
-              height: h * 0.65,
-              score: 0.85
-            };
-            resolve([{ box, score: 0.85 }]);
+            resolve([{ 
+              box: { x: w*0.25, y: h*0.15, width: w*0.5, height: h*0.65 },
+              score: 0.85 
+            }]);
           } else {
             resolve([]);
           }
-        }, 800);
+        }, 500);
       });
-    }
-
-    function shouldSimulateFace(img) {
-      if (img.src && img.src.includes('1507003211169')) {
-        return true;
-      }
-      if (img.dataset && img.dataset.isPortrait) return true;
-      return Math.random() < 0.05;
     }
 
     // ============================================
@@ -1456,13 +1590,11 @@
     // ============================================
     function addArtefactToFIFO(newArtefact) {
       state.artefacts.unshift(newArtefact);
-      
       if (state.artefacts.length > CONFIG.maxArtefacts) {
         const removed = state.artefacts.pop();
-        console.log('FIFO: Removed oldest artefact', removed.id);
-        showToast('Foto lama otomatis terhapus (FIFO)');
+        console.log('FIFO removed:', removed.id);
+        showToast('Foto lama terhapus (FIFO)');
       }
-      
       saveArtefacts();
     }
 
@@ -1481,7 +1613,11 @@
       const saved = localStorage.getItem('jejak_artefacts_meta');
       if (saved) {
         try {
-          return JSON.parse(saved);
+          const metadata = JSON.parse(saved);
+          return metadata.map((m, i) => ({
+            ...m,
+            url: dummyArtefacts[i % dummyArtefacts.length].url
+          }));
         } catch (e) {
           return [];
         }
@@ -1501,7 +1637,6 @@
       const allFilters = ['filter-monochrome', 'filter-sepia', 'filter-lomo', 'filter-vignette', 
                          'filter-noir', 'filter-fade', 'filter-cyber', 'filter-warm', 
                          'filter-cold', 'filter-dream', 'filter-crisp', 'filter-moody', 'filter-golden'];
-      
       allFilters.forEach(f => element.classList.remove(f));
       element.classList.add(useColor ? theme.filter : 'filter-monochrome');
     }
@@ -1563,7 +1698,6 @@
     // ============================================
     function initQuotaSystem() {
       const now = Date.now();
-      
       if (!state.quotaStart) {
         state.quotaStart = now.toString();
         localStorage.setItem('jejak_quota_start', state.quotaStart);
@@ -1575,11 +1709,12 @@
       const cycleStart = quotaStart + (currentCycle * CONFIG.quotaDays * 24 * 60 * 60 * 1000);
       const daysIntoCycle = Math.floor((now - cycleStart) / (1000 * 60 * 60 * 24));
       
-      const inUploadWindow = daysIntoCycle < CONFIG.uploadWindowDays;
-      const daysUntilWindow = CONFIG.quotaDays - daysIntoCycle;
-      const daysLeftInWindow = CONFIG.uploadWindowDays - daysIntoCycle;
-      
-      return { inUploadWindow, daysIntoCycle, daysUntilWindow, daysLeftInWindow };
+      return {
+        inUploadWindow: daysIntoCycle < CONFIG.uploadWindowDays,
+        daysIntoCycle,
+        daysUntilWindow: CONFIG.quotaDays - daysIntoCycle,
+        daysLeftInWindow: CONFIG.uploadWindowDays - daysIntoCycle
+      };
     }
 
     function updateQuotaUI() {
@@ -1604,7 +1739,7 @@
     }
 
     // ============================================
-    // FACE SCRIBBLE RENDERING
+    // RENDER FUNCTIONS
     // ============================================
     function createScribbleElement(box, containerWidth, containerHeight, imgWidth, imgHeight) {
       const div = document.createElement('div');
@@ -1631,224 +1766,6 @@
       return div;
     }
 
-    function renderFaceScribbles(containerId, artefact, containerWidth, containerHeight) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
-      
-      container.innerHTML = '';
-      
-      if (!artefact.faces || artefact.faces.length === 0) return;
-      
-      const img = new Image();
-      img.onload = () => {
-        artefact.faces.forEach(face => {
-          const scribble = createScribbleElement(
-            face.box, 
-            containerWidth, 
-            containerHeight, 
-            img.naturalWidth, 
-            img.naturalHeight
-          );
-          container.appendChild(scribble);
-        });
-      };
-      img.src = artefact.url;
-    }
-
-    // ============================================
-    // GALLERY & UPLOAD
-    // ============================================
-    function openGallery() {
-      const quota = initQuotaSystem();
-      if (!quota.inUploadWindow) {
-        showToast(`Tunggu ${quota.daysUntilWindow} hari lagi`);
-        return;
-      }
-      document.getElementById('file-input').click();
-    }
-
-    async function processImage(file) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        const url = URL.createObjectURL(file);
-        
-        img.onload = async () => {
-          document.getElementById('processing').classList.add('active');
-          document.getElementById('processing-status').textContent = 'Mendeteksi wajah...';
-          
-          try {
-            const detections = await detectFaces(img);
-            
-            const artefact = {
-              id: 'u' + Date.now() + Math.random().toString(36).substr(2, 9),
-              url: url,
-              note: 'new drop',
-              timestamp: Date.now(),
-              faces: detections.map(d => ({ 
-                box: d.box,
-                score: d.score 
-              })),
-              hasFace: detections.length > 0,
-              file: file
-            };
-            
-            document.getElementById('processing').classList.remove('active');
-            resolve(artefact);
-          } catch (err) {
-            document.getElementById('processing').classList.remove('active');
-            reject(err);
-          }
-        };
-        
-        img.onerror = () => {
-          document.getElementById('processing').classList.remove('active');
-          reject(new Error('Failed to load image'));
-        };
-        
-        img.src = url;
-      });
-    }
-
-    async function handleFileSelect(e) {
-      const files = Array.from(e.target.files);
-      if (files.length === 0) return;
-      
-      const validFiles = files.filter(file => {
-        if (file.size > CONFIG.maxFileSize) {
-          showToast(`${file.name} terlalu besar (max 5MB)`);
-          return false;
-        }
-        return true;
-      }).slice(0, CONFIG.maxSelection);
-      
-      if (validFiles.length === 0) return;
-      
-      const processed = [];
-      for (let i = 0; i < validFiles.length; i++) {
-        try {
-          const artefact = await processImage(validFiles[i]);
-          processed.push(artefact);
-        } catch (err) {
-          showToast(`Gagal memproses ${validFiles[i].name}`);
-        }
-      }
-      
-      if (processed.length === 0) return;
-      
-      state.selectedFiles = new Set(processed);
-      renderGalleryModal(processed);
-    }
-
-    function renderGalleryModal(artefacts) {
-      const grid = document.getElementById('gallery-grid');
-      grid.innerHTML = '';
-      
-      artefacts.forEach((artefact, index) => {
-        const div = document.createElement('div');
-        div.className = 'gallery-item selected';
-        div.dataset.index = index;
-        div.onclick = () => toggleSelection(div, artefact);
-        
-        const wrapper = document.createElement('div');
-        wrapper.style.position = 'relative';
-        wrapper.style.width = '100%';
-        wrapper.style.height = '100%';
-        
-        const img = document.createElement('img');
-        img.src = artefact.url;
-        img.className = state.colorMode ? getCurrentMonthTheme().filter : 'filter-monochrome';
-        
-        wrapper.appendChild(img);
-        
-        if (artefact.hasFace) {
-          const badge = document.createElement('div');
-          badge.className = 'detection-badge';
-          badge.textContent = 'WAJAH TERSENSOR';
-          wrapper.appendChild(badge);
-        }
-        
-        if (artefact.faces && artefact.faces.length > 0) {
-          artefact.faces.forEach(face => {
-            const scribble = document.createElement('div');
-            scribble.className = 'face-scribble';
-            scribble.style.left = `${(face.box.x / 400) * 100}%`;
-            scribble.style.top = `${(face.box.y / 400) * 100}%`;
-            scribble.style.width = `${(face.box.width / 400) * 100}%`;
-            scribble.style.height = `${(face.box.height / 400) * 100}%`;
-            scribble.style.zIndex = '10';
-            const lines = document.createElement('div');
-            lines.className = 'marker-lines';
-            scribble.appendChild(lines);
-            wrapper.appendChild(scribble);
-          });
-        }
-        
-        div.appendChild(wrapper);
-        grid.appendChild(div);
-      });
-      
-      updateSelectedCount();
-      document.getElementById('gallery-modal').classList.add('active');
-    }
-
-    function toggleSelection(element, artefact) {
-      if (element.classList.contains('selected')) {
-        element.classList.remove('selected');
-        state.selectedFiles.delete(artefact);
-      } else {
-        if (state.selectedFiles.size >= CONFIG.maxSelection) {
-          showToast(`Max ${CONFIG.maxSelection} foto`);
-          return;
-        }
-        element.classList.add('selected');
-        state.selectedFiles.add(artefact);
-      }
-      updateSelectedCount();
-    }
-
-    function updateSelectedCount() {
-      document.getElementById('selected-count').textContent = state.selectedFiles.size;
-    }
-
-    function closeGallery() {
-      document.getElementById('gallery-modal').classList.remove('active');
-      state.selectedFiles.clear();
-      document.getElementById('file-input').value = '';
-    }
-
-    function confirmUpload() {
-      if (state.selectedFiles.size === 0) {
-        showToast('Pilih minimal 1 foto');
-        return;
-      }
-      
-      const artefacts = Array.from(state.selectedFiles);
-      let faceCount = 0;
-      
-      artefacts.forEach(artefact => {
-        addArtefactToFIFO(artefact);
-        if (artefact.hasFace) faceCount++;
-      });
-      
-      state.uploadsThisWindow += artefacts.length;
-      localStorage.setItem('jejak_uploads_count', state.uploadsThisWindow.toString());
-      
-      const first = artefacts[0];
-      setHero(first.url, first.note, first.faces);
-      
-      renderTray();
-      closeGallery();
-      
-      if (faceCount > 0) {
-        showToast(`${artefacts.length} foto disimpan • ${faceCount} wajah disensor`);
-      } else {
-        showToast(`${artefacts.length} artefak ditambahkan (FIFO)`);
-      }
-    }
-
-    // ============================================
-    // RENDER FUNCTIONS
-    // ============================================
     window.selectMood = function(mood) {
       state.currentMood = mood;
       document.querySelectorAll('.mood-card').forEach(card => {
@@ -1858,10 +1775,16 @@
       if (navigator.vibrate) navigator.vibrate(10);
     };
 
-    window.toggleVibe = function(entryId, vibeKey, btn) {
+    window.toggleVibe = async function(entryId, vibeKey, btn) {
       const key = `${entryId}-${vibeKey}`;
       const countEl = btn.querySelector('.vibe-count');
       let count = parseInt(countEl.textContent);
+      
+      // Find entry
+      let entry = state.entries.find(e => e.id === entryId);
+      if (!entry) {
+        entry = dummyEntries.find(e => e.id === entryId);
+      }
       
       if (state.userVibes.has(key)) {
         state.userVibes.delete(key);
@@ -1874,6 +1797,19 @@
         btn.style.transform = 'scale(0.9)';
         setTimeout(() => btn.style.transform = '', 150);
         showToast(`${VIBES[vibeKey].label}!`);
+        
+        // Update vibes in database if online
+        if (state.isOnline && entry) {
+          try {
+            const newVibes = { ...entry.vibes, [vibeKey]: (entry.vibes[vibeKey] || 0) + 1 };
+            await state.supabase
+              .from('rants')
+              .update({ vibes: newVibes })
+              .eq('id', entryId);
+          } catch (e) {
+            console.error('Failed to update vibes:', e);
+          }
+        }
       }
     };
 
@@ -1908,9 +1844,17 @@
 
     function renderEntries() {
       const container = document.getElementById('entries-container');
-      const entries = state.entries.length ? state.entries : dummyEntries;
       
-      if (!entries.length) {
+      /**
+       * ALGORITMA RENDER:
+       * 1. User entries (state.entries) - di atas, LIFO
+       * 2. Dummy entries - di bawah sebagai fallback/contoh
+       * 3. Gabungkan: [...userEntries, ...dummyEntries]
+       */
+      const userEntries = state.entries || [];
+      const allEntries = [...userEntries, ...dummyEntries];
+      
+      if (allEntries.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
             <span class="empty-emoji">🍃</span>
@@ -1921,16 +1865,23 @@
         return;
       }
       
-      container.innerHTML = entries.map(entry => `
-        <article class="entry">
+      container.innerHTML = allEntries.map(entry => {
+        const isUserEntry = userEntries.find(e => e.id === entry.id);
+        const spillStatus = entry.isSpilled ? 
+          '<div class="spill-status spilled">✓ Ter-spill ke komunitas</div>' : '';
+        
+        return `
+        <article class="entry" data-id="${entry.id}">
           <div class="entry-header">
             <div class="entry-meta">
               <span class="entry-time">${formatTime(entry.timestamp)}</span>
               <span class="entry-mood ${entry.mood}">${MOODS[entry.mood].label}</span>
+              ${isUserEntry ? '<span style="font-size: 9px; color: var(--accent-primary);">• ANDA</span>' : ''}
             </div>
           </div>
           <div class="entry-content">
             <p>${entry.content}</p>
+            ${spillStatus}
           </div>
           <div class="vibe-bar">
             ${Object.entries(VIBES).map(([key, vibe]) => {
@@ -1948,112 +1899,9 @@
             }).join('')}
           </div>
         </article>
-      `).join('');
+      `}).join('');
     }
 
     function renderTray() {
       const grid = document.getElementById('tray-grid');
-      const items = state.artefacts.length ? state.artefacts : dummyArtefacts;
-      
-      grid.innerHTML = items.map((item, index) => `
-        <div class="tray-item" onclick="setHero('${item.url}', '${item.note}', ${JSON.stringify(item.faces || []).replace(/"/g, '&quot;')})">
-          <div style="position: relative; width: 100%; height: 100%;">
-            <img src="${item.url}" alt="${item.note}" loading="lazy" class="${state.colorMode ? getCurrentMonthTheme().filter : 'filter-monochrome'}">
-            ${item.hasFace ? '<div class="detection-badge" style="top: 4px; left: 4px; right: auto;">SENSORED</div>' : ''}
-            ${renderTrayScribblesHTML(item.faces)}
-          </div>
-        </div>
-      `).join('');
-      
-      const emptySlots = Math.max(0, CONFIG.maxArtefacts - items.length);
-      for (let i = 0; i < emptySlots; i++) {
-        grid.innerHTML += `<div class="tray-item empty" onclick="openGallery()">+</div>`;
-      }
-    }
-
-    function renderTrayScribblesHTML(faces) {
-      if (!faces || faces.length === 0) return '';
-      
-      return faces.map(face => `
-        <div class="face-scribble" style="
-          left: ${(face.box.x / 400) * 100}%;
-          top: ${(face.box.y / 400) * 100}%;
-          width: ${(face.box.width / 400) * 100}%;
-          height: ${(face.box.height / 400) * 100}%;
-          z-index: 5;
-        ">
-          <div class="marker-lines"></div>
-        </div>
-      `).join('');
-    }
-
-    // ============================================
-    // EVENTS
-    // ============================================
-    document.getElementById('rant-input').addEventListener('input', function() {
-      document.getElementById('char-count').textContent = `${this.value.length}/500`;
-    });
-
-    document.getElementById('submit-btn').addEventListener('click', function() {
-      const input = document.getElementById('rant-input');
-      const content = input.value.trim();
-      
-      if (!content) {
-        showToast('Tulis dulu, bestie');
-        input.focus();
-        return;
-      }
-      
-      const newEntry = {
-        id: 'u' + Date.now(),
-        content,
-        mood: state.currentMood,
-        timestamp: Date.now(),
-        vibes: { relatable: 0, mood: 0, tea: 0, hug: 0, real: 0, dead: 0 }
-      };
-      
-      state.entries.unshift(newEntry);
-      input.value = '';
-      document.getElementById('char-count').textContent = '0/500';
-      
-      renderEntries();
-      showToast(`Jejak ${MOODS[state.currentMood].label} tersimpan!`);
-      document.querySelector('.entries-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-
-    document.getElementById('upload-btn').addEventListener('click', openGallery);
-    document.getElementById('file-input').addEventListener('change', handleFileSelect);
-
-    // ============================================
-    // INIT
-    // ============================================
-    async function init() {
-      await loadFaceApi();
-      
-      const saved = loadArtefacts();
-      if (saved.length > 0) {
-        state.artefacts = saved.map((s, i) => ({
-          ...s,
-          url: dummyArtefacts[i % dummyArtefacts.length].url
-        }));
-      } else {
-        state.artefacts = [...dummyArtefacts];
-      }
-      
-      updateQuotaUI();
-      updateFilterUI();
-      renderEntries();
-      renderTray();
-      
-      if (state.artefacts.length > 0) {
-        const first = state.artefacts[0];
-        setHero(first.url, first.note, first.faces);
-      }
-      
-      setInterval(updateQuotaUI, 3600000);
-    }
-
-    init();
-  </script>
-</body>
-</html>
+      const items = state.artefacts.length ? state.artefacts : dummyAr
