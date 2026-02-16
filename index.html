@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NOPE — Masuk</title>
+  <title>jejak — Masuk</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Archivo:wght@400;600;800&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
+      /* Color Palettes - User can choose */
       --bg: #0a0a0a;
       --surface: #121212;
       --border: #222222;
@@ -17,13 +18,40 @@
       --accent: #b266ff;
       --logo-color: #ff9999;
       --error: #ff6b6b;
+      --success: #00ff88;
+      --heart-color: #b266ff;
     }
+
+    /* Theme Options */
+    [data-theme="glitch"] {
+      --accent: #b266ff;
+      --logo-color: #ff9999;
+      --heart-color: #b266ff;
+    }
+    
+    [data-theme="toxic"] {
+      --accent: #ccff00;
+      --logo-color: #ccff00;
+      --heart-color: #ccff00;
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+    }
+    
+    [data-theme="cyber"] {
+      --accent: #00f0ff;
+      --logo-color: #ff0055;
+      --heart-color: #ff0055;
+      --bg: #050508;
+      --surface: #0d0d12;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Consolas, monospace;
-      font-weight: 300;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 400;
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -31,59 +59,152 @@
       padding: 20px;
       font-size: 15px;
       line-height: 1.55;
+      overflow-x: hidden;
     }
+
     .container {
-      max-width: 400px;
+      max-width: 420px;
       width: 100%;
+      position: relative;
     }
-    .logo {
-      font-family: 'Manrope', sans-serif;
-      font-size: 48px;
-      font-weight: 700;
-      color: var(--logo-color);
+
+    /* Logo Monogram - Lowercase, tilted 3% up */
+    .logo-container {
       text-align: center;
       margin-bottom: 8px;
-      letter-spacing: -0.02em;
+      transform: rotate(-3deg);
     }
+
+    .logo {
+      font-family: 'Archivo', sans-serif;
+      font-size: 52px;
+      font-weight: 800;
+      color: var(--logo-color);
+      letter-spacing: -0.03em;
+      text-transform: lowercase;
+      display: inline-block;
+      position: relative;
+      line-height: 1;
+    }
+
+    .logo::after {
+      content: 'jejak';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      color: transparent;
+      -webkit-text-stroke: 1px var(--logo-color);
+      opacity: 0.3;
+      z-index: -1;
+    }
+
     .tagline {
       text-align: center;
       font-size: 13px;
       color: var(--muted);
-      margin-bottom: 40px;
+      margin-bottom: 30px;
       line-height: 1.5;
+      transform: rotate(-3deg);
     }
+
+    /* Theme Selector */
+    .theme-selector {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      transform: rotate(-3deg);
+    }
+
+    .theme-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    .theme-btn:hover {
+      transform: scale(1.2);
+    }
+
+    .theme-btn.active {
+      border-color: var(--text);
+      transform: scale(1.1);
+    }
+
+    .theme-btn.glitch { background: linear-gradient(135deg, #b266ff, #ff9999); }
+    .theme-btn.toxic { background: linear-gradient(135deg, #ccff00, #88cc00); }
+    .theme-btn.cyber { background: linear-gradient(135deg, #00f0ff, #ff0055); }
+
     .auth-box {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 32px 24px;
+      border-radius: 20px;
+      padding: 32px 28px;
+      position: relative;
+      overflow: hidden;
     }
+
+    .auth-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.5;
+    }
+
+    /* Input Label Styling */
+    .input-label {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: lowercase;
+      opacity: 0.8;
+    }
+
     .form-group {
       margin-bottom: 20px;
+      position: relative;
     }
+
     .form-group input {
       width: 100%;
       background: #1a1a1a;
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px;
+      border-radius: 12px;
+      padding: 18px;
       color: var(--text);
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'Space Grotesk', sans-serif;
       font-size: 16px;
-      font-weight: 400;
+      font-weight: 500;
       text-align: center;
       text-transform: lowercase;
-      transition: border-color 0.2s;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      letter-spacing: 0.5px;
     }
+
     .form-group input:focus {
       outline: none;
       border-color: var(--accent);
-      box-shadow: 0 0 0 2px rgba(178, 102, 255, 0.2);
+      box-shadow: 0 0 0 3px rgba(178, 102, 255, 0.15), 0 0 20px rgba(178, 102, 255, 0.1);
+      transform: translateY(-2px);
     }
+
     .form-group input::placeholder {
       color: var(--muted);
-      font-weight: 300;
+      font-weight: 400;
+      opacity: 0.7;
     }
+
     .error-msg {
       color: var(--error);
       font-size: 12px;
@@ -91,107 +212,340 @@
       text-align: center;
       display: none;
       line-height: 1.4;
+      font-weight: 500;
+      animation: shake 0.5s ease-in-out;
     }
+
     .error-msg.show {
       display: block;
     }
+
     .success-msg {
-      color: #00ff88;
+      color: var(--success);
       font-size: 12px;
       margin-top: 10px;
       text-align: center;
       display: none;
+      font-weight: 500;
     }
+
     .success-msg.show {
       display: block;
     }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
     .btn {
       width: 100%;
       background: var(--accent);
       color: #000;
       border: none;
-      border-radius: 10px;
-      padding: 16px;
-      font-family: 'JetBrains Mono', monospace;
+      border-radius: 12px;
+      padding: 18px;
+      font-family: 'Syne', sans-serif;
       font-size: 16px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       margin-top: 12px;
-      transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-      text-transform: uppercase;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      text-transform: lowercase;
       letter-spacing: 1px;
+      position: relative;
+      overflow: hidden;
     }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn:hover:not(:disabled)::before {
+      left: 100%;
+    }
+
     .btn:hover:not(:disabled) {
-      background: #c284ff;
-      transform: translateY(-1px);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 10px 30px rgba(178, 102, 255, 0.3);
     }
+
     .btn:active {
-      transform: translateY(0);
+      transform: translateY(0) scale(0.98);
     }
+
     .btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
       transform: none;
     }
 
-    .info {
+    /* Notification Box - Gen Z Style */
+    .notif-box {
       margin-top: 20px;
-      padding: 12px;
-      background: transparent;
-      border: none;
-      border-radius: 10px;
-      font-size: 13px;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(178, 102, 255, 0.1), rgba(255, 153, 153, 0.05));
+      border: 1px solid rgba(178, 102, 255, 0.2);
+      border-radius: 12px;
+      font-size: 12px;
       color: var(--muted);
-      line-height: 1.4;
+      line-height: 1.6;
       text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
+      position: relative;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .info .lock-icon {
-      font-size: 20px;
+
+    .notif-box.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .notif-box::before {
+      content: '✨';
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface);
+      padding: 0 8px;
+      font-size: 14px;
+    }
+
+    .notif-box h4 {
       color: var(--accent);
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      margin-bottom: 8px;
+      font-size: 13px;
+      text-transform: lowercase;
+    }
+
+    .notif-box p {
+      margin-bottom: 6px;
+    }
+
+    .notif-box .highlight {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* Soul Footer Styling */
+    .soul-footer {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      position: relative;
+    }
+
+    .soul-text {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 400;
+      letter-spacing: 1px;
+      text-transform: lowercase;
+      margin-bottom: 8px;
+      opacity: 0.7;
+    }
+
+    .soul-brand {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .heart-container {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .pulsing-heart {
+      color: var(--heart-color);
+      font-size: 16px;
+      animation: heartPulse 1.5s ease-in-out infinite;
+      filter: drop-shadow(0 0 8px var(--heart-color));
+    }
+
+    .pulsing-heart:nth-child(2) {
+      animation-delay: 0.2s;
+      font-size: 20px;
+    }
+
+    .pulsing-heart:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes heartPulse {
+      0%, 100% { 
+        transform: scale(1); 
+        opacity: 0.6;
+        filter: drop-shadow(0 0 5px var(--heart-color));
+      }
+      50% { 
+        transform: scale(1.3); 
+        opacity: 1;
+        filter: drop-shadow(0 0 15px var(--heart-color)) drop-shadow(0 0 25px var(--heart-color));
+      }
     }
 
     .device-info {
       display: none !important;
     }
 
+    /* Animations */
     .pulse-animation {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at center, rgba(178, 102, 255, 0.12), transparent);
+      background: radial-gradient(circle at center, rgba(178, 102, 255, 0.15), transparent);
       pointer-events: none;
       opacity: 0;
       z-index: 999;
       animation: pulse 1.4s cubic-bezier(0.2, 0.8, 0.4, 1);
     }
+
     @keyframes pulse {
       0% { transform: scale(0.9); opacity: 0.6; }
       100% { transform: scale(1.6); opacity: 0; }
     }
 
+    .float-animation {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(-3deg); }
+      50% { transform: translateY(-10px) rotate(-3deg); }
+    }
+
+    /* Glitch effect for logo */
+    .glitch-text {
+      position: relative;
+    }
+
+    .glitch-text::before,
+    .glitch-text::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .glitch-text::before {
+      left: 2px;
+      text-shadow: -2px 0 #ff00c1;
+      clip: rect(44px, 450px, 56px, 0);
+      animation: glitch-anim 5s infinite linear alternate-reverse;
+    }
+
+    .glitch-text::after {
+      left: -2px;
+      text-shadow: -2px 0 #00fff9;
+      clip: rect(44px, 450px, 56px, 0);
+      animation: glitch-anim2 5s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitch-anim {
+      0% { clip: rect(12px, 9999px, 52px, 0); }
+      20% { clip: rect(65px, 9999px, 11px, 0); }
+      40% { clip: rect(26px, 9999px, 89px, 0); }
+      60% { clip: rect(78px, 9999px, 14px, 0); }
+      80% { clip: rect(33px, 9999px, 66px, 0); }
+      100% { clip: rect(55px, 9999px, 99px, 0); }
+    }
+
+    @keyframes glitch-anim2 {
+      0% { clip: rect(65px, 9999px, 99px, 0); }
+      20% { clip: rect(12px, 9999px, 52px, 0); }
+      40% { clip: rect(78px, 9999px, 33px, 0); }
+      60% { clip: rect(26px, 9999px, 88px, 0); }
+      80% { clip: rect(44px, 9999px, 14px, 0); }
+      100% { clip: rect(11px, 9999px, 66px, 0); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       * { animation-duration: 0.01ms !important; }
+    }
+
+    /* Font selector */
+    .font-selector {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      transform: rotate(-3deg);
+    }
+
+    .font-btn {
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 20px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: inherit;
+    }
+
+    .font-btn:hover, .font-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(178, 102, 255, 0.1);
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="logo">NOPE</div>
-    <div class="tagline">Nyambat • Aksi • Solusi</div>
+    <div class="logo-container float-animation">
+      <div class="logo glitch-text" data-text="jejak">jejak</div>
+    </div>
+    <div class="tagline">nyambat • aksi • solusi</div>
+    
+    <!-- Theme Selector -->
+    <div class="theme-selector">
+      <div class="theme-btn glitch active" onclick="setTheme('glitch')" title="Glitch Purple"></div>
+      <div class="theme-btn toxic" onclick="setTheme('toxic')" title="Toxic Green"></div>
+      <div class="theme-btn cyber" onclick="setTheme('cyber')" title="Cyber Punk"></div>
+    </div>
+
+    <!-- Font Selector -->
+    <div class="font-selector">
+      <button class="font-btn active" onclick="setFont('Space Grotesk')">space grotesk</button>
+      <button class="font-btn" onclick="setFont('Archivo')">archivo</button>
+      <button class="font-btn" onclick="setFont('Syne')">syne</button>
+    </div>
      
     <div class="auth-box">
       <form id="login-form">
+        <!-- Input Label Above -->
+        <div class="input-label">pilih 2 kata </div>
+        
         <div class="form-group">
           <input 
             type="text" 
             id="username" 
-            placeholder="2 kata unikmu" 
+            placeholder="contoh: nick name" 
             autocomplete="off" 
             autofocus 
             maxlength="40"
@@ -200,11 +554,26 @@
           <div class="success-msg" id="success-msg"></div>
         </div>
         
-        <button type="submit" class="btn" id="login-btn">GASKEUN! 🚀</button>
+        <button type="submit" class="btn" id="login-btn">gaskeun! 🚀</button>
         
-        <div class="info">
-          <div class="lock-icon">🔒</div>
-          <div>STAY SAFE STAY ANONIM</div>
+        <!-- Notification Box - Hidden by default, shown after username input -->
+        <div class="notif-box" id="notif-box">
+          <h4>stay safe stay anonim bestie! 🔒</h4>
+          <p>jangan spill <span class="highlight">nama asli</span> ya</p>
+          <p>no foto wajah, keep it mysterious ✨</p>
+          <p>patuhi aturan hukum, jangan jadi <span class="highlight">buzzer hoax</span></p>
+          <p>have fun tapi tetep <span class="highlight">responsibel</span> 🤙</p>
+        </div>
+
+        <!-- Soul Footer -->
+        <div class="soul-footer">
+          
+          <div class="soul-brand">Soul by itsALrUdio</div>
+          <div class="heart-container">
+            <span class="pulsing-heart">💜</span>
+            <span class="pulsing-heart">💜</span>
+            <span class="pulsing-heart">💜</span>
+          </div>
         </div>
 
         <div class="device-info" id="device-info">
@@ -218,8 +587,29 @@
     const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
+    // Theme and Font Management
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`.theme-btn.${theme}`).classList.add('active');
+      localStorage.setItem('jejak_theme', theme);
+    }
+
+    function setFont(font) {
+      document.body.style.fontFamily = `'${font}', sans-serif`;
+      document.querySelectorAll('.font-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      localStorage.setItem('jejak_font', font);
+    }
+
+    // Load saved preferences
+    const savedTheme = localStorage.getItem('jejak_theme') || 'glitch';
+    const savedFont = localStorage.getItem('jejak_font') || 'Space Grotesk';
+    setTheme(savedTheme);
+    document.body.style.fontFamily = `'${savedFont}', sans-serif`;
+
     // ========================================
-    // SUPABASE FUNCTION - Better error handling
+    // SUPABASE FUNCTION
     // ========================================
     async function supabaseFetch(table, method = 'GET', body = null, filter = '') {
       const headers = {
@@ -256,10 +646,9 @@
     }
 
     // ========================================
-    // DEVICE FINGERPRINT - Stable version
+    // DEVICE FINGERPRINT
     // ========================================
     async function generateDeviceFingerprint() {
-      // Only use stable components that don't change
       const components = [
         navigator.userAgent,
         navigator.language,
@@ -304,6 +693,11 @@
       document.getElementById('error-msg').classList.remove('show');
     }
 
+    function showNotification() {
+      const notif = document.getElementById('notif-box');
+      notif.classList.add('show');
+    }
+
     // ========================================
     // USERNAME VALIDATION
     // ========================================
@@ -314,36 +708,34 @@
     function validateUsername(username) {
       const words = username.split(' ');
       if (words.length !== 2) {
-        return 'Username harus TEPAT 2 kata (pisahkan dengan spasi)';
+        return 'username harus tepat 2 kata bestie (pisah pake spasi)';
       }
       if (words[0].length < 2 || words[1].length < 2) {
-        return 'Setiap kata minimal 2 huruf';
+        return 'tiap kata minimal 2 huruf ya';
       }
       if (!/^[a-z ]+$/.test(username)) {
-        return 'Hanya boleh huruf lowercase dan spasi';
+        return 'hanya huruf kecil dan spasi aja, no angka/simbol';
       }
       return null;
     }
 
     // ========================================
-    // DEVICE ID MANAGEMENT - With caching
+    // DEVICE ID MANAGEMENT
     // ========================================
     let currentDeviceId = '';
     
     async function initDeviceId() {
-      // Check if we have cached device ID
-      const cachedId = localStorage.getItem('nope_device_id');
+      const cachedId = localStorage.getItem('jejak_device_id');
       
       if (cachedId) {
         console.log('✅ Using cached device ID:', cachedId);
         currentDeviceId = cachedId;
       } else {
         currentDeviceId = await generateDeviceFingerprint();
-        localStorage.setItem('nope_device_id', currentDeviceId);
+        localStorage.setItem('jejak_device_id', currentDeviceId);
         console.log('✅ Generated new device ID:', currentDeviceId);
       }
       
-      // Display for debugging
       const displayEl = document.getElementById('device-id-display');
       if (displayEl) {
         displayEl.textContent = currentDeviceId.substring(0, 16) + '...';
@@ -353,12 +745,28 @@
     }
 
     // ========================================
-    // PRE-FILL USERNAME IF EXISTS
+    // PRE-FILL USERNAME
     // ========================================
-    const savedUsername = localStorage.getItem('nope_username');
+    const savedUsername = localStorage.getItem('jejak_username');
     if (savedUsername) {
       document.getElementById('username').value = savedUsername;
+      showNotification();
     }
+
+    // ========================================
+    // USERNAME INPUT LISTENER - Show notification
+    // ========================================
+    document.getElementById('username').addEventListener('input', (e) => {
+      let value = e.target.value.toLowerCase();
+      value = value.replace(/[^a-z\s]/g, '');
+      value = value.replace(/\s+/g, ' ');
+      e.target.value = value;
+      
+      // Show notification when user starts typing
+      if (value.length > 0) {
+        showNotification();
+      }
+    });
 
     // ========================================
     // LOGIN FORM SUBMIT
@@ -371,9 +779,8 @@
       
       hideError();
       
-      // Validate input
       if (!input.trim()) {
-        showError('Username tidak boleh kosong');
+        showError('username ga boleh kosong bestie');
         return;
       }
       
@@ -386,17 +793,15 @@
       }
       
       btn.disabled = true;
-      btn.textContent = 'Verifying...';
+      btn.textContent = 'verifying...';
       
       try {
-        // Ensure device ID is ready
         if (!currentDeviceId) {
           await initDeviceId();
         }
         
         console.log('🔑 Logging in with:', { username, deviceId: currentDeviceId });
         
-        // Check if user exists
         const users = await supabaseFetch('users', 'GET', null, 
           `?username=eq.${encodeURIComponent(username)}&select=username,device_id`
         );
@@ -404,7 +809,6 @@
         console.log('👤 User query result:', users);
         
         if (users.length === 0) {
-          // Create new user
           console.log('➕ Creating new user...');
           
           const newUser = await supabaseFetch('users', 'POST', {
@@ -413,25 +817,23 @@
           });
           
           console.log('✅ New user created:', newUser);
-          showSuccess('✅ Akun baru berhasil dibuat!');
+          showSuccess('✅ akun baru berhasil dibuat bestie!');
           
         } else {
           const user = users[0];
           console.log('👤 Existing user found:', user);
           
-          // Check device ID match
           if (user.device_id && user.device_id !== currentDeviceId) {
             console.log('❌ Device mismatch:', {
               stored: user.device_id,
               current: currentDeviceId
             });
-            showError('⚠️ Username ini sudah terdaftar di device lain.');
+            showError('⚠️ username ini udah terdaftar di device lain bestie');
             btn.disabled = false;
-            btn.textContent = 'GASKEUN! 🚀';
+            btn.textContent = 'gaskeun! 🚀';
             return;
           }
           
-          // Update device ID if not set
           if (!user.device_id) {
             console.log('🔄 Updating device_id for existing user...');
             
@@ -443,16 +845,14 @@
             console.log('✅ Device ID updated');
           }
           
-          showSuccess('✅ Login berhasil!');
+          showSuccess('✅ login berhasil bestie!');
         }
         
-        // Save to localStorage
-        localStorage.setItem('nope_username', username);
-        localStorage.setItem('nope_device_id', currentDeviceId);
+        localStorage.setItem('jejak_username', username);
+        localStorage.setItem('jejak_device_id', currentDeviceId);
         
         console.log('💾 Saved to localStorage');
         
-        // Redirect
         setTimeout(() => {
           console.log('🚀 Redirecting to jejak.html...');
           window.location.href = 'jejak.html';
@@ -462,15 +862,15 @@
         console.error('❌ Login error:', e);
         
         if (e.message.includes('duplicate key')) {
-          showError('Username sudah dipakai di device lain');
+          showError('username udah dipake di device lain bestie');
         } else if (e.message.includes('network')) {
-          showError('Gagal koneksi. Cek internet kamu.');
+          showError('gagal koneksi, cek internet kamu ya');
         } else {
-          showError('Gagal login. Coba lagi.');
+          showError('gagal login, coba lagi bestie');
         }
       } finally {
         btn.disabled = false;
-        btn.textContent = 'GASKEUN! 🚀';
+        btn.textContent = 'gaskeun! 🚀';
       }
     });
 
@@ -486,10 +886,8 @@
       console.log('🔍 Checking auto-login for:', savedUsername);
       
       try {
-        // Ensure device ID is initialized
         await initDeviceId();
         
-        // Verify with server
         const users = await supabaseFetch('users', 'GET', null, 
           `?username=eq.${encodeURIComponent(savedUsername)}&select=username,device_id`
         );
@@ -509,24 +907,12 @@
           console.log('❌ User not found, clearing localStorage');
         }
         
-        // Clear if verification failed
         localStorage.clear();
         
       } catch (e) {
         console.error('❌ Auto-login check failed:', e);
-        // Don't clear localStorage on network error
       }
     })();
-
-    // ========================================
-    // INPUT SANITIZATION
-    // ========================================
-    document.getElementById('username').addEventListener('input', (e) => {
-      let value = e.target.value.toLowerCase();
-      value = value.replace(/[^a-z\s]/g, '');
-      value = value.replace(/\s+/g, ' ');
-      e.target.value = value;
-    });
 
     // ========================================
     // PULSE ANIMATION ON LOAD
