@@ -157,24 +157,6 @@
     }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     
-    /* WARNING BANNER */
-    .warning-banner {
-      background: var(--surface);
-      border: 2px solid var(--accent-tertiary);
-      padding: var(--space-md);
-      margin-bottom: var(--space-md);
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-    
-    .warning-icon {
-      font-size: 20px;
-      color: var(--accent-tertiary);
-    }
-    
     /* FILTER CONTROLS */
     .filter-controls {
       display: flex;
@@ -348,7 +330,7 @@
       z-index: 20;
     }
     
-    /* FACE SCRIBBLE OVERLAY - Enhanced Marker Effect */
+    /* FACE SCRIBBLE OVERLAY */
     .face-scribble {
       position: absolute;
       background: rgba(0,0,0,0.95);
@@ -1041,13 +1023,28 @@
       transform: translateY(-2px);
     }
     
-    .face-warning {
-      background: var(--surface-elevated);
-      border-left: 4px solid var(--accent-tertiary);
+    /* GALERY WARNING - Muncul saat upload */
+    .gallery-warning {
+      background: var(--accent-tertiary);
+      color: var(--text);
       padding: var(--space-md);
       margin-bottom: var(--space-md);
-      font-size: 12px;
-      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: 2px solid var(--accent-tertiary);
+      animation: pulse-warning 2s infinite;
+    }
+    
+    @keyframes pulse-warning {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    
+    .gallery-warning::before {
+      content: '🚫 ';
     }
     
     .detection-badge {
@@ -1079,15 +1076,6 @@
         </div>
       </div>
     </header>
-
-    <!-- WARNING BANNER -->
-    <div class="warning-banner">
-      <span class="warning-icon">🚫</span>
-      <div>
-        <strong style="color: var(--text); display: block; margin-bottom: 4px;">AI PRIVACY SHIELD AKTIF</strong>
-        Wajah terdeteksi otomatis disensor • Sistem FIFO (6 foto max) • Tidak dapat dihapus
-      </div>
-    </div>
 
     <!-- FILTER CONTROLS -->
     <div class="filter-controls">
@@ -1224,9 +1212,16 @@
         <h3 class="modal-title">Review Artefak</h3>
         <button class="modal-close" onclick="closeGallery()">×</button>
       </div>
-      <div class="face-warning">
-        ⚠️ <strong>PERINGATAN PRIVASI:</strong> Wajah terdeteksi akan otomatis disensor dengan marker permanen. Foto yang diupload tidak dapat dihapus (sistem FIFO 6 foto max).
+      
+      <!-- WARNING MUNCUL SAAT UPLOAD -->
+      <div class="gallery-warning">
+        DILARANG UPLOAD FOTO WAJAH!
       </div>
+      
+      <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: var(--space-md); text-align: center;">
+        Wajah terdeteksi akan otomatis disensor • Sistem FIFO (6 foto max) • Tidak dapat dihapus
+      </div>
+      
       <div class="gallery-grid" id="gallery-grid"></div>
       <div class="modal-actions">
         <button class="modal-btn" onclick="closeGallery()">Batal</button>
@@ -1248,8 +1243,8 @@
       maxFileSize: 5 * 1024 * 1024,
       maxSelection: 6,
       maxArtefacts: 6,
-      faceThreshold: 0.6, // Higher = more accurate, less false positives
-      inputSize: 416 // Higher = more accurate, slower
+      faceThreshold: 0.6,
+      inputSize: 416
     };
 
     const MONTHLY_THEMES = [
@@ -1268,113 +1263,26 @@
     ];
 
     // ============================================
-    // STATE
+    // VIBES & MOODS (DEFINE SEBELUM STATE)
     // ============================================
-    const state = {
-      currentUser: localStorage.getItem('jejak_user') || '@anon',
-      currentMood: 'surviving',
-      entries: [],
-      artefacts: [],
-      userVibes: new Set(),
-      selectedFiles: new Set(),
-      colorMode: false,
-      faceApiLoaded: false,
-      
-      quotaStart: localStorage.getItem('jejak_quota_start') || null,
-      uploadsThisWindow: parseInt(localStorage.getItem('jejak_uploads_count') || '0')
+    const VIBES = {
+      relatable: { emoji: '💯', label: 'literally me' },
+      mood:      { emoji: '🛋️', label: 'big mood' },
+      tea:       { emoji: '🐸', label: 'spill tea' },
+      hug:       { emoji: '🤗', label: 'virtual hug' },
+      real:      { emoji: '🎯', label: 'no cap' },
+      dead:      { emoji: '💀', label: 'rip me' }
+    };
+
+    const MOODS = {
+      surviving: { emoji: '😮‍💨', color: '#FF9500', label: 'surviving' },
+      thriving:  { emoji: '✨', color: '#39FF14', label: 'thriving' },
+      chaotic:   { emoji: '🌀', color: '#00F0FF', label: 'chaotic' },
+      doom:      { emoji: '🛌', color: '#8B5CF6', label: 'doom' }
     };
 
     // ============================================
-    // ENHANCED FACE DETECTION
-    // ============================================
-    async function loadFaceApi() {
-      const statusEl = document.getElementById('processing-status');
-      try {
-        statusEl.textContent = 'Memuat TinyFaceDetector...';
-        await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model');
-        
-        statusEl.textContent = 'Memuat landmarks...';
-        await faceapi.nets.faceLandmark68TinyNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model');
-        
-        state.faceApiLoaded = true;
-        console.log('Face API loaded successfully');
-      } catch (e) {
-        console.error('Face API load failed, using fallback:', e);
-        state.faceApiLoaded = false;
-      }
-    }
-
-    // Accurate face detection with validation
-    async function detectFaces(imageElement) {
-      if (!state.faceApiLoaded) {
-        return simulateAccurateDetection(imageElement);
-      }
-      
-      try {
-        // Use higher accuracy settings
-        const options = new faceapi.TinyFaceDetectorOptions({ 
-          inputSize: CONFIG.inputSize, 
-          scoreThreshold: CONFIG.faceThreshold 
-        });
-        
-        const detections = await faceapi.detectAllFaces(imageElement, options);
-        
-        // Additional validation: filter out detections that are too small (likely false positives)
-        const validDetections = detections.filter(d => {
-          const area = d.box.width * d.box.height;
-          const imgArea = imageElement.naturalWidth * imageElement.naturalHeight;
-          const ratio = area / imgArea;
-          // Face should be at least 1% of image area and at most 80%
-          return ratio > 0.01 && ratio < 0.8 && d.score > CONFIG.faceThreshold;
-        });
-        
-        return validDetections;
-      } catch (e) {
-        console.error('Detection error:', e);
-        return simulateAccurateDetection(imageElement);
-      }
-    }
-
-    // Accurate simulation - only 1 specific image has face
-    function simulateAccurateDetection(img) {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          // Check if this is the "portrait" image based on aspect ratio or random seed
-          // For demo: only trigger on specific condition
-          const hasFace = shouldSimulateFace(img);
-          
-          if (hasFace) {
-            // Accurate box positioning (center, proportional)
-            const w = img.naturalWidth || 400;
-            const h = img.naturalHeight || 400;
-            const box = {
-              x: w * 0.25,
-              y: h * 0.15,
-              width: w * 0.5,
-              height: h * 0.65,
-              score: 0.85
-            };
-            resolve([{ box, score: 0.85 }]);
-          } else {
-            resolve([]);
-          }
-        }, 800);
-      });
-    }
-
-    function shouldSimulateFace(img) {
-      // Deterministic check based on image src or random with seed
-      // For dummy: only index 4 (the portrait) has face
-      if (img.src && img.src.includes('1507003211169')) {
-        return true;
-      }
-      // For uploaded files: use file name hash or random with low probability
-      if (img.dataset && img.dataset.isPortrait) return true;
-      return Math.random() < 0.05; // 5% chance for user uploads to have face
-    }
-
-    // ============================================
-    // DUMMY DATA - Only 1 with face (index 4)
+    // DUMMY DATA (DEFINE SEBELUM STATE)
     // ============================================
     const dummyArtefacts = [
       { 
@@ -1447,6 +1355,101 @@
         vibes: { hug: 20, relatable: 18, dead: 10, real: 7, mood: 3, tea: 0 }
       }
     ];
+
+    // ============================================
+    // STATE
+    // ============================================
+    const state = {
+      currentUser: localStorage.getItem('jejak_user') || '@anon',
+      currentMood: 'surviving',
+      entries: [],
+      artefacts: [],
+      userVibes: new Set(),
+      selectedFiles: new Set(),
+      colorMode: false,
+      faceApiLoaded: false,
+      
+      quotaStart: localStorage.getItem('jejak_quota_start') || null,
+      uploadsThisWindow: parseInt(localStorage.getItem('jejak_uploads_count') || '0')
+    };
+
+    // ============================================
+    // FACE DETECTION
+    // ============================================
+    async function loadFaceApi() {
+      const statusEl = document.getElementById('processing-status');
+      try {
+        statusEl.textContent = 'Memuat TinyFaceDetector...';
+        await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model');
+        
+        statusEl.textContent = 'Memuat landmarks...';
+        await faceapi.nets.faceLandmark68TinyNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model');
+        
+        state.faceApiLoaded = true;
+        console.log('Face API loaded successfully');
+      } catch (e) {
+        console.error('Face API load failed, using fallback:', e);
+        state.faceApiLoaded = false;
+      }
+    }
+
+    async function detectFaces(imageElement) {
+      if (!state.faceApiLoaded) {
+        return simulateAccurateDetection(imageElement);
+      }
+      
+      try {
+        const options = new faceapi.TinyFaceDetectorOptions({ 
+          inputSize: CONFIG.inputSize, 
+          scoreThreshold: CONFIG.faceThreshold 
+        });
+        
+        const detections = await faceapi.detectAllFaces(imageElement, options);
+        
+        const validDetections = detections.filter(d => {
+          const area = d.box.width * d.box.height;
+          const imgArea = imageElement.naturalWidth * imageElement.naturalHeight;
+          const ratio = area / imgArea;
+          return ratio > 0.01 && ratio < 0.8 && d.score > CONFIG.faceThreshold;
+        });
+        
+        return validDetections;
+      } catch (e) {
+        console.error('Detection error:', e);
+        return simulateAccurateDetection(imageElement);
+      }
+    }
+
+    function simulateAccurateDetection(img) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const hasFace = shouldSimulateFace(img);
+          
+          if (hasFace) {
+            const w = img.naturalWidth || 400;
+            const h = img.naturalHeight || 400;
+            const box = {
+              x: w * 0.25,
+              y: h * 0.15,
+              width: w * 0.5,
+              height: h * 0.65,
+              score: 0.85
+            };
+            resolve([{ box, score: 0.85 }]);
+          } else {
+            resolve([]);
+          }
+        }, 800);
+      });
+    }
+
+    function shouldSimulateFace(img) {
+      if (img.src && img.src.includes('1507003211169')) {
+        return true;
+      }
+      if (img.dataset && img.dataset.isPortrait) return true;
+      return Math.random() < 0.05;
+    }
 
     // ============================================
     // FIFO SYSTEM
@@ -1610,7 +1613,6 @@
       const scaleX = containerWidth / imgWidth;
       const scaleY = containerHeight / imgHeight;
       
-      // Add padding to ensure full coverage
       const padding = 10;
       const left = Math.max(0, (box.x * scaleX) - padding);
       const top = Math.max(0, (box.y * scaleY) - padding);
@@ -1721,7 +1723,6 @@
       
       if (validFiles.length === 0) return;
       
-      // Process sequentially for better UX
       const processed = [];
       for (let i = 0; i < validFiles.length; i++) {
         try {
@@ -1759,7 +1760,6 @@
         
         wrapper.appendChild(img);
         
-        // Detection badge
         if (artefact.hasFace) {
           const badge = document.createElement('div');
           badge.className = 'detection-badge';
@@ -1767,7 +1767,6 @@
           wrapper.appendChild(badge);
         }
         
-        // Scribble preview
         if (artefact.faces && artefact.faces.length > 0) {
           artefact.faces.forEach(face => {
             const scribble = document.createElement('div');
@@ -2033,7 +2032,6 @@
       
       const saved = loadArtefacts();
       if (saved.length > 0) {
-        // Restore with proper face data
         state.artefacts = saved.map((s, i) => ({
           ...s,
           url: dummyArtefacts[i % dummyArtefacts.length].url
