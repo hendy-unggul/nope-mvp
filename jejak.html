@@ -160,7 +160,6 @@
     }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     
-    /* SYNC STATUS */
     .sync-status {
       font-size: 10px;
       color: var(--text-muted);
@@ -168,20 +167,17 @@
       align-items: center;
       gap: 4px;
     }
-    .sync-status.syncing::before {
-      content: '';
-      width: 8px;
-      height: 8px;
-      border: 1px solid var(--text-muted);
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
+    .sync-status::before {
+      content: '•';
     }
-    .sync-status.synced {
+    .sync-status.online {
       color: var(--accent-quaternary);
     }
-    .sync-status.error {
+    .sync-status.offline {
       color: var(--accent-tertiary);
+    }
+    .sync-status.syncing {
+      color: var(--accent-warm);
     }
     
     /* FILTER CONTROLS */
@@ -643,7 +639,6 @@
       color: var(--text);
     }
     
-    /* SPILL STATUS */
     .spill-status {
       display: flex;
       align-items: center;
@@ -654,10 +649,6 @@
     }
     .spill-status.spilled {
       color: var(--accent-secondary);
-    }
-    .spill-status::before {
-      content: '•';
-      margin-right: 4px;
     }
     
     /* VIBE BAR */
@@ -1050,7 +1041,7 @@
         <div class="tagline">no filter, just truth</div>
       </div>
       <div class="top-right">
-        <div class="sync-status" id="sync-status">Menyambungkan...</div>
+        <div class="sync-status offline" id="sync-status">Offline</div>
         <div class="status-indicator">
           <span class="status-dot"></span>
           <span>2.4k online</span>
@@ -1214,20 +1205,23 @@
 
   <script>
     // ============================================
-    // CONFIGURATION
+    // CONSTANTS - DEFINED FIRST
     // ============================================
-    const CONFIG = {
-      quotaDays: 28,
-      uploadWindowDays: 3,
-      maxFileSize: 5 * 1024 * 1024,
-      maxSelection: 6,
-      maxArtefacts: 6,
-      faceThreshold: 0.6,
-      inputSize: 416,
-      
-      // Supabase Config - GANTI DENGAN KREDENSIAL ANDA
-      supabaseUrl: 'https://your-project.supabase.co',
-      supabaseKey: 'your-anon-key'
+    
+    const VIBES = {
+      relatable: { emoji: '💯', label: 'literally me' },
+      mood:      { emoji: '🛋️', label: 'big mood' },
+      tea:       { emoji: '🐸', label: 'spill tea' },
+      hug:       { emoji: '🤗', label: 'virtual hug' },
+      real:      { emoji: '🎯', label: 'no cap' },
+      dead:      { emoji: '💀', label: 'rip me' }
+    };
+
+    const MOODS = {
+      surviving: { emoji: '😮‍💨', color: '#FF9500', label: 'surviving' },
+      thriving:  { emoji: '✨', color: '#39FF14', label: 'thriving' },
+      chaotic:   { emoji: '🌀', color: '#00F0FF', label: 'chaotic' },
+      doom:      { emoji: '🛌', color: '#8B5CF6', label: 'doom' }
     };
 
     const MONTHLY_THEMES = [
@@ -1245,29 +1239,39 @@
       { name: 'GOLDEN', filter: 'filter-golden', desc: 'Autumn glow', icon: '🍂' }
     ];
 
-    // ============================================
-    // CONSTANTS
-    // ============================================
-    const VIBES = {
-      relatable: { emoji: '💯', label: 'literally me' },
-      mood:      { emoji: '🛋️', label: 'big mood' },
-      tea:       { emoji: '🐸', label: 'spill tea' },
-      hug:       { emoji: '🤗', label: 'virtual hug' },
-      real:      { emoji: '🎯', label: 'no cap' },
-      dead:      { emoji: '💀', label: 'rip me' }
-    };
+    // DUMMY ENTRIES
+    const DUMMY_ENTRIES = [
+      {
+        id: 'd1',
+        content: "gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus.",
+        mood: 'surviving',
+        timestamp: Date.now() - 172800000,
+        vibes: { relatable: 12, mood: 9, hug: 8, tea: 3, real: 5, dead: 2 },
+        isSpilled: true,
+        spillId: 'spill_d1'
+      },
+      {
+        id: 'd2',
+        content: "deadline mepet, dosen gak jelas, dompet kering. rasanya pengen ijin cuti sehari buat jadi batu aja.",
+        mood: 'doom',
+        timestamp: Date.now() - 86400000,
+        vibes: { relatable: 9, mood: 5, dead: 7, real: 3, hug: 2, tea: 1 },
+        isSpilled: true,
+        spillId: 'spill_d2'
+      },
+      {
+        id: 'd3',
+        content: "capek.",
+        mood: 'surviving',
+        timestamp: Date.now() - 43200000,
+        vibes: { hug: 20, relatable: 18, dead: 10, real: 7, mood: 3, tea: 0 },
+        isSpilled: true,
+        spillId: 'spill_d3'
+      }
+    ];
 
-    const MOODS = {
-      surviving: { emoji: '😮‍💨', color: '#FF9500', label: 'surviving' },
-      thriving:  { emoji: '✨', color: '#39FF14', label: 'thriving' },
-      chaotic:   { emoji: '🌀', color: '#00F0FF', label: 'chaotic' },
-      doom:      { emoji: '🛌', color: '#8B5CF6', label: 'doom' }
-    };
-
-    // ============================================
-    // DUMMY DATA
-    // ============================================
-    const dummyArtefacts = [
+    // DUMMY ARTEFACTS
+    const DUMMY_ARTEFACTS = [
       { 
         id: 'a1', 
         url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80', 
@@ -1315,35 +1319,20 @@
       }
     ];
 
-    const dummyEntries = [
-      {
-        id: 'd1',
-        content: "gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus.",
-        mood: 'surviving',
-        timestamp: Date.now() - 172800000,
-        vibes: { relatable: 12, mood: 9, hug: 8, tea: 3, real: 5, dead: 2 },
-        isSpilled: true,
-        spillId: 'spill_d1'
-      },
-      {
-        id: 'd2',
-        content: "deadline mepet, dosen gak jelas, dompet kering. rasanya pengen ijin cuti sehari buat jadi batu aja.",
-        mood: 'doom',
-        timestamp: Date.now() - 86400000,
-        vibes: { relatable: 9, mood: 5, dead: 7, real: 3, hug: 2, tea: 1 },
-        isSpilled: true,
-        spillId: 'spill_d2'
-      },
-      {
-        id: 'd3',
-        content: "capek.",
-        mood: 'surviving',
-        timestamp: Date.now() - 43200000,
-        vibes: { hug: 20, relatable: 18, dead: 10, real: 7, mood: 3, tea: 0 },
-        isSpilled: true,
-        spillId: 'spill_d3'
-      }
-    ];
+    // ============================================
+    // CONFIG
+    // ============================================
+    const CONFIG = {
+      quotaDays: 28,
+      uploadWindowDays: 3,
+      maxFileSize: 5 * 1024 * 1024,
+      maxSelection: 6,
+      maxArtefacts: 6,
+      faceThreshold: 0.6,
+      inputSize: 416,
+      supabaseUrl: 'https://your-project.supabase.co',
+      supabaseKey: 'your-anon-key'
+    };
 
     // ============================================
     // STATE
@@ -1351,8 +1340,8 @@
     const state = {
       currentUser: localStorage.getItem('jejak_user') || '@anon_' + Math.random().toString(36).substr(2, 6),
       currentMood: 'surviving',
-      entries: [], // User entries (LIFO - newest first)
-      artefacts: [],
+      entries: [], // User entries (LIFO)
+      artefacts: [...DUMMY_ARTEFACTS], // Start with dummy artefacts
       userVibes: new Set(),
       selectedFiles: new Set(),
       colorMode: false,
@@ -1368,18 +1357,27 @@
     localStorage.setItem('jejak_user', state.currentUser);
 
     // ============================================
-    // SUPABASE SETUP
+    // SUPABASE INITIALIZATION
     // ============================================
     function initSupabase() {
       try {
+        if (typeof supabase === 'undefined' || !CONFIG.supabaseUrl.includes('your-project')) {
+          console.log('Supabase not configured, running in offline mode');
+          updateSyncStatus('offline', 'Offline mode');
+          return false;
+        }
+        
         state.supabase = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
         state.isOnline = true;
-        updateSyncStatus('synced', 'Terhubung');
+        updateSyncStatus('online', 'Terhubung');
+        
+        // Subscribe to realtime changes
+        subscribeToSpills();
+        
         return true;
       } catch (e) {
         console.error('Supabase init failed:', e);
-        state.isOnline = false;
-        updateSyncStatus('error', 'Offline mode');
+        updateSyncStatus('offline', 'Offline mode');
         return false;
       }
     }
@@ -1391,22 +1389,47 @@
     }
 
     // ============================================
-    // RANT SYSTEM - CORE ALGORITHM
+    // REALTIME SUBSCRIPTION
     // ============================================
-    
-    /**
-     * ALGORITMA RANT:
-     * 1. User submit rant
-     * 2. Simpan ke state.entries (LIFO - unshift ke array)
-     * 3. Kirim ke Supabase (table: rants)
-     * 4. Broadcast ke "Spill the Tea" (table: spills)
-     * 5. Render entries (user entries + dummy di bawah)
-     */
+    function subscribeToSpills() {
+      if (!state.supabase) return;
+      
+      state.supabase
+        .channel('spills')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'spills' }, (payload) => {
+          console.log('Spill update:', payload);
+          // Refresh entries when new spill arrives
+          fetchSpills();
+        })
+        .subscribe();
+    }
+
+    async function fetchSpills() {
+      if (!state.supabase) return;
+      
+      try {
+        const { data, error } = await state.supabase
+          .from('spills')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(10);
+        
+        if (error) throw error;
+        
+        // Merge with user entries
+        console.log('Fetched spills:', data);
+      } catch (e) {
+        console.error('Fetch spills failed:', e);
+      }
+    }
+
+    // ============================================
+    // RANT SUBMISSION WITH SUPABASE
+    // ============================================
     async function submitRant(content, mood) {
       const timestamp = Date.now();
       const rantId = 'rant_' + timestamp + '_' + Math.random().toString(36).substr(2, 5);
       
-      // 1. Create rant object
       const newRant = {
         id: rantId,
         content: content,
@@ -1418,18 +1441,17 @@
         created_at: new Date(timestamp).toISOString()
       };
       
-      // 2. Add to state (LIFO - newest first)
-      // Unshift = tambah di depan array
+      // 1. Add to state (LIFO)
       state.entries.unshift(newRant);
       
-      // 3. Save to localStorage (backup)
-      saveEntriesToLocal();
+      // 2. Save to localStorage
+      localStorage.setItem('jejak_user_entries', JSON.stringify(state.entries));
       
-      // 4. Render immediately (optimistic UI)
+      // 3. Render immediately
       renderEntries();
       
-      // 5. Send to Supabase (async)
-      if (state.isOnline) {
+      // 4. Send to Supabase
+      if (state.isOnline && state.supabase) {
         try {
           updateSyncStatus('syncing', 'Menyimpan...');
           
@@ -1441,28 +1463,26 @@
               content: content,
               mood: mood,
               author: state.currentUser,
-              created_at: new Date(timestamp).toISOString(),
+              created_at: newRant.created_at,
               vibes: newRant.vibes
             }]);
           
           if (rantError) throw rantError;
           
-          // 6. Broadcast to Spill the Tea
+          // 5. Broadcast to Spill the Tea
           await broadcastToSpillTea(newRant);
           
-          updateSyncStatus('synced', 'Tersimpan');
-          showToast('Jejak tersimpan & di-spill!');
+          updateSyncStatus('online', 'Tersimpan');
+          showToast('Jejak tersimpan & di-spill ke komunitas!');
           
         } catch (error) {
           console.error('Save failed:', error);
-          updateSyncStatus('error', 'Gagal menyimpan');
+          updateSyncStatus('offline', 'Sync pending');
           showToast('Tersimpan lokal (sync pending)');
-          
-          // Queue for retry
           queueForRetry(newRant);
         }
       } else {
-        showToast('Tersimpan lokal (offline)');
+        showToast('Tersimpan lokal (offline mode)');
         queueForRetry(newRant);
       }
       
@@ -1474,6 +1494,8 @@
        * Kirim ke "Spill the Tea" untuk dapat respon emoji dari user lain
        * Table: spills (public, bisa dilihat semua user)
        */
+      if (!state.supabase) return;
+      
       try {
         const { data, error } = await state.supabase
           .from('spills')
@@ -1485,7 +1507,8 @@
             author: state.currentUser,
             created_at: rant.created_at,
             is_anonymous: true,
-            response_count: 0
+            response_count: 0,
+            vibes: rant.vibes
           }]);
         
         if (error) throw error;
@@ -1495,6 +1518,8 @@
         if (entry) {
           entry.isSpilled = true;
           entry.spillId = 'spill_' + rant.id;
+          localStorage.setItem('jejak_user_entries', JSON.stringify(state.entries));
+          renderEntries();
         }
         
         return data;
@@ -1502,23 +1527,6 @@
         console.error('Broadcast failed:', error);
         throw error;
       }
-    }
-
-    function saveEntriesToLocal() {
-      // Simpan hanya user entries (bukan dummy)
-      localStorage.setItem('jejak_user_entries', JSON.stringify(state.entries));
-    }
-
-    function loadEntriesFromLocal() {
-      const saved = localStorage.getItem('jejak_user_entries');
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch (e) {
-          return [];
-        }
-      }
-      return [];
     }
 
     function queueForRetry(entry) {
@@ -1532,6 +1540,12 @@
     // ============================================
     async function loadFaceApi() {
       try {
+        if (typeof faceapi === 'undefined') {
+          console.log('Face API not loaded');
+          state.faceApiLoaded = false;
+          return;
+        }
+        
         await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model');
         await faceapi.nets.faceLandmark68TinyNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model');
         state.faceApiLoaded = true;
@@ -1543,7 +1557,7 @@
     }
 
     async function detectFaces(imageElement) {
-      if (!state.faceApiLoaded) {
+      if (!state.faceApiLoaded || typeof faceapi === 'undefined') {
         return simulateAccurateDetection(imageElement);
       }
       
@@ -1616,7 +1630,7 @@
           const metadata = JSON.parse(saved);
           return metadata.map((m, i) => ({
             ...m,
-            url: dummyArtefacts[i % dummyArtefacts.length].url
+            url: DUMMY_ARTEFACTS[i % DUMMY_ARTEFACTS.length].url
           }));
         } catch (e) {
           return [];
@@ -1626,233 +1640,14 @@
     }
 
     // ============================================
-    // UI FUNCTIONS
-    // ============================================
-    function getCurrentMonthTheme() {
-      return MONTHLY_THEMES[new Date().getMonth()];
-    }
-
-    function applyFilter(element, useColor = false) {
-      const theme = getCurrentMonthTheme();
-      const allFilters = ['filter-monochrome', 'filter-sepia', 'filter-lomo', 'filter-vignette', 
-                         'filter-noir', 'filter-fade', 'filter-cyber', 'filter-warm', 
-                         'filter-cold', 'filter-dream', 'filter-crisp', 'filter-moody', 'filter-golden'];
-      allFilters.forEach(f => element.classList.remove(f));
-      element.classList.add(useColor ? theme.filter : 'filter-monochrome');
-    }
-
-    function updateFilterUI() {
-      const theme = getCurrentMonthTheme();
-      const badge = document.getElementById('current-filter');
-      const desc = document.getElementById('filter-desc');
-      const icon = document.getElementById('filter-icon');
-      const label = document.getElementById('filter-label');
-      const toggle = document.getElementById('filter-toggle');
-      
-      if (state.colorMode) {
-        badge.textContent = theme.name;
-        desc.textContent = theme.desc;
-        icon.textContent = theme.icon;
-        label.textContent = 'COLOR';
-        toggle.classList.add('active');
-      } else {
-        badge.textContent = 'MONOCHROME';
-        desc.textContent = 'Default';
-        icon.textContent = '⚫';
-        label.textContent = 'B&W';
-        toggle.classList.remove('active');
-      }
-      
-      const heroImg = document.getElementById('hero-img');
-      applyFilter(heroImg, state.colorMode);
-      
-      document.querySelectorAll('.tray-item img').forEach(img => {
-        applyFilter(img, state.colorMode);
-      });
-    }
-
-    function toggleColorMode() {
-      state.colorMode = !state.colorMode;
-      updateFilterUI();
-      showToast(state.colorMode ? `Theme: ${getCurrentMonthTheme().name}` : 'Monochrome mode');
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2500);
-    }
-
-    function formatTime(ts) {
-      const diff = Date.now() - ts;
-      const hours = Math.floor(diff / 3600000);
-      if (hours < 1) return 'baru saja';
-      if (hours < 24) return `${hours}j`;
-      const days = Math.floor(hours / 24);
-      return `${days}h`;
-    }
-
-    // ============================================
-    // QUOTA SYSTEM
-    // ============================================
-    function initQuotaSystem() {
-      const now = Date.now();
-      if (!state.quotaStart) {
-        state.quotaStart = now.toString();
-        localStorage.setItem('jejak_quota_start', state.quotaStart);
-      }
-      
-      const quotaStart = parseInt(state.quotaStart);
-      const daysSinceQuota = Math.floor((now - quotaStart) / (1000 * 60 * 60 * 24));
-      const currentCycle = Math.floor(daysSinceQuota / CONFIG.quotaDays);
-      const cycleStart = quotaStart + (currentCycle * CONFIG.quotaDays * 24 * 60 * 60 * 1000);
-      const daysIntoCycle = Math.floor((now - cycleStart) / (1000 * 60 * 60 * 24));
-      
-      return {
-        inUploadWindow: daysIntoCycle < CONFIG.uploadWindowDays,
-        daysIntoCycle,
-        daysUntilWindow: CONFIG.quotaDays - daysIntoCycle,
-        daysLeftInWindow: CONFIG.uploadWindowDays - daysIntoCycle
-      };
-    }
-
-    function updateQuotaUI() {
-      const quota = initQuotaSystem();
-      const btn = document.getElementById('upload-btn');
-      const counter = document.getElementById('upload-counter');
-      const timer = document.getElementById('quota-timer');
-      
-      if (quota.inUploadWindow) {
-        btn.disabled = false;
-        counter.style.display = 'none';
-        timer.textContent = `Window aktif • Sisa ${quota.daysLeftInWindow} hari`;
-        timer.classList.remove('urgent');
-        if (quota.daysLeftInWindow <= 1) timer.classList.add('urgent');
-      } else {
-        btn.disabled = true;
-        counter.textContent = quota.daysUntilWindow;
-        counter.style.display = 'block';
-        timer.textContent = `Next window: ${quota.daysUntilWindow} hari`;
-        timer.classList.remove('urgent');
-      }
-    }
-
-    // ============================================
     // RENDER FUNCTIONS
     // ============================================
-    function createScribbleElement(box, containerWidth, containerHeight, imgWidth, imgHeight) {
-      const div = document.createElement('div');
-      div.className = 'face-scribble';
-      
-      const scaleX = containerWidth / imgWidth;
-      const scaleY = containerHeight / imgHeight;
-      
-      const padding = 10;
-      const left = Math.max(0, (box.x * scaleX) - padding);
-      const top = Math.max(0, (box.y * scaleY) - padding);
-      const width = Math.min(containerWidth - left, (box.width * scaleX) + (padding * 2));
-      const height = Math.min(containerHeight - top, (box.height * scaleY) + (padding * 2));
-      
-      div.style.left = `${left}px`;
-      div.style.top = `${top}px`;
-      div.style.width = `${width}px`;
-      div.style.height = `${height}px`;
-      
-      const lines = document.createElement('div');
-      lines.className = 'marker-lines';
-      div.appendChild(lines);
-      
-      return div;
-    }
-
-    window.selectMood = function(mood) {
-      state.currentMood = mood;
-      document.querySelectorAll('.mood-card').forEach(card => {
-        card.classList.remove('active');
-        if (card.dataset.mood === mood) card.classList.add('active');
-      });
-      if (navigator.vibrate) navigator.vibrate(10);
-    };
-
-    window.toggleVibe = async function(entryId, vibeKey, btn) {
-      const key = `${entryId}-${vibeKey}`;
-      const countEl = btn.querySelector('.vibe-count');
-      let count = parseInt(countEl.textContent);
-      
-      // Find entry
-      let entry = state.entries.find(e => e.id === entryId);
-      if (!entry) {
-        entry = dummyEntries.find(e => e.id === entryId);
-      }
-      
-      if (state.userVibes.has(key)) {
-        state.userVibes.delete(key);
-        btn.classList.remove('vibed');
-        countEl.textContent = Math.max(0, count - 1);
-      } else {
-        state.userVibes.add(key);
-        btn.classList.add('vibed');
-        countEl.textContent = count + 1;
-        btn.style.transform = 'scale(0.9)';
-        setTimeout(() => btn.style.transform = '', 150);
-        showToast(`${VIBES[vibeKey].label}!`);
-        
-        // Update vibes in database if online
-        if (state.isOnline && entry) {
-          try {
-            const newVibes = { ...entry.vibes, [vibeKey]: (entry.vibes[vibeKey] || 0) + 1 };
-            await state.supabase
-              .from('rants')
-              .update({ vibes: newVibes })
-              .eq('id', entryId);
-          } catch (e) {
-            console.error('Failed to update vibes:', e);
-          }
-        }
-      }
-    };
-
-    window.setHero = function(url, note, faces = []) {
-      const heroImg = document.getElementById('hero-img');
-      const heroFaces = document.getElementById('hero-faces');
-      
-      heroImg.src = url;
-      applyFilter(heroImg, state.colorMode);
-      document.getElementById('hero-notation').textContent = `"${note}"`;
-      
-      heroFaces.innerHTML = '';
-      
-      heroImg.onload = () => {
-        if (faces && faces.length > 0) {
-          const container = heroImg.parentElement;
-          const rect = container.getBoundingClientRect();
-          
-          faces.forEach(face => {
-            const scribble = createScribbleElement(
-              face.box,
-              rect.width,
-              rect.height,
-              heroImg.naturalWidth,
-              heroImg.naturalHeight
-            );
-            heroFaces.appendChild(scribble);
-          });
-        }
-      };
-    };
-
     function renderEntries() {
       const container = document.getElementById('entries-container');
       
-      /**
-       * ALGORITMA RENDER:
-       * 1. User entries (state.entries) - di atas, LIFO
-       * 2. Dummy entries - di bawah sebagai fallback/contoh
-       * 3. Gabungkan: [...userEntries, ...dummyEntries]
-       */
+      // Combine: User entries first (LIFO), then dummy entries
       const userEntries = state.entries || [];
-      const allEntries = [...userEntries, ...dummyEntries];
+      const allEntries = [...userEntries, ...DUMMY_ENTRIES];
       
       if (allEntries.length === 0) {
         container.innerHTML = `
@@ -1904,4 +1699,475 @@
 
     function renderTray() {
       const grid = document.getElementById('tray-grid');
-      const items = state.artefacts.length ? state.artefacts : dummyAr
+      const items = state.artefacts.length > 0 ? state.artefacts : DUMMY_ARTEFACTS;
+      
+      grid.innerHTML = items.map((item, index) => `
+        <div class="tray-item" onclick="setHero('${item.url}', '${item.note}', ${JSON.stringify(item.faces || []).replace(/"/g, '&quot;')})">
+          <div style="position: relative; width: 100%; height: 100%;">
+            <img src="${item.url}" alt="${item.note}" loading="lazy" class="${state.colorMode ? getCurrentMonthTheme().filter : 'filter-monochrome'}">
+            ${item.hasFace ? '<div class="detection-badge" style="top: 4px; left: 4px; right: auto;">SENSORED</div>' : ''}
+            ${renderTrayScribblesHTML(item.faces)}
+          </div>
+        </div>
+      `).join('');
+      
+      // Fill empty slots up to 6
+      const emptySlots = Math.max(0, 6 - items.length);
+      for (let i = 0; i < emptySlots; i++) {
+        grid.innerHTML += `<div class="tray-item empty" onclick="openGallery()">+</div>`;
+      }
+    }
+
+    function renderTrayScribblesHTML(faces) {
+      if (!faces || faces.length === 0) return '';
+      
+      return faces.map(face => `
+        <div class="face-scribble" style="
+          left: ${(face.box.x / 400) * 100}%;
+          top: ${(face.box.y / 400) * 100}%;
+          width: ${(face.box.width / 400) * 100}%;
+          height: ${(face.box.height / 400) * 100}%;
+          z-index: 5;
+        ">
+          <div class="marker-lines"></div>
+        </div>
+      `).join('');
+    }
+
+    function applyFilter(element, useColor) {
+      const theme = getCurrentMonthTheme();
+      const allFilters = ['filter-monochrome', 'filter-sepia', 'filter-lomo', 'filter-vignette', 
+                         'filter-noir', 'filter-fade', 'filter-cyber', 'filter-warm', 
+                         'filter-cold', 'filter-dream', 'filter-crisp', 'filter-moody', 'filter-golden'];
+      allFilters.forEach(f => element.classList.remove(f));
+      element.classList.add(useColor ? theme.filter : 'filter-monochrome');
+    }
+
+    function updateFilterUI() {
+      const theme = getCurrentMonthTheme();
+      const badge = document.getElementById('current-filter');
+      const desc = document.getElementById('filter-desc');
+      const icon = document.getElementById('filter-icon');
+      const label = document.getElementById('filter-label');
+      const toggle = document.getElementById('filter-toggle');
+      
+      if (state.colorMode) {
+        badge.textContent = theme.name;
+        desc.textContent = theme.desc;
+        icon.textContent = theme.icon;
+        label.textContent = 'COLOR';
+        toggle.classList.add('active');
+      } else {
+        badge.textContent = 'MONOCHROME';
+        desc.textContent = 'Default';
+        icon.textContent = '⚫';
+        label.textContent = 'B&W';
+        toggle.classList.remove('active');
+      }
+      
+      const heroImg = document.getElementById('hero-img');
+      applyFilter(heroImg, state.colorMode);
+      
+      document.querySelectorAll('.tray-item img').forEach(img => {
+        applyFilter(img, state.colorMode);
+      });
+    }
+
+    // ============================================
+    // INTERACTIVE FUNCTIONS
+    // ============================================
+    window.toggleColorMode = function() {
+      state.colorMode = !state.colorMode;
+      updateFilterUI();
+      showToast(state.colorMode ? `Theme: ${getCurrentMonthTheme().name}` : 'Monochrome mode');
+    };
+
+    window.selectMood = function(mood) {
+      state.currentMood = mood;
+      document.querySelectorAll('.mood-card').forEach(card => {
+        card.classList.remove('active');
+        if (card.dataset.mood === mood) card.classList.add('active');
+      });
+      if (navigator.vibrate) navigator.vibrate(10);
+    };
+
+    window.toggleVibe = async function(entryId, vibeKey, btn) {
+      const key = `${entryId}-${vibeKey}`;
+      const countEl = btn.querySelector('.vibe-count');
+      let count = parseInt(countEl.textContent);
+      
+      // Find entry in user entries or dummy
+      let entry = state.entries.find(e => e.id === entryId) || DUMMY_ENTRIES.find(e => e.id === entryId);
+      
+      if (state.userVibes.has(key)) {
+        state.userVibes.delete(key);
+        btn.classList.remove('vibed');
+        countEl.textContent = Math.max(0, count - 1);
+      } else {
+        state.userVibes.add(key);
+        btn.classList.add('vibed');
+        countEl.textContent = count + 1;
+        btn.style.transform = 'scale(0.9)';
+        setTimeout(() => btn.style.transform = '', 150);
+        showToast(`${VIBES[vibeKey].label}!`);
+        
+        // Update in Supabase if online
+        if (state.isOnline && state.supabase && entry) {
+          try {
+            const newVibes = { ...entry.vibes, [vibeKey]: (entry.vibes[vibeKey] || 0) + 1 };
+            
+            // Update rants table
+            await state.supabase
+              .from('rants')
+              .update({ vibes: newVibes })
+              .eq('id', entryId);
+            
+            // Also update spills table if spilled
+            if (entry.isSpilled && entry.spillId) {
+              await state.supabase
+                .from('spills')
+                .update({ vibes: newVibes, response_count: (entry.vibes && Object.values(entry.vibes).reduce((a,b) => a+b, 0)) + 1 })
+                .eq('id', entry.spillId);
+            }
+            
+            entry.vibes = newVibes;
+          } catch (e) {
+            console.error('Failed to update vibes:', e);
+          }
+        }
+      }
+    };
+
+    window.setHero = function(url, note, faces) {
+      faces = faces || [];
+      const heroImg = document.getElementById('hero-img');
+      const heroFaces = document.getElementById('hero-faces');
+      
+      heroImg.src = url;
+      applyFilter(heroImg, state.colorMode);
+      document.getElementById('hero-notation').textContent = '"' + note + '"';
+      
+      heroFaces.innerHTML = '';
+      
+      heroImg.onload = function() {
+        if (faces.length > 0) {
+          const container = heroImg.parentElement;
+          const rect = container.getBoundingClientRect();
+          
+          faces.forEach(function(face) {
+            const div = document.createElement('div');
+            div.className = 'face-scribble';
+            
+            const scaleX = rect.width / heroImg.naturalWidth;
+            const scaleY = rect.height / heroImg.naturalHeight;
+            const padding = 10;
+            
+            div.style.left = Math.max(0, (face.box.x * scaleX) - padding) + 'px';
+            div.style.top = Math.max(0, (face.box.y * scaleY) - padding) + 'px';
+            div.style.width = Math.min(rect.width, (face.box.width * scaleX) + (padding * 2)) + 'px';
+            div.style.height = Math.min(rect.height, (face.box.height * scaleY) + (padding * 2)) + 'px';
+            
+            const lines = document.createElement('div');
+            lines.className = 'marker-lines';
+            div.appendChild(lines);
+            heroFaces.appendChild(div);
+          });
+        }
+      };
+    };
+
+    // ============================================
+    // UPLOAD FUNCTIONS
+    // ============================================
+    window.openGallery = function() {
+      const quota = initQuotaSystem();
+      if (!quota.inUploadWindow) {
+        showToast('Tunggu ' + quota.daysUntilWindow + ' hari lagi');
+        return;
+      }
+      document.getElementById('file-input').click();
+    };
+
+    function initQuotaSystem() {
+      const now = Date.now();
+      if (!state.quotaStart) {
+        state.quotaStart = now.toString();
+        localStorage.setItem('jejak_quota_start', state.quotaStart);
+      }
+      
+      const quotaStart = parseInt(state.quotaStart);
+      const daysSinceQuota = Math.floor((now - quotaStart) / (1000 * 60 * 60 * 24));
+      const currentCycle = Math.floor(daysSinceQuota / CONFIG.quotaDays);
+      const cycleStart = quotaStart + (currentCycle * CONFIG.quotaDays * 24 * 60 * 60 * 1000);
+      const daysIntoCycle = Math.floor((now - cycleStart) / (1000 * 60 * 60 * 24));
+      
+      return {
+        inUploadWindow: daysIntoCycle < CONFIG.uploadWindowDays,
+        daysIntoCycle,
+        daysUntilWindow: CONFIG.quotaDays - daysIntoCycle,
+        daysLeftInWindow: CONFIG.uploadWindowDays - daysIntoCycle
+      };
+    }
+
+    function updateQuotaUI() {
+      const quota = initQuotaSystem();
+      const btn = document.getElementById('upload-btn');
+      const counter = document.getElementById('upload-counter');
+      const timer = document.getElementById('quota-timer');
+      
+      if (quota.inUploadWindow) {
+        btn.disabled = false;
+        counter.style.display = 'none';
+        timer.textContent = 'Window aktif • Sisa ' + quota.daysLeftInWindow + ' hari';
+        timer.classList.remove('urgent');
+        if (quota.daysLeftInWindow <= 1) timer.classList.add('urgent');
+      } else {
+        btn.disabled = true;
+        counter.textContent = quota.daysUntilWindow;
+        counter.style.display = 'block';
+        timer.textContent = 'Next window: ' + quota.daysUntilWindow + ' hari';
+        timer.classList.remove('urgent');
+      }
+    }
+
+    // File input handler
+    document.getElementById('file-input').addEventListener('change', async function(e) {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+      
+      document.getElementById('processing').classList.add('active');
+      
+      const processed = [];
+      for (const file of files) {
+        if (file.size > CONFIG.maxFileSize) {
+          showToast(file.name + ' terlalu besar (max 5MB)');
+          continue;
+        }
+        
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.src = url;
+        
+        await new Promise(resolve => {
+          img.onload = async function() {
+            const detections = await detectFaces(img);
+            processed.push({
+              id: 'artefact_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+              url: url,
+              note: 'new drop',
+              timestamp: Date.now(),
+              faces: detections.map(d => ({ box: d.box, score: d.score })),
+              hasFace: detections.length > 0,
+              file: file
+            });
+            resolve();
+          };
+        });
+      }
+      
+      document.getElementById('processing').classList.remove('active');
+      
+      if (processed.length > 0) {
+        state.selectedFiles = new Set(processed);
+        renderGalleryModal(processed);
+      }
+    });
+
+    function renderGalleryModal(artefacts) {
+      const grid = document.getElementById('gallery-grid');
+      grid.innerHTML = '';
+      
+      artefacts.forEach(function(artefact, index) {
+        const div = document.createElement('div');
+        div.className = 'gallery-item selected';
+        div.dataset.index = index;
+        div.onclick = function() {
+          if (div.classList.contains('selected')) {
+            div.classList.remove('selected');
+            state.selectedFiles.delete(artefact);
+          } else {
+            if (state.selectedFiles.size >= CONFIG.maxSelection) {
+              showToast('Max ' + CONFIG.maxSelection + ' foto');
+              return;
+            }
+            div.classList.add('selected');
+            state.selectedFiles.add(artefact);
+          }
+          document.getElementById('selected-count').textContent = state.selectedFiles.size;
+        };
+        
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'relative';
+        wrapper.style.width = '100%';
+        wrapper.style.height = '100%';
+        
+        const img = document.createElement('img');
+        img.src = artefact.url;
+        img.className = state.colorMode ? getCurrentMonthTheme().filter : 'filter-monochrome';
+        
+        wrapper.appendChild(img);
+        
+        if (artefact.hasFace) {
+          const badge = document.createElement('div');
+          badge.className = 'detection-badge';
+          badge.textContent = 'WAJAH TERSENSOR';
+          wrapper.appendChild(badge);
+        }
+        
+        if (artefact.faces && artefact.faces.length > 0) {
+          artefact.faces.forEach(function(face) {
+            const scribble = document.createElement('div');
+            scribble.className = 'face-scribble';
+            scribble.style.left = ((face.box.x / 400) * 100) + '%';
+            scribble.style.top = ((face.box.y / 400) * 100) + '%';
+            scribble.style.width = ((face.box.width / 400) * 100) + '%';
+            scribble.style.height = ((face.box.height / 400) * 100) + '%';
+            scribble.style.zIndex = '10';
+            const lines = document.createElement('div');
+            lines.className = 'marker-lines';
+            scribble.appendChild(lines);
+            wrapper.appendChild(scribble);
+          });
+        }
+        
+        div.appendChild(wrapper);
+        grid.appendChild(div);
+      });
+      
+      document.getElementById('selected-count').textContent = state.selectedFiles.size;
+      document.getElementById('gallery-modal').classList.add('active');
+    }
+
+    window.closeGallery = function() {
+      document.getElementById('gallery-modal').classList.remove('active');
+      state.selectedFiles.clear();
+      document.getElementById('file-input').value = '';
+    };
+
+    window.confirmUpload = function() {
+      if (state.selectedFiles.size === 0) {
+        showToast('Pilih minimal 1 foto');
+        return;
+      }
+      
+      const artefacts = Array.from(state.selectedFiles);
+      let faceCount = 0;
+      
+      artefacts.forEach(function(artefact) {
+        addArtefactToFIFO(artefact);
+        if (artefact.hasFace) faceCount++;
+      });
+      
+      state.uploadsThisWindow += artefacts.length;
+      localStorage.setItem('jejak_uploads_count', state.uploadsThisWindow.toString());
+      
+      const first = artefacts[0];
+      window.setHero(first.url, first.note, first.faces);
+      
+      renderTray();
+      window.closeGallery();
+      
+      if (faceCount > 0) {
+        showToast(artefacts.length + ' foto disimpan • ' + faceCount + ' wajah disensor');
+      } else {
+        showToast(artefacts.length + ' artefak ditambahkan (FIFO)');
+      }
+    };
+
+    // ============================================
+    // UTILITY FUNCTIONS
+    // ============================================
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function() {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    function formatTime(ts) {
+      const diff = Date.now() - ts;
+      const hours = Math.floor(diff / 3600000);
+      if (hours < 1) return 'baru saja';
+      if (hours < 24) return hours + 'j';
+      const days = Math.floor(hours / 24);
+      return days + 'h';
+    }
+
+    function getCurrentMonthTheme() {
+      return MONTHLY_THEMES[new Date().getMonth()];
+    }
+
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize Supabase
+      initSupabase();
+      
+      // Load Face API
+      loadFaceApi();
+      
+      // Load saved entries
+      const savedEntries = localStorage.getItem('jejak_user_entries');
+      if (savedEntries) {
+        try {
+          state.entries = JSON.parse(savedEntries);
+        } catch (e) {
+          state.entries = [];
+        }
+      }
+      
+      // Load saved artefacts
+      const savedArtefacts = loadArtefacts();
+      if (savedArtefacts.length > 0) {
+        state.artefacts = savedArtefacts;
+      }
+      
+      // Input character count
+      document.getElementById('rant-input').addEventListener('input', function() {
+        document.getElementById('char-count').textContent = this.value.length + '/500';
+      });
+      
+      // Submit button
+      document.getElementById('submit-btn').addEventListener('click', function() {
+        const input = document.getElementById('rant-input');
+        const content = input.value.trim();
+        
+        if (!content) {
+          showToast('Tulis dulu, bestie');
+          input.focus();
+          return;
+        }
+        
+        submitRant(content, state.currentMood);
+        
+        // Clear input
+        input.value = '';
+        document.getElementById('char-count').textContent = '0/500';
+      });
+      
+      // Upload button
+      document.getElementById('upload-btn').addEventListener('click', window.openGallery);
+      
+      // Initialize UI
+      updateQuotaUI();
+      updateFilterUI();
+      renderEntries();
+      renderTray();
+      
+      // Set initial hero
+      if (state.artefacts.length > 0) {
+        const first = state.artefacts[0];
+        window.setHero(first.url, first.note, first.faces);
+      } else if (DUMMY_ARTEFACTS.length > 0) {
+        window.setHero(DUMMY_ARTEFACTS[0].url, DUMMY_ARTEFACTS[0].note, DUMMY_ARTEFACTS[0].faces);
+      }
+      
+      // Update quota every hour
+      setInterval(updateQuotaUI, 3600000);
+    });
+  </script>
+</body>
+</html>
