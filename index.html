@@ -688,13 +688,23 @@
       document.documentElement.style.setProperty('--accent-4', colors.accent4);
       
       document.querySelectorAll('.vibe-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
+      
+      // Find and activate the correct button
+      const buttons = document.querySelectorAll('.vibe-btn');
+      buttons.forEach(btn => {
+        if (btn.textContent.includes(vibe)) {
+          btn.classList.add('active');
+        }
+      });
+      
       localStorage.setItem('jejak_vibe', vibe);
     }
 
     // Load saved vibe
     const savedVibe = localStorage.getItem('jejak_vibe') || 'cyber';
-    setVibe(savedVibe);
+    window.addEventListener('DOMContentLoaded', () => {
+      setVibe(savedVibe);
+    });
 
     // Cursor Trail Effect
     let trails = [];
