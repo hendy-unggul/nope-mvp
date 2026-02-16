@@ -1205,7 +1205,28 @@
 
   <script>
     // ============================================
-    // CONSTANTS - DEFINED FIRST
+    // CONFIGURATION - UPDATE THESE WITH YOUR SUPABASE CREDENTIALS
+    // ============================================
+    const CONFIG = {
+      // UPDATE THESE WITH YOUR ACTUAL SUPABASE CREDENTIALS
+      supabaseUrl: 'https://your-project.supabase.co',
+      supabaseKey: 'your-anon-key',
+      
+      // App settings
+      quotaDays: 28,
+      uploadWindowDays: 3,
+      maxFileSize: 5 * 1024 * 1024,
+      maxSelection: 6,
+      maxArtefacts: 6,
+      faceThreshold: 0.6,
+      inputSize: 416,
+      
+      // Supabase storage bucket
+      storageBucket: 'artefacts'
+    };
+
+    // ============================================
+    // CONSTANTS
     // ============================================
     
     const VIBES = {
@@ -1320,28 +1341,13 @@
     ];
 
     // ============================================
-    // CONFIG
-    // ============================================
-    const CONFIG = {
-      quotaDays: 28,
-      uploadWindowDays: 3,
-      maxFileSize: 5 * 1024 * 1024,
-      maxSelection: 6,
-      maxArtefacts: 6,
-      faceThreshold: 0.6,
-      inputSize: 416,
-      supabaseUrl: 'https://your-project.supabase.co',
-      supabaseKey: 'your-anon-key'
-    };
-
-    // ============================================
     // STATE
     // ============================================
     const state = {
       currentUser: localStorage.getItem('jejak_user') || '@anon_' + Math.random().toString(36).substr(2, 6),
       currentMood: 'surviving',
-      entries: [], // User entries (LIFO)
-      artefacts: [...DUMMY_ARTEFACTS], // Start with dummy artefacts
+      entries: [],
+      artefacts: [...DUMMY_ARTEFACTS],
       userVibes: new Set(),
       selectedFiles: new Set(),
       colorMode: false,
@@ -1361,8 +1367,8 @@
     // ============================================
     function initSupabase() {
       try {
-        if (typeof supabase === 'undefined' || !CONFIG.supabaseUrl.includes('your-project')) {
-          console.log('Supabase not configured, running in offline mode');
+        if (typeof supabase === 'undefined' || !CONFIG.supabaseUrl.includes('supabase.co')) {
+          console.log('⚠️ Supabase not configured. Update CONFIG.supabaseUrl and CONFIG.supabaseKey');
           updateSyncStatus('offline', 'Offline mode');
           return false;
         }
@@ -1371,12 +1377,14 @@
         state.isOnline = true;
         updateSyncStatus('online', 'Terhubung');
         
+        console.log('✅ Supabase connected');
+        
         // Subscribe to realtime changes
         subscribeToSpills();
         
         return true;
       } catch (e) {
-        console.error('Supabase init failed:', e);
+        console.error('❌ Supabase init failed:', e);
         updateSyncStatus('offline', 'Offline mode');
         return false;
       }
@@ -1397,8 +1405,7 @@
       state.supabase
         .channel('spills')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'spills' }, (payload) => {
-          console.log('Spill update:', payload);
-          // Refresh entries when new spill arrives
+          console.log('📡 Spill update:', payload);
           fetchSpills();
         })
         .subscribe();
@@ -1416,10 +1423,9 @@
         
         if (error) throw error;
         
-        // Merge with user entries
-        console.log('Fetched spills:', data);
+        console.log('📥 Fetched spills:', data);
       } catch (e) {
-        console.error('Fetch spills failed:', e);
+        console.error('❌ Fetch spills failed:', e);
       }
     }
 
@@ -1465,9 +1471,15 @@
               author: state.currentUser,
               created_at: newRant.created_at,
               vibes: newRant.vibes
-            }]);
+            }])
+            .select();
           
-          if (rantError) throw rantError;
+          if (rantError) {
+            console.error('❌ Rant insert error:', rantError);
+            throw rantError;
+          }
+          
+          console.log('✅ Rant saved:', rantData);
           
           // 5. Broadcast to Spill the Tea
           await broadcastToSpillTea(newRant);
@@ -1476,7 +1488,7 @@
           showToast('Jejak tersimpan & di-spill ke komunitas!');
           
         } catch (error) {
-          console.error('Save failed:', error);
+          console.error('❌ Save failed:', error);
           updateSyncStatus('offline', 'Sync pending');
           showToast('Tersimpan lokal (sync pending)');
           queueForRetry(newRant);
@@ -1490,17 +1502,15 @@
     }
 
     async function broadcastToSpillTea(rant) {
-      /**
-       * Kirim ke "Spill the Tea" untuk dapat respon emoji dari user lain
-       * Table: spills (public, bisa dilihat semua user)
-       */
       if (!state.supabase) return;
       
       try {
+        const spillId = 'spill_' + rant.id;
+        
         const { data, error } = await state.supabase
           .from('spills')
           .insert([{
-            id: 'spill_' + rant.id,
+            id: spillId,
             rant_id: rant.id,
             content: rant.content,
             mood: rant.mood,
@@ -1509,22 +1519,28 @@
             is_anonymous: true,
             response_count: 0,
             vibes: rant.vibes
-          }]);
+          }])
+          .select();
         
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Spill insert error:', error);
+          throw error;
+        }
+        
+        console.log('✅ Spilled to community:', data);
         
         // Update local state
         const entry = state.entries.find(e => e.id === rant.id);
         if (entry) {
           entry.isSpilled = true;
-          entry.spillId = 'spill_' + rant.id;
+          entry.spillId = spillId;
           localStorage.setItem('jejak_user_entries', JSON.stringify(state.entries));
           renderEntries();
         }
         
         return data;
       } catch (error) {
-        console.error('Broadcast failed:', error);
+        console.error('❌ Broadcast failed:', error);
         throw error;
       }
     }
@@ -1536,12 +1552,84 @@
     }
 
     // ============================================
+    // IMAGE UPLOAD TO SUPABASE STORAGE
+    // ============================================
+    async function uploadImageToSupabase(file, artefactId) {
+      if (!state.supabase) {
+        console.log('⚠️ Supabase not available for upload');
+        return null;
+      }
+      
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${state.currentUser}/${artefactId}.${fileExt}`;
+        
+        console.log('📤 Uploading to Supabase Storage:', fileName);
+        
+        const { data, error } = await state.supabase.storage
+          .from(CONFIG.storageBucket)
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+        
+        if (error) {
+          console.error('❌ Upload error:', error);
+          throw error;
+        }
+        
+        // Get public URL
+        const { data: publicUrl } = state.supabase.storage
+          .from(CONFIG.storageBucket)
+          .getPublicUrl(fileName);
+        
+        console.log('✅ Upload successful:', publicUrl.publicUrl);
+        return publicUrl.publicUrl;
+        
+      } catch (error) {
+        console.error('❌ Failed to upload image:', error);
+        return null;
+      }
+    }
+
+    async function saveArtefactMetadata(artefact, publicUrl) {
+      if (!state.supabase) return;
+      
+      try {
+        const { data, error } = await state.supabase
+          .from('artefacts')
+          .insert([{
+            id: artefact.id,
+            author: state.currentUser,
+            url: publicUrl,
+            note: artefact.note,
+            has_face: artefact.hasFace,
+            faces: artefact.faces,
+            created_at: new Date(artefact.timestamp).toISOString()
+          }])
+          .select();
+        
+        if (error) {
+          console.error('❌ Artefact metadata error:', error);
+          throw error;
+        }
+        
+        console.log('✅ Artefact metadata saved:', data);
+        return data;
+        
+      } catch (error) {
+        console.error('❌ Failed to save artefact metadata:', error);
+        throw error;
+      }
+    }
+
+    // ============================================
     // FACE DETECTION
     // ============================================
     async function loadFaceApi() {
       try {
         if (typeof faceapi === 'undefined') {
-          console.log('Face API not loaded');
+          console.log('⚠️ Face API not loaded');
           state.faceApiLoaded = false;
           return;
         }
@@ -1549,9 +1637,9 @@
         await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model');
         await faceapi.nets.faceLandmark68TinyNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model');
         state.faceApiLoaded = true;
-        console.log('Face API loaded');
+        console.log('✅ Face API loaded');
       } catch (e) {
-        console.error('Face API failed:', e);
+        console.error('❌ Face API failed:', e);
         state.faceApiLoaded = false;
       }
     }
@@ -1615,6 +1703,7 @@
     function saveArtefacts() {
       const metadata = state.artefacts.map(a => ({
         id: a.id,
+        url: a.url,
         note: a.note,
         faces: a.faces || [],
         hasFace: a.hasFace || false,
@@ -1628,10 +1717,7 @@
       if (saved) {
         try {
           const metadata = JSON.parse(saved);
-          return metadata.map((m, i) => ({
-            ...m,
-            url: DUMMY_ARTEFACTS[i % DUMMY_ARTEFACTS.length].url
-          }));
+          return metadata;
         } catch (e) {
           return [];
         }
@@ -1645,7 +1731,6 @@
     function renderEntries() {
       const container = document.getElementById('entries-container');
       
-      // Combine: User entries first (LIFO), then dummy entries
       const userEntries = state.entries || [];
       const allEntries = [...userEntries, ...DUMMY_ENTRIES];
       
@@ -1711,7 +1796,6 @@
         </div>
       `).join('');
       
-      // Fill empty slots up to 6
       const emptySlots = Math.max(0, 6 - items.length);
       for (let i = 0; i < emptySlots; i++) {
         grid.innerHTML += `<div class="tray-item empty" onclick="openGallery()">+</div>`;
@@ -1796,7 +1880,6 @@
       const countEl = btn.querySelector('.vibe-count');
       let count = parseInt(countEl.textContent);
       
-      // Find entry in user entries or dummy
       let entry = state.entries.find(e => e.id === entryId) || DUMMY_ENTRIES.find(e => e.id === entryId);
       
       if (state.userVibes.has(key)) {
@@ -1811,22 +1894,22 @@
         setTimeout(() => btn.style.transform = '', 150);
         showToast(`${VIBES[vibeKey].label}!`);
         
-        // Update in Supabase if online
         if (state.isOnline && state.supabase && entry) {
           try {
             const newVibes = { ...entry.vibes, [vibeKey]: (entry.vibes[vibeKey] || 0) + 1 };
             
-            // Update rants table
             await state.supabase
               .from('rants')
               .update({ vibes: newVibes })
               .eq('id', entryId);
             
-            // Also update spills table if spilled
             if (entry.isSpilled && entry.spillId) {
               await state.supabase
                 .from('spills')
-                .update({ vibes: newVibes, response_count: (entry.vibes && Object.values(entry.vibes).reduce((a,b) => a+b, 0)) + 1 })
+                .update({ 
+                  vibes: newVibes, 
+                  response_count: Object.values(newVibes).reduce((a,b) => a+b, 0) 
+                })
                 .eq('id', entry.spillId);
             }
             
@@ -2044,7 +2127,7 @@
       document.getElementById('file-input').value = '';
     };
 
-    window.confirmUpload = function() {
+    window.confirmUpload = async function() {
       if (state.selectedFiles.size === 0) {
         showToast('Pilih minimal 1 foto');
         return;
@@ -2053,10 +2136,28 @@
       const artefacts = Array.from(state.selectedFiles);
       let faceCount = 0;
       
-      artefacts.forEach(function(artefact) {
-        addArtefactToFIFO(artefact);
+      // Upload to Supabase and add to FIFO
+      for (const artefact of artefacts) {
         if (artefact.hasFace) faceCount++;
-      });
+        
+        // Upload to Supabase Storage
+        if (state.isOnline && state.supabase) {
+          try {
+            updateSyncStatus('syncing', 'Uploading...');
+            
+            const publicUrl = await uploadImageToSupabase(artefact.file, artefact.id);
+            
+            if (publicUrl) {
+              artefact.url = publicUrl;
+              await saveArtefactMetadata(artefact, publicUrl);
+            }
+          } catch (e) {
+            console.error('Upload failed:', e);
+          }
+        }
+        
+        addArtefactToFIFO(artefact);
+      }
       
       state.uploadsThisWindow += artefacts.length;
       localStorage.setItem('jejak_uploads_count', state.uploadsThisWindow.toString());
@@ -2066,6 +2167,10 @@
       
       renderTray();
       window.closeGallery();
+      
+      if (state.isOnline) {
+        updateSyncStatus('online', 'Tersimpan');
+      }
       
       if (faceCount > 0) {
         showToast(artefacts.length + ' foto disimpan • ' + faceCount + ' wajah disensor');
