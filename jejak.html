@@ -62,7 +62,7 @@
       line-height: 1.4;
       min-height: 100vh;
       overflow-x: hidden;
-      padding-bottom: 100px; /* Space for bottom nav */
+      padding-bottom: 100px;
     }
     
     /* Noise texture */
@@ -154,9 +154,66 @@
     }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     
-    /* ============================================
-       BOTTOM NAVIGATION — 4 Tabs Restored
-       ============================================ */
+    /* FILTER CONTROLS */
+    .filter-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-sm);
+      padding: var(--space-sm) 0;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .filter-info {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    .filter-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 4px 8px;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    
+    .filter-toggle {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .filter-toggle:hover {
+      border-color: var(--accent-primary);
+    }
+    
+    .filter-toggle.active {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: var(--bg);
+    }
+    
+    .filter-icon {
+      font-size: 16px;
+    }
+    
+    .filter-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    /* BOTTOM NAVIGATION */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -239,13 +296,13 @@
       overflow: hidden;
       border-top: 2px solid var(--border);
       border-bottom: 2px solid var(--border);
+      background: var(--surface);
     }
     .hero img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      filter: contrast(1.1) saturate(0.9);
-      transition: transform 0.6s;
+      transition: transform 0.6s, filter 0.3s;
     }
     .hero:hover img { transform: scale(1.03); }
     .hero::after {
@@ -268,10 +325,19 @@
       color: var(--text);
       line-height: 1.2;
     }
-    .upload-btn {
+    
+    /* UPLOAD CONTROLS */
+    .upload-controls {
       position: absolute;
       top: var(--space-md);
       right: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      align-items: flex-end;
+    }
+    
+    .upload-btn {
       width: 48px;
       height: 48px;
       background: var(--accent-primary);
@@ -284,6 +350,7 @@
       cursor: pointer;
       transition: all 0.2s;
       box-shadow: 4px 4px 0 var(--bg), 4px 4px 0 2px var(--accent-primary);
+      position: relative;
     }
     .upload-btn:hover:not(:disabled) {
       transform: translate(2px, 2px);
@@ -293,6 +360,7 @@
       background: var(--text-muted);
       box-shadow: none;
       cursor: not-allowed;
+      opacity: 0.6;
     }
     .upload-counter {
       position: absolute;
@@ -305,6 +373,27 @@
       padding: 2px 6px;
       min-width: 20px;
       text-align: center;
+    }
+    
+    .quota-timer {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: var(--space-sm) var(--space-md);
+      font-size: 11px;
+      color: var(--text-secondary);
+      max-width: 200px;
+      text-align: right;
+    }
+    
+    .quota-timer.urgent {
+      border-color: var(--accent-tertiary);
+      color: var(--accent-tertiary);
+      animation: pulse-border 2s infinite;
+    }
+    
+    @keyframes pulse-border {
+      0%, 100% { border-color: var(--accent-tertiary); }
+      50% { border-color: var(--text-muted); }
     }
     
     /* INPUT SECTION */
@@ -504,9 +593,7 @@
       color: var(--text);
     }
     
-    /* ============================================
-       VIBE BAR — 6 EMOJI dengan 💀 SKULL
-       ============================================ */
+    /* VIBE BAR */
     .vibe-bar {
       display: flex;
       border-top: 1px solid var(--border);
@@ -603,15 +690,15 @@
       justify-content: center;
       color: var(--text-muted);
       font-size: 20px;
+      border: 2px dashed var(--border);
     }
     .tray-item img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       transition: all 0.3s;
-      filter: grayscale(0.3);
     }
-    .tray-item:hover img { filter: none; transform: scale(1.1); }
+    .tray-item:hover img { transform: scale(1.1); }
     .tray-item::after {
       content: '';
       position: absolute;
@@ -622,6 +709,31 @@
       mix-blend-mode: multiply;
     }
     .tray-item:hover::after { opacity: 0.3; }
+    
+    /* FILTER CLASSES */
+    .filter-monochrome { filter: grayscale(100%) contrast(1.1) !important; }
+    .filter-sepia { filter: sepia(100%) contrast(1.1) saturate(0.8) !important; }
+    .filter-lomo { filter: contrast(1.2) saturate(1.3) brightness(0.9) !important; }
+    .filter-vignette { 
+      filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+      position: relative;
+    }
+    .filter-vignette::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      box-shadow: inset 0 0 150px rgba(0,0,0,0.7);
+      pointer-events: none;
+    }
+    .filter-noir { filter: grayscale(100%) contrast(1.4) brightness(0.8) !important; }
+    .filter-fade { filter: sepia(30%) saturate(0.6) contrast(0.9) brightness(1.1) !important; }
+    .filter-cyber { filter: hue-rotate(180deg) saturate(1.5) contrast(1.1) !important; }
+    .filter-warm { filter: sepia(60%) hue-rotate(-30deg) saturate(1.2) !important; }
+    .filter-cold { filter: hue-rotate(180deg) saturate(0.5) brightness(1.1) !important; }
+    .filter-dream { filter: blur(0.5px) saturate(1.4) brightness(1.1) contrast(0.9) !important; }
+    .filter-crisp { filter: contrast(1.3) saturate(1.1) sharpness(1.2) !important; }
+    .filter-moody { filter: brightness(0.8) contrast(1.2) saturate(0.7) !important; }
+    .filter-golden { filter: sepia(40%) hue-rotate(-15deg) saturate(1.3) contrast(1.1) !important; }
     
     /* EMPTY STATE */
     .empty-state {
@@ -656,7 +768,7 @@
       padding: var(--space-xl) 0;
       text-align: center;
       border-top: 2px solid var(--border);
-      margin-bottom: 80px; /* Space for bottom nav */
+      margin-bottom: 80px;
     }
     .footer-text {
       font-size: 11px;
@@ -668,7 +780,7 @@
     /* TOAST */
     .toast {
       position: fixed;
-      bottom: 80px; /* Above bottom nav */
+      bottom: 80px;
       left: 50%;
       transform: translateX(-50%) translateY(100px);
       background: var(--text);
@@ -683,6 +795,133 @@
     .toast.show {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
+    }
+    
+    /* MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.9);
+      z-index: 10001;
+      padding: var(--space-md);
+      overflow-y: auto;
+    }
+    
+    .modal.active {
+      display: block;
+    }
+    
+    .modal-content {
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: var(--space-lg);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-md);
+      border-bottom: 2px solid var(--border);
+    }
+    
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 24px;
+      cursor: pointer;
+    }
+    
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-sm);
+    }
+    
+    .gallery-item {
+      aspect-ratio: 1;
+      background: var(--surface-elevated);
+      border: 2px solid var(--border);
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: all 0.2s;
+    }
+    
+    .gallery-item:hover img {
+      transform: scale(1.05);
+    }
+    
+    .gallery-item.selected {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px var(--accent-primary);
+    }
+    
+    .gallery-item.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: var(--accent-primary);
+      color: var(--bg);
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    
+    .modal-actions {
+      margin-top: var(--space-md);
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-sm);
+    }
+    
+    .modal-btn {
+      padding: 12px 24px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .modal-btn.primary {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: var(--bg);
+    }
+    
+    .modal-btn:hover {
+      transform: translateY(-2px);
     }
   </style>
 </head>
@@ -702,15 +941,32 @@
       </div>
     </header>
 
+    <!-- FILTER CONTROLS -->
+    <div class="filter-controls">
+      <div class="filter-info">
+        <span class="filter-badge" id="current-filter">MONOCHROME</span>
+        <span style="font-size: 11px; color: var(--text-muted);" id="filter-desc">Default</span>
+      </div>
+      <button class="filter-toggle" id="filter-toggle" onclick="toggleColorMode()">
+        <span class="filter-icon" id="filter-icon">⚫</span>
+        <span class="filter-label" id="filter-label">B&W</span>
+      </button>
+    </div>
+
     <!-- HERO -->
     <section class="hero-section">
-      <div class="hero">
-        <img id="hero-img" src="https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80" alt="artefak">
+      <div class="hero" id="hero-container">
+        <img id="hero-img" src="https://images.unsplash.com/photo-1517842645767-c639042777db?w=800&q=80" alt="artefak" class="filter-monochrome">
         <div class="hero-notation" id="hero-notation">"kadang hidup butuh jeda"</div>
-        <button class="upload-btn" id="upload-btn" title="Upload artefak (30d cooldown)">
-          +
-          <span class="upload-counter" id="upload-counter" style="display: none;"></span>
-        </button>
+        <div class="upload-controls">
+          <div class="quota-timer" id="quota-timer">
+            Window aktif • Sisa 2 hari
+          </div>
+          <button class="upload-btn" id="upload-btn" title="Buka galeri">
+            +
+            <span class="upload-counter" id="upload-counter" style="display: none;"></span>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -782,9 +1038,7 @@
     </footer>
   </div>
 
-  <!-- ============================================
-       BOTTOM NAVIGATION — 4 TABS RESTORED
-       ============================================ -->
+  <!-- BOTTOM NAVIGATION -->
   <nav class="bottom-nav">
     <div class="nav-container">
       <a href="jejak.html" class="nav-item active">
@@ -806,10 +1060,51 @@
     </div>
   </nav>
 
+  <!-- GALLERY MODAL -->
+  <div class="modal" id="gallery-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Pilih Artefak</h3>
+        <button class="modal-close" onclick="closeGallery()">×</button>
+      </div>
+      <div class="gallery-grid" id="gallery-grid"></div>
+      <div class="modal-actions">
+        <button class="modal-btn" onclick="closeGallery()">Batal</button>
+        <button class="modal-btn primary" onclick="confirmUpload()">Upload (<span id="selected-count">0</span>)</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
-  <input type="file" id="file-input" accept="image/*" style="display: none;">
+  <input type="file" id="file-input" accept="image/*" multiple style="display: none;">
 
   <script>
+    // ============================================
+    // CONFIGURATION
+    // ============================================
+    const CONFIG = {
+      quotaDays: 28,
+      uploadWindowDays: 3,
+      maxFileSize: 5 * 1024 * 1024, // 5MB
+      maxSelection: 6
+    };
+
+    // 12 Monthly Themes (Jan - Dec)
+    const MONTHLY_THEMES = [
+      { name: 'NOIR', filter: 'filter-noir', desc: 'High contrast B&W', icon: '⚫' },
+      { name: 'SEPIA', filter: 'filter-sepia', desc: 'Vintage warmth', icon: '🟤' },
+      { name: 'LOMO', filter: 'filter-lomo', desc: 'Analog saturation', icon: '📷' },
+      { name: 'VIGNETTE', filter: 'filter-vignette', desc: 'Dark edges', icon: '⚫' },
+      { name: 'CYBER', filter: 'filter-cyber', desc: 'Neon shift', icon: '💠' },
+      { name: 'FADE', filter: 'filter-fade', desc: 'Soft vintage', icon: '🌫️' },
+      { name: 'WARM', filter: 'filter-warm', desc: 'Golden hour', icon: '☀️' },
+      { name: 'COLD', filter: 'filter-cold', desc: 'Icy blue', icon: '❄️' },
+      { name: 'DREAM', filter: 'filter-dream', desc: 'Soft focus', icon: '💭' },
+      { name: 'CRISP', filter: 'filter-crisp', desc: 'Sharp detail', icon: '🔪' },
+      { name: 'MOODY', filter: 'filter-moody', desc: 'Dark tones', icon: '🌑' },
+      { name: 'GOLDEN', filter: 'filter-golden', desc: 'Autumn glow', icon: '🍂' }
+    ];
+
     // ============================================
     // STATE
     // ============================================
@@ -819,19 +1114,25 @@
       entries: [],
       artefacts: [],
       userVibes: new Set(),
-      lastUpload: localStorage.getItem('jejak_last_upload')
+      selectedFiles: new Set(),
+      colorMode: false, // false = monochrome, true = color
+      
+      // Quota system
+      quotaStart: localStorage.getItem('jejak_quota_start') || null,
+      lastUploadWindow: localStorage.getItem('jejak_last_window') || null,
+      uploadsThisWindow: parseInt(localStorage.getItem('jejak_uploads_count') || '0')
     };
 
     // ============================================
-    // 6 EMOJI dengan 💀 SKULL (jernih & universal)
+    // 6 EMOJI VIBES
     // ============================================
     const VIBES = {
-      relatable: { emoji: '💯', label: 'literally me' },  // 100%
-      mood:      { emoji: '🛋️', label: 'big mood' },      // Couch
-      tea:       { emoji: '🐸', label: 'spill tea' },      // Tea frog
-      hug:       { emoji: '🤗', label: 'virtual hug' },    // Hug
-      real:      { emoji: '🎯', label: 'no cap' },         // Target
-      dead:      { emoji: '💀', label: 'rip me' }          // SKULL — jernih & iconic
+      relatable: { emoji: '💯', label: 'literally me' },
+      mood:      { emoji: '🛋️', label: 'big mood' },
+      tea:       { emoji: '🐸', label: 'spill tea' },
+      hug:       { emoji: '🤗', label: 'virtual hug' },
+      real:      { emoji: '🎯', label: 'no cap' },
+      dead:      { emoji: '💀', label: 'rip me' }
     };
 
     const MOODS = {
@@ -878,6 +1179,126 @@
     ];
 
     // ============================================
+    // FILTER SYSTEM
+    // ============================================
+    function getCurrentMonthTheme() {
+      const month = new Date().getMonth(); // 0-11
+      return MONTHLY_THEMES[month];
+    }
+
+    function applyFilter(element, useColor = false) {
+      const theme = getCurrentMonthTheme();
+      const allFilters = ['filter-monochrome', 'filter-sepia', 'filter-lomo', 'filter-vignette', 
+                         'filter-noir', 'filter-fade', 'filter-cyber', 'filter-warm', 
+                         'filter-cold', 'filter-dream', 'filter-crisp', 'filter-moody', 'filter-golden'];
+      
+      // Remove all filters
+      allFilters.forEach(f => element.classList.remove(f));
+      
+      if (useColor) {
+        // Apply monthly theme filter
+        element.classList.add(theme.filter);
+      } else {
+        // Default monochrome
+        element.classList.add('filter-monochrome');
+      }
+    }
+
+    function updateFilterUI() {
+      const theme = getCurrentMonthTheme();
+      const badge = document.getElementById('current-filter');
+      const desc = document.getElementById('filter-desc');
+      const icon = document.getElementById('filter-icon');
+      const label = document.getElementById('filter-label');
+      const toggle = document.getElementById('filter-toggle');
+      
+      if (state.colorMode) {
+        badge.textContent = theme.name;
+        desc.textContent = theme.desc;
+        icon.textContent = theme.icon;
+        label.textContent = 'COLOR';
+        toggle.classList.add('active');
+      } else {
+        badge.textContent = 'MONOCHROME';
+        desc.textContent = 'Default';
+        icon.textContent = '⚫';
+        label.textContent = 'B&W';
+        toggle.classList.remove('active');
+      }
+      
+      // Apply to hero
+      const heroImg = document.getElementById('hero-img');
+      applyFilter(heroImg, state.colorMode);
+      
+      // Apply to all tray items
+      document.querySelectorAll('.tray-item img').forEach(img => {
+        applyFilter(img, state.colorMode);
+      });
+    }
+
+    function toggleColorMode() {
+      state.colorMode = !state.colorMode;
+      updateFilterUI();
+      showToast(state.colorMode ? `Theme: ${getCurrentMonthTheme().name}` : 'Monochrome mode');
+    }
+
+    // ============================================
+    // QUOTA SYSTEM
+    // ============================================
+    function initQuotaSystem() {
+      const now = Date.now();
+      
+      // Initialize quota start if not exists
+      if (!state.quotaStart) {
+        state.quotaStart = now.toString();
+        localStorage.setItem('jejak_quota_start', state.quotaStart);
+      }
+      
+      const quotaStart = parseInt(state.quotaStart);
+      const daysSinceQuota = Math.floor((now - quotaStart) / (1000 * 60 * 60 * 24));
+      const currentCycle = Math.floor(daysSinceQuota / CONFIG.quotaDays);
+      const cycleStart = quotaStart + (currentCycle * CONFIG.quotaDays * 24 * 60 * 60 * 1000);
+      const daysIntoCycle = Math.floor((now - cycleStart) / (1000 * 60 * 60 * 24));
+      
+      // Check if we're in upload window (first 3 days of cycle)
+      const inUploadWindow = daysIntoCycle < CONFIG.uploadWindowDays;
+      const daysUntilWindow = CONFIG.quotaDays - daysIntoCycle;
+      const daysLeftInWindow = CONFIG.uploadWindowDays - daysIntoCycle;
+      
+      return {
+        inUploadWindow,
+        daysIntoCycle,
+        daysUntilWindow,
+        daysLeftInWindow,
+        cycleStart
+      };
+    }
+
+    function updateQuotaUI() {
+      const quota = initQuotaSystem();
+      const btn = document.getElementById('upload-btn');
+      const counter = document.getElementById('upload-counter');
+      const timer = document.getElementById('quota-timer');
+      
+      if (quota.inUploadWindow) {
+        btn.disabled = false;
+        counter.style.display = 'none';
+        timer.textContent = `Window aktif • Sisa ${quota.daysLeftInWindow} hari`;
+        timer.classList.remove('urgent');
+        
+        if (quota.daysLeftInWindow <= 1) {
+          timer.classList.add('urgent');
+        }
+      } else {
+        btn.disabled = true;
+        counter.textContent = quota.daysUntilWindow;
+        counter.style.display = 'block';
+        timer.textContent = `Next window: ${quota.daysUntilWindow} hari`;
+        timer.classList.remove('urgent');
+      }
+    }
+
+    // ============================================
     // UTILS
     // ============================================
     function showToast(msg) {
@@ -896,29 +1317,120 @@
       return `${days}h`;
     }
 
-    function checkUploadQuota() {
-      const btn = document.getElementById('upload-btn');
-      const counter = document.getElementById('upload-counter');
+    // ============================================
+    // GALLERY SYSTEM
+    // ============================================
+    function openGallery() {
+      const quota = initQuotaSystem();
+      if (!quota.inUploadWindow) {
+        showToast(`Tunggu ${quota.daysUntilWindow} hari lagi`);
+        return;
+      }
       
-      if (!state.lastUpload) {
-        btn.disabled = false;
-        counter.style.display = 'none';
+      document.getElementById('file-input').click();
+    }
+
+    function handleFileSelect(e) {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+      
+      // Validate files
+      const validFiles = files.filter(file => {
+        if (file.size > CONFIG.maxFileSize) {
+          showToast(`${file.name} terlalu besar (max 5MB)`);
+          return false;
+        }
         return true;
+      }).slice(0, CONFIG.maxSelection);
+      
+      if (validFiles.length === 0) return;
+      
+      // Show gallery modal with previews
+      state.selectedFiles = new Set(validFiles);
+      renderGalleryModal(validFiles);
+    }
+
+    function renderGalleryModal(files) {
+      const grid = document.getElementById('gallery-grid');
+      grid.innerHTML = '';
+      
+      files.forEach((file, index) => {
+        const url = URL.createObjectURL(file);
+        const div = document.createElement('div');
+        div.className = 'gallery-item selected';
+        div.dataset.index = index;
+        div.onclick = () => toggleSelection(div, file);
+        
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = state.colorMode ? getCurrentMonthTheme().filter : 'filter-monochrome';
+        
+        div.appendChild(img);
+        grid.appendChild(div);
+      });
+      
+      updateSelectedCount();
+      document.getElementById('gallery-modal').classList.add('active');
+    }
+
+    function toggleSelection(element, file) {
+      if (element.classList.contains('selected')) {
+        element.classList.remove('selected');
+        state.selectedFiles.delete(file);
+      } else {
+        if (state.selectedFiles.size >= CONFIG.maxSelection) {
+          showToast(`Max ${CONFIG.maxSelection} foto`);
+          return;
+        }
+        element.classList.add('selected');
+        state.selectedFiles.add(file);
+      }
+      updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+      document.getElementById('selected-count').textContent = state.selectedFiles.size;
+    }
+
+    function closeGallery() {
+      document.getElementById('gallery-modal').classList.remove('active');
+      state.selectedFiles.clear();
+      document.getElementById('file-input').value = '';
+    }
+
+    function confirmUpload() {
+      if (state.selectedFiles.size === 0) {
+        showToast('Pilih minimal 1 foto');
+        return;
       }
       
-      const daysSince = Math.floor((Date.now() - parseInt(state.lastUpload)) / 86400000);
-      const daysLeft = 30 - daysSince;
+      const files = Array.from(state.selectedFiles);
+      let uploadCount = 0;
       
-      if (daysLeft > 0) {
-        btn.disabled = true;
-        counter.textContent = daysLeft;
-        counter.style.display = 'block';
-        return false;
-      }
+      files.forEach(file => {
+        const url = URL.createObjectURL(file);
+        const newArtefact = {
+          id: 'u' + Date.now() + Math.random().toString(36).substr(2, 9),
+          url: url,
+          note: 'new drop',
+          file: file
+        };
+        
+        state.artefacts.unshift(newArtefact);
+        uploadCount++;
+      });
       
-      btn.disabled = false;
-      counter.style.display = 'none';
-      return true;
+      // Update quota tracking
+      state.uploadsThisWindow += uploadCount;
+      localStorage.setItem('jejak_uploads_count', state.uploadsThisWindow.toString());
+      
+      // Set first uploaded as hero
+      const firstUrl = URL.createObjectURL(files[0]);
+      setHero(firstUrl, 'new drop');
+      
+      renderTray();
+      closeGallery();
+      showToast(`${uploadCount} artefak ditambahkan!`);
     }
 
     // ============================================
@@ -991,13 +1503,13 @@
       
       grid.innerHTML = items.map(item => `
         <div class="tray-item" onclick="setHero('${item.url}', '${item.note}')">
-          <img src="${item.url}" alt="${item.note}" loading="lazy">
+          <img src="${item.url}" alt="${item.note}" loading="lazy" class="${state.colorMode ? getCurrentMonthTheme().filter : 'filter-monochrome'}">
         </div>
       `).join('');
       
-      const emptySlots = 6 - items.length;
+      const emptySlots = Math.max(0, 6 - items.length);
       for (let i = 0; i < emptySlots; i++) {
-        grid.innerHTML += `<div class="tray-item empty">+</div>`;
+        grid.innerHTML += `<div class="tray-item empty" onclick="openGallery()">+</div>`;
       }
     }
 
@@ -1026,7 +1538,9 @@
     };
 
     window.setHero = function(url, note) {
-      document.getElementById('hero-img').src = url;
+      const heroImg = document.getElementById('hero-img');
+      heroImg.src = url;
+      applyFilter(heroImg, state.colorMode);
       document.getElementById('hero-notation').textContent = `"${note}"`;
     };
 
@@ -1065,45 +1579,19 @@
       document.querySelector('.entries-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
-    document.getElementById('upload-btn').addEventListener('click', function() {
-      if (!checkUploadQuota()) {
-        showToast('Cooldown aktif. Sabar ya.');
-        return;
-      }
-      document.getElementById('file-input').click();
-    });
-
-    document.getElementById('file-input').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      
-      if (file.size > 5 * 1024 * 1024) {
-        showToast('Max 5MB, bestie');
-        return;
-      }
-      
-      const url = URL.createObjectURL(file);
-      state.artefacts.unshift({
-        id: 'u' + Date.now(),
-        url,
-        note: 'new drop'
-      });
-      
-      state.lastUpload = Date.now().toString();
-      localStorage.setItem('jejak_last_upload', state.lastUpload);
-      
-      setHero(url, 'new drop');
-      renderTray();
-      checkUploadQuota();
-      showToast('Artefak ditambahkan!');
-    });
+    document.getElementById('upload-btn').addEventListener('click', openGallery);
+    document.getElementById('file-input').addEventListener('change', handleFileSelect);
 
     // ============================================
     // INIT
     // ============================================
-    checkUploadQuota();
+    updateQuotaUI();
+    updateFilterUI();
     renderEntries();
     renderTray();
+    
+    // Update quota display every hour
+    setInterval(updateQuotaUI, 3600000);
   </script>
 </body>
 </html>
