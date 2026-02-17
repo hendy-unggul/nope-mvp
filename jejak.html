@@ -1579,114 +1579,68 @@
     // RANT SUBMISSION WITH SUPABASE
     // ============================================
     async function submitRant(content, mood) {
-      const timestamp = Date.now();
-      const rantId = 'rant_' + timestamp + '_' + Math.random().toString(36).substr(2, 5);
+  const timestamp = Date.now();
+  const rantId = 'rant_' + timestamp + '_' + Math.random().toString(36).substr(2, 5);
+  
+  // Only declare newRant ONCE
+  const newRant = {
+    id: rantId,
+    content: content,
+    mood: mood,
+    timestamp: timestamp,
+    vibes: { relatable: 0, mood: 0, tea: 0, hug: 0, real: 0, dead: 0 },
+    isSpilled: false,
+    author: state.currentUser,
+    created_at: new Date(timestamp).toISOString()
+  };
+  
+  // 1. Add to state (LIFO)
+  state.entries.unshift(newRant);
+  
+  // 2. Save to localStorage
+  localStorage.setItem('jejak_user_entries', JSON.stringify(state.entries));
+  
+  // 3. Render immediately
+  renderEntries();
+  
+  // 4. Send to Supabase
+  if (state.isOnline && state.supabase) {
+    try {
+      updateSyncStatus('syncing', 'Menyimpan...');
       
-      const newRant = {
-        id: rantId,
-        content: content,
-        mood: mood,
-        timestamp: timestamp,
-        vibes: { relatable: 0, mood: 0, tea: 0, hug: 0, real: 0, dead: 0 },
-        isSpilled: false,
-        author: state.currentUser,
-        created_at: new Date(timestamp).toISOString()
-      };
+      const { data: rantData, error: rantError } = await state.supabase
+        .from('rants')
+        .insert([{
+          id: rantId,
+          content: content,
+          mood: mood,
+          author: state.currentUser,
+          created_at: newRant.created_at,
+          vibes: newRant.vibes
+        }])
+        .select();
       
-      // 1. Add to state (LIFO)
-      state.entries.unshift(newRant);
+      if (rantError) throw rantError;
       
-      // 2. Save to localStorage
-      localStorage.setItem('jejak_user_entries', JSON.stringify(state.entries));
+      console.log('✅ Rant saved:', rantData);
+      await broadcastToSpillTea(newRant);
       
-      // 3. Render immediately
-      renderEntries();
+      updateSyncStatus('online', 'Tersimpan');
+      showToast('Jejak tersimpan & di-spill ke komunitas!');
       
-      // 4. Send to Supabase
-      if (state.isOnline && state.supabase) {
-        try {
-          updateSyncStatus('syncing', 'Menyimpan...');
-          
-          const { data: rantData, error: rantError } = await state.supabase
-            .from('rants')
-            .insert([{
-              id: rantId,
-              content: content,
-              mood: mood,
-              author: state.currentUser,
-              created_at: newRant.created_at,
-              vibes: newRant.vibes
-            }])
-            .select();
-          
-          if (rantError) throw rantError;
-          
-          console.log('✅ Rant saved:', rantData);
-          await broadcastToSpillTea(newRant);
-          
-          updateSyncStatus('online', 'Tersimpan');
-          showToast('Jejak tersimpan & di-spill ke komunitas!');
-          
-        } catch (error) {
-          console.error('❌ Save failed:', error);
-          updateSyncStatus('offline', 'Sync pending');
-          showToast('Tersimpan lokal (sync pending)');
-          queueForRetry(newRant);
-        }
-      } else {
-        showToast('Tersimpan lokal (offline mode)');
-        queueForRetry(newRant);
-      }
-      
-      return newRant;
+    } catch (error) {
+      console.error('❌ Save failed:', error);
+      updateSyncStatus('offline', 'Sync pending');
+      showToast('Tersimpan lokal (sync pending)');
+      queueForRetry(newRant);
     }
-
-    async function broadcastToSpillTea(rant) {
-      if (!state.supabase) return;
-      
-      try {
-        const spillId = 'spill_' + rant.id;
-        
-        const { data, error } = await state.supabase
-          .from('spills')
-          .insert([{
-            id: spillId,
-            rant_id: rant.id,
-            content: rant.content,
-            mood: rant.mood,
-            author: state.currentUser,
-            created_at: rant.created_at,
-            is_anonymous: true,
-            response_count: 0,
-            vibes: rant.vibes
-          }])
-          .select();
-        
-        if (error) throw error;
-        
-        console.log('✅ Spilled to community:', data);
-        
-        const entry = state.entries.find(e => e.id === rant.id);
-        if (entry) {
-          entry.isSpilled = true;
-          entry.spillId = spillId;
-          localStorage.setItem('jejak_user_entries', JSON.stringify(state.entries));
-          renderEntries();
-        }
-        
-        return data;
-      } catch (error) {
-        console.error('❌ Broadcast failed:', error);
-        throw error;
-      }
-    }
-
-    function queueForRetry(entry) {
-      const queue = JSON.parse(localStorage.getItem('jejak_sync_queue') || '[]');
-      queue.push(entry);
-      localStorage.setItem('jejak_sync_queue', JSON.stringify(queue));
-    }
-
+  } else {
+    showToast('Tersimpan lokal (offline mode)');
+    queueForRetry(newRant);
+  }
+  
+  return newRant;
+}
     // ============================================
     // IMAGE UPLOAD TO SUPABASE STORAGE
     // ============================================
