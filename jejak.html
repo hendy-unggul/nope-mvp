@@ -1039,10 +1039,91 @@
       text-transform: uppercase;
       z-index: 20;
     }
+    
+    /* LOGIN MODAL */
+    .login-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.95);
+      z-index: 10003;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-md);
+    }
+    .login-modal.active { display: flex; }
+    .login-box {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: var(--space-xl);
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+    }
+    .login-title {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: var(--space-md);
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+    .login-input {
+      width: 100%;
+      background: var(--surface-elevated);
+      border: 2px solid var(--border);
+      padding: var(--space-md);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 16px;
+      margin-bottom: var(--space-md);
+      text-align: center;
+    }
+    .login-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+    }
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent-primary);
+      border: none;
+      color: var(--bg);
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 0 var(--surface-elevated), 0 4px 0 2px var(--accent-primary);
+    }
   </style>
 </head>
 <body>
-  <div class="wrapper">
+  <!-- LOGIN MODAL -->
+  <div class="login-modal" id="login-modal">
+    <div class="login-box">
+      <h2 class="login-title">JEJAK</h2>
+      <p style="color: var(--text-secondary); margin-bottom: var(--space-lg); font-size: 14px;">
+        Masukkan username untuk mulai
+      </p>
+      <input 
+        type="text" 
+        class="login-input" 
+        id="login-username" 
+        placeholder="username"
+        maxlength="20"
+      >
+      <button class="login-btn" onclick="handleLogin()">Masuk</button>
+    </div>
+  </div>
+
+  <div class="wrapper" id="main-content" style="display: none;">
     <!-- HEADER -->
     <header>
       <div>
@@ -1218,11 +1299,9 @@
     // CONFIGURATION - UPDATE THESE WITH YOUR SUPABASE CREDENTIALS
     // ============================================
     const CONFIG = {
-      // UPDATE THESE WITH YOUR ACTUAL SUPABASE CREDENTIALS
       supabaseUrl: 'https://fuovfrdicdhnlymnacpz.supabase.co',
       supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0',
       
-      // App settings
       quotaDays: 28,
       uploadWindowDays: 3,
       maxFileSize: 5 * 1024 * 1024,
@@ -1230,8 +1309,6 @@
       maxArtefacts: 6,
       faceThreshold: 0.6,
       inputSize: 416,
-      
-      // Supabase storage bucket
       storageBucket: 'artefacts'
     };
 
@@ -1301,7 +1378,7 @@
       }
     ];
 
-    // DUMMY ARTEFACTS
+    // DUMMY ARTEFACTS - Only used when NO user artefacts exist
     const DUMMY_ARTEFACTS = [
       { 
         id: 'a1', 
@@ -1354,10 +1431,10 @@
     // STATE
     // ============================================
     const state = {
-      currentUser: localStorage.getItem('jejak_user') || '@anon_' + Math.random().toString(36).substr(2, 6),
+      currentUser: null, // Will be set after login
       currentMood: 'surviving',
       entries: [],
-      artefacts: [...DUMMY_ARTEFACTS],
+      artefacts: [], // Start empty - will be populated from localStorage or dummy
       userVibes: new Set(),
       selectedFiles: new Set(),
       colorMode: false,
@@ -1369,8 +1446,67 @@
       uploadsThisWindow: parseInt(localStorage.getItem('jejak_uploads_count') || '0')
     };
 
-    // Save user
-    localStorage.setItem('jejak_user', state.currentUser);
+    // ============================================
+    // LOGIN SYSTEM
+    // ============================================
+    function checkLogin() {
+      const savedUser = localStorage.getItem('jejak_user');
+      if (savedUser) {
+        state.currentUser = savedUser;
+        showMainContent();
+      } else {
+        showLoginModal();
+      }
+    }
+
+    function showLoginModal() {
+      document.getElementById('login-modal').classList.add('active');
+      document.getElementById('main-content').style.display = 'none';
+    }
+
+    function showMainContent() {
+      document.getElementById('login-modal').classList.remove('active');
+      document.getElementById('main-content').style.display = 'block';
+      
+      // Update username display
+      document.getElementById('username-display').textContent = state.currentUser;
+      
+      // Initialize app
+      initApp();
+    }
+
+    window.handleLogin = function() {
+      const usernameInput = document.getElementById('login-username');
+      const username = usernameInput.value.trim();
+      
+      if (!username) {
+        showToast('Masukkan username dulu');
+        usernameInput.focus();
+        return;
+      }
+      
+      // Format username with @ prefix if not present
+      const formattedUsername = username.startsWith('@') ? username : '@' + username;
+      
+      // Save to localStorage
+      localStorage.setItem('jejak_user', formattedUsername);
+      state.currentUser = formattedUsername;
+      
+      showToast('Welcome, ' + formattedUsername);
+      showMainContent();
+    };
+
+    // Allow Enter key to login
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginInput = document.getElementById('login-username');
+      if (loginInput) {
+        loginInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            handleLogin();
+          }
+        });
+      }
+    });
 
     // ============================================
     // SUPABASE INITIALIZATION
@@ -1378,7 +1514,7 @@
     function initSupabase() {
       try {
         if (typeof supabase === 'undefined' || !CONFIG.supabaseUrl.includes('supabase.co')) {
-          console.log('⚠️ Supabase not configured. Update CONFIG.supabaseUrl and CONFIG.supabaseKey');
+          console.log('⚠️ Supabase not configured');
           updateSyncStatus('offline', 'Offline mode');
           return false;
         }
@@ -1388,8 +1524,6 @@
         updateSyncStatus('online', 'Terhubung');
         
         console.log('✅ Supabase connected');
-        
-        // Subscribe to realtime changes
         subscribeToSpills();
         
         return true;
@@ -1402,8 +1536,10 @@
 
     function updateSyncStatus(status, text) {
       const el = document.getElementById('sync-status');
-      el.className = 'sync-status ' + status;
-      el.textContent = text;
+      if (el) {
+        el.className = 'sync-status ' + status;
+        el.textContent = text;
+      }
     }
 
     // ============================================
@@ -1471,7 +1607,6 @@
         try {
           updateSyncStatus('syncing', 'Menyimpan...');
           
-          // Insert to rants table
           const { data: rantData, error: rantError } = await state.supabase
             .from('rants')
             .insert([{
@@ -1484,14 +1619,9 @@
             }])
             .select();
           
-          if (rantError) {
-            console.error('❌ Rant insert error:', rantError);
-            throw rantError;
-          }
+          if (rantError) throw rantError;
           
           console.log('✅ Rant saved:', rantData);
-          
-          // 5. Broadcast to Spill the Tea
           await broadcastToSpillTea(newRant);
           
           updateSyncStatus('online', 'Tersimpan');
@@ -1532,14 +1662,10 @@
           }])
           .select();
         
-        if (error) {
-          console.error('❌ Spill insert error:', error);
-          throw error;
-        }
+        if (error) throw error;
         
         console.log('✅ Spilled to community:', data);
         
-        // Update local state
         const entry = state.entries.find(e => e.id === rant.id);
         if (entry) {
           entry.isSpilled = true;
@@ -1583,12 +1709,8 @@
             upsert: false
           });
         
-        if (error) {
-          console.error('❌ Upload error:', error);
-          throw error;
-        }
+        if (error) throw error;
         
-        // Get public URL
         const { data: publicUrl } = state.supabase.storage
           .from(CONFIG.storageBucket)
           .getPublicUrl(fileName);
@@ -1619,10 +1741,7 @@
           }])
           .select();
         
-        if (error) {
-          console.error('❌ Artefact metadata error:', error);
-          throw error;
-        }
+        if (error) throw error;
         
         console.log('✅ Artefact metadata saved:', data);
         return data;
@@ -1698,16 +1817,27 @@
     }
 
     // ============================================
-    // FIFO SYSTEM
+    // FIFO SYSTEM - FIXED
     // ============================================
     function addArtefactToFIFO(newArtefact) {
+      // Add new artefact to beginning (newest first)
       state.artefacts.unshift(newArtefact);
+      
+      // If exceeds max, remove oldest (from the end)
       if (state.artefacts.length > CONFIG.maxArtefacts) {
         const removed = state.artefacts.pop();
         console.log('FIFO removed:', removed.id);
         showToast('Foto lama terhapus (FIFO)');
       }
+      
+      // Save to localStorage
       saveArtefacts();
+      
+      // Re-render tray
+      renderTray();
+      
+      // Update hero to show newest
+      window.setHero(newArtefact.url, newArtefact.note, newArtefact.faces);
     }
 
     function saveArtefacts() {
@@ -1720,6 +1850,7 @@
         timestamp: a.timestamp || Date.now()
       }));
       localStorage.setItem('jejak_artefacts_meta', JSON.stringify(metadata));
+      console.log('💾 Saved artefacts to localStorage:', metadata.length, 'items');
     }
 
     function loadArtefacts() {
@@ -1727,8 +1858,10 @@
       if (saved) {
         try {
           const metadata = JSON.parse(saved);
+          console.log('📂 Loaded artefacts from localStorage:', metadata.length, 'items');
           return metadata;
         } catch (e) {
+          console.error('❌ Failed to parse artefacts:', e);
           return [];
         }
       }
@@ -1740,6 +1873,7 @@
     // ============================================
     function renderEntries() {
       const container = document.getElementById('entries-container');
+      if (!container) return;
       
       const userEntries = state.entries || [];
       const allEntries = [...userEntries, ...DUMMY_ENTRIES];
@@ -1794,7 +1928,12 @@
 
     function renderTray() {
       const grid = document.getElementById('tray-grid');
+      if (!grid) return;
+      
+      // Use user artefacts if available, otherwise use dummy
       const items = state.artefacts.length > 0 ? state.artefacts : DUMMY_ARTEFACTS;
+      
+      console.log('🎨 Rendering tray with', items.length, 'items');
       
       grid.innerHTML = items.map((item, index) => `
         <div class="tray-item" onclick="setHero('${item.url}', '${item.note}', ${JSON.stringify(item.faces || []).replace(/"/g, '&quot;')})">
@@ -1806,6 +1945,7 @@
         </div>
       `).join('');
       
+      // Add empty slots if less than 6
       const emptySlots = Math.max(0, 6 - items.length);
       for (let i = 0; i < emptySlots; i++) {
         grid.innerHTML += `<div class="tray-item empty" onclick="openGallery()">+</div>`;
@@ -1845,6 +1985,8 @@
       const label = document.getElementById('filter-label');
       const toggle = document.getElementById('filter-toggle');
       
+      if (!badge) return;
+      
       if (state.colorMode) {
         badge.textContent = theme.name;
         desc.textContent = theme.desc;
@@ -1860,7 +2002,7 @@
       }
       
       const heroImg = document.getElementById('hero-img');
-      applyFilter(heroImg, state.colorMode);
+      if (heroImg) applyFilter(heroImg, state.colorMode);
       
       document.querySelectorAll('.tray-item img').forEach(img => {
         applyFilter(img, state.colorMode);
@@ -1936,14 +2078,18 @@
       const heroImg = document.getElementById('hero-img');
       const heroFaces = document.getElementById('hero-faces');
       
+      if (!heroImg) return;
+      
       heroImg.src = url;
       applyFilter(heroImg, state.colorMode);
-      document.getElementById('hero-notation').textContent = '"' + note + '"';
       
-      heroFaces.innerHTML = '';
+      const notation = document.getElementById('hero-notation');
+      if (notation) notation.textContent = '"' + note + '"';
+      
+      if (heroFaces) heroFaces.innerHTML = '';
       
       heroImg.onload = function() {
-        if (faces.length > 0) {
+        if (faces.length > 0 && heroFaces) {
           const container = heroImg.parentElement;
           const rect = container.getBoundingClientRect();
           
@@ -2008,6 +2154,8 @@
       const counter = document.getElementById('upload-counter');
       const timer = document.getElementById('quota-timer');
       
+      if (!btn) return;
+      
       if (quota.inUploadWindow) {
         btn.disabled = false;
         counter.style.display = 'none';
@@ -2024,50 +2172,57 @@
     }
 
     // File input handler
-    document.getElementById('file-input').addEventListener('change', async function(e) {
-      const files = Array.from(e.target.files);
-      if (files.length === 0) return;
-      
-      document.getElementById('processing').classList.add('active');
-      
-      const processed = [];
-      for (const file of files) {
-        if (file.size > CONFIG.maxFileSize) {
-          showToast(file.name + ' terlalu besar (max 5MB)');
-          continue;
-        }
-        
-        const url = URL.createObjectURL(file);
-        const img = new Image();
-        img.src = url;
-        
-        await new Promise(resolve => {
-          img.onload = async function() {
-            const detections = await detectFaces(img);
-            processed.push({
-              id: 'artefact_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
-              url: url,
-              note: 'new drop',
-              timestamp: Date.now(),
-              faces: detections.map(d => ({ box: d.box, score: d.score })),
-              hasFace: detections.length > 0,
-              file: file
+    document.addEventListener('DOMContentLoaded', function() {
+      const fileInput = document.getElementById('file-input');
+      if (fileInput) {
+        fileInput.addEventListener('change', async function(e) {
+          const files = Array.from(e.target.files);
+          if (files.length === 0) return;
+          
+          document.getElementById('processing').classList.add('active');
+          
+          const processed = [];
+          for (const file of files) {
+            if (file.size > CONFIG.maxFileSize) {
+              showToast(file.name + ' terlalu besar (max 5MB)');
+              continue;
+            }
+            
+            const url = URL.createObjectURL(file);
+            const img = new Image();
+            img.src = url;
+            
+            await new Promise(resolve => {
+              img.onload = async function() {
+                const detections = await detectFaces(img);
+                processed.push({
+                  id: 'artefact_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                  url: url,
+                  note: 'new drop',
+                  timestamp: Date.now(),
+                  faces: detections.map(d => ({ box: d.box, score: d.score })),
+                  hasFace: detections.length > 0,
+                  file: file
+                });
+                resolve();
+              };
             });
-            resolve();
-          };
+          }
+          
+          document.getElementById('processing').classList.remove('active');
+          
+          if (processed.length > 0) {
+            state.selectedFiles = new Set(processed);
+            renderGalleryModal(processed);
+          }
         });
-      }
-      
-      document.getElementById('processing').classList.remove('active');
-      
-      if (processed.length > 0) {
-        state.selectedFiles = new Set(processed);
-        renderGalleryModal(processed);
       }
     });
 
     function renderGalleryModal(artefacts) {
       const grid = document.getElementById('gallery-grid');
+      if (!grid) return;
+      
       grid.innerHTML = '';
       
       artefacts.forEach(function(artefact, index) {
@@ -2166,16 +2321,13 @@
           }
         }
         
+        // Add to FIFO (this will also save and render)
         addArtefactToFIFO(artefact);
       }
       
       state.uploadsThisWindow += artefacts.length;
       localStorage.setItem('jejak_uploads_count', state.uploadsThisWindow.toString());
       
-      const first = artefacts[0];
-      window.setHero(first.url, first.note, first.faces);
-      
-      renderTray();
       window.closeGallery();
       
       if (state.isOnline) {
@@ -2194,6 +2346,7 @@
     // ============================================
     function showToast(msg) {
       const toast = document.getElementById('toast');
+      if (!toast) return;
       toast.textContent = msg;
       toast.classList.add('show');
       setTimeout(function() {
@@ -2215,9 +2368,11 @@
     }
 
     // ============================================
-    // EVENT LISTENERS
+    // APP INITIALIZATION
     // ============================================
-    document.addEventListener('DOMContentLoaded', function() {
+    function initApp() {
+      console.log('🚀 Initializing app for user:', state.currentUser);
+      
       // Initialize Supabase
       initSupabase();
       
@@ -2234,40 +2389,53 @@
         }
       }
       
-      // Load saved artefacts
+      // Load saved artefacts - THIS IS THE KEY FIX
       const savedArtefacts = loadArtefacts();
       if (savedArtefacts.length > 0) {
+        // User has uploaded artefacts, use them (not dummy)
         state.artefacts = savedArtefacts;
+        console.log('✅ Using user artefacts:', state.artefacts.length);
+      } else {
+        // No user artefacts yet, start with empty array
+        // Dummy will be shown by renderTray when array is empty
+        state.artefacts = [];
+        console.log('ℹ️ No user artefacts yet, using dummy data');
       }
       
-      // Update username display
-      document.getElementById('username-display').textContent = state.currentUser;
-      
       // Input character count
-      document.getElementById('rant-input').addEventListener('input', function() {
-        document.getElementById('char-count').textContent = this.value.length + '/500';
-      });
+      const rantInput = document.getElementById('rant-input');
+      if (rantInput) {
+        rantInput.addEventListener('input', function() {
+          document.getElementById('char-count').textContent = this.value.length + '/500';
+        });
+      }
       
       // Submit button
-      document.getElementById('submit-btn').addEventListener('click', function() {
-        const input = document.getElementById('rant-input');
-        const content = input.value.trim();
-        
-        if (!content) {
-          showToast('Tulis dulu, bestie');
-          input.focus();
-          return;
-        }
-        
-        submitRant(content, state.currentMood);
-        
-        // Clear input
-        input.value = '';
-        document.getElementById('char-count').textContent = '0/500';
-      });
+      const submitBtn = document.getElementById('submit-btn');
+      if (submitBtn) {
+        submitBtn.addEventListener('click', function() {
+          const input = document.getElementById('rant-input');
+          const content = input.value.trim();
+          
+          if (!content) {
+            showToast('Tulis dulu, bestie');
+            input.focus();
+            return;
+          }
+          
+          submitRant(content, state.currentMood);
+          
+          // Clear input
+          input.value = '';
+          document.getElementById('char-count').textContent = '0/500';
+        });
+      }
       
       // Upload button
-      document.getElementById('upload-btn').addEventListener('click', window.openGallery);
+      const uploadBtn = document.getElementById('upload-btn');
+      if (uploadBtn) {
+        uploadBtn.addEventListener('click', window.openGallery);
+      }
       
       // Initialize UI
       updateQuotaUI();
@@ -2276,15 +2444,19 @@
       renderTray();
       
       // Set initial hero
-      if (state.artefacts.length > 0) {
-        const first = state.artefacts[0];
+      const itemsToShow = state.artefacts.length > 0 ? state.artefacts : DUMMY_ARTEFACTS;
+      if (itemsToShow.length > 0) {
+        const first = itemsToShow[0];
         window.setHero(first.url, first.note, first.faces);
-      } else if (DUMMY_ARTEFACTS.length > 0) {
-        window.setHero(DUMMY_ARTEFACTS[0].url, DUMMY_ARTEFACTS[0].note, DUMMY_ARTEFACTS[0].faces);
       }
       
       // Update quota every hour
       setInterval(updateQuotaUI, 3600000);
+    }
+
+    // Start with login check
+    document.addEventListener('DOMContentLoaded', function() {
+      checkLogin();
     });
   </script>
 </body>
