@@ -1,1207 +1,700 @@
-<!DOCTYPE html>
-<html lang="id" data-theme="brutalgenz">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>JEJAK — Spill Your Truth</title>
-  
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/dist/face-api.min.js"></script>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <style>
-    :root{--bg:#0A0A0A;--surface:#141414;--surface-elevated:#1E1E1E;--border:#2A2A2A;--border-accent:#FF4D00;--text:#FFF;--text-secondary:#888;--text-muted:#555;--accent-primary:#FF4D00;--accent-secondary:#00F0FF;--accent-tertiary:#FF006E;--accent-quaternary:#39FF14;--accent-warm:#FFD700;--mood-surviving:#FF9500;--mood-thriving:#39FF14;--mood-chaotic:#00F0FF;--mood-doom:#8B5CF6;--radius:0;--space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px}
-    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-    html{scroll-behavior:smooth}
-    body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:500;font-size:15px;line-height:1.4;min-height:100vh;overflow-x:hidden;padding-bottom:100px}
-    body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.4}
-    .wrapper{max-width:480px;margin:0 auto;padding:0 var(--space-md)}
-    
-    /* Header */
-    header{padding:var(--space-lg) 0 var(--space-md);display:flex;justify-content:space-between;align-items:flex-start}
-    .logo{font-size:42px;font-weight:800;letter-spacing:-0.04em;cursor:pointer;line-height:0.9;position:relative}
-    .logo::before,.logo::after{content:'JEJAK';position:absolute;top:0;left:0;opacity:0;transition:opacity 0.1s}
-    .logo::before{color:var(--accent-secondary);transform:translate(-2px,0)}
-    .logo::after{color:var(--accent-tertiary);transform:translate(2px,0)}
-    .logo:hover::before{opacity:0.8;animation:g 0.3s infinite}
-    @keyframes g{0%,100%{transform:translate(-2px,0)}25%{transform:translate(2px,2px)}50%{transform:translate(-2px,-2px)}75%{transform:translate(2px,0)}}
-    .tagline{font-family:'Instrument Serif',serif;font-size:13px;color:var(--text-secondary);font-style:italic;margin-top:var(--space-xs)}
-    .top-right{display:flex;flex-direction:column;align-items:flex-end;gap:var(--space-sm)}
-    .status-indicator{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted)}
-    .status-dot{width:6px;height:6px;background:var(--accent-quaternary);border-radius:50%;animation:p 2s infinite}
-    @keyframes p{0%,100%{opacity:1}50%{opacity:0.3}}
-    .sync-status{font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:4px}
-    .sync-status::before{content:'•'}
-    .sync-status.online{color:var(--accent-quaternary)}
-    .sync-status.offline{color:var(--accent-tertiary)}
-    .sync-status.syncing{color:var(--accent-warm)}
-    
-    /* Filter Controls */
-    .filter-controls{display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--space-sm);padding:var(--space-sm) 0;border-bottom:1px solid var(--border)}
-    .filter-info{display:flex;align-items:center;gap:var(--space-sm)}
-    .filter-badge{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:4px 8px;background:var(--surface-elevated);border:1px solid var(--border);color:var(--text-secondary)}
-    .filter-toggle{display:flex;align-items:center;gap:var(--space-sm);background:var(--surface);border:2px solid var(--border);padding:6px 12px;cursor:pointer;transition:all 0.2s}
-    .filter-toggle:hover{border-color:var(--accent-primary)}
-    .filter-toggle.active{background:var(--accent-primary);border-color:var(--accent-primary);color:var(--bg)}
-    .filter-icon{font-size:16px}
-    .filter-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em}
-    
-    /* Navigation */
-    .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:2px solid var(--border);z-index:1000;padding-bottom:env(safe-area-inset-bottom)}
-    .nav-container{max-width:480px;margin:0 auto;display:flex;justify-content:space-around;align-items:center;height:64px}
-    .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:100%;color:var(--text-muted);text-decoration:none;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;transition:all 0.2s;position:relative;cursor:pointer}
-    .nav-item::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--accent-primary);transition:width 0.2s}
-    .nav-item:hover{color:var(--text-secondary);background:var(--surface-elevated)}
-    .nav-item.active{color:var(--accent-primary)}
-    .nav-item.active::before{width:100%}
-    .nav-icon{font-size:20px;line-height:1}
-    
-    /* Hero */
-    .hero-section{position:relative;margin:0 calc(-1 * var(--space-md));margin-bottom:var(--space-lg)}
-    .hero{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;border-top:2px solid var(--border);border-bottom:2px solid var(--border);background:var(--surface)}
-    .hero img{width:100%;height:100%;object-fit:cover;transition:transform 0.6s,filter 0.3s}
-    .hero:hover img{transform:scale(1.03)}
-    .hero::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none}
-    .hero-notation{position:absolute;bottom:0;left:0;right:0;padding:var(--space-md);background:linear-gradient(to top,rgba(0,0,0,0.9),transparent);font-family:'Instrument Serif',serif;font-size:24px;font-style:italic;color:var(--text);line-height:1.2;z-index:20}
-    
-    /* Face Scribble */
-    .face-scribble{position:absolute;background:rgba(0,0,0,0.95);pointer-events:none;z-index:15;overflow:hidden}
-    .face-scribble::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(255,255,255,0.1) 2px,rgba(255,255,255,0.1) 4px),repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.05) 2px,rgba(255,255,255,0.05) 4px)}
-    .marker-lines{position:absolute;inset:0;background-image:repeating-linear-gradient(-45deg,transparent,transparent 3px,rgba(0,0,0,0.8) 3px,rgba(0,0,0,0.8) 6px)}
-    
-    /* Upload Controls */
-    .upload-controls{position:absolute;top:var(--space-md);right:var(--space-md);display:flex;flex-direction:column;gap:var(--space-sm);align-items:flex-end;z-index:20}
-    .upload-btn{width:48px;height:48px;background:var(--accent-primary);border:none;color:var(--bg);font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;box-shadow:4px 4px 0 var(--bg),4px 4px 0 2px var(--accent-primary);position:relative}
-    .upload-btn:hover:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 var(--bg),2px 2px 0 2px var(--accent-primary)}
-    .upload-btn:disabled{background:var(--text-muted);box-shadow:none;cursor:not-allowed;opacity:0.6}
-    .upload-counter{position:absolute;top:-8px;right:-8px;background:var(--accent-tertiary);color:var(--text);font-size:10px;font-weight:700;padding:2px 6px;min-width:20px;text-align:center}
-    .quota-timer{background:var(--surface);border:2px solid var(--border);padding:var(--space-sm) var(--space-md);font-size:11px;color:var(--text-secondary);max-width:200px;text-align:right}
-    .quota-timer.urgent{border-color:var(--accent-tertiary);color:var(--accent-tertiary);animation:pb 2s infinite}
-    @keyframes pb{0%,100%{border-color:var(--accent-tertiary)}50%{border-color:var(--text-muted)}}
-    
-    /* Input Section */
-    .input-section{margin-bottom:var(--space-xl)}
-    .input-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-sm)}
-    .input-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-secondary)}
-    .char-count{font-size:12px;color:var(--text-muted);font-variant-numeric:tabular-nums}
-    .rant-input{width:100%;background:var(--surface);border:2px solid var(--border);padding:var(--space-md);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;line-height:1.5;resize:none;min-height:120px;transition:all 0.2s}
-    .rant-input:focus{outline:none;border-color:var(--accent-primary);background:var(--surface-elevated)}
-    .rant-input::placeholder{color:var(--text-muted)}
-    
-    /* Mood Selector */
-    .mood-section{margin:var(--space-md) 0}
-    .mood-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-secondary);margin-bottom:var(--space-sm)}
-    .mood-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-sm)}
-    .mood-card{position:relative;padding:var(--space-md);background:var(--surface);border:2px solid var(--border);cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;gap:var(--space-xs)}
-    .mood-card:hover{border-color:var(--text-secondary);transform:translateY(-2px)}
-    .mood-card.active{border-color:currentColor;background:var(--surface-elevated)}
-    .mood-card.active::before{content:'✓';position:absolute;top:8px;right:8px;font-size:12px;font-weight:700}
-    .mood-emoji{font-size:28px;line-height:1}
-    .mood-name{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em}
-    .mood-desc{font-size:11px;color:var(--text-secondary)}
-    .mood-card[data-mood="surviving"]{color:var(--mood-surviving)}
-    .mood-card[data-mood="thriving"]{color:var(--mood-thriving)}
-    .mood-card[data-mood="chaotic"]{color:var(--mood-chaotic)}
-    .mood-card[data-mood="doom"]{color:var(--mood-doom)}
-    
-    .input-actions{display:flex;justify-content:flex-end;margin-top:var(--space-md)}
-    .submit-btn{padding:14px 32px;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;background:var(--accent-primary);border:none;color:var(--bg);cursor:pointer;transition:all 0.2s;box-shadow:4px 4px 0 var(--surface-elevated),4px 4px 0 2px var(--accent-primary)}
-    .submit-btn:hover:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 var(--surface-elevated),2px 2px 0 2px var(--accent-primary)}
-    .submit-btn:disabled{opacity:0.5;cursor:not-allowed;box-shadow:none}
-    
-    /* Entries - FIFO Optimized */
-    .section-header{display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);padding-bottom:var(--space-sm);border-bottom:2px solid var(--border)}
-    .section-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.15em;color:var(--text)}
-    .section-line{flex:1;height:2px;background:var(--border)}
-    
-    .entry{background:var(--surface);border:2px solid var(--border);margin-bottom:var(--space-md);position:relative;animation:si 0.4s ease}
-    @keyframes si{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-    .entry:hover{border-color:var(--border-accent)}
-    .entry-header{display:flex;justify-content:space-between;align-items:center;padding:var(--space-sm) var(--space-md);border-bottom:1px solid var(--border);background:var(--surface-elevated)}
-    .entry-meta{display:flex;align-items:center;gap:var(--space-sm)}
-    .entry-time{font-size:11px;color:var(--text-muted);font-weight:600;letter-spacing:0.05em}
-    .entry-mood{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:4px 8px;border:1px solid currentColor}
-    .entry-mood.surviving{color:var(--mood-surviving)}
-    .entry-mood.thriving{color:var(--mood-thriving)}
-    .entry-mood.chaotic{color:var(--mood-chaotic)}
-    .entry-mood.doom{color:var(--mood-doom)}
-    .entry-content{padding:var(--space-md);font-size:15px;line-height:1.6;color:var(--text)}
-    .spill-status{display:flex;align-items:center;gap:var(--space-xs);font-size:10px;color:var(--text-muted);margin-top:var(--space-xs)}
-    .spill-status.spilled{color:var(--accent-secondary)}
-    
-    /* FIFO Indicator */
-    .fifo-indicator{font-size:9px;color:var(--text-muted);background:var(--surface-elevated);padding:2px 6px;border:1px dashed var(--border);text-transform:uppercase;letter-spacing:0.05em}
-    
-    /* Vibe Bar */
-    .vibe-bar{display:flex;border-top:1px solid var(--border);background:var(--surface-elevated)}
-    .vibe-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:var(--space-sm) 4px;background:transparent;border:none;border-right:1px solid var(--border);color:var(--text-secondary);cursor:pointer;transition:all 0.15s;position:relative}
-    .vibe-btn:last-child{border-right:none}
-    .vibe-btn:hover{background:var(--surface);color:var(--text)}
-    .vibe-btn.vibed{background:var(--surface)}
-    .vibe-btn.vibed .vibe-emoji{filter:none;transform:scale(1.15);text-shadow:0 0 10px currentColor}
-    .vibe-btn.vibed .vibe-count{color:var(--text);font-weight:700}
-    .vibe-emoji{font-size:24px;line-height:1;filter:grayscale(0.4);transition:all 0.2s}
-    .vibe-btn:hover .vibe-emoji{filter:none;transform:scale(1.1)}
-    .vibe-count{font-size:11px;font-weight:600;color:var(--text-muted);min-width:20px;text-align:center}
-    .vibe-label{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(4px);background:var(--text);color:var(--bg);padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap;opacity:0;visibility:hidden;transition:all 0.2s;pointer-events:none}
-    .vibe-btn:hover .vibe-label{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
-    
-    /* Tray - FIFO Optimized */
-    .tray-section{margin-bottom:var(--space-xl)}
-    .tray-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border);border:2px solid var(--border)}
-    .tray-item{aspect-ratio:1;background:var(--surface);position:relative;overflow:hidden;cursor:pointer}
-    .tray-item.empty{display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:20px;border:2px dashed var(--border)}
-    .tray-item img{width:100%;height:100%;object-fit:cover;transition:all 0.3s}
-    .tray-item:hover img{transform:scale(1.1)}
-    .tray-item::after{content:'';position:absolute;inset:0;background:var(--accent-primary);opacity:0;transition:opacity 0.2s;mix-blend-mode:multiply}
-    .tray-item:hover::after{opacity:0.3}
-    
-    /* Filters */
-    .filter-monochrome{filter:grayscale(100%) contrast(1.1)!important}
-    .filter-sepia{filter:sepia(100%) contrast(1.1) saturate(0.8)!important}
-    .filter-lomo{filter:contrast(1.2) saturate(1.3) brightness(0.9)!important}
-    .filter-vignette{filter:grayscale(100%) contrast(1.2) brightness(0.9)!important;position:relative}
-    .filter-vignette::after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 150px rgba(0,0,0,0.7);pointer-events:none}
-    .filter-noir{filter:grayscale(100%) contrast(1.4) brightness(0.8)!important}
-    .filter-fade{filter:sepia(30%) saturate(0.6) contrast(0.9) brightness(1.1)!important}
-    .filter-cyber{filter:hue-rotate(180deg) saturate(1.5) contrast(1.1)!important}
-    .filter-warm{filter:sepia(60%) hue-rotate(-30deg) saturate(1.2)!important}
-    .filter-cold{filter:hue-rotate(180deg) saturate(0.5) brightness(1.1)!important}
-    .filter-dream{filter:blur(0.5px) saturate(1.4) brightness(1.1) contrast(0.9)!important}
-    .filter-crisp{filter:contrast(1.3) saturate(1.1)!important}
-    .filter-moody{filter:brightness(0.8) contrast(1.2) saturate(0.7)!important}
-    .filter-golden{filter:sepia(40%) hue-rotate(-15deg) saturate(1.3) contrast(1.1)!important}
-    
-    /* Dummy States */
-    .entry-dummy{opacity:0.6;border-style:dashed!important}
-    .entry-dummy:hover{border-color:var(--border)!important;opacity:0.75}
-    .tray-item-dummy{opacity:0.5}
-    .tray-item-dummy:hover{opacity:0.7}
-    
-    /* Empty State */
-    .empty-state{padding:var(--space-xl) var(--space-md);text-align:center;border:2px dashed var(--border)}
-    .empty-emoji{font-size:48px;margin-bottom:var(--space-md);display:block;animation:f 3s ease-in-out infinite}
-    @keyframes f{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-    .empty-text{font-family:'Instrument Serif',serif;font-size:20px;font-style:italic;color:var(--text-secondary);margin-bottom:var(--space-sm)}
-    .empty-subtext{font-size:13px;color:var(--text-muted)}
-    
-    /* Footer */
-    footer{padding:var(--space-xl) 0;text-align:center;border-top:2px solid var(--border);margin-bottom:80px}
-    .footer-text{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.2em}
-    
-    /* Toast */
-    .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--text);color:var(--bg);padding:var(--space-sm) var(--space-md);font-size:13px;font-weight:600;z-index:10000;opacity:0;transition:all 0.3s}
-    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-    
-    /* Processing Overlay */
-    .processing-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:10002;display:none;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-md)}
-    .processing-overlay.active{display:flex}
-    .processing-spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--accent-primary);border-radius:50%;animation:s 1s linear infinite}
-    @keyframes s{to{transform:rotate(360deg)}}
-    .processing-text{font-size:14px;color:var(--text-secondary);text-align:center}
-    
-    /* Modal */
-    .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:10001;padding:var(--space-md);overflow-y:auto}
-    .modal.active{display:block}
-    .modal-content{max-width:480px;margin:0 auto;background:var(--surface);border:2px solid var(--border);padding:var(--space-lg)}
-    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-md);padding-bottom:var(--space-md);border-bottom:2px solid var(--border)}
-    .modal-title{font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em}
-    .modal-close{background:none;border:none;color:var(--text);font-size:24px;cursor:pointer}
-    .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-sm)}
-    .gallery-item{aspect-ratio:1;background:var(--surface-elevated);border:2px solid var(--border);cursor:pointer;overflow:hidden;position:relative}
-    .gallery-item img{width:100%;height:100%;object-fit:cover;transition:all 0.2s}
-    .gallery-item:hover img{transform:scale(1.05)}
-    .gallery-item.selected{border-color:var(--accent-primary);box-shadow:0 0 0 2px var(--accent-primary)}
-    .gallery-item.selected::after{content:'✓';position:absolute;top:4px;right:4px;background:var(--accent-primary);color:var(--bg);width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
-    .modal-actions{margin-top:var(--space-md);display:flex;justify-content:flex-end;gap:var(--space-sm)}
-    .modal-btn{padding:12px 24px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;border:2px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all 0.2s}
-    .modal-btn.primary{background:var(--accent-primary);border-color:var(--accent-primary);color:var(--bg)}
-    .modal-btn:hover{transform:translateY(-2px)}
-    
-    /* Gallery Warning */
-    .gallery-warning{background:var(--accent-tertiary);color:var(--text);padding:var(--space-md);margin-bottom:var(--space-md);font-size:13px;font-weight:700;text-align:center;text-transform:uppercase;letter-spacing:0.05em;border:2px solid var(--accent-tertiary);animation:pw 2s infinite}
-    @keyframes pw{0%,100%{opacity:1}50%{opacity:0.8}}
-    .gallery-warning::before{content:'🚫 '}
-    .detection-badge{position:absolute;top:4px;left:4px;background:var(--accent-tertiary);color:var(--text);font-size:9px;font-weight:700;padding:2px 6px;text-transform:uppercase;z-index:20}
-  </style>
-<base target="_blank">
-</head>
-<body>
-  <div class="wrapper">
-    <header>
-      <div>
-        <div class="logo" onclick="location.reload()">JEJAK</div>
-        <div class="tagline">no filter, just truth</div>
-      </div>
-      <div class="top-right">
-        <div style="font-size:12px;font-weight:700;color:var(--accent-primary);letter-spacing:0.05em" id="header-username">@loading...</div>
-        <div class="sync-status offline" id="sync-status">Offline</div>
-        <button onclick="logoutUser()" style="font-size:10px;background:none;border:1px solid var(--border);color:var(--text-muted);padding:3px 8px;cursor:pointer">logout</button>
-      </div>
-    </header>
-
-    <div class="filter-controls">
-      <div class="filter-info">
-        <span class="filter-badge" id="current-filter">MONOCHROME</span>
-        <span style="font-size:11px;color:var(--text-muted)" id="filter-desc">Default</span>
-      </div>
-      <button class="filter-toggle" id="filter-toggle" onclick="toggleColorMode()">
-        <span class="filter-icon" id="filter-icon">⚫</span>
-        <span class="filter-label" id="filter-label">B&W</span>
-      </button>
-    </div>
-
-    <section class="hero-section">
-      <div class="hero" id="hero-container">
-        <img id="hero-img" src="" alt="artefak" class="filter-monochrome">
-        <div id="hero-faces" style="position:absolute;inset:0;pointer-events:none"></div>
-        <div class="hero-notation" id="hero-notation">"memori tersimpan"</div>
-        <div class="upload-controls">
-          <div class="quota-timer" id="quota-timer">Window aktif • Sisa 2 hari</div>
-          <button class="upload-btn" id="upload-btn" title="Buka galeri">+<span class="upload-counter" id="upload-counter" style="display:none"></span></button>
-        </div>
-      </div>
-    </section>
-
-    <section class="input-section">
-      <div class="input-header">
-        <span class="input-label">Spill your truth</span>
-        <span class="char-count" id="char-count">0/500</span>
-      </div>
-      <textarea class="rant-input" id="rant-input" placeholder="What's eating you alive right now? No cap, no filter..." maxlength="500"></textarea>
-      
-      <div class="mood-section">
-        <div class="mood-label">Pilih mood-mu sekarang</div>
-        <div class="mood-grid" id="mood-grid">
-          <div class="mood-card active" data-mood="surviving" onclick="selectMood('surviving')">
-            <span class="mood-emoji">😮‍💨</span>
-            <span class="mood-name" style="color:var(--mood-surviving)">Surviving</span>
-            <span class="mood-desc">Hidup tapi barely</span>
-          </div>
-          <div class="mood-card" data-mood="thriving" onclick="selectMood('thriving')">
-            <span class="mood-emoji">✨</span>
-            <span class="mood-name" style="color:var(--mood-thriving)">Thriving</span>
-            <span class="mood-desc">On top of my game</span>
-          </div>
-          <div class="mood-card" data-mood="chaotic" onclick="selectMood('chaotic')">
-            <span class="mood-emoji">🌀</span>
-            <span class="mood-name" style="color:var(--mood-chaotic)">Chaotic</span>
-            <span class="mood-desc">Everything is on fire</span>
-          </div>
-          <div class="mood-card" data-mood="doom" onclick="selectMood('doom')">
-            <span class="mood-emoji">🛌</span>
-            <span class="mood-name" style="color:var(--mood-doom)">Doom</span>
-            <span class="mood-desc">Just wanna disappear</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="input-actions">
-        <button class="submit-btn" id="submit-btn">Jejakkan & Spill</button>
-      </div>
-    </section>
-
-    <section class="entries-section">
-      <div class="section-header">
-        <span class="section-title">Riwayat</span>
-        <div class="section-line"></div>
-        <span style="font-size:10px;color:var(--text-muted);margin-left:auto">FIFO • MAX 6 • AUTO-CENSOR</span>
-      </div>
-      <div id="entries-container"></div>
-    </section>
-
-    <section class="tray-section">
-      <div class="section-header">
-        <span class="section-title">Memori</span>
-        <div class="section-line"></div>
-        <span style="font-size:10px;color:var(--text-muted);margin-left:auto">FIFO • MAX 6 • AUTO-CENSOR</span>
-      </div>
-      <div class="tray-grid" id="tray-grid"></div>
-    </section>
-
-    <footer>
-      <p class="footer-text">Nyambat • Aksi • Solusi</p>
-    </footer>
-  </div>
-
-  <nav class="bottom-nav">
-    <div class="nav-container">
-      <a href="jejak.html" class="nav-item active"><span class="nav-icon">✦</span><span>Jejak</span></a>
-      <a href="cocomeo.html" class="nav-item"><span class="nav-icon">〜</span><span>Cocomeo</span></a>
-      <a href="saynope.html" class="nav-item"><span class="nav-icon">✕</span><span>Spill</span></a>
-      <a href="glitch.html" class="nav-item"><span class="nav-icon">⚡</span><span>Glitch</span></a>
-    </div>
-  </nav>
-
-  <div class="processing-overlay" id="processing">
-    <div class="processing-spinner"></div>
-    <div class="processing-text">Scanning untuk wajah...<br><small>AI Privacy Shield Active</small></div>
-  </div>
-
-  <div class="modal" id="gallery-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Review Artefak</h3>
-        <button class="modal-close" onclick="closeGallery()">×</button>
-      </div>
-      <div class="gallery-warning">DILARANG UPLOAD FOTO WAJAH!</div>
-      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:var(--space-md);text-align:center">Wajah terdeteksi akan otomatis disensor • Sistem FIFO (6 foto max) • Tidak dapat dihapus</div>
-      <div class="gallery-grid" id="gallery-grid"></div>
-      <div class="modal-actions">
-        <button class="modal-btn" onclick="closeGallery()">Batal</button>
-        <button class="modal-btn primary" onclick="confirmUpload()">Konfirmasi (<span id="selected-count">0</span>)</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="toast" id="toast"></div>
-  <input type="file" id="file-input" accept="image/*" multiple style="display:none">
-
-  <script>
     // ============================================
-    // CONFIGURATION
-    // ============================================
-    const CONFIG = {
-      supabaseUrl: 'https://fuovfrdicdhnlymnacpz.supabase.co',
-      supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0',
-      quotaDays: 28,
-      uploadWindowDays: 3,
-      maxFileSize: 5 * 1024 * 1024,
-      maxSelection: 6,
-      maxArtefacts: 6,
-      maxEntries: 6, // FIFO untuk Riwayat
-      faceThreshold: 0.6,
-      inputSize: 416,
-      storageBucket: 'artefacts'
-    };
-
-    // ============================================
-    // CONSTANTS & DATA
-    // ============================================
-    const VIBES = {
-      relatable: { emoji: '💯', label: 'literally me' },
-      mood: { emoji: '🛋️', label: 'big mood' },
-      tea: { emoji: '🐸', label: 'spill tea' },
-      hug: { emoji: '🤗', label: 'virtual hug' },
-      real: { emoji: '🎯', label: 'no cap' },
-      dead: { emoji: '💀', label: 'rip me' }
-    };
-
-    const MOODS = {
-      surviving: { emoji: '😮‍💨', color: '#FF9500', label: 'surviving' },
-      thriving: { emoji: '✨', color: '#39FF14', label: 'thriving' },
-      chaotic: { emoji: '🌀', color: '#00F0FF', label: 'chaotic' },
-      doom: { emoji: '🛌', color: '#8B5CF6', label: 'doom' }
-    };
-
-    const MONTHLY_THEMES = [
-      { name: 'NOIR', filter: 'filter-noir', desc: 'High contrast B&W', icon: '⚫' },
-      { name: 'SEPIA', filter: 'filter-sepia', desc: 'Vintage warmth', icon: '🟤' },
-      { name: 'LOMO', filter: 'filter-lomo', desc: 'Analog saturation', icon: '📷' },
-      { name: 'VIGNETTE', filter: 'filter-vignette', desc: 'Dark edges', icon: '⚫' },
-      { name: 'CYBER', filter: 'filter-cyber', desc: 'Neon shift', icon: '💠' },
-      { name: 'FADE', filter: 'filter-fade', desc: 'Soft vintage', icon: '🌫️' },
-      { name: 'WARM', filter: 'filter-warm', desc: 'Golden hour', icon: '☀️' },
-      { name: 'COLD', filter: 'filter-cold', desc: 'Icy blue', icon: '❄️' },
-      { name: 'DREAM', filter: 'filter-dream', desc: 'Soft focus', icon: '💭' },
-      { name: 'CRISP', filter: 'filter-crisp', desc: 'Sharp detail', icon: '🔪' },
-      { name: 'MOODY', filter: 'filter-moody', desc: 'Dark tones', icon: '🌑' },
-      { name: 'GOLDEN', filter: 'filter-golden', desc: 'Autumn glow', icon: '🍂' }
-    ];
-
-    // Dummy data untuk onboarding - akan tergeser FIFO
-    const DUMMY_ENTRIES = [
-      { id: '__d1', content: "gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus.", mood: 'surviving', timestamp: Date.now() - 172800000, vibes: { relatable: 12, mood: 9, hug: 8, tea: 3, real: 5, dead: 2 }, isSpilled: true, isDummy: true },
-      { id: '__d2', content: "deadline mepet, dosen gak jelas, dompet kering. rasanya pengen ijin cuti sehari buat jadi batu aja.", mood: 'doom', timestamp: Date.now() - 86400000, vibes: { relatable: 9, mood: 5, dead: 7, real: 3, hug: 2, tea: 1 }, isSpilled: true, isDummy: true },
-      { id: '__d3', content: "capek.", mood: 'surviving', timestamp: Date.now() - 43200000, vibes: { hug: 20, relatable: 18, dead: 10, real: 7, mood: 3, tea: 0 }, isSpilled: true, isDummy: true }
-    ];
-
-    const DUMMY_ARTEFACTS = [
-      { id: '__a1', url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80', note: 'jeda', faces: [], hasFace: false, isDummy: true },
-      { id: '__a2', url: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80', note: 'hijau', faces: [], hasFace: false, isDummy: true },
-      { id: '__a3', url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=80', note: 'gabut', faces: [], hasFace: false, isDummy: true },
-      { id: '__a4', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80', note: 'sendiri', faces: [], hasFace: false, isDummy: true },
-      { id: '__a5', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80', note: 'capek', faces: [{ box: { x: 75, y: 45, width: 150, height: 200 }, score: 0.92 }], hasFace: true, isDummy: true },
-      { id: '__a6', url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80', note: 'love', faces: [], hasFace: false, isDummy: true }
-    ];
-
-    // ============================================
-    // STATE MANAGEMENT
-    // ============================================
-    const SESSION = (() => {
-      const keys = { username: 'jejak_username', userId: 'jejak_user_id', loggedIn: 'jejak_logged_in' };
-      const username = localStorage.getItem(keys.username);
-      const userId = localStorage.getItem(keys.userId);
-      const loggedIn = localStorage.getItem(keys.loggedIn);
-      if (!loggedIn || !username) {
-        console.warn('No session, using anon');
-        return { username: '@anon', userId: null };
-      }
-      return { username, userId };
-    })();
-
-    const STORAGE_PREFIX = 'jejak_' + (SESSION.userId || SESSION.username).replace(/[^a-z0-9]/g, '_') + '_';
-
-    const state = {
-      currentUser: SESSION.username,
-      currentUserId: SESSION.userId,
-      currentMood: 'surviving',
-      entries: [], // Real entries only
-      artefacts: [], // Real artefacts only
-      userVibes: new Set(),
-      selectedFiles: new Set(),
-      colorMode: false,
-      faceApiLoaded: false,
-      supabase: null,
-      isOnline: false,
-      quotaStart: localStorage.getItem(STORAGE_PREFIX + 'quota_start') || null,
-      uploadsThisWindow: parseInt(localStorage.getItem(STORAGE_PREFIX + 'uploads_count') || '0')
-    };
-
-    // ============================================
-    // FIFO SYSTEM - CORE FUNCTIONALITY
-    // ============================================
-    
-    // FIFO untuk Entries (Riwayat) - Dummy tergeser saat real entry masuk
-    function getVisibleEntries() {
-      const realCount = state.entries.length;
-      if (realCount === 0) return DUMMY_ENTRIES;
-      
-      // Jika real entries < 3, tambahkan dummy untuk filler
-      if (realCount < 3) {
-        const needed = 3 - realCount;
-        return [...state.entries, ...DUMMY_ENTRIES.slice(0, needed)];
-      }
-      return state.entries.slice(0, CONFIG.maxEntries);
-    }
-
-    function addEntryFIFO(newEntry) {
-      // Tambah di depan (newest first)
-      state.entries.unshift(newEntry);
-      
-      // FIFO: hapus yang paling lama jika melebihi max
-      if (state.entries.length > CONFIG.maxEntries) {
-        const removed = state.entries.pop();
-        console.log('🔄 Entry FIFO removed:', removed.id);
-        showToast('Entry lama terhapus otomatis (FIFO)');
-      }
-      
-      saveEntries();
-      renderEntries();
-    }
-
-    // FIFO untuk Artefacts (Memori)
-    function getVisibleArtefacts() {
-      const real = state.artefacts.filter(a => !a.isDummy);
-      if (real.length >= 6) return real.slice(0, 6);
-      const needed = 6 - real.length;
-      return [...real, ...DUMMY_ARTEFACTS.slice(0, needed)];
-    }
-
-    function addArtefactFIFO(newArtefact) {
-      const realArtefacts = state.artefacts.filter(a => !a.isDummy);
-      realArtefacts.unshift(newArtefact);
-      
-      if (realArtefacts.length > CONFIG.maxArtefacts) {
-        const removed = realArtefacts.pop();
-        console.log('🔄 Artefact FIFO removed:', removed.id);
-        showToast('Foto lama terhapus otomatis (FIFO)');
-      }
-      
-      state.artefacts = realArtefacts;
-      saveArtefacts();
-      renderTray();
-    }
-
-    // ============================================
-    // SUPABASE & API
-    // ============================================
-    function initSupabase() {
-      try {
-        if (typeof supabase === 'undefined') {
-          updateSyncStatus('offline', 'Offline mode');
-          return false;
-        }
-        state.supabase = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
-        state.isOnline = true;
-        updateSyncStatus('online', 'Terhubung');
-        subscribeToChanges();
-        return true;
-      } catch (e) {
-        updateSyncStatus('offline', 'Offline mode');
-        return false;
-      }
-    }
-
-    function updateSyncStatus(status, text) {
-      const el = document.getElementById('sync-status');
-      el.className = 'sync-status ' + status;
-      el.textContent = text;
-    }
-
-    function subscribeToChanges() {
-      if (!state.supabase) return;
-      state.supabase.channel('spills').on('postgres_changes', { event: '*', schema: 'public', table: 'spills' }, () => {
-        loadUserRantsFromDB();
-      }).subscribe();
-    }
-
-    async function loadUserRantsFromDB() {
-      if (!state.isOnline || !state.supabase) return;
-      try {
-        const { data, error } = await state.supabase
-          .from('rants')
-          .select('*')
-          .eq('author', state.currentUser)
-          .order('created_at', { ascending: false })
-          .limit(CONFIG.maxEntries);
-        
-        if (error) throw error;
-        
-        if (data?.length > 0) {
-          const localIds = new Set(state.entries.map(e => e.id));
-          const newEntries = data
-            .filter(r => !localIds.has(r.id))
-            .map(r => ({
-              id: r.id,
-              content: r.content,
-              mood: r.mood,
-              timestamp: new Date(r.created_at).getTime(),
-              vibes: r.vibes || {relatable:0,mood:0,tea:0,hug:0,real:0,dead:0},
-              isSpilled: true,
-              author: r.author
-            }));
-          
-          state.entries = [...state.entries, ...newEntries].sort((a,b) => b.timestamp - a.timestamp).slice(0, CONFIG.maxEntries);
-          saveEntries();
-          renderEntries();
-        }
-      } catch (e) {
-        console.error('Load rants failed:', e);
-      }
-    }
-
-    async function loadUserArtefactsFromDB() {
-      if (!state.isOnline || !state.supabase) return;
-      try {
-        const { data, error } = await state.supabase
-          .from('artefacts')
-          .select('*')
-          .eq('author', state.currentUser)
-          .order('created_at', { ascending: false })
-          .limit(CONFIG.maxArtefacts);
-        
-        if (error) throw error;
-        
-        if (data?.length > 0) {
-          state.artefacts = data.map(a => ({
-            id: a.id,
-            url: a.url,
-            note: a.note || 'memory',
-            faces: a.faces || [],
-            hasFace: a.has_face || false,
-            timestamp: new Date(a.created_at).getTime()
-          }));
-          saveArtefacts();
-          renderTray();
-          const first = state.artefacts[0];
-          if (first) setHero(first.url, first.note, first.faces);
-        }
-      } catch (e) {
-        console.error('Load artefacts failed:', e);
-      }
-    }
-
-    // ============================================
-    // CORE FUNCTIONS
+    // CORE FUNCTIONS (CONTINUED)
     // ============================================
     async function submitRant(content, mood) {
       const rantId = crypto.randomUUID();
       const timestamp = Date.now();
       
-      const newRant = {
+      const entry = {
         id: rantId,
-        content,
-        mood,
-        timestamp,
+        content: content,
+        mood: mood,
+        timestamp: timestamp,
         vibes: { relatable: 0, mood: 0, tea: 0, hug: 0, real: 0, dead: 0 },
         isSpilled: false,
-        author: state.currentUser,
-        created_at: new Date(timestamp).toISOString()
+        author: state.currentUser
       };
+
+      // Save locally first
+      addEntryFIFO(entry);
       
-      // FIFO Logic: Add to state
-      addEntryFIFO(newRant);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      
-      // Sync to Supabase
+      // Try to sync with Supabase
       if (state.isOnline && state.supabase) {
         try {
-          updateSyncStatus('syncing', 'Menyimpan...');
-          await state.supabase.from('rants').insert([{
-            id: rantId, content, mood, author: state.currentUser,
-            created_at: newRant.created_at, vibes: newRant.vibes
-          }]);
+          const { error } = await state.supabase
+            .from('rants')
+            .insert({
+              id: rantId,
+              content: content,
+              mood: mood,
+              author: state.currentUser,
+              vibes: entry.vibes,
+              created_at: new Date(timestamp).toISOString()
+            });
           
-          // Broadcast to Spill
-          const spillId = crypto.randomUUID();
-          await state.supabase.from('spills').insert([{
-            id: spillId, rant_id: rantId, content, mood,
-            author: state.currentUser, created_at: newRant.created_at,
-            is_anonymous: true, response_count: 0, vibes: newRant.vibes
-          }]);
+          if (error) throw error;
           
-          newRant.isSpilled = true;
-          newRant.spillId = spillId;
-          saveEntries();
-          renderEntries();
-          
-          updateSyncStatus('online', 'Tersimpan');
-          showToast('Jejak tersimpan & di-spill!');
-        } catch (error) {
-          updateSyncStatus('offline', 'Sync pending');
-          showToast('Tersimpan lokal (sync pending)');
-          queueForRetry(newRant);
+          // Mark as spilled
+          entry.isSpilled = true;
+          updateEntry(rantId, { isSpilled: true });
+          showToast('✓ Spill synced to cloud');
+        } catch (e) {
+          console.error('Sync failed:', e);
+          showToast('⚠ Disimpan lokal, sync pending');
+          queueForSync('rant', entry);
         }
       } else {
-        showToast('Tersimpan lokal (offline mode)');
-        queueForRetry(newRant);
+        showToast('⚠ Disimpan lokal (offline)');
+        queueForSync('rant', entry);
+      }
+      
+      // Clear input
+      document.getElementById('rant-input').value = '';
+      document.getElementById('char-count').textContent = '0/500';
+      selectMood('surviving');
+    }
+
+    function updateEntry(id, updates) {
+      const idx = state.entries.findIndex(e => e.id === id);
+      if (idx !== -1) {
+        state.entries[idx] = { ...state.entries[idx], ...updates };
+        saveEntries();
+        renderEntries();
       }
     }
 
-    async function uploadImageToSupabase(file, artefactId) {
-      if (!state.supabase) return null;
-      try {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${state.currentUser}/${artefactId}.${fileExt}`;
-        const { error } = await state.supabase.storage.from(CONFIG.storageBucket).upload(fileName, file, { cacheControl: '3600', upsert: false });
-        if (error) throw error;
-        const { data: publicUrl } = state.supabase.storage.from(CONFIG.storageBucket).getPublicUrl(fileName);
-        return publicUrl.publicUrl;
-      } catch (error) {
-        console.error('Upload failed:', error);
-        return null;
-      }
-    }
-
-    async function saveArtefactMetadata(artefact, publicUrl) {
-      if (!state.supabase) return;
-      try {
-        await state.supabase.from('artefacts').insert([{
-          id: artefact.id, author: state.currentUser, url: publicUrl,
-          note: artefact.note, has_face: artefact.hasFace,
-          faces: artefact.faces, created_at: new Date(artefact.timestamp).toISOString()
-        }]);
-      } catch (error) {
-        console.error('Metadata save failed:', error);
-      }
+    function queueForSync(type, data) {
+      const queue = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'sync_queue') || '[]');
+      queue.push({ type, data, timestamp: Date.now() });
+      localStorage.setItem(STORAGE_PREFIX + 'sync_queue', JSON.stringify(queue));
     }
 
     // ============================================
-    // FACE DETECTION
+    // FACE API & IMAGE PROCESSING
     // ============================================
-    async function loadFaceApi() {
+    async function loadFaceApiModels() {
+      const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model/';
       try {
-        if (typeof faceapi === 'undefined') {
-          state.faceApiLoaded = false;
-          return;
-        }
-        await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model');
-        await faceapi.nets.faceLandmark68TinyNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model');
+        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
         state.faceApiLoaded = true;
+        console.log('✓ Face-API ready');
       } catch (e) {
+        console.error('Face-API load failed:', e);
         state.faceApiLoaded = false;
       }
     }
 
-    async function detectFaces(img) {
-      if (!state.faceApiLoaded) return simulateDetection(img);
+    async function detectFaces(imageFile) {
+      if (!state.faceApiLoaded) {
+        console.warn('Face-API not loaded, skipping detection');
+        return [];
+      }
+      
+      document.getElementById('processing').classList.add('active');
+      
       try {
-        const options = new faceapi.TinyFaceDetectorOptions({ inputSize: CONFIG.inputSize, scoreThreshold: CONFIG.faceThreshold });
-        const detections = await faceapi.detectAllFaces(img, options);
-        return detections.filter(d => {
-          const area = d.box.width * d.box.height;
-          const imgArea = img.naturalWidth * img.naturalHeight;
-          const ratio = area / imgArea;
-          return ratio > 0.01 && ratio < 0.8 && d.score > CONFIG.faceThreshold;
-        });
+        const img = await faceapi.bufferToImage(imageFile);
+        const detections = await faceapi.detectAllFaces(img, new faceapi.TinyFaceDetectorOptions({ inputSize: CONFIG.inputSize, scoreThreshold: CONFIG.faceThreshold }));
+        
+        return detections.map(d => ({
+          box: {
+            x: d.box.x,
+            y: d.box.y,
+            width: d.box.width,
+            height: d.box.height
+          },
+          score: d.score
+        }));
       } catch (e) {
-        return simulateDetection(img);
+        console.error('Face detection error:', e);
+        return [];
+      } finally {
+        document.getElementById('processing').classList.remove('active');
       }
     }
 
-    function simulateDetection(img) {
-      return new Promise(resolve => {
-        setTimeout(() => {
-          if (img.src?.includes('1507003211169')) {
-            const w = img.naturalWidth || 400, h = img.naturalHeight || 400;
-            resolve([{ box: { x: w*0.25, y: h*0.15, width: w*0.5, height: h*0.65 }, score: 0.85 }]);
-          } else {
-            resolve([]);
-          }
-        }, 500);
-      });
+    function createFaceScribble(face, containerWidth, containerHeight) {
+      const div = document.createElement('div');
+      div.className = 'face-scribble';
+      
+      const scaleX = containerWidth / 416; // Based on inputSize
+      const scaleY = containerHeight / (416 * (containerHeight/containerWidth));
+      
+      const x = face.box.x * scaleX;
+      const y = face.box.y * scaleY;
+      const w = face.box.width * scaleX;
+      const h = face.box.height * scaleY;
+      
+      div.style.left = x + 'px';
+      div.style.top = y + 'px';
+      div.style.width = w + 'px';
+      div.style.height = h + 'px';
+      
+      // Add marker lines effect
+      const marker = document.createElement('div');
+      marker.className = 'marker-lines';
+      div.appendChild(marker);
+      
+      return div;
     }
 
     // ============================================
-    // RENDER FUNCTIONS
+    // UPLOAD & GALLERY SYSTEM
+    // ============================================
+    function initUploadSystem() {
+      const uploadBtn = document.getElementById('upload-btn');
+      const fileInput = document.getElementById('file-input');
+      
+      uploadBtn.addEventListener('click', () => {
+        if (!checkQuota()) {
+          showToast('⏳ Quota habis. Tunggu window berikutnya.');
+          return;
+        }
+        fileInput.click();
+      });
+      
+      fileInput.addEventListener('change', handleFileSelect);
+    }
+
+    function checkQuota() {
+      if (!state.quotaStart) {
+        state.quotaStart = Date.now();
+        localStorage.setItem(STORAGE_PREFIX + 'quota_start', state.quotaStart);
+        state.uploadsThisWindow = 0;
+        localStorage.setItem(STORAGE_PREFIX + 'uploads_count', '0');
+        return true;
+      }
+      
+      const elapsed = Date.now() - parseInt(state.quotaStart);
+      const windowDuration = CONFIG.uploadWindowDays * 24 * 60 * 60 * 1000;
+      
+      if (elapsed > windowDuration) {
+        // Reset window
+        state.quotaStart = Date.now();
+        state.uploadsThisWindow = 0;
+        localStorage.setItem(STORAGE_PREFIX + 'quota_start', state.quotaStart);
+        localStorage.setItem(STORAGE_PREFIX + 'uploads_count', '0');
+        return true;
+      }
+      
+      return state.uploadsThisWindow < CONFIG.maxSelection;
+    }
+
+    function updateQuotaDisplay() {
+      const timer = document.getElementById('quota-timer');
+      const counter = document.getElementById('upload-counter');
+      
+      if (!state.quotaStart) {
+        timer.textContent = 'Window aktif • Sisa 6 slot';
+        timer.classList.remove('urgent');
+        counter.style.display = 'none';
+        return;
+      }
+      
+      const elapsed = Date.now() - parseInt(state.quotaStart);
+      const windowDuration = CONFIG.uploadWindowDays * 24 * 60 * 60 * 1000;
+      const remaining = Math.max(0, windowDuration - elapsed);
+      const daysLeft = Math.ceil(remaining / (24 * 60 * 60 * 1000));
+      const slotsLeft = CONFIG.maxSelection - state.uploadsThisWindow;
+      
+      if (remaining <= 0) {
+        timer.textContent = 'Window reset • Sisa 6 slot';
+        timer.classList.remove('urgent');
+      } else {
+        timer.textContent = `Window aktif • ${daysLeft} hari lagi • Sisa ${slotsLeft} slot`;
+        if (slotsLeft <= 2) timer.classList.add('urgent');
+      }
+      
+      if (state.uploadsThisWindow > 0) {
+        counter.textContent = state.uploadsThisWindow;
+        counter.style.display = 'block';
+      } else {
+        counter.style.display = 'none';
+      }
+    }
+
+    async function handleFileSelect(e) {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+      
+      // Check total size
+      const totalSize = files.reduce((sum, f) => sum + f.size, 0);
+      if (totalSize > CONFIG.maxFileSize * 2) {
+        showToast('⚠ Total file terlalu besar (max 10MB)');
+        return;
+      }
+      
+      // Process each file
+      const processedFiles = [];
+      for (const file of files.slice(0, CONFIG.maxSelection)) {
+        const faces = await detectFaces(file);
+        processedFiles.push({
+          file: file,
+          faces: faces,
+          hasFace: faces.length > 0,
+          preview: URL.createObjectURL(file)
+        });
+      }
+      
+      openGallery(processedFiles);
+    }
+
+    function openGallery(files) {
+      state.selectedFiles = new Set(files.map((_, i) => i));
+      state.currentTheme = 0;
+      state.notationText = '';
+      
+      const grid = document.getElementById('gallery-grid');
+      grid.innerHTML = '';
+      
+      files.forEach((item, idx) => {
+        const div = document.createElement('div');
+        div.className = 'gallery-item' + (state.selectedFiles.has(idx) ? ' selected' : '');
+        div.innerHTML = `<img src="${item.preview}" alt="preview" class="filter-monochrome" id="preview-${idx}">`;
+        div.onclick = () => toggleSelection(idx, div);
+        
+        if (item.hasFace) {
+          const badge = document.createElement('div');
+          badge.className = 'detection-badge';
+          badge.textContent = 'WAJAH TERDETEKSI';
+          div.appendChild(badge);
+        }
+        
+        grid.appendChild(div);
+      });
+      
+      // Reset theme slider and notation
+      document.getElementById('theme-slider').value = 0;
+      document.getElementById('theme-name').textContent = THEMES[0].name;
+      document.getElementById('notation-input').value = '';
+      document.getElementById('notation-count').textContent = '0/4';
+      updateSelectedCount();
+      
+      document.getElementById('gallery-modal').classList.add('active');
+      
+      // Store files for later
+      state.pendingFiles = files;
+    }
+
+    function toggleSelection(idx, element) {
+      if (state.selectedFiles.has(idx)) {
+        state.selectedFiles.delete(idx);
+        element.classList.remove('selected');
+      } else {
+        state.selectedFiles.add(idx);
+        element.classList.add('selected');
+      }
+      updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+      document.getElementById('selected-count').textContent = state.selectedFiles.size;
+    }
+
+    function updateThemeFromSlider(value) {
+      state.currentTheme = parseInt(value);
+      const theme = THEMES[state.currentTheme];
+      document.getElementById('theme-name').textContent = theme.name;
+      
+      // Update all previews
+      state.pendingFiles.forEach((_, idx) => {
+        const img = document.getElementById(`preview-${idx}`);
+        if (img) {
+          // Remove all filter classes
+          img.className = '';
+          // Add new filter
+          img.classList.add(theme.filter);
+        }
+      });
+    }
+
+    function validateNotation(input) {
+      const words = input.value.trim().split(/\s+/).filter(w => w.length > 0);
+      const count = words.length;
+      document.getElementById('notation-count').textContent = `${count}/4`;
+      
+      if (count > 4) {
+        input.value = words.slice(0, 4).join(' ');
+        document.getElementById('notation-count').textContent = '4/4';
+      }
+      
+      state.notationText = input.value.trim();
+    }
+
+    function closeGallery() {
+      document.getElementById('gallery-modal').classList.remove('active');
+      state.pendingFiles = [];
+      state.selectedFiles = new Set();
+    }
+
+    async function confirmUpload() {
+      if (state.selectedFiles.size === 0) {
+        showToast('Pilih minimal 1 foto');
+        return;
+      }
+      
+      const theme = THEMES[state.currentTheme];
+      const notation = state.notationText || 'memory';
+      
+      // Process selected files
+      for (const idx of state.selectedFiles) {
+        const item = state.pendingFiles[idx];
+        await processAndUploadArtefact(item, theme, notation);
+      }
+      
+      // Update quota
+      state.uploadsThisWindow += state.selectedFiles.size;
+      localStorage.setItem(STORAGE_PREFIX + 'uploads_count', state.uploadsThisWindow.toString());
+      updateQuotaDisplay();
+      
+      closeGallery();
+      showToast(`✓ ${state.selectedFiles.size} foto diupload`);
+    }
+
+    async function processAndUploadArtefact(item, theme, notation) {
+      const artefactId = crypto.randomUUID();
+      
+      // Create canvas for processing
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      await new Promise((resolve) => {
+        img.onload = resolve;
+        img.src = item.preview;
+      });
+      
+      canvas.width = img.width;
+      canvas.height = img.height;
+      
+      // Apply filter via CSS-like canvas operations
+      ctx.filter = getCanvasFilter(theme.filter);
+      ctx.drawImage(img, 0, 0);
+      
+      // Convert to blob
+      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+      
+      // Upload to Supabase Storage if online
+      let publicUrl = item.preview; // fallback
+      
+      if (state.isOnline && state.supabase) {
+        try {
+          const fileName = `${state.currentUser}/${artefactId}.jpg`;
+          const { error: uploadError } = await state.supabase
+            .storage
+            .from(CONFIG.storageBucket)
+            .upload(fileName, blob);
+          
+          if (uploadError) throw uploadError;
+          
+          const { data: { publicUrl: url } } = state.supabase
+            .storage
+            .from(CONFIG.storageBucket)
+            .getPublicUrl(fileName);
+          
+          publicUrl = url;
+          
+          // Save metadata to DB
+          await state.supabase.from('artefacts').insert({
+            id: artefactId,
+            url: publicUrl,
+            note: notation,
+            faces: item.faces,
+            has_face: item.hasFace,
+            author: state.currentUser,
+            theme: theme.name,
+            created_at: new Date().toISOString()
+          });
+          
+        } catch (e) {
+          console.error('Upload failed:', e);
+          // Save locally for later sync
+        }
+      }
+      
+      // Add to local state
+      const artefact = {
+        id: artefactId,
+        url: publicUrl,
+        note: notation,
+        faces: item.faces,
+        hasFace: item.hasFace,
+        theme: theme.name,
+        timestamp: Date.now(),
+        isDummy: false
+      };
+      
+      addArtefactFIFO(artefact);
+      
+      // Set as hero if first
+      if (state.artefacts.filter(a => !a.isDummy).length === 1) {
+        setHero(publicUrl, notation, item.faces, theme.filter);
+      }
+    }
+
+    function getCanvasFilter(filterClass) {
+      const filters = {
+        'filter-monochrome': 'grayscale(100%) contrast(1.1)',
+        'filter-noir': 'grayscale(100%) contrast(1.4) brightness(0.8)',
+        'filter-sepia': 'sepia(100%) contrast(1.1) saturate(0.8)',
+        'filter-warm': 'sepia(60%) hue-rotate(-30deg) saturate(1.2)',
+        'filter-golden': 'sepia(40%) hue-rotate(-15deg) saturate(1.3) contrast(1.1)',
+        'filter-lomo': 'contrast(1.2) saturate(1.3) brightness(0.9)',
+        'filter-dream': 'blur(0.5px) saturate(1.4) brightness(1.1) contrast(0.9)',
+        'filter-cold': 'hue-rotate(180deg) saturate(0.5) brightness(1.1)',
+        'filter-cyber': 'hue-rotate(180deg) saturate(1.5) contrast(1.1)',
+        'filter-vignette': 'grayscale(100%) contrast(1.2) brightness(0.9)',
+        'filter-crisp': 'contrast(1.3) saturate(1.1)',
+        'filter-moody': 'brightness(0.8) contrast(1.2) saturate(0.7)'
+      };
+      return filters[filterClass] || filters['filter-monochrome'];
+    }
+
+    // ============================================
+    // RENDERING
     // ============================================
     function renderEntries() {
       const container = document.getElementById('entries-container');
       const entries = getVisibleEntries();
       
       if (entries.length === 0) {
-        container.innerHTML = `<div class="empty-state"><span class="empty-emoji">🍃</span><p class="empty-text">"Jejak pertamamu menanti"</p><p class="empty-subtext">Tulis sesuatu. Hanya kamu yang bisa lihat.</p></div>`;
+        container.innerHTML = `
+          <div class="empty-state">
+            <span class="empty-emoji">🍃</span>
+            <div class="empty-text">Belum ada jejak</div>
+            <div class="empty-subtext">Jadilah yang pertama spill your truth</div>
+          </div>
+        `;
         return;
       }
       
       container.innerHTML = entries.map(entry => {
-        const isDummy = entry.isDummy;
-        const spillStatus = entry.isSpilled ? `<div class="spill-status spilled">✓ Ter-spill ke komunitas</div>` : '';
+        const mood = MOODS[entry.mood];
+        const date = new Date(entry.timestamp);
+        const timeStr = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) + ' • ' + 
+                       date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        
+        const isDummy = entry.isDummy || entry.id.startsWith('__d');
         
         return `
-        <article class="entry ${isDummy ? 'entry-dummy' : ''}" data-id="${entry.id}">
-          <div class="entry-header">
-            <div class="entry-meta">
-              <span class="entry-time">${isDummy ? 'contoh' : formatTime(entry.timestamp)}</span>
-              <span class="entry-mood ${entry.mood}">${MOODS[entry.mood].label}</span>
-              ${isDummy ? '<span class="fifo-indicator">CONTOH</span>' : ''}
+          <article class="entry ${isDummy ? 'entry-dummy' : ''}" data-id="${entry.id}">
+            <div class="entry-header">
+              <div class="entry-meta">
+                <span class="entry-time">${timeStr}</span>
+                <span class="entry-mood ${entry.mood}">${mood.emoji} ${mood.label}</span>
+              </div>
+              ${isDummy ? '<span class="fifo-indicator">Contoh</span>' : ''}
             </div>
-          </div>
-          <div class="entry-content">
-            <p>${entry.content}</p>
-            ${spillStatus}
-          </div>
-          <div class="vibe-bar">
-            ${Object.entries(VIBES).map(([key, vibe]) => {
-              const count = entry.vibes?.[key] || 0;
-              const isVibed = state.userVibes.has(`${entry.id}-${key}`);
-              return `
-                <button class="vibe-btn ${isVibed ? 'vibed' : ''}" 
-                  onclick="${isDummy ? 'showToast(`Tulis rantmu dulu bestie!`)' : `toggleVibe('${entry.id}', '${key}', this)`}"
-                  ${isDummy ? 'style="opacity:0.5"' : ''}>
+            <div class="entry-content">${escapeHtml(entry.content)}</div>
+            <div class="spill-status ${entry.isSpilled ? 'spilled' : ''}">
+              ${entry.isSpilled ? '✓ Synced to cloud' : '⏳ Pending sync'}
+            </div>
+            <div class="vibe-bar">
+              ${Object.entries(VIBES).map(([key, vibe]) => `
+                <button class="vibe-btn ${(entry.vibes?.[key] > 0) ? 'vibed' : ''}" onclick="addVibe('${entry.id}', '${key}')" ${isDummy ? 'disabled' : ''}>
                   <span class="vibe-emoji">${vibe.emoji}</span>
-                  <span class="vibe-count">${count}</span>
+                  <span class="vibe-count">${entry.vibes?.[key] || 0}</span>
                   <span class="vibe-label">${vibe.label}</span>
                 </button>
-              `;
-            }).join('')}
-          </div>
-        </article>`;
+              `).join('')}
+            </div>
+          </article>
+        `;
       }).join('');
     }
 
     function renderTray() {
       const grid = document.getElementById('tray-grid');
-      const items = getVisibleArtefacts();
+      const artefacts = getVisibleArtefacts();
       
-      grid.innerHTML = items.map(item => `
-        <div class="tray-item ${item.isDummy ? 'tray-item-dummy' : ''}" 
-             onclick="setHero('${item.url}', '${item.note}', ${JSON.stringify(item.faces || []).replace(/"/g, '&quot;')})">
-          <div style="position:relative;width:100%;height:100%">
-            <img src="${item.url}" alt="${item.note}" loading="lazy" class="${state.colorMode ? getCurrentTheme().filter : 'filter-monochrome'}">
-            ${item.hasFace ? '<div class="detection-badge">SENSORED</div>' : ''}
-            ${item.isDummy ? '<div style="position:absolute;bottom:4px;right:4px;font-size:8px;font-weight:700;color:var(--text-muted);background:rgba(0,0,0,0.7);padding:2px 5px">CONTOH</div>' : ''}
-            ${renderScribbles(item.faces)}
-          </div>
-        </div>
-      `).join('');
-      
-      const emptySlots = Math.max(0, 6 - items.length);
-      for (let i = 0; i < emptySlots; i++) {
-        grid.innerHTML += `<div class="tray-item empty" onclick="openGallery()">+</div>`;
-      }
-    }
-
-    function renderScribbles(faces) {
-      if (!faces?.length) return '';
-      return faces.map(f => `
-        <div class="face-scribble" style="left:${(f.box.x/400)*100}%;top:${(f.box.y/400)*100}%;width:${(f.box.width/400)*100}%;height:${(f.box.height/400)*100}%">
-          <div class="marker-lines"></div>
-        </div>
-      `).join('');
-    }
-
-    function applyFilter(el, useColor) {
-      const theme = getCurrentTheme();
-      const filters = ['filter-monochrome','filter-sepia','filter-lomo','filter-vignette','filter-noir','filter-fade','filter-cyber','filter-warm','filter-cold','filter-dream','filter-crisp','filter-moody','filter-golden'];
-      filters.forEach(f => el.classList.remove(f));
-      el.classList.add(useColor ? theme.filter : 'filter-monochrome');
-    }
-
-    function updateFilterUI() {
-      const theme = getCurrentTheme();
-      const els = {
-        badge: document.getElementById('current-filter'),
-        desc: document.getElementById('filter-desc'),
-        icon: document.getElementById('filter-icon'),
-        label: document.getElementById('filter-label'),
-        toggle: document.getElementById('filter-toggle')
-      };
-      
-      if (state.colorMode) {
-        Object.assign(els, { badge: theme.name, desc: theme.desc, icon: theme.icon, label: 'COLOR' });
-        els.toggle.classList.add('active');
-      } else {
-        Object.assign(els, { badge: 'MONOCHROME', desc: 'Default', icon: '⚫', label: 'B&W' });
-        els.toggle.classList.remove('active');
-      }
-      
-      applyFilter(document.getElementById('hero-img'), state.colorMode);
-      document.querySelectorAll('.tray-item img').forEach(img => applyFilter(img, state.colorMode));
-    }
-
-    // ============================================
-    // INTERACTION HANDLERS
-    // ============================================
-    window.toggleColorMode = () => {
-      state.colorMode = !state.colorMode;
-      updateFilterUI();
-      showToast(state.colorMode ? `Theme: ${getCurrentTheme().name}` : 'Monochrome mode');
-    };
-
-    window.selectMood = (mood) => {
-      state.currentMood = mood;
-      document.querySelectorAll('.mood-card').forEach(c => c.classList.toggle('active', c.dataset.mood === mood));
-      navigator.vibrate?.(10);
-    };
-
-    window.toggleVibe = async (entryId, vibeKey, btn) => {
-      const key = `${entryId}-${vibeKey}`;
-      const countEl = btn.querySelector('.vibe-count');
-      let count = parseInt(countEl.textContent);
-      const entry = state.entries.find(e => e.id === entryId);
-      
-      if (state.userVibes.has(key)) {
-        state.userVibes.delete(key);
-        btn.classList.remove('vibed');
-        countEl.textContent = Math.max(0, count - 1);
-      } else {
-        state.userVibes.add(key);
-        btn.classList.add('vibed');
-        countEl.textContent = count + 1;
-        btn.style.transform = 'scale(0.9)';
-        setTimeout(() => btn.style.transform = '', 150);
-        showToast(`${VIBES[vibeKey].label}!`);
+      grid.innerHTML = artefacts.map((art, idx) => {
+        const isDummy = art.isDummy || art.id.startsWith('__a');
         
-        if (state.isOnline && state.supabase && entry) {
-          try {
-            const newVibes = { ...entry.vibes, [vibeKey]: (entry.vibes[vibeKey] || 0) + 1 };
-            await state.supabase.from('rants').update({ vibes: newVibes }).eq('id', entryId);
-            if (entry.isSpilled && entry.spillId) {
-              await state.supabase.from('spills').update({ vibes: newVibes, response_count: Object.values(newVibes).reduce((a,b)=>a+b,0) }).eq('id', entry.spillId);
-            }
-            entry.vibes = newVibes;
-          } catch (e) {
-            console.error('Vibe update failed:', e);
-          }
+        if (!art.url) {
+          return `<div class="tray-item empty">+</div>`;
         }
-      }
-    };
+        
+        return `
+          <div class="tray-item ${isDummy ? 'tray-item-dummy' : ''}" onclick="setHeroFromTray('${art.id}')" style="position:relative">
+            <img src="${art.url}" alt="${art.note}" class="${art.theme ? 'filter-' + art.theme.toLowerCase() : 'filter-monochrome'}">
+            ${art.hasFace ? '<span class="detection-badge">SENSORED</span>' : ''}
+          </div>
+        `;
+      }).join('');
+    }
 
-    window.setHero = (url, note, faces) => {
-      faces = faces || [];
+    function setHero(url, note, faces, filterClass = 'filter-monochrome') {
       const heroImg = document.getElementById('hero-img');
+      const heroNotation = document.getElementById('hero-notation');
       const heroFaces = document.getElementById('hero-faces');
       
       heroImg.src = url;
-      applyFilter(heroImg, state.colorMode);
-      document.getElementById('hero-notation').textContent = `"${note}"`;
+      heroImg.className = filterClass;
+      heroNotation.textContent = `"${note}"`;
       
+      // Clear and redraw face scribbles
       heroFaces.innerHTML = '';
-      heroImg.onload = () => {
-        if (!faces.length) return;
-        const rect = heroImg.parentElement.getBoundingClientRect();
-        const scaleX = rect.width / heroImg.naturalWidth;
-        const scaleY = rect.height / heroImg.naturalHeight;
-        const padding = 10;
-        
+      if (faces && faces.length > 0) {
         faces.forEach(face => {
-          const div = document.createElement('div');
-          div.className = 'face-scribble';
-          div.style.left = Math.max(0, (face.box.x * scaleX) - padding) + 'px';
-          div.style.top = Math.max(0, (face.box.y * scaleY) - padding) + 'px';
-          div.style.width = Math.min(rect.width, (face.box.width * scaleX) + (padding * 2)) + 'px';
-          div.style.height = Math.min(rect.height, (face.box.height * scaleY) + (padding * 2)) + 'px';
-          div.innerHTML = '<div class="marker-lines"></div>';
-          heroFaces.appendChild(div);
-        });
-      };
-    };
-
-    window.openGallery = () => {
-      const quota = checkQuota();
-      if (!quota.inWindow) {
-        showToast(`Tunggu ${quota.daysUntil} hari lagi`);
-        return;
-      }
-      document.getElementById('file-input').click();
-    };
-
-    function checkQuota() {
-      const now = Date.now();
-      if (!state.quotaStart) {
-        state.quotaStart = now.toString();
-        localStorage.setItem(STORAGE_PREFIX + 'quota_start', state.quotaStart);
-      }
-      const quotaStart = parseInt(state.quotaStart);
-      const daysSince = Math.floor((now - quotaStart) / (1000 * 60 * 60 * 24));
-      const currentCycle = Math.floor(daysSince / CONFIG.quotaDays);
-      const cycleStart = quotaStart + (currentCycle * CONFIG.quotaDays * 24 * 60 * 60 * 1000);
-      const daysInto = Math.floor((now - cycleStart) / (1000 * 60 * 60 * 24));
-      
-      return {
-        inWindow: daysInto < CONFIG.uploadWindowDays,
-        daysInto,
-        daysUntil: CONFIG.quotaDays - daysInto,
-        daysLeft: CONFIG.uploadWindowDays - daysInto
-      };
-    }
-
-    function updateQuotaUI() {
-      const quota = checkQuota();
-      const btn = document.getElementById('upload-btn');
-      const counter = document.getElementById('upload-counter');
-      const timer = document.getElementById('quota-timer');
-      
-      if (quota.inWindow) {
-        btn.disabled = false;
-        counter.style.display = 'none';
-        timer.textContent = `Window aktif • Sisa ${quota.daysLeft} hari`;
-        timer.classList.toggle('urgent', quota.daysLeft <= 1);
-      } else {
-        btn.disabled = true;
-        counter.textContent = quota.daysUntil;
-        counter.style.display = 'block';
-        timer.textContent = `Next window: ${quota.daysUntil} hari`;
-        timer.classList.remove('urgent');
-      }
-    }
-
-    // File handling
-    document.getElementById('file-input').addEventListener('change', async (e) => {
-      const files = Array.from(e.target.files);
-      if (!files.length) return;
-      
-      document.getElementById('processing').classList.add('active');
-      const processed = [];
-      
-      for (const file of files) {
-        if (file.size > CONFIG.maxFileSize) {
-          showToast(`${file.name} terlalu besar (max 5MB)`);
-          continue;
-        }
-        const url = URL.createObjectURL(file);
-        const img = new Image();
-        img.src = url;
-        await new Promise(resolve => {
-          img.onload = async () => {
-            const detections = await detectFaces(img);
-            processed.push({
-              id: crypto.randomUUID(),
-              url, note: 'new drop', timestamp: Date.now(),
-              faces: detections.map(d => ({ box: d.box, score: d.score })),
-              hasFace: detections.length > 0,
-              file
-            });
-            resolve();
-          };
+          const scribble = createFaceScribble(face, heroImg.clientWidth, heroImg.clientHeight);
+          heroFaces.appendChild(scribble);
         });
       }
-      
-      document.getElementById('processing').classList.remove('active');
-      if (processed.length) {
-        state.selectedFiles = new Set(processed);
-        renderGallery(processed);
-      }
-    });
-
-    function renderGallery(artefacts) {
-      const grid = document.getElementById('gallery-grid');
-      grid.innerHTML = artefacts.map((art, idx) => `
-        <div class="gallery-item selected" data-idx="${idx}" onclick="toggleGallerySelection(this, ${idx})">
-          <div style="position:relative;width:100%;height:100%">
-            <img src="${art.url}" class="${state.colorMode ? getCurrentTheme().filter : 'filter-monochrome'}">
-            ${art.hasFace ? '<div class="detection-badge">WAJAH TERSENSOR</div>' : ''}
-            ${art.faces?.length ? renderScribbles(art.faces) : ''}
-          </div>
-        </div>
-      `).join('');
-      document.getElementById('selected-count').textContent = state.selectedFiles.size;
-      document.getElementById('gallery-modal').classList.add('active');
     }
 
-    window.toggleGallerySelection = (el, idx) => {
-      const artefacts = Array.from(state.selectedFiles);
-      const artefact = artefacts[idx];
-      
-      if (el.classList.contains('selected')) {
-        el.classList.remove('selected');
-        state.selectedFiles.delete(artefact);
-      } else {
-        if (state.selectedFiles.size >= CONFIG.maxSelection) {
-          showToast(`Max ${CONFIG.maxSelection} foto`);
-          return;
-        }
-        el.classList.add('selected');
-        state.selectedFiles.add(artefact);
+    function setHeroFromTray(id) {
+      const art = state.artefacts.find(a => a.id === id) || DUMMY_ARTEFACTS.find(a => a.id === id);
+      if (art) {
+        setHero(art.url, art.note, art.faces, art.theme ? 'filter-' + art.theme.toLowerCase() : 'filter-monochrome');
       }
-      document.getElementById('selected-count').textContent = state.selectedFiles.size;
-    };
+    }
 
-    window.closeGallery = () => {
-      document.getElementById('gallery-modal').classList.remove('active');
-      state.selectedFiles.clear();
-      document.getElementById('file-input').value = '';
-    };
+    // ============================================
+    // INTERACTIONS
+    // ============================================
+    function selectMood(mood) {
+      state.currentMood = mood;
+      document.querySelectorAll('.mood-card').forEach(card => {
+        card.classList.toggle('active', card.dataset.mood === mood);
+      });
+    }
 
-    window.confirmUpload = async () => {
-      if (!state.selectedFiles.size) {
-        showToast('Pilih minimal 1 foto');
+    async function addVibe(entryId, vibeType) {
+      if (state.userVibes.has(entryId + '-' + vibeType)) {
+        showToast('Kamu sudah memberi vibe ini');
         return;
       }
       
-      const artefacts = Array.from(state.selectedFiles);
-      let faceCount = 0;
+      state.userVibes.add(entryId + '-' + vibeType);
       
-      for (const art of artefacts) {
-        if (art.hasFace) faceCount++;
-        
-        if (state.isOnline && state.supabase) {
-          try {
-            updateSyncStatus('syncing', 'Uploading...');
-            const publicUrl = await uploadImageToSupabase(art.file, art.id);
-            if (publicUrl) {
-              art.url = publicUrl;
-              await saveArtefactMetadata(art, publicUrl);
-            }
-          } catch (e) {
-            console.error('Upload error:', e);
-          }
+      const entry = state.entries.find(e => e.id === entryId);
+      if (!entry) return;
+      
+      entry.vibes[vibeType] = (entry.vibes[vibeType] || 0) + 1;
+      updateEntry(entryId, { vibes: entry.vibes });
+      
+      // Sync to DB if online
+      if (state.isOnline && state.supabase && !entryId.startsWith('__')) {
+        try {
+          await state.supabase
+            .from('rants')
+            .update({ vibes: entry.vibes })
+            .eq('id', entryId);
+        } catch (e) {
+          console.error('Vibe sync failed:', e);
         }
-        addArtefactFIFO(art);
       }
       
-      state.uploadsThisWindow += artefacts.length;
-      localStorage.setItem(STORAGE_PREFIX + 'uploads_count', state.uploadsThisWindow.toString());
-      
-      const first = artefacts[0];
-      setHero(first.url, first.note, first.faces);
-      closeGallery();
-      
-      if (state.isOnline) updateSyncStatus('online', 'Tersimpan');
-      showToast(`${artefacts.length} artefak ditambahkan${faceCount ? ` • ${faceCount} wajah disensor` : ''} (FIFO)`);
-    };
+      showToast(`+1 ${VIBES[vibeType].label}`);
+    }
 
-    // ============================================
-    // UTILITIES
-    // ============================================
-    function showToast(msg) {
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function showToast(message) {
       const toast = document.getElementById('toast');
-      toast.textContent = msg;
+      toast.textContent = message;
       toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2500);
+      setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    function formatTime(ts) {
-      const diff = Date.now() - ts;
-      const hours = Math.floor(diff / 3600000);
-      if (hours < 1) return 'baru saja';
-      if (hours < 24) return `${hours}j`;
-      return `${Math.floor(hours/24)}h`;
-    }
-
-    function getCurrentTheme() {
-      return MONTHLY_THEMES[new Date().getMonth()];
-    }
-
+    // ============================================
+    // STORAGE HELPERS
+    // ============================================
     function saveEntries() {
       localStorage.setItem(STORAGE_PREFIX + 'entries', JSON.stringify(state.entries));
     }
 
     function saveArtefacts() {
-      const meta = state.artefacts.map(a => ({
-        id: a.id, url: a.url, note: a.note,
-        faces: a.faces || [], hasFace: a.hasFace || false,
-        timestamp: a.timestamp || Date.now()
-      }));
-      localStorage.setItem(STORAGE_PREFIX + 'artefacts_meta', JSON.stringify(meta));
+      localStorage.setItem(STORAGE_PREFIX + 'artefacts', JSON.stringify(state.artefacts));
     }
 
-    function loadArtefacts() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'artefacts_meta')) || [];
-      } catch {
-        return [];
+    function loadFromStorage() {
+      const entries = localStorage.getItem(STORAGE_PREFIX + 'entries');
+      const artefacts = localStorage.getItem(STORAGE_PREFIX + 'artefacts');
+      
+      if (entries) {
+        state.entries = JSON.parse(entries);
+      }
+      if (artefacts) {
+        state.artefacts = JSON.parse(artefacts);
       }
     }
 
-    function queueForRetry(entry) {
-      const queue = JSON.parse(localStorage.getItem('jejak_sync_queue') || '[]');
-      queue.push(entry);
-      localStorage.setItem('jejak_sync_queue', JSON.stringify(queue));
-    }
-
-    window.logoutUser = () => {
-      if (!confirm('Yakin mau logout?')) return;
-      ['jejak_logged_in','jejak_username','jejak_user_id'].forEach(k => localStorage.removeItem(k));
+    // ============================================
+    // AUTH
+    // ============================================
+    function logoutUser() {
+      localStorage.removeItem('jejak_username');
+      localStorage.removeItem('jejak_user_id');
+      localStorage.removeItem('jejak_logged_in');
       location.href = 'index.html';
-    };
+    }
 
     // ============================================
     // INITIALIZATION
     // ============================================
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('header-username').textContent = '@' + state.currentUser;
-      
-      initSupabase();
-      loadFaceApi();
+      // Update UI
+      document.getElementById('header-username').textContent = state.currentUser;
       
       // Load saved data
-      const savedEntries = localStorage.getItem(STORAGE_PREFIX + 'entries');
-      if (savedEntries) state.entries = JSON.parse(savedEntries);
+      loadFromStorage();
       
-      const savedArtefacts = loadArtefacts();
-      if (savedArtefacts.length) state.artefacts = savedArtefacts;
+      // Initialize systems
+      initSupabase();
+      loadFaceApiModels();
+      initUploadSystem();
       
-      // Event listeners
-      document.getElementById('rant-input').addEventListener('input', function() {
-        document.getElementById('char-count').textContent = `${this.value.length}/500`;
+      // Render
+      renderEntries();
+      renderTray();
+      updateQuotaDisplay();
+      
+      // Load from cloud
+      if (state.isOnline) {
+        loadUserRantsFromDB();
+        loadUserArtefactsFromDB();
+      }
+      
+      // Set initial hero
+      const firstReal = state.artefacts.find(a => !a.isDummy);
+      if (firstReal) {
+        setHero(firstReal.url, firstReal.note, firstReal.faces);
+      } else if (DUMMY_ARTEFACTS[0]) {
+        setHero(DUMMY_ARTEFACTS[0].url, DUMMY_ARTEFACTS[0].note, DUMMY_ARTEFACTS[0].faces);
+      }
+      
+      // Input listeners
+      const rantInput = document.getElementById('rant-input');
+      const charCount = document.getElementById('char-count');
+      
+      rantInput.addEventListener('input', () => {
+        const len = rantInput.value.length;
+        charCount.textContent = `${len}/500`;
+        if (len >= 450) {
+          charCount.style.color = 'var(--accent-tertiary)';
+        } else {
+          charCount.style.color = 'var(--text-muted)';
+        }
       });
       
+      // Submit handler
       document.getElementById('submit-btn').addEventListener('click', () => {
-        const input = document.getElementById('rant-input');
-        const content = input.value.trim();
+        const content = rantInput.value.trim();
         if (!content) {
-          showToast('Tulis dulu, bestie');
-          input.focus();
+          showToast('Tulis sesuatu dulu...');
           return;
         }
         submitRant(content, state.currentMood);
-        input.value = '';
-        document.getElementById('char-count').textContent = '0/500';
       });
       
-      document.getElementById('upload-btn').addEventListener('click', openGallery);
-      
-      // Initial render
-      updateQuotaUI();
-      updateFilterUI();
-      renderEntries();
-      renderTray();
-      
-      const visibleArts = getVisibleArtefacts();
-      if (visibleArts.length) setHero(visibleArts[0].url, visibleArts[0].note, visibleArts[0].faces);
-      
-      // Load from DB
-      loadUserArtefactsFromDB();
-      loadUserRantsFromDB();
-      
-      // Periodic updates
-      setInterval(updateQuotaUI, 3600000);
+      // Periodic quota update
+      setInterval(updateQuotaDisplay, 60000);
     });
   </script>
 </body>
