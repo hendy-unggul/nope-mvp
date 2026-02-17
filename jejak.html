@@ -1442,20 +1442,39 @@
       });
     }
     
-    async function submitRant(content, mood) {
-      const timestamp = Date.now();
-      const rantId = generateUUID(); // Use UUID instead of text-based ID
-      
-      const newRant = {
-        id: rantId,
-        content: content,
-        mood: mood,
-        timestamp: timestamp,
-        vibes: { relatable: 0, mood: 0, tea: 0, hug: 0, real: 0, dead: 0 },
-        isSpilled: false,
-        author: state.currentUser,
-        created_at: new Date(timestamp).toISOString()
-      };
+    // Test dengan UUID yang proper
+async function testRantFixed() {
+  try {
+    // Generate UUID
+    const testId = crypto.randomUUID();
+    console.log('UUID:', testId, 'Type:', typeof testId);
+    
+    const insertData = {
+      id: testId,
+      content: 'test dari console fix',
+      mood: 'surviving',
+      author: state.currentUser,
+      vibes: {relatable:0, mood:0, tea:0, hug:0, real:0, dead:0}
+    };
+    
+    console.log('Insert data:', insertData);
+    
+    const { data, error } = await state.supabase
+      .from('rants')
+      .insert([insertData])
+      .select();
+    
+    if (error) {
+      console.error('❌ Error:', error);
+    } else {
+      console.log('✅ Success:', data);
+    }
+  } catch (e) {
+    console.error('❌ Exception:', e);
+  }
+}
+
+testRantFixed();
       
       // 1. Add to state (LIFO)
       state.entries.unshift(newRant);
