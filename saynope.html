@@ -346,23 +346,24 @@
     // ═══════════════════════════════════════
     // CONSTANTS - Mapping emoji ke tabel reactions
     // ═══════════════════════════════════════
+    // CHANGED: ✊ (fist) → 💀 (skeleton/dead)
     const VIBE_REACTIONS = {
-      relatable: { emoji: '💯', label: 'literally me',  slang: 'Sama', dbEmoji: '😢' },
-      mood:      { emoji: '🛋️', label: 'big mood',     slang: 'Mood', dbEmoji: '😔' },
+      relatable: { emoji: '💯', label: 'literally me',  slang: 'Sama', dbEmoji: '💯' },
+      mood:      { emoji: '🛋️', label: 'big mood',     slang: 'Mood', dbEmoji: '🛋️' },
       hug:       { emoji: '🤗', label: 'virtual hug',  slang: 'Peluk', dbEmoji: '🤗' },
-      tea:       { emoji: '🐸', label: 'spill tea',    slang: 'Tea', dbEmoji: '🍵' },
-      real:      { emoji: '🎯', label: 'no cap',       slang: 'Real', dbEmoji: '👏' },
-      dead:      { emoji: '💀', label: 'rip me',       slang: 'RIP', dbEmoji: '💀' }
+      tea:       { emoji: '🐸', label: 'spill tea',    slang: 'Tea', dbEmoji: '🐸' },
+      real:      { emoji: '🎯', label: 'no cap',       slang: 'Real', dbEmoji: '🎯' },
+      dead:      { emoji: '💀', label: 'rip me',       slang: 'RIP', dbEmoji: '💀' }  // CHANGED from ✊
     };
 
     // Reverse mapping dari emoji DB ke key
     const EMOJI_TO_KEY = {
-      '😢': 'relatable',
-      '😔': 'mood',
+      '💯': 'relatable',
+      '🛋️': 'mood',
       '🤗': 'hug',
-      '🍵': 'tea',
-      '👏': 'real',
-      '💀': 'dead'
+      '🐸': 'tea',
+      '🎯': 'real',
+      '💀': 'dead'  // CHANGED from ✊
     };
 
     const MOOD_META = {
@@ -481,7 +482,7 @@
     }
 
     // ═══════════════════════════════════════
-    // LOAD SPILLS WITH REACTION COUNTS
+    // LOAD SPILLS WITH REACTION COUNTS FROM DB
     // ═══════════════════════════════════════
     async function loadSpills() {
       showLoading();
@@ -497,7 +498,7 @@
 
         if (spillsError) throw spillsError;
 
-        // Load reactions count for all spills
+        // Load reactions count for all spills from reactions table
         const { data: reactionsData, error: reactionsError } = await state.db
           .from('reactions')
           .select('rant_id, emoji');
@@ -759,16 +760,18 @@
 
       setTimeout(() => openPeek(spillId), 200);
 
-      // Save to Supabase reactions table
+      // SAVE TO SUPABASE REACTIONS TABLE
       if (state.db) {
         try {
           const dbEmoji = VIBE_REACTIONS[vibeKey].dbEmoji;
           const { error } = await state.db
             .from('reactions')
             .insert({
-              rant_id: spillId,
-              user_id: SESSION.username,
-              emoji: dbEmoji
+              id: crypto.randomUUID(),  // Generate UUID for id
+              rant_id: spillId,         // ID of the spill being reacted to
+              user_id: SESSION.username, // Current user
+              emoji: dbEmoji,           // The emoji used
+              created_at: new Date().toISOString()
             });
           
           if (error) throw error;
