@@ -4,2558 +4,969 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>NOPE — Spill the Tea</title>
-  
-  <!-- PWA -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23FF4D00'/%3E%3Ctext x='50' y='70' font-size='50' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%230A0A0A'%3E🍵%3C/text%3E%3C/svg%3E">
   <meta name="theme-color" content="#0A0A0A">
-  
-  <!-- Fonts -->
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
   <style>
     :root {
-      --bg: #0A0A0A;
-      --surface: #141414;
-      --surface-elevated: #1E1E1E;
-      --border: #2A2A2A;
-      --border-accent: #FF4D00;
-      
-      --text: #FFFFFF;
-      --text-secondary: #888888;
-      --text-muted: #555555;
-      
-      --accent-primary: #FF4D00;
-      --accent-secondary: #00F0FF;
-      --accent-tertiary: #FF006E;
-      --accent-quaternary: #39FF14;
-      --accent-warm: #FFD700;
-      
-      /* Mood Colors */
-      --mood-surviving: #FF9500;
-      --mood-thriving: #39FF14;
-      --mood-chaotic: #00F0FF;
-      --mood-doom: #8B5CF6;
-      --mood-existential: #FF006E;
-      
-      --radius: 0px;
-      --radius-sm: 4px;
-      --space-xs: 4px;
-      --space-sm: 8px;
-      --space-md: 16px;
-      --space-lg: 24px;
-      --space-xl: 32px;
+      --bg: #0A0A0A; --surface: #141414; --surface-elevated: #1E1E1E;
+      --border: #2A2A2A; --border-accent: #FF4D00;
+      --text: #FFFFFF; --text-secondary: #888888; --text-muted: #555555;
+      --accent-primary: #FF4D00; --accent-secondary: #00F0FF;
+      --accent-tertiary: #FF006E; --accent-quaternary: #39FF14; --accent-warm: #FFD700;
+      --mood-surviving: #FF9500; --mood-thriving: #39FF14; --mood-chaotic: #00F0FF; --mood-doom: #8B5CF6;
+      --radius: 0px; --radius-sm: 4px;
+      --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px;
     }
-    
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-    
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html { scroll-behavior: smooth; }
-    
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-      font-weight: 500;
-      font-size: 15px;
-      line-height: 1.4;
-      min-height: 100vh;
-      overflow-x: hidden;
-      padding-bottom: 100px;
-    }
-    
-    /* Noise texture */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 9999;
-      opacity: 0.4;
-    }
-    
-    .wrapper {
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 0 var(--space-md);
-    }
+    body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 500; font-size: 15px; line-height: 1.4; min-height: 100vh; overflow-x: hidden; padding-bottom: 100px; }
+    body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 9999; opacity: 0.4; }
+    .wrapper { max-width: 480px; margin: 0 auto; padding: 0 var(--space-md); }
 
-    /* === HEADER BRUTALIST STYLE === */
-    header {
-      padding: var(--space-lg) 0 var(--space-md);
-      border-bottom: 2px solid var(--border);
-      margin-bottom: var(--space-md);
-      position: relative;
-    }
+    header { padding: var(--space-lg) 0 var(--space-md); border-bottom: 2px solid var(--border); margin-bottom: var(--space-md); display: flex; justify-content: space-between; align-items: center; }
+    .header-title { font-size: 32px; font-weight: 800; letter-spacing: -0.04em; color: var(--text); line-height: 0.9; display: inline-flex; align-items: center; gap: var(--space-sm); }
+    .header-title::before { content: '🍵'; filter: grayscale(0.3); }
+    .header-user { font-size: 11px; font-weight: 700; color: var(--accent-primary); letter-spacing: 0.05em; text-transform: uppercase; }
+    .sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); display: inline-block; margin-right: 4px; }
+    .sync-dot.live { background: var(--accent-quaternary); animation: blink 1.5s infinite; }
 
-    .header-title {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 32px;
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      color: var(--text);
-      line-height: 0.9;
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-sm);
-    }
+    .page-header { margin: var(--space-lg) 0; padding-bottom: var(--space-md); border-bottom: 2px solid var(--border); }
+    .page-subtitle { font-family: 'Instrument Serif', serif; font-size: 16px; font-style: italic; color: var(--text-secondary); margin-bottom: var(--space-xs); }
+    .page-tagline { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--accent-primary); }
 
-    .header-title::before {
-      content: '🍵';
-      filter: grayscale(0.3);
-    }
+    .vibrasi-filter { background: var(--surface); border: 2px solid var(--border); padding: var(--space-md); margin-bottom: var(--space-lg); position: relative; }
+    .vibrasi-filter::before { content: 'FILTER VIBRASI'; position: absolute; top: -10px; left: var(--space-md); background: var(--bg); padding: 0 var(--space-xs); font-size: 10px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.1em; }
+    .filter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-md); margin-top: var(--space-xs); }
+    .filter-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+    .filter-stats { font-size: 11px; color: var(--accent-primary); font-weight: 700; }
+    .filter-reset { font-size: 11px; color: var(--accent-primary); cursor: pointer; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid var(--border); background: none; padding: var(--space-xs) var(--space-sm); transition: all 0.2s; }
+    .filter-reset:hover { background: var(--accent-primary); color: var(--bg); border-color: var(--accent-primary); }
+    .filter-slider { width: 100%; height: 4px; background: var(--border); outline: none; -webkit-appearance: none; margin: var(--space-md) 0; }
+    .filter-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: var(--accent-primary); cursor: pointer; border: 2px solid var(--text); box-shadow: 2px 2px 0 var(--bg), 2px 2px 0 2px var(--accent-primary); }
+    .filter-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .mood-chips { display: flex; gap: var(--space-xs); flex-wrap: wrap; margin-top: var(--space-md); }
+    .mood-chip { padding: 4px 12px; border: 1px solid var(--border); font-size: 11px; font-weight: 700; cursor: pointer; color: var(--text-muted); transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.05em; background: none; }
+    .mood-chip.active { background: var(--accent-primary); border-color: var(--accent-primary); color: var(--bg); }
+    .mood-chip[data-mood="surviving"].active { background: var(--mood-surviving); border-color: var(--mood-surviving); }
+    .mood-chip[data-mood="thriving"].active { background: var(--mood-thriving); border-color: var(--mood-thriving); color: var(--bg); }
+    .mood-chip[data-mood="chaotic"].active { background: var(--mood-chaotic); border-color: var(--mood-chaotic); color: var(--bg); }
+    .mood-chip[data-mood="doom"].active { background: var(--mood-doom); border-color: var(--mood-doom); }
 
-    /* === PAGE HEADER === */
-    .page-header {
-      margin: var(--space-lg) 0;
-      padding-bottom: var(--space-md);
-      border-bottom: 2px solid var(--border);
-    }
+    /* NEW SPILL BANNER */
+    .new-spill-banner { display: none; text-align: center; padding: var(--space-sm); background: var(--accent-primary); color: var(--bg); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; cursor: pointer; margin-bottom: var(--space-md); }
+    .new-spill-banner.show { display: block; animation: slideDown 0.3s ease; }
+    @keyframes slideDown { from { transform: translateY(-20px); opacity:0; } to { transform: translateY(0); opacity:1; } }
 
-    .page-title {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      color: var(--text);
-      margin-bottom: var(--space-sm);
-      line-height: 0.9;
-    }
+    .tea-container { display: flex; flex-direction: column; gap: var(--space-md); }
+    .tea-card { background: var(--surface); border: 2px solid var(--border); padding: var(--space-md); position: relative; transition: all 0.2s; animation: slideIn 0.4s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .tea-card:hover { border-color: var(--border-accent); transform: translateY(-2px); box-shadow: 4px 4px 0 var(--surface-elevated); }
+    .tea-card.dimmed { opacity: 0.4; filter: grayscale(0.7); }
+    .tea-card.highlighted { border-color: var(--accent-primary); box-shadow: 4px 4px 0 var(--accent-primary); }
+    .tea-card.own-spill { border-color: var(--accent-secondary); }
+    .tea-card.own-spill::after { content: 'KAMU'; position: absolute; top: -10px; right: var(--space-md); background: var(--accent-secondary); color: var(--bg); font-size: 9px; font-weight: 800; padding: 3px 10px; letter-spacing: 0.1em; }
+    .resonance-badge { position: absolute; top: -12px; right: var(--space-md); background: var(--accent-primary); color: var(--bg); font-size: 10px; font-weight: 800; padding: 4px 12px; text-transform: uppercase; letter-spacing: 0.05em; display: none; border: 2px solid var(--bg); }
+    .tea-card.highlighted .resonance-badge { display: block; }
+    .live-badge { position: absolute; top: -12px; left: var(--space-md); background: var(--accent-quaternary); color: var(--bg); font-size: 9px; font-weight: 800; padding: 4px 10px; display: flex; align-items: center; gap: 4px; border: 2px solid var(--bg); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.7; } }
+    .live-indicator { width: 6px; height: 6px; background: var(--bg); border-radius: 50%; animation: blink 1s infinite; }
+    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+    .trending-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent-tertiary); color: var(--bg); font-size: 9px; font-weight: 800; padding: 4px 10px; text-transform: uppercase; letter-spacing: 0.05em; border: 2px solid var(--bg); }
+    .tea-header { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: var(--space-sm); padding-bottom: var(--space-sm); border-bottom: 1px solid var(--border); }
+    .tea-avatar { width: 40px; height: 40px; background: var(--surface-elevated); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; font-family: monospace; flex-shrink: 0; cursor: pointer; transition: all 0.2s; color: var(--text-secondary); }
+    .tea-avatar:hover { border-color: var(--accent-primary); transform: scale(1.1); }
+    .tea-meta { flex: 1; min-width: 0; }
+    .tea-user { font-size: 13px; font-weight: 700; color: var(--text); cursor: pointer; display: inline-flex; align-items: center; gap: var(--space-xs); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; letter-spacing: 0.02em; }
+    .tea-user:hover { color: var(--accent-primary); }
+    .tea-time { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+    .tea-mood { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 8px; border: 1px solid currentColor; }
+    .tea-mood.surviving { color: var(--mood-surviving); }
+    .tea-mood.thriving { color: var(--mood-thriving); }
+    .tea-mood.chaotic { color: var(--mood-chaotic); }
+    .tea-mood.doom { color: var(--mood-doom); }
+    .tea-content { font-size: 15px; line-height: 1.6; color: var(--text); margin-bottom: var(--space-md); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .tea-content.expanded { -webkit-line-clamp: unset; }
+    .read-more { font-size: 11px; color: var(--accent-primary); cursor: pointer; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-md); display: inline-block; border-bottom: 1px solid var(--accent-primary); }
+    .vibe-section { border-top: 1px solid var(--border); padding-top: var(--space-sm); }
+    .vibe-reactions { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+    .vibe-btn { display: flex; align-items: center; gap: var(--space-xs); padding: 8px 12px; background: var(--surface-elevated); border: 1px solid var(--border); cursor: pointer; transition: all 0.15s; font-size: 12px; color: var(--text-secondary); position: relative; font-weight: 600; }
+    .vibe-btn:hover:not(.used) { background: var(--surface); border-color: var(--text-secondary); color: var(--text); transform: translateY(-1px); }
+    .vibe-btn.used { background: var(--accent-primary); border-color: var(--accent-primary); color: var(--bg); cursor: default; }
+    .vibe-btn .emoji { font-size: 16px; line-height: 1; }
+    .vibe-btn .count { font-size: 11px; font-weight: 700; min-width: 16px; text-align: center; }
+    .vibe-tooltip { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 6px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; opacity: 0; visibility: hidden; transition: all 0.2s; pointer-events: none; z-index: 1000; }
+    .vibe-btn:hover:not(.used) .vibe-tooltip { opacity: 1; visibility: visible; }
 
-    .page-subtitle {
-      font-family: 'Instrument Serif', serif;
-      font-size: 16px;
-      font-style: italic;
-      color: var(--text-secondary);
-      margin-bottom: var(--space-xs);
-    }
-
-    .page-tagline {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--accent-primary);
-    }
-
-    /* === KESAMAAN VIBRASI FILTER === */
-    .vibrasi-filter {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      padding: var(--space-md);
-      margin-bottom: var(--space-lg);
-      position: relative;
-    }
-
-    .vibrasi-filter::before {
-      content: 'FILTER';
-      position: absolute;
-      top: -10px;
-      left: var(--space-md);
-      background: var(--bg);
-      padding: 0 var(--space-xs);
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--text-muted);
-      letter-spacing: 0.1em;
-    }
-
-    .filter-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--space-md);
-      margin-top: var(--space-xs);
-    }
-
-    .filter-title {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text);
-    }
-
-    .filter-reset {
-      font-size: 11px;
-      color: var(--accent-primary);
-      cursor: pointer;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border: none;
-      background: none;
-      padding: var(--space-xs) var(--space-sm);
-      border: 1px solid var(--border);
-      transition: all 0.2s;
-    }
-
-    .filter-reset:hover {
-      background: var(--accent-primary);
-      color: var(--bg);
-      border-color: var(--accent-primary);
-    }
-
-    .filter-slider {
-      width: 100%;
-      height: 4px;
-      background: var(--border);
-      outline: none;
-      -webkit-appearance: none;
-      margin: var(--space-md) 0;
-    }
-
-    .filter-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 20px;
-      height: 20px;
-      background: var(--accent-primary);
-      cursor: pointer;
-      border: 2px solid var(--text);
-      box-shadow: 2px 2px 0 var(--bg), 2px 2px 0 2px var(--accent-primary);
-    }
-
-    .filter-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 10px;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    /* === TEA CARDS === */
-    .tea-container {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-md);
-    }
-
-    .tea-card {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      padding: var(--space-md);
-      position: relative;
-      transition: all 0.2s;
-      animation: slideIn 0.4s ease;
-    }
-
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .tea-card:hover {
-      border-color: var(--border-accent);
-      transform: translateY(-2px);
-      box-shadow: 4px 4px 0 var(--surface-elevated);
-    }
-
-    .tea-card.dimmed {
-      opacity: 0.4;
-      filter: grayscale(0.7);
-    }
-
-    .tea-card.highlighted {
-      border-color: var(--accent-primary);
-      box-shadow: 4px 4px 0 var(--accent-primary);
-    }
-
-    .resonance-badge {
-      position: absolute;
-      top: -12px;
-      right: var(--space-md);
-      background: var(--accent-primary);
-      color: var(--bg);
-      font-size: 10px;
-      font-weight: 800;
-      padding: 4px 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      display: none;
-      border: 2px solid var(--bg);
-    }
-
-    .tea-card.highlighted .resonance-badge {
-      display: block;
-    }
-
-    /* Social Proof Badge */
-    .live-badge {
-      position: absolute;
-      top: -12px;
-      left: var(--space-md);
-      background: var(--accent-quaternary);
-      color: var(--bg);
-      font-size: 9px;
-      font-weight: 800;
-      padding: 4px 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      border: 2px solid var(--bg);
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-
-    .live-indicator {
-      width: 6px;
-      height: 6px;
-      background: var(--bg);
-      border-radius: 50%;
-      animation: blink 1s infinite;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
-    .trending-badge {
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--accent-tertiary);
-      color: var(--bg);
-      font-size: 9px;
-      font-weight: 800;
-      padding: 4px 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border: 2px solid var(--bg);
-    }
-
-    .tea-header {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      margin-bottom: var(--space-sm);
-      padding-bottom: var(--space-sm);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .tea-avatar {
-      width: 40px;
-      height: 40px;
-      background: var(--surface-elevated);
-      border: 2px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .tea-avatar:hover {
-      border-color: var(--accent-primary);
-      transform: scale(1.1);
-    }
-
-    .tea-meta {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .tea-user {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-xs);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-    }
-
-    .tea-user:hover {
-      color: var(--accent-primary);
-    }
-
-    .tea-time {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .tea-mood {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      padding: 4px 8px;
-      border: 1px solid currentColor;
-      color: var(--accent-secondary);
-    }
-
-    .tea-content {
-      font-size: 15px;
-      line-height: 1.6;
-      color: var(--text);
-      margin-bottom: var(--space-md);
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .tea-content.expanded {
-      -webkit-line-clamp: unset;
-    }
-
-    .read-more {
-      font-size: 11px;
-      color: var(--accent-primary);
-      cursor: pointer;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: var(--space-md);
-      display: inline-block;
-      border-bottom: 1px solid var(--accent-primary);
-    }
-
-    .tea-image {
-      width: 100%;
-      max-height: 200px;
-      object-fit: cover;
-      margin-bottom: var(--space-md);
-      border: 2px solid var(--border);
-      filter: contrast(1.1) grayscale(0.3);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .tea-image:hover {
-      filter: none;
-      border-color: var(--accent-primary);
-    }
-
-    /* === VIBE REACTIONS === */
-    .vibe-section {
-      border-top: 1px solid var(--border);
-      padding-top: var(--space-sm);
-    }
-
-    .vibe-reactions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--space-xs);
-    }
-
-    .vibe-btn {
-      display: flex;
-      align-items: center;
-      gap: var(--space-xs);
-      padding: 8px 12px;
-      background: var(--surface-elevated);
-      border: 1px solid var(--border);
-      cursor: pointer;
-      transition: all 0.15s;
-      font-size: 12px;
-      color: var(--text-secondary);
-      position: relative;
-      font-weight: 600;
-    }
-
-    .vibe-btn:hover:not(.used) {
-      background: var(--surface);
-      border-color: var(--text-secondary);
-      color: var(--text);
-      transform: translateY(-1px);
-    }
-
-    .vibe-btn.used {
-      background: var(--accent-primary);
-      border-color: var(--accent-primary);
-      color: var(--bg);
-      cursor: default;
-    }
-
-    .vibe-btn .emoji {
-      font-size: 16px;
-      line-height: 1;
-    }
-
-    .vibe-btn .count {
-      font-size: 11px;
-      font-weight: 700;
-      min-width: 16px;
-      text-align: center;
-    }
-
-    /* === TOOLTIP === */
-    .vibe-tooltip {
-      position: absolute;
-      bottom: calc(100% + 8px);
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--text);
-      color: var(--bg);
-      padding: 6px 10px;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      white-space: nowrap;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.2s;
-      pointer-events: none;
-      z-index: 1000;
-    }
-
-    .vibe-btn:hover:not(.used) .vibe-tooltip {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    /* === JEJAK PEEK OVERLAY === */
-    .jejak-peek-overlay {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      z-index: 9998;
-      display: none;
-      flex-direction: column;
-      overflow-y: auto;
-      animation: slideUp 0.3s ease;
-    }
-
-    .jejak-peek-overlay.show {
-      display: flex;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-
-    .peek-header {
-      background: var(--surface);
-      border-bottom: 2px solid var(--border);
-      padding: var(--space-md);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .peek-timer {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--accent-primary);
-      background: var(--surface-elevated);
-      padding: 8px 16px;
-      border: 2px solid var(--accent-primary);
-    }
-
-    .peek-timer.pulse {
-      animation: timerPulse 1s infinite;
-    }
-
-    @keyframes timerPulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.7; transform: scale(1.05); }
-    }
-
-    /* Typing Indicator */
-    .typing-indicator {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 600;
-      margin-top: var(--space-xs);
-    }
-
-    .typing-dots {
-      display: flex;
-      gap: 3px;
-    }
-
-    .typing-dots span {
-      width: 6px;
-      height: 6px;
-      background: var(--accent-primary);
-      border-radius: 50%;
-      animation: typingBounce 1.4s infinite ease-in-out both;
-    }
-
+    /* PEEK OVERLAY */
+    .jejak-peek-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 9998; display: none; flex-direction: column; overflow-y: auto; animation: slideUp 0.3s ease; }
+    .jejak-peek-overlay.show { display: flex; }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .peek-header { background: var(--surface); border-bottom: 2px solid var(--border); padding: var(--space-md); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; }
+    .peek-timer { display: flex; align-items: center; gap: var(--space-sm); font-size: 14px; font-weight: 700; color: var(--accent-primary); background: var(--surface-elevated); padding: 8px 16px; border: 2px solid var(--accent-primary); }
+    .peek-timer.pulse { animation: timerPulse 1s infinite; }
+    @keyframes timerPulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.7; transform:scale(1.05); } }
+    .typing-indicator { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: var(--space-xs); }
+    .typing-dots { display: flex; gap: 3px; }
+    .typing-dots span { width: 6px; height: 6px; background: var(--accent-primary); border-radius: 50%; animation: typingBounce 1.4s infinite ease-in-out both; }
     .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
     .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
-
-    @keyframes typingBounce {
-      0%, 80%, 100% { transform: scale(0); }
-      40% { transform: scale(1); }
-    }
-
-    .peek-content {
-      flex: 1;
-      padding: var(--space-md);
-      max-width: 480px;
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    .peek-profile {
-      text-align: center;
-      padding: var(--space-lg) 0;
-      border-bottom: 2px solid var(--border);
-      margin-bottom: var(--space-lg);
-    }
-
-    .peek-avatar {
-      width: 100px;
-      height: 100px;
-      background: var(--surface-elevated);
-      border: 3px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 50px;
-      margin: 0 auto var(--space-md);
-      position: relative;
-    }
-
-    .peek-avatar::after {
-      content: '👁️';
-      position: absolute;
-      bottom: -5px;
-      right: -5px;
-      background: var(--accent-primary);
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      border: 2px solid var(--bg);
-    }
-
-    .peek-username {
-      font-size: 20px;
-      font-weight: 800;
-      margin-bottom: var(--space-xs);
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-    }
-
-    .online-status {
-      font-size: 11px;
-      color: var(--accent-quaternary);
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      margin-top: 4px;
-    }
-
-    .online-dot {
-      width: 6px;
-      height: 6px;
-      background: var(--accent-quaternary);
-      border-radius: 50%;
-      animation: blink 2s infinite;
-    }
-
-    .peek-stats {
-      display: flex;
-      justify-content: center;
-      gap: var(--space-lg);
-      margin-top: var(--space-md);
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    /* Progressive Disclosure Entries */
-    .peek-entry {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      padding: var(--space-md);
-      margin-bottom: var(--space-md);
-      position: relative;
-      transition: all 0.5s ease;
-    }
-
-    .peek-entry.locked {
-      filter: blur(8px);
-      opacity: 0.3;
-      pointer-events: none;
-    }
-
-    .peek-entry.revealed {
-      filter: blur(0);
-      opacity: 1;
-      animation: revealEntry 0.5s ease;
-    }
-
-    @keyframes revealEntry {
-      from { 
-        filter: blur(8px);
-        opacity: 0.3;
-        transform: translateY(10px);
-      }
-      to { 
-        filter: blur(0);
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .peek-entry-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--space-sm);
-    }
-
-    .peek-entry-mood {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--accent-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .peek-entry-time {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
-    .peek-entry-content {
-      font-size: 14px;
-      line-height: 1.6;
-      color: var(--text);
-      font-family: 'Instrument Serif', serif;
-      font-style: italic;
-    }
-
-    .entry-teaser {
-      font-size: 14px;
-      color: var(--text-muted);
-      font-style: italic;
-      position: relative;
-    }
-
-    .entry-teaser::after {
-      content: '...';
-      color: var(--accent-primary);
-      font-weight: 700;
-    }
-
-    .unlock-hint {
-      position: absolute;
-      bottom: var(--space-md);
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--accent-primary);
-      color: var(--bg);
-      padding: 6px 12px;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      white-space: nowrap;
-    }
-
-    .peek-reactions {
-      display: flex;
-      gap: var(--space-xs);
-      margin-top: var(--space-md);
-      padding-top: var(--space-sm);
-      border-top: 1px solid var(--border);
-    }
-
-    .peek-reaction-btn {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 6px 12px;
-      background: var(--surface-elevated);
-      border: 1px solid var(--border);
-      cursor: pointer;
-      font-size: 11px;
-      color: var(--text-secondary);
-      transition: all 0.2s;
-      font-weight: 600;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .peek-reaction-btn:hover {
-      background: var(--accent-primary);
-      border-color: var(--accent-primary);
-      color: var(--bg);
-      transform: scale(1.05);
-    }
-
-    .peek-reaction-btn.given {
-      background: var(--accent-primary);
-      border-color: var(--accent-primary);
-      color: var(--bg);
-    }
-
-    .peek-reaction-btn::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      background: rgba(255,255,255,0.3);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: width 0.3s, height 0.3s;
-    }
-
-    .peek-reaction-btn:active::after {
-      width: 100px;
-      height: 100px;
-    }
-
-    /* Spring Animation */
-    @keyframes spring {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-
-    .peek-reaction-btn.spring {
-      animation: spring 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
-
-    .peek-extend {
-      text-align: center;
-      padding: var(--space-lg);
-      border-top: 2px dashed var(--border);
-      margin-top: var(--space-lg);
-      background: var(--surface);
-    }
-
-    .peek-extend-text {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-bottom: var(--space-md);
-      font-weight: 600;
-    }
-
-    .peek-extend-btn {
-      background: var(--accent-primary);
-      color: var(--bg);
-      border: none;
-      padding: 12px 24px;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 4px 4px 0 var(--surface-elevated), 4px 4px 0 2px var(--accent-primary);
-    }
-
-    .peek-extend-btn:hover {
-      transform: translate(2px, 2px);
-      box-shadow: 2px 2px 0 var(--surface-elevated), 2px 2px 0 2px var(--accent-primary);
-    }
-
-    .peek-locked {
-      text-align: center;
-      padding: var(--space-xl) var(--space-md);
-      background: var(--surface);
-      border: 2px dashed var(--border);
-      margin-top: var(--space-lg);
-    }
-
-    .peek-locked-icon {
-      font-size: 40px;
-      margin-bottom: var(--space-md);
-      opacity: 0.5;
-    }
-
-    .peek-locked-text {
-      font-family: 'Instrument Serif', serif;
-      font-size: 16px;
-      font-style: italic;
-      color: var(--text-secondary);
-      margin-bottom: var(--space-md);
-    }
-
-    .peek-back-btn {
-      background: none;
-      border: 2px solid var(--border);
-      color: var(--text);
-      font-size: 18px;
-      cursor: pointer;
-      padding: var(--space-sm);
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-      font-weight: 700;
-    }
-
-    .peek-back-btn:hover {
-      background: var(--accent-primary);
-      border-color: var(--accent-primary);
-      color: var(--bg);
-    }
-
-    /* Reciprocity Notification */
-    .reciprocity-toast {
-      position: fixed;
-      top: var(--space-md);
-      left: 50%;
-      transform: translateX(-50%) translateY(-100px);
-      background: var(--accent-quaternary);
-      color: var(--bg);
-      padding: 12px 20px;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      z-index: 10003;
-      opacity: 0;
-      transition: all 0.3s;
-      border: 2px solid var(--bg);
-      box-shadow: 4px 4px 0 var(--accent-primary);
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-    }
-
-    .reciprocity-toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    /* === HOMIE EMPTY STATE === */
-    .homie-empty {
-      text-align: center;
-      padding: var(--space-xl) var(--space-md);
-      background: var(--surface);
-      border: 2px dashed var(--border);
-      margin: var(--space-lg) 0;
-    }
-
-    .homie-empty-icon {
-      font-size: 48px;
-      margin-bottom: var(--space-md);
-      display: block;
-      animation: float 3s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-
-    .homie-empty-title {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--text);
-      margin-bottom: var(--space-sm);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .homie-empty-text {
-      font-family: 'Instrument Serif', serif;
-      font-size: 16px;
-      font-style: italic;
-      color: var(--text-secondary);
-      line-height: 1.5;
-      margin-bottom: var(--space-md);
-    }
-
-    .homie-empty-btn {
-      background: var(--accent-primary);
-      color: var(--bg);
-      border: none;
-      padding: 12px 24px;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 4px 4px 0 var(--surface-elevated), 4px 4px 0 2px var(--accent-primary);
-    }
-
-    .homie-empty-btn:hover {
-      transform: translate(2px, 2px);
-      box-shadow: 2px 2px 0 var(--surface-elevated), 2px 2px 0 2px var(--accent-primary);
-    }
-
-    /* === GETARAN CARDS === */
-    .getaran-section {
-      margin-top: var(--space-xl);
-      margin-bottom: var(--space-xl);
-    }
-
-    .getaran-header {
-      font-size: 11px;
-      font-weight: 800;
-      color: var(--text);
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      margin-bottom: var(--space-md);
-      padding-bottom: var(--space-sm);
-      border-bottom: 2px solid var(--border);
-      position: relative;
-    }
-
-    .getaran-header::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 60px;
-      height: 2px;
-      background: var(--accent-primary);
-    }
-
-    .getaran-card {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      padding: var(--space-md);
-      margin-bottom: var(--space-md);
-      position: relative;
-      transition: all 0.2s;
-    }
-
-    .getaran-card:hover {
-      border-color: var(--border-accent);
-    }
-
-    .getaran-content {
-      display: flex;
-      gap: var(--space-md);
-      margin-bottom: var(--space-md);
-    }
-
-    .getaran-icon {
-      width: 48px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      flex-shrink: 0;
-      border: 2px solid var(--border);
-      background: var(--surface-elevated);
-    }
-
-    .getaran-icon.blue {
-      border-color: var(--accent-secondary);
-      color: var(--accent-secondary);
-    }
-
-    .getaran-icon.neutral {
-      border-color: var(--text-muted);
-      color: var(--text-muted);
-    }
-
-    .getaran-text {
-      flex: 1;
-    }
-
-    .getaran-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-      line-height: 1.4;
-      margin-bottom: var(--space-sm);
-    }
-
-    .getaran-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .getaran-list li {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-bottom: var(--space-xs);
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      font-weight: 500;
-    }
-
-    .getaran-list li::before {
-      content: '>';
-      color: var(--accent-primary);
-      font-weight: 700;
-    }
-
-    .getaran-actions {
-      display: flex;
-      gap: var(--space-sm);
-      padding-left: 64px;
-    }
-
-    .getaran-btn {
-      padding: 10px 20px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: 2px solid var(--border);
-      background: transparent;
-    }
-
-    .getaran-btn.skip {
-      color: var(--text-muted);
-    }
-
-    .getaran-btn.skip:hover {
-      color: var(--text);
-      background: var(--surface-elevated);
-      border-color: var(--text-secondary);
-    }
-
-    .getaran-btn.primary {
-      background: var(--text);
-      color: var(--bg);
-      border-color: var(--text);
-    }
-
-    .getaran-btn.primary:hover {
-      background: var(--accent-primary);
-      border-color: var(--accent-primary);
-      transform: translateY(-1px);
-      box-shadow: 2px 2px 0 var(--surface-elevated);
-    }
-
-    /* === REFRESH BUTTON === */
-    .refresh-container {
-      text-align: center;
-      margin: var(--space-xl) 0;
-    }
-
-    .refresh-btn {
-      background: var(--surface);
-      border: 2px solid var(--accent-primary);
-      color: var(--accent-primary);
-      padding: 12px 28px;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-sm);
-      transition: all 0.2s;
-      box-shadow: 4px 4px 0 var(--surface-elevated), 4px 4px 0 2px var(--accent-primary);
-    }
-
-    .refresh-btn:hover {
-      background: var(--accent-primary);
-      color: var(--bg);
-      transform: translate(2px, 2px);
-      box-shadow: 2px 2px 0 var(--surface-elevated), 2px 2px 0 2px var(--accent-primary);
-    }
-
-    .refresh-btn.spinning .emoji {
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    /* === FOOTER === */
-    .zone-footer {
-      text-align: center;
-      font-family: 'Instrument Serif', serif;
-      font-size: 14px;
-      font-style: italic;
-      color: var(--text-muted);
-      padding: var(--space-xl) 0;
-      margin-bottom: 80px;
-      border-top: 2px solid var(--border);
-    }
-
-    /* === NOTIFICATION === */
-    .notification {
-      position: fixed;
-      top: var(--space-md);
-      left: 50%;
-      transform: translateX(-50%) translateY(-100px);
-      background: var(--text);
-      color: var(--bg);
-      padding: 12px 24px;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      z-index: 10002;
-      opacity: 0;
-      transition: all 0.3s;
-      border: 2px solid var(--bg);
-      box-shadow: 4px 4px 0 var(--accent-primary);
-    }
-
-    .notification.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    /* === SCROLL PAUSE INDICATOR === */
-    .scroll-pause {
-      text-align: center;
-      padding: var(--space-lg);
-      margin: var(--space-lg) 0;
-      border: 2px dashed var(--border);
-      background: var(--surface);
-      display: none;
-    }
-
-    .scroll-pause.show {
-      display: block;
-      animation: fadeIn 0.5s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .scroll-pause-text {
-      font-family: 'Instrument Serif', serif;
-      font-size: 16px;
-      font-style: italic;
-      color: var(--text-secondary);
-      margin-bottom: var(--space-md);
-    }
-
-    .scroll-pause-btn {
-      background: var(--surface-elevated);
-      border: 2px solid var(--border);
-      color: var(--text);
-      padding: 10px 20px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .scroll-pause-btn:hover {
-      background: var(--accent-primary);
-      border-color: var(--accent-primary);
-      color: var(--bg);
-    }
-
-    /* === BOTTOM NAV === */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--surface);
-      border-top: 2px solid var(--border);
-      z-index: 1000;
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    .nav-container {
-      max-width: 480px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      height: 64px;
-    }
-
-    .nav-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      height: 100%;
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      transition: all 0.2s;
-      position: relative;
-      cursor: pointer;
-    }
-
-    .nav-item::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 2px;
-      background: var(--accent-primary);
-      transition: width 0.2s;
-    }
-
-    .nav-item:hover {
-      color: var(--text-secondary);
-      background: var(--surface-elevated);
-    }
-
-    .nav-item.active {
-      color: var(--accent-primary);
-    }
-
-    .nav-item.active::before {
-      width: 100%;
-    }
-
-    .nav-icon {
-      font-size: 20px;
-      line-height: 1;
-    }
-
-    /* === PAYWALL MODAL === */
-    .paywall-modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.9);
-      z-index: 10001;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: var(--space-md);
-      backdrop-filter: blur(8px);
-    }
-
-    .paywall-modal.show {
-      display: flex;
-    }
-
-    .paywall-content {
-      background: var(--surface);
-      border: 2px solid var(--accent-warm);
-      width: 100%;
-      max-width: 340px;
-      padding: var(--space-xl) var(--space-md);
-      text-align: center;
-      animation: scaleIn 0.3s ease;
-      position: relative;
-    }
-
-    .paywall-content::before {
-      content: 'PREMIUM';
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--accent-warm);
-      color: var(--bg);
-      padding: 4px 16px;
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 0.1em;
-    }
-
-    .paywall-icon {
-      font-size: 40px;
-      margin-bottom: var(--space-md);
-    }
-
-    .paywall-title {
-      font-size: 18px;
-      font-weight: 800;
-      margin-bottom: var(--space-xs);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .paywall-desc {
-      font-family: 'Instrument Serif', serif;
-      font-size: 15px;
-      font-style: italic;
-      color: var(--text-secondary);
-      margin-bottom: var(--space-lg);
-      line-height: 1.5;
-    }
-
-    .pricing-options {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-sm);
-      margin-bottom: var(--space-md);
-    }
-
-    .pricing-card {
-      background: var(--surface-elevated);
-      border: 2px solid var(--border);
-      padding: var(--space-md);
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative;
-    }
-
-    .pricing-card:hover {
-      border-color: var(--accent-warm);
-      transform: translateY(-2px);
-    }
-
-    .pricing-card.recommended {
-      border-color: var(--accent-warm);
-      background: rgba(212, 175, 55, 0.1);
-    }
-
-    .pricing-price {
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--text);
-      margin-bottom: 2px;
-    }
-
-    .pricing-period {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .pricing-save {
-      font-size: 10px;
-      color: var(--accent-primary);
-      font-weight: 700;
-      margin-top: var(--space-xs);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .paywall-btn {
-      width: 100%;
-      background: var(--accent-warm);
-      color: var(--bg);
-      border: none;
-      padding: 14px;
-      font-size: 14px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 4px 4px 0 var(--bg), 4px 4px 0 2px var(--accent-warm);
-    }
-
-    .paywall-btn:hover {
-      transform: translate(2px, 2px);
-      box-shadow: 2px 2px 0 var(--bg), 2px 2px 0 2px var(--accent-warm);
-    }
-
-    .paywall-skip {
-      margin-top: var(--space-md);
-      font-size: 12px;
-      color: var(--text-muted);
-      cursor: pointer;
-      background: none;
-      border: none;
-      font-family: inherit;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .paywall-skip:hover {
-      color: var(--text);
-    }
-
-    /* Micro-transaction option */
-    .micro-transaction {
-      margin-top: var(--space-md);
-      padding-top: var(--space-md);
-      border-top: 1px solid var(--border);
-    }
-
-    .micro-text {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-bottom: var(--space-sm);
-      font-weight: 600;
-    }
-
-    .micro-btn {
-      background: var(--surface-elevated);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 8px 16px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-      width: 100%;
-    }
-
-    .micro-btn:hover {
-      background: var(--accent-primary);
-      border-color: var(--accent-primary);
-      color: var(--bg);
-    }
-
-    @keyframes scaleIn {
-      from { transform: scale(0.9); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
-
-    /* === NARRATIVE ARC OVERLAY === */
-    .narrative-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.95);
-      z-index: 10004;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: var(--space-md);
-      text-align: center;
-    }
-
-    .narrative-overlay.show {
-      display: flex;
-      animation: fadeIn 0.5s ease;
-    }
-
-    .narrative-content {
-      max-width: 320px;
-    }
-
-    .narrative-icon {
-      font-size: 60px;
-      margin-bottom: var(--space-lg);
-      animation: float 3s ease-in-out infinite;
-    }
-
-    .narrative-title {
-      font-size: 20px;
-      font-weight: 800;
-      margin-bottom: var(--space-md);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .narrative-text {
-      font-family: 'Instrument Serif', serif;
-      font-size: 16px;
-      font-style: italic;
-      color: var(--text-secondary);
-      line-height: 1.6;
-      margin-bottom: var(--space-xl);
-    }
-
-    .narrative-btn {
-      background: var(--accent-primary);
-      color: var(--bg);
-      border: none;
-      padding: 14px 28px;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 4px 4px 0 var(--surface-elevated), 4px 4px 0 2px var(--accent-primary);
-    }
-
-    .narrative-btn:hover {
-      transform: translate(2px, 2px);
-      box-shadow: 2px 2px 0 var(--surface-elevated), 2px 2px 0 2px var(--accent-primary);
-    }
-
-    .narrative-cliffhanger {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: var(--space-lg);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-
-    @media (max-width: 480px) {
-      .wrapper {
-        padding: 0 var(--space-sm);
-      }
-
-      .page-title {
-        font-size: 24px;
-      }
-
-      .tea-content, .vibe-section, .tea-image {
-        padding-left: 0;
-        margin-left: 0;
-        width: 100%;
-      }
-
-      .tea-header {
-        margin-bottom: var(--space-xs);
-      }
-      
-      .getaran-content {
-        gap: var(--space-sm);
-      }
-      
-      .getaran-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 20px;
-      }
-
-      .getaran-actions {
-        padding-left: 56px;
-      }
-    }
+    @keyframes typingBounce { 0%,80%,100% { transform:scale(0); } 40% { transform:scale(1); } }
+    .peek-content { flex: 1; padding: var(--space-md); max-width: 480px; margin: 0 auto; width: 100%; }
+    .peek-profile { text-align: center; padding: var(--space-lg) 0; border-bottom: 2px solid var(--border); margin-bottom: var(--space-lg); }
+    .peek-avatar-big { width: 100px; height: 100px; background: var(--surface-elevated); border: 3px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 800; font-family: monospace; margin: 0 auto var(--space-md); position: relative; color: var(--text-secondary); }
+    .peek-avatar-big::after { content: '👁️'; position: absolute; bottom: -5px; right: -5px; background: var(--accent-primary); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid var(--bg); }
+    .peek-username { font-size: 20px; font-weight: 800; margin-bottom: var(--space-xs); text-transform: uppercase; letter-spacing: 0.02em; }
+    .online-status { font-size: 11px; color: var(--accent-quaternary); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 4px; }
+    .online-dot { width: 6px; height: 6px; background: var(--accent-quaternary); border-radius: 50%; animation: blink 2s infinite; }
+    .peek-stats { display: flex; justify-content: center; gap: var(--space-lg); margin-top: var(--space-md); font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .peek-entry { background: var(--surface); border: 2px solid var(--border); padding: var(--space-md); margin-bottom: var(--space-md); position: relative; transition: all 0.5s ease; }
+    .peek-entry.locked { filter: blur(8px); opacity: 0.3; pointer-events: none; }
+    .peek-entry.revealed { filter: blur(0); opacity: 1; animation: revealEntry 0.5s ease; }
+    @keyframes revealEntry { from { filter:blur(8px); opacity:0.3; transform:translateY(10px); } to { filter:blur(0); opacity:1; transform:translateY(0); } }
+    .peek-entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm); }
+    .peek-entry-mood { font-size: 12px; font-weight: 700; color: var(--accent-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+    .peek-entry-time { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+    .peek-entry-content { font-size: 14px; line-height: 1.6; color: var(--text); font-family: 'Instrument Serif', serif; font-style: italic; }
+    .unlock-hint { position: absolute; bottom: var(--space-md); left: 50%; transform: translateX(-50%); background: var(--accent-primary); color: var(--bg); padding: 6px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+    .peek-extend { text-align: center; padding: var(--space-lg); border-top: 2px dashed var(--border); margin-top: var(--space-lg); background: var(--surface); }
+    .peek-extend-text { font-size: 12px; color: var(--text-secondary); margin-bottom: var(--space-md); font-weight: 600; }
+    .peek-reactions { display: flex; flex-wrap: wrap; gap: var(--space-xs); justify-content: center; }
+    .peek-reaction-btn { display: flex; align-items: center; gap: 4px; padding: 8px 14px; background: var(--surface-elevated); border: 1px solid var(--border); cursor: pointer; font-size: 12px; color: var(--text-secondary); transition: all 0.2s; font-weight: 700; }
+    .peek-reaction-btn:hover { background: var(--accent-primary); border-color: var(--accent-primary); color: var(--bg); transform: scale(1.05); }
+    .peek-reaction-btn.given { background: var(--accent-primary); border-color: var(--accent-primary); color: var(--bg); }
+    .peek-locked { text-align: center; padding: var(--space-xl) var(--space-md); background: var(--surface); border: 2px dashed var(--border); margin-top: var(--space-lg); }
+    .peek-locked-icon { font-size: 40px; margin-bottom: var(--space-md); opacity: 0.5; }
+    .peek-locked-text { font-family: 'Instrument Serif', serif; font-size: 16px; font-style: italic; color: var(--text-secondary); margin-bottom: var(--space-md); }
+    .peek-back-btn { background: none; border: 2px solid var(--border); color: var(--text); font-size: 18px; cursor: pointer; padding: var(--space-sm); width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-weight: 700; }
+    .peek-back-btn:hover { background: var(--accent-primary); border-color: var(--accent-primary); color: var(--bg); }
+
+    /* GETARAN */
+    .getaran-section { margin-top: var(--space-xl); margin-bottom: var(--space-xl); }
+    .getaran-header { font-size: 11px; font-weight: 800; color: var(--text); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: var(--space-md); padding-bottom: var(--space-sm); border-bottom: 2px solid var(--border); position: relative; }
+    .getaran-header::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 60px; height: 2px; background: var(--accent-primary); }
+    .getaran-card { background: var(--surface); border: 2px solid var(--border); padding: var(--space-md); margin-bottom: var(--space-md); transition: all 0.2s; }
+    .getaran-card:hover { border-color: var(--border-accent); }
+    .getaran-content { display: flex; gap: var(--space-md); margin-bottom: var(--space-md); }
+    .getaran-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; border: 2px solid var(--border); background: var(--surface-elevated); }
+    .getaran-icon.blue { border-color: var(--accent-secondary); }
+    .getaran-icon.neutral { border-color: var(--text-muted); }
+    .getaran-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: var(--space-sm); }
+    .getaran-list { list-style: none; }
+    .getaran-list li { font-size: 12px; color: var(--text-secondary); margin-bottom: var(--space-xs); display: flex; align-items: center; gap: var(--space-sm); font-weight: 500; }
+    .getaran-list li::before { content: '>'; color: var(--accent-primary); font-weight: 700; }
+    .getaran-actions { display: flex; gap: var(--space-sm); padding-left: 64px; }
+    .getaran-btn { padding: 10px 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s; border: 2px solid var(--border); background: transparent; }
+    .getaran-btn.skip { color: var(--text-muted); }
+    .getaran-btn.skip:hover { color: var(--text); background: var(--surface-elevated); }
+    .getaran-btn.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+    .getaran-btn.primary:hover { background: var(--accent-primary); border-color: var(--accent-primary); transform: translateY(-1px); }
+
+    /* EMPTY & LOADING */
+    .homie-empty { text-align: center; padding: var(--space-xl) var(--space-md); background: var(--surface); border: 2px dashed var(--border); margin: var(--space-lg) 0; display: none; }
+    .homie-empty-icon { font-size: 48px; margin-bottom: var(--space-md); display: block; animation: float 3s ease-in-out infinite; }
+    @keyframes float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
+    .homie-empty-title { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: var(--space-sm); text-transform: uppercase; letter-spacing: 0.05em; }
+    .homie-empty-text { font-family: 'Instrument Serif', serif; font-size: 16px; font-style: italic; color: var(--text-secondary); line-height: 1.5; margin-bottom: var(--space-md); }
+    .homie-empty-btn { background: var(--accent-primary); color: var(--bg); border: none; padding: 12px 24px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s; box-shadow: 4px 4px 0 var(--surface-elevated), 4px 4px 0 2px var(--accent-primary); }
+    .loading-state { text-align: center; padding: var(--space-xl); border: 2px dashed var(--border); }
+    .loading-spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto var(--space-md); }
+    @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+
+    .scroll-pause { text-align: center; padding: var(--space-lg); margin: var(--space-lg) 0; border: 2px dashed var(--border); background: var(--surface); display: none; }
+    .scroll-pause.show { display: block; animation: fadeIn 0.5s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    .scroll-pause-text { font-family: 'Instrument Serif', serif; font-size: 16px; font-style: italic; color: var(--text-secondary); margin-bottom: var(--space-md); }
+    .scroll-pause-btn { background: var(--surface-elevated); border: 2px solid var(--border); color: var(--text); padding: 10px 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s; }
+    .scroll-pause-btn:hover { background: var(--accent-primary); border-color: var(--accent-primary); color: var(--bg); }
+
+    .refresh-container { text-align: center; margin: var(--space-xl) 0; }
+    .refresh-btn { background: var(--surface); border: 2px solid var(--accent-primary); color: var(--accent-primary); padding: 12px 28px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; display: inline-flex; align-items: center; gap: var(--space-sm); transition: all 0.2s; box-shadow: 4px 4px 0 var(--surface-elevated), 4px 4px 0 2px var(--accent-primary); }
+    .refresh-btn:hover { background: var(--accent-primary); color: var(--bg); transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--surface-elevated); }
+    .refresh-btn.spinning .emoji { animation: spin 1s linear infinite; }
+
+    .zone-footer { text-align: center; font-family: 'Instrument Serif', serif; font-size: 14px; font-style: italic; color: var(--text-muted); padding: var(--space-xl) 0; margin-bottom: 80px; border-top: 2px solid var(--border); }
+
+    .notification { position: fixed; top: var(--space-md); left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--text); color: var(--bg); padding: 12px 24px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; z-index: 10002; opacity: 0; transition: all 0.3s; border: 2px solid var(--bg); box-shadow: 4px 4px 0 var(--accent-primary); pointer-events: none; white-space: nowrap; }
+    .notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .reciprocity-toast { position: fixed; top: var(--space-md); left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--accent-quaternary); color: var(--bg); padding: 12px 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; z-index: 10003; opacity: 0; transition: all 0.3s; border: 2px solid var(--bg); box-shadow: 4px 4px 0 var(--accent-primary); display: flex; align-items: center; gap: var(--space-sm); }
+    .reciprocity-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* NARRATIVE ARC */
+    .narrative-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10004; display: none; align-items: center; justify-content: center; padding: var(--space-md); text-align: center; }
+    .narrative-overlay.show { display: flex; animation: fadeIn 0.5s ease; }
+    .narrative-content { max-width: 320px; }
+    .narrative-icon { font-size: 60px; margin-bottom: var(--space-lg); animation: float 3s ease-in-out infinite; }
+    .narrative-title { font-size: 20px; font-weight: 800; margin-bottom: var(--space-md); text-transform: uppercase; letter-spacing: 0.05em; }
+    .narrative-text { font-family: 'Instrument Serif', serif; font-size: 16px; font-style: italic; color: var(--text-secondary); line-height: 1.6; margin-bottom: var(--space-xl); }
+    .narrative-btn { background: var(--accent-primary); color: var(--bg); border: none; padding: 14px 28px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; transition: all 0.2s; box-shadow: 4px 4px 0 var(--surface-elevated), 4px 4px 0 2px var(--accent-primary); }
+    .narrative-cliffhanger { font-size: 11px; color: var(--text-muted); margin-top: var(--space-lg); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 2px solid var(--border); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
+    .nav-container { max-width: 480px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center; height: 64px; }
+    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 100%; color: var(--text-muted); text-decoration: none; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; position: relative; cursor: pointer; }
+    .nav-item::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 0; height: 2px; background: var(--accent-primary); transition: width 0.2s; }
+    .nav-item:hover { color: var(--text-secondary); background: var(--surface-elevated); }
+    .nav-item.active { color: var(--accent-primary); }
+    .nav-item.active::before { width: 100%; }
+    .nav-icon { font-size: 20px; line-height: 1; }
   </style>
 </head>
 <body>
   <div class="wrapper">
-    <!-- HEADER -->
     <header>
       <div class="header-title">Spill the Tea</div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="sync-dot" id="sync-dot"></span>
+        <span class="header-user" id="header-username">@...</span>
+      </div>
     </header>
 
-    <!-- PAGE HEADER -->
     <div class="page-header">
       <p class="page-subtitle">Curhatan dari komunitas yang selaras dengan vibrasimu</p>
-      <div class="page-tagline">Give your vibe and start your journey...</div>
+      <div class="page-tagline" id="spill-tagline">Memuat spills...</div>
     </div>
 
-    <!-- KESAMAAN VIBRASI FILTER -->
-    <div class="vibrasi-filter" id="vibrasi-filter">
+    <div class="new-spill-banner" id="new-spill-banner" onclick="loadPendingSpills()">↑ Ada spill baru! Tap untuk lihat</div>
+
+    <div class="vibrasi-filter">
       <div class="filter-header">
         <span class="filter-title">Kesamaan Vibrasi</span>
+        <span class="filter-stats" id="filter-stats"></span>
         <button class="filter-reset" onclick="resetFilter()">Reset</button>
       </div>
       <input type="range" class="filter-slider" id="filter-slider" min="0" max="100" value="80" oninput="adjustResonance(this.value)">
-      <div class="filter-labels">
-        <span>Homie Only</span>
-        <span>Semi-Selaras</span>
-        <span>Semua</span>
+      <div class="filter-labels"><span>Homie Only</span><span>Semi-Selaras</span><span>Semua</span></div>
+      <div class="mood-chips">
+        <button class="mood-chip active" data-mood="all" onclick="setMoodFilter('all')">Semua</button>
+        <button class="mood-chip" data-mood="surviving" onclick="setMoodFilter('surviving')">😮‍💨 Surviving</button>
+        <button class="mood-chip" data-mood="thriving" onclick="setMoodFilter('thriving')">✨ Thriving</button>
+        <button class="mood-chip" data-mood="chaotic" onclick="setMoodFilter('chaotic')">🌀 Chaotic</button>
+        <button class="mood-chip" data-mood="doom" onclick="setMoodFilter('doom')">🛌 Doom</button>
       </div>
     </div>
 
     <div class="tea-container" id="tea-container">
-      <!-- Tea cards will be rendered here -->
+      <div class="loading-state"><div class="loading-spinner"></div><div style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Menyeduh teh...</div></div>
     </div>
 
-    <!-- SCROLL PAUSE INDICATOR -->
-    <div class="scroll-pause" id="scroll-pause">
-      <div class="scroll-pause-text">💭 Sudah cukup scroll untuk sekarang?</div>
-      <button class="scroll-pause-btn" onclick="continueScrolling()">Lanjutkan</button>
-    </div>
-
-    <!-- HOMIE EMPTY STATE -->
-    <div class="homie-empty" id="homie-empty" style="display: none;">
-      <div class="homie-empty-icon">🌌</div>
+    <div class="homie-empty" id="homie-empty">
+      <span class="homie-empty-icon">🌌</span>
       <div class="homie-empty-title">Belum Ada yang Selaras</div>
-      <div class="homie-empty-text">
-        Vibrasimu hari ini unik! Belum ada yang spill dengan energi serupa. 
-        Coba turunkan tingkat resonansi atau tulis di JEJAK dulu.
-      </div>
-      <button class="homie-empty-btn" onclick="adjustResonance(50)">Buka Filter Lebar</button>
+      <div class="homie-empty-text">Vibrasimu unik! Coba turunkan tingkat resonansi atau tulis di JEJAK dulu.</div>
+      <button class="homie-empty-btn" onclick="resetFilter()">Buka Filter Lebar</button>
     </div>
 
     <div class="refresh-container">
-      <button class="refresh-btn" id="refresh-btn" onclick="loadNewTea()">
+      <button class="refresh-btn" id="refresh-btn" onclick="refreshTea()">
         <span class="emoji">🔄</span> Seduh Teh Baru
       </button>
     </div>
 
-    <!-- GETARAN CARDS SECTION -->
-    <div class="getaran-section">
+    <div class="getaran-section" id="getaran-section" style="display:none;">
       <div class="getaran-header">Getaran yang Cocok</div>
-      
-      <!-- Card 1 -->
-      <div class="getaran-card">
-        <div class="getaran-content">
-          <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-xs);">
-            <div class="getaran-icon blue">👁️</div>
-          </div>
-          <div class="getaran-text">
-            <div class="getaran-title">Seseorang dengan pola "chaotic good" sering muncul di timeline kamu.</div>
-            <ul class="getaran-list">
-              <li>Sama-sama aktif jam aneh</li>
-              <li>Sama-sama react 🤗 tapi jarang post</li>
-              <li>Sama-sama "surviving" mode</li>
-            </ul>
-          </div>
-        </div>
-        <div class="getaran-actions">
-          <button class="getaran-btn skip" onclick="skipGetaran(this)">Lewati</button>
-          <button class="getaran-btn primary" onclick="beriIsyarat(this)">Beri isyarat</button>
-        </div>
-      </div>
-
-      <!-- Card 2 -->
-      <div class="getaran-card">
-        <div class="getaran-content">
-          <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-xs);">
-            <div class="getaran-icon neutral">🗂️</div>
-          </div>
-          <div class="getaran-text">
-            <div class="getaran-title">Ada yang sering kasih hug ke curhatanmu, tapi jarang cerita balik.</div>
-            <ul class="getaran-list">
-              <li>Pola "caregiver" yang sama</li>
-              <li>Sama-sama burnout tapi diam</li>
-            </ul>
-          </div>
-        </div>
-        <div class="getaran-actions">
-          <button class="getaran-btn skip" onclick="skipGetaran(this)">Lewati</button>
-          <button class="getaran-btn primary" onclick="beriIsyarat(this)">Beri isyarat</button>
-        </div>
-      </div>
+      <div id="getaran-cards"></div>
     </div>
 
     <div class="zone-footer">Nyambat • Aksi • Solusi</div>
   </div>
 
-  <!-- JEJAK PEEK OVERLAY -->
+  <!-- PEEK OVERLAY -->
   <div class="jejak-peek-overlay" id="jejak-peek-overlay">
     <div class="peek-header">
       <button class="peek-back-btn" onclick="closePeek()">←</button>
-      <div class="peek-timer" id="peek-timer">
-        <span>👁️</span>
-        <span id="timer-count">15</span>s
-      </div>
+      <div class="peek-timer" id="peek-timer"><span>👁️</span><span id="timer-count">15</span>s</div>
     </div>
-    
     <div class="peek-content">
       <div class="peek-profile">
-        <div class="peek-avatar" id="peek-avatar">👤</div>
-        <div class="peek-username" id="peek-username">@username</div>
-        <div class="online-status" id="online-status">
-          <span class="online-dot"></span>
-          <span>Online sekarang</span>
-        </div>
-        
-        <!-- Typing Indicator -->
-        <div class="typing-indicator" id="typing-indicator" style="display: none;">
-          <span>Sedang melihat profilmu</span>
-          <div class="typing-dots">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </div>
-        
+        <div class="peek-avatar-big" id="peek-avatar-big">??</div>
+        <div class="peek-username" id="peek-username">@user</div>
+        <div class="online-status" id="online-status" style="display:none;"><span class="online-dot"></span><span>Online sekarang</span></div>
+        <div class="typing-indicator" id="typing-indicator" style="display:none;"><span>Sedang melihat profilmu</span><div class="typing-dots"><span></span><span></span><span></span></div></div>
         <div class="peek-stats">
-          <div class="stat">
-            <span class="stat-value" id="peek-entries">12</span>
-            <span>Entries</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value" id="peek-vibes">48</span>
-            <span>Vibes</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value" id="peek-tea">3</span>
-            <span>Tea</span>
-          </div>
+          <div><span id="peek-entry-count">0</span> Entries</div>
+          <div><span id="peek-vibe-count">0</span> Vibes</div>
         </div>
       </div>
-
-      <div id="peek-entries-container">
-        <!-- Entries with progressive disclosure -->
-      </div>
-
+      <div id="peek-entries-container"></div>
       <div class="peek-extend" id="peek-extend-section">
         <div class="peek-extend-text">Kasih reaksi untuk tambah waktu peeking +15 detik</div>
-        <div class="peek-reactions" id="peek-reactions">
-          <!-- 6 emoji reactions -->
-        </div>
+        <div class="peek-reactions" id="peek-reactions"></div>
       </div>
-
-      <div class="peek-locked" id="peek-locked" style="display: none;">
+      <div class="peek-locked" id="peek-locked" style="display:none;">
         <div class="peek-locked-icon">🔒</div>
-        <div class="peek-locked-text">Waktu habis! Reaksi untuk membuka lagi atau upgrade untuk akses penuh.</div>
-        <button class="paywall-btn" onclick="showPaywall()" style="margin-top: var(--space-md);">Unlock Unlimited</button>
+        <div class="peek-locked-text">Waktu habis! Reaksi untuk buka lagi.</div>
       </div>
     </div>
   </div>
 
-  <!-- RECIPROCITY TOAST -->
-  <div class="reciprocity-toast" id="reciprocity-toast">
-    <span>👁️</span>
-    <span id="reciprocity-text">@user juga melihatmu!</span>
-  </div>
-
-  <!-- PAYWALL MODAL -->
-  <div class="paywall-modal" id="paywall-modal" onclick="closePaywall(event)">
-    <div class="paywall-content" onclick="event.stopPropagation()">
-      <div class="paywall-icon">🔐</div>
-      <div class="paywall-title">Unlock Direct Messages</div>
-      <div class="paywall-desc">
-        Kirim pesan langsung ke pemilik jurnal dan connect dengan komunitas NOPE.
-      </div>
-      
-      <div class="pricing-options">
-        <div class="pricing-card" onclick="selectPlan('monthly')">
-          <div class="pricing-price">Rp10.000</div>
-          <div class="pricing-period">/bulan</div>
-          <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px; font-weight: 600;">Unlimited DM</div>
-        </div>
-        
-        <div class="pricing-card recommended" onclick="selectPlan('yearly')">
-          <div class="pricing-price">Rp50.000</div>
-          <div class="pricing-period">/tahun</div>
-          <div class="pricing-save">Hemat 58%</div>
-          <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px; font-weight: 600;">Unlimited DM + Badge</div>
-        </div>
-      </div>
-      
-      <button class="paywall-btn" onclick="subscribe()">Langganan Sekarang</button>
-      
-      <!-- Micro-transaction option -->
-      <div class="micro-transaction">
-        <div class="micro-text">Atau coba dulu:</div>
-        <button class="micro-btn" onclick="microUnlock()">Rp5.000 - Unlock 1 DM</button>
-      </div>
-      
-      <button class="paywall-skip" onclick="closePaywall()">Nanti dulu</button>
-    </div>
-  </div>
-
-  <!-- NARRATIVE ARC OVERLAY -->
+  <div class="reciprocity-toast" id="reciprocity-toast"><span>👁️</span><span id="reciprocity-text"></span></div>
   <div class="narrative-overlay" id="narrative-overlay" onclick="closeNarrative(event)">
     <div class="narrative-content" onclick="event.stopPropagation()">
       <div class="narrative-icon" id="narrative-icon">✨</div>
-      <div class="narrative-title" id="narrative-title">Koneksi Tersimpan</div>
-      <div class="narrative-text" id="narrative-text">
-        Vibrasi kalian saling merespons. Seperti dua gelombang radio yang menemukan frekuensi yang sama di tengah kebisingan.
-      </div>
-      <button class="narrative-btn" id="narrative-btn" onclick="closeNarrative()">Lanjutkan Perjalanan</button>
-      <div class="narrative-cliffhanger" id="narrative-cliffhanger">
-        Lanjutkan besok untuk membuka bab baru...
-      </div>
+      <div class="narrative-title" id="narrative-title"></div>
+      <div class="narrative-text" id="narrative-text"></div>
+      <button class="narrative-btn" onclick="closeNarrative()">Lanjutkan</button>
+      <div class="narrative-cliffhanger" id="narrative-cliffhanger"></div>
     </div>
   </div>
 
-  <!-- BOTTOM NAVIGATION -->
   <nav class="bottom-nav">
     <div class="nav-container">
-      <a href="jejak.html" class="nav-item">
-        <span class="nav-icon">✦</span>
-        <span>Jejak</span>
-      </a>
-      <a href="cocomeo.html" class="nav-item">
-        <span class="nav-icon">〜</span>
-        <span>Cocomeo</span>
-      </a>
-      <a href="saynope.html" class="nav-item active">
-        <span class="nav-icon">✕</span>
-        <span>Spill</span>
-      </a>
-      <a href="glitch.html" class="nav-item">
-        <span class="nav-icon">⚡</span>
-        <span>Glitch</span>
-      </a>
+      <a href="jejak.html" class="nav-item"><span class="nav-icon">✦</span><span>Jejak</span></a>
+      <a href="cocomeo.html" class="nav-item"><span class="nav-icon">〜</span><span>Cocomeo</span></a>
+      <a href="saynope.html" class="nav-item active"><span class="nav-icon">✕</span><span>Spill</span></a>
+      <a href="glitch.html" class="nav-item"><span class="nav-icon">⚡</span><span>Glitch</span></a>
     </div>
   </nav>
 
   <script>
-    // === VIBRATIONAL MATCHING SYSTEM ===
-    
-    let userVibe = {
-      emotion: 'chaotic',
-      intensity: 0.7,
-      timestamp: null,
-      keywords: ['overthinking', 'anxiety', 'night']
-    };
+    // ═══════════════════════════════════════
+    // SUPABASE CONFIG
+    // ═══════════════════════════════════════
+    const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-    let resonanceThreshold = 80;
-    let isSubscribed = false;
-    let selectedPlan = 'yearly';
-    let scrollCount = 0;
+    // ═══════════════════════════════════════
+    // SESSION CHECK
+    // ═══════════════════════════════════════
+    const SESSION = (() => {
+      const username = localStorage.getItem('jejak_username');
+      const loggedIn = localStorage.getItem('jejak_logged_in');
+      if (!loggedIn || !username) { window.location.href = 'index.html'; return null; }
+      return { username };
+    })();
+    if (!SESSION) throw new Error('No session');
 
-    // 6 EMOJI SAMA DENGAN JEJAK
+    // ═══════════════════════════════════════
+    // CONSTANTS
+    // ═══════════════════════════════════════
     const VIBE_REACTIONS = {
-      'relatable': { emoji: '💯', label: 'literally me', slang: 'Sama' },
-      'same': { emoji: '🛋️', label: 'big mood', slang: 'Mood' },
-      'hug': { emoji: '🤗', label: 'virtual hug', slang: 'Peluk' },
-      'tea': { emoji: '🐸', label: 'spill tea', slang: 'Tea' },
-      'stay': { emoji: '✊', label: 'stay strong', slang: 'Kuat' },
-      'real': { emoji: '🎯', label: 'no cap', slang: 'Real' }
+      relatable: { emoji: '💯', label: 'literally me',  slang: 'Sama' },
+      mood:      { emoji: '🛋️', label: 'big mood',     slang: 'Mood' },
+      hug:       { emoji: '🤗', label: 'virtual hug',  slang: 'Peluk' },
+      tea:       { emoji: '🐸', label: 'spill tea',    slang: 'Tea' },
+      real:      { emoji: '🎯', label: 'no cap',       slang: 'Real' },
+      dead:      { emoji: '💀', label: 'rip me',       slang: 'RIP' }
     };
 
-    const TEA_POOL = [
-      {
-        id: 'tea-1',
-        user: '@overthinker_3am',
-        avatar: '🧠',
-        mood: '🛌 doomscrolling',
-        content: "kenapa ya tiap kali mau tidur malah jadi overthinking? padahal besok ada ujian tapi otakku malah playback moment cringe dari 5 tahun lalu 💀",
-        time: '20m',
-        vibes: { relatable: 45, hug: 23, same: 18 },
-        hasImage: false,
-        isLive: true,
-        viewers: 12,
-        isTrending: true,
-        vibeSignature: {
-          primary: 'chaotic',
-          intensity: 0.85,
-          keywords: ['overthinking', '3am', 'cringe', 'anxiety']
-        },
-        journal: [
-          { time: '3:42 AM', mood: '😴', content: "masih scrolling tiktok padahal mata udah ngantuk", reactions: { relatable: 12, same: 8 } },
-          { time: '2:15 AM', mood: '😰', content: "coba tidur tapi kepikiran typo ke grup kantor", reactions: { relatable: 5 } },
-          { time: '1:30 AM', mood: '🌀', content: "overthinking tentang masa depan padahal besok harus presentasi", reactions: { hug: 15, real: 8 } }
-        ]
+    const MOOD_META = {
+      surviving: { emoji: '😮‍💨', color: '#FF9500', kw: ['capek','lelah','burnout','gabut','bosan','overwhelmed'] },
+      thriving:  { emoji: '✨',   color: '#39FF14', kw: ['happy','senang','bagus','mantap','great','semangat'] },
+      chaotic:   { emoji: '🌀',   color: '#00F0FF', kw: ['chaos','overthinking','random','absurd','rusuh','gila'] },
+      doom:      { emoji: '🛌',   color: '#8B5CF6', kw: ['sedih','down','hopeless','galau','menyerah','hancur'] }
+    };
+
+    // Dummy spills — onboarding filler
+    const DUMMY_SPILLS = [
+      { id:'__d1', author:'overthinker_3am', mood:'chaotic', isDummy:true, isLive:true, viewers:12,
+        content:'kenapa ya tiap kali mau tidur malah jadi overthinking? padahal besok ada deadline tapi otak malah playback cringe moment dari 5 tahun lalu 💀',
+        vibes:{ relatable:45, mood:23, hug:18, tea:5, real:12, dead:8 }, created_at: new Date(Date.now()-1200000).toISOString(),
+        journal:[{mood:'🌀',time:'3:42 AM',content:'masih scrolling padahal mata udah ngantuk'},{mood:'😰',time:'2:15 AM',content:'typo ke grup kantor bikin gabisa tidur'}]
       },
-      {
-        id: 'tea-2',
-        user: '@anakpertama_capek',
-        avatar: '👤',
-        mood: '😮‍💨 surviving',
-        content: "capek banget jadi anak pertama, semua ekspektasi ditimpa ke gue padahal gue juga lagi struggling. mau ngeluh ke ortu takut dianggap lemah 😭",
-        time: '1j',
-        vibes: { relatable: 67, hug: 34, same: 12 },
-        hasImage: false,
-        isLive: false,
-        viewers: 8,
-        isTrending: false,
-        vibeSignature: {
-          primary: 'melancholy',
-          intensity: 0.75,
-          keywords: ['capek', 'struggling', 'pressure', 'family']
-        },
-        journal: [
-          { time: '8:00 PM', mood: '💸', content: "adik minta duit lagi, gue sendiri udah hemat", reactions: { relatable: 15 } },
-          { time: '6:30 PM', mood: '😔', content: "pengen curhat tapi gaada yang ngerti", reactions: { hug: 20, same: 10 } }
-        ]
+      { id:'__d2', author:'anak_pertama_capek', mood:'surviving', isDummy:true, isLive:false, viewers:8,
+        content:'capek banget jadi anak pertama, semua ekspektasi ditimpa ke gue padahal gue juga lagi struggling. mau ngeluh ke ortu takut dianggap lemah 😭',
+        vibes:{ relatable:67, mood:12, hug:34, tea:8, real:20, dead:5 }, created_at: new Date(Date.now()-3600000).toISOString(),
+        journal:[{mood:'💸',time:'8:00 PM',content:'adik minta duit lagi, gue sendiri udah hemat banget'},{mood:'😔',time:'6:30 PM',content:'pengen curhat tapi gaada yang ngerti situasi gue'}]
       },
-      {
-        id: 'tea-3',
-        user: '@ghosted_again',
-        avatar: '👻',
-        mood: '✨ thriving',
-        content: "read 10:42 pm. read 10:43 pm. online. typing... then gone. story update tapi chat gue dibiarin 🙃",
-        time: '2j',
-        vibes: { real: 89, relatable: 56, same: 34 },
-        hasImage: true,
-        image: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=300&q=80',
-        isLive: true,
-        viewers: 24,
-        isTrending: true,
-        vibeSignature: {
-          primary: 'melancholy',
-          intensity: 0.6,
-          keywords: ['ghosted', 'ignored', 'sad', 'confused']
-        },
-        journal: [
-          { time: '11:00 PM', mood: '📱', content: "checking chat tiap 5 menit", reactions: { real: 25 } },
-          { time: '10:00 PM', mood: '💔', content: "kenapa ya orang bisa tiba-tiba hilang gitu aja", reactions: { hug: 30, relatable: 20 } }
-        ]
+      { id:'__d3', author:'ghosted_again', mood:'doom', isDummy:true, isLive:true, viewers:24,
+        content:'read 10:42 pm. read 10:43 pm. online. typing... then gone. story update tapi chat gue dibiarin 🙃',
+        vibes:{ relatable:56, mood:34, hug:20, tea:89, real:15, dead:10 }, created_at: new Date(Date.now()-7200000).toISOString(),
+        journal:[{mood:'📱',time:'11:00 PM',content:'checking chat tiap 5 menit'},{mood:'💔',time:'10:00 PM',content:'kenapa orang bisa tiba-tiba hilang gitu aja'}]
       },
-      {
-        id: 'tea-4',
-        user: '@burnout_resigned',
-        avatar: '🔥',
-        mood: '🎭 dread',
-        content: "resign dari kerjaan pertama setelah 6 bulan. toxic workplace, gaslighting boss. no regrets, mental health first ✨",
-        time: '3j',
-        vibes: { real: 92, stay: 45, tea: 38 },
-        hasImage: false,
-        isLive: false,
-        viewers: 15,
-        isTrending: true,
-        vibeSignature: {
-          primary: 'hopeful',
-          intensity: 0.8,
-          keywords: ['resign', 'freedom', 'toxic', 'growth', 'new']
-        },
-        journal: [
-          { time: 'Hari ini', mood: '🎉', content: "FINALLY FREE! 🎉", reactions: { real: 40, stay: 15 } },
-          { time: 'Kemarin', mood: '😤', content: "last day, boss masih nyindir", reactions: { tea: 25 } }
-        ]
+      { id:'__d4', author:'burnout_resigned', mood:'thriving', isDummy:true, isLive:false, viewers:15,
+        content:'resign dari kerjaan pertama setelah 6 bulan. toxic workplace, gaslighting boss. no regrets, mental health first ✨',
+        vibes:{ relatable:30, mood:18, hug:25, tea:38, real:92, dead:3 }, created_at: new Date(Date.now()-10800000).toISOString(),
+        journal:[{mood:'🎉',time:'Hari ini',content:'FINALLY FREE!'},{mood:'😤',time:'Kemarin',content:'last day boss masih nyindir'}]
       }
     ];
 
-    let currentTea = [];
-    let currentPeekUser = null;
-    let peekTimer = null;
-    let peekTimeLeft = 15;
-    let peekExtensions = 0;
-    let revealedEntries = 1;
+    // ═══════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════
+    const state = {
+      db: null,
+      allSpills: [],
+      filteredSpills: [],
+      resonanceThreshold: 20,   // 100 - slider value
+      activeMood: 'all',
+      usedVibes: new Set(JSON.parse(localStorage.getItem('saynope_vibes') || '[]')),
+      pendingSpills: [],
+      userSig: null,
+      scrollCount: 0,
+      // Peek state
+      peekSpill: null,
+      peekTimer: null,
+      peekTimeLeft: 15,
+      peekExtensions: 0
+    };
 
-    // === AUTO SYNC ON LOAD ===
-    function initVibeSync() {
-      const savedVibe = localStorage.getItem('jejak_current_vibe');
-      
-      if (savedVibe) {
-        userVibe = JSON.parse(savedVibe);
+    // ═══════════════════════════════════════
+    // SUPABASE INIT
+    // ═══════════════════════════════════════
+    function initDB() {
+      try {
+        state.db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        document.getElementById('sync-dot').className = 'sync-dot live';
+        return true;
+      } catch(e) {
+        console.error('Supabase init failed:', e);
+        return false;
       }
-      
-      const matchedTea = filterTeaByVibe();
-      renderTea(matchedTea);
     }
 
-    function calculateVibeMatch(userVibe, teaVibe) {
-      const emotionMatch = userVibe.emotion === teaVibe.primary ? 1 : 0;
-      const intensityDiff = Math.abs(userVibe.intensity - teaVibe.intensity);
-      const intensityMatch = 1 - intensityDiff;
-      
-      const userKeywords = new Set(userVibe.keywords);
-      const teaKeywords = new Set(teaVibe.keywords);
-      const intersection = new Set([...userKeywords].filter(x => teaKeywords.has(x)));
-      const keywordMatch = intersection.size / Math.max(userKeywords.size, teaKeywords.size);
-      
-      const matchScore = (emotionMatch * 0.4) + (intensityMatch * 0.3) + (keywordMatch * 0.3);
-      
-      return Math.round(matchScore * 100);
+    // ═══════════════════════════════════════
+    // VIBE SIGNATURE — baca dari riwayat rant user
+    // ═══════════════════════════════════════
+    function buildUserSignature() {
+      const key = 'jejak_' + SESSION.username.replace(/[^a-z0-9]/g,'_') + '_entries';
+      const stored = localStorage.getItem(key);
+      if (!stored) return { dominant: null, moodCounts: {}, keywords: [] };
+
+      const entries = JSON.parse(stored);
+      const moodCounts = {};
+      const words = [];
+
+      entries.forEach(e => {
+        if (e.mood) moodCounts[e.mood] = (moodCounts[e.mood] || 0) + 1;
+        if (e.content) {
+          const ws = e.content.toLowerCase().replace(/[^\w\s]/g,'').split(/\s+/);
+          words.push(...ws);
+        }
+      });
+
+      const stopwords = new Set(['dan','yang','ke','di','nya','gue','aku','kamu','lo','itu','ini','ya','ga','gak','tidak','tapi','juga','udah','aja','deh','sih','sama','bisa','mau','lagi','dari','buat','itu','ada','mau','kalo','kalau']);
+      const keywords = [...new Set(words.filter(w => w.length > 3 && !stopwords.has(w)))].slice(0, 30);
+      const dominant = Object.entries(moodCounts).sort((a,b) => b[1]-a[1])[0]?.[0] || null;
+
+      return { dominant, moodCounts, keywords };
     }
 
-    function filterTeaByVibe() {
-      const matched = TEA_POOL.map(tea => {
-        const matchScore = calculateVibeMatch(userVibe, tea.vibeSignature);
-        return { ...tea, matchScore };
-      }).filter(tea => tea.matchScore >= resonanceThreshold);
-      
-      return matched.sort((a, b) => b.matchScore - a.matchScore);
+    // ═══════════════════════════════════════
+    // VIBE SCORE ALGORITHM
+    // Hitung seberapa selaras sebuah spill dengan user
+    // ═══════════════════════════════════════
+    function calcVibeScore(spill, sig) {
+      let score = 0;
+
+      // 1. Mood match (bobot 35%)
+      if (sig.dominant && spill.mood === sig.dominant) score += 35;
+      else if (sig.moodCounts && sig.moodCounts[spill.mood] > 0) score += 15;
+
+      // 2. Keyword overlap (bobot 40%)
+      if (spill.content && sig.keywords.length > 0) {
+        const spillWords = spill.content.toLowerCase().split(/\s+/);
+        const hits = sig.keywords.filter(k => spillWords.some(w => w.includes(k))).length;
+        score += Math.min(40, (hits / Math.max(sig.keywords.length, 1)) * 100);
+      }
+
+      // 3. Mood keyword baseline (bobot 25%)
+      if (spill.content && spill.mood) {
+        const moodKw = MOOD_META[spill.mood]?.kw || [];
+        const lower = spill.content.toLowerCase();
+        const hits = moodKw.filter(w => lower.includes(w)).length;
+        score += Math.min(25, hits * 6);
+      }
+
+      return Math.round(Math.min(100, score));
     }
 
-    function adjustResonance(value) {
-      resonanceThreshold = 100 - value;
-      const matchedTea = filterTeaByVibe();
-      renderTea(matchedTea);
-      
-      if (matchedTea.length === 0) {
-        document.getElementById('homie-empty').style.display = 'block';
+    // ═══════════════════════════════════════
+    // LOAD SPILLS FROM SUPABASE
+    // ═══════════════════════════════════════
+    async function loadSpills() {
+      showLoading();
+      state.userSig = buildUserSignature();
+
+      try {
+        const { data, error } = await state.db
+          .from('spills')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(60);
+
+        if (error) throw error;
+
+        let spills = data || [];
+
+        // Filler dummy jika real spills < 4
+        if (spills.length < 4) {
+          const needed = 4 - spills.length;
+          spills = [...spills, ...DUMMY_SPILLS.slice(0, needed)];
+        }
+
+        state.allSpills = spills.map(s => ({
+          ...s,
+          vibeScore: calcVibeScore(s, state.userSig),
+          isOwn: s.author === SESSION.username
+        }));
+
+        applyFilters();
+        subscribeRealtime();
+        buildGetaranCards();
+
+      } catch(e) {
+        console.error('Load spills failed:', e);
+        // Full dummy fallback
+        state.allSpills = DUMMY_SPILLS.map(s => ({
+          ...s, vibeScore: calcVibeScore(s, state.userSig), isOwn: false
+        }));
+        applyFilters();
+        showNotification('Mode offline — menampilkan contoh ☕');
+      }
+    }
+
+    // ═══════════════════════════════════════
+    // REALTIME SUBSCRIPTION
+    // ═══════════════════════════════════════
+    function subscribeRealtime() {
+      if (!state.db) return;
+      state.db.channel('spills-rt')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'spills' }, payload => {
+          const s = payload.new;
+          if (s.author === SESSION.username) return;
+          const newSpill = { ...s, vibeScore: calcVibeScore(s, state.userSig), isOwn: false };
+          state.pendingSpills.unshift(newSpill);
+          const banner = document.getElementById('new-spill-banner');
+          banner.textContent = `↑ ${state.pendingSpills.length} spill baru! Tap untuk lihat`;
+          banner.classList.add('show');
+        })
+        .subscribe();
+    }
+
+    function loadPendingSpills() {
+      if (!state.pendingSpills.length) return;
+      state.allSpills = [...state.pendingSpills, ...state.allSpills];
+      state.pendingSpills = [];
+      document.getElementById('new-spill-banner').classList.remove('show');
+      applyFilters();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ═══════════════════════════════════════
+    // FILTER & SORT
+    // ═══════════════════════════════════════
+    function applyFilters() {
+      let list = [...state.allSpills];
+
+      // Mood filter
+      if (state.activeMood !== 'all') {
+        list = list.filter(s => s.mood === state.activeMood);
+      }
+
+      // Resonance filter
+      if (state.resonanceThreshold > 0) {
+        const thresh = state.resonanceThreshold;
+        list = list.map(s => ({
+          ...s,
+          _show: s.vibeScore >= thresh || s.isOwn
+        }));
       } else {
-        document.getElementById('homie-empty').style.display = 'none';
+        list = list.map(s => ({ ...s, _show: true }));
       }
+
+      // Sort: own first, then by vibeScore desc, then by time
+      list.sort((a,b) => {
+        if (a.isOwn && !b.isOwn) return -1;
+        if (!a.isOwn && b.isOwn) return 1;
+        if (b.vibeScore !== a.vibeScore) return b.vibeScore - a.vibeScore;
+        return new Date(b.created_at) - new Date(a.created_at);
+      });
+
+      state.filteredSpills = list;
+
+      const showing = list.filter(s => s._show !== false).length;
+      document.getElementById('filter-stats').textContent = `${showing} spills`;
+      document.getElementById('spill-tagline').textContent =
+        showing > 0
+          ? `${showing} curhat • ${state.resonanceThreshold > 0 ? `≥${state.resonanceThreshold}% match` : 'semua vibrasi'}`
+          : 'Tidak ada yang cocok';
+
+      renderSpills(list);
     }
 
-    function resetFilter() {
-      document.getElementById('filter-slider').value = 80;
-      resonanceThreshold = 20;
-      adjustResonance(80);
-    }
-
-    function renderTea(teaList = null) {
+    // ═══════════════════════════════════════
+    // RENDER SPILLS
+    // ═══════════════════════════════════════
+    function renderSpills(list) {
       const container = document.getElementById('tea-container');
-      container.innerHTML = '';
-      
-      const teaToRender = teaList || TEA_POOL;
-      
-      if (teaToRender.length === 0) {
-        document.getElementById('homie-empty').style.display = 'block';
+      const empty = document.getElementById('homie-empty');
+
+      const visible = list.filter(s => s._show !== false);
+
+      if (!visible.length) {
+        container.innerHTML = '';
+        empty.style.display = 'block';
         return;
-      } else {
-        document.getElementById('homie-empty').style.display = 'none';
       }
-      
-      teaToRender.forEach((tea, index) => {
-        // Zombie scroll prevention - show pause after 5 cards
-        if (index === 5) {
-          const pauseDiv = document.createElement('div');
-          pauseDiv.className = 'scroll-pause';
-          pauseDiv.id = 'scroll-pause-trigger';
-          pauseDiv.innerHTML = `
-            <div class="scroll-pause-text">💭 Sudah cukup scroll untuk sekarang?</div>
-            <button class="scroll-pause-btn" onclick="this.parentElement.style.display='none'">Lanjutkan</button>
-          `;
-          container.appendChild(pauseDiv);
-          
-          // Auto show after delay
-          setTimeout(() => {
-            pauseDiv.classList.add('show');
-          }, 100);
+      empty.style.display = 'none';
+      container.innerHTML = '';
+
+      visible.forEach((spill, idx) => {
+        // Scroll pause after 5 cards
+        if (idx === 5) {
+          const pause = document.createElement('div');
+          pause.className = 'scroll-pause show';
+          pause.innerHTML = `<div class="scroll-pause-text">💭 Sudah cukup scroll untuk sekarang?</div><button class="scroll-pause-btn" onclick="this.closest('.scroll-pause').style.display='none'">Lanjutkan</button>`;
+          container.appendChild(pause);
         }
-        
-        const card = document.createElement('div');
-        card.className = 'tea-card';
-        card.id = tea.id;
-        
-        if (tea.matchScore >= 85) {
-          card.classList.add('highlighted');
-        } else if (tea.matchScore < 50) {
-          card.classList.add('dimmed');
-        }
-        
-        let badgesHtml = '';
-        if (tea.isLive) {
-          badgesHtml += `<div class="live-badge"><span class="live-indicator"></span> ${tea.viewers} Online</div>`;
-        }
-        if (tea.isTrending) {
-          badgesHtml += `<div class="trending-badge">🔥 Trending</div>`;
-        }
-        
-        let vibesHtml = '';
-        Object.keys(VIBE_REACTIONS).forEach(key => {
-          const vibe = VIBE_REACTIONS[key];
-          const count = tea.vibes[key] || 0;
-          
-          vibesHtml += `
-            <button class="vibe-btn" onclick="handleVibeClick('${tea.id}', '${key}', this)">
-              <span class="emoji">${vibe.emoji}</span>
-              <span class="count">${count}</span>
-              <span class="vibe-tooltip">${vibe.slang}</span>
-            </button>
-          `;
-        });
-        
-        const readMore = tea.content.length > 120 ? `<span class="read-more" onclick="toggleReadMore(this)">Baca selengkapnya</span>` : '';
-        const matchBadge = tea.matchScore ? `<div class="resonance-badge">${tea.matchScore}% Match</div>` : '';
-        
-        card.innerHTML = `
-          ${badgesHtml}
-          ${matchBadge}
-          <div class="tea-header">
-            <div class="tea-avatar" onclick="openPeek('${tea.id}')">${tea.avatar}</div>
-            <div class="tea-meta">
-              <div class="tea-user" onclick="openPeek('${tea.id}')">${tea.user}</div>
-              <div class="tea-time">${tea.time}</div>
-            </div>
-            <div class="tea-mood">${tea.mood}</div>
-          </div>
-          
-          <div class="tea-content">${tea.content}</div>
-          ${readMore}
-          
-          ${tea.hasImage ? `<img src="${tea.image}" class="tea-image" alt="tea" onclick="openPeek('${tea.id}')">` : ''}
-          
-          <div class="vibe-section">
-            <div class="vibe-reactions">
-              ${vibesHtml}
-            </div>
-          </div>
-        `;
-        
-        container.appendChild(card);
+
+        container.appendChild(buildCard(spill, idx));
       });
     }
 
-    function loadNewTea() {
-      const btn = document.getElementById('refresh-btn');
-      btn.classList.add('spinning');
-      
-      // 3 second intentional delay to prevent mindless consumption
-      setTimeout(() => {
-        const matchedTea = filterTeaByVibe();
-        renderTea(matchedTea);
-        btn.classList.remove('spinning');
-        scrollCount++;
-        
-        // Show gentle nudge after 3 refreshes
-        if (scrollCount >= 3) {
-          showNotification('Kamu sudah 3x refresh. Istirahat dulu? ☕');
-          scrollCount = 0;
-        }
-      }, 3000);
+    function buildCard(spill, idx) {
+      const el = document.createElement('div');
+      const isHighlighted = spill.vibeScore >= 70 && !spill.isOwn;
+      const isDimmed = spill.vibeScore < 30 && !spill.isOwn && state.resonanceThreshold > 0;
+
+      el.className = `tea-card ${isHighlighted ? 'highlighted' : ''} ${isDimmed ? 'dimmed' : ''} ${spill.isOwn ? 'own-spill' : ''}`;
+      el.id = 'card-' + spill.id;
+
+      const avatarText = spill.isDummy ? '👤' : (spill.author || '??').slice(0,2).toUpperCase();
+      const timeAgo = fmtTime(spill.created_at);
+      const mood = spill.mood || 'surviving';
+      const moodMeta = MOOD_META[mood] || MOOD_META.surviving;
+      const vibes = typeof spill.vibes === 'string' ? JSON.parse(spill.vibes) : (spill.vibes || {});
+      const isNew = idx < 2 && !spill.isDummy;
+      const matchLabel = spill.vibeScore >= 80 ? `${spill.vibeScore}% Match 🔥` : spill.vibeScore >= 60 ? `${spill.vibeScore}% Selaras` : null;
+
+      const vibesHtml = Object.entries(VIBE_REACTIONS).map(([k, v]) => {
+        const count = vibes[k] || 0;
+        const used = state.usedVibes.has(`${spill.id}-${k}`);
+        return `<button class="vibe-btn ${used ? 'used' : ''}" onclick="handleVibe('${spill.id}','${k}',this,${!!spill.isDummy})">
+          <span class="emoji">${v.emoji}</span><span class="count">${count}</span>
+          <span class="vibe-tooltip">${v.slang}</span></button>`;
+      }).join('');
+
+      el.innerHTML = `
+        ${isNew ? `<div class="live-badge"><span class="live-indicator"></span> Baru</div>` : ''}
+        ${isHighlighted && matchLabel ? `<div class="resonance-badge">${matchLabel}</div>` : ''}
+        <div class="tea-header">
+          <div class="tea-avatar" onclick="openPeek('${spill.id}')">${avatarText}</div>
+          <div class="tea-meta">
+            <div class="tea-user" onclick="openPeek('${spill.id}')">@${spill.author || 'anon'}${spill.isDummy ? ' <span style="font-size:9px;color:var(--text-muted);font-weight:400;">(contoh)</span>' : ''}</div>
+            <div class="tea-time">${timeAgo}</div>
+          </div>
+          <div class="tea-mood ${mood}">${moodMeta.emoji} ${mood}</div>
+        </div>
+        <div class="tea-content" id="content-${spill.id}">${escHtml(spill.content || '')}</div>
+        ${(spill.content||'').length > 150 ? `<span class="read-more" onclick="toggleRead('${spill.id}')">Baca selengkapnya</span>` : ''}
+        <div class="vibe-section"><div class="vibe-reactions">${vibesHtml}</div></div>`;
+
+      return el;
     }
 
-    function toggleReadMore(el) {
-      const content = el.previousElementSibling;
-      content.classList.toggle('expanded');
-      el.textContent = content.classList.contains('expanded') ? 'Sembunyikan' : 'Baca selengkapnya';
-    }
+    // ═══════════════════════════════════════
+    // VIBE REACTION — SAVE TO SUPABASE
+    // ═══════════════════════════════════════
+    async function handleVibe(spillId, vibeKey, btn, isDummy) {
+      if (isDummy) {
+        showNotification('Tulis rantmu dulu di Jejak! ✍️');
+        setTimeout(() => window.location.href = 'jejak.html', 1500);
+        return;
+      }
 
-    // === PEeking MECHANISM ===
-    function handleVibeClick(teaId, vibeKey, btnElement) {
-      btnElement.classList.add('used');
-      btnElement.disabled = true;
-      
-      const countEl = btnElement.querySelector('.count');
+      const comboKey = `${spillId}-${vibeKey}`;
+      if (state.usedVibes.has(comboKey)) { showNotification('Udah kasih reaksi ini!'); return; }
+
+      // Optimistic UI
+      btn.classList.add('used');
+      const countEl = btn.querySelector('.count');
       countEl.textContent = parseInt(countEl.textContent) + 1;
-      
-      // Spring animation
-      btnElement.style.transform = 'scale(1.2)';
-      btnElement.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-      
-      setTimeout(() => {
-        btnElement.style.transform = 'scale(1)';
-        openPeek(teaId);
-      }, 150);
+      btn.style.transform = 'scale(1.25)';
+      setTimeout(() => btn.style.transform = '', 200);
+
+      // Persist
+      state.usedVibes.add(comboKey);
+      localStorage.setItem('saynope_vibes', JSON.stringify([...state.usedVibes].slice(-300)));
+
+      // Trigger peek after vibe
+      setTimeout(() => openPeek(spillId), 200);
+
+      // Save to Supabase
+      if (state.db) {
+        try {
+          const { data: cur } = await state.db.from('spills').select('vibes').eq('id', spillId).single();
+          if (cur) {
+            const v = typeof cur.vibes === 'string' ? JSON.parse(cur.vibes) : (cur.vibes || {});
+            v[vibeKey] = (v[vibeKey] || 0) + 1;
+            await state.db.from('spills').update({ vibes: v }).eq('id', spillId);
+          }
+        } catch(e) { console.error('Vibe save failed:', e); }
+      }
+
+      showNotification(`${VIBE_REACTIONS[vibeKey].emoji} ${VIBE_REACTIONS[vibeKey].slang}!`);
     }
 
-    function openPeek(teaId) {
-      const tea = TEA_POOL.find(t => t.id === teaId);
-      if (!tea) return;
-      
-      currentPeekUser = tea;
-      peekExtensions = 0;
-      revealedEntries = 1;
-      
-      // Set profile info
-      document.getElementById('peek-avatar').textContent = tea.avatar;
-      document.getElementById('peek-username').textContent = tea.user;
-      
-      // Online status
-      const onlineStatus = document.getElementById('online-status');
-      if (tea.isLive) {
-        onlineStatus.style.display = 'flex';
-        // Show typing indicator after 3 seconds
-        setTimeout(() => {
-          document.getElementById('typing-indicator').style.display = 'flex';
-        }, 3000);
-      } else {
-        onlineStatus.style.display = 'none';
-        document.getElementById('typing-indicator').style.display = 'none';
+    // ═══════════════════════════════════════
+    // PEEK MECHANIC (dari saynope asli)
+    // ═══════════════════════════════════════
+    function openPeek(spillId) {
+      const spill = state.filteredSpills.find(s => s.id === spillId);
+      if (!spill || spill.isDummy) return;
+
+      state.peekSpill = spill;
+      state.peekExtensions = 0;
+
+      const avatarText = (spill.author || '??').slice(0,2).toUpperCase();
+      document.getElementById('peek-avatar-big').textContent = avatarText;
+      document.getElementById('peek-username').textContent = '@' + (spill.author || 'anon');
+
+      // Online: tampilkan kalau spill < 2 jam
+      const isRecent = Date.now() - new Date(spill.created_at).getTime() < 7200000;
+      document.getElementById('online-status').style.display = isRecent ? 'flex' : 'none';
+      if (isRecent) {
+        setTimeout(() => { document.getElementById('typing-indicator').style.display = 'flex'; }, 3000);
       }
-      
-      document.getElementById('peek-entries').textContent = tea.journal.length;
-      const totalVibes = Object.values(tea.vibes).reduce((a, b) => a + b, 0);
-      document.getElementById('peek-vibes').textContent = totalVibes;
-      document.getElementById('peek-tea').textContent = Math.floor(Math.random() * 5) + 1;
-      
-      // Progressive disclosure: render entries
-      const entriesContainer = document.getElementById('peek-entries-container');
-      entriesContainer.innerHTML = '';
-      
-      tea.journal.forEach((entry, index) => {
-        const entryDiv = document.createElement('div');
-        entryDiv.className = 'peek-entry';
-        entryDiv.dataset.index = index;
-        
-        if (index === 0) {
-          entryDiv.classList.add('revealed');
-        } else {
-          entryDiv.classList.add('locked');
-        }
-        
-        const isLocked = index > 0;
-        
-        entryDiv.innerHTML = `
+
+      // Count vibes
+      const vibes = typeof spill.vibes === 'string' ? JSON.parse(spill.vibes) : (spill.vibes || {});
+      const totalVibes = Object.values(vibes).reduce((a,b) => a+b, 0);
+      document.getElementById('peek-entry-count').textContent = spill.journal?.length || 1;
+      document.getElementById('peek-vibe-count').textContent = totalVibes;
+
+      // Build journal entries (progressive disclosure)
+      const ec = document.getElementById('peek-entries-container');
+      ec.innerHTML = '';
+      const journal = spill.journal || [{ mood: MOOD_META[spill.mood]?.emoji || '💭', time: fmtTime(spill.created_at), content: spill.content }];
+      journal.forEach((entry, i) => {
+        const div = document.createElement('div');
+        div.className = 'peek-entry ' + (i === 0 ? 'revealed' : 'locked');
+        div.dataset.index = i;
+        div.innerHTML = `
           <div class="peek-entry-header">
-            <span class="peek-entry-mood">${entry.mood}</span>
-            <span class="peek-entry-time">${entry.time}</span>
+            <span class="peek-entry-mood">${entry.mood || '💭'}</span>
+            <span class="peek-entry-time">${entry.time || ''}</span>
           </div>
-          <div class="peek-entry-content">
-            ${isLocked ? `<div class="entry-teaser">${entry.content.substring(0, 20)}</div>` : entry.content}
-          </div>
-          ${isLocked ? '<div class="unlock-hint">Extend untuk unlock</div>' : ''}
-        `;
-        
-        entriesContainer.appendChild(entryDiv);
+          <div class="peek-entry-content">${i === 0 ? escHtml(entry.content) : escHtml(entry.content.slice(0,25)) + '...'}</div>
+          ${i > 0 ? '<div class="unlock-hint">React untuk unlock</div>' : ''}`;
+        ec.appendChild(div);
       });
-      
-      // Setup reaction buttons
-      const reactionsContainer = document.getElementById('peek-reactions');
-      reactionsContainer.innerHTML = '';
-      
-      Object.keys(VIBE_REACTIONS).forEach(key => {
-        const vibe = VIBE_REACTIONS[key];
-        const btn = document.createElement('button');
-        btn.className = 'peek-reaction-btn';
-        btn.innerHTML = `<span>${vibe.emoji}</span> ${vibe.slang}`;
-        btn.onclick = () => extendPeekTime(key, btn);
-        reactionsContainer.appendChild(btn);
-      });
-      
-      // Show overlay
+
+      // Build peek reaction buttons
+      const rc = document.getElementById('peek-reactions');
+      rc.innerHTML = Object.entries(VIBE_REACTIONS).map(([k,v]) =>
+        `<button class="peek-reaction-btn" onclick="extendPeek('${k}',this)">${v.emoji} ${v.slang}</button>`
+      ).join('');
+
+      document.getElementById('peek-extend-section').style.display = 'block';
+      document.getElementById('peek-locked').style.display = 'none';
       document.getElementById('jejak-peek-overlay').classList.add('show');
       document.body.style.overflow = 'hidden';
-      
-      // Start timer
+
       startPeekTimer();
-      
-      // Simulate reciprocity after 10 seconds
-      if (Math.random() > 0.5) {
-        setTimeout(() => {
-          showReciprocityToast(tea.user);
-        }, 10000);
+
+      // Reciprocity simulation
+      if (Math.random() > 0.6) {
+        setTimeout(() => showReciprocity('@' + (spill.author || 'someone')), 8000);
       }
     }
 
     function startPeekTimer() {
-      peekTimeLeft = 15;
-      updateTimerDisplay();
-      
-      if (peekTimer) clearInterval(peekTimer);
-      
-      peekTimer = setInterval(() => {
-        peekTimeLeft--;
-        updateTimerDisplay();
-        
-        if (peekTimeLeft <= 5) {
-          document.getElementById('peek-timer').classList.add('pulse');
-        }
-        
-        if (peekTimeLeft <= 0) {
-          endPeekSession();
-        }
+      state.peekTimeLeft = 15;
+      document.getElementById('timer-count').textContent = 15;
+      document.getElementById('peek-timer').classList.remove('pulse');
+      if (state.peekTimer) clearInterval(state.peekTimer);
+      state.peekTimer = setInterval(() => {
+        state.peekTimeLeft--;
+        document.getElementById('timer-count').textContent = state.peekTimeLeft;
+        if (state.peekTimeLeft <= 5) document.getElementById('peek-timer').classList.add('pulse');
+        if (state.peekTimeLeft <= 0) endPeek();
       }, 1000);
     }
 
-    function updateTimerDisplay() {
-      document.getElementById('timer-count').textContent = peekTimeLeft;
-    }
+    function extendPeek(vibeKey, btn) {
+      if (btn.classList.contains('given')) return;
+      btn.classList.add('given');
+      state.peekTimeLeft += 15;
+      state.peekExtensions++;
+      document.getElementById('timer-count').textContent = state.peekTimeLeft;
+      document.getElementById('peek-timer').classList.remove('pulse');
 
-    function extendPeekTime(vibeKey, btnElement) {
-      if (btnElement.classList.contains('given')) return;
-      
-      // Haptic feedback
-      if (navigator.vibrate) {
-        navigator.vibrate(50);
-      }
-      
-      // Spring animation
-      btnElement.classList.add('spring');
-      setTimeout(() => btnElement.classList.remove('spring'), 300);
-      
-      btnElement.classList.add('given');
-      peekTimeLeft += 15;
-      peekExtensions++;
-      
-      // Progressive disclosure: reveal next entry
-      revealNextEntry();
-      
-      // Remove pulse if time is safe
-      if (peekTimeLeft > 5) {
-        document.getElementById('peek-timer').classList.remove('pulse');
-      }
-      
-      updateTimerDisplay();
-      
-      // Emotional connection hints
-      if (peekExtensions === 1) {
-        showNotification('Mereka juga online... 👀');
-      } else if (peekExtensions === 3) {
-        showNotification('Vibrasi kalian saling merespons... ✨');
-      }
-    }
-
-    function revealNextEntry() {
-      const lockedEntries = document.querySelectorAll('.peek-entry.locked');
-      if (lockedEntries.length > 0) {
-        const nextEntry = lockedEntries[0];
-        nextEntry.classList.remove('locked');
-        nextEntry.classList.add('revealed');
-        
-        // Remove unlock hint
-        const hint = nextEntry.querySelector('.unlock-hint');
+      // Reveal next locked entry
+      const locked = document.querySelectorAll('.peek-entry.locked');
+      if (locked.length > 0) {
+        const next = locked[0];
+        next.classList.replace('locked','revealed');
+        const idx = parseInt(next.dataset.index);
+        const journal = state.peekSpill.journal || [];
+        if (journal[idx]) next.querySelector('.peek-entry-content').innerHTML = escHtml(journal[idx].content);
+        const hint = next.querySelector('.unlock-hint');
         if (hint) hint.remove();
-        
-        // Show full content
-        const index = parseInt(nextEntry.dataset.index);
-        const contentDiv = nextEntry.querySelector('.peek-entry-content');
-        contentDiv.innerHTML = currentPeekUser.journal[index].content;
       }
+
+      if (state.peekExtensions === 1) showNotification('Mereka juga online sekarang... 👀');
+      if (state.peekExtensions === 3) showNotification('Vibrasi kalian saling merespons ✨');
     }
 
-    function endPeekSession() {
-      clearInterval(peekTimer);
+    function endPeek() {
+      clearInterval(state.peekTimer);
       document.getElementById('peek-extend-section').style.display = 'none';
       document.getElementById('peek-locked').style.display = 'block';
-      
-      // Intensify blur on remaining locked entries
-      document.querySelectorAll('.peek-entry.locked').forEach(entry => {
-        entry.style.filter = 'blur(12px)';
-        entry.style.opacity = '0.2';
-      });
     }
 
     function closePeek() {
-      clearInterval(peekTimer);
+      clearInterval(state.peekTimer);
       document.getElementById('jejak-peek-overlay').classList.remove('show');
-      document.body.style.overflow = '';
-      document.getElementById('peek-extend-section').style.display = 'block';
-      document.getElementById('peek-locked').style.display = 'none';
-      document.getElementById('peek-timer').classList.remove('pulse');
       document.getElementById('typing-indicator').style.display = 'none';
-      
-      // Reset reaction buttons
-      document.querySelectorAll('.peek-reaction-btn').forEach(btn => {
-        btn.classList.remove('given');
-      });
-      
-      // Show narrative arc if significant interaction
-      if (peekExtensions >= 3) {
-        showNarrativeArc();
-      }
+      document.body.style.overflow = '';
+      if (state.peekExtensions >= 3) showNarrative();
     }
 
-    function showReciprocityToast(username) {
-      const toast = document.getElementById('reciprocity-toast');
+    function showReciprocity(username) {
       document.getElementById('reciprocity-text').textContent = `${username} juga melihat jejakmu!`;
-      toast.classList.add('show');
-      
-      setTimeout(() => {
-        toast.classList.remove('show');
-      }, 3000);
+      const t = document.getElementById('reciprocity-toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
     }
 
-    function showNarrativeArc() {
-      const overlay = document.getElementById('narrative-overlay');
-      overlay.classList.add('show');
-      
-      // Dynamic narrative based on extensions
+    function showNarrative() {
       const narratives = [
-        {
-          icon: '✨',
-          title: 'Koneksi Tersimpan',
-          text: 'Vibrasi kalian saling merespons. Seperti dua gelombang radio yang menemukan frekuensi yang sama di tengah kebisingan.',
-          btn: 'Lanjutkan Perjalanan',
-          cliffhanger: 'Lanjutkan besok untuk membuka bab baru...'
-        },
-        {
-          icon: '🌊',
-          title: 'Resonansi Terdeteksi',
-          text: 'Setiap extend yang kamu berikan menciptakan riak dalam kolam kosmik. Mereka merasakan getaranmu.',
-          btn: 'Simpan Momen',
-          cliffhanger: 'Koneksi ini akan tertunda 24 jam...'
-        },
-        {
-          icon: '🔮',
-          title: 'Misteri Terkunci',
-          text: 'Ada sesuatu yang belum terungkap. Tapi waktumu habis. Keingintahuan adalah benih koneksi.',
-          btn: 'Tutup Sementara',
-          cliffhanger: 'Upgrade untuk membuka sekarang...'
-        }
+        { icon:'✨', title:'Koneksi Tersimpan', text:'Vibrasi kalian saling merespons. Seperti dua gelombang yang menemukan frekuensi yang sama.', ch:'Lanjutkan besok untuk membuka bab baru...' },
+        { icon:'🌊', title:'Resonansi Terdeteksi', text:'Setiap reaksi yang kamu berikan menciptakan riak. Mereka merasakan getaranmu.', ch:'Koneksi ini akan matang 24 jam lagi...' },
+        { icon:'🔮', title:'Misteri Terkunci', text:'Ada sesuatu yang belum terungkap. Keingintahuan adalah benih koneksi yang sesungguhnya.', ch:'Terus spill untuk membuka...' }
       ];
-      
-      const narrative = narratives[Math.min(peekExtensions - 3, narratives.length - 1)];
-      
-      document.getElementById('narrative-icon').textContent = narrative.icon;
-      document.getElementById('narrative-title').textContent = narrative.title;
-      document.getElementById('narrative-text').textContent = narrative.text;
-      document.getElementById('narrative-btn').textContent = narrative.btn;
-      document.getElementById('narrative-cliffhanger').textContent = narrative.cliffhanger;
+      const n = narratives[Math.min(state.peekExtensions - 3, narratives.length - 1)];
+      document.getElementById('narrative-icon').textContent = n.icon;
+      document.getElementById('narrative-title').textContent = n.title;
+      document.getElementById('narrative-text').textContent = n.text;
+      document.getElementById('narrative-cliffhanger').textContent = n.ch;
+      document.getElementById('narrative-overlay').classList.add('show');
     }
 
-    function closeNarrative(event) {
-      if (!event || event.target.id === 'narrative-overlay' || event.target.id === 'narrative-btn') {
+    function closeNarrative(e) {
+      if (!e || e.target.id === 'narrative-overlay' || e.target.tagName === 'BUTTON') {
         document.getElementById('narrative-overlay').classList.remove('show');
       }
     }
 
-    function showPaywall() {
-      document.getElementById('paywall-modal').classList.add('show');
+    // ═══════════════════════════════════════
+    // GETARAN CARDS — dari rant user lain yang sering bereaksi
+    // ═══════════════════════════════════════
+    function buildGetaranCards() {
+      const sig = state.userSig;
+      if (!sig.dominant) return;
+
+      const dominant = MOOD_META[sig.dominant];
+      const section = document.getElementById('getaran-section');
+      const cards = document.getElementById('getaran-cards');
+
+      cards.innerHTML = `
+        <div class="getaran-card">
+          <div class="getaran-content">
+            <div class="getaran-icon blue">👁️</div>
+            <div class="getaran-text">
+              <div class="getaran-title">Seseorang dengan pola "${sig.dominant}" sering muncul di timelinemu.</div>
+              <ul class="getaran-list">
+                <li>Mood dominan: ${dominant.emoji} ${sig.dominant}</li>
+                ${sig.keywords.slice(0,2).map(k => `<li>Keyword: "${k}"</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+          <div class="getaran-actions">
+            <button class="getaran-btn skip" onclick="this.closest('.getaran-card').remove()">Lewati</button>
+            <button class="getaran-btn primary" onclick="setMoodFilter('${sig.dominant}');this.textContent='✓ Diterapkan'">Cari yang serupa</button>
+          </div>
+        </div>`;
+
+      section.style.display = 'block';
     }
 
-    function closePaywall(event) {
-      if (!event || event.target.id === 'paywall-modal') {
-        document.getElementById('paywall-modal').classList.remove('show');
-      }
+    // ═══════════════════════════════════════
+    // FILTER CONTROLS
+    // ═══════════════════════════════════════
+    function adjustResonance(sliderVal) {
+      // Slider: 100=Homie Only(high threshold), 0=Semua(no threshold)
+      state.resonanceThreshold = 100 - parseInt(sliderVal);
+      applyFilters();
     }
 
-    function selectPlan(plan) {
-      selectedPlan = plan;
-      document.querySelectorAll('.pricing-card').forEach(card => {
-        card.classList.remove('recommended');
+    function setMoodFilter(mood) {
+      state.activeMood = mood;
+      document.querySelectorAll('.mood-chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.mood === mood);
       });
-      event.currentTarget.classList.add('recommended');
+      applyFilters();
     }
 
-    function subscribe() {
-      isSubscribed = true;
-      closePaywall();
-      
-      const price = selectedPlan === 'monthly' ? '10k/bulan' : '50k/tahun';
-      showNotification(`Berlangganan ${price}! Access unlocked 🔓`);
-      
-      if (document.getElementById('jejak-peek-overlay').classList.contains('show')) {
-        document.getElementById('peek-locked').style.display = 'none';
-        document.getElementById('peek-extend-section').style.display = 'block';
-        document.querySelectorAll('.peek-entry').forEach(entry => {
-          entry.classList.remove('locked');
-          entry.classList.add('revealed');
-          entry.style.filter = 'blur(0)';
-          entry.style.opacity = '1';
-        });
-        clearInterval(peekTimer);
-        document.getElementById('peek-timer').innerHTML = '<span>✨</span><span>UNLIMITED</span>';
+    function resetFilter() {
+      state.resonanceThreshold = 20;
+      state.activeMood = 'all';
+      document.getElementById('filter-slider').value = 80;
+      document.querySelectorAll('.mood-chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.mood === 'all');
+      });
+      applyFilters();
+    }
+
+    async function refreshTea() {
+      const btn = document.getElementById('refresh-btn');
+      btn.classList.add('spinning');
+      btn.disabled = true;
+      state.scrollCount++;
+      if (state.scrollCount >= 3) {
+        showNotification('Udah 3x refresh. Istirahat sebentar? ☕');
+        state.scrollCount = 0;
       }
+      // 2s intentional delay (anti zombie-scroll)
+      await new Promise(r => setTimeout(r, 2000));
+      await loadSpills();
+      btn.classList.remove('spinning');
+      btn.disabled = false;
     }
 
-    function microUnlock() {
-      closePaywall();
-      showNotification('Rp5.000 - 1 DM unlocked! 💬');
-      // Logic for single DM unlock
+    // ═══════════════════════════════════════
+    // UI HELPERS
+    // ═══════════════════════════════════════
+    function showLoading() {
+      document.getElementById('tea-container').innerHTML = `<div class="loading-state"><div class="loading-spinner"></div><div style="font-size:11px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Menyeduh teh...</div></div>`;
     }
 
-    function showNotification(message) {
-      const existing = document.querySelector('.notification');
-      if (existing) existing.remove();
-      
-      const notif = document.createElement('div');
-      notif.className = 'notification';
-      notif.textContent = message;
-      
-      document.body.appendChild(notif);
-      
-      setTimeout(() => notif.classList.add('show'), 10);
-      
-      setTimeout(() => {
-        notif.classList.remove('show');
-        setTimeout(() => notif.remove(), 300);
-      }, 2000);
+    function toggleRead(id) {
+      const el = document.getElementById('content-' + id);
+      const btn = el?.nextElementSibling;
+      if (!el || !btn) return;
+      el.classList.toggle('expanded');
+      btn.textContent = el.classList.contains('expanded') ? 'Sembunyikan' : 'Baca selengkapnya';
     }
 
-    function skipGetaran(btn) {
-      const card = btn.closest('.getaran-card');
-      card.style.opacity = '0.5';
-      card.style.transform = 'translateX(-20px)';
-      setTimeout(() => {
-        card.style.display = 'none';
-      }, 300);
-      showNotification('Dilewati 👋');
+    function fmtTime(iso) {
+      if (!iso) return '';
+      const diff = Date.now() - new Date(iso).getTime();
+      const m = Math.floor(diff/60000), h = Math.floor(diff/3600000), d = Math.floor(diff/86400000);
+      if (m < 1) return 'Baru saja';
+      if (m < 60) return m + 'm';
+      if (h < 24) return h + 'j';
+      return d + 'h';
     }
 
-    function beriIsyarat(btn) {
-      btn.textContent = 'Terkirim ✓';
-      btn.style.background = 'var(--accent-primary)';
-      btn.style.borderColor = 'var(--accent-primary)';
-      showNotification('Isyarat terkirim! Mereka akan tahu 💫');
+    function escHtml(t) {
+      return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    // Initialize auto-sync on load
+    let _notifTimer;
+    function showNotification(msg) {
+      let el = document.querySelector('.notification');
+      if (!el) { el = document.createElement('div'); el.className = 'notification'; document.body.appendChild(el); }
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(_notifTimer);
+      _notifTimer = setTimeout(() => el.classList.remove('show'), 2200);
+    }
+
+    // ═══════════════════════════════════════
+    // INIT
+    // ═══════════════════════════════════════
     document.addEventListener('DOMContentLoaded', () => {
-      initVibeSync();
+      document.getElementById('header-username').textContent = '@' + SESSION.username;
+      initDB();
+      loadSpills();
     });
   </script>
 </body>
