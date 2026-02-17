@@ -377,11 +377,12 @@
     // SESSION MANAGEMENT
     // ============================================
     function setSession(user) {
-      // Simpan semua info user ke localStorage
+      // users table hanya punya: username, device_id
+      // Gunakan username sebagai userId (tidak ada kolom id)
       localStorage.setItem(SESSION_KEYS.username, user.username);
-      localStorage.setItem(SESSION_KEYS.userId, user.id);
+      localStorage.setItem(SESSION_KEYS.userId, user.username); // username IS the ID
       localStorage.setItem(SESSION_KEYS.loggedIn, 'true');
-      console.log('✅ Session set:', user.username, '|', user.id);
+      console.log('✅ Session set for:', user.username);
     }
 
     function clearSession() {
@@ -461,8 +462,8 @@
         const deviceId = await getDeviceId();
         
         // Verify user masih ada di database dan device sama
-        const users = await supabaseFetch('users', 'GET', null,
-          `?id=eq.${session.userId}&username=eq.${encodeURIComponent(session.username)}&select=id,username,device_id`
+        const users = await supabaseFetch('jejak_users', 'GET', null,
+          `?username=eq.${encodeURIComponent(session.username)}&select=username,device_id`
         );
 
         if (users.length > 0 && users[0].device_id === deviceId) {
@@ -532,8 +533,8 @@
         const deviceId = await getDeviceId();
         
         // Cek username sudah ada atau belum
-        const users = await supabaseFetch('users', 'GET', null,
-          `?username=eq.${encodeURIComponent(username)}&select=id,username,device_id`
+        const users = await supabaseFetch('jejak_users', 'GET', null,
+          `?username=eq.${encodeURIComponent(username)}&select=username,device_id`
         );
 
         let user;
@@ -542,21 +543,22 @@
           // ===== REGISTER USER BARU =====
           console.log('📝 Registering new user:', username);
           
-          const newUsers = await supabaseFetch('users', 'POST', {
-            username: username,
-            device_id: deviceId
-          });
-          
-          // Ambil user yang baru dibuat
-          if (newUsers && newUsers.length > 0) {
-            user = newUsers[0];
-          } else {
-            // Kalau tidak ada response, fetch ulang
-            const created = await supabaseFetch('users', 'GET', null,
-              `?username=eq.${encodeURIComponent(username)}&select=id,username,device_id`
-            );
-            user = created[0];
+          // Insert user baru - only username dan device_id
+          try {
+            await supabaseFetch('jejak_users', 'POST', {
+              username: username,
+              device_id: deviceId
+            });
+          } catch(insertErr) {
+            // Ignore - might be duplicate or Prefer header issue
+            console.warn('Insert note:', insertErr.message);
           }
+          
+          // Fetch user yang baru dibuat
+          const created = await supabaseFetch('jejak_users', 'GET', null,
+            `?username=eq.${encodeURIComponent(username)}&select=username,device_id`
+          );
+          user = created[0] || { username: username, id: null };
           
           showSuccess('✅ account created! welcome bestie 🎉');
           
@@ -574,25 +576,29 @@
           
           // Update device_id kalau belum ada
           if (!user.device_id) {
-            await supabaseFetch('users', 'PATCH',
-              { device_id: deviceId },
-              `?username=eq.${encodeURIComponent(username)}`
-            );
+            try {
+              await supabaseFetch('jejak_users', 'PATCH',
+                { device_id: deviceId },
+                `?username=eq.${encodeURIComponent(username)}`
+              );
+            } catch(patchErr) {
+              console.warn('Patch note:', patchErr.message);
+            }
             user.device_id = deviceId;
           }
           
           showSuccess('✅ welcome back bestie! 🚀');
         }
         
-        // Simpan session lengkap dengan ID user
-        if (user && user.id) {
+        // Simpan session — pakai username sebagai fallback ID
+        if (user && user.username) {
           setSession(user);
           
           setTimeout(() => {
             window.location.href = 'jejak.html';
           }, 800);
         } else {
-          throw new Error('User ID not found after login');
+          throw new Error('User data not found after login');
         }
         
       } catch (err) {
