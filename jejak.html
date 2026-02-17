@@ -796,6 +796,22 @@
     .filter-moody { filter: brightness(0.8) contrast(1.2) saturate(0.7) !important; }
     .filter-golden { filter: sepia(40%) hue-rotate(-15deg) saturate(1.3) contrast(1.1) !important; }
     
+    /* DUMMY ONBOARDING STYLES */
+    .entry-dummy {
+      opacity: 0.6;
+      border-style: dashed !important;
+    }
+    .entry-dummy:hover {
+      border-color: var(--border) !important;
+      opacity: 0.75;
+    }
+    .tray-item-dummy {
+      opacity: 0.5;
+    }
+    .tray-item-dummy:hover {
+      opacity: 0.7;
+    }
+    
     /* EMPTY STATE */
     .empty-state {
       padding: var(--space-xl) var(--space-md);
@@ -1041,10 +1057,10 @@
         <div class="tagline">no filter, just truth</div>
       </div>
       <div class="top-right">
+        <div style="font-size:12px; font-weight:700; color:var(--accent-primary); letter-spacing:0.05em;" id="header-username">@loading...</div>
         <div class="sync-status offline" id="sync-status">Offline</div>
-        <div class="status-indicator">
-          <span class="status-dot"></span>
-          <span>2.4k online</span>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <button onclick="logoutUser()" style="font-size:10px; background:none; border:1px solid var(--border); color:var(--text-muted); padding:3px 8px; cursor:pointer;">logout</button>
         </div>
       </div>
     </header>
@@ -1208,11 +1224,8 @@
     // CONFIGURATION - UPDATE THESE WITH YOUR SUPABASE CREDENTIALS
     // ============================================
     const CONFIG = {
-      // UPDATE THESE WITH YOUR ACTUAL SUPABASE CREDENTIALS
-      supabaseUrl: 'https://your-project.supabase.co',
-      supabaseKey: 'your-anon-key',
-      
-      // App settings
+      supabaseUrl: 'https://fuovfrdicdhnlymnacpz.supabase.co',
+      supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0',
       quotaDays: 28,
       uploadWindowDays: 3,
       maxFileSize: 5 * 1024 * 1024,
@@ -1220,10 +1233,33 @@
       maxArtefacts: 6,
       faceThreshold: 0.6,
       inputSize: 416,
-      
-      // Supabase storage bucket
       storageBucket: 'artefacts'
     };
+
+    // ============================================
+    // SESSION — Baca dari localStorage yang di-set index.html
+    // ============================================
+    const SESSION_KEYS = {
+      username: 'jejak_username',
+      userId:   'jejak_user_id',
+      deviceId: 'jejak_device_id',
+      loggedIn: 'jejak_logged_in'
+    };
+
+    function checkSession() {
+      const username = localStorage.getItem(SESSION_KEYS.username);
+      const userId   = localStorage.getItem(SESSION_KEYS.userId);
+      const loggedIn = localStorage.getItem(SESSION_KEYS.loggedIn);
+      if (!loggedIn || !username) {
+        console.warn('No valid session, redirecting to login...');
+        // Uncomment line below when deployed with login page
+        // window.location.href = 'index.html';
+        return { username: username || '@anon', userId: userId || null };
+      }
+      return { username, userId };
+    }
+
+    const SESSION = checkSession();
 
     // ============================================
     // CONSTANTS
@@ -1260,107 +1296,94 @@
       { name: 'GOLDEN', filter: 'filter-golden', desc: 'Autumn glow', icon: '🍂' }
     ];
 
-    // DUMMY ENTRIES
+    // ============================================
+    // DUMMY DATA — Onboarding visual guidance
+    // Akan otomatis TERGESER oleh data asli user (FIFO)
+    // ============================================
     const DUMMY_ENTRIES = [
       {
-        id: 'd1',
+        id: '__dummy_d1',
         content: "gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus.",
         mood: 'surviving',
         timestamp: Date.now() - 172800000,
         vibes: { relatable: 12, mood: 9, hug: 8, tea: 3, real: 5, dead: 2 },
         isSpilled: true,
-        spillId: 'spill_d1'
+        isDummy: true
       },
       {
-        id: 'd2',
+        id: '__dummy_d2',
         content: "deadline mepet, dosen gak jelas, dompet kering. rasanya pengen ijin cuti sehari buat jadi batu aja.",
         mood: 'doom',
         timestamp: Date.now() - 86400000,
         vibes: { relatable: 9, mood: 5, dead: 7, real: 3, hug: 2, tea: 1 },
         isSpilled: true,
-        spillId: 'spill_d2'
+        isDummy: true
       },
       {
-        id: 'd3',
+        id: '__dummy_d3',
         content: "capek.",
         mood: 'surviving',
         timestamp: Date.now() - 43200000,
         vibes: { hug: 20, relatable: 18, dead: 10, real: 7, mood: 3, tea: 0 },
         isSpilled: true,
-        spillId: 'spill_d3'
+        isDummy: true
       }
     ];
 
-    // DUMMY ARTEFACTS
+    // Dummy entries tampil hanya kalau user belum punya real entries
+    function getVisibleEntries() {
+      const realEntries = state.entries || [];
+      if (realEntries.length === 0) {
+        // Belum ada rant asli — tampilkan dummy sebagai onboarding
+        return DUMMY_ENTRIES;
+      }
+      // Sudah ada rant asli — tampilkan rant asli saja (dummy tergeser)
+      return realEntries;
+    }
+
+    // DUMMY ARTEFACTS — Onboarding visual guidance
+    // Akan otomatis TERGESER saat user upload foto baru (FIFO max 6)
     const DUMMY_ARTEFACTS = [
-      { 
-        id: 'a1', 
-        url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80', 
-        note: 'jeda',
-        faces: [],
-        hasFace: false
-      },
-      { 
-        id: 'a2', 
-        url: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80', 
-        note: 'hijau',
-        faces: [],
-        hasFace: false
-      },
-      { 
-        id: 'a3', 
-        url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=80', 
-        note: 'gabut',
-        faces: [],
-        hasFace: false
-      },
-      { 
-        id: 'a4', 
-        url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80', 
-        note: 'sendiri',
-        faces: [],
-        hasFace: false
-      },
-      { 
-        id: 'a5', 
-        url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80', 
-        note: 'capek',
-        faces: [{ 
-          box: { x: 75, y: 45, width: 150, height: 200 },
-          score: 0.92 
-        }],
-        hasFace: true
-      },
-      { 
-        id: 'a6', 
-        url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80', 
-        note: 'love',
-        faces: [],
-        hasFace: false
-      }
+      { id: '__dummy_a1', url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80', note: 'jeda', faces: [], hasFace: false, isDummy: true },
+      { id: '__dummy_a2', url: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80', note: 'hijau', faces: [], hasFace: false, isDummy: true },
+      { id: '__dummy_a3', url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=80', note: 'gabut', faces: [], hasFace: false, isDummy: true },
+      { id: '__dummy_a4', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80', note: 'sendiri', faces: [], hasFace: false, isDummy: true },
+      { id: '__dummy_a5', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80', note: 'capek', faces: [{ box: { x: 75, y: 45, width: 150, height: 200 }, score: 0.92 }], hasFace: true, isDummy: true },
+      { id: '__dummy_a6', url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80', note: 'love', faces: [], hasFace: false, isDummy: true }
     ];
 
+    // Artefacts tampil: real user artefacts + dummy sebagai filler sampai max 6
+    function getVisibleArtefacts() {
+      const real = (state.artefacts || []).filter(a => !a.isDummy);
+      if (real.length >= 6) return real.slice(0, 6); // Semua slot terisi real
+      // Tambahkan dummy sebagai filler di slot yang kosong
+      const needed = 6 - real.length;
+      const fillers = DUMMY_ARTEFACTS.slice(0, needed);
+      return [...real, ...fillers];
+    }
+
     // ============================================
-    // STATE
+    // STATE — currentUser diambil dari SESSION (login)
     // ============================================
+    const STORAGE_KEY_PREFIX = 'jejak_' + (SESSION.userId || SESSION.username).replace(/[^a-z0-9]/g, '_') + '_';
+
     const state = {
-      currentUser: localStorage.getItem('jejak_user') || '@anon_' + Math.random().toString(36).substr(2, 6),
+      currentUser: SESSION.username,        // Username dari login
+      currentUserId: SESSION.userId,        // UUID user dari tabel users
       currentMood: 'surviving',
       entries: [],
-      artefacts: [...DUMMY_ARTEFACTS],
+      artefacts: [],                        // Tidak pakai dummy — load dari DB
       userVibes: new Set(),
       selectedFiles: new Set(),
       colorMode: false,
       faceApiLoaded: false,
       supabase: null,
       isOnline: false,
-      
-      quotaStart: localStorage.getItem('jejak_quota_start') || null,
-      uploadsThisWindow: parseInt(localStorage.getItem('jejak_uploads_count') || '0')
+      quotaStart: localStorage.getItem(STORAGE_KEY_PREFIX + 'quota_start') || null,
+      uploadsThisWindow: parseInt(localStorage.getItem(STORAGE_KEY_PREFIX + 'uploads_count') || '0')
     };
 
-    // Save user
-    localStorage.setItem('jejak_user', state.currentUser);
+    console.log('🚀 Initializing app for user:', state.currentUser, '| ID:', state.currentUserId);
 
     // ============================================
     // SUPABASE INITIALIZATION
@@ -1435,6 +1458,11 @@
     
     // Helper function to generate UUID v4
     function generateUUID() {
+      // Use crypto.randomUUID() if available (modern browsers)
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+      // Fallback for older browsers
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
         const r = Math.random() * 16 | 0;
         const v = c === 'x' ? r : (r & 0x3 | 0x8);
@@ -1461,10 +1489,13 @@
       state.entries.unshift(newRant);
       
       // 2. Save to localStorage
-      localStorage.setItem('jejak_user_entries', JSON.stringify(state.entries));
+      localStorage.setItem(STORAGE_KEY_PREFIX + 'entries', JSON.stringify(state.entries));
       
       // 3. Render immediately
       renderEntries();
+      
+      // 3b. Scroll to top to show new entry
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       
       // 4. Send to Supabase
       if (state.isOnline && state.supabase) {
@@ -1544,7 +1575,7 @@
         if (entry) {
           entry.isSpilled = true;
           entry.spillId = spillId;
-          localStorage.setItem('jejak_user_entries', JSON.stringify(state.entries));
+          localStorage.setItem(STORAGE_KEY_PREFIX + 'entries', JSON.stringify(state.entries));
           renderEntries();
         }
         
@@ -1701,13 +1732,24 @@
     // FIFO SYSTEM
     // ============================================
     function addArtefactToFIFO(newArtefact) {
-      state.artefacts.unshift(newArtefact);
-      if (state.artefacts.length > CONFIG.maxArtefacts) {
-        const removed = state.artefacts.pop();
-        console.log('FIFO removed:', removed.id);
-        showToast('Foto lama terhapus (FIFO)');
+      // Pastikan hanya real artefacts yang disimpan (tanpa dummy)
+      const realArtefacts = (state.artefacts || []).filter(a => !a.isDummy);
+      
+      // Tambahkan di depan (newest first)
+      realArtefacts.unshift(newArtefact);
+      
+      // FIFO: kalau lebih dari max, hapus yang paling lama
+      if (realArtefacts.length > CONFIG.maxArtefacts) {
+        const removed = realArtefacts.pop();
+        console.log('🔄 FIFO removed:', removed.id, removed.note);
+        showToast('Foto lama terhapus otomatis (FIFO)');
       }
+      
+      // Update state dengan real artefacts saja
+      state.artefacts = realArtefacts;
       saveArtefacts();
+      
+      console.log(`📦 Tray: ${realArtefacts.length} real artefacts, ${Math.max(0, 6 - realArtefacts.length)} dummy fillers`);
     }
 
     function saveArtefacts() {
@@ -1719,11 +1761,11 @@
         hasFace: a.hasFace || false,
         timestamp: a.timestamp || Date.now()
       }));
-      localStorage.setItem('jejak_artefacts_meta', JSON.stringify(metadata));
+      localStorage.setItem(STORAGE_KEY_PREFIX + 'artefacts_meta', JSON.stringify(metadata));
     }
 
     function loadArtefacts() {
-      const saved = localStorage.getItem('jejak_artefacts_meta');
+      const saved = localStorage.getItem(STORAGE_KEY_PREFIX + 'artefacts_meta');
       if (saved) {
         try {
           const metadata = JSON.parse(saved);
@@ -1741,32 +1783,32 @@
     function renderEntries() {
       const container = document.getElementById('entries-container');
       
-      const userEntries = state.entries || [];
-      const allEntries = [...userEntries, ...DUMMY_ENTRIES];
+      // Tampilkan rant user — kalau kosong tampilkan dummy sebagai onboarding
+      const allEntries = getVisibleEntries();
       
       if (allEntries.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
             <span class="empty-emoji">🍃</span>
-            <p class="empty-text">"Belum ada yang berani spill"</p>
-            <p class="empty-subtext">Jadilah yang pertama. No judgment.</p>
+            <p class="empty-text">"Jejak pertamamu menanti"</p>
+            <p class="empty-subtext">Tulis sesuatu. Hanya kamu yang bisa lihat.</p>
           </div>
         `;
         return;
       }
       
       container.innerHTML = allEntries.map(entry => {
-        const isUserEntry = userEntries.find(e => e.id === entry.id);
         const spillStatus = entry.isSpilled ? 
           '<div class="spill-status spilled">✓ Ter-spill ke komunitas</div>' : '';
         
+        const isDummy = entry.isDummy === true;
         return `
-        <article class="entry" data-id="${entry.id}">
+        <article class="entry ${isDummy ? 'entry-dummy' : ''}" data-id="${entry.id}">
           <div class="entry-header">
             <div class="entry-meta">
-              <span class="entry-time">${formatTime(entry.timestamp)}</span>
+              <span class="entry-time">${isDummy ? 'contoh' : formatTime(entry.timestamp)}</span>
               <span class="entry-mood ${entry.mood}">${MOODS[entry.mood].label}</span>
-              ${isUserEntry ? '<span style="font-size: 9px; color: var(--accent-primary);">• ANDA</span>' : ''}
+              ${isDummy ? '<span style="font-size:9px;color:var(--text-muted);border:1px dashed var(--border);padding:2px 6px;">CONTOH</span>' : ''}
             </div>
           </div>
           <div class="entry-content">
@@ -1779,8 +1821,9 @@
               const isVibed = state.userVibes.has(`${entry.id}-${key}`);
               return `
                 <button class="vibe-btn ${isVibed ? 'vibed' : ''}" 
-                        onclick="toggleVibe('${entry.id}', '${key}', this)"
-                        aria-label="${vibe.label}">
+                        onclick="${isDummy ? 'showToast("Tulis rantmu dulu bestie!")' : `toggleVibe('${entry.id}', '${key}', this)`}"
+                        aria-label="${vibe.label}"
+                        ${isDummy ? 'style="opacity:0.5;pointer-events:auto;"' : ''}>
                   <span class="vibe-emoji">${vibe.emoji}</span>
                   <span class="vibe-count">${count}</span>
                   <span class="vibe-label">${vibe.label}</span>
@@ -1794,18 +1837,30 @@
 
     function renderTray() {
       const grid = document.getElementById('tray-grid');
-      const items = state.artefacts.length > 0 ? state.artefacts : DUMMY_ARTEFACTS;
+      // Tampilkan real artefacts + dummy sebagai filler (FIFO: real geser dummy)
+      const items = getVisibleArtefacts();
       
       grid.innerHTML = items.map((item, index) => `
-        <div class="tray-item" onclick="setHero('${item.url}', '${item.note}', ${JSON.stringify(item.faces || []).replace(/"/g, '&quot;')})">
+        <div class="tray-item ${item.isDummy ? 'tray-item-dummy' : ''}" 
+             onclick="setHero('${item.url}', '${item.note}', ${JSON.stringify(item.faces || []).replace(/"/g, '&quot;')})">
           <div style="position: relative; width: 100%; height: 100%;">
             <img src="${item.url}" alt="${item.note}" loading="lazy" class="${state.colorMode ? getCurrentMonthTheme().filter : 'filter-monochrome'}">
             ${item.hasFace ? '<div class="detection-badge" style="top: 4px; left: 4px; right: auto;">SENSORED</div>' : ''}
+            ${item.isDummy ? '<div style="position:absolute;bottom:4px;right:4px;font-size:8px;font-weight:700;color:var(--text-muted);background:rgba(0,0,0,0.7);padding:2px 5px;letter-spacing:0.05em;">CONTOH</div>' : ''}
             ${renderTrayScribblesHTML(item.faces)}
           </div>
         </div>
       `).join('');
       
+      if (items.length === 0) {
+        // Show all empty slots with upload hint
+        grid.innerHTML = '';
+        for (let i = 0; i < 6; i++) {
+          grid.innerHTML += `<div class="tray-item empty" onclick="openGallery()">+</div>`;
+        }
+        return;
+      }
+
       const emptySlots = Math.max(0, 6 - items.length);
       for (let i = 0; i < emptySlots; i++) {
         grid.innerHTML += `<div class="tray-item empty" onclick="openGallery()">+</div>`;
@@ -1890,7 +1945,7 @@
       const countEl = btn.querySelector('.vibe-count');
       let count = parseInt(countEl.textContent);
       
-      let entry = state.entries.find(e => e.id === entryId) || DUMMY_ENTRIES.find(e => e.id === entryId);
+      let entry = state.entries.find(e => e.id === entryId);
       
       if (state.userVibes.has(key)) {
         state.userVibes.delete(key);
@@ -1985,7 +2040,7 @@
       const now = Date.now();
       if (!state.quotaStart) {
         state.quotaStart = now.toString();
-        localStorage.setItem('jejak_quota_start', state.quotaStart);
+        localStorage.setItem(STORAGE_KEY_PREFIX + 'quota_start', state.quotaStart);
       }
       
       const quotaStart = parseInt(state.quotaStart);
@@ -2170,7 +2225,7 @@
       }
       
       state.uploadsThisWindow += artefacts.length;
-      localStorage.setItem('jejak_uploads_count', state.uploadsThisWindow.toString());
+      localStorage.setItem(STORAGE_KEY_PREFIX + 'uploads_count', state.uploadsThisWindow.toString());
       
       const first = artefacts[0];
       window.setHero(first.url, first.note, first.faces);
@@ -2217,7 +2272,97 @@
     // ============================================
     // EVENT LISTENERS
     // ============================================
+    // ============================================
+    // LOAD USER DATA FROM SUPABASE
+    // ============================================
+    async function loadUserArtefactsFromDB() {
+      if (!state.isOnline || !state.supabase) return;
+      try {
+        const { data, error } = await state.supabase
+          .from('artefacts')
+          .select('*')
+          .eq('author', state.currentUser)
+          .order('created_at', { ascending: false })
+          .limit(6);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          state.artefacts = data.map(a => ({
+            id: a.id,
+            url: a.url,
+            note: a.note || 'memory',
+            faces: a.faces || [],
+            hasFace: a.has_face || false,
+            timestamp: new Date(a.created_at).getTime()
+          }));
+          saveArtefacts();
+          renderTray();
+          // Set hero to most recent artefact
+          const first = state.artefacts[0];
+          window.setHero(first.url, first.note, first.faces || []);
+          console.log('✅ Loaded', data.length, 'artefacts from DB');
+        }
+      } catch (e) {
+        console.error('❌ Failed to load artefacts from DB:', e);
+      }
+    }
+
+    async function loadUserRantsFromDB() {
+      if (!state.isOnline || !state.supabase) return;
+      try {
+        const { data, error } = await state.supabase
+          .from('rants')
+          .select('*')
+          .eq('author', state.currentUser)
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          // Merge dengan entries yang ada di local state (hindari duplikat)
+          const localIds = new Set(state.entries.map(e => e.id));
+          const newEntries = data
+            .filter(r => !localIds.has(r.id))
+            .map(r => ({
+              id: r.id,
+              content: r.content,
+              mood: r.mood,
+              timestamp: new Date(r.created_at).getTime(),
+              vibes: r.vibes || {relatable:0,mood:0,tea:0,hug:0,real:0,dead:0},
+              isSpilled: true,
+              author: r.author
+            }));
+
+          state.entries = [...state.entries, ...newEntries]
+            .sort((a, b) => b.timestamp - a.timestamp);
+
+          localStorage.setItem(STORAGE_KEY_PREFIX + 'entries', JSON.stringify(state.entries));
+          renderEntries();
+          console.log('✅ Loaded', data.length, 'rants from DB');
+        }
+      } catch (e) {
+        console.error('❌ Failed to load rants from DB:', e);
+      }
+    }
+
+        // Logout function
+    window.logoutUser = function() {
+      if (!confirm('Yakin mau logout?')) return;
+      localStorage.removeItem('jejak_logged_in');
+      localStorage.removeItem('jejak_username');
+      localStorage.removeItem('jejak_user_id');
+      window.location.href = 'index.html';
+    };
+
     document.addEventListener('DOMContentLoaded', function() {
+      // Show username in header
+      const headerUsername = document.getElementById('header-username');
+      if (headerUsername) {
+        headerUsername.textContent = '@' + state.currentUser;
+      }
+
       // Initialize Supabase
       initSupabase();
       
@@ -2225,7 +2370,7 @@
       loadFaceApi();
       
       // Load saved entries
-      const savedEntries = localStorage.getItem('jejak_user_entries');
+      const savedEntries = localStorage.getItem(STORAGE_KEY_PREFIX + 'entries');
       if (savedEntries) {
         try {
           state.entries = JSON.parse(savedEntries);
@@ -2272,14 +2417,18 @@
       renderEntries();
       renderTray();
       
-      // Set initial hero
-      if (state.artefacts.length > 0) {
-        const first = state.artefacts[0];
-        window.setHero(first.url, first.note, first.faces);
-      } else if (DUMMY_ARTEFACTS.length > 0) {
-        window.setHero(DUMMY_ARTEFACTS[0].url, DUMMY_ARTEFACTS[0].note, DUMMY_ARTEFACTS[0].faces);
+      // Set initial hero — real artefacts or dummy as fallback
+      const visibleArts = getVisibleArtefacts();
+      if (visibleArts.length > 0) {
+        const first = visibleArts[0];
+        window.setHero(first.url, first.note, first.faces || []);
       }
+      // Load artefacts from Supabase if online (real will replace dummy)
+      loadUserArtefactsFromDB();
       
+      // Load user data from DB
+      loadUserRantsFromDB();
+
       // Update quota every hour
       setInterval(updateQuotaUI, 3600000);
     });
