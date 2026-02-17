@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+akarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0A0A0A; --surface: #141414; --surface-elevated: #1E1E1E;
@@ -95,12 +95,13 @@
     .vibe-section { border-top: 1px solid var(--border); padding-top: var(--space-sm); }
     .vibe-reactions { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
     .vibe-btn { display: flex; align-items: center; gap: var(--space-xs); padding: 8px 12px; background: var(--surface-elevated); border: 1px solid var(--border); cursor: pointer; transition: all 0.15s; font-size: 12px; color: var(--text-secondary); position: relative; font-weight: 600; }
-    .vibe-btn:hover:not(.used) { background: var(--surface); border-color: var(--text-secondary); color: var(--text); transform: translateY(-1px); }
+    .vibe-btn:hover:not(.used):not(.disabled) { background: var(--surface); border-color: var(--text-secondary); color: var(--text); transform: translateY(-1px); }
     .vibe-btn.used { background: var(--accent-primary); border-color: var(--accent-primary); color: var(--bg); cursor: default; }
+    .vibe-btn.disabled { opacity: 0.3; cursor: not-allowed; pointer-events: none; }
     .vibe-btn .emoji { font-size: 16px; line-height: 1; }
     .vibe-btn .count { font-size: 11px; font-weight: 700; min-width: 16px; text-align: center; }
     .vibe-tooltip { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 6px 10px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; opacity: 0; visibility: hidden; transition: all 0.2s; pointer-events: none; z-index: 1000; }
-    .vibe-btn:hover:not(.used) .vibe-tooltip { opacity: 1; visibility: visible; }
+    .vibe-btn:hover:not(.used):not(.disabled) .vibe-tooltip { opacity: 1; visibility: visible; }
 
     /* PEEK OVERLAY */
     .jejak-peek-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 9998; display: none; flex-direction: column; overflow-y: auto; animation: slideUp 0.3s ease; }
@@ -216,6 +217,7 @@
     .nav-item.active::before { width: 100%; }
     .nav-icon { font-size: 20px; line-height: 1; }
   </style>
+<base target="_blank">
 </head>
 <body>
   <div class="wrapper">
@@ -395,7 +397,9 @@
       filteredSpills: [],
       resonanceThreshold: 20,   // 100 - slider value
       activeMood: 'all',
-      usedVibes: new Set(JSON.parse(localStorage.getItem('saynope_vibes') || '[]')),
+      // REVISI 3: Simpan reaksi per spill, bukan per kombinasi spill+emoji
+      // Format: { 'spillId': 'emojiKey' }
+      usedVibesPerSpill: JSON.parse(localStorage.getItem('saynope_vibes_per_spill') || '{}'),
       pendingSpills: [],
       userSig: null,
       scrollCount: 0,
@@ -494,6 +498,10 @@
 
         let spills = data || [];
 
+        // REVISI 1 & 2: Filter OUT rant milik user sendiri
+        // Hanya rant user lain yang bisa masuk spill
+        spills = spills.filter(s => s.author !== SESSION.username);
+
         // Filler dummy jika real spills < 4
         if (spills.length < 4) {
           const needed = 4 - spills.length;
@@ -503,7 +511,7 @@
         state.allSpills = spills.map(s => ({
           ...s,
           vibeScore: calcVibeScore(s, state.userSig),
-          isOwn: s.author === SESSION.username
+          isOwn: false // Semua yang di spill adalah milik orang lain
         }));
 
         applyFilters();
@@ -529,6 +537,7 @@
       state.db.channel('spills-rt')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'spills' }, payload => {
           const s = payload.new;
+          // REVISI 1: Jangan tampilkan rant user sendiri di realtime juga
           if (s.author === SESSION.username) return;
           const newSpill = { ...s, vibeScore: calcVibeScore(s, state.userSig), isOwn: false };
           state.pendingSpills.unshift(newSpill);
@@ -559,21 +568,20 @@
         list = list.filter(s => s.mood === state.activeMood);
       }
 
-      // Resonance filter
+      // REVISI 2: Resonance filter - hanya rant yang lolos algoritma yang masuk
+      // Threshold menentukan apakah spill ditampilkan atau tidak
       if (state.resonanceThreshold > 0) {
         const thresh = state.resonanceThreshold;
         list = list.map(s => ({
           ...s,
-          _show: s.vibeScore >= thresh || s.isOwn
+          _show: s.vibeScore >= thresh
         }));
       } else {
         list = list.map(s => ({ ...s, _show: true }));
       }
 
-      // Sort: own first, then by vibeScore desc, then by time
+      // Sort: by vibeScore desc, then by time
       list.sort((a,b) => {
-        if (a.isOwn && !b.isOwn) return -1;
-        if (!a.isOwn && b.isOwn) return 1;
         if (b.vibeScore !== a.vibeScore) return b.vibeScore - a.vibeScore;
         return new Date(b.created_at) - new Date(a.created_at);
       });
@@ -622,10 +630,10 @@
 
     function buildCard(spill, idx) {
       const el = document.createElement('div');
-      const isHighlighted = spill.vibeScore >= 70 && !spill.isOwn;
-      const isDimmed = spill.vibeScore < 30 && !spill.isOwn && state.resonanceThreshold > 0;
+      const isHighlighted = spill.vibeScore >= 70;
+      const isDimmed = spill.vibeScore < 30 && state.resonanceThreshold > 0;
 
-      el.className = `tea-card ${isHighlighted ? 'highlighted' : ''} ${isDimmed ? 'dimmed' : ''} ${spill.isOwn ? 'own-spill' : ''}`;
+      el.className = `tea-card ${isHighlighted ? 'highlighted' : ''} ${isDimmed ? 'dimmed' : ''}`;
       el.id = 'card-' + spill.id;
 
       const avatarText = spill.isDummy ? '👤' : (spill.author || '??').slice(0,2).toUpperCase();
@@ -636,10 +644,17 @@
       const isNew = idx < 2 && !spill.isDummy;
       const matchLabel = spill.vibeScore >= 80 ? `${spill.vibeScore}% Match 🔥` : spill.vibeScore >= 60 ? `${spill.vibeScore}% Selaras` : null;
 
+      // REVISI 3: Cek apakah user sudah memberi reaksi pada spill ini
+      const usedEmojiKey = state.usedVibesPerSpill[spill.id];
+      const hasReacted = !!usedEmojiKey;
+
       const vibesHtml = Object.entries(VIBE_REACTIONS).map(([k, v]) => {
         const count = vibes[k] || 0;
-        const used = state.usedVibes.has(`${spill.id}-${k}`);
-        return `<button class="vibe-btn ${used ? 'used' : ''}" onclick="handleVibe('${spill.id}','${k}',this,${!!spill.isDummy})">
+        // REVISI 3: Jika sudah memberi reaksi, semua emoji lain disabled, yang dipilih jadi used
+        const isUsed = usedEmojiKey === k;
+        const isDisabled = hasReacted && !isUsed;
+        
+        return `<button class="vibe-btn ${isUsed ? 'used' : ''} ${isDisabled ? 'disabled' : ''}" onclick="handleVibe('${spill.id}','${k}',this,${!!spill.isDummy})" ${isDisabled ? 'disabled' : ''}>
           <span class="emoji">${v.emoji}</span><span class="count">${count}</span>
           <span class="vibe-tooltip">${v.slang}</span></button>`;
       }).join('');
@@ -672,8 +687,11 @@
         return;
       }
 
-      const comboKey = `${spillId}-${vibeKey}`;
-      if (state.usedVibes.has(comboKey)) { showNotification('Udah kasih reaksi ini!'); return; }
+      // REVISI 3: Cek apakah sudah memberi reaksi pada spill ini
+      if (state.usedVibesPerSpill[spillId]) {
+        showNotification('Kamu sudah kasih reaksi pada curhat ini!');
+        return;
+      }
 
       // Optimistic UI
       btn.classList.add('used');
@@ -682,9 +700,21 @@
       btn.style.transform = 'scale(1.25)';
       setTimeout(() => btn.style.transform = '', 200);
 
-      // Persist
-      state.usedVibes.add(comboKey);
-      localStorage.setItem('saynope_vibes', JSON.stringify([...state.usedVibes].slice(-300)));
+      // REVISI 3: Simpan bahwa user sudah memberi reaksi pada spill ini
+      state.usedVibesPerSpill[spillId] = vibeKey;
+      localStorage.setItem('saynope_vibes_per_spill', JSON.stringify(state.usedVibesPerSpill));
+
+      // Disable semua emoji lain di card ini
+      const card = document.getElementById('card-' + spillId);
+      if (card) {
+        const allBtns = card.querySelectorAll('.vibe-btn');
+        allBtns.forEach(b => {
+          if (!b.classList.contains('used')) {
+            b.classList.add('disabled');
+            b.disabled = true;
+          }
+        });
+      }
 
       // Trigger peek after vibe
       setTimeout(() => openPeek(spillId), 200);
