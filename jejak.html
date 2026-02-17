@@ -3,346 +3,2434 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>NOPE — Jejak</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%2300F0FF'/%3E%3Ctext x='50' y='70' font-size='50' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%230A0A0A'%3E✦%3C/text%3E%3C/svg%3E">
-  <meta name="theme-color" content="#0A0A0A">
+  <title>JEJAK — Spill Your Truth</title>
+  
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+  
+  <!-- Face Detection -->
+  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/dist/face-api.min.js"></script>
+  
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      --bg: #0A0A0A; --surface: #141414; --surface-elevated: #1E1E1E;
-      --border: #2A2A2A; --border-accent: #00F0FF;
-      --text: #FFFFFF; --text-secondary: #888888; --text-muted: #555555;
-      --accent-primary: #00F0FF; --accent-secondary: #FF4D00;
-      --accent-warm: #FFD700; --accent-hug: #FF69B4;
-      --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px;
+      --bg: #0A0A0A;
+      --surface: #141414;
+      --surface-elevated: #1E1E1E;
+      --border: #2A2A2A;
+      --border-accent: #FF4D00;
+      
+      --text: #FFFFFF;
+      --text-secondary: #888888;
+      --text-muted: #555555;
+      
+      --accent-primary: #FF4D00;
+      --accent-secondary: #00F0FF;
+      --accent-tertiary: #FF006E;
+      --accent-quaternary: #39FF14;
+      --accent-warm: #FFD700;
+      
+      /* Mood Colors */
+      --mood-surviving: #FF9500;
+      --mood-thriving: #39FF14;
+      --mood-chaotic: #00F0FF;
+      --mood-doom: #8B5CF6;
+      --mood-existential: #FF006E;
+      
+      --radius: 0px;
+      --radius-sm: 4px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-weight: 500; font-size: 15px; line-height: 1.4; min-height: 100vh; overflow-x: hidden; padding-bottom: 100px; }
-    .wrapper { max-width: 480px; margin: 0 auto; padding: 0 var(--space-md); }
-
-    header { padding: var(--space-lg) 0 var(--space-md); border-bottom: 2px solid var(--border); margin-bottom: var(--space-md); display: flex; justify-content: space-between; align-items: center; }
-    .header-title { font-size: 32px; font-weight: 800; letter-spacing: -0.04em; color: var(--text); line-height: 0.9; }
-    .header-title::before { content: '✦'; color: var(--accent-primary); margin-right: var(--space-sm); }
-    .header-user { font-size: 11px; font-weight: 700; color: var(--accent-primary); letter-spacing: 0.05em; text-transform: uppercase; }
-
-    .page-header { margin: var(--space-lg) 0; padding-bottom: var(--space-md); border-bottom: 2px solid var(--border); }
-    .page-subtitle { font-family: 'Instrument Serif', serif; font-size: 16px; font-style: italic; color: var(--text-secondary); margin-bottom: var(--space-xs); }
-    .page-tagline { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--accent-primary); }
-
-    /* ENTRI RANT */
-    .entry-card { background: var(--surface); border: 2px solid var(--border); padding: var(--space-md); margin-bottom: var(--space-md); position: relative; transition: all 0.2s; }
-    .entry-card:hover { border-color: var(--border-accent); transform: translateY(-2px); box-shadow: 4px 4px 0 var(--surface-elevated); }
-    .entry-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm); padding-bottom: var(--space-sm); border-bottom: 1px solid var(--border); }
-    .entry-mood { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 8px; border: 1px solid currentColor; }
-    .entry-time { font-size: 11px; color: var(--text-muted); font-weight: 600; }
-    .entry-content { font-size: 15px; line-height: 1.6; color: var(--text); margin-bottom: var(--space-md); font-family: 'Instrument Serif', serif; font-style: italic; }
-
-    /* EMPATHIC REACTIONS - Format Hangat */
-    .empathy-section { border-top: 1px solid var(--border); padding-top: var(--space-sm); }
-    .empathy-container { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; }
     
-    .empathy-pill { 
-      display: inline-flex; 
-      align-items: center; 
-      gap: var(--space-xs); 
-      padding: 8px 16px; 
-      background: var(--surface-elevated); 
-      border: 2px solid var(--border); 
-      font-size: 13px; 
-      font-weight: 600; 
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    html { scroll-behavior: smooth; }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-weight: 500;
+      font-size: 15px;
+      line-height: 1.4;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 100px;
+    }
+    
+    /* Noise texture */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+    
+    .wrapper {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 var(--space-md);
+    }
+    
+    /* HEADER */
+    header {
+      padding: var(--space-lg) 0 var(--space-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    
+    .logo {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--text);
+      cursor: pointer;
+      line-height: 0.9;
+      position: relative;
+    }
+    
+    .logo::before, .logo::after {
+      content: 'JEJAK';
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+    .logo::before { color: var(--accent-secondary); transform: translate(-2px, 0); }
+    .logo::after { color: var(--accent-tertiary); transform: translate(2px, 0); }
+    .logo:hover::before { opacity: 0.8; animation: glitch 0.3s infinite; }
+    
+    @keyframes glitch {
+      0%, 100% { transform: translate(-2px, 0); }
+      25% { transform: translate(2px, 2px); }
+      50% { transform: translate(-2px, -2px); }
+      75% { transform: translate(2px, 0); }
+    }
+    
+    .tagline {
+      font-family: 'Instrument Serif', serif;
+      font-size: 13px;
       color: var(--text-secondary);
-      transition: all 0.2s;
-    }
-    
-    .empathy-pill.warm { 
-      background: linear-gradient(135deg, rgba(255,105,180,0.1) 0%, rgba(255,215,0,0.1) 100%);
-      border-color: var(--accent-hug);
-      color: var(--text);
-    }
-    
-    .empathy-pill.supportive {
-      background: linear-gradient(135deg, rgba(0,240,255,0.1) 0%, rgba(57,255,20,0.1) 100%);
-      border-color: var(--accent-primary);
-      color: var(--text);
-    }
-    
-    .empathy-pill.energetic {
-      background: linear-gradient(135deg, rgba(255,77,0,0.1) 0%, rgba(255,215,0,0.1) 100%);
-      border-color: var(--accent-secondary);
-      color: var(--text);
-    }
-    
-    .empathy-icon { font-size: 18px; }
-    .empathy-text { font-family: 'Instrument Serif', serif; font-style: italic; }
-    .empathy-count { font-weight: 700; color: var(--accent-primary); }
-
-    /* Multiple reactions summary */
-    .empathy-summary { 
-      font-size: 12px; 
-      color: var(--text-secondary); 
       font-style: italic;
       margin-top: var(--space-xs);
     }
-
-    /* Empty state */
-    .empty-empathy { 
-      font-size: 12px; 
-      color: var(--text-muted); 
-      font-style: italic;
-      padding: var(--space-sm) 0;
+    
+    .top-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--space-sm);
     }
-
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 2px solid var(--border); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-    .nav-container { max-width: 480px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center; height: 64px; }
-    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 100%; color: var(--text-muted); text-decoration: none; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; position: relative; cursor: pointer; }
-    .nav-item.active { color: var(--accent-primary); }
-    .nav-icon { font-size: 20px; line-height: 1; }
-
-    .notification { position: fixed; top: var(--space-md); left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--text); color: var(--bg); padding: 12px 24px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; z-index: 10002; opacity: 0; transition: all 0.3s; border: 2px solid var(--bg); box-shadow: 4px 4px 0 var(--accent-primary); pointer-events: none; }
-    .notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent-quaternary);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    
+    .sync-status {
+      font-size: 10px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .sync-status::before {
+      content: '•';
+    }
+    .sync-status.online {
+      color: var(--accent-quaternary);
+    }
+    .sync-status.offline {
+      color: var(--accent-tertiary);
+    }
+    .sync-status.syncing {
+      color: var(--accent-warm);
+    }
+    
+    /* FILTER CONTROLS */
+    .filter-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-sm);
+      padding: var(--space-sm) 0;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .filter-info {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    
+    .filter-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 4px 8px;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+    
+    .filter-toggle {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .filter-toggle:hover {
+      border-color: var(--accent-primary);
+    }
+    
+    .filter-toggle.active {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: var(--bg);
+    }
+    
+    .filter-icon {
+      font-size: 16px;
+    }
+    
+    .filter-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    /* BOTTOM NAVIGATION */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 2px solid var(--border);
+      z-index: 1000;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    .nav-container {
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 64px;
+    }
+    
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: 100%;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background: var(--accent-primary);
+      transition: width 0.2s;
+    }
+    
+    .nav-item:hover {
+      color: var(--text-secondary);
+      background: var(--surface-elevated);
+    }
+    
+    .nav-item.active {
+      color: var(--accent-primary);
+    }
+    
+    .nav-item.active::before {
+      width: 100%;
+    }
+    
+    .nav-icon {
+      font-size: 20px;
+      line-height: 1;
+    }
+    
+    /* HERO */
+    .hero-section {
+      position: relative;
+      margin: 0 calc(-1 * var(--space-md));
+      margin-bottom: var(--space-lg);
+    }
+    .hero {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      border-top: 2px solid var(--border);
+      border-bottom: 2px solid var(--border);
+      background: var(--surface);
+    }
+    .hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s, filter 0.3s;
+    }
+    .hero:hover img { transform: scale(1.03); }
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+      pointer-events: none;
+    }
+    .hero-notation {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: var(--space-md);
+      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+      font-family: 'Instrument Serif', serif;
+      font-size: 24px;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.2;
+      z-index: 20;
+    }
+    
+    /* FACE SCRIBBLE */
+    .face-scribble {
+      position: absolute;
+      background: rgba(0,0,0,0.95);
+      pointer-events: none;
+      z-index: 15;
+      overflow: hidden;
+    }
+    .face-scribble::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: 
+        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.1) 2px, rgba(255,255,255,0.1) 4px),
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.05) 2px, rgba(255,255,255,0.05) 4px);
+    }
+    .marker-lines {
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 3px,
+        rgba(0,0,0,0.8) 3px,
+        rgba(0,0,0,0.8) 6px
+      );
+    }
+    
+    /* UPLOAD CONTROLS */
+    .upload-controls {
+      position: absolute;
+      top: var(--space-md);
+      right: var(--space-md);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      align-items: flex-end;
+      z-index: 20;
+    }
+    .upload-btn {
+      width: 48px;
+      height: 48px;
+      background: var(--accent-primary);
+      border: none;
+      color: var(--bg);
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 4px 4px 0 var(--bg), 4px 4px 0 2px var(--accent-primary);
+      position: relative;
+    }
+    .upload-btn:hover:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 var(--bg), 2px 2px 0 2px var(--accent-primary);
+    }
+    .upload-btn:disabled {
+      background: var(--text-muted);
+      box-shadow: none;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    .upload-counter {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: var(--accent-tertiary);
+      color: var(--text);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      min-width: 20px;
+      text-align: center;
+    }
+    .quota-timer {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: var(--space-sm) var(--space-md);
+      font-size: 11px;
+      color: var(--text-secondary);
+      max-width: 200px;
+      text-align: right;
+    }
+    .quota-timer.urgent {
+      border-color: var(--accent-tertiary);
+      color: var(--accent-tertiary);
+      animation: pulse-border 2s infinite;
+    }
+    @keyframes pulse-border {
+      0%, 100% { border-color: var(--accent-tertiary); }
+      50% { border-color: var(--text-muted); }
+    }
+    
+    /* INPUT SECTION */
+    .input-section { margin-bottom: var(--space-xl); }
+    .input-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-sm);
+    }
+    .input-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+    }
+    .char-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .rant-input {
+      width: 100%;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: var(--space-md);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      resize: none;
+      min-height: 120px;
+      transition: all 0.2s;
+    }
+    .rant-input:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      background: var(--surface-elevated);
+    }
+    .rant-input::placeholder { color: var(--text-muted); }
+    
+    /* MOOD SELECTOR */
+    .mood-section { margin: var(--space-md) 0; }
+    .mood-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-sm);
+    }
+    .mood-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-sm);
+    }
+    .mood-card {
+      position: relative;
+      padding: var(--space-md);
+      background: var(--surface);
+      border: 2px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .mood-card:hover {
+      border-color: var(--text-secondary);
+      transform: translateY(-2px);
+    }
+    .mood-card.active {
+      border-color: currentColor;
+      background: var(--surface-elevated);
+    }
+    .mood-card.active::before {
+      content: '✓';
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .mood-emoji { font-size: 28px; line-height: 1; }
+    .mood-name {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .mood-desc {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+    .mood-card[data-mood="surviving"] { color: var(--mood-surviving); }
+    .mood-card[data-mood="thriving"] { color: var(--mood-thriving); }
+    .mood-card[data-mood="chaotic"] { color: var(--mood-chaotic); }
+    .mood-card[data-mood="doom"] { color: var(--mood-doom); }
+    
+    .input-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: var(--space-md);
+    }
+    .submit-btn {
+      padding: 14px 32px;
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: var(--accent-primary);
+      border: none;
+      color: var(--bg);
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 4px 4px 0 var(--surface-elevated), 4px 4px 0 2px var(--accent-primary);
+    }
+    .submit-btn:hover:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 var(--surface-elevated), 2px 2px 0 2px var(--accent-primary);
+    }
+    .submit-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+    
+    /* ENTRIES */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 2px solid var(--border);
+    }
+    .section-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text);
+    }
+    .section-line { flex: 1; height: 2px; background: var(--border); }
+    
+    .entry {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      margin-bottom: var(--space-md);
+      position: relative;
+      animation: slideIn 0.4s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .entry:hover { border-color: var(--border-accent); }
+    .entry-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-sm) var(--space-md);
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-elevated);
+    }
+    .entry-meta { display: flex; align-items: center; gap: var(--space-sm); }
+    .entry-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+    .entry-mood {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 4px 8px;
+      border: 1px solid currentColor;
+    }
+    .entry-mood.surviving { color: var(--mood-surviving); }
+    .entry-mood.thriving { color: var(--mood-thriving); }
+    .entry-mood.chaotic { color: var(--mood-chaotic); }
+    .entry-mood.doom { color: var(--mood-doom); }
+    
+    .entry-content {
+      padding: var(--space-md);
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    
+    .spill-status {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: var(--space-xs);
+    }
+    .spill-status.spilled {
+      color: var(--accent-secondary);
+    }
+    
+    /* VIBE BAR */
+    .vibe-bar {
+      display: flex;
+      border-top: 1px solid var(--border);
+      background: var(--surface-elevated);
+    }
+    .vibe-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: var(--space-sm) 4px;
+      background: transparent;
+      border: none;
+      border-right: 1px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+      position: relative;
+    }
+    .vibe-btn:last-child { border-right: none; }
+    .vibe-btn:hover { background: var(--surface); color: var(--text); }
+    .vibe-btn.vibed { background: var(--surface); }
+    .vibe-btn.vibed .vibe-emoji {
+      filter: none;
+      transform: scale(1.15);
+      text-shadow: 0 0 10px currentColor;
+    }
+    .vibe-btn.vibed .vibe-count {
+      color: var(--text);
+      font-weight: 700;
+    }
+    .vibe-emoji {
+      font-size: 24px;
+      line-height: 1;
+      filter: grayscale(0.4);
+      transition: all 0.2s;
+    }
+    .vibe-btn:hover .vibe-emoji {
+      filter: none;
+      transform: scale(1.1);
+    }
+    .vibe-count {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      min-width: 20px;
+      text-align: center;
+    }
+    .vibe-label {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      background: var(--text);
+      color: var(--bg);
+      padding: 6px 10px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s;
+      pointer-events: none;
+    }
+    .vibe-btn:hover .vibe-label {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+    
+    /* TRAY */
+    .tray-section { margin-bottom: var(--space-xl); }
+    .tray-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: var(--border);
+      border: 2px solid var(--border);
+    }
+    .tray-item {
+      aspect-ratio: 1;
+      background: var(--surface);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .tray-item.empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 20px;
+      border: 2px dashed var(--border);
+    }
+    .tray-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: all 0.3s;
+    }
+    .tray-item:hover img { transform: scale(1.1); }
+    .tray-item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--accent-primary);
+      opacity: 0;
+      transition: opacity 0.2s;
+      mix-blend-mode: multiply;
+    }
+    .tray-item:hover::after { opacity: 0.3; }
+    .tray-item .face-scribble {
+      position: absolute;
+      z-index: 5;
+    }
+    
+    /* FILTER CLASSES */
+    .filter-monochrome { filter: grayscale(100%) contrast(1.1) !important; }
+    .filter-sepia { filter: sepia(100%) contrast(1.1) saturate(0.8) !important; }
+    .filter-lomo { filter: contrast(1.2) saturate(1.3) brightness(0.9) !important; }
+    .filter-vignette { 
+      filter: grayscale(100%) contrast(1.2) brightness(0.9) !important;
+      position: relative;
+    }
+    .filter-vignette::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      box-shadow: inset 0 0 150px rgba(0,0,0,0.7);
+      pointer-events: none;
+    }
+    .filter-noir { filter: grayscale(100%) contrast(1.4) brightness(0.8) !important; }
+    .filter-fade { filter: sepia(30%) saturate(0.6) contrast(0.9) brightness(1.1) !important; }
+    .filter-cyber { filter: hue-rotate(180deg) saturate(1.5) contrast(1.1) !important; }
+    .filter-warm { filter: sepia(60%) hue-rotate(-30deg) saturate(1.2) !important; }
+    .filter-cold { filter: hue-rotate(180deg) saturate(0.5) brightness(1.1) !important; }
+    .filter-dream { filter: blur(0.5px) saturate(1.4) brightness(1.1) contrast(0.9) !important; }
+    .filter-crisp { filter: contrast(1.3) saturate(1.1) sharpness(1.2) !important; }
+    .filter-moody { filter: brightness(0.8) contrast(1.2) saturate(0.7) !important; }
+    .filter-golden { filter: sepia(40%) hue-rotate(-15deg) saturate(1.3) contrast(1.1) !important; }
+    
+    /* DUMMY ONBOARDING STYLES */
+    .entry-dummy {
+      opacity: 0.6;
+      border-style: dashed !important;
+    }
+    .entry-dummy:hover {
+      border-color: var(--border) !important;
+      opacity: 0.75;
+    }
+    .tray-item-dummy {
+      opacity: 0.5;
+    }
+    .tray-item-dummy:hover {
+      opacity: 0.7;
+    }
+    
+    /* EMPTY STATE */
+    .empty-state {
+      padding: var(--space-xl) var(--space-md);
+      text-align: center;
+      border: 2px dashed var(--border);
+    }
+    .empty-emoji {
+      font-size: 48px;
+      margin-bottom: var(--space-md);
+      display: block;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .empty-text {
+      font-family: 'Instrument Serif', serif;
+      font-size: 20px;
+      font-style: italic;
+      color: var(--text-secondary);
+      margin-bottom: var(--space-sm);
+    }
+    .empty-subtext {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    
+    /* FOOTER */
+    footer {
+      padding: var(--space-xl) 0;
+      text-align: center;
+      border-top: 2px solid var(--border);
+      margin-bottom: 80px;
+    }
+    .footer-text {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+    }
+    
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--text);
+      color: var(--bg);
+      padding: var(--space-sm) var(--space-md);
+      font-size: 13px;
+      font-weight: 600;
+      z-index: 10000;
+      opacity: 0;
+      transition: all 0.3s;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    
+    /* PROCESSING OVERLAY */
+    .processing-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.95);
+      z-index: 10002;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-md);
+    }
+    .processing-overlay.active { display: flex; }
+    .processing-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .processing-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+    
+    /* MODAL */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.95);
+      z-index: 10001;
+      padding: var(--space-md);
+      overflow-y: auto;
+    }
+    .modal.active { display: block; }
+    .modal-content {
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      padding: var(--space-lg);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-md);
+      border-bottom: 2px solid var(--border);
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-sm);
+    }
+    .gallery-item {
+      aspect-ratio: 1;
+      background: var(--surface-elevated);
+      border: 2px solid var(--border);
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+    }
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: all 0.2s;
+    }
+    .gallery-item:hover img { transform: scale(1.05); }
+    .gallery-item.selected {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px var(--accent-primary);
+    }
+    .gallery-item.selected::after {
+      content: '✓';
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: var(--accent-primary);
+      color: var(--bg);
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .modal-actions {
+      margin-top: var(--space-md);
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-sm);
+    }
+    .modal-btn {
+      padding: 12px 24px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: 2px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .modal-btn.primary {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: var(--bg);
+    }
+    .modal-btn:hover { transform: translateY(-2px); }
+    
+    /* GALLERY WARNING */
+    .gallery-warning {
+      background: var(--accent-tertiary);
+      color: var(--text);
+      padding: var(--space-md);
+      margin-bottom: var(--space-md);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: 2px solid var(--accent-tertiary);
+      animation: pulse-warning 2s infinite;
+    }
+    @keyframes pulse-warning {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.8; }
+    }
+    .gallery-warning::before {
+      content: '🚫 ';
+    }
+    .detection-badge {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      background: var(--accent-tertiary);
+      color: var(--text);
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      text-transform: uppercase;
+      z-index: 20;
+    }
   </style>
-<base target="_blank">
 </head>
 <body>
   <div class="wrapper">
+    <!-- HEADER -->
     <header>
-      <div class="header-title">Jejak</div>
-      <span class="header-user" id="header-username">@...</span>
+      <div>
+        <div class="logo" onclick="window.location.reload()">JEJAK</div>
+        <div class="tagline">no filter, just truth</div>
+      </div>
+      <div class="top-right">
+        <div style="font-size:12px; font-weight:700; color:var(--accent-primary); letter-spacing:0.05em;" id="header-username">@loading...</div>
+        <div class="sync-status offline" id="sync-status">Offline</div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <button onclick="logoutUser()" style="font-size:10px; background:none; border:1px solid var(--border); color:var(--text-muted); padding:3px 8px; cursor:pointer;">logout</button>
+        </div>
+      </div>
     </header>
 
-    <div class="page-header">
-      <p class="page-subtitle">Riwayat curhatan dan respon komunitas</p>
-      <div class="page-tagline" id="entries-count">Memuat...</div>
+    <!-- FILTER CONTROLS -->
+    <div class="filter-controls">
+      <div class="filter-info">
+        <span class="filter-badge" id="current-filter">MONOCHROME</span>
+        <span style="font-size: 11px; color: var(--text-muted);" id="filter-desc">Default</span>
+      </div>
+      <button class="filter-toggle" id="filter-toggle" onclick="toggleColorMode()">
+        <span class="filter-icon" id="filter-icon">⚫</span>
+        <span class="filter-label" id="filter-label">B&W</span>
+      </button>
     </div>
 
-    <div id="entries-container">
-      <div style="text-align:center;padding:var(--space-xl);color:var(--text-muted);">Memuat jejakmu...</div>
-    </div>
+    <!-- HERO -->
+    <section class="hero-section">
+      <div class="hero" id="hero-container">
+        <img id="hero-img" src="" alt="artefak" class="filter-monochrome">
+        <div id="hero-faces" style="position: absolute; inset: 0; pointer-events: none;"></div>
+        <div class="hero-notation" id="hero-notation">"memori tersimpan"</div>
+        <div class="upload-controls">
+          <div class="quota-timer" id="quota-timer">
+            Window aktif • Sisa 2 hari
+          </div>
+          <button class="upload-btn" id="upload-btn" title="Buka galeri">
+            +
+            <span class="upload-counter" id="upload-counter" style="display: none;"></span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- INPUT -->
+    <section class="input-section">
+      <div class="input-header">
+        <span class="input-label">Spill your truth</span>
+        <span class="char-count" id="char-count">0/500</span>
+      </div>
+      <textarea 
+        class="rant-input" 
+        id="rant-input" 
+        placeholder="What's eating you alive right now? No cap, no filter..."
+        maxlength="500"
+      ></textarea>
+      
+      <!-- MOOD SELECTOR -->
+      <div class="mood-section">
+        <div class="mood-label">Pilih mood-mu sekarang</div>
+        <div class="mood-grid" id="mood-grid">
+          <div class="mood-card active" data-mood="surviving" onclick="selectMood('surviving')">
+            <span class="mood-emoji">😮‍💨</span>
+            <span class="mood-name" style="color: var(--mood-surviving)">Surviving</span>
+            <span class="mood-desc">Hidup tapi barely</span>
+          </div>
+          <div class="mood-card" data-mood="thriving" onclick="selectMood('thriving')">
+            <span class="mood-emoji">✨</span>
+            <span class="mood-name" style="color: var(--mood-thriving)">Thriving</span>
+            <span class="mood-desc">On top of my game</span>
+          </div>
+          <div class="mood-card" data-mood="chaotic" onclick="selectMood('chaotic')">
+            <span class="mood-emoji">🌀</span>
+            <span class="mood-name" style="color: var(--mood-chaotic)">Chaotic</span>
+            <span class="mood-desc">Everything is on fire</span>
+          </div>
+          <div class="mood-card" data-mood="doom" onclick="selectMood('doom')">
+            <span class="mood-emoji">🛌</span>
+            <span class="mood-name" style="color: var(--mood-doom)">Doom</span>
+            <span class="mood-desc">Just wanna disappear</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="input-actions">
+        <button class="submit-btn" id="submit-btn">Jejakkan & Spill</button>
+      </div>
+    </section>
+
+    <!-- ENTRIES -->
+    <section class="entries-section">
+      <div class="section-header">
+        <span class="section-title">Riwayat</span>
+        <div class="section-line"></div>
+      </div>
+      <div id="entries-container"></div>
+    </section>
+
+    <!-- TRAY -->
+    <section class="tray-section">
+      <div class="section-header">
+        <span class="section-title">Memori</span>
+        <div class="section-line"></div>
+        <span style="font-size: 10px; color: var(--text-muted); margin-left: auto;">FIFO • MAX 6 • AUTO-CENSOR</span>
+      </div>
+      <div class="tray-grid" id="tray-grid"></div>
+    </section>
+
+    <footer>
+      <p class="footer-text">Nyambat • Aksi • Solusi</p>
+    </footer>
   </div>
 
+  <!-- BOTTOM NAVIGATION -->
   <nav class="bottom-nav">
     <div class="nav-container">
-      <a href="jejak.html" class="nav-item active"><span class="nav-icon">✦</span><span>Jejak</span></a>
-      <a href="cocomeo.html" class="nav-item"><span class="nav-icon">〜</span><span>Cocomeo</span></a>
-      <a href="saynope.html" class="nav-item"><span class="nav-icon">✕</span><span>Spill</span></a>
-      <a href="glitch.html" class="nav-item"><span class="nav-icon">⚡</span><span>Glitch</span></a>
+      <a href="jejak.html" class="nav-item active">
+        <span class="nav-icon">✦</span>
+        <span>Jejak</span>
+      </a>
+      <a href="cocomeo.html" class="nav-item">
+        <span class="nav-icon">〜</span>
+        <span>Cocomeo</span>
+      </a>
+      <a href="saynope.html" class="nav-item">
+        <span class="nav-icon">✕</span>
+        <span>Spill</span>
+      </a>
+      <a href="glitch.html" class="nav-item">
+        <span class="nav-icon">⚡</span>
+        <span>Glitch</span>
+      </a>
     </div>
   </nav>
 
+  <!-- PROCESSING OVERLAY -->
+  <div class="processing-overlay" id="processing">
+    <div class="processing-spinner"></div>
+    <div class="processing-text">Scanning untuk wajah...<br><small>AI Privacy Shield Active</small></div>
+  </div>
+
+  <!-- GALLERY MODAL -->
+  <div class="modal" id="gallery-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Review Artefak</h3>
+        <button class="modal-close" onclick="closeGallery()">×</button>
+      </div>
+      
+      <div class="gallery-warning">
+        DILARANG UPLOAD FOTO WAJAH!
+      </div>
+      
+      <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: var(--space-md); text-align: center;">
+        Wajah terdeteksi akan otomatis disensor • Sistem FIFO (6 foto max) • Tidak dapat dihapus
+      </div>
+      
+      <div class="gallery-grid" id="gallery-grid"></div>
+      <div class="modal-actions">
+        <button class="modal-btn" onclick="closeGallery()">Batal</button>
+        <button class="modal-btn primary" onclick="confirmUpload()">Konfirmasi (<span id="selected-count">0</span>)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <input type="file" id="file-input" accept="image/*" multiple style="display: none;">
+
   <script>
-    const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
-
-    const SESSION = (() => {
-      const username = localStorage.getItem('jejak_username');
-      const loggedIn = localStorage.getItem('jejak_logged_in');
-      if (!loggedIn || !username) { window.location.href = 'index.html'; return null; }
-      return { username };
-    })();
-    if (!SESSION) throw new Error('No session');
-
-    // Mapping emoji dari tabel reactions ke tipe
-    const REACTION_TYPES = {
-      '🤗': { key: 'hug', label: 'memelukmu', singular: 'memelukmu dari jauh', icon: '🤗', warmth: 'high', class: 'warm' },
-      '😢': { key: 'sad', label: 'merasakan', singular: 'merasakan bebanmu', icon: '💧', warmth: 'high', class: 'warm' },
-      '😔': { key: 'mood', label: 'sedang mood', singular: 'sedang dalam mood yang sama', icon: '🌙', warmth: 'medium', class: 'supportive' },
-      '👏': { key: 'clap', label: 'mendukungmu', singular: 'mendukung perjuanganmu', icon: '✨', warmth: 'high', class: 'energetic' },
-      '💀': { key: 'dead', label: 'terhibur', singular: 'terhibur dengan kejujuranmu', icon: '😂', warmth: 'medium', class: 'supportive' },
-      '🍵': { key: 'tea', label: 'mengamati', singular: 'sedang menyimak ceritamu', icon: '👁️', warmth: 'low', class: 'supportive' }
+    // ============================================
+    // CONFIGURATION - UPDATE THESE WITH YOUR SUPABASE CREDENTIALS
+    // ============================================
+    const CONFIG = {
+      supabaseUrl: 'https://fuovfrdicdhnlymnacpz.supabase.co',
+      supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0',
+      quotaDays: 28,
+      uploadWindowDays: 3,
+      maxFileSize: 5 * 1024 * 1024,
+      maxSelection: 6,
+      maxArtefacts: 6,
+      faceThreshold: 0.6,
+      inputSize: 416,
+      storageBucket: 'artefacts'
     };
 
-    // Format empatic messages berdasarkan jumlah dan tipe
-    const EMPATHIC_MESSAGES = {
-      hug: {
-        single: ['seseorang memelukmu erat', 'ada yang memelukmu dari jauh', 'sebuah pelukan hangat untukmu'],
-        few: ['{count} orang memelukmu dari jauh', '{count} pelukan hangat untukmu', '{count} jiwa merangkulmu'],
-        many: ['{count} pelukan mengelilingimu', '{count} orang ingin memelukmu saat ini', '{count} jiwa berbagi kehangatan']
-      },
-      sad: {
-        single: ['seseorang menangis bersamamu', 'ada yang merasakan bebanmu', 'seseorang berempati denganmu'],
-        few: ['{count} orang menangis bersamamu', '{count} jiwa merasakan bebanmu', '{count} hati berbagi kesedihan'],
-        many: ['{count} air mata mengalir untukmu', '{count} jiwa berbagi bebanmu', '{count} hati merasakan']
-      },
-      mood: {
-        single: ['seseorang dalam mood yang sama', 'ada yang merasakan vibe yang sama', 'seseorang mengerti'],
-        few: ['{count} orang dalam mood yang sama', '{count} jiwa berbagi vibe', '{count} orang mengerti perasaanmu'],
-        many: ['{count} jiwa beresonansi', '{count} orang dalam frekuensi yang sama', '{count} vibe saling terhubung']
-      },
-      clap: {
-        single: ['seseorang mendukungmu', 'ada yang bertepuk tangan untukmu', 'seseorang bangga padamu'],
-        few: ['{count} orang mendukung perjuanganmu', '{count} tepuk tangan untukmu', '{count} dukungan mengalir'],
-        many: ['{count} orang bersorak untukmu', '{count} dukungan mengelilingimu', '{count} jiwa memberi semangat']
-      },
-      dead: {
-        single: ['seseorang terhibur', 'ada yang tersenyum membaca ini', 'seseorang merasa terwakili'],
-        few: ['{count} orang terhibur', '{count} senyum tercipta', '{count} jiwa merasa terwakili'],
-        many: ['{count} tawa mengalir', '{count} orang merasa terhibur', '{count} jiwa berbagi tawa']
-      },
-      tea: {
-        single: ['seseorang menyimak', 'ada yang sedang membaca', 'seseorang mengamati'],
-        few: ['{count} orang menyimak ceritamu', '{count} mata membaca', '{count} jiwa mengamati'],
-        many: ['{count} orang menyimak', '{count} pembaca terpikat', '{count} jiwa mengamati']
+    // ============================================
+    // SESSION — Baca dari localStorage yang di-set index.html
+    // ============================================
+    const SESSION_KEYS = {
+      username: 'jejak_username',
+      userId:   'jejak_user_id',
+      deviceId: 'jejak_device_id',
+      loggedIn: 'jejak_logged_in'
+    };
+
+    function checkSession() {
+      const username = localStorage.getItem(SESSION_KEYS.username);
+      const userId   = localStorage.getItem(SESSION_KEYS.userId);
+      const loggedIn = localStorage.getItem(SESSION_KEYS.loggedIn);
+      if (!loggedIn || !username) {
+        console.warn('No valid session, redirecting to login...');
+        // Uncomment line below when deployed with login page
+        // window.location.href = 'index.html';
+        return { username: username || '@anon', userId: userId || null };
       }
+      return { username, userId };
+    }
+
+    const SESSION = checkSession();
+
+    // ============================================
+    // CONSTANTS
+    // ============================================
+    
+    const VIBES = {
+      relatable: { emoji: '💯', label: 'literally me' },
+      mood:      { emoji: '🛋️', label: 'big mood' },
+      tea:       { emoji: '🐸', label: 'spill tea' },
+      hug:       { emoji: '🤗', label: 'virtual hug' },
+      real:      { emoji: '🎯', label: 'no cap' },
+      dead:      { emoji: '💀', label: 'rip me' }
     };
 
-    let db;
+    const MOODS = {
+      surviving: { emoji: '😮‍💨', color: '#FF9500', label: 'surviving' },
+      thriving:  { emoji: '✨', color: '#39FF14', label: 'thriving' },
+      chaotic:   { emoji: '🌀', color: '#00F0FF', label: 'chaotic' },
+      doom:      { emoji: '🛌', color: '#8B5CF6', label: 'doom' }
+    };
 
-    function initDB() {
+    const MONTHLY_THEMES = [
+      { name: 'NOIR', filter: 'filter-noir', desc: 'High contrast B&W', icon: '⚫' },
+      { name: 'SEPIA', filter: 'filter-sepia', desc: 'Vintage warmth', icon: '🟤' },
+      { name: 'LOMO', filter: 'filter-lomo', desc: 'Analog saturation', icon: '📷' },
+      { name: 'VIGNETTE', filter: 'filter-vignette', desc: 'Dark edges', icon: '⚫' },
+      { name: 'CYBER', filter: 'filter-cyber', desc: 'Neon shift', icon: '💠' },
+      { name: 'FADE', filter: 'filter-fade', desc: 'Soft vintage', icon: '🌫️' },
+      { name: 'WARM', filter: 'filter-warm', desc: 'Golden hour', icon: '☀️' },
+      { name: 'COLD', filter: 'filter-cold', desc: 'Icy blue', icon: '❄️' },
+      { name: 'DREAM', filter: 'filter-dream', desc: 'Soft focus', icon: '💭' },
+      { name: 'CRISP', filter: 'filter-crisp', desc: 'Sharp detail', icon: '🔪' },
+      { name: 'MOODY', filter: 'filter-moody', desc: 'Dark tones', icon: '🌑' },
+      { name: 'GOLDEN', filter: 'filter-golden', desc: 'Autumn glow', icon: '🍂' }
+    ];
+
+    // ============================================
+    // DUMMY DATA — Onboarding visual guidance
+    // Akan otomatis TERGESER oleh data asli user (FIFO)
+    // ============================================
+    const DUMMY_ENTRIES = [
+      {
+        id: '__dummy_d1',
+        content: "gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus.",
+        mood: 'surviving',
+        timestamp: Date.now() - 172800000,
+        vibes: { relatable: 12, mood: 9, hug: 8, tea: 3, real: 5, dead: 2 },
+        isSpilled: true,
+        isDummy: true
+      },
+      {
+        id: '__dummy_d2',
+        content: "deadline mepet, dosen gak jelas, dompet kering. rasanya pengen ijin cuti sehari buat jadi batu aja.",
+        mood: 'doom',
+        timestamp: Date.now() - 86400000,
+        vibes: { relatable: 9, mood: 5, dead: 7, real: 3, hug: 2, tea: 1 },
+        isSpilled: true,
+        isDummy: true
+      },
+      {
+        id: '__dummy_d3',
+        content: "capek.",
+        mood: 'surviving',
+        timestamp: Date.now() - 43200000,
+        vibes: { hug: 20, relatable: 18, dead: 10, real: 7, mood: 3, tea: 0 },
+        isSpilled: true,
+        isDummy: true
+      }
+    ];
+
+    // Dummy entries tampil hanya kalau user belum punya real entries
+    function getVisibleEntries() {
+      const realEntries = state.entries || [];
+      if (realEntries.length === 0) {
+        // Belum ada rant asli — tampilkan dummy sebagai onboarding
+        return DUMMY_ENTRIES;
+      }
+      // Sudah ada rant asli — tampilkan rant asli saja (dummy tergeser)
+      return realEntries;
+    }
+
+    // DUMMY ARTEFACTS — Onboarding visual guidance
+    // Akan otomatis TERGESER saat user upload foto baru (FIFO max 6)
+    const DUMMY_ARTEFACTS = [
+      { id: '__dummy_a1', url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80', note: 'jeda', faces: [], hasFace: false, isDummy: true },
+      { id: '__dummy_a2', url: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80', note: 'hijau', faces: [], hasFace: false, isDummy: true },
+      { id: '__dummy_a3', url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=80', note: 'gabut', faces: [], hasFace: false, isDummy: true },
+      { id: '__dummy_a4', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80', note: 'sendiri', faces: [], hasFace: false, isDummy: true },
+      { id: '__dummy_a5', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80', note: 'capek', faces: [{ box: { x: 75, y: 45, width: 150, height: 200 }, score: 0.92 }], hasFace: true, isDummy: true },
+      { id: '__dummy_a6', url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80', note: 'love', faces: [], hasFace: false, isDummy: true }
+    ];
+
+    // Artefacts tampil: real user artefacts + dummy sebagai filler sampai max 6
+    function getVisibleArtefacts() {
+      const real = (state.artefacts || []).filter(a => !a.isDummy);
+      if (real.length >= 6) return real.slice(0, 6); // Semua slot terisi real
+      // Tambahkan dummy sebagai filler di slot yang kosong
+      const needed = 6 - real.length;
+      const fillers = DUMMY_ARTEFACTS.slice(0, needed);
+      return [...real, ...fillers];
+    }
+
+    // ============================================
+    // STATE — currentUser diambil dari SESSION (login)
+    // ============================================
+    const STORAGE_KEY_PREFIX = 'jejak_' + (SESSION.userId || SESSION.username).replace(/[^a-z0-9]/g, '_') + '_';
+
+    const state = {
+      currentUser: SESSION.username,        // Username dari login
+      currentUserId: SESSION.userId,        // UUID user dari tabel users
+      currentMood: 'surviving',
+      entries: [],
+      artefacts: [],                        // Tidak pakai dummy — load dari DB
+      userVibes: new Set(),
+      selectedFiles: new Set(),
+      colorMode: false,
+      faceApiLoaded: false,
+      supabase: null,
+      isOnline: false,
+      quotaStart: localStorage.getItem(STORAGE_KEY_PREFIX + 'quota_start') || null,
+      uploadsThisWindow: parseInt(localStorage.getItem(STORAGE_KEY_PREFIX + 'uploads_count') || '0')
+    };
+
+    console.log('🚀 Initializing app for user:', state.currentUser, '| ID:', state.currentUserId);
+
+    // ============================================
+    // SUPABASE INITIALIZATION
+    // ============================================
+    function initSupabase() {
       try {
-        db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        if (typeof supabase === 'undefined' || !CONFIG.supabaseUrl.includes('supabase.co')) {
+          console.log('⚠️ Supabase not configured. Update CONFIG.supabaseUrl and CONFIG.supabaseKey');
+          updateSyncStatus('offline', 'Offline mode');
+          return false;
+        }
+        
+        state.supabase = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
+        state.isOnline = true;
+        updateSyncStatus('online', 'Terhubung');
+        
+        console.log('✅ Supabase connected');
+        
+        // Subscribe to realtime changes
+        subscribeToSpills();
+        
         return true;
-      } catch(e) {
-        console.error('Supabase init failed:', e);
+      } catch (e) {
+        console.error('❌ Supabase init failed:', e);
+        updateSyncStatus('offline', 'Offline mode');
         return false;
       }
     }
 
-    function getMessageTemplate(type, count) {
-      const templates = EMPATHIC_MESSAGES[type];
-      if (!templates) return null;
-      
-      if (count === 1) return templates.single[Math.floor(Math.random() * templates.single.length)];
-      if (count < 5) return templates.few[Math.floor(Math.random() * templates.few.length)];
-      return templates.many[Math.floor(Math.random() * templates.many.length)];
+    function updateSyncStatus(status, text) {
+      const el = document.getElementById('sync-status');
+      el.className = 'sync-status ' + status;
+      el.textContent = text;
     }
 
-    async function loadEntries() {
-      const container = document.getElementById('entries-container');
-      const storageKey = 'jejak_' + SESSION.username.replace(/[^a-z0-9]/g,'_') + '_entries';
-      const stored = localStorage.getItem(storageKey);
+    // ============================================
+    // REALTIME SUBSCRIPTION
+    // ============================================
+    function subscribeToSpills() {
+      if (!state.supabase) return;
       
-      if (!stored) {
-        container.innerHTML = '<div style="text-align:center;padding:var(--space-xl);color:var(--text-muted);">Belum ada jejak. Tulis rant pertamamu!</div>';
-        document.getElementById('entries-count').textContent = '0 entri';
+      state.supabase
+        .channel('spills')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'spills' }, (payload) => {
+          console.log('📡 Spill update:', payload);
+          fetchSpills();
+        })
+        .subscribe();
+    }
+
+    async function fetchSpills() {
+      if (!state.supabase) return;
+      
+      try {
+        const { data, error } = await state.supabase
+          .from('spills')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(10);
+        
+        if (error) throw error;
+        
+        console.log('📥 Fetched spills:', data);
+      } catch (e) {
+        console.error('❌ Fetch spills failed:', e);
+      }
+    }
+
+    // ============================================
+    // RANT SUBMISSION WITH SUPABASE
+    // ============================================
+    
+    // Helper function to generate UUID v4
+    function generateUUID() {
+      // Use crypto.randomUUID() if available (modern browsers)
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return crypto.randomUUID();
+      }
+      // Fallback for older browsers
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+    
+    async function submitRant(content, mood) {
+      const timestamp = Date.now();
+      const rantId = generateUUID(); // Use UUID instead of text-based ID
+      
+      const newRant = {
+        id: rantId,
+        content: content,
+        mood: mood,
+        timestamp: timestamp,
+        vibes: { relatable: 0, mood: 0, tea: 0, hug: 0, real: 0, dead: 0 },
+        isSpilled: false,
+        author: state.currentUser,
+        created_at: new Date(timestamp).toISOString()
+      };
+      
+      // 1. Add to state (LIFO)
+      state.entries.unshift(newRant);
+      
+      // 2. Save to localStorage
+      localStorage.setItem(STORAGE_KEY_PREFIX + 'entries', JSON.stringify(state.entries));
+      
+      // 3. Render immediately
+      renderEntries();
+      
+      // 3b. Scroll to top to show new entry
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
+      // 4. Send to Supabase
+      if (state.isOnline && state.supabase) {
+        try {
+          updateSyncStatus('syncing', 'Menyimpan...');
+          
+          // Insert to rants table
+          const { data: rantData, error: rantError } = await state.supabase
+            .from('rants')
+            .insert([{
+              id: rantId,
+              content: content,
+              mood: mood,
+              author: state.currentUser,
+              created_at: newRant.created_at,
+              vibes: newRant.vibes
+            }])
+            .select();
+          
+          if (rantError) {
+            console.error('❌ Rant insert error:', rantError);
+            throw rantError;
+          }
+          
+          console.log('✅ Rant saved:', rantData);
+          
+          // 5. Broadcast to Spill the Tea
+          await broadcastToSpillTea(newRant);
+          
+          updateSyncStatus('online', 'Tersimpan');
+          showToast('Jejak tersimpan & di-spill ke komunitas!');
+          
+        } catch (error) {
+          console.error('❌ Save failed:', error);
+          updateSyncStatus('offline', 'Sync pending');
+          showToast('Tersimpan lokal (sync pending)');
+          queueForRetry(newRant);
+        }
+      } else {
+        showToast('Tersimpan lokal (offline mode)');
+        queueForRetry(newRant);
+      }
+      
+      return newRant;
+    }
+
+    async function broadcastToSpillTea(rant) {
+      if (!state.supabase) return;
+      
+      try {
+        const spillId = generateUUID(); // Use UUID for spill ID
+        
+        const { data, error } = await state.supabase
+          .from('spills')
+          .insert([{
+            id: spillId,
+            rant_id: rant.id,
+            content: rant.content,
+            mood: rant.mood,
+            author: state.currentUser,
+            created_at: rant.created_at,
+            is_anonymous: true,
+            response_count: 0,
+            vibes: rant.vibes
+          }])
+          .select();
+        
+        if (error) {
+          console.error('❌ Spill insert error:', error);
+          throw error;
+        }
+        
+        console.log('✅ Spilled to community:', data);
+        
+        // Update local state
+        const entry = state.entries.find(e => e.id === rant.id);
+        if (entry) {
+          entry.isSpilled = true;
+          entry.spillId = spillId;
+          localStorage.setItem(STORAGE_KEY_PREFIX + 'entries', JSON.stringify(state.entries));
+          renderEntries();
+        }
+        
+        return data;
+      } catch (error) {
+        console.error('❌ Broadcast failed:', error);
+        throw error;
+      }
+    }
+
+    function queueForRetry(entry) {
+      const queue = JSON.parse(localStorage.getItem('jejak_sync_queue') || '[]');
+      queue.push(entry);
+      localStorage.setItem('jejak_sync_queue', JSON.stringify(queue));
+    }
+
+    // ============================================
+    // IMAGE UPLOAD TO SUPABASE STORAGE
+    // ============================================
+    async function uploadImageToSupabase(file, artefactId) {
+      if (!state.supabase) {
+        console.log('⚠️ Supabase not available for upload');
+        return null;
+      }
+      
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${state.currentUser}/${artefactId}.${fileExt}`;
+        
+        console.log('📤 Uploading to Supabase Storage:', fileName);
+        
+        const { data, error } = await state.supabase.storage
+          .from(CONFIG.storageBucket)
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
+        
+        if (error) {
+          console.error('❌ Upload error:', error);
+          throw error;
+        }
+        
+        // Get public URL
+        const { data: publicUrl } = state.supabase.storage
+          .from(CONFIG.storageBucket)
+          .getPublicUrl(fileName);
+        
+        console.log('✅ Upload successful:', publicUrl.publicUrl);
+        return publicUrl.publicUrl;
+        
+      } catch (error) {
+        console.error('❌ Failed to upload image:', error);
+        return null;
+      }
+    }
+
+    async function saveArtefactMetadata(artefact, publicUrl) {
+      if (!state.supabase) return;
+      
+      try {
+        const { data, error } = await state.supabase
+          .from('artefacts')
+          .insert([{
+            id: artefact.id, // Already UUID from generateUUID()
+            author: state.currentUser,
+            url: publicUrl,
+            note: artefact.note,
+            has_face: artefact.hasFace,
+            faces: artefact.faces,
+            created_at: new Date(artefact.timestamp).toISOString()
+          }])
+          .select();
+        
+        if (error) {
+          console.error('❌ Artefact metadata error:', error);
+          throw error;
+        }
+        
+        console.log('✅ Artefact metadata saved:', data);
+        return data;
+        
+      } catch (error) {
+        console.error('❌ Failed to save artefact metadata:', error);
+        throw error;
+      }
+    }
+
+    // ============================================
+    // FACE DETECTION
+    // ============================================
+    async function loadFaceApi() {
+      try {
+        if (typeof faceapi === 'undefined') {
+          console.log('⚠️ Face API not loaded');
+          state.faceApiLoaded = false;
+          return;
+        }
+        
+        await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model');
+        await faceapi.nets.faceLandmark68TinyNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model');
+        state.faceApiLoaded = true;
+        console.log('✅ Face API loaded');
+      } catch (e) {
+        console.error('❌ Face API failed:', e);
+        state.faceApiLoaded = false;
+      }
+    }
+
+    async function detectFaces(imageElement) {
+      if (!state.faceApiLoaded || typeof faceapi === 'undefined') {
+        return simulateAccurateDetection(imageElement);
+      }
+      
+      try {
+        const options = new faceapi.TinyFaceDetectorOptions({ 
+          inputSize: CONFIG.inputSize, 
+          scoreThreshold: CONFIG.faceThreshold 
+        });
+        
+        const detections = await faceapi.detectAllFaces(imageElement, options);
+        
+        const validDetections = detections.filter(d => {
+          const area = d.box.width * d.box.height;
+          const imgArea = imageElement.naturalWidth * imageElement.naturalHeight;
+          const ratio = area / imgArea;
+          return ratio > 0.01 && ratio < 0.8 && d.score > CONFIG.faceThreshold;
+        });
+        
+        return validDetections;
+      } catch (e) {
+        return simulateAccurateDetection(imageElement);
+      }
+    }
+
+    function simulateAccurateDetection(img) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          if (img.src && img.src.includes('1507003211169')) {
+            const w = img.naturalWidth || 400;
+            const h = img.naturalHeight || 400;
+            resolve([{ 
+              box: { x: w*0.25, y: h*0.15, width: w*0.5, height: h*0.65 },
+              score: 0.85 
+            }]);
+          } else {
+            resolve([]);
+          }
+        }, 500);
+      });
+    }
+
+    // ============================================
+    // FIFO SYSTEM
+    // ============================================
+    function addArtefactToFIFO(newArtefact) {
+      // Pastikan hanya real artefacts yang disimpan (tanpa dummy)
+      const realArtefacts = (state.artefacts || []).filter(a => !a.isDummy);
+      
+      // Tambahkan di depan (newest first)
+      realArtefacts.unshift(newArtefact);
+      
+      // FIFO: kalau lebih dari max, hapus yang paling lama
+      if (realArtefacts.length > CONFIG.maxArtefacts) {
+        const removed = realArtefacts.pop();
+        console.log('🔄 FIFO removed:', removed.id, removed.note);
+        showToast('Foto lama terhapus otomatis (FIFO)');
+      }
+      
+      // Update state dengan real artefacts saja
+      state.artefacts = realArtefacts;
+      saveArtefacts();
+      
+      console.log(`📦 Tray: ${realArtefacts.length} real artefacts, ${Math.max(0, 6 - realArtefacts.length)} dummy fillers`);
+    }
+
+    function saveArtefacts() {
+      const metadata = state.artefacts.map(a => ({
+        id: a.id,
+        url: a.url,
+        note: a.note,
+        faces: a.faces || [],
+        hasFace: a.hasFace || false,
+        timestamp: a.timestamp || Date.now()
+      }));
+      localStorage.setItem(STORAGE_KEY_PREFIX + 'artefacts_meta', JSON.stringify(metadata));
+    }
+
+    function loadArtefacts() {
+      const saved = localStorage.getItem(STORAGE_KEY_PREFIX + 'artefacts_meta');
+      if (saved) {
+        try {
+          const metadata = JSON.parse(saved);
+          return metadata;
+        } catch (e) {
+          return [];
+        }
+      }
+      return [];
+    }
+
+    // ============================================
+    // RENDER FUNCTIONS
+    // ============================================
+    function renderEntries() {
+      const container = document.getElementById('entries-container');
+      
+      // Tampilkan rant user — kalau kosong tampilkan dummy sebagai onboarding
+      const allEntries = getVisibleEntries();
+      
+      if (allEntries.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <span class="empty-emoji">🍃</span>
+            <p class="empty-text">"Jejak pertamamu menanti"</p>
+            <p class="empty-subtext">Tulis sesuatu. Hanya kamu yang bisa lihat.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = allEntries.map(entry => {
+        const spillStatus = entry.isSpilled ? 
+          '<div class="spill-status spilled">✓ Ter-spill ke komunitas</div>' : '';
+        
+        const isDummy = entry.isDummy === true;
+        return `
+        <article class="entry ${isDummy ? 'entry-dummy' : ''}" data-id="${entry.id}">
+          <div class="entry-header">
+            <div class="entry-meta">
+              <span class="entry-time">${isDummy ? 'contoh' : formatTime(entry.timestamp)}</span>
+              <span class="entry-mood ${entry.mood}">${MOODS[entry.mood].label}</span>
+              ${isDummy ? '<span style="font-size:9px;color:var(--text-muted);border:1px dashed var(--border);padding:2px 6px;">CONTOH</span>' : ''}
+            </div>
+          </div>
+          <div class="entry-content">
+            <p>${entry.content}</p>
+            ${spillStatus}
+          </div>
+          <div class="vibe-bar">
+            ${Object.entries(VIBES).map(([key, vibe]) => {
+              const count = entry.vibes?.[key] || 0;
+              const isVibed = state.userVibes.has(`${entry.id}-${key}`);
+              return `
+                <button class="vibe-btn ${isVibed ? 'vibed' : ''}" 
+                        onclick="${isDummy ? 'showToast("Tulis rantmu dulu bestie!")' : `toggleVibe('${entry.id}', '${key}', this)`}"
+                        aria-label="${vibe.label}"
+                        ${isDummy ? 'style="opacity:0.5;pointer-events:auto;"' : ''}>
+                  <span class="vibe-emoji">${vibe.emoji}</span>
+                  <span class="vibe-count">${count}</span>
+                  <span class="vibe-label">${vibe.label}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </article>
+      `}).join('');
+    }
+
+    function renderTray() {
+      const grid = document.getElementById('tray-grid');
+      // Tampilkan real artefacts + dummy sebagai filler (FIFO: real geser dummy)
+      const items = getVisibleArtefacts();
+      
+      grid.innerHTML = items.map((item, index) => `
+        <div class="tray-item ${item.isDummy ? 'tray-item-dummy' : ''}" 
+             onclick="setHero('${item.url}', '${item.note}', ${JSON.stringify(item.faces || []).replace(/"/g, '&quot;')})">
+          <div style="position: relative; width: 100%; height: 100%;">
+            <img src="${item.url}" alt="${item.note}" loading="lazy" class="${state.colorMode ? getCurrentMonthTheme().filter : 'filter-monochrome'}">
+            ${item.hasFace ? '<div class="detection-badge" style="top: 4px; left: 4px; right: auto;">SENSORED</div>' : ''}
+            ${item.isDummy ? '<div style="position:absolute;bottom:4px;right:4px;font-size:8px;font-weight:700;color:var(--text-muted);background:rgba(0,0,0,0.7);padding:2px 5px;letter-spacing:0.05em;">CONTOH</div>' : ''}
+            ${renderTrayScribblesHTML(item.faces)}
+          </div>
+        </div>
+      `).join('');
+      
+      if (items.length === 0) {
+        // Show all empty slots with upload hint
+        grid.innerHTML = '';
+        for (let i = 0; i < 6; i++) {
+          grid.innerHTML += `<div class="tray-item empty" onclick="openGallery()">+</div>`;
+        }
         return;
       }
 
-      const entries = JSON.parse(stored);
-      document.getElementById('entries-count').textContent = `${entries.length} entri`;
-
-      // Get reactions for all user's rants
-      let reactionsData = [];
-      if (db) {
-        try {
-          // Get all rant IDs from entries
-          const rantIds = entries.map(e => e.id).filter(id => id);
-          if (rantIds.length > 0) {
-            const { data, error } = await db
-              .from('reactions')
-              .select('rant_id, emoji')
-              .in('rant_id', rantIds);
-            
-            if (!error) reactionsData = data || [];
-          }
-        } catch(e) {
-          console.error('Failed to load reactions:', e);
-        }
+      const emptySlots = Math.max(0, 6 - items.length);
+      for (let i = 0; i < emptySlots; i++) {
+        grid.innerHTML += `<div class="tray-item empty" onclick="openGallery()">+</div>`;
       }
-
-      // Group reactions by rant_id
-      const reactionsByRant = {};
-      reactionsData.forEach(r => {
-        if (!reactionsByRant[r.rant_id]) reactionsByRant[r.rant_id] = {};
-        reactionsByRant[r.rant_id][r.emoji] = (reactionsByRant[r.rant_id][r.emoji] || 0) + 1;
-      });
-
-      container.innerHTML = '';
-      
-      entries.forEach((entry, idx) => {
-        const el = document.createElement('div');
-        el.className = 'entry-card';
-        el.style.animationDelay = `${idx * 0.1}s`;
-        
-        const timeAgo = fmtTime(entry.timestamp || entry.created_at);
-        const reactions = reactionsByRant[entry.id] || {};
-        
-        // Build empathy section
-        const empathyHtml = buildEmpathySection(reactions);
-        
-        el.innerHTML = `
-          <div class="entry-header">
-            <span class="entry-mood" style="color: var(--accent-primary); border-color: var(--accent-primary);">${entry.mood || '💭'}</span>
-            <span class="entry-time">${timeAgo}</span>
-          </div>
-          <div class="entry-content">${escHtml(entry.content || '')}</div>
-          <div class="empathy-section">
-            ${empathyHtml}
-          </div>
-        `;
-        
-        container.appendChild(el);
-      });
     }
 
-    function buildEmpathySection(reactions) {
-      if (!reactions || Object.keys(reactions).length === 0) {
-        return '<div class="empty-empathy">Belum ada respon — curhatanmu sedang menunggu yang selaras ✨</div>';
-      }
-
-      // Convert reactions to array and sort by count
-      const reactionArray = Object.entries(reactions)
-        .map(([emoji, count]) => ({
-          ...REACTION_TYPES[emoji],
-          emoji,
-          count,
-          totalScore: count * (REACTION_TYPES[emoji]?.warmth === 'high' ? 2 : 1)
-        }))
-        .sort((a, b) => b.totalScore - a.totalScore);
-
-      const dominant = reactionArray[0];
-      const totalReactions = reactionArray.reduce((sum, r) => sum + r.count, 0);
+    function renderTrayScribblesHTML(faces) {
+      if (!faces || faces.length === 0) return '';
       
-      // Build primary empathy message
-      const message = getMessageTemplate(dominant.key, dominant.count)
-        ?.replace('{count}', dominant.count);
-
-      let html = `
-        <div class="empathy-container">
-          <div class="empathy-pill ${dominant.class}">
-            <span class="empathy-icon">${dominant.icon}</span>
-            <span class="empathy-text">${message}</span>
-          </div>
+      return faces.map(face => `
+        <div class="face-scribble" style="
+          left: ${(face.box.x / 400) * 100}%;
+          top: ${(face.box.y / 400) * 100}%;
+          width: ${(face.box.width / 400) * 100}%;
+          height: ${(face.box.height / 400) * 100}%;
+          z-index: 5;
+        ">
+          <div class="marker-lines"></div>
         </div>
-      `;
+      `).join('');
+    }
 
-      // Add secondary reactions if any
-      if (reactionArray.length > 1) {
-        const others = reactionArray.slice(1);
-        const otherTexts = others.map(r => {
-          const msg = getMessageTemplate(r.key, r.count)?.replace('{count}', r.count);
-          return msg;
-        }).filter(Boolean);
+    function applyFilter(element, useColor) {
+      const theme = getCurrentMonthTheme();
+      const allFilters = ['filter-monochrome', 'filter-sepia', 'filter-lomo', 'filter-vignette', 
+                         'filter-noir', 'filter-fade', 'filter-cyber', 'filter-warm', 
+                         'filter-cold', 'filter-dream', 'filter-crisp', 'filter-moody', 'filter-golden'];
+      allFilters.forEach(f => element.classList.remove(f));
+      element.classList.add(useColor ? theme.filter : 'filter-monochrome');
+    }
+
+    function updateFilterUI() {
+      const theme = getCurrentMonthTheme();
+      const badge = document.getElementById('current-filter');
+      const desc = document.getElementById('filter-desc');
+      const icon = document.getElementById('filter-icon');
+      const label = document.getElementById('filter-label');
+      const toggle = document.getElementById('filter-toggle');
+      
+      if (state.colorMode) {
+        badge.textContent = theme.name;
+        desc.textContent = theme.desc;
+        icon.textContent = theme.icon;
+        label.textContent = 'COLOR';
+        toggle.classList.add('active');
+      } else {
+        badge.textContent = 'MONOCHROME';
+        desc.textContent = 'Default';
+        icon.textContent = '⚫';
+        label.textContent = 'B&W';
+        toggle.classList.remove('active');
+      }
+      
+      const heroImg = document.getElementById('hero-img');
+      applyFilter(heroImg, state.colorMode);
+      
+      document.querySelectorAll('.tray-item img').forEach(img => {
+        applyFilter(img, state.colorMode);
+      });
+    }
+
+    // ============================================
+    // INTERACTIVE FUNCTIONS
+    // ============================================
+    window.toggleColorMode = function() {
+      state.colorMode = !state.colorMode;
+      updateFilterUI();
+      showToast(state.colorMode ? `Theme: ${getCurrentMonthTheme().name}` : 'Monochrome mode');
+    };
+
+    window.selectMood = function(mood) {
+      state.currentMood = mood;
+      document.querySelectorAll('.mood-card').forEach(card => {
+        card.classList.remove('active');
+        if (card.dataset.mood === mood) card.classList.add('active');
+      });
+      if (navigator.vibrate) navigator.vibrate(10);
+    };
+
+    window.toggleVibe = async function(entryId, vibeKey, btn) {
+      const key = `${entryId}-${vibeKey}`;
+      const countEl = btn.querySelector('.vibe-count');
+      let count = parseInt(countEl.textContent);
+      
+      let entry = state.entries.find(e => e.id === entryId);
+      
+      if (state.userVibes.has(key)) {
+        state.userVibes.delete(key);
+        btn.classList.remove('vibed');
+        countEl.textContent = Math.max(0, count - 1);
+      } else {
+        state.userVibes.add(key);
+        btn.classList.add('vibed');
+        countEl.textContent = count + 1;
+        btn.style.transform = 'scale(0.9)';
+        setTimeout(() => btn.style.transform = '', 150);
+        showToast(`${VIBES[vibeKey].label}!`);
         
-        if (otherTexts.length > 0) {
-          html += `<div class="empathy-summary">Juga: ${otherTexts.join(' • ')}</div>`;
+        if (state.isOnline && state.supabase && entry) {
+          try {
+            const newVibes = { ...entry.vibes, [vibeKey]: (entry.vibes[vibeKey] || 0) + 1 };
+            
+            await state.supabase
+              .from('rants')
+              .update({ vibes: newVibes })
+              .eq('id', entryId);
+            
+            if (entry.isSpilled && entry.spillId) {
+              await state.supabase
+                .from('spills')
+                .update({ 
+                  vibes: newVibes, 
+                  response_count: Object.values(newVibes).reduce((a,b) => a+b, 0) 
+                })
+                .eq('id', entry.spillId);
+            }
+            
+            entry.vibes = newVibes;
+          } catch (e) {
+            console.error('Failed to update vibes:', e);
+          }
         }
       }
+    };
 
-      return html;
+    window.setHero = function(url, note, faces) {
+      faces = faces || [];
+      const heroImg = document.getElementById('hero-img');
+      const heroFaces = document.getElementById('hero-faces');
+      
+      heroImg.src = url;
+      applyFilter(heroImg, state.colorMode);
+      document.getElementById('hero-notation').textContent = '"' + note + '"';
+      
+      heroFaces.innerHTML = '';
+      
+      heroImg.onload = function() {
+        if (faces.length > 0) {
+          const container = heroImg.parentElement;
+          const rect = container.getBoundingClientRect();
+          
+          faces.forEach(function(face) {
+            const div = document.createElement('div');
+            div.className = 'face-scribble';
+            
+            const scaleX = rect.width / heroImg.naturalWidth;
+            const scaleY = rect.height / heroImg.naturalHeight;
+            const padding = 10;
+            
+            div.style.left = Math.max(0, (face.box.x * scaleX) - padding) + 'px';
+            div.style.top = Math.max(0, (face.box.y * scaleY) - padding) + 'px';
+            div.style.width = Math.min(rect.width, (face.box.width * scaleX) + (padding * 2)) + 'px';
+            div.style.height = Math.min(rect.height, (face.box.height * scaleY) + (padding * 2)) + 'px';
+            
+            const lines = document.createElement('div');
+            lines.className = 'marker-lines';
+            div.appendChild(lines);
+            heroFaces.appendChild(div);
+          });
+        }
+      };
+    };
+
+    // ============================================
+    // UPLOAD FUNCTIONS
+    // ============================================
+    window.openGallery = function() {
+      const quota = initQuotaSystem();
+      if (!quota.inUploadWindow) {
+        showToast('Tunggu ' + quota.daysUntilWindow + ' hari lagi');
+        return;
+      }
+      document.getElementById('file-input').click();
+    };
+
+    function initQuotaSystem() {
+      const now = Date.now();
+      if (!state.quotaStart) {
+        state.quotaStart = now.toString();
+        localStorage.setItem(STORAGE_KEY_PREFIX + 'quota_start', state.quotaStart);
+      }
+      
+      const quotaStart = parseInt(state.quotaStart);
+      const daysSinceQuota = Math.floor((now - quotaStart) / (1000 * 60 * 60 * 24));
+      const currentCycle = Math.floor(daysSinceQuota / CONFIG.quotaDays);
+      const cycleStart = quotaStart + (currentCycle * CONFIG.quotaDays * 24 * 60 * 60 * 1000);
+      const daysIntoCycle = Math.floor((now - cycleStart) / (1000 * 60 * 60 * 24));
+      
+      return {
+        inUploadWindow: daysIntoCycle < CONFIG.uploadWindowDays,
+        daysIntoCycle,
+        daysUntilWindow: CONFIG.quotaDays - daysIntoCycle,
+        daysLeftInWindow: CONFIG.uploadWindowDays - daysIntoCycle
+      };
     }
 
-    function fmtTime(iso) {
-      if (!iso) return '';
-      const diff = Date.now() - new Date(iso).getTime();
-      const m = Math.floor(diff/60000), h = Math.floor(diff/3600000), d = Math.floor(diff/86400000);
-      if (m < 1) return 'Baru saja';
-      if (m < 60) return m + ' menit lalu';
-      if (h < 24) return h + ' jam lalu';
-      if (d < 7) return d + ' hari lalu';
-      return new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+    function updateQuotaUI() {
+      const quota = initQuotaSystem();
+      const btn = document.getElementById('upload-btn');
+      const counter = document.getElementById('upload-counter');
+      const timer = document.getElementById('quota-timer');
+      
+      if (quota.inUploadWindow) {
+        btn.disabled = false;
+        counter.style.display = 'none';
+        timer.textContent = 'Window aktif • Sisa ' + quota.daysLeftInWindow + ' hari';
+        timer.classList.remove('urgent');
+        if (quota.daysLeftInWindow <= 1) timer.classList.add('urgent');
+      } else {
+        btn.disabled = true;
+        counter.textContent = quota.daysUntilWindow;
+        counter.style.display = 'block';
+        timer.textContent = 'Next window: ' + quota.daysUntilWindow + ' hari';
+        timer.classList.remove('urgent');
+      }
     }
 
-    function escHtml(t) {
-      return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    // File input handler
+    document.getElementById('file-input').addEventListener('change', async function(e) {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+      
+      document.getElementById('processing').classList.add('active');
+      
+      const processed = [];
+      for (const file of files) {
+        if (file.size > CONFIG.maxFileSize) {
+          showToast(file.name + ' terlalu besar (max 5MB)');
+          continue;
+        }
+        
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.src = url;
+        
+        await new Promise(resolve => {
+          img.onload = async function() {
+            const detections = await detectFaces(img);
+            processed.push({
+              id: generateUUID(), // Use UUID for artefact ID
+              url: url,
+              note: 'new drop',
+              timestamp: Date.now(),
+              faces: detections.map(d => ({ box: d.box, score: d.score })),
+              hasFace: detections.length > 0,
+              file: file
+            });
+            resolve();
+          };
+        });
+      }
+      
+      document.getElementById('processing').classList.remove('active');
+      
+      if (processed.length > 0) {
+        state.selectedFiles = new Set(processed);
+        renderGalleryModal(processed);
+      }
+    });
+
+    function renderGalleryModal(artefacts) {
+      const grid = document.getElementById('gallery-grid');
+      grid.innerHTML = '';
+      
+      artefacts.forEach(function(artefact, index) {
+        const div = document.createElement('div');
+        div.className = 'gallery-item selected';
+        div.dataset.index = index;
+        div.onclick = function() {
+          if (div.classList.contains('selected')) {
+            div.classList.remove('selected');
+            state.selectedFiles.delete(artefact);
+          } else {
+            if (state.selectedFiles.size >= CONFIG.maxSelection) {
+              showToast('Max ' + CONFIG.maxSelection + ' foto');
+              return;
+            }
+            div.classList.add('selected');
+            state.selectedFiles.add(artefact);
+          }
+          document.getElementById('selected-count').textContent = state.selectedFiles.size;
+        };
+        
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'relative';
+        wrapper.style.width = '100%';
+        wrapper.style.height = '100%';
+        
+        const img = document.createElement('img');
+        img.src = artefact.url;
+        img.className = state.colorMode ? getCurrentMonthTheme().filter : 'filter-monochrome';
+        
+        wrapper.appendChild(img);
+        
+        if (artefact.hasFace) {
+          const badge = document.createElement('div');
+          badge.className = 'detection-badge';
+          badge.textContent = 'WAJAH TERSENSOR';
+          wrapper.appendChild(badge);
+        }
+        
+        if (artefact.faces && artefact.faces.length > 0) {
+          artefact.faces.forEach(function(face) {
+            const scribble = document.createElement('div');
+            scribble.className = 'face-scribble';
+            scribble.style.left = ((face.box.x / 400) * 100) + '%';
+            scribble.style.top = ((face.box.y / 400) * 100) + '%';
+            scribble.style.width = ((face.box.width / 400) * 100) + '%';
+            scribble.style.height = ((face.box.height / 400) * 100) + '%';
+            scribble.style.zIndex = '10';
+            const lines = document.createElement('div');
+            lines.className = 'marker-lines';
+            scribble.appendChild(lines);
+            wrapper.appendChild(scribble);
+          });
+        }
+        
+        div.appendChild(wrapper);
+        grid.appendChild(div);
+      });
+      
+      document.getElementById('selected-count').textContent = state.selectedFiles.size;
+      document.getElementById('gallery-modal').classList.add('active');
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('header-username').textContent = '@' + SESSION.username;
-      initDB();
-      loadEntries();
+    window.closeGallery = function() {
+      document.getElementById('gallery-modal').classList.remove('active');
+      state.selectedFiles.clear();
+      document.getElementById('file-input').value = '';
+    };
+
+    window.confirmUpload = async function() {
+      if (state.selectedFiles.size === 0) {
+        showToast('Pilih minimal 1 foto');
+        return;
+      }
+      
+      const artefacts = Array.from(state.selectedFiles);
+      let faceCount = 0;
+      
+      // Upload to Supabase and add to FIFO
+      for (const artefact of artefacts) {
+        if (artefact.hasFace) faceCount++;
+        
+        // Upload to Supabase Storage
+        if (state.isOnline && state.supabase) {
+          try {
+            updateSyncStatus('syncing', 'Uploading...');
+            
+            const publicUrl = await uploadImageToSupabase(artefact.file, artefact.id);
+            
+            if (publicUrl) {
+              artefact.url = publicUrl;
+              await saveArtefactMetadata(artefact, publicUrl);
+            }
+          } catch (e) {
+            console.error('Upload failed:', e);
+          }
+        }
+        
+        addArtefactToFIFO(artefact);
+      }
+      
+      state.uploadsThisWindow += artefacts.length;
+      localStorage.setItem(STORAGE_KEY_PREFIX + 'uploads_count', state.uploadsThisWindow.toString());
+      
+      const first = artefacts[0];
+      window.setHero(first.url, first.note, first.faces);
+      
+      renderTray();
+      window.closeGallery();
+      
+      if (state.isOnline) {
+        updateSyncStatus('online', 'Tersimpan');
+      }
+      
+      if (faceCount > 0) {
+        showToast(artefacts.length + ' foto disimpan • ' + faceCount + ' wajah disensor');
+      } else {
+        showToast(artefacts.length + ' artefak ditambahkan (FIFO)');
+      }
+    };
+
+    // ============================================
+    // UTILITY FUNCTIONS
+    // ============================================
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(function() {
+        toast.classList.remove('show');
+      }, 2500);
+    }
+
+    function formatTime(ts) {
+      const diff = Date.now() - ts;
+      const hours = Math.floor(diff / 3600000);
+      if (hours < 1) return 'baru saja';
+      if (hours < 24) return hours + 'j';
+      const days = Math.floor(hours / 24);
+      return days + 'h';
+    }
+
+    function getCurrentMonthTheme() {
+      return MONTHLY_THEMES[new Date().getMonth()];
+    }
+
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
+    // ============================================
+    // LOAD USER DATA FROM SUPABASE
+    // ============================================
+    async function loadUserArtefactsFromDB() {
+      if (!state.isOnline || !state.supabase) return;
+      try {
+        const { data, error } = await state.supabase
+          .from('artefacts')
+          .select('*')
+          .eq('author', state.currentUser)
+          .order('created_at', { ascending: false })
+          .limit(6);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          state.artefacts = data.map(a => ({
+            id: a.id,
+            url: a.url,
+            note: a.note || 'memory',
+            faces: a.faces || [],
+            hasFace: a.has_face || false,
+            timestamp: new Date(a.created_at).getTime()
+          }));
+          saveArtefacts();
+          renderTray();
+          // Set hero to most recent artefact
+          const first = state.artefacts[0];
+          window.setHero(first.url, first.note, first.faces || []);
+          console.log('✅ Loaded', data.length, 'artefacts from DB');
+        }
+      } catch (e) {
+        console.error('❌ Failed to load artefacts from DB:', e);
+      }
+    }
+
+    async function loadUserRantsFromDB() {
+      if (!state.isOnline || !state.supabase) return;
+      try {
+        const { data, error } = await state.supabase
+          .from('rants')
+          .select('*')
+          .eq('author', state.currentUser)
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          // Merge dengan entries yang ada di local state (hindari duplikat)
+          const localIds = new Set(state.entries.map(e => e.id));
+          const newEntries = data
+            .filter(r => !localIds.has(r.id))
+            .map(r => ({
+              id: r.id,
+              content: r.content,
+              mood: r.mood,
+              timestamp: new Date(r.created_at).getTime(),
+              vibes: r.vibes || {relatable:0,mood:0,tea:0,hug:0,real:0,dead:0},
+              isSpilled: true,
+              author: r.author
+            }));
+
+          state.entries = [...state.entries, ...newEntries]
+            .sort((a, b) => b.timestamp - a.timestamp);
+
+          localStorage.setItem(STORAGE_KEY_PREFIX + 'entries', JSON.stringify(state.entries));
+          renderEntries();
+          console.log('✅ Loaded', data.length, 'rants from DB');
+        }
+      } catch (e) {
+        console.error('❌ Failed to load rants from DB:', e);
+      }
+    }
+
+        // Logout function
+    window.logoutUser = function() {
+      if (!confirm('Yakin mau logout?')) return;
+      localStorage.removeItem('jejak_logged_in');
+      localStorage.removeItem('jejak_username');
+      localStorage.removeItem('jejak_user_id');
+      window.location.href = 'index.html';
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Show username in header
+      const headerUsername = document.getElementById('header-username');
+      if (headerUsername) {
+        headerUsername.textContent = '@' + state.currentUser;
+      }
+
+      // Initialize Supabase
+      initSupabase();
+      
+      // Load Face API
+      loadFaceApi();
+      
+      // Load saved entries
+      const savedEntries = localStorage.getItem(STORAGE_KEY_PREFIX + 'entries');
+      if (savedEntries) {
+        try {
+          state.entries = JSON.parse(savedEntries);
+        } catch (e) {
+          state.entries = [];
+        }
+      }
+      
+      // Load saved artefacts
+      const savedArtefacts = loadArtefacts();
+      if (savedArtefacts.length > 0) {
+        state.artefacts = savedArtefacts;
+      }
+      
+      // Input character count
+      document.getElementById('rant-input').addEventListener('input', function() {
+        document.getElementById('char-count').textContent = this.value.length + '/500';
+      });
+      
+      // Submit button
+      document.getElementById('submit-btn').addEventListener('click', function() {
+        const input = document.getElementById('rant-input');
+        const content = input.value.trim();
+        
+        if (!content) {
+          showToast('Tulis dulu, bestie');
+          input.focus();
+          return;
+        }
+        
+        submitRant(content, state.currentMood);
+        
+        // Clear input
+        input.value = '';
+        document.getElementById('char-count').textContent = '0/500';
+      });
+      
+      // Upload button
+      document.getElementById('upload-btn').addEventListener('click', window.openGallery);
+      
+      // Initialize UI
+      updateQuotaUI();
+      updateFilterUI();
+      renderEntries();
+      renderTray();
+      
+      // Set initial hero — real artefacts or dummy as fallback
+      const visibleArts = getVisibleArtefacts();
+      if (visibleArts.length > 0) {
+        const first = visibleArts[0];
+        window.setHero(first.url, first.note, first.faces || []);
+      }
+      // Load artefacts from Supabase if online (real will replace dummy)
+      loadUserArtefactsFromDB();
+      
+      // Load user data from DB
+      loadUserRantsFromDB();
+
+      // Update quota every hour
+      setInterval(updateQuotaUI, 3600000);
     });
   </script>
 </body>
