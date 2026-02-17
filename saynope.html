@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+akarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0A0A0A; --surface: #141414; --surface-elevated: #1E1E1E;
@@ -68,8 +68,6 @@
     .tea-card:hover { border-color: var(--border-accent); transform: translateY(-2px); box-shadow: 4px 4px 0 var(--surface-elevated); }
     .tea-card.dimmed { opacity: 0.4; filter: grayscale(0.7); }
     .tea-card.highlighted { border-color: var(--accent-primary); box-shadow: 4px 4px 0 var(--accent-primary); }
-    .tea-card.own-spill { border-color: var(--accent-secondary); }
-    .tea-card.own-spill::after { content: 'KAMU'; position: absolute; top: -10px; right: var(--space-md); background: var(--accent-secondary); color: var(--bg); font-size: 9px; font-weight: 800; padding: 3px 10px; letter-spacing: 0.1em; }
     .resonance-badge { position: absolute; top: -12px; right: var(--space-md); background: var(--accent-primary); color: var(--bg); font-size: 10px; font-weight: 800; padding: 4px 12px; text-transform: uppercase; letter-spacing: 0.05em; display: none; border: 2px solid var(--bg); }
     .tea-card.highlighted .resonance-badge { display: block; }
     .live-badge { position: absolute; top: -12px; left: var(--space-md); background: var(--accent-quaternary); color: var(--bg); font-size: 9px; font-weight: 800; padding: 4px 10px; display: flex; align-items: center; gap: 4px; border: 2px solid var(--bg); animation: pulse 2s infinite; }
@@ -346,15 +344,25 @@
     if (!SESSION) throw new Error('No session');
 
     // ═══════════════════════════════════════
-    // CONSTANTS
+    // CONSTANTS - Mapping emoji ke tabel reactions
     // ═══════════════════════════════════════
     const VIBE_REACTIONS = {
-      relatable: { emoji: '💯', label: 'literally me',  slang: 'Sama' },
-      mood:      { emoji: '🛋️', label: 'big mood',     slang: 'Mood' },
-      hug:       { emoji: '🤗', label: 'virtual hug',  slang: 'Peluk' },
-      tea:       { emoji: '🐸', label: 'spill tea',    slang: 'Tea' },
-      real:      { emoji: '🎯', label: 'no cap',       slang: 'Real' },
-      dead:      { emoji: '💀', label: 'rip me',       slang: 'RIP' }
+      relatable: { emoji: '💯', label: 'literally me',  slang: 'Sama', dbEmoji: '😢' },
+      mood:      { emoji: '🛋️', label: 'big mood',     slang: 'Mood', dbEmoji: '😔' },
+      hug:       { emoji: '🤗', label: 'virtual hug',  slang: 'Peluk', dbEmoji: '🤗' },
+      tea:       { emoji: '🐸', label: 'spill tea',    slang: 'Tea', dbEmoji: '🍵' },
+      real:      { emoji: '🎯', label: 'no cap',       slang: 'Real', dbEmoji: '👏' },
+      dead:      { emoji: '💀', label: 'rip me',       slang: 'RIP', dbEmoji: '💀' }
+    };
+
+    // Reverse mapping dari emoji DB ke key
+    const EMOJI_TO_KEY = {
+      '😢': 'relatable',
+      '😔': 'mood',
+      '🤗': 'hug',
+      '🍵': 'tea',
+      '👏': 'real',
+      '💀': 'dead'
     };
 
     const MOOD_META = {
@@ -395,15 +403,12 @@
       db: null,
       allSpills: [],
       filteredSpills: [],
-      resonanceThreshold: 20,   // 100 - slider value
+      resonanceThreshold: 20,
       activeMood: 'all',
-      // REVISI 3: Simpan reaksi per spill, bukan per kombinasi spill+emoji
-      // Format: { 'spillId': 'emojiKey' }
       usedVibesPerSpill: JSON.parse(localStorage.getItem('saynope_vibes_per_spill') || '{}'),
       pendingSpills: [],
       userSig: null,
       scrollCount: 0,
-      // Peek state
       peekSpill: null,
       peekTimer: null,
       peekTimeLeft: 15,
@@ -425,7 +430,7 @@
     }
 
     // ═══════════════════════════════════════
-    // VIBE SIGNATURE — baca dari riwayat rant user
+    // VIBE SIGNATURE
     // ═══════════════════════════════════════
     function buildUserSignature() {
       const key = 'jejak_' + SESSION.username.replace(/[^a-z0-9]/g,'_') + '_entries';
@@ -453,23 +458,18 @@
 
     // ═══════════════════════════════════════
     // VIBE SCORE ALGORITHM
-    // Hitung seberapa selaras sebuah spill dengan user
     // ═══════════════════════════════════════
     function calcVibeScore(spill, sig) {
       let score = 0;
-
-      // 1. Mood match (bobot 35%)
       if (sig.dominant && spill.mood === sig.dominant) score += 35;
       else if (sig.moodCounts && sig.moodCounts[spill.mood] > 0) score += 15;
 
-      // 2. Keyword overlap (bobot 40%)
       if (spill.content && sig.keywords.length > 0) {
         const spillWords = spill.content.toLowerCase().split(/\s+/);
         const hits = sig.keywords.filter(k => spillWords.some(w => w.includes(k))).length;
         score += Math.min(40, (hits / Math.max(sig.keywords.length, 1)) * 100);
       }
 
-      // 3. Mood keyword baseline (bobot 25%)
       if (spill.content && spill.mood) {
         const moodKw = MOOD_META[spill.mood]?.kw || [];
         const lower = spill.content.toLowerCase();
@@ -481,28 +481,49 @@
     }
 
     // ═══════════════════════════════════════
-    // LOAD SPILLS FROM SUPABASE
+    // LOAD SPILLS WITH REACTION COUNTS
     // ═══════════════════════════════════════
     async function loadSpills() {
       showLoading();
       state.userSig = buildUserSignature();
 
       try {
-        const { data, error } = await state.db
+        // Load spills
+        const { data: spillsData, error: spillsError } = await state.db
           .from('spills')
           .select('*')
           .order('created_at', { ascending: false })
           .limit(60);
 
-        if (error) throw error;
+        if (spillsError) throw spillsError;
 
-        let spills = data || [];
+        // Load reactions count for all spills
+        const { data: reactionsData, error: reactionsError } = await state.db
+          .from('reactions')
+          .select('rant_id, emoji');
 
-        // REVISI 1 & 2: Filter OUT rant milik user sendiri
-        // Hanya rant user lain yang bisa masuk spill
+        if (reactionsError) throw reactionsError;
+
+        // Count reactions per spill
+        const reactionCounts = {};
+        reactionsData.forEach(r => {
+          if (!reactionCounts[r.rant_id]) reactionCounts[r.rant_id] = {};
+          const key = EMOJI_TO_KEY[r.emoji] || 'relatable';
+          reactionCounts[r.rant_id][key] = (reactionCounts[r.rant_id][key] || 0) + 1;
+        });
+
+        let spills = spillsData || [];
+
+        // Filter out own spills
         spills = spills.filter(s => s.author !== SESSION.username);
 
-        // Filler dummy jika real spills < 4
+        // Merge reaction counts
+        spills = spills.map(s => ({
+          ...s,
+          vibes: reactionCounts[s.id] || {}
+        }));
+
+        // Add dummy if needed
         if (spills.length < 4) {
           const needed = 4 - spills.length;
           spills = [...spills, ...DUMMY_SPILLS.slice(0, needed)];
@@ -511,7 +532,7 @@
         state.allSpills = spills.map(s => ({
           ...s,
           vibeScore: calcVibeScore(s, state.userSig),
-          isOwn: false // Semua yang di spill adalah milik orang lain
+          isOwn: false
         }));
 
         applyFilters();
@@ -520,7 +541,6 @@
 
       } catch(e) {
         console.error('Load spills failed:', e);
-        // Full dummy fallback
         state.allSpills = DUMMY_SPILLS.map(s => ({
           ...s, vibeScore: calcVibeScore(s, state.userSig), isOwn: false
         }));
@@ -534,18 +554,49 @@
     // ═══════════════════════════════════════
     function subscribeRealtime() {
       if (!state.db) return;
+      
+      // Subscribe to new spills
       state.db.channel('spills-rt')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'spills' }, payload => {
           const s = payload.new;
-          // REVISI 1: Jangan tampilkan rant user sendiri di realtime juga
           if (s.author === SESSION.username) return;
-          const newSpill = { ...s, vibeScore: calcVibeScore(s, state.userSig), isOwn: false };
+          const newSpill = { ...s, vibes: {}, vibeScore: calcVibeScore(s, state.userSig), isOwn: false };
           state.pendingSpills.unshift(newSpill);
           const banner = document.getElementById('new-spill-banner');
           banner.textContent = `↑ ${state.pendingSpills.length} spill baru! Tap untuk lihat`;
           banner.classList.add('show');
         })
         .subscribe();
+
+      // Subscribe to new reactions
+      state.db.channel('reactions-rt')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reactions' }, payload => {
+          const r = payload.new;
+          const spill = state.allSpills.find(s => s.id === r.rant_id);
+          if (spill) {
+            const key = EMOJI_TO_KEY[r.emoji] || 'relatable';
+            spill.vibes[key] = (spill.vibes[key] || 0) + 1;
+            updateCardVibes(spill.id);
+          }
+        })
+        .subscribe();
+    }
+
+    function updateCardVibes(spillId) {
+      const card = document.getElementById('card-' + spillId);
+      if (!card) return;
+      
+      const spill = state.allSpills.find(s => s.id === spillId);
+      if (!spill) return;
+
+      // Update counts without re-rendering
+      Object.entries(VIBE_REACTIONS).forEach(([key, val]) => {
+        const btn = card.querySelector(`button[onclick*="'${key}'"]`);
+        if (btn) {
+          const countEl = btn.querySelector('.count');
+          if (countEl) countEl.textContent = spill.vibes[key] || 0;
+        }
+      });
     }
 
     function loadPendingSpills() {
@@ -563,13 +614,10 @@
     function applyFilters() {
       let list = [...state.allSpills];
 
-      // Mood filter
       if (state.activeMood !== 'all') {
         list = list.filter(s => s.mood === state.activeMood);
       }
 
-      // REVISI 2: Resonance filter - hanya rant yang lolos algoritma yang masuk
-      // Threshold menentukan apakah spill ditampilkan atau tidak
       if (state.resonanceThreshold > 0) {
         const thresh = state.resonanceThreshold;
         list = list.map(s => ({
@@ -580,7 +628,6 @@
         list = list.map(s => ({ ...s, _show: true }));
       }
 
-      // Sort: by vibeScore desc, then by time
       list.sort((a,b) => {
         if (b.vibeScore !== a.vibeScore) return b.vibeScore - a.vibeScore;
         return new Date(b.created_at) - new Date(a.created_at);
@@ -616,7 +663,6 @@
       container.innerHTML = '';
 
       visible.forEach((spill, idx) => {
-        // Scroll pause after 5 cards
         if (idx === 5) {
           const pause = document.createElement('div');
           pause.className = 'scroll-pause show';
@@ -640,17 +686,15 @@
       const timeAgo = fmtTime(spill.created_at);
       const mood = spill.mood || 'surviving';
       const moodMeta = MOOD_META[mood] || MOOD_META.surviving;
-      const vibes = typeof spill.vibes === 'string' ? JSON.parse(spill.vibes) : (spill.vibes || {});
+      const vibes = spill.vibes || {};
       const isNew = idx < 2 && !spill.isDummy;
       const matchLabel = spill.vibeScore >= 80 ? `${spill.vibeScore}% Match 🔥` : spill.vibeScore >= 60 ? `${spill.vibeScore}% Selaras` : null;
 
-      // REVISI 3: Cek apakah user sudah memberi reaksi pada spill ini
       const usedEmojiKey = state.usedVibesPerSpill[spill.id];
       const hasReacted = !!usedEmojiKey;
 
       const vibesHtml = Object.entries(VIBE_REACTIONS).map(([k, v]) => {
         const count = vibes[k] || 0;
-        // REVISI 3: Jika sudah memberi reaksi, semua emoji lain disabled, yang dipilih jadi used
         const isUsed = usedEmojiKey === k;
         const isDisabled = hasReacted && !isUsed;
         
@@ -678,7 +722,7 @@
     }
 
     // ═══════════════════════════════════════
-    // VIBE REACTION — SAVE TO SUPABASE
+    // VIBE REACTION — SAVE TO REACTIONS TABLE
     // ═══════════════════════════════════════
     async function handleVibe(spillId, vibeKey, btn, isDummy) {
       if (isDummy) {
@@ -687,7 +731,6 @@
         return;
       }
 
-      // REVISI 3: Cek apakah sudah memberi reaksi pada spill ini
       if (state.usedVibesPerSpill[spillId]) {
         showNotification('Kamu sudah kasih reaksi pada curhat ini!');
         return;
@@ -700,11 +743,9 @@
       btn.style.transform = 'scale(1.25)';
       setTimeout(() => btn.style.transform = '', 200);
 
-      // REVISI 3: Simpan bahwa user sudah memberi reaksi pada spill ini
       state.usedVibesPerSpill[spillId] = vibeKey;
       localStorage.setItem('saynope_vibes_per_spill', JSON.stringify(state.usedVibesPerSpill));
 
-      // Disable semua emoji lain di card ini
       const card = document.getElementById('card-' + spillId);
       if (card) {
         const allBtns = card.querySelectorAll('.vibe-btn');
@@ -716,26 +757,39 @@
         });
       }
 
-      // Trigger peek after vibe
       setTimeout(() => openPeek(spillId), 200);
 
-      // Save to Supabase
+      // Save to Supabase reactions table
       if (state.db) {
         try {
-          const { data: cur } = await state.db.from('spills').select('vibes').eq('id', spillId).single();
-          if (cur) {
-            const v = typeof cur.vibes === 'string' ? JSON.parse(cur.vibes) : (cur.vibes || {});
-            v[vibeKey] = (v[vibeKey] || 0) + 1;
-            await state.db.from('spills').update({ vibes: v }).eq('id', spillId);
+          const dbEmoji = VIBE_REACTIONS[vibeKey].dbEmoji;
+          const { error } = await state.db
+            .from('reactions')
+            .insert({
+              rant_id: spillId,
+              user_id: SESSION.username,
+              emoji: dbEmoji
+            });
+          
+          if (error) throw error;
+          
+          // Update local count
+          const spill = state.allSpills.find(s => s.id === spillId);
+          if (spill) {
+            spill.vibes[vibeKey] = (spill.vibes[vibeKey] || 0) + 1;
           }
-        } catch(e) { console.error('Vibe save failed:', e); }
+          
+        } catch(e) { 
+          console.error('Reaction save failed:', e);
+          showNotification('Gagal menyimpan reaksi, coba lagi');
+        }
       }
 
       showNotification(`${VIBE_REACTIONS[vibeKey].emoji} ${VIBE_REACTIONS[vibeKey].slang}!`);
     }
 
     // ═══════════════════════════════════════
-    // PEEK MECHANIC (dari saynope asli)
+    // PEEK MECHANIC
     // ═══════════════════════════════════════
     function openPeek(spillId) {
       const spill = state.filteredSpills.find(s => s.id === spillId);
@@ -748,20 +802,17 @@
       document.getElementById('peek-avatar-big').textContent = avatarText;
       document.getElementById('peek-username').textContent = '@' + (spill.author || 'anon');
 
-      // Online: tampilkan kalau spill < 2 jam
       const isRecent = Date.now() - new Date(spill.created_at).getTime() < 7200000;
       document.getElementById('online-status').style.display = isRecent ? 'flex' : 'none';
       if (isRecent) {
         setTimeout(() => { document.getElementById('typing-indicator').style.display = 'flex'; }, 3000);
       }
 
-      // Count vibes
-      const vibes = typeof spill.vibes === 'string' ? JSON.parse(spill.vibes) : (spill.vibes || {});
+      const vibes = spill.vibes || {};
       const totalVibes = Object.values(vibes).reduce((a,b) => a+b, 0);
       document.getElementById('peek-entry-count').textContent = spill.journal?.length || 1;
       document.getElementById('peek-vibe-count').textContent = totalVibes;
 
-      // Build journal entries (progressive disclosure)
       const ec = document.getElementById('peek-entries-container');
       ec.innerHTML = '';
       const journal = spill.journal || [{ mood: MOOD_META[spill.mood]?.emoji || '💭', time: fmtTime(spill.created_at), content: spill.content }];
@@ -779,7 +830,6 @@
         ec.appendChild(div);
       });
 
-      // Build peek reaction buttons
       const rc = document.getElementById('peek-reactions');
       rc.innerHTML = Object.entries(VIBE_REACTIONS).map(([k,v]) =>
         `<button class="peek-reaction-btn" onclick="extendPeek('${k}',this)">${v.emoji} ${v.slang}</button>`
@@ -792,7 +842,6 @@
 
       startPeekTimer();
 
-      // Reciprocity simulation
       if (Math.random() > 0.6) {
         setTimeout(() => showReciprocity('@' + (spill.author || 'someone')), 8000);
       }
@@ -819,7 +868,6 @@
       document.getElementById('timer-count').textContent = state.peekTimeLeft;
       document.getElementById('peek-timer').classList.remove('pulse');
 
-      // Reveal next locked entry
       const locked = document.querySelectorAll('.peek-entry.locked');
       if (locked.length > 0) {
         const next = locked[0];
@@ -877,7 +925,7 @@
     }
 
     // ═══════════════════════════════════════
-    // GETARAN CARDS — dari rant user lain yang sering bereaksi
+    // GETARAN CARDS
     // ═══════════════════════════════════════
     function buildGetaranCards() {
       const sig = state.userSig;
@@ -912,7 +960,6 @@
     // FILTER CONTROLS
     // ═══════════════════════════════════════
     function adjustResonance(sliderVal) {
-      // Slider: 100=Homie Only(high threshold), 0=Semua(no threshold)
       state.resonanceThreshold = 100 - parseInt(sliderVal);
       applyFilters();
     }
@@ -944,7 +991,6 @@
         showNotification('Udah 3x refresh. Istirahat sebentar? ☕');
         state.scrollCount = 0;
       }
-      // 2s intentional delay (anti zombie-scroll)
       await new Promise(r => setTimeout(r, 2000));
       await loadSpills();
       btn.classList.remove('spinning');
