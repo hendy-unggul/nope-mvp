@@ -298,25 +298,47 @@
       margin-bottom: 16px;
     }
     
-    .spill-actions {
+    /* 6 Emoji Reactions */
+    .spill-reactions {
       display: flex;
-      gap: 12px;
+      gap: 8px;
+      flex-wrap: wrap;
     }
     
-    .spill-action {
-      background: transparent;
+    .reaction-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface-elevated);
       border: 1px solid var(--border);
       color: var(--text-secondary);
-      padding: 8px 16px;
-      font-size: 11px;
-      font-weight: 600;
+      padding: 8px 12px;
+      font-size: 13px;
       cursor: pointer;
       transition: all 0.2s;
+      border-radius: 20px;
     }
     
-    .spill-action:hover {
+    .reaction-btn:hover {
       border-color: var(--accent);
-      color: var(--accent);
+      background: var(--accent);
+      color: var(--bg);
+      transform: scale(1.05);
+    }
+    
+    .reaction-btn:active {
+      transform: scale(0.95);
+    }
+    
+    .reaction-emoji {
+      font-size: 16px;
+    }
+    
+    .reaction-count {
+      font-weight: 600;
+      font-size: 12px;
+      min-width: 16px;
+      text-align: center;
     }
     
     /* New Spill Button */
@@ -385,6 +407,73 @@
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
+
+    /* Bottom Navigation - 4 Tab Style */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      z-index: 1000;
+    }
+    
+    .nav-container {
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 60px;
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 8px 24px;
+      transition: all 0.2s;
+      text-decoration: none;
+      flex: 1;
+      position: relative;
+    }
+    
+    .nav-item.active {
+      color: var(--accent);
+    }
+    
+    .nav-item.active::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--accent);
+    }
+    
+    .nav-item:hover {
+      color: var(--text);
+    }
+    
+    .nav-icon {
+      font-size: 20px;
+      font-weight: 400;
+    }
+    
+    .nav-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
   </style>
 </head>
 <body>
@@ -444,6 +533,28 @@
   
   <div class="toast" id="toast"></div>
 
+  <!-- Bottom Navigation - 4 Tab Style -->
+  <nav class="bottom-nav">
+    <div class="nav-container">
+      <a href="jejak.html" class="nav-item">
+        <span class="nav-icon">✦</span>
+        <span class="nav-label">Jejak</span>
+      </a>
+      <a href="cocomeo.html" class="nav-item">
+        <span class="nav-icon">〜</span>
+        <span class="nav-label">Cocomeo</span>
+      </a>
+      <a href="saynope.html" class="nav-item active">
+        <span class="nav-icon">✕</span>
+        <span class="nav-label">Spill</span>
+      </a>
+      <a href="glitch.html" class="nav-item">
+        <span class="nav-icon">⚡</span>
+        <span class="nav-label">Glitch</span>
+      </a>
+    </div>
+  </nav>
+
   <script>
     // ============================================
     // CONFIGURATION
@@ -460,10 +571,22 @@
       supabase: null,
       isOnline: false,
       spills: [],
+      reactions: {},
+      currentUserId: null,
       currentFilter: 'all',
       vibeMatch: 100,
       isLoading: true
     };
+
+    // 6 Emoji reactions configuration
+    const EMOJI_REACTIONS = [
+      { id: 'relatable', emoji: '💯', label: 'Relatable' },
+      { id: 'hug', emoji: '🤗', label: 'Hug' },
+      { id: 'same', emoji: '✋', label: 'Same' },
+      { id: 'mood', emoji: '😮‍💨', label: 'Mood' },
+      { id: 'tea', emoji: '🍵', label: 'Tea' },
+      { id: 'fire', emoji: '🔥', label: 'Fire' }
+    ];
 
     // ============================================
     // DUMMY DATA - Fallback jika gagal load
@@ -474,24 +597,27 @@
         content: "Ada yang pernah ngerasa kalo lagi banyak kerjaan malah makin males ngerjain? Padahal deadline mepet. Help",
         mood: 'chaotic',
         author: '@anonymouse',
+        user_id: 'other-user-1',
         timestamp: Date.now() - 3600000,
-        vibes: { relatable: 5, mood: 3 }
+        reactions: { relatable: 5, hug: 2, same: 3, mood: 4, tea: 1, fire: 0 }
       },
       {
         id: 'dummy-2',
         content: "Hari ini gue bangun pagi, olahraga, sarapan sehat, dan ngerjain side project. Semoga konsisten",
         mood: 'thriving',
         author: '@earlybird',
+        user_id: 'other-user-2',
         timestamp: Date.now() - 7200000,
-        vibes: { hug: 2, real: 4 }
+        reactions: { relatable: 2, hug: 1, same: 0, mood: 1, tea: 3, fire: 5 }
       },
       {
         id: 'dummy-3',
         content: "Capek banget rasanya. Pengen tidur 3 hari 3 malam tanpa gangguan.",
         mood: 'doom',
         author: '@tiredsoul',
+        user_id: 'other-user-3',
         timestamp: Date.now() - 10800000,
-        vibes: { hug: 8, relatable: 6 }
+        reactions: { relatable: 8, hug: 12, same: 6, mood: 9, tea: 2, fire: 1 }
       }
     ];
 
@@ -539,7 +665,7 @@
     }
 
     // ============================================
-    // LOAD SPILLS
+    // LOAD SPILLS - Exclude current user's rants
     // ============================================
     async function loadSpills() {
       console.log('Loading spills...');
@@ -549,11 +675,24 @@
       if (state.isOnline && state.supabase) {
         try {
           console.log('Fetching from Supabase...');
-          const { data, error } = await state.supabase
+          
+          // Get current user first
+          const { data: { user } } = await state.supabase.auth.getUser();
+          state.currentUserId = user ? user.id : null;
+          
+          // Fetch spills excluding current user's rants
+          let query = state.supabase
             .from('spills')
             .select('*')
             .order('created_at', { ascending: false })
             .limit(20);
+          
+          // Exclude current user's rants if logged in
+          if (state.currentUserId) {
+            query = query.neq('user_id', state.currentUserId);
+          }
+          
+          const { data, error } = await query;
           
           if (error) {
             console.error('Supabase error:', error);
@@ -569,29 +708,67 @@
                 content: s.content,
                 mood: s.mood,
                 author: s.author || '@anonymous',
+                user_id: s.user_id,
                 timestamp: new Date(s.created_at).getTime(),
-                vibes: s.vibes || {}
+                reactions: s.reactions || {}
               };
             });
+            
+            // Load reactions for these spills
+            await loadReactions(data.map(s => s.id));
           } else {
-            // Use dummy if no data
+            // Use dummy if no data, filter out current user
             console.log('No data, using dummy');
-            state.spills = DUMMY_SPILLS;
+            state.spills = DUMMY_SPILLS.filter(s => s.user_id !== state.currentUserId);
           }
         } catch (e) {
           console.error('Load failed:', e);
-          state.spills = DUMMY_SPILLS;
+          state.spills = DUMMY_SPILLS.filter(s => s.user_id !== state.currentUserId);
           showToast('Gagal memuat data, menampilkan contoh');
         }
       } else {
-        // Offline - use dummy
+        // Offline - use dummy, filter out current user if known
         console.log('Offline mode, using dummy');
-        state.spills = DUMMY_SPILLS;
+        state.spills = DUMMY_SPILLS.filter(s => s.user_id !== state.currentUserId);
         showToast('Mode offline - menampilkan contoh');
       }
       
       setLoading(false);
       renderSpills();
+    }
+
+    async function loadReactions(spillIds) {
+      if (!state.supabase || spillIds.length === 0) return;
+      
+      try {
+        const { data, error } = await state.supabase
+          .from('reactions')
+          .select('*')
+          .in('spill_id', spillIds);
+        
+        if (error) throw error;
+        
+        // Aggregate reactions by spill_id
+        state.reactions = {};
+        spillIds.forEach(id => {
+          state.reactions[id] = {};
+          EMOJI_REACTIONS.forEach(r => {
+            state.reactions[id][r.id] = 0;
+          });
+        });
+        
+        if (data) {
+          data.forEach(reaction => {
+            if (state.reactions[reaction.spill_id]) {
+              if (state.reactions[reaction.spill_id][reaction.reaction_type] !== undefined) {
+                state.reactions[reaction.spill_id][reaction.reaction_type]++;
+              }
+            }
+          });
+        }
+      } catch (e) {
+        console.error('Failed to load reactions:', e);
+      }
     }
 
     function setLoading(loading) {
@@ -659,8 +836,24 @@
       for (var i = 0; i < filtered.length; i++) {
         var spill = filtered[i];
         var moodColor = getMoodColor(spill.mood);
-        var relatableCount = spill.vibes && spill.vibes.relatable ? spill.vibes.relatable : 0;
-        var hugCount = spill.vibes && spill.vibes.hug ? spill.vibes.hug : 0;
+        
+        // Build 6 reactions HTML
+        var reactionsHtml = '';
+        for (var j = 0; j < EMOJI_REACTIONS.length; j++) {
+          var reaction = EMOJI_REACTIONS[j];
+          var count = 0;
+          if (state.reactions[spill.id] && state.reactions[spill.id][reaction.id]) {
+            count = state.reactions[spill.id][reaction.id];
+          } else if (spill.reactions && spill.reactions[reaction.id]) {
+            count = spill.reactions[reaction.id];
+          }
+          
+          reactionsHtml += 
+            '<button class="reaction-btn" onclick="reactToSpill(\'' + spill.id + '\', \'' + reaction.id + '\')">' +
+              '<span class="reaction-emoji">' + reaction.emoji + '</span>' +
+              '<span class="reaction-count" id="count-' + spill.id + '-' + reaction.id + '">' + count + '</span>' +
+            '</button>';
+        }
         
         html += 
           '<div class="spill-card">' +
@@ -669,13 +862,8 @@
               '<span class="spill-mood" style="color: ' + moodColor + '">' + spill.mood + '</span>' +
             '</div>' +
             '<div class="spill-content">' + escapeHtml(spill.content) + '</div>' +
-            '<div class="spill-actions">' +
-              '<button class="spill-action" onclick="reactToSpill(\'' + spill.id + '\', \'relatable\')">' +
-                '💯 ' + relatableCount +
-              '</button>' +
-              '<button class="spill-action" onclick="reactToSpill(\'' + spill.id + '\', \'hug\')">' +
-                '🤗 ' + hugCount +
-              '</button>' +
+            '<div class="spill-reactions">' +
+              reactionsHtml +
             '</div>' +
           '</div>';
       }
@@ -734,8 +922,56 @@
       renderSpills();
     }
 
-    function reactToSpill(spillId, reaction) {
-      showToast('Reacted ' + reaction + '!');
+    // ============================================
+    // REACTION - Save to Supabase
+    // ============================================
+    async function reactToSpill(spillId, reactionType) {
+      // Optimistic update
+      const countEl = document.getElementById('count-' + spillId + '-' + reactionType);
+      if (countEl) {
+        countEl.textContent = parseInt(countEl.textContent) + 1;
+      }
+      
+      // Update local state
+      if (!state.reactions[spillId]) {
+        state.reactions[spillId] = {};
+      }
+      if (!state.reactions[spillId][reactionType]) {
+        state.reactions[spillId][reactionType] = 0;
+      }
+      state.reactions[spillId][reactionType]++;
+      
+      showToast('Reaksi tersimpan!');
+      
+      // Save to Supabase if online
+      if (state.isOnline && state.supabase) {
+        try {
+          const { data: { user } } = await state.supabase.auth.getUser();
+          
+          const reactionData = {
+            spill_id: spillId,
+            reaction_type: reactionType,
+            created_at: new Date().toISOString()
+          };
+          
+          // Add user_id if logged in
+          if (user) {
+            reactionData.user_id = user.id;
+          }
+          
+          const { error } = await state.supabase
+            .from('reactions')
+            .insert(reactionData);
+          
+          if (error) {
+            console.error('Failed to save reaction:', error);
+          } else {
+            console.log('Reaction saved to Supabase');
+          }
+        } catch (e) {
+          console.error('Error saving reaction:', e);
+        }
+      }
     }
 
     function createNewSpill() {
