@@ -21,8 +21,8 @@
     body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.4}
     .wrapper{max-width:480px;margin:0 auto;padding:0 var(--space-md)}
     
-    /* HEADER - FILTER CONTROLS REMOVED */
-    header{padding:var(--space-lg) 0 var(--space-md);display:flex;justify-content:space-between;align-items:flex-start}
+    /* HEADER - MINIMALIS */
+    header{padding:var(--space-lg) 0 var(--space-md);display:flex;justify-content:space-between;align-items:flex-start;position:relative}
     .logo{font-size:42px;font-weight:800;letter-spacing:-0.04em;cursor:pointer;line-height:0.9;position:relative}
     .logo::before,.logo::after{content:'JEJAK';position:absolute;top:0;left:0;opacity:0;transition:opacity 0.1s}
     .logo::before{color:var(--accent-secondary);transform:translate(-2px,0)}
@@ -30,12 +30,24 @@
     .logo:hover::before{opacity:0.8;animation:g 0.3s infinite}
     @keyframes g{0%,100%{transform:translate(-2px,0)}25%{transform:translate(2px,2px)}50%{transform:translate(-2px,-2px)}75%{transform:translate(2px,0)}}
     .tagline{font-family:'Instrument Serif',serif;font-size:13px;color:var(--text-secondary);font-style:italic;margin-top:var(--space-xs)}
-    .top-right{display:flex;flex-direction:column;align-items:flex-end;gap:var(--space-sm)}
-    .sync-status{font-size:10px;color:var(--text-muted);display:flex;align-items:center;gap:4px}
-    .sync-status::before{content:'•'}
-    .sync-status.online{color:var(--accent-quaternary)}
-    .sync-status.offline{color:var(--accent-tertiary)}
-    .sync-status.syncing{color:var(--accent-warm)}
+    
+    /* Top Right - Minimalis */
+    .top-right{display:flex;align-items:center;gap:var(--space-sm)}
+    
+    /* Online Indicator - Titik hijau blinking only */
+    .online-dot{width:8px;height:8px;background:var(--accent-quaternary);border-radius:50%;animation:blink 2s infinite;flex-shrink:0}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+    .online-dot.offline{background:var(--accent-tertiary);animation:none}
+    
+    /* Settings Menu (3 dots) */
+    .settings-menu{position:relative}
+    .menu-trigger{width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:transparent;border:none;cursor:pointer;padding:0}
+    .menu-trigger span{width:4px;height:4px;background:var(--text);border-radius:50%;transition:all 0.2s}
+    .menu-trigger:hover span{background:var(--accent-primary)}
+    .menu-dropdown{position:absolute;top:100%;right:0;margin-top:var(--space-sm);background:var(--surface);border:2px solid var(--border);min-width:120px;display:none;z-index:100}
+    .menu-dropdown.active{display:block}
+    .menu-item{width:100%;padding:var(--space-sm) var(--space-md);background:transparent;border:none;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;text-align:left;cursor:pointer;transition:all 0.2s}
+    .menu-item:hover{background:var(--surface-elevated);color:var(--accent-primary)}
     
     /* NAVIGATION */
     .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:2px solid var(--border);z-index:1000;padding-bottom:env(safe-area-inset-bottom)}
@@ -121,26 +133,12 @@
     .spill-status.spilled{color:var(--accent-secondary)}
     .fifo-indicator{font-size:9px;color:var(--text-muted);background:var(--surface-elevated);padding:2px 6px;border:1px dashed var(--border);text-transform:uppercase;letter-spacing:0.05em}
     
-    /* Empathy Text */
+    /* Empathy Text - HANYA INI YANG TAMPIL */
     .empathy-text{font-family:'Caveat',cursive;font-size:19px;color:var(--text);text-align:center;padding:var(--space-md);background:var(--surface-elevated);border-top:1px solid var(--border);line-height:1.3;font-weight:700;letter-spacing:0.02em}
     .empathy-highlight{color:var(--accent-primary);font-size:24px;font-weight:700}
     
-    /* Vibe Bar */
-    .vibe-bar{display:flex;border-top:1px solid var(--border);background:var(--surface-elevated)}
-    .vibe-bar.locked{opacity:0.35;pointer-events:none;position:relative}
-    .vibe-bar.locked::after{content:'🔒 Tidak bisa react rant sendiri';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.85);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);font-family:'Plus Jakarta Sans',sans-serif}
-    .vibe-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:var(--space-sm) 4px;background:transparent;border:none;border-right:1px solid var(--border);color:var(--text-secondary);cursor:pointer;transition:all 0.15s;position:relative}
-    .vibe-btn:last-child{border-right:none}
-    .vibe-btn:hover:not(:disabled){background:var(--surface);color:var(--text)}
-    .vibe-btn.vibed{background:var(--surface)}
-    .vibe-btn.vibed .vibe-emoji{filter:none;transform:scale(1.15);text-shadow:0 0 10px currentColor}
-    .vibe-btn.vibed .vibe-count{color:var(--text);font-weight:700}
-    .vibe-btn:disabled{opacity:0.5;cursor:not-allowed}
-    .vibe-emoji{font-size:24px;line-height:1;filter:grayscale(0.4);transition:all 0.2s}
-    .vibe-btn:hover:not(:disabled) .vibe-emoji{filter:none;transform:scale(1.1)}
-    .vibe-count{font-size:11px;font-weight:600;color:var(--text-muted);min-width:20px;text-align:center}
-    .vibe-label{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(4px);background:var(--text);color:var(--bg);padding:6px 10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;white-space:nowrap;opacity:0;visibility:hidden;transition:all 0.2s;pointer-events:none}
-    .vibe-btn:hover:not(:disabled) .vibe-label{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0)}
+    /* Vibe Bar - EMOJI DISembunyikan, hanya notasi empatik */
+    .vibe-bar{display:none} /* Sembunyikan seluruh vibe bar */
     
     /* Tray */
     .tray-section{margin-bottom:var(--space-xl)}
@@ -197,15 +195,13 @@
     @keyframes s{to{transform:rotate(360deg)}}
     .processing-text{font-size:14px;color:var(--text-secondary);text-align:center}
     
-    /* MODAL - ENHANCED WITH THEME SLIDER & NOTATION */
+    /* MODAL */
     .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:10001;padding:var(--space-md);overflow-y:auto}
     .modal.active{display:block}
     .modal-content{max-width:480px;margin:0 auto;background:var(--surface);border:2px solid var(--border);padding:var(--space-lg)}
     .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-md);padding-bottom:var(--space-md);border-bottom:2px solid var(--border)}
     .modal-title{font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em}
     .modal-close{background:none;border:none;color:var(--text);font-size:24px;cursor:pointer}
-    
-    /* Gallery Grid */
     .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-sm);margin-bottom:var(--space-md)}
     .gallery-item{aspect-ratio:1;background:var(--surface-elevated);border:2px solid var(--border);cursor:pointer;overflow:hidden;position:relative}
     .gallery-item img{width:100%;height:100%;object-fit:cover;transition:all 0.2s}
@@ -213,7 +209,7 @@
     .gallery-item.selected{border-color:var(--accent-primary);box-shadow:0 0 0 2px var(--accent-primary)}
     .gallery-item.selected::after{content:'✓';position:absolute;top:4px;right:4px;background:var(--accent-primary);color:var(--bg);width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
     
-    /* THEME SLIDER IN MODAL */
+    /* Theme Slider */
     .theme-section{margin:var(--space-md) 0;padding:var(--space-md);background:var(--surface-elevated);border:2px solid var(--border)}
     .theme-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-sm)}
     .theme-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-secondary)}
@@ -222,7 +218,7 @@
     .theme-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--accent-primary);cursor:pointer;border:2px solid var(--text);box-shadow:2px 2px 0 var(--bg)}
     .theme-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--text-muted);font-weight:600;text-transform:uppercase}
     
-    /* NOTATION INPUT IN MODAL */
+    /* Notation Input */
     .notation-section{margin:var(--space-md) 0;padding:var(--space-md);background:var(--surface-elevated);border:2px solid var(--border)}
     .notation-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-secondary);margin-bottom:var(--space-sm);display:flex;justify-content:space-between}
     .notation-count{font-size:10px;color:var(--text-muted)}
@@ -230,7 +226,6 @@
     .notation-input:focus{outline:none;border-color:var(--accent-primary);background:var(--surface-elevated)}
     .notation-input::placeholder{color:var(--text-muted);font-size:12px}
     
-    /* Gallery Warning */
     .gallery-warning{background:var(--accent-tertiary);color:var(--text);padding:var(--space-md);margin-bottom:var(--space-md);font-size:13px;font-weight:700;text-align:center;text-transform:uppercase;letter-spacing:0.05em;border:2px solid var(--accent-tertiary);animation:pw 2s infinite}
     @keyframes pw{0%,100%{opacity:1}50%{opacity:0.8}}
     .gallery-warning::before{content:'🚫 '}
@@ -248,14 +243,23 @@
         <div class="logo" onclick="location.reload()">JEJAK</div>
         <div class="tagline">no filter, just truth</div>
       </div>
+      
+      <!-- Top Right: Dot + Settings Menu -->
       <div class="top-right">
-        <div style="font-size:12px;font-weight:700;color:var(--accent-primary);letter-spacing:0.05em" id="header-username">@loading...</div>
-        <div class="sync-status offline" id="sync-status">Offline</div>
-        <button onclick="logoutUser()" style="font-size:10px;background:none;border:1px solid var(--border);color:var(--text-muted);padding:3px 8px;cursor:pointer">logout</button>
+        <div class="online-dot offline" id="online-dot" title="Offline"></div>
+        
+        <div class="settings-menu">
+          <button class="menu-trigger" onclick="toggleMenu()" title="Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <div class="menu-dropdown" id="menu-dropdown">
+            <button class="menu-item" onclick="logoutUser()">Logout</button>
+          </div>
+        </div>
       </div>
     </header>
-
-    <!-- FILTER CONTROLS REMOVED FROM HERE - MOVED TO MODAL -->
 
     <section class="hero-section">
       <div class="hero" id="hero-container">
@@ -344,7 +348,7 @@
     <div class="processing-text">Scanning untuk wajah...<br><small>AI Privacy Shield Active</small></div>
   </div>
 
-  <!-- ENHANCED GALLERY MODAL WITH THEME SLIDER & NOTATION -->
+  <!-- MODAL -->
   <div class="modal" id="gallery-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -358,10 +362,8 @@
         Wajah terdeteksi akan otomatis disensor • Sistem FIFO (6 foto max) • Tidak dapat dihapus
       </div>
       
-      <!-- Photo Grid -->
       <div class="gallery-grid" id="gallery-grid"></div>
       
-      <!-- THEME SLIDER SECTION -->
       <div class="theme-section">
         <div class="theme-header">
           <span class="theme-label">🎨 Tema Foto</span>
@@ -376,7 +378,6 @@
         </div>
       </div>
       
-      <!-- NOTATION INPUT SECTION -->
       <div class="notation-section">
         <div class="notation-label">
           <span>📝 Notasi (Max 4 kata)</span>
@@ -487,8 +488,8 @@
       artefacts: [],
       userVibes: new Set(),
       selectedFiles: new Set(),
-      currentTheme: 0, // Theme index for modal
-      notationText: '', // Notation text
+      currentTheme: 0,
+      notationText: '',
       colorMode: false,
       faceApiLoaded: false,
       supabase: null,
@@ -539,6 +540,9 @@
       state.artefacts = realArtefacts;
       saveArtefacts();
       renderTray();
+      
+      // FIX: Update hero immediately with new artefact
+      setHero(newArtefact.url, newArtefact.note, newArtefact.faces, 'filter-' + (newArtefact.theme || 'monochrome').toLowerCase());
     }
 
     // ============================================
@@ -547,24 +551,29 @@
     function initSupabase() {
       try {
         if (typeof supabase === 'undefined') {
-          updateSyncStatus('offline', 'Offline mode');
+          updateOnlineStatus(false);
           return false;
         }
         state.supabase = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
         state.isOnline = true;
-        updateSyncStatus('online', 'Terhubung');
+        updateOnlineStatus(true);
         subscribeToChanges();
         return true;
       } catch (e) {
-        updateSyncStatus('offline', 'Offline mode');
+        updateOnlineStatus(false);
         return false;
       }
     }
 
-    function updateSyncStatus(status, text) {
-      const el = document.getElementById('sync-status');
-      el.className = 'sync-status ' + status;
-      el.textContent = text;
+    function updateOnlineStatus(online) {
+      const dot = document.getElementById('online-dot');
+      if (online) {
+        dot.classList.remove('offline');
+        dot.title = 'Online';
+      } else {
+        dot.classList.add('offline');
+        dot.title = 'Offline';
+      }
     }
 
     function subscribeToChanges() {
@@ -657,10 +666,8 @@
         author: state.currentUser
       };
 
-      // Save locally first
       addEntryFIFO(entry);
       
-      // Try to sync with Supabase
       if (state.isOnline && state.supabase) {
         try {
           const { error } = await state.supabase
@@ -676,7 +683,6 @@
           
           if (error) throw error;
           
-          // Mark as spilled
           entry.isSpilled = true;
           updateEntry(rantId, { isSpilled: true });
           showToast('✓ Spill synced to cloud');
@@ -690,7 +696,6 @@
         queueForSync('rant', entry);
       }
       
-      // Clear input
       document.getElementById('rant-input').value = '';
       document.getElementById('char-count').textContent = '0/500';
       selectMood('surviving');
@@ -760,7 +765,7 @@
       const div = document.createElement('div');
       div.className = 'face-scribble';
       
-      const scaleX = containerWidth / 416; // Based on inputSize
+      const scaleX = containerWidth / 416;
       const scaleY = containerHeight / (416 * (containerHeight/containerWidth));
       
       const x = face.box.x * scaleX;
@@ -773,7 +778,6 @@
       div.style.width = w + 'px';
       div.style.height = h + 'px';
       
-      // Add marker lines effect
       const marker = document.createElement('div');
       marker.className = 'marker-lines';
       div.appendChild(marker);
@@ -812,7 +816,6 @@
       const windowDuration = CONFIG.uploadWindowDays * 24 * 60 * 60 * 1000;
       
       if (elapsed > windowDuration) {
-        // Reset window
         state.quotaStart = Date.now();
         state.uploadsThisWindow = 0;
         localStorage.setItem(STORAGE_PREFIX + 'quota_start', state.quotaStart);
@@ -860,14 +863,12 @@
       const files = Array.from(e.target.files);
       if (files.length === 0) return;
       
-      // Check total size
       const totalSize = files.reduce((sum, f) => sum + f.size, 0);
       if (totalSize > CONFIG.maxFileSize * 2) {
         showToast('⚠ Total file terlalu besar (max 10MB)');
         return;
       }
       
-      // Process each file
       const processedFiles = [];
       for (const file of files.slice(0, CONFIG.maxSelection)) {
         const faces = await detectFaces(file);
@@ -906,7 +907,6 @@
         grid.appendChild(div);
       });
       
-      // Reset theme slider and notation
       document.getElementById('theme-slider').value = 0;
       document.getElementById('theme-name').textContent = THEMES[0].name;
       document.getElementById('notation-input').value = '';
@@ -915,7 +915,6 @@
       
       document.getElementById('gallery-modal').classList.add('active');
       
-      // Store files for later
       state.pendingFiles = files;
     }
 
@@ -939,13 +938,10 @@
       const theme = THEMES[state.currentTheme];
       document.getElementById('theme-name').textContent = theme.name;
       
-      // Update all previews
       state.pendingFiles.forEach((_, idx) => {
         const img = document.getElementById(`preview-${idx}`);
         if (img) {
-          // Remove all filter classes
           img.className = '';
-          // Add new filter
           img.classList.add(theme.filter);
         }
       });
@@ -979,13 +975,11 @@
       const theme = THEMES[state.currentTheme];
       const notation = state.notationText || 'memory';
       
-      // Process selected files
       for (const idx of state.selectedFiles) {
         const item = state.pendingFiles[idx];
         await processAndUploadArtefact(item, theme, notation);
       }
       
-      // Update quota
       state.uploadsThisWindow += state.selectedFiles.size;
       localStorage.setItem(STORAGE_PREFIX + 'uploads_count', state.uploadsThisWindow.toString());
       updateQuotaDisplay();
@@ -997,7 +991,6 @@
     async function processAndUploadArtefact(item, theme, notation) {
       const artefactId = crypto.randomUUID();
       
-      // Create canvas for processing
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       const img = new Image();
@@ -1010,15 +1003,12 @@
       canvas.width = img.width;
       canvas.height = img.height;
       
-      // Apply filter via CSS-like canvas operations
       ctx.filter = getCanvasFilter(theme.filter);
       ctx.drawImage(img, 0, 0);
       
-      // Convert to blob
       const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
       
-      // Upload to Supabase Storage if online
-      let publicUrl = item.preview; // fallback
+      let publicUrl = item.preview;
       
       if (state.isOnline && state.supabase) {
         try {
@@ -1037,7 +1027,6 @@
           
           publicUrl = url;
           
-          // Save metadata to DB
           await state.supabase.from('artefacts').insert({
             id: artefactId,
             url: publicUrl,
@@ -1051,11 +1040,9 @@
           
         } catch (e) {
           console.error('Upload failed:', e);
-          // Save locally for later sync
         }
       }
       
-      // Add to local state
       const artefact = {
         id: artefactId,
         url: publicUrl,
@@ -1068,11 +1055,6 @@
       };
       
       addArtefactFIFO(artefact);
-      
-      // Set as hero if first
-      if (state.artefacts.filter(a => !a.isDummy).length === 1) {
-        setHero(publicUrl, notation, item.faces, theme.filter);
-      }
     }
 
     function getCanvasFilter(filterClass) {
@@ -1118,7 +1100,6 @@
                        date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
         
         const isDummy = entry.isDummy || entry.id.startsWith('__d');
-        const isOwnRant = entry.author === state.currentUser && !isDummy;
         
         // Get top vibe for empathy text
         const topVibe = getTopVibe(entry.vibes, entry.id);
@@ -1147,17 +1128,7 @@
               ${entry.isSpilled ? '✓ Synced to cloud' : '⏳ Pending sync'}
             </div>
             ${empathyHTML}
-            <div class="vibe-bar ${isOwnRant ? 'locked' : ''}">
-              ${Object.entries(VIBES).map(([key, vibe]) => `
-                <button class="vibe-btn ${(entry.vibes?.[key] > 0) ? 'vibed' : ''}" 
-                  onclick="${isOwnRant || isDummy ? '' : `addVibe('${entry.id}', '${key}')`}" 
-                  ${isOwnRant || isDummy ? 'disabled' : ''}>
-                  <span class="vibe-emoji">${vibe.emoji}</span>
-                  <span class="vibe-count">${entry.vibes?.[key] || 0}</span>
-                  <span class="vibe-label">${vibe.label}</span>
-                </button>
-              `).join('')}
-            </div>
+            <!-- Vibe bar hidden, only empathy text shown -->
           </article>
         `;
       }).join('');
@@ -1194,7 +1165,7 @@
         
         return `
           <div class="tray-item ${isDummy ? 'tray-item-dummy' : ''}" onclick="setHeroFromTray('${art.id}')" style="position:relative">
-            <img src="${art.url}" alt="${art.note}" class="${art.theme ? art.filter || 'filter-' + art.theme.toLowerCase() : 'filter-monochrome'}">
+            <img src="${art.url}" alt="${art.note}" class="${art.theme ? 'filter-' + art.theme.toLowerCase() : 'filter-monochrome'}">
             ${art.hasFace ? '<span class="detection-badge">SENSORED</span>' : ''}
           </div>
         `;
@@ -1214,7 +1185,6 @@
       heroImg.className = filterClass;
       heroNotation.textContent = `"${note}"`;
       
-      // Clear and redraw face scribbles
       heroFaces.innerHTML = '';
       if (faces && faces.length > 0) {
         faces.forEach(face => {
@@ -1241,35 +1211,6 @@
       });
     }
 
-    async function addVibe(entryId, vibeType) {
-      if (state.userVibes.has(entryId + '-' + vibeType)) {
-        showToast('Kamu sudah memberi vibe ini');
-        return;
-      }
-      
-      state.userVibes.add(entryId + '-' + vibeType);
-      
-      const entry = state.entries.find(e => e.id === entryId);
-      if (!entry) return;
-      
-      entry.vibes[vibeType] = (entry.vibes[vibeType] || 0) + 1;
-      updateEntry(entryId, { vibes: entry.vibes });
-      
-      // Sync to DB if online
-      if (state.isOnline && state.supabase && !entryId.startsWith('__')) {
-        try {
-          await state.supabase
-            .from('rants')
-            .update({ vibes: entry.vibes })
-            .eq('id', entryId);
-        } catch (e) {
-          console.error('Vibe sync failed:', e);
-        }
-      }
-      
-      showToast(`+1 ${VIBES[vibeType].label}`);
-    }
-
     function escapeHtml(text) {
       const div = document.createElement('div');
       div.textContent = text;
@@ -1282,6 +1223,31 @@
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
+
+    // ============================================
+    // MENU & AUTH
+    // ============================================
+    function toggleMenu() {
+      const menu = document.getElementById('menu-dropdown');
+      menu.classList.toggle('active');
+    }
+
+    function logoutUser() {
+      if (!confirm('Yakin mau logout?')) return;
+      localStorage.removeItem('jejak_username');
+      localStorage.removeItem('jejak_user_id');
+      localStorage.removeItem('jejak_logged_in');
+      location.href = 'index.html';
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      const menu = document.getElementById('menu-dropdown');
+      const trigger = document.querySelector('.menu-trigger');
+      if (!menu.contains(e.target) && !trigger.contains(e.target)) {
+        menu.classList.remove('active');
+      }
+    });
 
     // ============================================
     // STORAGE HELPERS
@@ -1307,51 +1273,33 @@
     }
 
     // ============================================
-    // AUTH
-    // ============================================
-    function logoutUser() {
-      if (!confirm('Yakin mau logout?')) return;
-      localStorage.removeItem('jejak_username');
-      localStorage.removeItem('jejak_user_id');
-      localStorage.removeItem('jejak_logged_in');
-      location.href = 'index.html';
-    }
-
-    // ============================================
     // INITIALIZATION
     // ============================================
     document.addEventListener('DOMContentLoaded', () => {
-      // Update UI
       document.getElementById('header-username').textContent = state.currentUser;
       
-      // Load saved data
       loadFromStorage();
-      
-      // Initialize systems
       initSupabase();
       loadFaceApiModels();
       initUploadSystem();
       
-      // Render
       renderEntries();
       renderTray();
       updateQuotaDisplay();
       
-      // Load from cloud
       if (state.isOnline) {
         loadUserRantsFromDB();
         loadUserArtefactsFromDB();
       }
       
-      // Set initial hero
+      // Set initial hero - prioritize real artefacts
       const firstReal = state.artefacts.find(a => !a.isDummy);
       if (firstReal) {
-        setHero(firstReal.url, firstReal.note, firstReal.faces);
+        setHero(firstReal.url, firstReal.note, firstReal.faces, firstReal.theme ? 'filter-' + firstReal.theme.toLowerCase() : 'filter-monochrome');
       } else if (DUMMY_ARTEFACTS[0]) {
         setHero(DUMMY_ARTEFACTS[0].url, DUMMY_ARTEFACTS[0].note, DUMMY_ARTEFACTS[0].faces);
       }
       
-      // Input listeners
       const rantInput = document.getElementById('rant-input');
       const charCount = document.getElementById('char-count');
       
@@ -1365,7 +1313,6 @@
         }
       });
       
-      // Submit handler
       document.getElementById('submit-btn').addEventListener('click', () => {
         const content = rantInput.value.trim();
         if (!content) {
@@ -1375,7 +1322,6 @@
         submitRant(content, state.currentMood);
       });
       
-      // Periodic quota update
       setInterval(updateQuotaDisplay, 60000);
     });
   </script>
