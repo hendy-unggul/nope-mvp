@@ -6,7 +6,7 @@
   <title>Spill the Tea</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta Sans:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
     
     :root {
       --bg: #0A0A0A;
@@ -280,10 +280,23 @@
       color: var(--text-secondary);
       cursor: pointer;
       transition: color 0.2s;
+      position: relative;
     }
     
     .spill-author:hover {
       color: var(--accent);
+    }
+    
+    .spill-author.locked::after {
+      content: '🔒';
+      margin-left: 6px;
+      font-size: 10px;
+    }
+    
+    .spill-author.unlocked::after {
+      content: '👁️';
+      margin-left: 6px;
+      font-size: 10px;
     }
     
     .spill-mood {
@@ -478,7 +491,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.9);
+      background: rgba(0, 0, 0, 0.95);
       backdrop-filter: blur(10px);
       z-index: 20000;
       opacity: 0;
@@ -538,6 +551,18 @@
       padding: 32px;
       background: var(--surface);
       border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .peaking-profile::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
     }
     
     .peaking-avatar {
@@ -551,6 +576,23 @@
       align-items: center;
       justify-content: center;
       font-size: 32px;
+      position: relative;
+    }
+    
+    .peaking-avatar::after {
+      content: '👁️';
+      position: absolute;
+      bottom: -5px;
+      right: -5px;
+      background: var(--accent);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      border: 2px solid var(--bg);
     }
     
     .peaking-username {
@@ -579,6 +621,9 @@
       margin-bottom: 16px;
       padding-bottom: 8px;
       border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     
     .peaking-rants {
@@ -591,6 +636,11 @@
       background: var(--surface);
       border: 1px solid var(--border);
       padding: 16px;
+      transition: all 0.2s;
+    }
+    
+    .peaking-rant-card:hover {
+      border-color: var(--accent);
     }
     
     .peaking-rant-date {
@@ -598,12 +648,14 @@
       color: var(--text-muted);
       margin-bottom: 8px;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
     
     .peaking-rant-content {
       font-size: 14px;
-      line-height: 1.5;
-      color: var(--text-secondary);
+      line-height: 1.6;
+      color: var(--text);
+      margin-bottom: 12px;
     }
     
     .peaking-rant-mood {
@@ -611,11 +663,10 @@
       font-size: 10px;
       padding: 4px 8px;
       border: 1px solid var(--border);
-      margin-top: 12px;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
     
-    /* Artefact Tray */
     .artefact-tray {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -629,16 +680,17 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
+      font-size: 28px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s;
       position: relative;
       overflow: hidden;
     }
     
     .artefact-item:hover {
       border-color: var(--accent);
-      transform: scale(1.05);
+      transform: translateY(-4px);
+      box-shadow: 0 4px 20px rgba(255, 77, 0, 0.3);
     }
     
     .artefact-item img {
@@ -657,12 +709,14 @@
       padding: 24px;
       border: 1px dashed var(--border);
       margin-bottom: 24px;
+      background: var(--surface);
     }
     
     .peaking-hint-text {
       font-size: 12px;
       color: var(--text-secondary);
       font-style: italic;
+      line-height: 1.6;
     }
     
     .reaction-unlock {
@@ -676,6 +730,7 @@
       font-weight: 700;
       text-transform: uppercase;
       margin-top: 16px;
+      letter-spacing: 0.05em;
     }
   </style>
 </head>
@@ -762,14 +817,20 @@
       </div>
       
       <div class="peaking-section">
-        <h3 class="peaking-section-title">📦 Artefact Tray</h3>
+        <h3 class="peaking-section-title">
+          <span>📦</span>
+          <span>Artefact Tray</span>
+        </h3>
         <div class="artefact-tray" id="peaking-artefacts">
           <!-- Artefacts loaded here -->
         </div>
       </div>
       
       <div class="peaking-section">
-        <h3 class="peaking-section-title">📝 All Rants</h3>
+        <h3 class="peaking-section-title">
+          <span>📝</span>
+          <span>All Rants</span>
+        </h3>
         <div class="peaking-rants" id="peaking-rants">
           <!-- Rants loaded here -->
         </div>
@@ -816,6 +877,9 @@
       peakingUserId: null
     };
 
+    // Track unlocked users for peaking
+    const unlockedUsers = new Set();
+
     const EMOJI_REACTIONS = [
       { id: 'relatable', emoji: '💯', label: 'Relatable' },
       { id: 'hug', emoji: '🤗', label: 'Hug' },
@@ -858,7 +922,6 @@
       }
     ];
 
-    // Dummy artefacts for peaking
     const DUMMY_ARTEFACTS = [
       { id: 1, emoji: '📷', type: 'photo' },
       { id: 2, emoji: '🎧', type: 'object' },
@@ -947,6 +1010,7 @@
             state.spills = DUMMY_SPILLS.filter(s => s.user_id !== state.currentUserId);
           }
         } catch (e) {
+          console.error('Load error:', e);
           state.spills = DUMMY_SPILLS.filter(s => s.user_id !== state.currentUserId);
           showToast('Gagal memuat data, menampilkan contoh');
         }
@@ -1044,6 +1108,7 @@
       for (let i = 0; i < filtered.length; i++) {
         const spill = filtered[i];
         const moodColor = getMoodColor(spill.mood);
+        const isUnlocked = unlockedUsers.has(spill.user_id);
         
         let reactionsHtml = '';
         for (let j = 0; j < EMOJI_REACTIONS.length; j++) {
@@ -1055,8 +1120,9 @@
             count = spill.reactions[reaction.id];
           }
           
+          // Pass user_id and author to reactToSpill
           reactionsHtml += 
-            '<button class="reaction-btn" onclick="reactToSpill(\'' + spill.rant_id + '\', \'' + reaction.id + '\', \'' + spill.user_id + '\', \'' + spill.author + '\')">' +
+            '<button class="reaction-btn" onclick="reactToSpill(\'' + spill.rant_id + '\', \'' + reaction.id + '\', \'' + (spill.user_id || '') + '\', \'' + (spill.author || '@anonymous') + '\')">' +
               '<span class="reaction-emoji">' + reaction.emoji + '</span>' +
               '<span class="reaction-count" id="count-' + spill.rant_id + '-' + reaction.id + '">' + count + '</span>' +
             '</button>';
@@ -1065,7 +1131,7 @@
         html += 
           '<div class="spill-card">' +
             '<div class="spill-header">' +
-              '<span class="spill-author" onclick="peakUser(\'' + spill.user_id + '\', \'' + spill.author + '\')">' + escapeHtml(spill.author) + '</span>' +
+              '<span class="spill-author ' + (isUnlocked ? 'unlocked' : 'locked') + '" onclick="peakUser(\'' + (spill.user_id || '') + '\', \'' + (spill.author || '@anonymous') + '\')">' + escapeHtml(spill.author) + '</span>' +
               '<span class="spill-mood" style="color: ' + moodColor + '">' + spill.mood + '</span>' +
             '</div>' +
             '<div class="spill-content">' + escapeHtml(spill.content) + '</div>' +
@@ -1090,10 +1156,9 @@
     // PEAKING FUNCTIONALITY
     // ============================================
     
-    // Track which users have been unlocked via reaction
-    const unlockedUsers = new Set();
-    
     async function reactToSpill(rantId, reactionType, userId, author) {
+      console.log('Reacting to:', rantId, 'User:', userId, 'Author:', author);
+      
       // Optimistic update
       const countEl = document.getElementById('count-' + rantId + '-' + reactionType);
       if (countEl) {
@@ -1109,25 +1174,20 @@
       state.reactions[rantId][reactionType]++;
       
       // Unlock user for peaking
-      if (userId && !unlockedUsers.has(userId)) {
+      if (userId && userId !== 'null' && userId !== 'undefined' && !unlockedUsers.has(userId)) {
         unlockedUsers.add(userId);
         showToast('🔓 Peaking unlocked! Click username to view their profile.');
+        renderSpills(); // Re-render to update lock icon
       }
       
       // Save to Supabase
       if (state.isOnline && state.supabase) {
         try {
-          const { data: { user } } = await state.supabase.auth.getUser();
-          
           const reactionData = {
             rant_id: rantId,
             reaction_type: reactionType,
             created_at: new Date().toISOString()
           };
-          
-          if (user) {
-            reactionData.user_id = user.id;
-          }
           
           const { error } = await state.supabase
             .from('reactions')
@@ -1135,6 +1195,8 @@
           
           if (error) {
             console.error('Failed to save reaction:', error);
+          } else {
+            console.log('Reaction saved successfully');
           }
         } catch (e) {
           console.error('Error saving reaction:', e);
@@ -1143,6 +1205,13 @@
     }
     
     async function peakUser(userId, author) {
+      console.log('Peaking user:', userId, 'Author:', author);
+      
+      if (!userId || userId === 'null' || userId === 'undefined') {
+        showToast('Cannot peak: User ID not available');
+        return;
+      }
+      
       // Check if user is unlocked
       if (!unlockedUsers.has(userId)) {
         showToast('🔒 React to their rant first to unlock peaking!');
@@ -1166,7 +1235,7 @@
       const rantsContainer = document.getElementById('peaking-rants');
       const artefactsContainer = document.getElementById('peaking-artefacts');
       
-      rantsContainer.innerHTML = '<div class="loading-text">Loading...</div>';
+      rantsContainer.innerHTML = '<div class="loading-text">Loading profile...</div>';
       artefactsContainer.innerHTML = '';
       
       if (state.isOnline && state.supabase) {
@@ -1180,7 +1249,7 @@
           
           if (rantsError) throw rantsError;
           
-          // Load user's artefacts (assuming there's an artefacts table)
+          // Load user's artefacts
           const { data: artefacts, error: artefactsError } = await state.supabase
             .from('artefacts')
             .select('*')
@@ -1191,9 +1260,14 @@
           if (rants && rants.length > 0) {
             rantsContainer.innerHTML = rants.map(rant => `
               <div class="peaking-rant-card">
-                <div class="peaking-rant-date">${new Date(rant.created_at).toLocaleDateString('id-ID')}</div>
+                <div class="peaking-rant-date">${new Date(rant.created_at).toLocaleDateString('id-ID', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}</div>
                 <div class="peaking-rant-content">${escapeHtml(rant.content)}</div>
-                <span class="peaking-rant-mood" style="color: ${getMoodColor(rant.mood)}">${rant.mood}</span>
+                <span class="peaking-rant-mood" style="color: ${getMoodColor(rant.mood)}; border-color: ${getMoodColor(rant.mood)}">${rant.mood}</span>
               </div>
             `).join('');
           } else {
@@ -1201,47 +1275,46 @@
           }
           
           // Render artefacts
-          const artefactsToShow = artefacts || DUMMY_ARTEFACTS;
-          if (artefactsToShow.length > 0) {
-            artefactsContainer.innerHTML = artefactsToShow.map((art, idx) => `
-              <div class="artefact-item" title="Artefact ${idx + 1}">
-                ${art.emoji || art.icon || '📦'}
-              </div>
-            `).join('');
-          } else {
-            artefactsContainer.innerHTML = '<div class="empty-text">No artefacts yet...</div>';
-          }
+          const artefactsToShow = artefacts && artefacts.length > 0 ? artefacts : DUMMY_ARTEFACTS;
+          artefactsContainer.innerHTML = artefactsToShow.map((art, idx) => `
+            <div class="artefact-item" title="${art.name || 'Artefact ' + (idx + 1)}">
+              ${art.emoji || art.icon || '📦'}
+            </div>
+          `).join('');
           
         } catch (e) {
           console.error('Error loading peaking data:', e);
-          // Fallback to dummy data
-          renderDummyPeakingData();
+          renderDummyPeakingData(userId);
         }
       } else {
-        renderDummyPeakingData();
+        renderDummyPeakingData(userId);
       }
     }
     
-    function renderDummyPeakingData() {
+    function renderDummyPeakingData(userId) {
       const rantsContainer = document.getElementById('peaking-rants');
       const artefactsContainer = document.getElementById('peaking-artefacts');
       
-      // Dummy rants
-      const dummyUserRants = DUMMY_SPILLS.filter(s => s.user_id === state.peakingUserId || Math.random() > 0.5);
+      // Filter dummy rants for this user or show all as fallback
+      const userRants = DUMMY_SPILLS.filter(s => s.user_id === userId);
       
-      if (dummyUserRants.length > 0) {
-        rantsContainer.innerHTML = dummyUserRants.map(rant => `
+      if (userRants.length > 0) {
+        rantsContainer.innerHTML = userRants.map(rant => `
           <div class="peaking-rant-card">
-            <div class="peaking-rant-date">${new Date(rant.timestamp).toLocaleDateString('id-ID')}</div>
+            <div class="peaking-rant-date">${new Date(rant.timestamp).toLocaleDateString('id-ID', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })}</div>
             <div class="peaking-rant-content">${escapeHtml(rant.content)}</div>
-            <span class="peaking-rant-mood" style="color: ${getMoodColor(rant.mood)}">${rant.mood}</span>
+            <span class="peaking-rant-mood" style="color: ${getMoodColor(rant.mood)}; border-color: ${getMoodColor(rant.mood)}">${rant.mood}</span>
           </div>
         `).join('');
       } else {
         rantsContainer.innerHTML = '<div class="empty-text">No rants yet...</div>';
       }
       
-      // Dummy artefacts
       artefactsContainer.innerHTML = DUMMY_ARTEFACTS.map((art, idx) => `
         <div class="artefact-item" title="Artefact ${idx + 1}">
           ${art.emoji}
@@ -1315,6 +1388,13 @@
     // Close peaking on escape key
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
+        closePeaking();
+      }
+    });
+    
+    // Close peaking when clicking outside
+    document.getElementById('peaking-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'peaking-modal') {
         closePeaking();
       }
     });
