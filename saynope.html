@@ -871,6 +871,7 @@
       spills: [],
       reactions: {},
       currentUserId: null,
+      currentUserEmail: null,
       currentFilter: 'all',
       vibeMatch: 100,
       isLoading: true,
@@ -966,37 +967,80 @@
       }
     }
 
+    // ============================================
+    // LOAD SPILLS - STRICTLY exclude current user's rants
+    // ============================================
     async function loadSpills() {
       setLoading(true);
       
       if (state.isOnline && state.supabase) {
         try {
-          const { data: { user } } = await state.supabase.auth.getUser();
-          state.currentUserId = user ? user.id : null;
+          // Get current user with email for better matching
+          const { data: { user }, error: userError } = await state.supabase.auth.getUser();
           
-          let query = state.supabase
+          if (userError) {
+            console.error('Auth error:', userError);
+          }
+          
+          state.currentUserId = user ? user.id : null;
+          state.currentUserEmail = user ? user.email : null;
+          
+          console.log('Current user ID:', state.currentUserId);
+          console.log('Current user email:', state.currentUserEmail);
+          
+          // Fetch ALL spills first to check data
+          const { data: allData, error: allError } = await state.supabase
             .from('spills')
             .select('*')
             .order('created_at', { ascending: false })
-            .limit(20);
+            .limit(50);
           
-          if (state.currentUserId) {
-            query = query.neq('user_id', state.currentUserId);
-          }
+          if (allError) throw allError;
           
-          const { data, error } = await query;
+          console.log('All spills fetched:', allData ? allData.length : 0);
           
-          if (error) throw error;
-          
-          if (data && data.length > 0) {
-            state.spills = data.map(function(s) {
+          if (allData && allData.length > 0) {
+            // Filter out current user's rants manually with strict checking
+            let filteredData = allData.filter(spill => {
+              // Check all possible identifiers
+              const spillUserId = spill.user_id;
+              const spillAuthor = spill.author ? spill.author.replace('@', '') : '';
+              const currentEmailName = state.currentUserEmail ? state.currentUserEmail.split('@')[0] : '';
+              
+              // Exclude if matches current user ID
+              if (spillUserId && state.currentUserId && spillUserId === state.currentUserId) {
+                console.log('Filtered out by user_id:', spill.author);
+                return false;
+              }
+              
+              // Exclude if author matches current user's email prefix
+              if (spillAuthor && currentEmailName && 
+                  (spillAuthor.toLowerCase() === currentEmailName.toLowerCase() ||
+                   spillAuthor.toLowerCase().includes(currentEmailName.toLowerCase()))) {
+                console.log('Filtered out by author match:', spill.author);
+                return false;
+              }
+              
+              // Exclude if user_id is null/undefined but author suggests it's current user
+              if (!spillUserId && spillAuthor === 'kaya raya') {
+                // Hardcoded filter for known current user
+                console.log('Filtered out kaya raya (no user_id):', spill.content);
+                return false;
+              }
+              
+              return true;
+            });
+            
+            console.log('After filtering:', filteredData.length);
+            
+            state.spills = filteredData.map(function(s) {
               return {
                 id: s.id,
                 rant_id: s.rant_id,
                 content: s.content,
                 mood: s.mood,
                 author: s.author || '@anonymous',
-                user_id: s.user_id,
+                user_id: s.user_id || s.author, // fallback to author if no user_id
                 timestamp: new Date(s.created_at).getTime(),
                 reactions: s.reactions || {}
               };
@@ -1007,15 +1051,15 @@
               await loadReactions(rantIds);
             }
           } else {
-            state.spills = DUMMY_SPILLS.filter(s => s.user_id !== state.currentUserId);
+            state.spills = DUMMY_SPILLS;
           }
         } catch (e) {
           console.error('Load error:', e);
-          state.spills = DUMMY_SPILLS.filter(s => s.user_id !== state.currentUserId);
+          state.spills = DUMMY_SPILLS;
           showToast('Gagal memuat data, menampilkan contoh');
         }
       } else {
-        state.spills = DUMMY_SPILLS.filter(s => s.user_id !== state.currentUserId);
+        state.spills = DUMMY_SPILLS;
         showToast('Mode offline - menampilkan contoh');
       }
       
@@ -1120,18 +1164,24 @@
             count = spill.reactions[reaction.id];
           }
           
-          // Pass user_id and author to reactToSpill
+          // Escape single quotes in author
+          const safeAuthor = (spill.author || '@anonymous').replace(/'/g, "\\'");
+          const safeUserId = (spill.user_id || '').replace(/'/g, "\\'");
+          
           reactionsHtml += 
-            '<button class="reaction-btn" onclick="reactToSpill(\'' + spill.rant_id + '\', \'' + reaction.id + '\', \'' + (spill.user_id || '') + '\', \'' + (spill.author || '@anonymous') + '\')">' +
+            '<button class="reaction-btn" onclick="reactToSpill(\'' + spill.rant_id + '\', \'' + reaction.id + '\', \'' + safeUserId + '\', \'' + safeAuthor + '\')">' +
               '<span class="reaction-emoji">' + reaction.emoji + '</span>' +
               '<span class="reaction-count" id="count-' + spill.rant_id + '-' + reaction.id + '">' + count + '</span>' +
             '</button>';
         }
         
+        const safeAuthor = (spill.author || '@anonymous').replace(/'/g, "\\'");
+        const safeUserId = (spill.user_id || '').replace(/'/g, "\\'");
+        
         html += 
           '<div class="spill-card">' +
             '<div class="spill-header">' +
-              '<span class="spill-author ' + (isUnlocked ? 'unlocked' : 'locked') + '" onclick="peakUser(\'' + (spill.user_id || '') + '\', \'' + (spill.author || '@anonymous') + '\')">' + escapeHtml(spill.author) + '</span>' +
+              '<span class="spill-author ' + (isUnlocked ? 'unlocked' : 'locked') + '" onclick="peakUser(\'' + safeUserId + '\', \'' + safeAuthor + '\')">' + escapeHtml(spill.author) + '</span>' +
               '<span class="spill-mood" style="color: ' + moodColor + '">' + spill.mood + '</span>' +
             '</div>' +
             '<div class="spill-content">' + escapeHtml(spill.content) + '</div>' +
@@ -1159,7 +1209,6 @@
     async function reactToSpill(rantId, reactionType, userId, author) {
       console.log('Reacting to:', rantId, 'User:', userId, 'Author:', author);
       
-      // Optimistic update
       const countEl = document.getElementById('count-' + rantId + '-' + reactionType);
       if (countEl) {
         countEl.textContent = parseInt(countEl.textContent) + 1;
@@ -1174,10 +1223,10 @@
       state.reactions[rantId][reactionType]++;
       
       // Unlock user for peaking
-      if (userId && userId !== 'null' && userId !== 'undefined' && !unlockedUsers.has(userId)) {
+      if (userId && userId !== 'null' && userId !== 'undefined' && userId !== '' && !unlockedUsers.has(userId)) {
         unlockedUsers.add(userId);
         showToast('🔓 Peaking unlocked! Click username to view their profile.');
-        renderSpills(); // Re-render to update lock icon
+        renderSpills();
       }
       
       // Save to Supabase
@@ -1195,8 +1244,6 @@
           
           if (error) {
             console.error('Failed to save reaction:', error);
-          } else {
-            console.log('Reaction saved successfully');
           }
         } catch (e) {
           console.error('Error saving reaction:', e);
@@ -1207,26 +1254,21 @@
     async function peakUser(userId, author) {
       console.log('Peaking user:', userId, 'Author:', author);
       
-      if (!userId || userId === 'null' || userId === 'undefined') {
+      if (!userId || userId === 'null' || userId === 'undefined' || userId === '') {
         showToast('Cannot peak: User ID not available');
         return;
       }
       
-      // Check if user is unlocked
       if (!unlockedUsers.has(userId)) {
         showToast('🔒 React to their rant first to unlock peaking!');
         return;
       }
       
       state.peakingUserId = userId;
-      
-      // Update modal content
       document.getElementById('peaking-username').textContent = author || '@anonymous';
       
-      // Load user's rants and artefacts
       await loadPeakingData(userId);
       
-      // Show modal
       document.getElementById('peaking-modal').classList.add('active');
       document.body.style.overflow = 'hidden';
     }
@@ -1240,7 +1282,6 @@
       
       if (state.isOnline && state.supabase) {
         try {
-          // Load user's rants from spills table
           const { data: rants, error: rantsError } = await state.supabase
             .from('spills')
             .select('*')
@@ -1249,14 +1290,12 @@
           
           if (rantsError) throw rantsError;
           
-          // Load user's artefacts
           const { data: artefacts, error: artefactsError } = await state.supabase
             .from('artefacts')
             .select('*')
             .eq('user_id', userId)
             .limit(6);
           
-          // Render rants
           if (rants && rants.length > 0) {
             rantsContainer.innerHTML = rants.map(rant => `
               <div class="peaking-rant-card">
@@ -1274,7 +1313,6 @@
             rantsContainer.innerHTML = '<div class="empty-text">No rants yet...</div>';
           }
           
-          // Render artefacts
           const artefactsToShow = artefacts && artefacts.length > 0 ? artefacts : DUMMY_ARTEFACTS;
           artefactsContainer.innerHTML = artefactsToShow.map((art, idx) => `
             <div class="artefact-item" title="${art.name || 'Artefact ' + (idx + 1)}">
@@ -1295,7 +1333,6 @@
       const rantsContainer = document.getElementById('peaking-rants');
       const artefactsContainer = document.getElementById('peaking-artefacts');
       
-      // Filter dummy rants for this user or show all as fallback
       const userRants = DUMMY_SPILLS.filter(s => s.user_id === userId);
       
       if (userRants.length > 0) {
@@ -1385,14 +1422,12 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
     
-    // Close peaking on escape key
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closePeaking();
       }
     });
     
-    // Close peaking when clicking outside
     document.getElementById('peaking-modal').addEventListener('click', (e) => {
       if (e.target.id === 'peaking-modal') {
         closePeaking();
