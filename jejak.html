@@ -14,7 +14,7 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Reenie+Beanie&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <style>
     :root {
@@ -1046,26 +1046,6 @@
       text-transform: uppercase;
       z-index: 20;
     }
-  
-    /* THEME SLIDER IN MODAL */
-    .theme-selector{margin:var(--space-md) 0;padding:var(--space-md);background:var(--surface-elevated);border:1px solid var(--border)}
-    .theme-selector-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-secondary);margin-bottom:var(--space-sm)}
-    .theme-slider-container{position:relative;padding:var(--space-lg) 0}
-    .theme-slider{width:100%;height:4px;background:var(--border);outline:none;-webkit-appearance:none}
-    .theme-slider::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;background:var(--accent-primary);border:2px solid var(--text);cursor:pointer;border-radius:50%}
-    .theme-preview{display:flex;align-items:center;gap:var(--space-sm);margin-top:var(--space-sm);font-size:13px}
-    .theme-preview-icon{font-size:20px}
-    .theme-preview-name{font-weight:700;color:var(--accent-primary)}
-    .theme-preview-desc{color:var(--text-muted);font-size:11px}
-    
-    /* NOTE INPUT IN MODAL */
-    .note-input-group{margin:var(--space-md) 0}
-    .note-input-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-secondary);margin-bottom:var(--space-sm);display:flex;justify-content:space-between}
-    .note-word-count{color:var(--text-muted);font-weight:400}
-    .note-input{width:100%;background:var(--surface-elevated);border:2px solid var(--border);padding:var(--space-sm) var(--space-md);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;transition:all 0.2s}
-    .note-input:focus{outline:none;border-color:var(--accent-primary);background:var(--surface)}
-    .note-input::placeholder{color:var(--text-muted);font-style:italic}
-
   </style>
 </head>
 <body>
@@ -1086,7 +1066,11 @@
     </header>
 
     <!-- FILTER CONTROLS -->
-    
+    <div class="filter-controls">
+      <div class="filter-info">
+        <span class="filter-badge" id="current-filter">MONOCHROME</span>
+        <span style="font-size: 11px; color: var(--text-muted);" id="filter-desc">Default</span>
+      </div>
       <button class="filter-toggle" id="filter-toggle" onclick="toggleColorMode()">
         <span class="filter-icon" id="filter-icon">⚫</span>
         <span class="filter-label" id="filter-label">B&W</span>
@@ -1266,18 +1250,13 @@
       const username = localStorage.getItem(SESSION_KEYS.username);
       const userId   = localStorage.getItem(SESSION_KEYS.userId);
       const loggedIn = localStorage.getItem(SESSION_KEYS.loggedIn);
-      
       if (!loggedIn || !username) {
         console.warn('No valid session, redirecting to login...');
-        window.location.href = 'index.html';
-        return null;
+        // Uncomment line below when deployed with login page
+        // window.location.href = 'index.html';
+        return { username: username || '@anon', userId: userId || null };
       }
-      
-      // userId bisa UUID atau username (fallback)
-      return { 
-        username: username, 
-        userId: userId || username  // fallback ke username kalau tidak ada userId
-      };
+      return { username, userId };
     }
 
     const SESSION = checkSession();
@@ -1386,8 +1365,7 @@
     // ============================================
     // STATE — currentUser diambil dari SESSION (login)
     // ============================================
-    // Gunakan username sebagai prefix key (lebih reliable)
-    const STORAGE_KEY_PREFIX = 'jejak_' + SESSION.username.replace(/[^a-z0-9]/g, '_') + '_';
+    const STORAGE_KEY_PREFIX = 'jejak_' + (SESSION.userId || SESSION.username).replace(/[^a-z0-9]/g, '_') + '_';
 
     const state = {
       currentUser: SESSION.username,        // Username dari login
@@ -1397,9 +1375,7 @@
       artefacts: [],                        // Tidak pakai dummy — load dari DB
       userVibes: new Set(),
       selectedFiles: new Set(),
-      selectedThemeIdx: 0,
-      selectedNote: 'new drop',
-      
+      colorMode: false,
       faceApiLoaded: false,
       supabase: null,
       isOnline: false,
@@ -1916,7 +1892,21 @@
       element.classList.add(useColor ? theme.filter : 'filter-monochrome');
     }
 
-     else {
+    function updateFilterUI() {
+      const theme = getCurrentMonthTheme();
+      const badge = document.getElementById('current-filter');
+      const desc = document.getElementById('filter-desc');
+      const icon = document.getElementById('filter-icon');
+      const label = document.getElementById('filter-label');
+      const toggle = document.getElementById('filter-toggle');
+      
+      if (state.colorMode) {
+        badge.textContent = theme.name;
+        desc.textContent = theme.desc;
+        icon.textContent = theme.icon;
+        label.textContent = 'COLOR';
+        toggle.classList.add('active');
+      } else {
         badge.textContent = 'MONOCHROME';
         desc.textContent = 'Default';
         icon.textContent = '⚫';
@@ -1925,7 +1915,7 @@
       }
       
       const heroImg = document.getElementById('hero-img');
-      heroImg.className = MONTHLY_THEMES[state.selectedThemeIdx].filter;
+      applyFilter(heroImg, state.colorMode);
       
       document.querySelectorAll('.tray-item img').forEach(img => {
         applyFilter(img, state.colorMode);
@@ -1949,56 +1939,6 @@
       });
       if (navigator.vibrate) navigator.vibrate(10);
     };
-
-    // Update theme preview in modal
-    window.updateThemePreview = function(idx) {
-      idx = parseInt(idx);
-      state.selectedThemeIdx = idx;
-      const theme = MONTHLY_THEMES[idx];
-      
-      document.getElementById('theme-icon').textContent = theme.icon;
-      document.getElementById('theme-name').textContent = theme.name;
-      document.getElementById('theme-desc').textContent = theme.desc;
-      
-      // Apply theme to all gallery images
-      const galleryImages = document.querySelectorAll('.gallery-item img');
-      const filters = ['filter-monochrome', 'filter-sepia', 'filter-lomo', 'filter-vignette', 
-                      'filter-noir', 'filter-fade', 'filter-cyber', 'filter-warm', 'filter-cold', 
-                      'filter-dream', 'filter-crisp', 'filter-moody', 'filter-golden'];
-      
-      galleryImages.forEach(function(img) {
-        filters.forEach(function(f) { img.classList.remove(f); });
-        img.classList.add(theme.filter);
-      });
-    };
-
-    // Rotate between different vibe reactions
-    window.rotateVibe = function(entryId) {
-      const entry = state.entries.find(function(e) { return e.id === entryId; });
-      if (!entry) return;
-      
-      const card = document.querySelector('[data-id="' + entryId + '"]');
-      const vibeBar = card ? card.querySelector('.vibe-bar .vibe-message') : null;
-      if (!vibeBar) return;
-      
-      const vibeEntries = Object.entries(entry.vibes || {}).filter(function(kv) { return kv[1] > 0; });
-      if (vibeEntries.length <= 1) return;
-      
-      // Find current vibe being displayed
-      const classes = vibeBar.className.split(' ');
-      const currentVibe = classes.find(function(c) { return VIBES[c]; });
-      const currentIdx = vibeEntries.findIndex(function(kv) { return kv[0] === currentVibe; });
-      const nextIdx = (currentIdx + 1) % vibeEntries.length;
-      const nextKey = vibeEntries[nextIdx][0];
-      const count = vibeEntries[nextIdx][1];
-      const vibe = VIBES[nextKey];
-      
-      // Update display with animation
-      vibeBar.className = 'vibe-message ' + nextKey;
-      vibeBar.innerHTML = '<span class="emoji">' + vibe.emoji + '</span><span class="count">' + count + '</span> ' + vibe.msg;
-    };
-
-
 
     window.toggleVibe = async function(entryId, vibeKey, btn) {
       const key = `${entryId}-${vibeKey}`;
@@ -2052,7 +1992,7 @@
       const heroFaces = document.getElementById('hero-faces');
       
       heroImg.src = url;
-      heroImg.className = MONTHLY_THEMES[state.selectedThemeIdx].filter;
+      applyFilter(heroImg, state.colorMode);
       document.getElementById('hero-notation').textContent = '"' + note + '"';
       
       heroFaces.innerHTML = '';
@@ -2185,9 +2125,6 @@
       const grid = document.getElementById('gallery-grid');
       grid.innerHTML = '';
       
-      // Get current theme
-      const theme = MONTHLY_THEMES[state.selectedThemeIdx];
-      
       artefacts.forEach(function(artefact, index) {
         const div = document.createElement('div');
         div.className = 'gallery-item selected';
@@ -2214,7 +2151,7 @@
         
         const img = document.createElement('img');
         img.src = artefact.url;
-        img.className = theme.filter;
+        img.className = state.colorMode ? getCurrentMonthTheme().filter : 'filter-monochrome';
         
         wrapper.appendChild(img);
         
@@ -2246,13 +2183,6 @@
       });
       
       document.getElementById('selected-count').textContent = state.selectedFiles.size;
-      
-      // Initialize theme slider and note input
-      document.getElementById('theme-slider').value = state.selectedThemeIdx;
-      window.updateThemePreview(state.selectedThemeIdx);
-      document.getElementById('note-input').value = '';
-      document.getElementById('note-word-count').textContent = '0/4 kata';
-      
       document.getElementById('gallery-modal').classList.add('active');
     }
 
@@ -2268,26 +2198,12 @@
         return;
       }
       
-      // Get note input and validate
-      const noteInput = document.getElementById('note-input').value.trim();
-      const words = noteInput.split(/\s+/).filter(function(w) { return w.length > 0; });
-      
-      if (words.length > 4) {
-        showToast('Maksimal 4 kata untuk notasi');
-        return;
-      }
-      
-      const finalNote = words.length > 0 ? words.join(' ') : 'new drop';
-      
       const artefacts = Array.from(state.selectedFiles);
       let faceCount = 0;
       
       // Upload to Supabase and add to FIFO
       for (const artefact of artefacts) {
         if (artefact.hasFace) faceCount++;
-        
-        // Apply user's note to artefact
-        artefact.note = finalNote;
         
         // Upload to Supabase Storage
         if (state.isOnline && state.supabase) {
@@ -2309,7 +2225,7 @@
       }
       
       state.uploadsThisWindow += artefacts.length;
-      localStorage.setItem(STORAGE_PREFIX + 'uploads_count', state.uploadsThisWindow.toString());
+      localStorage.setItem(STORAGE_KEY_PREFIX + 'uploads_count', state.uploadsThisWindow.toString());
       
       const first = artefacts[0];
       window.setHero(first.url, first.note, first.faces);
@@ -2514,20 +2430,6 @@
       loadUserRantsFromDB();
 
       // Update quota every hour
-      
-      // Note input word count
-      document.getElementById('note-input').addEventListener('input', function() {
-        const words = this.value.trim().split(/\s+/).filter(w => w.length > 0);
-        const count = words.length;
-        document.getElementById('note-word-count').textContent = `${count}/4 kata`;
-        
-        // Limit to 4 words
-        if (count > 4) {
-          this.value = words.slice(0, 4).join(' ');
-          document.getElementById('note-word-count').textContent = '4/4 kata';
-        }
-      });
-
       setInterval(updateQuotaUI, 3600000);
     });
   </script>
