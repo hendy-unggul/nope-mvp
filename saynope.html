@@ -38,7 +38,6 @@
       padding: 24px 16px;
     }
     
-    /* Header */
     header {
       display: flex;
       justify-content: space-between;
@@ -103,7 +102,6 @@
       border-radius: 50%;
     }
     
-    /* Tagline */
     .tagline {
       font-style: italic;
       color: var(--text-secondary);
@@ -119,7 +117,6 @@
       margin-bottom: 24px;
     }
     
-    /* Filter Section */
     .filter-section {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -152,7 +149,6 @@
       cursor: pointer;
     }
     
-    /* Vibe Slider */
     .vibe-slider-container {
       margin-bottom: 20px;
     }
@@ -183,7 +179,6 @@
       text-transform: uppercase;
     }
     
-    /* Mood Filters */
     .mood-filters {
       display: flex;
       flex-wrap: wrap;
@@ -212,7 +207,6 @@
       border-color: var(--text-secondary);
     }
     
-    /* Content Area */
     .content-area {
       min-height: 300px;
       display: flex;
@@ -257,7 +251,6 @@
       letter-spacing: 0.1em;
     }
     
-    /* Spill Cards */
     .spill-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -298,7 +291,6 @@
       margin-bottom: 16px;
     }
     
-    /* 6 Emoji Reactions */
     .spill-reactions {
       display: flex;
       gap: 8px;
@@ -341,7 +333,6 @@
       text-align: center;
     }
     
-    /* New Spill Button */
     .new-spill-btn {
       display: flex;
       align-items: center;
@@ -365,7 +356,6 @@
       color: var(--bg);
     }
     
-    /* Empty State */
     .empty-state {
       text-align: center;
       padding: 40px;
@@ -387,7 +377,6 @@
       font-size: 12px;
     }
     
-    /* Toast */
     .toast {
       position: fixed;
       bottom: 100px;
@@ -408,7 +397,6 @@
       transform: translateX(-50%) translateY(0);
     }
 
-    /* Bottom Navigation - 4 Tab Style */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -533,7 +521,6 @@
   
   <div class="toast" id="toast"></div>
 
-  <!-- Bottom Navigation - 4 Tab Style -->
   <nav class="bottom-nav">
     <div class="nav-container">
       <a href="jejak.html" class="nav-item">
@@ -556,17 +543,11 @@
   </nav>
 
   <script>
-    // ============================================
-    // CONFIGURATION
-    // ============================================
     const CONFIG = {
       supabaseUrl: 'https://fuovfrdicdhnlymnacpz.supabase.co',
       supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0'
     };
 
-    // ============================================
-    // STATE
-    // ============================================
     const state = {
       supabase: null,
       isOnline: false,
@@ -578,7 +559,6 @@
       isLoading: true
     };
 
-    // 6 Emoji reactions configuration
     const EMOJI_REACTIONS = [
       { id: 'relatable', emoji: '💯', label: 'Relatable' },
       { id: 'hug', emoji: '🤗', label: 'Hug' },
@@ -588,9 +568,6 @@
       { id: 'fire', emoji: '🔥', label: 'Fire' }
     ];
 
-    // ============================================
-    // DUMMY DATA - Fallback jika gagal load
-    // ============================================
     const DUMMY_SPILLS = [
       {
         id: 'dummy-1',
@@ -624,15 +601,10 @@
       }
     ];
 
-    // ============================================
-    // INITIALIZATION
-    // ============================================
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM loaded, initializing...');
       initSupabase();
       loadSpills();
       
-      // Setup slider
       const slider = document.getElementById('vibe-slider');
       if (slider) {
         slider.addEventListener('input', function(e) {
@@ -645,16 +617,13 @@
     function initSupabase() {
       try {
         if (typeof supabase === 'undefined') {
-          console.warn('Supabase not loaded');
           updateOnlineStatus(false);
           return;
         }
         state.supabase = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
         state.isOnline = true;
         updateOnlineStatus(true);
-        console.log('Supabase initialized');
       } catch (e) {
-        console.error('Supabase init failed:', e);
         updateOnlineStatus(false);
       }
     }
@@ -667,48 +636,33 @@
       }
     }
 
-    // ============================================
-    // LOAD SPILLS - Get from spills table with rant_id
-    // ============================================
     async function loadSpills() {
-      console.log('Loading spills...');
       setLoading(true);
       
-      // Try to load from Supabase
       if (state.isOnline && state.supabase) {
         try {
-          console.log('Fetching from Supabase...');
-          
-          // Get current user first
           const { data: { user } } = await state.supabase.auth.getUser();
           state.currentUserId = user ? user.id : null;
           
-          // Fetch from spills table (which has rant_id references)
           let query = state.supabase
             .from('spills')
             .select('*')
             .order('created_at', { ascending: false })
             .limit(20);
           
-          // Exclude current user's rants if logged in
           if (state.currentUserId) {
             query = query.neq('user_id', state.currentUserId);
           }
           
           const { data, error } = await query;
           
-          if (error) {
-            console.error('Supabase error:', error);
-            throw error;
-          }
-          
-          console.log('Data received:', data);
+          if (error) throw error;
           
           if (data && data.length > 0) {
             state.spills = data.map(function(s) {
               return {
                 id: s.id,
-                rant_id: s.rant_id, // This references the actual rant
+                rant_id: s.rant_id,
                 content: s.content,
                 mood: s.mood,
                 author: s.author || '@anonymous',
@@ -718,24 +672,18 @@
               };
             });
             
-            // Load reactions using rant_id
             const rantIds = state.spills.map(s => s.rant_id).filter(id => id);
             if (rantIds.length > 0) {
               await loadReactions(rantIds);
             }
           } else {
-            // Use dummy if no data, filter out current user
-            console.log('No data, using dummy');
             state.spills = DUMMY_SPILLS.filter(s => s.user_id !== state.currentUserId);
           }
         } catch (e) {
-          console.error('Load failed:', e);
           state.spills = DUMMY_SPILLS.filter(s => s.user_id !== state.currentUserId);
           showToast('Gagal memuat data, menampilkan contoh');
         }
       } else {
-        // Offline - use dummy, filter out current user if known
-        console.log('Offline mode, using dummy');
         state.spills = DUMMY_SPILLS.filter(s => s.user_id !== state.currentUserId);
         showToast('Mode offline - menampilkan contoh');
       }
@@ -748,61 +696,42 @@
       if (!state.supabase || rantIds.length === 0) return;
       
       try {
-        // Try to load reactions using rant_id column first
         const { data, error } = await state.supabase
           .from('reactions')
           .select('*')
           .in('rant_id', rantIds);
         
         if (error) {
-          console.log('Error with rant_id:', error.message);
-          // If rant_id doesn't work, the table might need to be updated
-          // For now, just log the error and continue
-          state.reactions = {};
-          rantIds.forEach(id => {
-            state.reactions[id] = {};
-            EMOJI_REACTIONS.forEach(r => {
-              state.reactions[id][r.id] = 0;
-            });
-          });
+          console.error('Error loading reactions:', error);
           return;
         }
         
-        // Aggregate reactions by rant_id
-        aggregateReactions(rantIds, data);
+        state.reactions = {};
+        rantIds.forEach(id => {
+          state.reactions[id] = {};
+          EMOJI_REACTIONS.forEach(r => {
+            state.reactions[id][r.id] = 0;
+          });
+        });
+        
+        if (data) {
+          data.forEach(reaction => {
+            const rantId = reaction.rant_id;
+            if (state.reactions[rantId] && reaction.reaction_type) {
+              if (state.reactions[rantId][reaction.reaction_type] !== undefined) {
+                state.reactions[rantId][reaction.reaction_type]++;
+              }
+            }
+          });
+        }
       } catch (e) {
         console.error('Failed to load reactions:', e);
       }
     }
 
-    function aggregateReactions(rantIds, data) {
-      state.reactions = {};
-      rantIds.forEach(id => {
-        state.reactions[id] = {};
-        EMOJI_REACTIONS.forEach(r => {
-          state.reactions[id][r.id] = 0;
-        });
-      });
-      
-      if (data) {
-        data.forEach(reaction => {
-          const rantId = reaction.rant_id;
-          if (state.reactions[rantId] && reaction.reaction_type) {
-            if (state.reactions[rantId][reaction.reaction_type] !== undefined) {
-              state.reactions[rantId][reaction.reaction_type]++;
-            }
-          }
-        });
-      }
-      
-      console.log('Reactions loaded:', state.reactions);
-    }
-
     function setLoading(loading) {
       state.isLoading = loading;
       const contentArea = document.getElementById('content-area');
-      const spinner = document.getElementById('spinner');
-      const loadingText = document.getElementById('loading-text');
       const statusText = document.getElementById('status-text');
       
       if (loading) {
@@ -816,35 +745,20 @@
       }
     }
 
-    // ============================================
-    // RENDER
-    // ============================================
     function renderSpills() {
-      console.log('Rendering spills...');
       const contentArea = document.getElementById('content-area');
-      if (!contentArea || state.isLoading) {
-        console.log('Cannot render: contentArea missing or still loading');
-        return;
-      }
+      if (!contentArea || state.isLoading) return;
       
-      // Filter spills
       let filtered = state.spills;
       
       if (state.currentFilter !== 'all') {
-        filtered = filtered.filter(function(s) {
-          return s.mood === state.currentFilter;
-        });
+        filtered = filtered.filter(s => s.mood === state.currentFilter);
       }
       
-      // Simulate vibe matching
       if (state.vibeMatch < 100) {
         const threshold = state.vibeMatch / 100;
-        filtered = filtered.filter(function() {
-          return Math.random() < threshold;
-        });
+        filtered = filtered.filter(() => Math.random() < threshold);
       }
-      
-      console.log('Filtered spills:', filtered.length);
       
       if (filtered.length === 0) {
         contentArea.className = 'content-area';
@@ -859,16 +773,15 @@
       
       contentArea.className = 'content-area has-content';
       
-      var html = '';
-      for (var i = 0; i < filtered.length; i++) {
-        var spill = filtered[i];
-        var moodColor = getMoodColor(spill.mood);
+      let html = '';
+      for (let i = 0; i < filtered.length; i++) {
+        const spill = filtered[i];
+        const moodColor = getMoodColor(spill.mood);
         
-        // Build 6 reactions HTML using rant_id
-        var reactionsHtml = '';
-        for (var j = 0; j < EMOJI_REACTIONS.length; j++) {
-          var reaction = EMOJI_REACTIONS[j];
-          var count = 0;
+        let reactionsHtml = '';
+        for (let j = 0; j < EMOJI_REACTIONS.length; j++) {
+          const reaction = EMOJI_REACTIONS[j];
+          let count = 0;
           if (state.reactions[spill.rant_id] && state.reactions[spill.rant_id][reaction.id]) {
             count = state.reactions[spill.rant_id][reaction.id];
           } else if (spill.reactions && spill.reactions[reaction.id]) {
@@ -889,14 +802,11 @@
               '<span class="spill-mood" style="color: ' + moodColor + '">' + spill.mood + '</span>' +
             '</div>' +
             '<div class="spill-content">' + escapeHtml(spill.content) + '</div>' +
-            '<div class="spill-reactions">' +
-              reactionsHtml +
-            '</div>' +
+            '<div class="spill-reactions">' + reactionsHtml + '</div>' +
           '</div>';
       }
       
       contentArea.innerHTML = html;
-      console.log('Render complete');
     }
 
     function getMoodColor(mood) {
@@ -909,22 +819,17 @@
       return colors[mood] || '#FFF';
     }
 
-    // ============================================
-    // ACTIONS
-    // ============================================
     function filterMood(mood) {
       state.currentFilter = mood;
       
-      // Update UI
-      var buttons = document.querySelectorAll('.mood-btn');
-      for (var i = 0; i < buttons.length; i++) {
-        var btn = buttons[i];
+      const buttons = document.querySelectorAll('.mood-btn');
+      buttons.forEach(btn => {
         if (btn.dataset.mood === mood) {
           btn.classList.add('active');
         } else {
           btn.classList.remove('active');
         }
-      }
+      });
       
       renderSpills();
     }
@@ -933,33 +838,27 @@
       state.currentFilter = 'all';
       state.vibeMatch = 100;
       
-      var slider = document.getElementById('vibe-slider');
+      const slider = document.getElementById('vibe-slider');
       if (slider) slider.value = 100;
       
-      var buttons = document.querySelectorAll('.mood-btn');
-      for (var i = 0; i < buttons.length; i++) {
-        var btn = buttons[i];
+      const buttons = document.querySelectorAll('.mood-btn');
+      buttons.forEach(btn => {
         if (btn.dataset.mood === 'all') {
           btn.classList.add('active');
         } else {
           btn.classList.remove('active');
         }
-      }
+      });
       
       renderSpills();
     }
 
-    // ============================================
-    // REACTION - Save to Supabase using rant_id
-    // ============================================
     async function reactToSpill(rantId, reactionType) {
-      // Optimistic update
       const countEl = document.getElementById('count-' + rantId + '-' + reactionType);
       if (countEl) {
         countEl.textContent = parseInt(countEl.textContent) + 1;
       }
       
-      // Update local state
       if (!state.reactions[rantId]) {
         state.reactions[rantId] = {};
       }
@@ -970,7 +869,6 @@
       
       showToast('Reaksi tersimpan!');
       
-      // Save to Supabase if online
       if (state.isOnline && state.supabase) {
         try {
           const { data: { user } } = await state.supabase.auth.getUser();
@@ -981,7 +879,6 @@
             created_at: new Date().toISOString()
           };
           
-          // Add user_id if logged in
           if (user) {
             reactionData.user_id = user.id;
           }
@@ -992,9 +889,6 @@
           
           if (error) {
             console.error('Failed to save reaction:', error);
-            showToast('Gagal menyimpan reaksi: ' + error.message);
-          } else {
-            console.log('Reaction saved to Supabase');
           }
         } catch (e) {
           console.error('Error saving reaction:', e);
@@ -1010,24 +904,19 @@
       showToast('Menu clicked');
     }
 
-    // ============================================
-    // UTILS
-    // ============================================
     function escapeHtml(text) {
       if (!text) return '';
-      var div = document.createElement('div');
+      const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
     }
 
     function showToast(message) {
-      var toast = document.getElementById('toast');
+      const toast = document.getElementById('toast');
       if (!toast) return;
       toast.textContent = message;
       toast.classList.add('show');
-      setTimeout(function() {
-        toast.classList.remove('show');
-      }, 3000);
+      setTimeout(() => toast.classList.remove('show'), 3000);
     }
   </script>
 </body>
