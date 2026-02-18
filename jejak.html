@@ -137,18 +137,15 @@
     .entry-mood.doom{color:var(--mood-doom)}
     .entry-content{padding:var(--space-md);font-size:15px;line-height:1.6;color:var(--text)}
     
-    /* Spill Status - Simplified, no cloud sync text */
-    .spill-status{display:flex;align-items:center;gap:var(--space-xs);font-size:10px;color:var(--text-muted);margin-top:var(--space-xs)}
-    .spill-status.spilled{color:var(--accent-secondary)}
-    .spill-status.spilled::before{content:'✓ '}
-    .fifo-indicator{font-size:9px;color:var(--text-muted);background:var(--surface-elevated);padding:2px 6px;border:1px dashed var(--border);text-transform:uppercase;letter-spacing:0.05em}
+    /* Spill Status - HIDDEN */
+    .spill-status{display:none}
     
-    /* Empathy Text - HANYA INI YANG TAMPIL */
+    /* Empathy Text - NARASI RESPON EMOJI */
     .empathy-text{font-family:'Caveat',cursive;font-size:19px;color:var(--text);text-align:center;padding:var(--space-md);background:var(--surface-elevated);border-top:1px solid var(--border);line-height:1.3;font-weight:700;letter-spacing:0.02em}
     .empathy-highlight{color:var(--accent-primary);font-size:24px;font-weight:700}
     
     /* Vibe Bar - EMOJI DISembunyikan, hanya notasi empatik */
-    .vibe-bar{display:none} /* Sembunyikan seluruh vibe bar */
+    .vibe-bar{display:none}
     
     /* Tray */
     .tray-section{margin-bottom:var(--space-xl)}
@@ -553,7 +550,6 @@
       saveArtefacts();
       renderTray();
       
-      // FIX: Update hero immediately with new artefact
       setHero(newArtefact.url, newArtefact.note, newArtefact.faces, 'filter-' + (newArtefact.theme || 'monochrome').toLowerCase());
     }
 
@@ -663,6 +659,53 @@
     }
 
     // ============================================
+    // LOAD REACTIONS FROM SUPABASE
+    // ============================================
+    async function loadReactionsForEntries() {
+      if (!state.isOnline || !state.supabase) return;
+      
+      const entryIds = state.entries.map(e => e.id).filter(id => !id.startsWith('__'));
+      if (entryIds.length === 0) return;
+      
+      try {
+        const { data, error } = await state.supabase
+          .from('reactions')
+          .select('*')
+          .in('rant_id', entryIds);
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          // Aggregate reactions by rant_id
+          const reactionCounts = {};
+          data.forEach(reaction => {
+            if (!reactionCounts[reaction.rant_id]) {
+              reactionCounts[reaction.rant_id] = {
+                relatable: 0, mood: 0, tea: 0, hug: 0, real: 0, dead: 0
+              };
+            }
+            if (reactionCounts[reaction.rant_id][reaction.reaction_type] !== undefined) {
+              reactionCounts[reaction.rant_id][reaction.reaction_type]++;
+            }
+          });
+          
+          // Update entries with reaction counts
+          state.entries = state.entries.map(entry => {
+            if (reactionCounts[entry.id]) {
+              return { ...entry, vibes: { ...entry.vibes, ...reactionCounts[entry.id] } };
+            }
+            return entry;
+          });
+          
+          saveEntries();
+          renderEntries();
+        }
+      } catch (e) {
+        console.error('Failed to load reactions:', e);
+      }
+    }
+
+    // ============================================
     // CORE FUNCTIONS
     // ============================================
     async function submitRant(content, mood) {
@@ -698,7 +741,6 @@
           
           entry.isSpilled = true;
           updateEntry(rantId, { isSpilled: true });
-          // Simplified toast - no cloud mention
           showToast('✓ Tersimpan');
         } catch (e) {
           console.error('Sync failed:', e);
@@ -1136,7 +1178,7 @@
         
         const isDummy = entry.isDummy || entry.id.startsWith('__d');
         
-        // Get top vibe for empathy text
+        // Get top vibe for empathy text - NARASI RESPON EMOJI
         const topVibe = getTopVibe(entry.vibes, entry.id);
         let empathyHTML = '';
         if (topVibe && topVibe[1] > 0) {
@@ -1149,11 +1191,7 @@
           `;
         }
         
-        // Simplified spill status - no cloud sync text
-        let spillStatusHTML = '';
-        if (!isDummy) {
-          spillStatusHTML = `<div class="spill-status ${entry.isSpilled ? 'spilled' : ''}">${entry.isSpilled ? 'Tersimpan' : 'Menunggu'}</div>`;
-        }
+        // spill-status HIDDEN - tidak ditampilkan lagi
         
         return `
           <article class="entry ${isDummy ? 'entry-dummy' : ''}" data-id="${entry.id}">
@@ -1165,7 +1203,6 @@
               ${isDummy ? '<span class="fifo-indicator">Contoh</span>' : ''}
             </div>
             <div class="entry-content">${escapeHtml(entry.content)}</div>
-            ${spillStatusHTML}
             ${empathyHTML}
           </article>
         `;
@@ -1351,6 +1388,8 @@
       if (state.isOnline) {
         loadUserRantsFromDB();
         loadUserArtefactsFromDB();
+        // Load reactions from Supabase
+        loadReactionsForEntries();
       }
       
       // Set initial hero - prioritize real artefacts, fallback to dummy
