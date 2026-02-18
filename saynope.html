@@ -594,6 +594,7 @@
     const DUMMY_SPILLS = [
       {
         id: 'dummy-1',
+        rant_id: 'dummy-1',
         content: "Ada yang pernah ngerasa kalo lagi banyak kerjaan malah makin males ngerjain? Padahal deadline mepet. Help",
         mood: 'chaotic',
         author: '@anonymouse',
@@ -603,6 +604,7 @@
       },
       {
         id: 'dummy-2',
+        rant_id: 'dummy-2',
         content: "Hari ini gue bangun pagi, olahraga, sarapan sehat, dan ngerjain side project. Semoga konsisten",
         mood: 'thriving',
         author: '@earlybird',
@@ -612,6 +614,7 @@
       },
       {
         id: 'dummy-3',
+        rant_id: 'dummy-3',
         content: "Capek banget rasanya. Pengen tidur 3 hari 3 malam tanpa gangguan.",
         mood: 'doom',
         author: '@tiredsoul',
@@ -665,7 +668,7 @@
     }
 
     // ============================================
-    // LOAD SPILLS - Exclude current user's rants
+    // LOAD SPILLS - Get from spills table with rant_id
     // ============================================
     async function loadSpills() {
       console.log('Loading spills...');
@@ -680,7 +683,7 @@
           const { data: { user } } = await state.supabase.auth.getUser();
           state.currentUserId = user ? user.id : null;
           
-          // Fetch spills excluding current user's rants
+          // Fetch from spills table (which has rant_id references)
           let query = state.supabase
             .from('spills')
             .select('*')
@@ -705,6 +708,7 @@
             state.spills = data.map(function(s) {
               return {
                 id: s.id,
+                rant_id: s.rant_id, // This references the actual rant
                 content: s.content,
                 mood: s.mood,
                 author: s.author || '@anonymous',
@@ -714,8 +718,11 @@
               };
             });
             
-            // Load reactions for these spills
-            await loadReactions(data.map(s => s.id));
+            // Load reactions using rant_id
+            const rantIds = state.spills.map(s => s.rant_id).filter(id => id);
+            if (rantIds.length > 0) {
+              await loadReactions(rantIds);
+            }
           } else {
             // Use dummy if no data, filter out current user
             console.log('No data, using dummy');
@@ -737,38 +744,58 @@
       renderSpills();
     }
 
-    async function loadReactions(spillIds) {
-      if (!state.supabase || spillIds.length === 0) return;
+    async function loadReactions(rantIds) {
+      if (!state.supabase || rantIds.length === 0) return;
       
       try {
+        // Try to load reactions using rant_id column first
         const { data, error } = await state.supabase
           .from('reactions')
           .select('*')
-          .in('spill_id', spillIds);
+          .in('rant_id', rantIds);
         
-        if (error) throw error;
-        
-        // Aggregate reactions by spill_id
-        state.reactions = {};
-        spillIds.forEach(id => {
-          state.reactions[id] = {};
-          EMOJI_REACTIONS.forEach(r => {
-            state.reactions[id][r.id] = 0;
+        if (error) {
+          console.log('Error with rant_id:', error.message);
+          // If rant_id doesn't work, the table might need to be updated
+          // For now, just log the error and continue
+          state.reactions = {};
+          rantIds.forEach(id => {
+            state.reactions[id] = {};
+            EMOJI_REACTIONS.forEach(r => {
+              state.reactions[id][r.id] = 0;
+            });
           });
-        });
-        
-        if (data) {
-          data.forEach(reaction => {
-            if (state.reactions[reaction.spill_id]) {
-              if (state.reactions[reaction.spill_id][reaction.reaction_type] !== undefined) {
-                state.reactions[reaction.spill_id][reaction.reaction_type]++;
-              }
-            }
-          });
+          return;
         }
+        
+        // Aggregate reactions by rant_id
+        aggregateReactions(rantIds, data);
       } catch (e) {
         console.error('Failed to load reactions:', e);
       }
+    }
+
+    function aggregateReactions(rantIds, data) {
+      state.reactions = {};
+      rantIds.forEach(id => {
+        state.reactions[id] = {};
+        EMOJI_REACTIONS.forEach(r => {
+          state.reactions[id][r.id] = 0;
+        });
+      });
+      
+      if (data) {
+        data.forEach(reaction => {
+          const rantId = reaction.rant_id;
+          if (state.reactions[rantId] && reaction.reaction_type) {
+            if (state.reactions[rantId][reaction.reaction_type] !== undefined) {
+              state.reactions[rantId][reaction.reaction_type]++;
+            }
+          }
+        });
+      }
+      
+      console.log('Reactions loaded:', state.reactions);
     }
 
     function setLoading(loading) {
@@ -837,21 +864,21 @@
         var spill = filtered[i];
         var moodColor = getMoodColor(spill.mood);
         
-        // Build 6 reactions HTML
+        // Build 6 reactions HTML using rant_id
         var reactionsHtml = '';
         for (var j = 0; j < EMOJI_REACTIONS.length; j++) {
           var reaction = EMOJI_REACTIONS[j];
           var count = 0;
-          if (state.reactions[spill.id] && state.reactions[spill.id][reaction.id]) {
-            count = state.reactions[spill.id][reaction.id];
+          if (state.reactions[spill.rant_id] && state.reactions[spill.rant_id][reaction.id]) {
+            count = state.reactions[spill.rant_id][reaction.id];
           } else if (spill.reactions && spill.reactions[reaction.id]) {
             count = spill.reactions[reaction.id];
           }
           
           reactionsHtml += 
-            '<button class="reaction-btn" onclick="reactToSpill(\'' + spill.id + '\', \'' + reaction.id + '\')">' +
+            '<button class="reaction-btn" onclick="reactToSpill(\'' + spill.rant_id + '\', \'' + reaction.id + '\')">' +
               '<span class="reaction-emoji">' + reaction.emoji + '</span>' +
-              '<span class="reaction-count" id="count-' + spill.id + '-' + reaction.id + '">' + count + '</span>' +
+              '<span class="reaction-count" id="count-' + spill.rant_id + '-' + reaction.id + '">' + count + '</span>' +
             '</button>';
         }
         
@@ -923,23 +950,23 @@
     }
 
     // ============================================
-    // REACTION - Save to Supabase
+    // REACTION - Save to Supabase using rant_id
     // ============================================
-    async function reactToSpill(spillId, reactionType) {
+    async function reactToSpill(rantId, reactionType) {
       // Optimistic update
-      const countEl = document.getElementById('count-' + spillId + '-' + reactionType);
+      const countEl = document.getElementById('count-' + rantId + '-' + reactionType);
       if (countEl) {
         countEl.textContent = parseInt(countEl.textContent) + 1;
       }
       
       // Update local state
-      if (!state.reactions[spillId]) {
-        state.reactions[spillId] = {};
+      if (!state.reactions[rantId]) {
+        state.reactions[rantId] = {};
       }
-      if (!state.reactions[spillId][reactionType]) {
-        state.reactions[spillId][reactionType] = 0;
+      if (!state.reactions[rantId][reactionType]) {
+        state.reactions[rantId][reactionType] = 0;
       }
-      state.reactions[spillId][reactionType]++;
+      state.reactions[rantId][reactionType]++;
       
       showToast('Reaksi tersimpan!');
       
@@ -949,7 +976,7 @@
           const { data: { user } } = await state.supabase.auth.getUser();
           
           const reactionData = {
-            spill_id: spillId,
+            rant_id: rantId,
             reaction_type: reactionType,
             created_at: new Date().toISOString()
           };
@@ -965,6 +992,7 @@
           
           if (error) {
             console.error('Failed to save reaction:', error);
+            showToast('Gagal menyimpan reaksi: ' + error.message);
           } else {
             console.log('Reaction saved to Supabase');
           }
