@@ -34,6 +34,9 @@
     /* Top Right - Minimalis */
     .top-right{display:flex;align-items:center;gap:var(--space-sm)}
     
+    /* Username Display */
+    .header-username{font-size:11px;font-weight:700;color:var(--text);text-transform:lowercase;letter-spacing:0.05em;padding:4px 8px;background:var(--surface);border:1px solid var(--border);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    
     /* Online Indicator - Titik hijau blinking only */
     .online-dot{width:8px;height:8px;background:var(--accent-quaternary);border-radius:50%;animation:blink 2s infinite;flex-shrink:0}
     @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
@@ -78,7 +81,11 @@
     .upload-btn:hover:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 var(--bg),2px 2px 0 2px var(--accent-primary)}
     .upload-btn:disabled{background:var(--text-muted);box-shadow:none;cursor:not-allowed;opacity:0.6}
     .upload-counter{position:absolute;top:-8px;right:-8px;background:var(--accent-tertiary);color:var(--text);font-size:10px;font-weight:700;padding:2px 6px;min-width:20px;text-align:center}
-    .quota-timer{background:var(--surface);border:2px solid var(--border);padding:var(--space-sm) var(--space-md);font-size:11px;color:var(--text-secondary);max-width:200px;text-align:right}
+    
+    /* Quota Timer Tooltip - Hidden by default, show on hover */
+    .quota-timer{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:2px solid var(--border);padding:var(--space-sm) var(--space-md);font-size:11px;color:var(--text-secondary);white-space:nowrap;opacity:0;visibility:hidden;transition:all 0.2s;z-index:30}
+    .quota-timer::before{content:'';position:absolute;bottom:100%;right:16px;border:6px solid transparent;border-bottom-color:var(--border)}
+    .upload-controls:hover .quota-timer{opacity:1;visibility:visible}
     .quota-timer.urgent{border-color:var(--accent-tertiary);color:var(--accent-tertiary);animation:pb 2s infinite}
     @keyframes pb{0%,100%{border-color:var(--accent-tertiary)}50%{border-color:var(--text-muted)}}
     
@@ -129,8 +136,11 @@
     .entry-mood.chaotic{color:var(--mood-chaotic)}
     .entry-mood.doom{color:var(--mood-doom)}
     .entry-content{padding:var(--space-md);font-size:15px;line-height:1.6;color:var(--text)}
+    
+    /* Spill Status - Simplified, no cloud sync text */
     .spill-status{display:flex;align-items:center;gap:var(--space-xs);font-size:10px;color:var(--text-muted);margin-top:var(--space-xs)}
     .spill-status.spilled{color:var(--accent-secondary)}
+    .spill-status.spilled::before{content:'✓ '}
     .fifo-indicator{font-size:9px;color:var(--text-muted);background:var(--surface-elevated);padding:2px 6px;border:1px dashed var(--border);text-transform:uppercase;letter-spacing:0.05em}
     
     /* Empathy Text - HANYA INI YANG TAMPIL */
@@ -244,8 +254,9 @@
         <div class="tagline">no filter, just truth</div>
       </div>
       
-      <!-- Top Right: Dot + Settings Menu -->
+      <!-- Top Right: Username + Dot + Settings Menu -->
       <div class="top-right">
+        <div class="header-username" id="header-username">@anon</div>
         <div class="online-dot offline" id="online-dot" title="Offline"></div>
         
         <div class="settings-menu">
@@ -267,6 +278,7 @@
         <div id="hero-faces" style="position:absolute;inset:0;pointer-events:none"></div>
         <div class="hero-notation" id="hero-notation">"memori tersimpan"</div>
         <div class="upload-controls">
+          <!-- Quota timer now hidden by default, shows on hover -->
           <div class="quota-timer" id="quota-timer">Window aktif • Sisa 2 hari</div>
           <button class="upload-btn" id="upload-btn" title="Buka galeri">+<span class="upload-counter" id="upload-counter" style="display:none"></span></button>
         </div>
@@ -686,14 +698,15 @@
           
           entry.isSpilled = true;
           updateEntry(rantId, { isSpilled: true });
-          showToast('✓ Spill synced to cloud');
+          // Simplified toast - no cloud mention
+          showToast('✓ Tersimpan');
         } catch (e) {
           console.error('Sync failed:', e);
-          showToast('⚠ Disimpan lokal, sync pending');
+          showToast('⚠ Disimpan lokal');
           queueForSync('rant', entry);
         }
       } else {
-        showToast('⚠ Disimpan lokal (offline)');
+        showToast('⚠ Disimpan lokal');
         queueForSync('rant', entry);
       }
       
@@ -1136,6 +1149,12 @@
           `;
         }
         
+        // Simplified spill status - no cloud sync text
+        let spillStatusHTML = '';
+        if (!isDummy) {
+          spillStatusHTML = `<div class="spill-status ${entry.isSpilled ? 'spilled' : ''}">${entry.isSpilled ? 'Tersimpan' : 'Menunggu'}</div>`;
+        }
+        
         return `
           <article class="entry ${isDummy ? 'entry-dummy' : ''}" data-id="${entry.id}">
             <div class="entry-header">
@@ -1146,9 +1165,7 @@
               ${isDummy ? '<span class="fifo-indicator">Contoh</span>' : ''}
             </div>
             <div class="entry-content">${escapeHtml(entry.content)}</div>
-            <div class="spill-status ${entry.isSpilled ? 'spilled' : ''}">
-              ${entry.isSpilled ? '✓ Synced to cloud' : '⏳ Pending sync'}
-            </div>
+            ${spillStatusHTML}
             ${empathyHTML}
           </article>
         `;
