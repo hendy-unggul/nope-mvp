@@ -567,6 +567,7 @@
 
     function updateOnlineStatus(online) {
       const dot = document.getElementById('online-dot');
+      if (!dot) return;
       if (online) {
         dot.classList.remove('offline');
         dot.title = 'Online';
@@ -792,6 +793,8 @@
       const uploadBtn = document.getElementById('upload-btn');
       const fileInput = document.getElementById('file-input');
       
+      if (!uploadBtn || !fileInput) return;
+      
       uploadBtn.addEventListener('click', () => {
         if (!checkQuota()) {
           showToast('⏳ Quota habis. Tunggu window berikutnya.');
@@ -830,10 +833,12 @@
       const timer = document.getElementById('quota-timer');
       const counter = document.getElementById('upload-counter');
       
+      if (!timer) return;
+      
       if (!state.quotaStart) {
         timer.textContent = 'Window aktif • Sisa 6 slot';
         timer.classList.remove('urgent');
-        counter.style.display = 'none';
+        if (counter) counter.style.display = 'none';
         return;
       }
       
@@ -851,11 +856,13 @@
         if (slotsLeft <= 2) timer.classList.add('urgent');
       }
       
-      if (state.uploadsThisWindow > 0) {
-        counter.textContent = state.uploadsThisWindow;
-        counter.style.display = 'block';
-      } else {
-        counter.style.display = 'none';
+      if (counter) {
+        if (state.uploadsThisWindow > 0) {
+          counter.textContent = state.uploadsThisWindow;
+          counter.style.display = 'block';
+        } else {
+          counter.style.display = 'none';
+        }
       }
     }
 
@@ -889,6 +896,8 @@
       state.notationText = '';
       
       const grid = document.getElementById('gallery-grid');
+      if (!grid) return;
+      
       grid.innerHTML = '';
       
       files.forEach((item, idx) => {
@@ -907,13 +916,20 @@
         grid.appendChild(div);
       });
       
-      document.getElementById('theme-slider').value = 0;
-      document.getElementById('theme-name').textContent = THEMES[0].name;
-      document.getElementById('notation-input').value = '';
-      document.getElementById('notation-count').textContent = '0/4';
+      const themeSlider = document.getElementById('theme-slider');
+      const themeName = document.getElementById('theme-name');
+      const notationInput = document.getElementById('notation-input');
+      const notationCount = document.getElementById('notation-count');
+      
+      if (themeSlider) themeSlider.value = 0;
+      if (themeName) themeName.textContent = THEMES[0].name;
+      if (notationInput) notationInput.value = '';
+      if (notationCount) notationCount.textContent = '0/4';
+      
       updateSelectedCount();
       
-      document.getElementById('gallery-modal').classList.add('active');
+      const modal = document.getElementById('gallery-modal');
+      if (modal) modal.classList.add('active');
       
       state.pendingFiles = files;
     }
@@ -930,13 +946,15 @@
     }
 
     function updateSelectedCount() {
-      document.getElementById('selected-count').textContent = state.selectedFiles.size;
+      const el = document.getElementById('selected-count');
+      if (el) el.textContent = state.selectedFiles.size;
     }
 
     function updateThemeFromSlider(value) {
       state.currentTheme = parseInt(value);
       const theme = THEMES[state.currentTheme];
-      document.getElementById('theme-name').textContent = theme.name;
+      const themeName = document.getElementById('theme-name');
+      if (themeName) themeName.textContent = theme.name;
       
       state.pendingFiles.forEach((_, idx) => {
         const img = document.getElementById(`preview-${idx}`);
@@ -950,18 +968,20 @@
     function validateNotation(input) {
       const words = input.value.trim().split(/\s+/).filter(w => w.length > 0);
       const count = words.length;
-      document.getElementById('notation-count').textContent = `${count}/4`;
+      const notationCount = document.getElementById('notation-count');
+      if (notationCount) notationCount.textContent = `${count}/4`;
       
       if (count > 4) {
         input.value = words.slice(0, 4).join(' ');
-        document.getElementById('notation-count').textContent = '4/4';
+        if (notationCount) notationCount.textContent = '4/4';
       }
       
       state.notationText = input.value.trim();
     }
 
     function closeGallery() {
-      document.getElementById('gallery-modal').classList.remove('active');
+      const modal = document.getElementById('gallery-modal');
+      if (modal) modal.classList.remove('active');
       state.pendingFiles = [];
       state.selectedFiles = new Set();
     }
@@ -1080,6 +1100,8 @@
     // ============================================
     function renderEntries() {
       const container = document.getElementById('entries-container');
+      if (!container) return;
+      
       const entries = getVisibleEntries();
       
       if (entries.length === 0) {
@@ -1128,7 +1150,6 @@
               ${entry.isSpilled ? '✓ Synced to cloud' : '⏳ Pending sync'}
             </div>
             ${empathyHTML}
-            <!-- Vibe bar hidden, only empathy text shown -->
           </article>
         `;
       }).join('');
@@ -1154,6 +1175,8 @@
 
     function renderTray() {
       const grid = document.getElementById('tray-grid');
+      if (!grid) return;
+      
       const artefacts = getVisibleArtefacts();
       
       grid.innerHTML = artefacts.map((art, idx) => {
@@ -1173,7 +1196,8 @@
     }
 
     function triggerUpload() {
-      document.getElementById('upload-btn').click();
+      const btn = document.getElementById('upload-btn');
+      if (btn) btn.click();
     }
 
     function setHero(url, note, faces, filterClass = 'filter-monochrome') {
@@ -1181,16 +1205,20 @@
       const heroNotation = document.getElementById('hero-notation');
       const heroFaces = document.getElementById('hero-faces');
       
+      if (!heroImg || !heroNotation) return;
+      
       heroImg.src = url;
       heroImg.className = filterClass;
       heroNotation.textContent = `"${note}"`;
       
-      heroFaces.innerHTML = '';
-      if (faces && faces.length > 0) {
-        faces.forEach(face => {
-          const scribble = createFaceScribble(face, heroImg.clientWidth, heroImg.clientHeight);
-          heroFaces.appendChild(scribble);
-        });
+      if (heroFaces) {
+        heroFaces.innerHTML = '';
+        if (faces && faces.length > 0) {
+          faces.forEach(face => {
+            const scribble = createFaceScribble(face, heroImg.clientWidth, heroImg.clientHeight);
+            heroFaces.appendChild(scribble);
+          });
+        }
       }
     }
 
@@ -1219,6 +1247,7 @@
 
     function showToast(message) {
       const toast = document.getElementById('toast');
+      if (!toast) return;
       toast.textContent = message;
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 3000);
@@ -1229,7 +1258,7 @@
     // ============================================
     function toggleMenu() {
       const menu = document.getElementById('menu-dropdown');
-      menu.classList.toggle('active');
+      if (menu) menu.classList.toggle('active');
     }
 
     function logoutUser() {
@@ -1244,7 +1273,7 @@
     document.addEventListener('click', (e) => {
       const menu = document.getElementById('menu-dropdown');
       const trigger = document.querySelector('.menu-trigger');
-      if (!menu.contains(e.target) && !trigger.contains(e.target)) {
+      if (menu && trigger && !menu.contains(e.target) && !trigger.contains(e.target)) {
         menu.classList.remove('active');
       }
     });
@@ -1265,10 +1294,18 @@
       const artefacts = localStorage.getItem(STORAGE_PREFIX + 'artefacts');
       
       if (entries) {
-        state.entries = JSON.parse(entries);
+        try {
+          state.entries = JSON.parse(entries);
+        } catch(e) {
+          state.entries = [];
+        }
       }
       if (artefacts) {
-        state.artefacts = JSON.parse(artefacts);
+        try {
+          state.artefacts = JSON.parse(artefacts);
+        } catch(e) {
+          state.artefacts = [];
+        }
       }
     }
 
@@ -1276,52 +1313,68 @@
     // INITIALIZATION
     // ============================================
     document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('header-username').textContent = state.currentUser;
+      // Set username display
+      const usernameEl = document.getElementById('header-username');
+      if (usernameEl) usernameEl.textContent = state.currentUser;
       
+      // Load data
       loadFromStorage();
+      
+      // Initialize systems
       initSupabase();
       loadFaceApiModels();
       initUploadSystem();
       
+      // Render UI
       renderEntries();
       renderTray();
       updateQuotaDisplay();
       
+      // Load from cloud if online
       if (state.isOnline) {
         loadUserRantsFromDB();
         loadUserArtefactsFromDB();
       }
       
-      // Set initial hero - prioritize real artefacts
+      // Set initial hero - prioritize real artefacts, fallback to dummy
       const firstReal = state.artefacts.find(a => !a.isDummy);
       if (firstReal) {
         setHero(firstReal.url, firstReal.note, firstReal.faces, firstReal.theme ? 'filter-' + firstReal.theme.toLowerCase() : 'filter-monochrome');
-      } else if (DUMMY_ARTEFACTS[0]) {
+      } else if (DUMMY_ARTEFACTS.length > 0) {
         setHero(DUMMY_ARTEFACTS[0].url, DUMMY_ARTEFACTS[0].note, DUMMY_ARTEFACTS[0].faces);
       }
       
+      // Setup input listeners
       const rantInput = document.getElementById('rant-input');
       const charCount = document.getElementById('char-count');
+      const submitBtn = document.getElementById('submit-btn');
       
-      rantInput.addEventListener('input', () => {
-        const len = rantInput.value.length;
-        charCount.textContent = `${len}/500`;
-        if (len >= 450) {
-          charCount.style.color = 'var(--accent-tertiary)';
-        } else {
-          charCount.style.color = 'var(--text-muted)';
-        }
-      });
+      if (rantInput && charCount) {
+        rantInput.addEventListener('input', () => {
+          const len = rantInput.value.length;
+          charCount.textContent = `${len}/500`;
+          if (len >= 450) {
+            charCount.style.color = 'var(--accent-tertiary)';
+          } else {
+            charCount.style.color = 'var(--text-muted)';
+          }
+        });
+      }
       
-      document.getElementById('submit-btn').addEventListener('click', () => {
-        const content = rantInput.value.trim();
-        if (!content) {
-          showToast('Tulis sesuatu dulu...');
-          return;
-        }
-        submitRant(content, state.currentMood);
-      });
+      if (submitBtn && rantInput) {
+        submitBtn.addEventListener('click', () => {
+          const content = rantInput.value.trim();
+          if (!content) {
+            showToast('Tulis sesuatu dulu...');
+            return;
+          }
+          submitRant(content, state.currentMood);
+          rantInput.value = '';
+          if (charCount) charCount.textContent = '0/500';
+        });
+      }
       
+      // Periodic quota update
       setInterval(updateQuotaDisplay, 60000);
     });
   </script>
