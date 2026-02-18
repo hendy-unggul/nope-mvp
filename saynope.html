@@ -6,6 +6,8 @@
   <title>Spill the Tea</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta Sans:wght@400;500;600;700;800&display=swap');
+    
     :root {
       --bg: #0A0A0A;
       --surface: #141414;
@@ -276,6 +278,12 @@
       font-size: 12px;
       font-weight: 700;
       color: var(--text-secondary);
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    
+    .spill-author:hover {
+      color: var(--accent);
     }
     
     .spill-mood {
@@ -462,6 +470,213 @@
       text-transform: uppercase;
       letter-spacing: 0.1em;
     }
+
+    /* PEAKING MODAL STYLES */
+    .peaking-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(10px);
+      z-index: 20000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      overflow-y: auto;
+    }
+    
+    .peaking-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .peaking-container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 24px 16px 100px;
+      min-height: 100vh;
+    }
+    
+    .peaking-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .peaking-title {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+    }
+    
+    .peaking-close {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .peaking-close:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    
+    .peaking-profile {
+      text-align: center;
+      margin-bottom: 32px;
+      padding: 32px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+    
+    .peaking-avatar {
+      width: 80px;
+      height: 80px;
+      background: var(--surface-elevated);
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+    }
+    
+    .peaking-username {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .peaking-vibe {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    
+    .peaking-section {
+      margin-bottom: 24px;
+    }
+    
+    .peaking-section-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .peaking-rants {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .peaking-rant-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 16px;
+    }
+    
+    .peaking-rant-date {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+    }
+    
+    .peaking-rant-content {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+    
+    .peaking-rant-mood {
+      display: inline-block;
+      font-size: 10px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      margin-top: 12px;
+      text-transform: uppercase;
+    }
+    
+    /* Artefact Tray */
+    .artefact-tray {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    
+    .artefact-item {
+      aspect-ratio: 1;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .artefact-item:hover {
+      border-color: var(--accent);
+      transform: scale(1.05);
+    }
+    
+    .artefact-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .artefact-item.empty {
+      border-style: dashed;
+      opacity: 0.3;
+    }
+    
+    .peaking-hint {
+      text-align: center;
+      padding: 24px;
+      border: 1px dashed var(--border);
+      margin-bottom: 24px;
+    }
+    
+    .peaking-hint-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+    
+    .reaction-unlock {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: var(--bg);
+      padding: 8px 16px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-top: 16px;
+    }
   </style>
 </head>
 <body>
@@ -521,6 +736,47 @@
   
   <div class="toast" id="toast"></div>
 
+  <!-- PEAKING MODAL -->
+  <div class="peaking-overlay" id="peaking-modal">
+    <div class="peaking-container">
+      <div class="peaking-header">
+        <span class="peaking-title">👁️ Peaking</span>
+        <button class="peaking-close" onclick="closePeaking()">✕</button>
+      </div>
+      
+      <div class="peaking-profile">
+        <div class="peaking-avatar" id="peaking-avatar">👤</div>
+        <div class="peaking-username" id="peaking-username">@anonymous</div>
+        <div class="peaking-vibe" id="peaking-vibe">Vibe Connection Unlocked</div>
+        <div class="reaction-unlock">
+          <span>🔓</span>
+          <span>Unlocked via Reaction</span>
+        </div>
+      </div>
+      
+      <div class="peaking-hint">
+        <p class="peaking-hint-text">
+          "Di balik anonimitas, kita terhubung melalui kesamaan rants, vibe, dan memori benda. 
+          Bukan wajah yang mengenal, tapi cerita dan artefak yang berbicara."
+        </p>
+      </div>
+      
+      <div class="peaking-section">
+        <h3 class="peaking-section-title">📦 Artefact Tray</h3>
+        <div class="artefact-tray" id="peaking-artefacts">
+          <!-- Artefacts loaded here -->
+        </div>
+      </div>
+      
+      <div class="peaking-section">
+        <h3 class="peaking-section-title">📝 All Rants</h3>
+        <div class="peaking-rants" id="peaking-rants">
+          <!-- Rants loaded here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
   <nav class="bottom-nav">
     <div class="nav-container">
       <a href="jejak.html" class="nav-item">
@@ -556,7 +812,8 @@
       currentUserId: null,
       currentFilter: 'all',
       vibeMatch: 100,
-      isLoading: true
+      isLoading: true,
+      peakingUserId: null
     };
 
     const EMOJI_REACTIONS = [
@@ -599,6 +856,16 @@
         timestamp: Date.now() - 10800000,
         reactions: { relatable: 8, hug: 12, same: 6, mood: 9, tea: 2, fire: 1 }
       }
+    ];
+
+    // Dummy artefacts for peaking
+    const DUMMY_ARTEFACTS = [
+      { id: 1, emoji: '📷', type: 'photo' },
+      { id: 2, emoji: '🎧', type: 'object' },
+      { id: 3, emoji: '☕', type: 'object' },
+      { id: 4, emoji: '📚', type: 'object' },
+      { id: 5, emoji: '🌙', type: 'photo' },
+      { id: 6, emoji: '🎸', type: 'object' }
     ];
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -789,7 +1056,7 @@
           }
           
           reactionsHtml += 
-            '<button class="reaction-btn" onclick="reactToSpill(\'' + spill.rant_id + '\', \'' + reaction.id + '\')">' +
+            '<button class="reaction-btn" onclick="reactToSpill(\'' + spill.rant_id + '\', \'' + reaction.id + '\', \'' + spill.user_id + '\', \'' + spill.author + '\')">' +
               '<span class="reaction-emoji">' + reaction.emoji + '</span>' +
               '<span class="reaction-count" id="count-' + spill.rant_id + '-' + reaction.id + '">' + count + '</span>' +
             '</button>';
@@ -798,7 +1065,7 @@
         html += 
           '<div class="spill-card">' +
             '<div class="spill-header">' +
-              '<span class="spill-author">' + escapeHtml(spill.author) + '</span>' +
+              '<span class="spill-author" onclick="peakUser(\'' + spill.user_id + '\', \'' + spill.author + '\')">' + escapeHtml(spill.author) + '</span>' +
               '<span class="spill-mood" style="color: ' + moodColor + '">' + spill.mood + '</span>' +
             '</div>' +
             '<div class="spill-content">' + escapeHtml(spill.content) + '</div>' +
@@ -817,6 +1084,175 @@
         doom: '#8B5CF6'
       };
       return colors[mood] || '#FFF';
+    }
+
+    // ============================================
+    // PEAKING FUNCTIONALITY
+    // ============================================
+    
+    // Track which users have been unlocked via reaction
+    const unlockedUsers = new Set();
+    
+    async function reactToSpill(rantId, reactionType, userId, author) {
+      // Optimistic update
+      const countEl = document.getElementById('count-' + rantId + '-' + reactionType);
+      if (countEl) {
+        countEl.textContent = parseInt(countEl.textContent) + 1;
+      }
+      
+      if (!state.reactions[rantId]) {
+        state.reactions[rantId] = {};
+      }
+      if (!state.reactions[rantId][reactionType]) {
+        state.reactions[rantId][reactionType] = 0;
+      }
+      state.reactions[rantId][reactionType]++;
+      
+      // Unlock user for peaking
+      if (userId && !unlockedUsers.has(userId)) {
+        unlockedUsers.add(userId);
+        showToast('🔓 Peaking unlocked! Click username to view their profile.');
+      }
+      
+      // Save to Supabase
+      if (state.isOnline && state.supabase) {
+        try {
+          const { data: { user } } = await state.supabase.auth.getUser();
+          
+          const reactionData = {
+            rant_id: rantId,
+            reaction_type: reactionType,
+            created_at: new Date().toISOString()
+          };
+          
+          if (user) {
+            reactionData.user_id = user.id;
+          }
+          
+          const { error } = await state.supabase
+            .from('reactions')
+            .insert(reactionData);
+          
+          if (error) {
+            console.error('Failed to save reaction:', error);
+          }
+        } catch (e) {
+          console.error('Error saving reaction:', e);
+        }
+      }
+    }
+    
+    async function peakUser(userId, author) {
+      // Check if user is unlocked
+      if (!unlockedUsers.has(userId)) {
+        showToast('🔒 React to their rant first to unlock peaking!');
+        return;
+      }
+      
+      state.peakingUserId = userId;
+      
+      // Update modal content
+      document.getElementById('peaking-username').textContent = author || '@anonymous';
+      
+      // Load user's rants and artefacts
+      await loadPeakingData(userId);
+      
+      // Show modal
+      document.getElementById('peaking-modal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+    
+    async function loadPeakingData(userId) {
+      const rantsContainer = document.getElementById('peaking-rants');
+      const artefactsContainer = document.getElementById('peaking-artefacts');
+      
+      rantsContainer.innerHTML = '<div class="loading-text">Loading...</div>';
+      artefactsContainer.innerHTML = '';
+      
+      if (state.isOnline && state.supabase) {
+        try {
+          // Load user's rants from spills table
+          const { data: rants, error: rantsError } = await state.supabase
+            .from('spills')
+            .select('*')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+          
+          if (rantsError) throw rantsError;
+          
+          // Load user's artefacts (assuming there's an artefacts table)
+          const { data: artefacts, error: artefactsError } = await state.supabase
+            .from('artefacts')
+            .select('*')
+            .eq('user_id', userId)
+            .limit(6);
+          
+          // Render rants
+          if (rants && rants.length > 0) {
+            rantsContainer.innerHTML = rants.map(rant => `
+              <div class="peaking-rant-card">
+                <div class="peaking-rant-date">${new Date(rant.created_at).toLocaleDateString('id-ID')}</div>
+                <div class="peaking-rant-content">${escapeHtml(rant.content)}</div>
+                <span class="peaking-rant-mood" style="color: ${getMoodColor(rant.mood)}">${rant.mood}</span>
+              </div>
+            `).join('');
+          } else {
+            rantsContainer.innerHTML = '<div class="empty-text">No rants yet...</div>';
+          }
+          
+          // Render artefacts
+          const artefactsToShow = artefacts || DUMMY_ARTEFACTS;
+          if (artefactsToShow.length > 0) {
+            artefactsContainer.innerHTML = artefactsToShow.map((art, idx) => `
+              <div class="artefact-item" title="Artefact ${idx + 1}">
+                ${art.emoji || art.icon || '📦'}
+              </div>
+            `).join('');
+          } else {
+            artefactsContainer.innerHTML = '<div class="empty-text">No artefacts yet...</div>';
+          }
+          
+        } catch (e) {
+          console.error('Error loading peaking data:', e);
+          // Fallback to dummy data
+          renderDummyPeakingData();
+        }
+      } else {
+        renderDummyPeakingData();
+      }
+    }
+    
+    function renderDummyPeakingData() {
+      const rantsContainer = document.getElementById('peaking-rants');
+      const artefactsContainer = document.getElementById('peaking-artefacts');
+      
+      // Dummy rants
+      const dummyUserRants = DUMMY_SPILLS.filter(s => s.user_id === state.peakingUserId || Math.random() > 0.5);
+      
+      if (dummyUserRants.length > 0) {
+        rantsContainer.innerHTML = dummyUserRants.map(rant => `
+          <div class="peaking-rant-card">
+            <div class="peaking-rant-date">${new Date(rant.timestamp).toLocaleDateString('id-ID')}</div>
+            <div class="peaking-rant-content">${escapeHtml(rant.content)}</div>
+            <span class="peaking-rant-mood" style="color: ${getMoodColor(rant.mood)}">${rant.mood}</span>
+          </div>
+        `).join('');
+      } else {
+        rantsContainer.innerHTML = '<div class="empty-text">No rants yet...</div>';
+      }
+      
+      // Dummy artefacts
+      artefactsContainer.innerHTML = DUMMY_ARTEFACTS.map((art, idx) => `
+        <div class="artefact-item" title="Artefact ${idx + 1}">
+          ${art.emoji}
+        </div>
+      `).join('');
+    }
+    
+    function closePeaking() {
+      document.getElementById('peaking-modal').classList.remove('active');
+      document.body.style.overflow = '';
+      state.peakingUserId = null;
     }
 
     function filterMood(mood) {
@@ -853,49 +1289,6 @@
       renderSpills();
     }
 
-    async function reactToSpill(rantId, reactionType) {
-      const countEl = document.getElementById('count-' + rantId + '-' + reactionType);
-      if (countEl) {
-        countEl.textContent = parseInt(countEl.textContent) + 1;
-      }
-      
-      if (!state.reactions[rantId]) {
-        state.reactions[rantId] = {};
-      }
-      if (!state.reactions[rantId][reactionType]) {
-        state.reactions[rantId][reactionType] = 0;
-      }
-      state.reactions[rantId][reactionType]++;
-      
-      showToast('Reaksi tersimpan!');
-      
-      if (state.isOnline && state.supabase) {
-        try {
-          const { data: { user } } = await state.supabase.auth.getUser();
-          
-          const reactionData = {
-            rant_id: rantId,
-            reaction_type: reactionType,
-            created_at: new Date().toISOString()
-          };
-          
-          if (user) {
-            reactionData.user_id = user.id;
-          }
-          
-          const { error } = await state.supabase
-            .from('reactions')
-            .insert(reactionData);
-          
-          if (error) {
-            console.error('Failed to save reaction:', error);
-          }
-        } catch (e) {
-          console.error('Error saving reaction:', e);
-        }
-      }
-    }
-
     function createNewSpill() {
       window.location.href = 'jejak.html';
     }
@@ -918,6 +1311,13 @@
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
+    
+    // Close peaking on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closePeaking();
+      }
+    });
   </script>
 </body>
 </html>
