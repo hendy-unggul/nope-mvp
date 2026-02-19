@@ -1,1778 +1,537 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Spill the Tea</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    
-    :root {
-      --bg: #0A0A0A;
-      --surface: #141414;
-      --surface-elevated: #1E1E1E;
-      --border: #2A2A2A;
-      --text: #FFF;
-      --text-secondary: #888;
-      --text-muted: #555;
-      --accent: #FF4D00;
-      --accent-secondary: #00F0FF;
-      --accent-tertiary: #FF006E;
-      --accent-quaternary: #39FF14;
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-      min-height: 100vh;
-      padding-bottom: 100px;
-    }
-    
-    .wrapper {
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 24px 16px;
-    }
-    
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 32px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
-    }
-    
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .brand-icon {
-      font-size: 32px;
-    }
-    
-    .brand-text {
-      font-size: 28px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-    
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    .online-dot {
-      width: 8px;
-      height: 8px;
-      background: var(--accent-secondary);
-      border-radius: 50%;
-      animation: blink 2s infinite;
-    }
-    
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-    
-    .menu-trigger {
-      width: 32px;
-      height: 32px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-    }
-    
-    .menu-trigger span {
-      width: 4px;
-      height: 4px;
-      background: var(--text);
-      border-radius: 50%;
-    }
-    
-    .tagline {
-      font-style: italic;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
-    }
-    
-    .status-text {
-      color: var(--accent);
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: 24px;
-    }
-    
-    .filter-section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 20px;
-      margin-bottom: 24px;
-    }
-    
-    .filter-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    
-    .filter-title {
-      font-size: 14px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    .reset-btn {
-      background: transparent;
-      border: 1px solid var(--accent);
-      color: var(--accent);
-      padding: 6px 12px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      cursor: pointer;
-    }
-    
-    .vibe-slider-container {
-      margin-bottom: 20px;
-    }
-    
-    .vibe-slider {
-      width: 100%;
-      height: 4px;
-      background: var(--border);
-      outline: none;
-      -webkit-appearance: none;
-      margin-bottom: 8px;
-    }
-    
-    .vibe-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 24px;
-      height: 24px;
-      background: var(--accent);
-      border: 2px solid var(--text);
-      cursor: pointer;
-    }
-    
-    .vibe-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-    
-    .mood-filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    
-    .mood-btn {
-      padding: 8px 16px;
-      background: var(--surface-elevated);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .mood-btn.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: var(--bg);
-    }
-    
-    .mood-btn:hover:not(.active) {
-      border-color: var(--text-secondary);
-    }
-    
-    .content-area {
-      min-height: 300px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border: 2px dashed var(--border);
-      padding: 40px;
-    }
-    
-    .content-area.loading {
-      border-style: dashed;
-    }
-    
-    .content-area.has-content {
-      border-style: solid;
-      border-color: var(--border);
-      padding: 0;
-      align-items: stretch;
-      justify-content: flex-start;
-      gap: 16px;
-    }
-    
-    .spinner {
-      width: 48px;
-      height: 48px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 16px;
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
-    .loading-text {
-      color: var(--text-secondary);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-    
-    .spill-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 20px;
-      animation: fadeIn 0.4s ease;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .spill-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-    }
-    
-    .spill-author {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: color 0.2s;
-      position: relative;
-    }
-    
-    .spill-author:hover {
-      color: var(--accent);
-    }
-    
-    .spill-author.locked::after {
-      content: '🔒';
-      margin-left: 6px;
-      font-size: 10px;
-    }
-    
-    .spill-author.unlocked::after {
-      content: '👁️';
-      margin-left: 6px;
-      font-size: 10px;
-    }
-    
-    .spill-mood {
-      font-size: 10px;
-      padding: 4px 8px;
-      border: 1px solid currentColor;
-      text-transform: uppercase;
-    }
-    
-    .spill-content {
-      font-size: 15px;
-      line-height: 1.6;
-      margin-bottom: 16px;
-    }
-    
-    .spill-reactions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    
-    .reaction-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--surface-elevated);
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      padding: 8px 12px;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s;
-      border-radius: 20px;
-    }
-    
-    .reaction-btn:hover {
-      border-color: var(--accent);
-      background: var(--accent);
-      color: var(--bg);
-      transform: scale(1.05);
-    }
-    
-    .reaction-btn:active {
-      transform: scale(0.95);
-    }
-    
-    .reaction-emoji {
-      font-size: 16px;
-    }
-    
-    .reaction-count {
-      font-weight: 600;
-      font-size: 12px;
-      min-width: 16px;
-      text-align: center;
-    }
-    
-    .new-spill-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      width: 100%;
-      padding: 16px;
-      background: transparent;
-      border: 2px solid var(--accent);
-      color: var(--accent);
-      font-size: 14px;
-      font-weight: 700;
-      text-transform: uppercase;
-      cursor: pointer;
-      margin-top: 24px;
-      margin-bottom: 32px;
-      transition: all 0.2s;
-    }
-    
-    .new-spill-btn:hover {
-      background: var(--accent);
-      color: var(--bg);
-    }
-    
-    .empty-state {
-      text-align: center;
-      padding: 40px;
-    }
-    
-    .empty-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-    }
-    
-    .empty-text {
-      color: var(--text-secondary);
-      font-style: italic;
-      margin-bottom: 8px;
-    }
-    
-    .empty-subtext {
-      color: var(--text-muted);
-      font-size: 12px;
-    }
-    
-    .toast {
-      position: fixed;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: var(--text);
-      color: var(--bg);
-      padding: 12px 24px;
-      font-size: 13px;
-      font-weight: 600;
-      z-index: 10000;
-      opacity: 0;
-      transition: all 0.3s;
-    }
-    
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      z-index: 1000;
-    }
-    
-    .nav-container {
-      max-width: 480px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      height: 60px;
-    }
-    
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      background: transparent;
-      border: none;
-      color: var(--text-secondary);
-      cursor: pointer;
-      padding: 8px 24px;
-      transition: all 0.2s;
-      text-decoration: none;
-      flex: 1;
-      position: relative;
-    }
-    
-    .nav-item.active {
-      color: var(--accent);
-    }
-    
-    .nav-item.active::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: var(--accent);
-    }
-    
-    .nav-item:hover {
-      color: var(--text);
-    }
-    
-    .nav-icon {
-      font-size: 20px;
-      font-weight: 400;
-    }
-    
-    .nav-label {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-
-    /* GETARAN YANG COCOK SECTION - NOW AT BOTTOM */
-    .vibe-match-section {
-      margin-top: 8px;
-      padding-top: 32px;
-      border-top: 1px solid var(--border);
-    }
-    
-    .vibe-match-header {
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .vibe-match-header::before {
-      content: '〰️';
-    }
-    
-    .vibe-match-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 16px;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .vibe-match-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    
-    .vibe-match-card:hover::before {
-      opacity: 1;
-    }
-    
-    .vibe-match-icon {
-      width: 48px;
-      height: 48px;
-      background: var(--surface-elevated);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      margin-bottom: 12px;
-      border: 2px solid var(--border);
-    }
-    
-    .vibe-match-icon.chaotic {
-      border-color: var(--accent-secondary);
-      animation: spin-slow 8s linear infinite;
-    }
-    
-    .vibe-match-icon.caregiver {
-      border-color: var(--accent-quaternary);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    
-    @keyframes spin-slow {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(57, 255, 20, 0.4); }
-      50% { transform: scale(1.05); box-shadow: 0 0 20px 5px rgba(57, 255, 20, 0.2); }
-    }
-    
-    .vibe-match-title {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 12px;
-      line-height: 1.4;
-    }
-    
-    .vibe-match-traits {
-      list-style: none;
-      margin-bottom: 16px;
-    }
-    
-    .vibe-match-traits li {
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .vibe-match-traits li::before {
-      content: '✓';
-      color: var(--accent-quaternary);
-      font-weight: 700;
-    }
-    
-    .vibe-match-graph {
-      display: flex;
-      align-items: flex-end;
-      gap: 3px;
-      height: 24px;
-      margin-bottom: 16px;
-      opacity: 0.6;
-    }
-    
-    .vibe-match-bar {
-      width: 4px;
-      background: linear-gradient(to top, var(--accent), var(--accent-secondary));
-      border-radius: 2px;
-      animation: equalizer 1.5s ease-in-out infinite;
-    }
-    
-    .vibe-match-bar:nth-child(1) { height: 40%; animation-delay: 0s; }
-    .vibe-match-bar:nth-child(2) { height: 70%; animation-delay: 0.1s; }
-    .vibe-match-bar:nth-child(3) { height: 50%; animation-delay: 0.2s; }
-    .vibe-match-bar:nth-child(4) { height: 90%; animation-delay: 0.3s; }
-    .vibe-match-bar:nth-child(5) { height: 60%; animation-delay: 0.4s; }
-    
-    @keyframes equalizer {
-      0%, 100% { transform: scaleY(1); }
-      50% { transform: scaleY(0.6); }
-    }
-    
-    .vibe-match-actions {
-      display: flex;
-      gap: 12px;
-    }
-    
-    .vibe-match-btn {
-      flex: 1;
-      padding: 10px 16px;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-radius: 20px;
-      cursor: pointer;
-      transition: all 0.2s;
-      border: none;
-    }
-    
-    .vibe-match-btn.skip {
-      background: transparent;
-      color: var(--text-secondary);
-      border: 1px solid var(--border);
-    }
-    
-    .vibe-match-btn.skip:hover {
-      border-color: var(--text-secondary);
-      color: var(--text);
-    }
-    
-    .vibe-match-btn.signal {
-      background: var(--text);
-      color: var(--bg);
-    }
-    
-    .vibe-match-btn.signal:hover {
-      background: var(--accent);
-      color: var(--text);
-    }
-
-    /* PEAKING MODAL STYLES */
-    .peaking-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.95);
-      backdrop-filter: blur(10px);
-      z-index: 20000;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-      overflow-y: auto;
-    }
-    
-    .peaking-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-    
-    .peaking-container {
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 24px 16px 100px;
-      min-height: 100vh;
-    }
-    
-    .peaking-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 32px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
-    }
-    
-    .peaking-title {
-      font-size: 14px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--accent);
-    }
-    
-    .peaking-close {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-      width: 40px;
-      height: 40px;
-      font-size: 20px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .peaking-close:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    
-    .peaking-profile {
-      text-align: center;
-      margin-bottom: 32px;
-      padding: 32px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .peaking-profile::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
-    }
-    
-    .peaking-avatar {
-      width: 80px;
-      height: 80px;
-      background: var(--surface-elevated);
-      border: 2px solid var(--accent);
-      border-radius: 50%;
-      margin: 0 auto 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      position: relative;
-    }
-    
-    .peaking-avatar::after {
-      content: '👁️';
-      position: absolute;
-      bottom: -5px;
-      right: -5px;
-      background: var(--accent);
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      border: 2px solid var(--bg);
-    }
-    
-    .peaking-username {
-      font-size: 18px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    
-    .peaking-vibe {
-      font-size: 12px;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-    }
-    
-    .peaking-section {
-      margin-bottom: 24px;
-    }
-    
-    .peaking-section-title {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-muted);
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .peaking-rants {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    
-    .peaking-rant-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 16px;
-      transition: all 0.2s;
-    }
-    
-    .peaking-rant-card:hover {
-      border-color: var(--accent);
-    }
-    
-    .peaking-rant-date {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    .peaking-rant-content {
-      font-size: 14px;
-      line-height: 1.6;
-      color: var(--text);
-      margin-bottom: 12px;
-    }
-    
-    .peaking-rant-mood {
-      display: inline-block;
-      font-size: 10px;
-      padding: 4px 8px;
-      border: 1px solid var(--border);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    .artefact-tray {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-    
-    .artefact-item {
-      aspect-ratio: 1;
-      background: var(--surface-elevated);
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      cursor: pointer;
-      transition: all 0.3s;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .artefact-item:hover {
-      border-color: var(--accent);
-      transform: translateY(-4px);
-      box-shadow: 0 4px 20px rgba(255, 77, 0, 0.3);
-    }
-    
-    .artefact-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .artefact-item.empty {
-      border-style: dashed;
-      opacity: 0.3;
-    }
-    
-    .peaking-hint {
-      text-align: center;
-      padding: 24px;
-      border: 1px dashed var(--border);
-      margin-bottom: 24px;
-      background: var(--surface);
-    }
-    
-    .peaking-hint-text {
-      font-size: 12px;
-      color: var(--text-secondary);
-      font-style: italic;
-      line-height: 1.6;
-    }
-    
-    .reaction-unlock {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--accent);
-      color: var(--bg);
-      padding: 8px 16px;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      margin-top: 16px;
-      letter-spacing: 0.05em;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Spill the Tea</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+:root{--bg:#0A0A0A;--surface:#141414;--se:#1E1E1E;--border:#2A2A2A;--txt:#FFF;--ts:#888;--tm:#555;--a:#FF4D00;--as:#00F0FF;--at:#FF006E;--aq:#39FF14}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:'Plus Jakarta Sans',system-ui,sans-serif;min-height:100vh;padding-bottom:100px}
+.wrapper{max-width:480px;margin:0 auto;padding:24px 16px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{font-size:32px}
+.brand-text{font-size:28px;font-weight:800;letter-spacing:-.02em}
+.header-actions{display:flex;align-items:center;gap:12px}
+.online-dot{width:8px;height:8px;background:var(--as);border-radius:50%;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.menu-trigger{width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:transparent;border:none;cursor:pointer}
+.menu-trigger span{width:4px;height:4px;background:var(--txt);border-radius:50%}
+.tagline{font-style:italic;color:var(--ts);margin-bottom:8px}
+.status-text{color:var(--a);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:24px}
+.filter-section{background:var(--surface);border:1px solid var(--border);padding:20px;margin-bottom:24px}
+.filter-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.filter-title{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.reset-btn{background:transparent;border:1px solid var(--a);color:var(--a);padding:6px 12px;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer}
+.vibe-slider{width:100%;height:4px;background:var(--border);outline:none;-webkit-appearance:none;margin-bottom:8px;display:block}
+.vibe-slider::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;background:var(--a);border:2px solid var(--txt);cursor:pointer}
+.vibe-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--tm);text-transform:uppercase;margin-bottom:20px}
+.mood-filters{display:flex;flex-wrap:wrap;gap:8px}
+.mood-btn{padding:8px 16px;background:var(--se);border:1px solid var(--border);color:var(--txt);font-size:12px;font-weight:600;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.mood-btn.active{background:var(--a);border-color:var(--a);color:var(--bg)}
+.mood-btn:hover:not(.active){border-color:var(--ts)}
+.content-area{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px dashed var(--border);padding:40px}
+.content-area.has-content{border-style:solid;border-color:var(--border);padding:0;align-items:stretch;justify-content:flex-start;gap:16px}
+.spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--a);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:var(--ts);font-size:12px;text-transform:uppercase;letter-spacing:.1em}
+.spill-card{background:var(--surface);border:1px solid var(--border);padding:20px;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.spill-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.spill-author{font-size:12px;font-weight:700;color:var(--ts);cursor:pointer;transition:color .2s}
+.spill-author:hover{color:var(--a)}
+.spill-author.locked::after{content:'🔒';margin-left:6px;font-size:10px}
+.spill-author.unlocked::after{content:'👁️';margin-left:6px;font-size:10px}
+.spill-mood{font-size:10px;padding:4px 8px;border:1px solid currentColor;text-transform:uppercase}
+.spill-content{font-size:15px;line-height:1.6;margin-bottom:16px}
+.spill-reactions{display:flex;gap:8px;flex-wrap:wrap}
+.reaction-btn{display:flex;align-items:center;gap:6px;background:var(--se);border:1px solid var(--border);color:var(--ts);padding:8px 12px;font-size:13px;cursor:pointer;transition:all .2s;border-radius:20px}
+.reaction-btn:hover{border-color:var(--a);background:var(--a);color:var(--bg);transform:scale(1.05)}
+.reaction-btn:active{transform:scale(.95)}
+.reaction-emoji{font-size:16px}
+.reaction-count{font-weight:600;font-size:12px;min-width:16px;text-align:center}
+.new-spill-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:16px;background:transparent;border:2px solid var(--a);color:var(--a);font-size:14px;font-weight:700;text-transform:uppercase;cursor:pointer;margin-top:24px;margin-bottom:32px;transition:all .2s}
+.new-spill-btn:hover{background:var(--a);color:var(--bg)}
+.empty-state{text-align:center;padding:40px}
+.empty-icon{font-size:48px;margin-bottom:16px}
+.empty-text{color:var(--ts);font-style:italic;margin-bottom:8px}
+.empty-subtext{color:var(--tm);font-size:12px}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--txt);color:var(--bg);padding:12px 24px;font-size:13px;font-weight:600;z-index:10000;opacity:0;transition:all .3s}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:1000}
+.nav-container{max-width:480px;margin:0 auto;display:flex;justify-content:space-around;align-items:center;height:60px}
+.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:transparent;border:none;color:var(--ts);cursor:pointer;padding:8px 24px;transition:all .2s;text-decoration:none;flex:1;position:relative}
+.nav-item.active{color:var(--a)}
+.nav-item.active::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--a)}
+.nav-item:hover{color:var(--txt)}
+.nav-icon{font-size:20px}
+.nav-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+.vibe-match-section{margin-top:8px;padding-top:32px;border-top:1px solid var(--border)}
+.vibe-match-header{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--tm);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.vibe-match-header::before{content:'〰️'}
+.vibe-match-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden;transition:border-color .3s,opacity .3s,transform .3s}
+.vibe-match-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--a),var(--as));opacity:0;transition:opacity .3s}
+.vibe-match-card:hover::before{opacity:1}
+.vibe-match-icon{width:48px;height:48px;background:var(--se);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px;border:2px solid var(--border)}
+.vibe-match-icon.chaotic{border-color:var(--as);animation:spin-slow 8s linear infinite}
+.vibe-match-icon.caregiver{border-color:var(--aq);animation:pulse 2s ease-in-out infinite}
+@keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(57,255,20,.4)}50%{transform:scale(1.05);box-shadow:0 0 20px 5px rgba(57,255,20,.2)}}
+.vibe-match-title{font-size:15px;font-weight:700;margin-bottom:12px;line-height:1.4}
+.vibe-match-traits{list-style:none;margin-bottom:16px}
+.vibe-match-traits li{font-size:13px;color:var(--ts);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.vibe-match-traits li::before{content:'✓';color:var(--aq);font-weight:700}
+.vibe-match-graph{display:flex;align-items:flex-end;gap:3px;height:24px;margin-bottom:16px;opacity:.6}
+.vibe-match-bar{width:4px;background:linear-gradient(to top,var(--a),var(--as));border-radius:2px;animation:equalizer 1.5s ease-in-out infinite}
+.vibe-match-bar:nth-child(1){height:40%;animation-delay:0s}
+.vibe-match-bar:nth-child(2){height:70%;animation-delay:.1s}
+.vibe-match-bar:nth-child(3){height:50%;animation-delay:.2s}
+.vibe-match-bar:nth-child(4){height:90%;animation-delay:.3s}
+.vibe-match-bar:nth-child(5){height:60%;animation-delay:.4s}
+@keyframes equalizer{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.6)}}
+.vibe-match-actions{display:flex;gap:12px}
+.vibe-match-btn{flex:1;padding:10px 16px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border-radius:20px;cursor:pointer;transition:all .2s;border:none}
+.vibe-match-btn.skip{background:transparent;color:var(--ts);border:1px solid var(--border)}
+.vibe-match-btn.skip:hover{border-color:var(--ts);color:var(--txt)}
+.vibe-match-btn.signal{background:var(--txt);color:var(--bg)}
+.vibe-match-btn.signal:hover{background:var(--a);color:var(--txt)}
+/* PEAKING MODAL */
+.peaking-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.95);backdrop-filter:blur(10px);z-index:20000;opacity:0;visibility:hidden;transition:all .3s ease;overflow-y:auto}
+.peaking-overlay.active{opacity:1;visibility:visible}
+.peaking-container{max-width:480px;margin:0 auto;padding:24px 16px 100px;min-height:100vh}
+.peaking-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.peaking-title{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--a)}
+.peaking-close{background:transparent;border:1px solid var(--border);color:var(--txt);width:40px;height:40px;font-size:20px;cursor:pointer;transition:all .2s}
+.peaking-close:hover{border-color:var(--a);color:var(--a)}
+.peaking-profile{text-align:center;margin-bottom:32px;padding:32px;background:var(--surface);border:1px solid var(--border);position:relative;overflow:hidden}
+.peaking-profile::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--a),var(--as))}
+.peaking-avatar{width:80px;height:80px;background:var(--se);border:2px solid var(--a);border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:32px;position:relative}
+.peaking-avatar::after{content:'👁️';position:absolute;bottom:-5px;right:-5px;background:var(--a);width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid var(--bg)}
+.peaking-username{font-size:18px;font-weight:700;margin-bottom:8px}
+.peaking-vibe{font-size:12px;color:var(--ts);text-transform:uppercase;letter-spacing:.1em}
+.peaking-section{margin-bottom:24px}
+.peaking-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--tm);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.peaking-rants{display:flex;flex-direction:column;gap:16px}
+.peaking-rant-card{background:var(--surface);border:1px solid var(--border);padding:16px;transition:border-color .2s}
+.peaking-rant-card:hover{border-color:var(--a)}
+.peaking-rant-date{font-size:11px;color:var(--tm);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em}
+.peaking-rant-content{font-size:14px;line-height:1.6;color:var(--txt);margin-bottom:12px}
+.peaking-rant-mood{display:inline-block;font-size:10px;padding:4px 8px;border:1px solid var(--border);text-transform:uppercase;letter-spacing:.05em}
+.artefact-tray{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.artefact-item{aspect-ratio:1;background:var(--se);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.artefact-item:hover{border-color:var(--a);transform:translateY(-4px);box-shadow:0 4px 20px rgba(255,77,0,.3)}
+.artefact-item img{width:100%;height:100%;object-fit:cover}
+.artefact-item.empty{border-style:dashed;opacity:.3}
+.peaking-hint{text-align:center;padding:24px;border:1px dashed var(--border);margin-bottom:24px;background:var(--surface)}
+.peaking-hint-text{font-size:12px;color:var(--ts);font-style:italic;line-height:1.6}
+.reaction-unlock{display:inline-flex;align-items:center;gap:8px;background:var(--a);color:var(--bg);padding:8px 16px;font-size:11px;font-weight:700;text-transform:uppercase;margin-top:16px;letter-spacing:.05em}
+</style>
 </head>
 <body>
-  <div class="wrapper">
-    <header>
-      <div class="brand">
-        <span class="brand-icon">🍵</span>
-        <span class="brand-text">Spill the Tea</span>
-      </div>
-      <div class="header-actions">
-        <div class="online-dot" id="online-dot"></div>
-        <button class="menu-trigger" onclick="toggleMenu()">
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-      </div>
-    </header>
-    
-    <p class="tagline">Curhatan dari komunitas yang selaras dengan vibrasimu</p>
-    <p class="status-text" id="status-text">Memuat spills...</p>
-    
-    <div class="filter-section">
-      <div class="filter-header">
-        <span class="filter-title">Kesamaan Vibrasi</span>
-        <button class="reset-btn" onclick="resetFilters()">Reset</button>
-      </div>
-      
-      <div class="vibe-slider-container">
-        <input type="range" class="vibe-slider" id="vibe-slider" min="0" max="100" value="100">
-        <div class="vibe-labels">
-          <span>Homie Only</span>
-          <span>Semi-Selaras</span>
-          <span>Semua</span>
-        </div>
-      </div>
-      
-      <div class="mood-filters" id="mood-filters">
-        <button class="mood-btn active" data-mood="all" onclick="filterMood('all')">Semua</button>
-        <button class="mood-btn" data-mood="surviving" onclick="filterMood('surviving')">😮‍💨 Surviving</button>
-        <button class="mood-btn" data-mood="thriving" onclick="filterMood('thriving')">✨ Thriving</button>
-        <button class="mood-btn" data-mood="chaotic" onclick="filterMood('chaotic')">🌀 Chaotic</button>
-        <button class="mood-btn" data-mood="doom" onclick="filterMood('doom')">🛌 Doom</button>
-      </div>
+<div class="wrapper">
+  <header>
+    <div class="brand">
+      <span class="brand-icon">🍵</span>
+      <span class="brand-text">Spill the Tea</span>
     </div>
-    
-    <div class="content-area loading" id="content-area">
-      <div class="spinner" id="spinner"></div>
-      <p class="loading-text" id="loading-text">Menyedu teh...</p>
+    <div class="header-actions">
+      <div class="online-dot" id="online-dot"></div>
+      <button class="menu-trigger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
     </div>
-    
-    <button class="new-spill-btn" onclick="createNewSpill()">
-      <span>🔄</span>
-      <span>Seduh Teh Baru</span>
-    </button>
-    
-    <!-- GETARAN YANG COCOK SECTION - DIPINDAHKAN KE BAWAH -->
-    <div class="vibe-match-section" id="vibe-match-section">
-      <div class="vibe-match-header">Getaran yang Cocok</div>
-      
-      <!-- Card 1: Chaotic Good -->
-      <div class="vibe-match-card" id="chaotic-good-card">
-        <div class="vibe-match-icon chaotic">🌀</div>
-        <div class="vibe-match-title">
-          Seseorang dengan pola "chaotic good" sering muncul di timeline kamu.
-        </div>
-        <div class="vibe-match-graph">
-          <div class="vibe-match-bar"></div>
-          <div class="vibe-match-bar"></div>
-          <div class="vibe-match-bar"></div>
-          <div class="vibe-match-bar"></div>
-          <div class="vibe-match-bar"></div>
-        </div>
-        <ul class="vibe-match-traits">
-          <li>Sama-sama aktif jam aneh</li>
-          <li>Sama-sama react 😂 tapi jarang post</li>
-          <li>Sama-sama "surviving" mode</li>
-        </ul>
-        <div class="vibe-match-actions">
-          <button class="vibe-match-btn skip" onclick="skipVibeMatch('chaotic')">Lewati</button>
-          <button class="vibe-match-btn signal" onclick="sendSignal('chaotic')">Beri Isyarat</button>
-        </div>
-      </div>
-      
-      <!-- Card 2: Silent Caregiver -->
-      <div class="vibe-match-card" id="caregiver-card">
-        <div class="vibe-match-icon caregiver">🫂</div>
-        <div class="vibe-match-title">
-          Ada yang sering kasih hug ke curhatanmu, tapi jarang cerita balik.
-        </div>
-        <div class="vibe-match-graph">
-          <div class="vibe-match-bar"></div>
-          <div class="vibe-match-bar"></div>
-          <div class="vibe-match-bar"></div>
-          <div class="vibe-match-bar"></div>
-          <div class="vibe-match-bar"></div>
-        </div>
-        <ul class="vibe-match-traits">
-          <li>Pola "caregiver" yang sama</li>
-          <li>Sama-sama burnout tapi diam</li>
-        </ul>
-        <div class="vibe-match-actions">
-          <button class="vibe-match-btn skip" onclick="skipVibeMatch('caregiver')">Lewati</button>
-          <button class="vibe-match-btn signal" onclick="sendSignal('caregiver')">Beri Isyarat</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  
-  <div class="toast" id="toast"></div>
+  </header>
 
-  <!-- PEAKING MODAL -->
-  <div class="peaking-overlay" id="peaking-modal">
-    <div class="peaking-container">
-      <div class="peaking-header">
-        <span class="peaking-title">👁️ Peaking</span>
-        <button class="peaking-close" onclick="closePeaking()">✕</button>
-      </div>
-      
-      <div class="peaking-profile">
-        <div class="peaking-avatar" id="peaking-avatar">👤</div>
-        <div class="peaking-username" id="peaking-username">@anonymous</div>
-        <div class="peaking-vibe" id="peaking-vibe">Vibe Connection Unlocked</div>
-        <div class="reaction-unlock">
-          <span>🔓</span>
-          <span>Unlocked via Reaction</span>
-        </div>
-      </div>
-      
-      <div class="peaking-hint">
-        <p class="peaking-hint-text">
-          "Di balik anonimitas, kita terhubung melalui kesamaan rants, vibe, dan memori benda. 
-          Bukan wajah yang mengenal, tapi cerita dan artefak yang berbicara."
-        </p>
-      </div>
-      
-      <div class="peaking-section">
-        <h3 class="peaking-section-title">
-          <span>📦</span>
-          <span>Artefact Tray</span>
-        </h3>
-        <div class="artefact-tray" id="peaking-artefacts">
-          <!-- Artefacts loaded here -->
-        </div>
-      </div>
-      
-      <div class="peaking-section">
-        <h3 class="peaking-section-title">
-          <span>📝</span>
-          <span>All Rants</span>
-        </h3>
-        <div class="peaking-rants" id="peaking-rants">
-          <!-- Rants loaded here -->
-        </div>
-      </div>
+  <p class="tagline">Curhatan dari komunitas yang selaras dengan vibrasimu</p>
+  <p class="status-text" id="status-text">Memuat spills...</p>
+
+  <div class="filter-section">
+    <div class="filter-header">
+      <span class="filter-title">Kesamaan Vibrasi</span>
+      <button class="reset-btn" onclick="resetFilters()">Reset</button>
+    </div>
+    <input type="range" class="vibe-slider" id="vibe-slider" min="0" max="100" value="100">
+    <div class="vibe-labels"><span>Homie Only</span><span>Semi-Selaras</span><span>Semua</span></div>
+    <div class="mood-filters" id="mood-filters">
+      <button class="mood-btn active" data-mood="all" onclick="filterMood('all')">Semua</button>
+      <button class="mood-btn" data-mood="surviving" onclick="filterMood('surviving')">😮‍💨 Surviving</button>
+      <button class="mood-btn" data-mood="thriving" onclick="filterMood('thriving')">✨ Thriving</button>
+      <button class="mood-btn" data-mood="chaotic" onclick="filterMood('chaotic')">🌀 Chaotic</button>
+      <button class="mood-btn" data-mood="doom" onclick="filterMood('doom')">🛌 Doom</button>
     </div>
   </div>
 
-  <nav class="bottom-nav">
-    <div class="nav-container">
-      <a href="jejak.html" class="nav-item">
-        <span class="nav-icon">✦</span>
-        <span class="nav-label">Jejak</span>
-      </a>
-      <a href="cocomeo.html" class="nav-item">
-        <span class="nav-icon">〜</span>
-        <span class="nav-label">Cocomeo</span>
-      </a>
-      <a href="saynope.html" class="nav-item active">
-        <span class="nav-icon">✕</span>
-        <span class="nav-label">Spill</span>
-      </a>
-      <a href="glitch.html" class="nav-item">
-        <span class="nav-icon">⚡</span>
-        <span class="nav-label">Glitch</span>
-      </a>
+  <div class="content-area loading" id="content-area">
+    <div class="spinner"></div>
+    <p class="loading-text">Menyedu teh...</p>
+  </div>
+
+  <button class="new-spill-btn" onclick="createNewSpill()">
+    <span>🔄</span><span>Seduh Teh Baru</span>
+  </button>
+
+  <div class="vibe-match-section" id="vibe-match-section">
+    <div class="vibe-match-header">Getaran yang Cocok</div>
+
+    <div class="vibe-match-card" id="chaotic-good-card">
+      <div class="vibe-match-icon chaotic">🌀</div>
+      <div class="vibe-match-title">Seseorang dengan pola "chaotic good" sering muncul di timeline kamu.</div>
+      <div class="vibe-match-graph">
+        <div class="vibe-match-bar"></div><div class="vibe-match-bar"></div>
+        <div class="vibe-match-bar"></div><div class="vibe-match-bar"></div>
+        <div class="vibe-match-bar"></div>
+      </div>
+      <ul class="vibe-match-traits">
+        <li>Sama-sama aktif jam aneh</li>
+        <li>Sama-sama react 😂 tapi jarang post</li>
+        <li>Sama-sama "surviving" mode</li>
+      </ul>
+      <div class="vibe-match-actions">
+        <button class="vibe-match-btn skip" onclick="skipVibeMatch('chaotic')">Lewati</button>
+        <button class="vibe-match-btn signal" onclick="sendSignal('chaotic')">Beri Isyarat</button>
+      </div>
     </div>
-  </nav>
 
-  <script>
-    const CONFIG = {
-      supabaseUrl: 'https://fuovfrdicdhnlymnacpz.supabase.co',
-      supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0'
-    };
+    <div class="vibe-match-card" id="caregiver-card">
+      <div class="vibe-match-icon caregiver">🫂</div>
+      <div class="vibe-match-title">Ada yang sering kasih hug ke curhatanmu, tapi jarang cerita balik.</div>
+      <div class="vibe-match-graph">
+        <div class="vibe-match-bar"></div><div class="vibe-match-bar"></div>
+        <div class="vibe-match-bar"></div><div class="vibe-match-bar"></div>
+        <div class="vibe-match-bar"></div>
+      </div>
+      <ul class="vibe-match-traits">
+        <li>Pola "caregiver" yang sama</li>
+        <li>Sama-sama burnout tapi diam</li>
+      </ul>
+      <div class="vibe-match-actions">
+        <button class="vibe-match-btn skip" onclick="skipVibeMatch('caregiver')">Lewati</button>
+        <button class="vibe-match-btn signal" onclick="sendSignal('caregiver')">Beri Isyarat</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-    const state = {
-      supabase: null,
-      isOnline: false,
-      spills: [],
-      reactions: {},
-      currentUserId: null,
-      currentUserEmail: null,
-      currentFilter: 'all',
-      vibeMatch: 100,
-      isLoading: true,
-      peakingUserId: null,
-      vibeMatches: {
-        chaotic: { shown: true, user: null },
-        caregiver: { shown: true, user: null }
+<div class="toast" id="toast"></div>
+
+<!-- PEAKING MODAL -->
+<div class="peaking-overlay" id="peaking-modal">
+  <div class="peaking-container">
+    <div class="peaking-header">
+      <span class="peaking-title">👁️ Peaking</span>
+      <button class="peaking-close" onclick="closePeaking()">✕</button>
+    </div>
+    <div class="peaking-profile">
+      <div class="peaking-avatar" id="peaking-avatar">👤</div>
+      <div class="peaking-username" id="peaking-username">@anonymous</div>
+      <div class="peaking-vibe" id="peaking-vibe">Vibe Connection Unlocked</div>
+      <div class="reaction-unlock"><span>🔓</span><span>Unlocked via Reaction</span></div>
+    </div>
+    <div class="peaking-hint">
+      <p class="peaking-hint-text">"Di balik anonimitas, kita terhubung melalui kesamaan rants, vibe, dan memori benda. Bukan wajah yang mengenal, tapi cerita dan artefak yang berbicara."</p>
+    </div>
+    <div class="peaking-section">
+      <h3 class="peaking-section-title"><span>📦</span><span>Artefact Tray</span></h3>
+      <div class="artefact-tray" id="peaking-artefacts"></div>
+    </div>
+    <div class="peaking-section">
+      <h3 class="peaking-section-title"><span>📝</span><span>All Rants</span></h3>
+      <div class="peaking-rants" id="peaking-rants"></div>
+    </div>
+  </div>
+</div>
+
+<nav class="bottom-nav">
+  <div class="nav-container">
+    <a href="jejak.html" class="nav-item"><span class="nav-icon">✦</span><span class="nav-label">Jejak</span></a>
+    <a href="cocomeo.html" class="nav-item"><span class="nav-icon">〜</span><span class="nav-label">Cocomeo</span></a>
+    <a href="saynope.html" class="nav-item active"><span class="nav-icon">✕</span><span class="nav-label">Spill</span></a>
+    <a href="glitch.html" class="nav-item"><span class="nav-icon">⚡</span><span class="nav-label">Glitch</span></a>
+  </div>
+</nav>
+
+<script>
+const CFG = {
+  url: 'https://fuovfrdicdhnlymnacpz.supabase.co',
+  key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0'
+};
+
+const st = {
+  sb: null, online: false, spills: [], reactions: {},
+  userId: null, userEmail: null, filter: 'all',
+  vibeMatch: 100, loading: true, peakingId: null,
+  vibeMatches: { chaotic: { shown: true, user: null }, caregiver: { shown: true, user: null } }
+};
+
+const unlocked = new Set();
+
+const REACTIONS = [
+  { id:'relatable', emoji:'💯', label:'Relatable' },
+  { id:'hug',       emoji:'🤗', label:'Hug'       },
+  { id:'same',      emoji:'✋', label:'Same'      },
+  { id:'mood',      emoji:'😮‍💨', label:'Mood'    },
+  { id:'tea',       emoji:'🍵', label:'Tea'       },
+  { id:'fire',      emoji:'🔥', label:'Fire'      }
+];
+
+const DUMMY_SPILLS = [
+  { id:'d1', rant_id:'d1', content:'Ada yang pernah ngerasa kalo lagi banyak kerjaan malah makin males ngerjain? Padahal deadline mepet. Help', mood:'chaotic', author:'@anonymouse', user_id:'u1', timestamp:Date.now()-3600000, reactions:{relatable:5,hug:2,same:3,mood:4,tea:1,fire:0} },
+  { id:'d2', rant_id:'d2', content:'Hari ini gue bangun pagi, olahraga, sarapan sehat, dan ngerjain side project. Semoga konsisten', mood:'thriving', author:'@earlybird', user_id:'u2', timestamp:Date.now()-7200000, reactions:{relatable:2,hug:1,same:0,mood:1,tea:3,fire:5} },
+  { id:'d3', rant_id:'d3', content:'Capek banget rasanya. Pengen tidur 3 hari 3 malam tanpa gangguan.', mood:'doom', author:'@tiredsoul', user_id:'u3', timestamp:Date.now()-10800000, reactions:{relatable:8,hug:12,same:6,mood:9,tea:2,fire:1} }
+];
+
+const DUMMY_ARTS = [
+  { emoji:'📷' },{ emoji:'🎧' },{ emoji:'☕' },
+  { emoji:'📚' },{ emoji:'🌙' },{ emoji:'🎸' }
+];
+
+const MOOD_COLORS = { surviving:'#FF9500', thriving:'#39FF14', chaotic:'#00F0FF', doom:'#8B5CF6' };
+
+function getMoodColor(m){ return MOOD_COLORS[m] || '#FFF'; }
+function esc(t){ if(!t) return ''; const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+
+// ---- INIT ----
+document.addEventListener('DOMContentLoaded', () => {
+  if(typeof supabase !== 'undefined'){
+    st.sb = supabase.createClient(CFG.url, CFG.key);
+    st.online = true;
+  }
+  const dot = document.getElementById('online-dot');
+  dot.style.background = st.online ? 'var(--as)' : 'var(--tm)';
+  dot.style.animation = st.online ? 'blink 2s infinite' : 'none';
+
+  document.getElementById('vibe-slider').addEventListener('input', e => {
+    st.vibeMatch = +e.target.value;
+    renderSpills();
+  });
+
+  loadSpills();
+  analyzeVibeMatches();
+});
+
+// ---- VIBE MATCH ----
+async function analyzeVibeMatches(){
+  if(st.online && st.sb){
+    try {
+      await st.sb.from('reactions').select('*').eq('user_id', st.userId);
+      await st.sb.from('rants').select('*').eq('author', st.userEmail);
+    } catch(e) {}
+  }
+  st.vibeMatches.chaotic.user = { id:'chaotic-u1', username:'@chaotic_good_angel', matchScore:87 };
+  st.vibeMatches.caregiver.user = { id:'caregiver-u1', username:'@silent_hugger', hugsGiven:23, storiesShared:1 };
+}
+
+function skipVibeMatch(type){
+  const id = type==='chaotic' ? 'chaotic-good-card' : 'caregiver-card';
+  const card = document.getElementById(id);
+  if(card){ card.style.opacity='0'; card.style.transform='translateX(-100%)'; setTimeout(()=>card.style.display='none',300); }
+  st.vibeMatches[type].shown = false;
+  toast(`Card ${type} dilewati. Mungkin lain kali.`);
+}
+
+function sendSignal(type){
+  const match = st.vibeMatches[type];
+  if(!match.user) return;
+  toast(`📡 Isyarat terkirim ke ${match.user.username}! Tunggu responsnya...`);
+  const id = type==='chaotic' ? 'chaotic-good-card' : 'caregiver-card';
+  const card = document.getElementById(id);
+  if(card){
+    card.style.borderColor = 'var(--aq)';
+    setTimeout(()=>{ card.style.opacity='0'; card.style.transform='scale(.95)'; setTimeout(()=>card.style.display='none',300); },1500);
+  }
+}
+
+// ---- LOAD SPILLS ----
+async function loadSpills(){
+  setLoading(true);
+  if(st.online && st.sb){
+    try {
+      const { data: { user } } = await st.sb.auth.getUser();
+      st.userId = user?.id || null;
+      st.userEmail = user?.email || null;
+
+      const { data, error } = await st.sb.from('spills').select('*').order('created_at',{ascending:false}).limit(50);
+      if(error) throw error;
+
+      if(data && data.length > 0){
+        const emailName = st.userEmail ? st.userEmail.split('@')[0].toLowerCase() : '';
+        st.spills = data.filter(s => {
+          if(s.user_id && st.userId && s.user_id === st.userId) return false;
+          const a = (s.author||'').replace('@','').toLowerCase();
+          if(a && emailName && (a === emailName || a.includes(emailName))) return false;
+          if(!s.user_id && a === 'kaya raya') return false;
+          return true;
+        }).map(s => ({
+          id: s.id, rant_id: s.rant_id, content: s.content, mood: s.mood,
+          author: s.author || '@anonymous', user_id: s.user_id || s.author,
+          timestamp: new Date(s.created_at).getTime(), reactions: s.reactions || {}
+        }));
+
+        const ids = st.spills.map(s=>s.rant_id).filter(Boolean);
+        if(ids.length) await loadReactions(ids);
+      } else {
+        st.spills = DUMMY_SPILLS;
       }
-    };
+    } catch(e){
+      console.error(e);
+      st.spills = DUMMY_SPILLS;
+      toast('Gagal memuat data, menampilkan contoh');
+    }
+  } else {
+    st.spills = DUMMY_SPILLS;
+    toast('Mode offline - menampilkan contoh');
+  }
+  setLoading(false);
+  renderSpills();
+}
 
-    // Track unlocked users for peaking
-    const unlockedUsers = new Set();
-
-    const EMOJI_REACTIONS = [
-      { id: 'relatable', emoji: '💯', label: 'Relatable' },
-      { id: 'hug', emoji: '🤗', label: 'Hug' },
-      { id: 'same', emoji: '✋', label: 'Same' },
-      { id: 'mood', emoji: '😮‍💨', label: 'Mood' },
-      { id: 'tea', emoji: '🍵', label: 'Tea' },
-      { id: 'fire', emoji: '🔥', label: 'Fire' }
-    ];
-
-    const DUMMY_SPILLS = [
-      {
-        id: 'dummy-1',
-        rant_id: 'dummy-1',
-        content: "Ada yang pernah ngerasa kalo lagi banyak kerjaan malah makin males ngerjain? Padahal deadline mepet. Help",
-        mood: 'chaotic',
-        author: '@anonymouse',
-        user_id: 'other-user-1',
-        timestamp: Date.now() - 3600000,
-        reactions: { relatable: 5, hug: 2, same: 3, mood: 4, tea: 1, fire: 0 }
-      },
-      {
-        id: 'dummy-2',
-        rant_id: 'dummy-2',
-        content: "Hari ini gue bangun pagi, olahraga, sarapan sehat, dan ngerjain side project. Semoga konsisten",
-        mood: 'thriving',
-        author: '@earlybird',
-        user_id: 'other-user-2',
-        timestamp: Date.now() - 7200000,
-        reactions: { relatable: 2, hug: 1, same: 0, mood: 1, tea: 3, fire: 5 }
-      },
-      {
-        id: 'dummy-3',
-        rant_id: 'dummy-3',
-        content: "Capek banget rasanya. Pengen tidur 3 hari 3 malam tanpa gangguan.",
-        mood: 'doom',
-        author: '@tiredsoul',
-        user_id: 'other-user-3',
-        timestamp: Date.now() - 10800000,
-        reactions: { relatable: 8, hug: 12, same: 6, mood: 9, tea: 2, fire: 1 }
-      }
-    ];
-
-    const DUMMY_ARTEFACTS = [
-      { id: 1, emoji: '📷', type: 'photo' },
-      { id: 2, emoji: '🎧', type: 'object' },
-      { id: 3, emoji: '☕', type: 'object' },
-      { id: 4, emoji: '📚', type: 'object' },
-      { id: 5, emoji: '🌙', type: 'photo' },
-      { id: 6, emoji: '🎸', type: 'object' }
-    ];
-
-    document.addEventListener('DOMContentLoaded', function() {
-      initSupabase();
-      loadSpills();
-      analyzeVibeMatches();
-      
-      const slider = document.getElementById('vibe-slider');
-      if (slider) {
-        slider.addEventListener('input', function(e) {
-          state.vibeMatch = parseInt(e.target.value);
-          renderSpills();
-        });
-      }
+async function loadReactions(ids){
+  if(!st.sb || !ids.length) return;
+  try {
+    const { data, error } = await st.sb.from('reactions').select('*').in('rant_id', ids);
+    if(error) return;
+    st.reactions = {};
+    ids.forEach(id => { st.reactions[id] = {}; REACTIONS.forEach(r => { st.reactions[id][r.id] = 0; }); });
+    (data||[]).forEach(r => {
+      if(st.reactions[r.rant_id] && r.reaction_type && st.reactions[r.rant_id][r.reaction_type] !== undefined)
+        st.reactions[r.rant_id][r.reaction_type]++;
     });
+  } catch(e){ console.error(e); }
+}
 
-    function initSupabase() {
-      try {
-        if (typeof supabase === 'undefined') {
-          updateOnlineStatus(false);
-          return;
-        }
-        state.supabase = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
-        state.isOnline = true;
-        updateOnlineStatus(true);
-      } catch (e) {
-        updateOnlineStatus(false);
-      }
-    }
+function setLoading(v){
+  st.loading = v;
+  const ca = document.getElementById('content-area');
+  const s = document.getElementById('status-text');
+  if(v){
+    ca.className = 'content-area loading';
+    ca.innerHTML = '<div class="spinner"></div><p class="loading-text">Menyedu teh...</p>';
+    if(s) s.textContent = 'Memuat spills...';
+  } else {
+    if(s) s.textContent = st.spills.length + ' spills ditemukan';
+  }
+}
 
-    function updateOnlineStatus(online) {
-      const dot = document.getElementById('online-dot');
-      if (dot) {
-        dot.style.background = online ? 'var(--accent-secondary)' : 'var(--text-muted)';
-        dot.style.animation = online ? 'blink 2s infinite' : 'none';
-      }
-    }
+function renderSpills(){
+  const ca = document.getElementById('content-area');
+  if(!ca || st.loading) return;
 
-    // ============================================
-    // VIBE MATCH ANALYSIS
-    // ============================================
-    async function analyzeVibeMatches() {
-      // In real implementation, this would analyze user's behavior patterns
-      // and find matching users from the database
-      
-      // For now, we show the cards based on dummy analysis
-      // This would be replaced with actual algorithm:
-      // - Chaotic Good: users who react often but post rarely, active at odd hours
-      // - Caregiver: users who give hugs frequently but rarely share their own stories
-      
-      if (state.isOnline && state.supabase) {
-        try {
-          // Analyze current user's patterns
-          const { data: userReactions } = await state.supabase
-            .from('reactions')
-            .select('*')
-            .eq('user_id', state.currentUserId);
-            
-          const { data: userRants } = await state.supabase
-            .from('rants')
-            .select('*')
-            .eq('author', state.currentUser);
-          
-          // Find users with similar patterns
-          // This is simplified - real implementation would be more complex
-          await findChaoticGoodMatch();
-          await findCaregiverMatch();
-        } catch (e) {
-          console.log('Using dummy vibe matches');
-        }
-      }
-    }
+  let list = st.spills;
+  if(st.filter !== 'all') list = list.filter(s => s.mood === st.filter);
+  if(st.vibeMatch < 100) list = list.filter(() => Math.random() < st.vibeMatch/100);
 
-    async function findChaoticGoodMatch() {
-      // Find user who:
-      // 1. Often reacts with 😂 but rarely posts
-      // 2. Active at similar odd hours
-      // 3. Same "surviving" mode
-      
-      // Dummy implementation - would query database
-      state.vibeMatches.chaotic.user = {
-        id: 'chaotic-user-1',
-        username: '@chaotic_good_angel',
-        matchScore: 87
-      };
-    }
+  if(!list.length){
+    ca.className = 'content-area';
+    ca.innerHTML = '<div class="empty-state"><div class="empty-icon">🍃</div><div class="empty-text">Belum ada teh yang tumpah...</div><div class="empty-subtext">Jadilah yang pertama!</div></div>';
+    return;
+  }
 
-    async function findCaregiverMatch() {
-      // Find user who:
-      // 1. Frequently gives hugs to current user's rants
-      // 2. Rarely shares their own stories
-      // 3. Similar burnout pattern
-      
-      // Dummy implementation - would query database
-      state.vibeMatches.caregiver.user = {
-        id: 'caregiver-user-1',
-        username: '@silent_hugger',
-        hugsGiven: 23,
-        storiesShared: 1
-      };
-    }
+  ca.className = 'content-area has-content';
+  ca.innerHTML = list.map(spill => {
+    const isUnlocked = unlocked.has(spill.user_id);
+    const sa = (spill.author||'@anonymous').replace(/'/g,"\\'");
+    const su = (spill.user_id||'').replace(/'/g,"\\'");
+    const rxHtml = REACTIONS.map(r => {
+      let c = (st.reactions[spill.rant_id]||{})[r.id] || (spill.reactions||{})[r.id] || 0;
+      return `<button class="reaction-btn" onclick="reactToSpill('${spill.rant_id}','${r.id}','${su}','${sa}')"><span class="reaction-emoji">${r.emoji}</span><span class="reaction-count" id="count-${spill.rant_id}-${r.id}">${c}</span></button>`;
+    }).join('');
+    return `<div class="spill-card"><div class="spill-header"><span class="spill-author ${isUnlocked?'unlocked':'locked'}" onclick="peakUser('${su}','${sa}')">${esc(spill.author)}</span><span class="spill-mood" style="color:${getMoodColor(spill.mood)}">${spill.mood}</span></div><div class="spill-content">${esc(spill.content)}</div><div class="spill-reactions">${rxHtml}</div></div>`;
+  }).join('');
+}
 
-    function skipVibeMatch(type) {
-      const card = document.getElementById(type === 'chaotic' ? 'chaotic-good-card' : 'caregiver-card');
-      if (card) {
-        card.style.opacity = '0';
-        card.style.transform = 'translateX(-100%)';
-        setTimeout(() => {
-          card.style.display = 'none';
-        }, 300);
-      }
-      state.vibeMatches[type].shown = false;
-      showToast(`Card ${type} dilewati. Mungkin lain kali.`);
-    }
+// ---- PEAKING ----
+async function reactToSpill(rantId, type, userId, author){
+  const el = document.getElementById(`count-${rantId}-${type}`);
+  if(el) el.textContent = +el.textContent + 1;
+  if(!st.reactions[rantId]) st.reactions[rantId] = {};
+  st.reactions[rantId][type] = (st.reactions[rantId][type]||0) + 1;
 
-    function sendSignal(type) {
-      const match = state.vibeMatches[type];
-      if (match.user) {
-        // In real implementation, this would send a signal to the matched user
-        // Could be a notification, a special reaction, or opening a connection
-        
-        showToast(`📡 Isyarat terkirim ke ${match.user.username}! Tunggu responsnya...`);
-        
-        // Animate the card to show success
-        const card = document.getElementById(type === 'chaotic' ? 'chaotic-good-card' : 'caregiver-card');
-        if (card) {
-          card.style.borderColor = 'var(--accent-quaternary)';
-          setTimeout(() => {
-            card.style.opacity = '0';
-            card.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-              card.style.display = 'none';
-            }, 300);
-          }, 1500);
-        }
-        
-        // Here you would typically:
-        // 1. Create a connection request in database
-        // 2. Send notification to matched user
-        // 3. Track that signal was sent
-      }
-    }
+  if(userId && userId!=='null' && userId!=='undefined' && userId!=='' && !unlocked.has(userId)){
+    unlocked.add(userId);
+    toast('🔓 Peaking unlocked! Click username to view their profile.');
+    renderSpills();
+  }
 
-    // ============================================
-    // LOAD SPILLS - STRICTLY exclude current user's rants
-    // ============================================
-    async function loadSpills() {
-      setLoading(true);
-      
-      if (state.isOnline && state.supabase) {
-        try {
-          // Get current user with email for better matching
-          const { data: { user }, error: userError } = await state.supabase.auth.getUser();
-          
-          if (userError) {
-            console.error('Auth error:', userError);
-          }
-          
-          state.currentUserId = user ? user.id : null;
-          state.currentUserEmail = user ? user.email : null;
-          
-          console.log('Current user ID:', state.currentUserId);
-          console.log('Current user email:', state.currentUserEmail);
-          
-          // Fetch ALL spills first to check data
-          const { data: allData, error: allError } = await state.supabase
-            .from('spills')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(50);
-          
-          if (allError) throw allError;
-          
-          console.log('All spills fetched:', allData ? allData.length : 0);
-          
-          if (allData && allData.length > 0) {
-            // Filter out current user's rants manually with strict checking
-            let filteredData = allData.filter(spill => {
-              // Check all possible identifiers
-              const spillUserId = spill.user_id;
-              const spillAuthor = spill.author ? spill.author.replace('@', '') : '';
-              const currentEmailName = state.currentUserEmail ? state.currentUserEmail.split('@')[0] : '';
-              
-              // Exclude if matches current user ID
-              if (spillUserId && state.currentUserId && spillUserId === state.currentUserId) {
-                console.log('Filtered out by user_id:', spill.author);
-                return false;
-              }
-              
-              // Exclude if author matches current user's email prefix
-              if (spillAuthor && currentEmailName && 
-                  (spillAuthor.toLowerCase() === currentEmailName.toLowerCase() ||
-                   spillAuthor.toLowerCase().includes(currentEmailName.toLowerCase()))) {
-                console.log('Filtered out by author match:', spill.author);
-                return false;
-              }
-              
-              // Exclude if user_id is null/undefined but author suggests it's current user
-              if (!spillUserId && spillAuthor === 'kaya raya') {
-                // Hardcoded filter for known current user
-                console.log('Filtered out kaya raya (no user_id):', spill.content);
-                return false;
-              }
-              
-              return true;
-            });
-            
-            console.log('After filtering:', filteredData.length);
-            
-            state.spills = filteredData.map(function(s) {
-              return {
-                id: s.id,
-                rant_id: s.rant_id,
-                content: s.content,
-                mood: s.mood,
-                author: s.author || '@anonymous',
-                user_id: s.user_id || s.author, // fallback to author if no user_id
-                timestamp: new Date(s.created_at).getTime(),
-                reactions: s.reactions || {}
-              };
-            });
-            
-            const rantIds = state.spills.map(s => s.rant_id).filter(id => id);
-            if (rantIds.length > 0) {
-              await loadReactions(rantIds);
-            }
-          } else {
-            state.spills = DUMMY_SPILLS;
-          }
-        } catch (e) {
-          console.error('Load error:', e);
-          state.spills = DUMMY_SPILLS;
-          showToast('Gagal memuat data, menampilkan contoh');
-        }
-      } else {
-        state.spills = DUMMY_SPILLS;
-        showToast('Mode offline - menampilkan contoh');
-      }
-      
-      setLoading(false);
-      renderSpills();
-    }
+  if(st.online && st.sb){
+    try {
+      await st.sb.from('reactions').insert({ rant_id:rantId, reaction_type:type, created_at:new Date().toISOString() });
+    } catch(e){ console.error(e); }
+  }
+}
 
-    async function loadReactions(rantIds) {
-      if (!state.supabase || rantIds.length === 0) return;
-      
-      try {
-        const { data, error } = await state.supabase
-          .from('reactions')
-          .select('*')
-          .in('rant_id', rantIds);
-        
-        if (error) {
-          console.error('Error loading reactions:', error);
-          return;
-        }
-        
-        state.reactions = {};
-        rantIds.forEach(id => {
-          state.reactions[id] = {};
-          EMOJI_REACTIONS.forEach(r => {
-            state.reactions[id][r.id] = 0;
-          });
-        });
-        
-        if (data) {
-          data.forEach(reaction => {
-            const rantId = reaction.rant_id;
-            if (state.reactions[rantId] && reaction.reaction_type) {
-              if (state.reactions[rantId][reaction.reaction_type] !== undefined) {
-                state.reactions[rantId][reaction.reaction_type]++;
-              }
-            }
-          });
-        }
-      } catch (e) {
-        console.error('Failed to load reactions:', e);
-      }
-    }
+async function peakUser(userId, author){
+  if(!userId || userId==='null' || userId==='undefined' || userId===''){
+    toast('Cannot peak: User ID not available'); return;
+  }
+  if(!unlocked.has(userId)){ toast('🔒 React to their rant first to unlock peaking!'); return; }
+  st.peakingId = userId;
+  document.getElementById('peaking-username').textContent = author || '@anonymous';
+  await loadPeakingData(userId);
+  document.getElementById('peaking-modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
 
-    function setLoading(loading) {
-      state.isLoading = loading;
-      const contentArea = document.getElementById('content-area');
-      const statusText = document.getElementById('status-text');
-      
-      if (loading) {
-        if (contentArea) {
-          contentArea.className = 'content-area loading';
-          contentArea.innerHTML = '<div class="spinner" id="spinner"></div><p class="loading-text" id="loading-text">Menyedu teh...</p>';
-        }
-        if (statusText) statusText.textContent = 'Memuat spills...';
-      } else {
-        if (statusText) statusText.textContent = state.spills.length + ' spills ditemukan';
-      }
-    }
+async function loadPeakingData(userId){
+  const rc = document.getElementById('peaking-rants');
+  const ac = document.getElementById('peaking-artefacts');
+  rc.innerHTML = '<div class="loading-text">Loading profile...</div>';
+  ac.innerHTML = '';
 
-    function renderSpills() {
-      const contentArea = document.getElementById('content-area');
-      if (!contentArea || state.isLoading) return;
-      
-      let filtered = state.spills;
-      
-      if (state.currentFilter !== 'all') {
-        filtered = filtered.filter(s => s.mood === state.currentFilter);
-      }
-      
-      if (state.vibeMatch < 100) {
-        const threshold = state.vibeMatch / 100;
-        filtered = filtered.filter(() => Math.random() < threshold);
-      }
-      
-      if (filtered.length === 0) {
-        contentArea.className = 'content-area';
-        contentArea.innerHTML = 
-          '<div class="empty-state">' +
-            '<div class="empty-icon">🍃</div>' +
-            '<div class="empty-text">Belum ada teh yang tumpah...</div>' +
-            '<div class="empty-subtext">Jadilah yang pertama!</div>' +
-          '</div>';
-        return;
-      }
-      
-      contentArea.className = 'content-area has-content';
-      
-      let html = '';
-      for (let i = 0; i < filtered.length; i++) {
-        const spill = filtered[i];
-        const moodColor = getMoodColor(spill.mood);
-        const isUnlocked = unlockedUsers.has(spill.user_id);
-        
-        let reactionsHtml = '';
-        for (let j = 0; j < EMOJI_REACTIONS.length; j++) {
-          const reaction = EMOJI_REACTIONS[j];
-          let count = 0;
-          if (state.reactions[spill.rant_id] && state.reactions[spill.rant_id][reaction.id]) {
-            count = state.reactions[spill.rant_id][reaction.id];
-          } else if (spill.reactions && spill.reactions[reaction.id]) {
-            count = spill.reactions[reaction.id];
-          }
-          
-          // Escape single quotes in author
-          const safeAuthor = (spill.author || '@anonymous').replace(/'/g, "\\'");
-          const safeUserId = (spill.user_id || '').replace(/'/g, "\\'");
-          
-          reactionsHtml += 
-            '<button class="reaction-btn" onclick="reactToSpill(\'' + spill.rant_id + '\', \'' + reaction.id + '\', \'' + safeUserId + '\', \'' + safeAuthor + '\')">' +
-              '<span class="reaction-emoji">' + reaction.emoji + '</span>' +
-              '<span class="reaction-count" id="count-' + spill.rant_id + '-' + reaction.id + '">' + count + '</span>' +
-            '</button>';
-        }
-        
-        const safeAuthor = (spill.author || '@anonymous').replace(/'/g, "\\'");
-        const safeUserId = (spill.user_id || '').replace(/'/g, "\\'");
-        
-        html += 
-          '<div class="spill-card">' +
-            '<div class="spill-header">' +
-              '<span class="spill-author ' + (isUnlocked ? 'unlocked' : 'locked') + '" onclick="peakUser(\'' + safeUserId + '\', \'' + safeAuthor + '\')">' + escapeHtml(spill.author) + '</span>' +
-              '<span class="spill-mood" style="color: ' + moodColor + '">' + spill.mood + '</span>' +
-            '</div>' +
-            '<div class="spill-content">' + escapeHtml(spill.content) + '</div>' +
-            '<div class="spill-reactions">' + reactionsHtml + '</div>' +
-          '</div>';
-      }
-      
-      contentArea.innerHTML = html;
-    }
+  if(st.online && st.sb){
+    try {
+      const { data: rants } = await st.sb.from('spills').select('*').eq('user_id',userId).order('created_at',{ascending:false});
+      const { data: arts } = await st.sb.from('artefacts').select('*').eq('user_id',userId).limit(6);
 
-    function getMoodColor(mood) {
-      const colors = {
-        surviving: '#FF9500',
-        thriving: '#39FF14',
-        chaotic: '#00F0FF',
-        doom: '#8B5CF6'
-      };
-      return colors[mood] || '#FFF';
-    }
+      rc.innerHTML = (rants && rants.length)
+        ? rants.map(r=>`<div class="peaking-rant-card"><div class="peaking-rant-date">${new Date(r.created_at).toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div><div class="peaking-rant-content">${esc(r.content)}</div><span class="peaking-rant-mood" style="color:${getMoodColor(r.mood)};border-color:${getMoodColor(r.mood)}">${r.mood}</span></div>`).join('')
+        : '<div class="empty-text">No rants yet...</div>';
 
-    // ============================================
-    // PEAKING FUNCTIONALITY
-    // ============================================
-    
-    async function reactToSpill(rantId, reactionType, userId, author) {
-      console.log('Reacting to:', rantId, 'User:', userId, 'Author:', author);
-      
-      const countEl = document.getElementById('count-' + rantId + '-' + reactionType);
-      if (countEl) {
-        countEl.textContent = parseInt(countEl.textContent) + 1;
-      }
-      
-      if (!state.reactions[rantId]) {
-        state.reactions[rantId] = {};
-      }
-      if (!state.reactions[rantId][reactionType]) {
-        state.reactions[rantId][reactionType] = 0;
-      }
-      state.reactions[rantId][reactionType]++;
-      
-      // Unlock user for peaking
-      if (userId && userId !== 'null' && userId !== 'undefined' && userId !== '' && !unlockedUsers.has(userId)) {
-        unlockedUsers.add(userId);
-        showToast('🔓 Peaking unlocked! Click username to view their profile.');
-        renderSpills();
-      }
-      
-      // Save to Supabase
-      if (state.isOnline && state.supabase) {
-        try {
-          const reactionData = {
-            rant_id: rantId,
-            reaction_type: reactionType,
-            created_at: new Date().toISOString()
-          };
-          
-          const { error } = await state.supabase
-            .from('reactions')
-            .insert(reactionData);
-          
-          if (error) {
-            console.error('Failed to save reaction:', error);
-          }
-        } catch (e) {
-          console.error('Error saving reaction:', e);
-        }
-      }
-    }
-    
-    async function peakUser(userId, author) {
-      console.log('Peaking user:', userId, 'Author:', author);
-      
-      if (!userId || userId === 'null' || userId === 'undefined' || userId === '') {
-        showToast('Cannot peak: User ID not available');
-        return;
-      }
-      
-      if (!unlockedUsers.has(userId)) {
-        showToast('🔒 React to their rant first to unlock peaking!');
-        return;
-      }
-      
-      state.peakingUserId = userId;
-      document.getElementById('peaking-username').textContent = author || '@anonymous';
-      
-      await loadPeakingData(userId);
-      
-      document.getElementById('peaking-modal').classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
-    
-    async function loadPeakingData(userId) {
-      const rantsContainer = document.getElementById('peaking-rants');
-      const artefactsContainer = document.getElementById('peaking-artefacts');
-      
-      rantsContainer.innerHTML = '<div class="loading-text">Loading profile...</div>';
-      artefactsContainer.innerHTML = '';
-      
-      if (state.isOnline && state.supabase) {
-        try {
-          const { data: rants, error: rantsError } = await state.supabase
-            .from('spills')
-            .select('*')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false });
-          
-          if (rantsError) throw rantsError;
-          
-          const { data: artefacts, error: artefactsError } = await state.supabase
-            .from('artefacts')
-            .select('*')
-            .eq('user_id', userId)
-            .limit(6);
-          
-          if (rants && rants.length > 0) {
-            rantsContainer.innerHTML = rants.map(rant => `
-              <div class="peaking-rant-card">
-                <div class="peaking-rant-date">${new Date(rant.created_at).toLocaleDateString('id-ID', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}</div>
-                <div class="peaking-rant-content">${escapeHtml(rant.content)}</div>
-                <span class="peaking-rant-mood" style="color: ${getMoodColor(rant.mood)}; border-color: ${getMoodColor(rant.mood)}">${rant.mood}</span>
-              </div>
-            `).join('');
-          } else {
-            rantsContainer.innerHTML = '<div class="empty-text">No rants yet...</div>';
-          }
-          
-          const artefactsToShow = artefacts && artefacts.length > 0 ? artefacts : DUMMY_ARTEFACTS;
-          artefactsContainer.innerHTML = artefactsToShow.map((art, idx) => `
-            <div class="artefact-item" title="${art.name || 'Artefact ' + (idx + 1)}">
-              ${art.emoji || art.icon || '📦'}
-            </div>
-          `).join('');
-          
-        } catch (e) {
-          console.error('Error loading peaking data:', e);
-          renderDummyPeakingData(userId);
-        }
-      } else {
-        renderDummyPeakingData(userId);
-      }
-    }
-    
-    function renderDummyPeakingData(userId) {
-      const rantsContainer = document.getElementById('peaking-rants');
-      const artefactsContainer = document.getElementById('peaking-artefacts');
-      
-      const userRants = DUMMY_SPILLS.filter(s => s.user_id === userId);
-      
-      if (userRants.length > 0) {
-        rantsContainer.innerHTML = userRants.map(rant => `
-          <div class="peaking-rant-card">
-            <div class="peaking-rant-date">${new Date(rant.timestamp).toLocaleDateString('id-ID', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            })}</div>
-            <div class="peaking-rant-content">${escapeHtml(rant.content)}</div>
-            <span class="peaking-rant-mood" style="color: ${getMoodColor(rant.mood)}; border-color: ${getMoodColor(rant.mood)}">${rant.mood}</span>
-          </div>
-        `).join('');
-      } else {
-        rantsContainer.innerHTML = '<div class="empty-text">No rants yet...</div>';
-      }
-      
-      artefactsContainer.innerHTML = DUMMY_ARTEFACTS.map((art, idx) => `
-        <div class="artefact-item" title="Artefact ${idx + 1}">
-          ${art.emoji}
-        </div>
-      `).join('');
-    }
-    
-    function closePeaking() {
-      document.getElementById('peaking-modal').classList.remove('active');
-      document.body.style.overflow = '';
-      state.peakingUserId = null;
-    }
+      const show = (arts && arts.length) ? arts : DUMMY_ARTS;
+      ac.innerHTML = show.map((a,i)=>`<div class="artefact-item" title="${a.name||'Artefact '+(i+1)}">${a.emoji||a.icon||'📦'}</div>`).join('');
+      return;
+    } catch(e){ console.error(e); }
+  }
+  renderDummyPeaking(userId, rc, ac);
+}
 
-    function filterMood(mood) {
-      state.currentFilter = mood;
-      
-      const buttons = document.querySelectorAll('.mood-btn');
-      buttons.forEach(btn => {
-        if (btn.dataset.mood === mood) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      });
-      
-      renderSpills();
-    }
+function renderDummyPeaking(userId, rc, ac){
+  const ur = DUMMY_SPILLS.filter(s=>s.user_id===userId);
+  rc.innerHTML = ur.length
+    ? ur.map(r=>`<div class="peaking-rant-card"><div class="peaking-rant-date">${new Date(r.timestamp).toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div><div class="peaking-rant-content">${esc(r.content)}</div><span class="peaking-rant-mood" style="color:${getMoodColor(r.mood)};border-color:${getMoodColor(r.mood)}">${r.mood}</span></div>`).join('')
+    : '<div class="empty-text">No rants yet...</div>';
+  ac.innerHTML = DUMMY_ARTS.map((a,i)=>`<div class="artefact-item" title="Artefact ${i+1}">${a.emoji}</div>`).join('');
+}
 
-    function resetFilters() {
-      state.currentFilter = 'all';
-      state.vibeMatch = 100;
-      
-      const slider = document.getElementById('vibe-slider');
-      if (slider) slider.value = 100;
-      
-      const buttons = document.querySelectorAll('.mood-btn');
-      buttons.forEach(btn => {
-        if (btn.dataset.mood === 'all') {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      });
-      
-      renderSpills();
-    }
+function closePeaking(){
+  document.getElementById('peaking-modal').classList.remove('active');
+  document.body.style.overflow = '';
+  st.peakingId = null;
+}
 
-    function createNewSpill() {
-      window.location.href = 'jejak.html';
-    }
+// ---- FILTERS & MISC ----
+function filterMood(mood){
+  st.filter = mood;
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('active', b.dataset.mood === mood));
+  renderSpills();
+}
 
-    function toggleMenu() {
-      showToast('Menu clicked');
-    }
+function resetFilters(){
+  st.filter = 'all'; st.vibeMatch = 100;
+  document.getElementById('vibe-slider').value = 100;
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('active', b.dataset.mood === 'all'));
+  renderSpills();
+}
 
-    function escapeHtml(text) {
-      if (!text) return '';
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
+function createNewSpill(){ window.location.href = 'jejak.html'; }
+function toggleMenu(){ toast('Menu clicked'); }
 
-    function showToast(message) {
-      const toast = document.getElementById('toast');
-      if (!toast) return;
-      toast.textContent = message;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-    
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closePeaking();
-      }
-    });
-    
-    document.getElementById('peaking-modal').addEventListener('click', (e) => {
-      if (e.target.id === 'peaking-modal') {
-        closePeaking();
-      }
-    });
-  </script>
+// ---- KEYBOARD / CLICK OUTSIDE ----
+document.addEventListener('keydown', e => { if(e.key==='Escape') closePeaking(); });
+document.getElementById('peaking-modal').addEventListener('click', e => { if(e.target.id==='peaking-modal') closePeaking(); });
+</script>
 </body>
 </html>
