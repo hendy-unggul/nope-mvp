@@ -1,1454 +1,403 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="brutalgenz">
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>JEJAK — Spill Your Truth</title>
-  
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/dist/face-api.js"></script>
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap" rel="stylesheet">
-  
-  <style>
-    :root{--bg:#0A0A0A;--surface:#141414;--surface-elevated:#1E1E1E;--border:#2A2A2A;--border-accent:#FF4D00;--text:#FFF;--text-secondary:#888;--text-muted:#555;--accent-primary:#FF4D00;--accent-secondary:#00F0FF;--accent-tertiary:#FF006E;--accent-quaternary:#39FF14;--accent-warm:#FFD700;--mood-surviving:#FF9500;--mood-thriving:#39FF14;--mood-chaotic:#00F0FF;--mood-doom:#8B5CF6;--radius:0;--space-xs:4px;--space-sm:8px;--space-md:16px;--space-lg:24px;--space-xl:32px}
-    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-    html{scroll-behavior:smooth}
-    body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:500;font-size:15px;line-height:1.4;min-height:100vh;overflow-x:hidden;padding-bottom:100px}
-    body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.4}
-    .wrapper{max-width:480px;margin:0 auto;padding:0 var(--space-md)}
-    
-    /* HEADER - MINIMALIS */
-    header{padding:var(--space-lg) 0 var(--space-md);display:flex;justify-content:space-between;align-items:flex-start;position:relative}
-    .logo{font-size:42px;font-weight:800;letter-spacing:-0.04em;cursor:pointer;line-height:0.9;position:relative}
-    .logo::before,.logo::after{content:'JEJAK';position:absolute;top:0;left:0;opacity:0;transition:opacity 0.1s}
-    .logo::before{color:var(--accent-secondary);transform:translate(-2px,0)}
-    .logo::after{color:var(--accent-tertiary);transform:translate(2px,0)}
-    .logo:hover::before{opacity:0.8;animation:g 0.3s infinite}
-    @keyframes g{0%,100%{transform:translate(-2px,0)}25%{transform:translate(2px,2px)}50%{transform:translate(-2px,-2px)}75%{transform:translate(2px,0)}}
-    .tagline{font-family:'Instrument Serif',serif;font-size:13px;color:var(--text-secondary);font-style:italic;margin-top:var(--space-xs)}
-    
-    /* Top Right - Minimalis */
-    .top-right{display:flex;align-items:center;gap:var(--space-sm)}
-    
-    /* Username Display */
-    .header-username{font-size:11px;font-weight:700;color:var(--text);text-transform:lowercase;letter-spacing:0.05em;padding:4px 8px;background:var(--surface);border:1px solid var(--border);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    
-    /* Online Indicator - Titik hijau blinking only */
-    .online-dot{width:8px;height:8px;background:var(--accent-quaternary);border-radius:50%;animation:blink 2s infinite;flex-shrink:0}
-    @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
-    .online-dot.offline{background:var(--accent-tertiary);animation:none}
-    
-    /* Settings Menu (3 dots) */
-    .settings-menu{position:relative}
-    .menu-trigger{width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:transparent;border:none;cursor:pointer;padding:0}
-    .menu-trigger span{width:4px;height:4px;background:var(--text);border-radius:50%;transition:all 0.2s}
-    .menu-trigger:hover span{background:var(--accent-primary)}
-    .menu-dropdown{position:absolute;top:100%;right:0;margin-top:var(--space-sm);background:var(--surface);border:2px solid var(--border);min-width:120px;display:none;z-index:100}
-    .menu-dropdown.active{display:block}
-    .menu-item{width:100%;padding:var(--space-sm) var(--space-md);background:transparent;border:none;color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;text-align:left;cursor:pointer;transition:all 0.2s}
-    .menu-item:hover{background:var(--surface-elevated);color:var(--accent-primary)}
-    
-    /* NAVIGATION */
-    .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:2px solid var(--border);z-index:1000;padding-bottom:env(safe-area-inset-bottom)}
-    .nav-container{max-width:480px;margin:0 auto;display:flex;justify-content:space-around;align-items:center;height:64px}
-    .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:100%;color:var(--text-muted);text-decoration:none;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;transition:all 0.2s;position:relative;cursor:pointer}
-    .nav-item::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--accent-primary);transition:width 0.2s}
-    .nav-item:hover{color:var(--text-secondary);background:var(--surface-elevated)}
-    .nav-item.active{color:var(--accent-primary)}
-    .nav-item.active::before{width:100%}
-    .nav-icon{font-size:20px;line-height:1}
-    
-    /* HERO */
-    .hero-section{position:relative;margin:0 calc(-1 * var(--space-md));margin-bottom:var(--space-lg)}
-    .hero{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;border-top:2px solid var(--border);border-bottom:2px solid var(--border);background:var(--surface)}
-    .hero img{width:100%;height:100%;object-fit:cover;transition:transform 0.6s,filter 0.3s}
-    .hero:hover img{transform:scale(1.03)}
-    .hero::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none}
-    .hero-notation{position:absolute;bottom:0;left:0;right:0;padding:var(--space-md);background:linear-gradient(to top,rgba(0,0,0,0.9),transparent);font-family:'Instrument Serif',serif;font-size:24px;font-style:italic;color:var(--text);line-height:1.2;z-index:20}
-    
-    /* Face Scribble */
-    .face-scribble{position:absolute;background:rgba(0,0,0,0.95);pointer-events:none;z-index:15;overflow:hidden}
-    .face-scribble::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(255,255,255,0.1) 2px,rgba(255,255,255,0.1) 4px),repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,0.05) 2px,rgba(255,255,255,0.05) 4px)}
-    .marker-lines{position:absolute;inset:0;background-image:repeating-linear-gradient(-45deg,transparent,transparent 3px,rgba(0,0,0,0.8) 3px,rgba(0,0,0,0.8) 6px)}
-    
-    /* Upload Controls */
-    .upload-controls{position:absolute;top:var(--space-md);right:var(--space-md);display:flex;flex-direction:column;gap:var(--space-sm);align-items:flex-end;z-index:20}
-    .upload-btn{width:48px;height:48px;background:var(--accent-primary);border:none;color:var(--bg);font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;box-shadow:4px 4px 0 var(--bg),4px 4px 0 2px var(--accent-primary);position:relative}
-    .upload-btn:hover:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 var(--bg),2px 2px 0 2px var(--accent-primary)}
-    .upload-btn:disabled{background:var(--text-muted);box-shadow:none;cursor:not-allowed;opacity:0.6}
-    .upload-counter{position:absolute;top:-8px;right:-8px;background:var(--accent-tertiary);color:var(--text);font-size:10px;font-weight:700;padding:2px 6px;min-width:20px;text-align:center}
-    
-    /* Quota Timer Tooltip - Hidden by default, show on hover */
-    .quota-timer{position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:2px solid var(--border);padding:var(--space-sm) var(--space-md);font-size:11px;color:var(--text-secondary);white-space:nowrap;opacity:0;visibility:hidden;transition:all 0.2s;z-index:30}
-    .quota-timer::before{content:'';position:absolute;bottom:100%;right:16px;border:6px solid transparent;border-bottom-color:var(--border)}
-    .upload-controls:hover .quota-timer{opacity:1;visibility:visible}
-    .quota-timer.urgent{border-color:var(--accent-tertiary);color:var(--accent-tertiary);animation:pb 2s infinite}
-    @keyframes pb{0%,100%{border-color:var(--accent-tertiary)}50%{border-color:var(--text-muted)}}
-    
-    /* Input Section */
-    .input-section{margin-bottom:var(--space-xl)}
-    .input-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-sm)}
-    .input-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-secondary)}
-    .char-count{font-size:12px;color:var(--text-muted);font-variant-numeric:tabular-nums}
-    .rant-input{width:100%;background:var(--surface);border:2px solid var(--border);padding:var(--space-md);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;line-height:1.5;resize:none;min-height:120px;transition:all 0.2s}
-    .rant-input:focus{outline:none;border-color:var(--accent-primary);background:var(--surface-elevated)}
-    .rant-input::placeholder{color:var(--text-muted)}
-    
-    /* Mood Selector */
-    .mood-section{margin:var(--space-md) 0}
-    .mood-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-secondary);margin-bottom:var(--space-sm)}
-    .mood-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--space-sm)}
-    .mood-card{position:relative;padding:var(--space-md);background:var(--surface);border:2px solid var(--border);cursor:pointer;transition:all 0.2s;display:flex;flex-direction:column;gap:var(--space-xs)}
-    .mood-card:hover{border-color:var(--text-secondary);transform:translateY(-2px)}
-    .mood-card.active{border-color:currentColor;background:var(--surface-elevated)}
-    .mood-card.active::before{content:'✓';position:absolute;top:8px;right:8px;font-size:12px;font-weight:700}
-    .mood-emoji{font-size:28px;line-height:1}
-    .mood-name{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em}
-    .mood-desc{font-size:11px;color:var(--text-secondary)}
-    .mood-card[data-mood="surviving"]{color:var(--mood-surviving)}
-    .mood-card[data-mood="thriving"]{color:var(--mood-thriving)}
-    .mood-card[data-mood="chaotic"]{color:var(--mood-chaotic)}
-    .mood-card[data-mood="doom"]{color:var(--mood-doom)}
-    
-    .input-actions{display:flex;justify-content:flex-end;margin-top:var(--space-md)}
-    .submit-btn{padding:14px 32px;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;background:var(--accent-primary);border:none;color:var(--bg);cursor:pointer;transition:all 0.2s;box-shadow:4px 4px 0 var(--surface-elevated),4px 4px 0 2px var(--accent-primary)}
-    .submit-btn:hover:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 var(--surface-elevated),2px 2px 0 2px var(--accent-primary)}
-    .submit-btn:disabled{opacity:0.5;cursor:not-allowed;box-shadow:none}
-    
-    /* Entries */
-    .section-header{display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-md);padding-bottom:var(--space-sm);border-bottom:2px solid var(--border)}
-    .section-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.15em;color:var(--text)}
-    .section-line{flex:1;height:2px;background:var(--border)}
-    
-    .entry{background:var(--surface);border:2px solid var(--border);margin-bottom:var(--space-md);position:relative;animation:si 0.4s ease}
-    @keyframes si{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-    .entry:hover{border-color:var(--border-accent)}
-    .entry-header{display:flex;justify-content:space-between;align-items:center;padding:var(--space-sm) var(--space-md);border-bottom:1px solid var(--border);background:var(--surface-elevated)}
-    .entry-meta{display:flex;align-items:center;gap:var(--space-sm)}
-    .entry-time{font-size:11px;color:var(--text-muted);font-weight:600;letter-spacing:0.05em}
-    .entry-mood{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;padding:4px 8px;border:1px solid currentColor}
-    .entry-mood.surviving{color:var(--mood-surviving)}
-    .entry-mood.thriving{color:var(--mood-thriving)}
-    .entry-mood.chaotic{color:var(--mood-chaotic)}
-    .entry-mood.doom{color:var(--mood-doom)}
-    .entry-content{padding:var(--space-md);font-size:15px;line-height:1.6;color:var(--text)}
-    
-    /* Spill Status - HIDDEN */
-    .spill-status{display:none}
-    
-    /* Empathy Text - NARASI RESPON EMOJI */
-    .empathy-text{font-family:'Caveat',cursive;font-size:19px;color:var(--text);text-align:center;padding:var(--space-md);background:var(--surface-elevated);border-top:1px solid var(--border);line-height:1.3;font-weight:700;letter-spacing:0.02em;display:flex;align-items:center;justify-content:center;gap:8px}
-    .empathy-highlight{color:var(--accent-primary);font-size:24px;font-weight:700}
-    .empathy-emoji{font-size:22px}
-    
-    /* Vibe Bar - EMOJI DISembunyikan, hanya notasi empatik */
-    .vibe-bar{display:none}
-    
-    /* Tray */
-    .tray-section{margin-bottom:var(--space-xl)}
-    .tray-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--border);border:2px solid var(--border)}
-    .tray-item{aspect-ratio:1;background:var(--surface);position:relative;overflow:hidden;cursor:pointer}
-    .tray-item.empty{display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:20px;border:2px dashed var(--border)}
-    .tray-item img{width:100%;height:100%;object-fit:cover;transition:all 0.3s}
-    .tray-item:hover img{transform:scale(1.1)}
-    .tray-item::after{content:'';position:absolute;inset:0;background:var(--accent-primary);opacity:0;transition:opacity 0.2s;mix-blend-mode:multiply}
-    .tray-item:hover::after{opacity:0.3}
-    .tray-item-dummy{opacity:0.5}
-    .tray-item-dummy:hover{opacity:0.7}
-    .detection-badge{position:absolute;top:4px;left:4px;background:var(--accent-tertiary);color:var(--text);font-size:9px;font-weight:700;padding:2px 6px;text-transform:uppercase;z-index:20}
-    
-    /* Filters */
-    .filter-monochrome{filter:grayscale(100%) contrast(1.1)!important}
-    .filter-sepia{filter:sepia(100%) contrast(1.1) saturate(0.8)!important}
-    .filter-lomo{filter:contrast(1.2) saturate(1.3) brightness(0.9)!important}
-    .filter-vignette{filter:grayscale(100%) contrast(1.2) brightness(0.9)!important;position:relative}
-    .filter-vignette::after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 150px rgba(0,0,0,0.7);pointer-events:none}
-    .filter-noir{filter:grayscale(100%) contrast(1.4) brightness(0.8)!important}
-    .filter-fade{filter:sepia(30%) saturate(0.6) contrast(0.9) brightness(1.1)!important}
-    .filter-cyber{filter:hue-rotate(180deg) saturate(1.5) contrast(1.1)!important}
-    .filter-warm{filter:sepia(60%) hue-rotate(-30deg) saturate(1.2)!important}
-    .filter-cold{filter:hue-rotate(180deg) saturate(0.5) brightness(1.1)!important}
-    .filter-dream{filter:blur(0.5px) saturate(1.4) brightness(1.1) contrast(0.9)!important}
-    .filter-crisp{filter:contrast(1.3) saturate(1.1)!important}
-    .filter-moody{filter:brightness(0.8) contrast(1.2) saturate(0.7)!important}
-    .filter-golden{filter:sepia(40%) hue-rotate(-15deg) saturate(1.3) contrast(1.1)!important}
-    
-    /* Dummy States */
-    .entry-dummy{opacity:0.6;border-style:dashed!important}
-    .entry-dummy:hover{border-color:var(--border)!important;opacity:0.75}
-    .fifo-indicator{font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;padding:2px 6px;border:1px solid var(--border)}
-    
-    /* Empty State */
-    .empty-state{padding:var(--space-xl) var(--space-md);text-align:center;border:2px dashed var(--border)}
-    .empty-emoji{font-size:48px;margin-bottom:var(--space-md);display:block;animation:f 3s ease-in-out infinite}
-    @keyframes f{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-    .empty-text{font-family:'Instrument Serif',serif;font-size:20px;font-style:italic;color:var(--text-secondary);margin-bottom:var(--space-sm)}
-    .empty-subtext{font-size:13px;color:var(--text-muted)}
-    
-    /* Footer */
-    footer{padding:var(--space-xl) 0;text-align:center;border-top:2px solid var(--border);margin-bottom:80px}
-    .footer-text{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.2em}
-    
-    /* Toast */
-    .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--text);color:var(--bg);padding:var(--space-sm) var(--space-md);font-size:13px;font-weight:600;z-index:10000;opacity:0;transition:all 0.3s}
-    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-    
-    /* Processing Overlay */
-    .processing-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:10002;display:none;flex-direction:column;align-items:center;justify-content:center;gap:var(--space-md)}
-    .processing-overlay.active{display:flex}
-    .processing-spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--accent-primary);border-radius:50%;animation:s 1s linear infinite}
-    @keyframes s{to{transform:rotate(360deg)}}
-    .processing-text{font-size:14px;color:var(--text-secondary);text-align:center}
-    
-    /* MODAL */
-    .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:10001;padding:var(--space-md);overflow-y:auto}
-    .modal.active{display:block}
-    .modal-content{max-width:480px;margin:0 auto;background:var(--surface);border:2px solid var(--border);padding:var(--space-lg)}
-    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-md);padding-bottom:var(--space-md);border-bottom:2px solid var(--border)}
-    .modal-title{font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em}
-    .modal-close{background:none;border:none;color:var(--text);font-size:24px;cursor:pointer}
-    .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--space-sm);margin-bottom:var(--space-md)}
-    .gallery-item{aspect-ratio:1;background:var(--surface-elevated);border:2px solid var(--border);cursor:pointer;overflow:hidden;position:relative}
-    .gallery-item img{width:100%;height:100%;object-fit:cover;transition:all 0.2s}
-    .gallery-item:hover img{transform:scale(1.05)}
-    .gallery-item.selected{border-color:var(--accent-primary);box-shadow:0 0 0 2px var(--accent-primary)}
-    .gallery-item.selected::after{content:'✓';position:absolute;top:4px;right:4px;background:var(--accent-primary);color:var(--bg);width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
-    
-    /* Theme Slider */
-    .theme-section{margin:var(--space-md) 0;padding:var(--space-md);background:var(--surface-elevated);border:2px solid var(--border)}
-    .theme-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-sm)}
-    .theme-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-secondary)}
-    .theme-name{font-size:11px;font-weight:700;color:var(--accent-primary)}
-    .theme-slider{width:100%;height:4px;background:var(--border);outline:none;-webkit-appearance:none;margin:var(--space-sm) 0}
-    .theme-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--accent-primary);cursor:pointer;border:2px solid var(--text);box-shadow:2px 2px 0 var(--bg)}
-    .theme-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--text-muted);font-weight:600;text-transform:uppercase}
-    
-    /* Notation Input */
-    .notation-section{margin:var(--space-md) 0;padding:var(--space-md);background:var(--surface-elevated);border:2px solid var(--border)}
-    .notation-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-secondary);margin-bottom:var(--space-sm);display:flex;justify-content:space-between}
-    .notation-count{font-size:10px;color:var(--text-muted)}
-    .notation-input{width:100%;background:var(--surface);border:2px solid var(--border);padding:var(--space-sm);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;transition:all 0.2s}
-    .notation-input:focus{outline:none;border-color:var(--accent-primary);background:var(--surface-elevated)}
-    .notation-input::placeholder{color:var(--text-muted);font-size:12px}
-    
-    .gallery-warning{background:var(--accent-tertiary);color:var(--text);padding:var(--space-md);margin-bottom:var(--space-md);font-size:13px;font-weight:700;text-align:center;text-transform:uppercase;letter-spacing:0.05em;border:2px solid var(--accent-tertiary);animation:pw 2s infinite}
-    @keyframes pw{0%,100%{opacity:1}50%{opacity:0.8}}
-    .gallery-warning::before{content:'🚫 '}
-    
-    .modal-actions{margin-top:var(--space-md);display:flex;justify-content:flex-end;gap:var(--space-sm)}
-    .modal-btn{padding:12px 24px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;border:2px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all 0.2s}
-    .modal-btn.primary{background:var(--accent-primary);border-color:var(--accent-primary);color:var(--bg)}
-    .modal-btn:hover{transform:translateY(-2px)}
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>JEJAK — Spill Your Truth</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/dist/face-api.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0A0A0A;--sf:#141414;--sfe:#1E1E1E;--bd:#2A2A2A;--tx:#FFF;--txs:#888;--txm:#555;--ap:#FF4D00;--as:#00F0FF;--at:#FF006E;--aq:#39FF14;--aw:#FFD700;--ms:#FF9500;--mt:#39FF14;--mc:#00F0FF;--md:#8B5CF6}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:500;font-size:15px;line-height:1.4;min-height:100vh;overflow-x:hidden;padding-bottom:100px}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.4}
+.w{max-width:480px;margin:0 auto;padding:0 16px}
+header{padding:24px 0 16px;display:flex;justify-content:space-between;align-items:flex-start}
+.logo{font-size:42px;font-weight:800;letter-spacing:-.04em;cursor:pointer;line-height:.9;position:relative}
+.logo::before,.logo::after{content:'JEJAK';position:absolute;top:0;left:0;opacity:0;transition:opacity .1s}
+.logo::before{color:var(--as);transform:translate(-2px,0)}
+.logo::after{color:var(--at);transform:translate(2px,0)}
+.logo:hover::before{opacity:.8;animation:g .3s infinite}
+@keyframes g{0%,100%{transform:translate(-2px,0)}25%{transform:translate(2px,2px)}50%{transform:translate(-2px,-2px)}75%{transform:translate(2px,0)}}
+.tagline{font-family:'Instrument Serif',serif;font-size:13px;color:var(--txs);font-style:italic;margin-top:4px}
+.top-right{display:flex;align-items:center;gap:8px}
+.huser{font-size:11px;font-weight:700;color:var(--tx);text-transform:lowercase;letter-spacing:.05em;padding:4px 8px;background:var(--sf);border:1px solid var(--bd);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dot{width:8px;height:8px;background:var(--aq);border-radius:50%;animation:blink 2s infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.dot.off{background:var(--at);animation:none}
+.smenu{position:relative}
+.mtrig{width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:transparent;border:none;cursor:pointer;padding:0}
+.mtrig span{width:4px;height:4px;background:var(--tx);border-radius:50%;transition:all .2s}
+.mtrig:hover span{background:var(--ap)}
+.mdd{position:absolute;top:100%;right:0;margin-top:8px;background:var(--sf);border:2px solid var(--bd);min-width:120px;display:none;z-index:100}
+.mdd.on{display:block}
+.mi{width:100%;padding:8px 16px;background:transparent;border:none;color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;text-align:left;cursor:pointer;transition:all .2s}
+.mi:hover{background:var(--sfe);color:var(--ap)}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--sf);border-top:2px solid var(--bd);z-index:1000;padding-bottom:env(safe-area-inset-bottom)}
+.bnav-c{max-width:480px;margin:0 auto;display:flex;justify-content:space-around;align-items:center;height:64px}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:100%;color:var(--txm);text-decoration:none;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;transition:all .2s;position:relative;cursor:pointer}
+.ni::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--ap);transition:width .2s}
+.ni:hover{color:var(--txs);background:var(--sfe)}
+.ni.act{color:var(--ap)}
+.ni.act::before{width:100%}
+.nico{font-size:20px;line-height:1}
+.hero-s{position:relative;margin:0 -16px 24px}
+.hero{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;border-top:2px solid var(--bd);border-bottom:2px solid var(--bd);background:var(--sf)}
+.hero img{width:100%;height:100%;object-fit:cover;transition:transform .6s,filter .3s}
+.hero:hover img{transform:scale(1.03)}
+.hero::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none}
+.hnote{position:absolute;bottom:0;left:0;right:0;padding:16px;background:linear-gradient(to top,rgba(0,0,0,.9),transparent);font-family:'Instrument Serif',serif;font-size:24px;font-style:italic;color:var(--tx);line-height:1.2;z-index:20}
+.fscrib{position:absolute;background:rgba(0,0,0,.95);pointer-events:none;z-index:15;overflow:hidden}
+.fscrib::before{content:'';position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(255,255,255,.1) 2px,rgba(255,255,255,.1) 4px),repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.05) 2px,rgba(255,255,255,.05) 4px)}
+.mlines{position:absolute;inset:0;background-image:repeating-linear-gradient(-45deg,transparent,transparent 3px,rgba(0,0,0,.8) 3px,rgba(0,0,0,.8) 6px)}
+.upctrls{position:absolute;top:16px;right:16px;display:flex;flex-direction:column;gap:8px;align-items:flex-end;z-index:20}
+.upbtn{width:48px;height:48px;background:var(--ap);border:none;color:var(--bg);font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;box-shadow:4px 4px 0 var(--bg),4px 4px 0 2px var(--ap);position:relative}
+.upbtn:hover:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 var(--bg),2px 2px 0 2px var(--ap)}
+.upbtn:disabled{background:var(--txm);box-shadow:none;cursor:not-allowed;opacity:.6}
+.upcnt{position:absolute;top:-8px;right:-8px;background:var(--at);color:var(--tx);font-size:10px;font-weight:700;padding:2px 6px;min-width:20px;text-align:center}
+.qtimer{position:absolute;top:calc(100% + 8px);right:0;background:var(--sf);border:2px solid var(--bd);padding:8px 16px;font-size:11px;color:var(--txs);white-space:nowrap;opacity:0;visibility:hidden;transition:all .2s;z-index:30}
+.qtimer::before{content:'';position:absolute;bottom:100%;right:16px;border:6px solid transparent;border-bottom-color:var(--bd)}
+.upctrls:hover .qtimer{opacity:1;visibility:visible}
+.qtimer.urg{border-color:var(--at);color:var(--at);animation:pb 2s infinite}
+@keyframes pb{0%,100%{border-color:var(--at)}50%{border-color:var(--txm)}}
+.isec{margin-bottom:32px}
+.ihdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ilbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--txs)}
+.ccount{font-size:12px;color:var(--txm);font-variant-numeric:tabular-nums}
+.ri{width:100%;background:var(--sf);border:2px solid var(--bd);padding:16px;color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;line-height:1.5;resize:none;min-height:120px;transition:all .2s}
+.ri:focus{outline:none;border-color:var(--ap);background:var(--sfe)}
+.ri::placeholder{color:var(--txm)}
+.msec{margin:16px 0}
+.mlbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--txs);margin-bottom:8px}
+.mgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.mc{position:relative;padding:16px;background:var(--sf);border:2px solid var(--bd);cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:4px}
+.mc:hover{border-color:var(--txs);transform:translateY(-2px)}
+.mc.act{border-color:currentColor;background:var(--sfe)}
+.mc.act::before{content:'✓';position:absolute;top:8px;right:8px;font-size:12px;font-weight:700}
+.me{font-size:28px;line-height:1}
+.mn{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.md-desc{font-size:11px;color:var(--txs)}
+.mc[data-mood="surviving"]{color:var(--ms)}
+.mc[data-mood="thriving"]{color:var(--mt)}
+.mc[data-mood="chaotic"]{color:var(--mc)}
+.mc[data-mood="doom"]{color:var(--md)}
+.iact{display:flex;justify-content:flex-end;margin-top:16px}
+.sbtn{padding:14px 32px;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;background:var(--ap);border:none;color:var(--bg);cursor:pointer;transition:all .2s;box-shadow:4px 4px 0 var(--sfe),4px 4px 0 2px var(--ap)}
+.sbtn:hover:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 var(--sfe),2px 2px 0 2px var(--ap)}
+.sbtn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
+.shdr{display:flex;align-items:center;gap:8px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--bd)}
+.stit{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--tx)}
+.sline{flex:1;height:2px;background:var(--bd)}
+.entry{background:var(--sf);border:2px solid var(--bd);margin-bottom:16px;position:relative;animation:si .4s ease}
+@keyframes si{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.entry:hover{border-color:var(--ap)}
+.ehdr{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-bottom:1px solid var(--bd);background:var(--sfe)}
+.emeta{display:flex;align-items:center;gap:8px}
+.etime{font-size:11px;color:var(--txm);font-weight:600;letter-spacing:.05em}
+.emood{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:4px 8px;border:1px solid currentColor}
+.emood.surviving{color:var(--ms)}
+.emood.thriving{color:var(--mt)}
+.emood.chaotic{color:var(--mc)}
+.emood.doom{color:var(--md)}
+.econt{padding:16px;font-size:15px;line-height:1.6;color:var(--tx)}
+.etext{font-family:'Caveat',cursive;font-size:19px;color:var(--tx);text-align:center;padding:16px;background:var(--sfe);border-top:1px solid var(--bd);line-height:1.3;font-weight:700;letter-spacing:.02em;display:flex;align-items:center;justify-content:center;gap:8px}
+.ehi{color:var(--ap);font-size:24px;font-weight:700}
+.eemoji{font-size:22px}
+.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--bd);border:2px solid var(--bd)}
+.ti{aspect-ratio:1;background:var(--sf);position:relative;overflow:hidden;cursor:pointer}
+.ti.empty{display:flex;align-items:center;justify-content:center;color:var(--txm);font-size:20px;border:2px dashed var(--bd)}
+.ti img{width:100%;height:100%;object-fit:cover;transition:all .3s}
+.ti:hover img{transform:scale(1.1)}
+.ti::after{content:'';position:absolute;inset:0;background:var(--ap);opacity:0;transition:opacity .2s;mix-blend-mode:multiply}
+.ti:hover::after{opacity:.3}
+.ti-dum{opacity:.5}
+.ti-dum:hover{opacity:.7}
+.dbadge{position:absolute;top:4px;left:4px;background:var(--at);color:var(--tx);font-size:9px;font-weight:700;padding:2px 6px;text-transform:uppercase;z-index:20}
+.fifo-i{font-size:9px;color:var(--txm);text-transform:uppercase;letter-spacing:.05em;padding:2px 6px;border:1px solid var(--bd)}
+.es{padding:32px 16px;text-align:center;border:2px dashed var(--bd)}
+.ee{font-size:48px;margin-bottom:16px;display:block;animation:fl 3s ease-in-out infinite}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.et{font-family:'Instrument Serif',serif;font-size:20px;font-style:italic;color:var(--txs);margin-bottom:8px}
+.est{font-size:13px;color:var(--txm)}
+footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bottom:80px}
+.ftxt{font-size:11px;color:var(--txm);text-transform:uppercase;letter-spacing:.2em}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--tx);color:var(--bg);padding:8px 16px;font-size:13px;font-weight:600;z-index:10000;opacity:0;transition:all .3s}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.proc{position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:10002;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.proc.on{display:flex}
+.pspin{width:48px;height:48px;border:3px solid var(--bd);border-top-color:var(--ap);border-radius:50%;animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.ptxt{font-size:14px;color:var(--txs);text-align:center}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:10001;padding:16px;overflow-y:auto}
+.modal.on{display:block}
+.mc2{max-width:480px;margin:0 auto;background:var(--sf);border:2px solid var(--bd);padding:24px}
+.mhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-bottom:16px;border-bottom:2px solid var(--bd)}
+.mtit{font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.mcls{background:none;border:none;color:var(--tx);font-size:24px;cursor:pointer}
+.ggrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.gi{aspect-ratio:1;background:var(--sfe);border:2px solid var(--bd);cursor:pointer;overflow:hidden;position:relative}
+.gi img{width:100%;height:100%;object-fit:cover;transition:all .2s}
+.gi:hover img{transform:scale(1.05)}
+.gi.sel{border-color:var(--ap);box-shadow:0 0 0 2px var(--ap)}
+.gi.sel::after{content:'✓';position:absolute;top:4px;right:4px;background:var(--ap);color:var(--bg);width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.tmsec{margin:16px 0;padding:16px;background:var(--sfe);border:2px solid var(--bd)}
+.tmhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.tmlbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--txs)}
+.tmnm{font-size:11px;font-weight:700;color:var(--ap)}
+.tmsl{width:100%;height:4px;background:var(--bd);outline:none;-webkit-appearance:none;margin:8px 0}
+.tmsl::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--ap);cursor:pointer;border:2px solid var(--tx);box-shadow:2px 2px 0 var(--bg)}
+.tmlabs{display:flex;justify-content:space-between;font-size:9px;color:var(--txm);font-weight:600;text-transform:uppercase}
+.notsec{margin:16px 0;padding:16px;background:var(--sfe);border:2px solid var(--bd)}
+.notlbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--txs);margin-bottom:8px;display:flex;justify-content:space-between}
+.notcnt{font-size:10px;color:var(--txm)}
+.noti{width:100%;background:var(--sf);border:2px solid var(--bd);padding:8px;color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;transition:all .2s}
+.noti:focus{outline:none;border-color:var(--ap);background:var(--sfe)}
+.noti::placeholder{color:var(--txm);font-size:12px}
+.gwarn{background:var(--at);color:var(--tx);padding:16px;margin-bottom:16px;font-size:13px;font-weight:700;text-align:center;text-transform:uppercase;letter-spacing:.05em;border:2px solid var(--at);animation:pw 2s infinite}
+@keyframes pw{0%,100%{opacity:1}50%{opacity:.8}}
+.gwarn::before{content:'🚫 '}
+.macts{margin-top:16px;display:flex;justify-content:flex-end;gap:8px}
+.mbtn{padding:12px 24px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border:2px solid var(--bd);background:var(--sf);color:var(--tx);cursor:pointer;transition:all .2s}
+.mbtn.pri{background:var(--ap);border-color:var(--ap);color:var(--bg)}
+.mbtn:hover{transform:translateY(-2px)}
+/* filters */
+.fm{filter:grayscale(100%) contrast(1.1)!important}
+.fsp{filter:sepia(100%) contrast(1.1) saturate(.8)!important}
+.fl{filter:contrast(1.2) saturate(1.3) brightness(.9)!important}
+.fv{filter:grayscale(100%) contrast(1.2) brightness(.9)!important}
+.fn{filter:grayscale(100%) contrast(1.4) brightness(.8)!important}
+.ff{filter:sepia(30%) saturate(.6) contrast(.9) brightness(1.1)!important}
+.fc{filter:hue-rotate(180deg) saturate(1.5) contrast(1.1)!important}
+.fw{filter:sepia(60%) hue-rotate(-30deg) saturate(1.2)!important}
+.fco{filter:hue-rotate(180deg) saturate(.5) brightness(1.1)!important}
+.fd{filter:blur(.5px) saturate(1.4) brightness(1.1) contrast(.9)!important}
+.fcr{filter:contrast(1.3) saturate(1.1)!important}
+.fmo{filter:brightness(.8) contrast(1.2) saturate(.7)!important}
+.fg{filter:sepia(40%) hue-rotate(-15deg) saturate(1.3) contrast(1.1)!important}
+.entry-dummy{opacity:.6;border-style:dashed!important}
+.entry-dummy:hover{border-color:var(--bd)!important;opacity:.75}
+</style>
 </head>
 <body>
-  <div class="wrapper">
-    <header>
-      <div>
-        <div class="logo" onclick="location.reload()">JEJAK</div>
-        <div class="tagline">no filter, just truth</div>
-      </div>
-      
-      <!-- Top Right: Username + Dot + Settings Menu -->
-      <div class="top-right">
-        <div class="header-username" id="header-username">@anon</div>
-        <div class="online-dot offline" id="online-dot" title="Offline"></div>
-        
-        <div class="settings-menu">
-          <button class="menu-trigger" onclick="toggleMenu()" title="Menu">
-            <span></span>
-            <span></span>
-            <span></span>
-          </button>
-          <div class="menu-dropdown" id="menu-dropdown">
-            <button class="menu-item" onclick="logoutUser()">Logout</button>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <section class="hero-section">
-      <div class="hero" id="hero-container">
-        <img id="hero-img" src="" alt="artefak" class="filter-monochrome">
-        <div id="hero-faces" style="position:absolute;inset:0;pointer-events:none"></div>
-        <div class="hero-notation" id="hero-notation">"memori tersimpan"</div>
-        <div class="upload-controls">
-          <!-- Quota timer now hidden by default, shows on hover -->
-          <div class="quota-timer" id="quota-timer">Window aktif • Sisa 2 hari</div>
-          <button class="upload-btn" id="upload-btn" title="Buka galeri">+<span class="upload-counter" id="upload-counter" style="display:none"></span></button>
-        </div>
-      </div>
-    </section>
-
-    <section class="input-section">
-      <div class="input-header">
-        <span class="input-label">Spill your truth</span>
-        <span class="char-count" id="char-count">0/500</span>
-      </div>
-      <textarea class="rant-input" id="rant-input" placeholder="What's eating you alive right now? No cap, no filter..." maxlength="500"></textarea>
-      
-      <div class="mood-section">
-        <div class="mood-label">Pilih mood-mu sekarang</div>
-        <div class="mood-grid" id="mood-grid">
-          <div class="mood-card active" data-mood="surviving" onclick="selectMood('surviving')">
-            <span class="mood-emoji">😮‍💨</span>
-            <span class="mood-name" style="color:var(--mood-surviving)">Surviving</span>
-            <span class="mood-desc">Hidup tapi barely</span>
-          </div>
-          <div class="mood-card" data-mood="thriving" onclick="selectMood('thriving')">
-            <span class="mood-emoji">✨</span>
-            <span class="mood-name" style="color:var(--mood-thriving)">Thriving</span>
-            <span class="mood-desc">On top of my game</span>
-          </div>
-          <div class="mood-card" data-mood="chaotic" onclick="selectMood('chaotic')">
-            <span class="mood-emoji">🌀</span>
-            <span class="mood-name" style="color:var(--mood-chaotic)">Chaotic</span>
-            <span class="mood-desc">Everything is on fire</span>
-          </div>
-          <div class="mood-card" data-mood="doom" onclick="selectMood('doom')">
-            <span class="mood-emoji">🛌</span>
-            <span class="mood-name" style="color:var(--mood-doom)">Doom</span>
-            <span class="mood-desc">Just wanna disappear</span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="input-actions">
-        <button class="submit-btn" id="submit-btn">Jejakkan & Spill</button>
-      </div>
-    </section>
-
-    <section class="entries-section">
-      <div class="section-header">
-        <span class="section-title">Riwayat</span>
-        <div class="section-line"></div>
-        <span style="font-size:10px;color:var(--text-muted);margin-left:auto">FIFO • MAX 6 • AUTO-CENSOR</span>
-      </div>
-      <div id="entries-container"></div>
-    </section>
-
-    <section class="tray-section">
-      <div class="section-header">
-        <span class="section-title">Memori</span>
-        <div class="section-line"></div>
-        <span style="font-size:10px;color:var(--text-muted);margin-left:auto">FIFO • MAX 6 • AUTO-CENSOR</span>
-      </div>
-      <div class="tray-grid" id="tray-grid"></div>
-    </section>
-
-    <footer>
-      <p class="footer-text">Nyambat • Aksi • Solusi</p>
-    </footer>
-  </div>
-
-  <nav class="bottom-nav">
-    <div class="nav-container">
-      <a href="jejak.html" class="nav-item active"><span class="nav-icon">✦</span><span>Jejak</span></a>
-      <a href="cocomeo.html" class="nav-item"><span class="nav-icon">〜</span><span>Cocomeo</span></a>
-      <a href="saynope.html" class="nav-item"><span class="nav-icon">✕</span><span>Spill</span></a>
-      <a href="glitch.html" class="nav-item"><span class="nav-icon">⚡</span><span>Glitch</span></a>
+<div class="w">
+  <header>
+    <div>
+      <div class="logo" onclick="location.reload()">JEJAK</div>
+      <div class="tagline">no filter, just truth</div>
     </div>
-  </nav>
-
-  <div class="processing-overlay" id="processing">
-    <div class="processing-spinner"></div>
-    <div class="processing-text">Scanning untuk wajah...<br><small>AI Privacy Shield Active</small></div>
-  </div>
-
-  <!-- MODAL -->
-  <div class="modal" id="gallery-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title">Review Artefak</h3>
-        <button class="modal-close" onclick="closeGallery()">×</button>
-      </div>
-      
-      <div class="gallery-warning">DILARANG UPLOAD FOTO WAJAH!</div>
-      
-      <div style="font-size:11px;color:var(--text-secondary);margin-bottom:var(--space-md);text-align:center">
-        Wajah terdeteksi akan otomatis disensor • Sistem FIFO (6 foto max) • Tidak dapat dihapus
-      </div>
-      
-      <div class="gallery-grid" id="gallery-grid"></div>
-      
-      <div class="theme-section">
-        <div class="theme-header">
-          <span class="theme-label">🎨 Tema Foto</span>
-          <span class="theme-name" id="theme-name">MONOCHROME</span>
-        </div>
-        <input type="range" class="theme-slider" id="theme-slider" min="0" max="11" value="0" step="1" oninput="updateThemeFromSlider(this.value)">
-        <div class="theme-labels">
-          <span>B&W</span>
-          <span>Warm</span>
-          <span>Cool</span>
-          <span>Art</span>
-        </div>
-      </div>
-      
-      <div class="notation-section">
-        <div class="notation-label">
-          <span>📝 Notasi (Max 4 kata)</span>
-          <span class="notation-count" id="notation-count">0/4</span>
-        </div>
-        <input type="text" class="notation-input" id="notation-input" placeholder="Contoh: senja di kamar" maxlength="30" oninput="validateNotation(this)">
-      </div>
-      
-      <div class="modal-actions">
-        <button class="modal-btn" onclick="closeGallery()">Batal</button>
-        <button class="modal-btn primary" onclick="confirmUpload()">Konfirmasi (<span id="selected-count">0</span>)</button>
+    <div class="top-right">
+      <div class="huser" id="huser">@anon</div>
+      <div class="dot off" id="odot" title="Offline"></div>
+      <div class="smenu">
+        <button class="mtrig" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+        <div class="mdd" id="mdd"><button class="mi" onclick="logoutUser()">Logout</button></div>
       </div>
     </div>
+  </header>
+
+  <section class="hero-s">
+    <div class="hero" id="hero">
+      <img id="himg" src="" alt="artefak" class="fm">
+      <div id="hfaces" style="position:absolute;inset:0;pointer-events:none"></div>
+      <div class="hnote" id="hnote">"memori tersimpan"</div>
+      <div class="upctrls">
+        <div class="qtimer" id="qtimer">Window aktif • Sisa 2 hari</div>
+        <button class="upbtn" id="upbtn">+<span class="upcnt" id="ucnt" style="display:none"></span></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="isec">
+    <div class="ihdr">
+      <span class="ilbl">Spill your truth</span>
+      <span class="ccount" id="ccount">0/500</span>
+    </div>
+    <textarea class="ri" id="ri" placeholder="What's eating you alive right now? No cap, no filter..." maxlength="500"></textarea>
+    <div class="msec">
+      <div class="mlbl">Pilih mood-mu sekarang</div>
+      <div class="mgrid">
+        <div class="mc act" data-mood="surviving" onclick="selMood('surviving')"><span class="me">😮‍💨</span><span class="mn" style="color:var(--ms)">Surviving</span><span class="md-desc">Hidup tapi barely</span></div>
+        <div class="mc" data-mood="thriving" onclick="selMood('thriving')"><span class="me">✨</span><span class="mn" style="color:var(--mt)">Thriving</span><span class="md-desc">On top of my game</span></div>
+        <div class="mc" data-mood="chaotic" onclick="selMood('chaotic')"><span class="me">🌀</span><span class="mn" style="color:var(--mc)">Chaotic</span><span class="md-desc">Everything is on fire</span></div>
+        <div class="mc" data-mood="doom" onclick="selMood('doom')"><span class="me">🛌</span><span class="mn" style="color:var(--md)">Doom</span><span class="md-desc">Just wanna disappear</span></div>
+      </div>
+    </div>
+    <div class="iact"><button class="sbtn" id="sbtn">Jejakkan & Spill</button></div>
+  </section>
+
+  <section>
+    <div class="shdr"><span class="stit">Riwayat</span><div class="sline"></div><span style="font-size:10px;color:var(--txm);margin-left:auto">FIFO • MAX 6 • AUTO-CENSOR</span></div>
+    <div id="econ"></div>
+  </section>
+
+  <section style="margin-bottom:32px">
+    <div class="shdr"><span class="stit">Memori</span><div class="sline"></div><span style="font-size:10px;color:var(--txm);margin-left:auto">FIFO • MAX 6 • AUTO-CENSOR</span></div>
+    <div class="tgrid" id="tgrid"></div>
+  </section>
+
+  <footer><p class="ftxt">Nyambat • Aksi • Solusi</p></footer>
+</div>
+
+<nav class="bnav">
+  <div class="bnav-c">
+    <a href="jejak.html" class="ni act"><span class="nico">✦</span><span>Jejak</span></a>
+    <a href="cocomeo.html" class="ni"><span class="nico">〜</span><span>Cocomeo</span></a>
+    <a href="saynope.html" class="ni"><span class="nico">✕</span><span>Spill</span></a>
+    <a href="glitch.html" class="ni"><span class="nico">⚡</span><span>Glitch</span></a>
   </div>
+</nav>
 
-  <div class="toast" id="toast"></div>
-  <input type="file" id="file-input" accept="image/*" multiple style="display:none">
+<div class="proc" id="proc">
+  <div class="pspin"></div>
+  <div class="ptxt">Scanning untuk wajah...<br><small>AI Privacy Shield Active</small></div>
+</div>
 
-  <script>
-    // ============================================
-    // CONFIGURATION
-    // ============================================
-    const CONFIG = {
-      supabaseUrl: 'https://fuovfrdicdhnlymnacpz.supabase.co',
-      supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0',
-      quotaDays: 28,
-      uploadWindowDays: 3,
-      maxFileSize: 5 * 1024 * 1024,
-      maxSelection: 6,
-      maxArtefacts: 6,
-      maxEntries: 6,
-      faceThreshold: 0.6,
-      inputSize: 416,
-      storageBucket: 'artefacts'
-    };
+<div class="modal" id="gmodal">
+  <div class="mc2">
+    <div class="mhdr"><h3 class="mtit">Review Artefak</h3><button class="mcls" onclick="closeGallery()">×</button></div>
+    <div class="gwarn">DILARANG UPLOAD FOTO WAJAH!</div>
+    <div style="font-size:11px;color:var(--txs);margin-bottom:16px;text-align:center">Wajah terdeteksi akan otomatis disensor • Sistem FIFO (6 foto max) • Tidak dapat dihapus</div>
+    <div class="ggrid" id="ggrid"></div>
+    <div class="tmsec">
+      <div class="tmhdr"><span class="tmlbl">🎨 Tema Foto</span><span class="tmnm" id="tmnm">MONOCHROME</span></div>
+      <input type="range" class="tmsl" id="tmsl" min="0" max="11" value="0" step="1" oninput="updTheme(this.value)">
+      <div class="tmlabs"><span>B&W</span><span>Warm</span><span>Cool</span><span>Art</span></div>
+    </div>
+    <div class="notsec">
+      <div class="notlbl"><span>📝 Notasi (Max 4 kata)</span><span class="notcnt" id="notcnt">0/4</span></div>
+      <input type="text" class="noti" id="noti" placeholder="Contoh: senja di kamar" maxlength="30" oninput="valNote(this)">
+    </div>
+    <div class="macts">
+      <button class="mbtn" onclick="closeGallery()">Batal</button>
+      <button class="mbtn pri" onclick="confirmUpload()">Konfirmasi (<span id="selcnt">0</span>)</button>
+    </div>
+  </div>
+</div>
 
-    // ============================================
-    // CONSTANTS & DATA
-    // ============================================
-    const VIBES = {
-      relatable: { emoji: '💯', label: 'literally me', empathy: 'orang merasa sama sepertimu' },
-      mood: { emoji: '🛋️', label: 'big mood', empathy: 'orang merasakan vibes yang sama' },
-      tea: { emoji: '🐸', label: 'spill tea', empathy: 'orang penasaran cerita lengkapnya' },
-      hug: { emoji: '🤗', label: 'virtual hug', empathy: 'orang memberimu pelukan hangat' },
-      real: { emoji: '🎯', label: 'no cap', empathy: 'orang setuju ini real banget' },
-      dead: { emoji: '💀', label: 'rip me', empathy: 'orang relate sampai mati' }
-    };
+<div class="toast" id="toast"></div>
+<input type="file" id="finput" accept="image/*" multiple style="display:none">
 
-    const MOODS = {
-      surviving: { emoji: '😮‍💨', color: '#FF9500', label: 'surviving' },
-      thriving: { emoji: '✨', color: '#39FF14', label: 'thriving' },
-      chaotic: { emoji: '🌀', color: '#00F0FF', label: 'chaotic' },
-      doom: { emoji: '🛌', color: '#8B5CF6', label: 'doom' }
-    };
+<script>
+const CFG={supabaseUrl:'https://fuovfrdicdhnlymnacpz.supabase.co',supabaseKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0',quotaDays:28,uploadWindowDays:3,maxFileSize:5*1024*1024,maxSelection:6,maxArtefacts:6,maxEntries:6,faceThreshold:.6,inputSize:416,storageBucket:'artefacts'};
 
-    const THEMES = [
-      { name: 'MONOCHROME', filter: 'filter-monochrome', desc: 'Default B&W' },
-      { name: 'NOIR', filter: 'filter-noir', desc: 'High contrast' },
-      { name: 'SEPIA', filter: 'filter-sepia', desc: 'Vintage warmth' },
-      { name: 'WARM', filter: 'filter-warm', desc: 'Golden hour' },
-      { name: 'GOLDEN', filter: 'filter-golden', desc: 'Autumn glow' },
-      { name: 'LOMO', filter: 'filter-lomo', desc: 'Analog saturation' },
-      { name: 'DREAM', filter: 'filter-dream', desc: 'Soft focus' },
-      { name: 'COLD', filter: 'filter-cold', desc: 'Icy blue' },
-      { name: 'CYBER', filter: 'filter-cyber', desc: 'Neon shift' },
-      { name: 'VIGNETTE', filter: 'filter-vignette', desc: 'Dark edges' },
-      { name: 'CRISP', filter: 'filter-crisp', desc: 'Sharp detail' },
-      { name: 'MOODY', filter: 'filter-moody', desc: 'Dark tones' }
-    ];
+const VIBES={relatable:{emoji:'💯',label:'literally me',empathy:'orang merasa sama sepertimu'},mood:{emoji:'🛋️',label:'big mood',empathy:'orang merasakan vibes yang sama'},tea:{emoji:'🐸',label:'spill tea',empathy:'orang penasaran cerita lengkapnya'},hug:{emoji:'🤗',label:'virtual hug',empathy:'orang memberimu pelukan hangat'},real:{emoji:'🎯',label:'no cap',empathy:'orang setuju ini real banget'},dead:{emoji:'💀',label:'rip me',empathy:'orang relate sampai mati'}};
+const MOODS={surviving:{emoji:'😮‍💨',color:'#FF9500',label:'surviving'},thriving:{emoji:'✨',color:'#39FF14',label:'thriving'},chaotic:{emoji:'🌀',color:'#00F0FF',label:'chaotic'},doom:{emoji:'🛌',color:'#8B5CF6',label:'doom'}};
+const THEMES=[{name:'MONOCHROME',filter:'fm'},{name:'NOIR',filter:'fn'},{name:'SEPIA',filter:'fsp'},{name:'WARM',filter:'fw'},{name:'GOLDEN',filter:'fg'},{name:'LOMO',filter:'fl'},{name:'DREAM',filter:'fd'},{name:'COLD',filter:'fco'},{name:'CYBER',filter:'fc'},{name:'VIGNETTE',filter:'fv'},{name:'CRISP',filter:'fcr'},{name:'MOODY',filter:'fmo'}];
+const CANVAS_FILTERS={'fm':'grayscale(100%) contrast(1.1)','fn':'grayscale(100%) contrast(1.4) brightness(.8)','fsp':'sepia(100%) contrast(1.1) saturate(.8)','fw':'sepia(60%) hue-rotate(-30deg) saturate(1.2)','fg':'sepia(40%) hue-rotate(-15deg) saturate(1.3) contrast(1.1)','fl':'contrast(1.2) saturate(1.3) brightness(.9)','fd':'blur(.5px) saturate(1.4) brightness(1.1) contrast(.9)','fco':'hue-rotate(180deg) saturate(.5) brightness(1.1)','fc':'hue-rotate(180deg) saturate(1.5) contrast(1.1)','fv':'grayscale(100%) contrast(1.2) brightness(.9)','fcr':'contrast(1.3) saturate(1.1)','fmo':'brightness(.8) contrast(1.2) saturate(.7)'};
 
-    const DUMMY_ENTRIES = [
-      { id: '__d1', content: "gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus.", mood: 'surviving', timestamp: Date.now() - 172800000, vibes: { relatable: 12, mood: 9, hug: 8, tea: 3, real: 5, dead: 2 }, isSpilled: true, isDummy: true },
-      { id: '__d2', content: "deadline mepet, dosen gak jelas, dompet kering. rasanya pengen ijin cuti sehari buat jadi batu aja.", mood: 'doom', timestamp: Date.now() - 86400000, vibes: { relatable: 9, mood: 5, dead: 7, real: 3, hug: 2, tea: 1 }, isSpilled: true, isDummy: true },
-      { id: '__d3', content: "capek.", mood: 'surviving', timestamp: Date.now() - 43200000, vibes: { hug: 20, relatable: 18, dead: 10, real: 7, mood: 3, tea: 0 }, isSpilled: true, isDummy: true }
-    ];
+const DE=[
+  {id:'__d1',content:"gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus.",mood:'surviving',timestamp:Date.now()-172800000,vibes:{relatable:12,mood:9,hug:8,tea:3,real:5,dead:2},isSpilled:true,isDummy:true},
+  {id:'__d2',content:"deadline mepet, dosen gak jelas, dompet kering. rasanya pengen ijin cuti sehari buat jadi batu aja.",mood:'doom',timestamp:Date.now()-86400000,vibes:{relatable:9,mood:5,dead:7,real:3,hug:2,tea:1},isSpilled:true,isDummy:true},
+  {id:'__d3',content:"capek.",mood:'surviving',timestamp:Date.now()-43200000,vibes:{hug:20,relatable:18,dead:10,real:7,mood:3,tea:0},isSpilled:true,isDummy:true}
+];
+const DA=[
+  {id:'__a1',url:'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80',note:'jeda',faces:[],hasFace:false,isDummy:true},
+  {id:'__a2',url:'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80',note:'hijau',faces:[],hasFace:false,isDummy:true},
+  {id:'__a3',url:'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=80',note:'gabut',faces:[],hasFace:false,isDummy:true},
+  {id:'__a4',url:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',note:'sendiri',faces:[],hasFace:false,isDummy:true},
+  {id:'__a5',url:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',note:'capek',faces:[{box:{x:75,y:45,width:150,height:200},score:.92}],hasFace:true,isDummy:true},
+  {id:'__a6',url:'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80',note:'love',faces:[],hasFace:false,isDummy:true}
+];
 
-    const DUMMY_ARTEFACTS = [
-      { id: '__a1', url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80', note: 'jeda', faces: [], hasFace: false, isDummy: true },
-      { id: '__a2', url: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80', note: 'hijau', faces: [], hasFace: false, isDummy: true },
-      { id: '__a3', url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=80', note: 'gabut', faces: [], hasFace: false, isDummy: true },
-      { id: '__a4', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80', note: 'sendiri', faces: [], hasFace: false, isDummy: true },
-      { id: '__a5', url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80', note: 'capek', faces: [{ box: { x: 75, y: 45, width: 150, height: 200 }, score: 0.92 }], hasFace: true, isDummy: true },
-      { id: '__a6', url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80', note: 'love', faces: [], hasFace: false, isDummy: true }
-    ];
+const SESS=(()=>{const k={u:'jejak_username',id:'jejak_user_id',li:'jejak_logged_in'};const u=localStorage.getItem(k.u),id=localStorage.getItem(k.id),li=localStorage.getItem(k.li);return(!li||!u)?{username:'@anon',userId:null}:{username:u,userId:id}})();
+const PFX='jejak_'+(SESS.userId||SESS.username).replace(/[^a-z0-9]/g,'_')+'_';
 
-    // ============================================
-    // STATE MANAGEMENT
-    // ============================================
-    const SESSION = (() => {
-      const keys = { username: 'jejak_username', userId: 'jejak_user_id', loggedIn: 'jejak_logged_in' };
-      const username = localStorage.getItem(keys.username);
-      const userId = localStorage.getItem(keys.userId);
-      const loggedIn = localStorage.getItem(keys.loggedIn);
-      if (!loggedIn || !username) {
-        console.warn('No session, using anon');
-        return { username: '@anon', userId: null };
-      }
-      return { username, userId };
-    })();
+const S={user:SESS.username,uid:SESS.userId,mood:'surviving',entries:[],artefacts:[],selFiles:new Set(),theme:0,note:'',faceLoaded:false,sb:null,online:false,qStart:localStorage.getItem(PFX+'quota_start')||null,uploads:parseInt(localStorage.getItem(PFX+'uploads_count')||'0'),pendingFiles:[]};
 
-    const STORAGE_PREFIX = 'jejak_' + (SESSION.userId || SESSION.username).replace(/[^a-z0-9]/g, '_') + '_';
+const $=id=>document.getElementById(id);
+const toast=msg=>{const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)};
+const esc=t=>{const d=document.createElement('div');d.textContent=t;return d.innerHTML};
+const showProc=v=>$('proc').classList[v?'add':'remove']('on');
 
-    const state = {
-      currentUser: SESSION.username,
-      currentUserId: SESSION.userId,
-      currentMood: 'surviving',
-      entries: [],
-      artefacts: [],
-      userVibes: new Set(),
-      selectedFiles: new Set(),
-      currentTheme: 0,
-      notationText: '',
-      colorMode: false,
-      faceApiLoaded: false,
-      supabase: null,
-      isOnline: false,
-      quotaStart: localStorage.getItem(STORAGE_PREFIX + 'quota_start') || null,
-      uploadsThisWindow: parseInt(localStorage.getItem(STORAGE_PREFIX + 'uploads_count') || '0')
-    };
+// FIFO
+function getVisEntries(){const r=S.entries,n=r.length;if(!n)return DE;if(n<3)return[...r,...DE.slice(0,3-n)];return r.slice(0,CFG.maxEntries)}
+function addEntryFIFO(e){S.entries.unshift(e);if(S.entries.length>CFG.maxEntries){S.entries.pop();toast('Entry lama terhapus otomatis (FIFO)')}saveEntries();renderEntries()}
+function getVisArtefacts(){const r=S.artefacts.filter(a=>!a.isDummy);if(r.length>=6)return r.slice(0,6);return[...r,...DA.slice(0,6-r.length)]}
+function addArtefactFIFO(a){const r=S.artefacts.filter(x=>!x.isDummy);r.unshift(a);if(r.length>CFG.maxArtefacts){r.pop();toast('Foto lama terhapus otomatis (FIFO)')}S.artefacts=r;saveArtefacts();renderTray();setHero(a.url,a.note,a.faces,'f'+(a.theme||'m').toLowerCase())}
 
-    // ============================================
-    // FIFO SYSTEM
-    // ============================================
-    function getVisibleEntries() {
-      const realCount = state.entries.length;
-      if (realCount === 0) return DUMMY_ENTRIES;
-      if (realCount < 3) {
-        const needed = 3 - realCount;
-        return [...state.entries, ...DUMMY_ENTRIES.slice(0, needed)];
-      }
-      return state.entries.slice(0, CONFIG.maxEntries);
-    }
+// SUPABASE
+function initSB(){try{if(typeof supabase==='undefined'){updOnline(false);return false}S.sb=supabase.createClient(CFG.supabaseUrl,CFG.supabaseKey);S.online=true;updOnline(true);subChanges();return true}catch(e){updOnline(false);return false}}
+function updOnline(on){const d=$('odot');if(!d)return;d.classList[on?'remove':'add']('off');d.title=on?'Online':'Offline'}
+function subChanges(){if(!S.sb)return;S.sb.channel('spills').on('postgres_changes',{event:'*',schema:'public',table:'spills'},()=>loadRants()).subscribe()}
 
-    function addEntryFIFO(newEntry) {
-      state.entries.unshift(newEntry);
-      if (state.entries.length > CONFIG.maxEntries) {
-        const removed = state.entries.pop();
-        console.log('🔄 Entry FIFO removed:', removed.id);
-        showToast('Entry lama terhapus otomatis (FIFO)');
-      }
-      saveEntries();
-      renderEntries();
-    }
+async function loadRants(){if(!S.online||!S.sb)return;try{const{data,error}=await S.sb.from('rants').select('*').eq('author',S.user).order('created_at',{ascending:false}).limit(CFG.maxEntries);if(error)throw error;if(data?.length){const ids=new Set(S.entries.map(e=>e.id));const ne=data.filter(r=>!ids.has(r.id)).map(r=>({id:r.id,content:r.content,mood:r.mood,timestamp:new Date(r.created_at).getTime(),vibes:r.vibes||{relatable:0,mood:0,tea:0,hug:0,real:0,dead:0},isSpilled:true,author:r.author}));S.entries=[...S.entries,...ne].sort((a,b)=>b.timestamp-a.timestamp).slice(0,CFG.maxEntries);saveEntries();renderEntries()}}catch(e){console.error(e)}}
 
-    function getVisibleArtefacts() {
-      const real = state.artefacts.filter(a => !a.isDummy);
-      if (real.length >= 6) return real.slice(0, 6);
-      const needed = 6 - real.length;
-      return [...real, ...DUMMY_ARTEFACTS.slice(0, needed)];
-    }
+async function loadArtefacts(){if(!S.online||!S.sb)return;try{const{data,error}=await S.sb.from('artefacts').select('*').eq('author',S.user).order('created_at',{ascending:false}).limit(CFG.maxArtefacts);if(error)throw error;if(data?.length){S.artefacts=data.map(a=>({id:a.id,url:a.url,note:a.note||'memory',faces:a.faces||[],hasFace:a.has_face||false,timestamp:new Date(a.created_at).getTime()}));saveArtefacts();renderTray();const f=S.artefacts[0];if(f)setHero(f.url,f.note,f.faces)}}catch(e){console.error(e)}}
 
-    function addArtefactFIFO(newArtefact) {
-      const realArtefacts = state.artefacts.filter(a => !a.isDummy);
-      realArtefacts.unshift(newArtefact);
-      if (realArtefacts.length > CONFIG.maxArtefacts) {
-        const removed = realArtefacts.pop();
-        console.log('🔄 Artefact FIFO removed:', removed.id);
-        showToast('Foto lama terhapus otomatis (FIFO)');
-      }
-      state.artefacts = realArtefacts;
-      saveArtefacts();
-      renderTray();
-      
-      setHero(newArtefact.url, newArtefact.note, newArtefact.faces, 'filter-' + (newArtefact.theme || 'monochrome').toLowerCase());
-    }
+async function loadReactions(){if(!S.online||!S.sb)return;const ids=S.entries.map(e=>e.id).filter(id=>!id.startsWith('__'));if(!ids.length)return;try{const{data,error}=await S.sb.from('reactions').select('*').in('rant_id',ids);if(error)throw error;if(data?.length){const rc={};data.forEach(r=>{if(!rc[r.rant_id])rc[r.rant_id]={relatable:0,mood:0,tea:0,hug:0,real:0,dead:0};if(rc[r.rant_id][r.reaction_type]!==undefined)rc[r.rant_id][r.reaction_type]++});S.entries=S.entries.map(e=>rc[e.id]?{...e,vibes:{...e.vibes,...rc[e.id]}}:e);saveEntries();renderEntries()}}catch(e){console.error(e)}}
 
-    // ============================================
-    // SUPABASE & API
-    // ============================================
-    function initSupabase() {
-      try {
-        if (typeof supabase === 'undefined') {
-          updateOnlineStatus(false);
-          return false;
-        }
-        state.supabase = supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
-        state.isOnline = true;
-        updateOnlineStatus(true);
-        subscribeToChanges();
-        return true;
-      } catch (e) {
-        updateOnlineStatus(false);
-        return false;
-      }
-    }
+// FACE API
+async function loadFaceApi(){const URL='https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model/';try{await faceapi.nets.tinyFaceDetector.loadFromUri(URL);await faceapi.nets.faceLandmark68Net.loadFromUri(URL);S.faceLoaded=true}catch(e){S.faceLoaded=false}}
 
-    function updateOnlineStatus(online) {
-      const dot = document.getElementById('online-dot');
-      if (!dot) return;
-      if (online) {
-        dot.classList.remove('offline');
-        dot.title = 'Online';
-      } else {
-        dot.classList.add('offline');
-        dot.title = 'Offline';
-      }
-    }
+async function detectFaces(file){if(!S.faceLoaded)return[];showProc(true);try{const img=await faceapi.bufferToImage(file);const d=await faceapi.detectAllFaces(img,new faceapi.TinyFaceDetectorOptions({inputSize:CFG.inputSize,scoreThreshold:CFG.faceThreshold}));return d.map(x=>({box:{x:x.box.x,y:x.box.y,width:x.box.width,height:x.box.height},score:x.score}))}catch(e){return[]}finally{showProc(false)}}
 
-    function subscribeToChanges() {
-      if (!state.supabase) return;
-      state.supabase.channel('spills').on('postgres_changes', { event: '*', schema: 'public', table: 'spills' }, () => {
-        loadUserRantsFromDB();
-      }).subscribe();
-    }
+function mkScribble(face,cw,ch){const div=document.createElement('div');div.className='fscrib';const sx=cw/416,sy=ch/(416*(ch/cw));div.style.cssText=`left:${face.box.x*sx}px;top:${face.box.y*sy}px;width:${face.box.width*sx}px;height:${face.box.height*sy}px`;const m=document.createElement('div');m.className='mlines';div.appendChild(m);return div}
 
-    async function loadUserRantsFromDB() {
-      if (!state.isOnline || !state.supabase) return;
-      try {
-        const { data, error } = await state.supabase
-          .from('rants')
-          .select('*')
-          .eq('author', state.currentUser)
-          .order('created_at', { ascending: false })
-          .limit(CONFIG.maxEntries);
-        
-        if (error) throw error;
-        
-        if (data?.length > 0) {
-          const localIds = new Set(state.entries.map(e => e.id));
-          const newEntries = data
-            .filter(r => !localIds.has(r.id))
-            .map(r => ({
-              id: r.id,
-              content: r.content,
-              mood: r.mood,
-              timestamp: new Date(r.created_at).getTime(),
-              vibes: r.vibes || {relatable:0,mood:0,tea:0,hug:0,real:0,dead:0},
-              isSpilled: true,
-              author: r.author
-            }));
-          
-          state.entries = [...state.entries, ...newEntries].sort((a,b) => b.timestamp - a.timestamp).slice(0, CONFIG.maxEntries);
-          saveEntries();
-          renderEntries();
-        }
-      } catch (e) {
-        console.error('Load rants failed:', e);
-      }
-    }
+// UPLOAD
+function initUpload(){const btn=$('upbtn'),fi=$('finput');if(!btn||!fi)return;btn.onclick=()=>{if(!checkQuota()){toast('⏳ Quota habis. Tunggu window berikutnya.');return}fi.click()};fi.onchange=handleFiles}
 
-    async function loadUserArtefactsFromDB() {
-      if (!state.isOnline || !state.supabase) return;
-      try {
-        const { data, error } = await state.supabase
-          .from('artefacts')
-          .select('*')
-          .eq('author', state.currentUser)
-          .order('created_at', { ascending: false })
-          .limit(CONFIG.maxArtefacts);
-        
-        if (error) throw error;
-        
-        if (data?.length > 0) {
-          state.artefacts = data.map(a => ({
-            id: a.id,
-            url: a.url,
-            note: a.note || 'memory',
-            faces: a.faces || [],
-            hasFace: a.has_face || false,
-            timestamp: new Date(a.created_at).getTime()
-          }));
-          saveArtefacts();
-          renderTray();
-          const first = state.artefacts[0];
-          if (first) setHero(first.url, first.note, first.faces);
-        }
-      } catch (e) {
-        console.error('Load artefacts failed:', e);
-      }
-    }
+function checkQuota(){if(!S.qStart){S.qStart=Date.now();localStorage.setItem(PFX+'quota_start',S.qStart);S.uploads=0;localStorage.setItem(PFX+'uploads_count','0');return true}const e=Date.now()-parseInt(S.qStart),w=CFG.uploadWindowDays*86400000;if(e>w){S.qStart=Date.now();S.uploads=0;localStorage.setItem(PFX+'quota_start',S.qStart);localStorage.setItem(PFX+'uploads_count','0');return true}return S.uploads<CFG.maxSelection}
 
-    // ============================================
-    // LOAD REACTIONS FROM SUPABASE
-    // ============================================
-    async function loadReactionsForEntries() {
-      if (!state.isOnline || !state.supabase) return;
-      
-      const entryIds = state.entries.map(e => e.id).filter(id => !id.startsWith('__'));
-      if (entryIds.length === 0) return;
-      
-      try {
-        const { data, error } = await state.supabase
-          .from('reactions')
-          .select('*')
-          .in('rant_id', entryIds);
-        
-        if (error) throw error;
-        
-        if (data && data.length > 0) {
-          // Aggregate reactions by rant_id
-          const reactionCounts = {};
-          data.forEach(reaction => {
-            if (!reactionCounts[reaction.rant_id]) {
-              reactionCounts[reaction.rant_id] = {
-                relatable: 0, mood: 0, tea: 0, hug: 0, real: 0, dead: 0
-              };
-            }
-            if (reactionCounts[reaction.rant_id][reaction.reaction_type] !== undefined) {
-              reactionCounts[reaction.rant_id][reaction.reaction_type]++;
-            }
-          });
-          
-          // Update entries with reaction counts
-          state.entries = state.entries.map(entry => {
-            if (reactionCounts[entry.id]) {
-              return { ...entry, vibes: { ...entry.vibes, ...reactionCounts[entry.id] } };
-            }
-            return entry;
-          });
-          
-          saveEntries();
-          renderEntries();
-        }
-      } catch (e) {
-        console.error('Failed to load reactions:', e);
-      }
-    }
+function updQuota(){const t=$('qtimer'),c=$('ucnt');if(!t)return;if(!S.qStart){t.textContent='Window aktif • Sisa 6 slot';t.classList.remove('urg');if(c)c.style.display='none';return}const e=Date.now()-parseInt(S.qStart),w=CFG.uploadWindowDays*86400000,rem=Math.max(0,w-e),days=Math.ceil(rem/86400000),slots=CFG.maxSelection-S.uploads;if(rem<=0)t.textContent='Window reset • Sisa 6 slot';else{t.textContent=`Window aktif • ${days} hari lagi • Sisa ${slots} slot`;if(slots<=2)t.classList.add('urg')}if(c){c.textContent=S.uploads;c.style.display=S.uploads>0?'block':'none'}}
 
-    // ============================================
-    // CORE FUNCTIONS
-    // ============================================
-    async function submitRant(content, mood) {
-      const rantId = crypto.randomUUID();
-      const timestamp = Date.now();
-      
-      const entry = {
-        id: rantId,
-        content: content,
-        mood: mood,
-        timestamp: timestamp,
-        vibes: { relatable: 0, mood: 0, tea: 0, hug: 0, real: 0, dead: 0 },
-        isSpilled: false,
-        author: state.currentUser
-      };
+async function handleFiles(e){const files=Array.from(e.target.files);if(!files.length)return;if(files.reduce((s,f)=>s+f.size,0)>CFG.maxFileSize*2){toast('⚠ Total file terlalu besar (max 10MB)');return}const pf=[];for(const f of files.slice(0,CFG.maxSelection)){const faces=await detectFaces(f);pf.push({file:f,faces,hasFace:faces.length>0,preview:URL.createObjectURL(f)})}openGallery(pf)}
 
-      addEntryFIFO(entry);
-      
-      if (state.isOnline && state.supabase) {
-        try {
-          const { error } = await state.supabase
-            .from('rants')
-            .insert({
-              id: rantId,
-              content: content,
-              mood: mood,
-              author: state.currentUser,
-              vibes: entry.vibes,
-              created_at: new Date(timestamp).toISOString()
-            });
-          
-          if (error) throw error;
-          
-          entry.isSpilled = true;
-          updateEntry(rantId, { isSpilled: true });
-          showToast('✓ Tersimpan');
-        } catch (e) {
-          console.error('Sync failed:', e);
-          showToast('⚠ Disimpan lokal');
-          queueForSync('rant', entry);
-        }
-      } else {
-        showToast('⚠ Disimpan lokal');
-        queueForSync('rant', entry);
-      }
-      
-      document.getElementById('rant-input').value = '';
-      document.getElementById('char-count').textContent = '0/500';
-      selectMood('surviving');
-    }
+function openGallery(files){S.selFiles=new Set(files.map((_,i)=>i));S.theme=0;S.note='';const grid=$('ggrid');if(!grid)return;grid.innerHTML='';files.forEach((item,i)=>{const d=document.createElement('div');d.className='gi sel';d.innerHTML=`<img src="${item.preview}" class="fm" id="pv${i}">`;d.onclick=()=>toggleSel(i,d);if(item.hasFace){const b=document.createElement('div');b.className='dbadge';b.textContent='WAJAH TERDETEKSI';d.appendChild(b)}grid.appendChild(d)});['tmsl','tmnm','noti','notcnt'].forEach(id=>{const el=$(id);if(el){if(id==='tmsl')el.value=0;else if(id==='tmnm')el.textContent='MONOCHROME';else if(id==='noti')el.value='';else el.textContent='0/4'}});updSelCnt();$('gmodal').classList.add('on');S.pendingFiles=files}
 
-    function updateEntry(id, updates) {
-      const idx = state.entries.findIndex(e => e.id === id);
-      if (idx !== -1) {
-        state.entries[idx] = { ...state.entries[idx], ...updates };
-        saveEntries();
-        renderEntries();
-      }
-    }
+function toggleSel(i,el){S.selFiles[S.selFiles.has(i)?'delete':'add'](i);el.classList.toggle('sel');updSelCnt()}
+function updSelCnt(){const el=$('selcnt');if(el)el.textContent=S.selFiles.size}
+function updTheme(v){S.theme=+v;const t=THEMES[S.theme];const nm=$('tmnm');if(nm)nm.textContent=t.name;S.pendingFiles.forEach((_,i)=>{const img=$('pv'+i);if(img){img.className='';img.classList.add(t.filter)}})}
+function valNote(inp){const w=inp.value.trim().split(/\s+/).filter(x=>x.length);const nc=$('notcnt');if(nc)nc.textContent=`${Math.min(w.length,4)}/4`;if(w.length>4)inp.value=w.slice(0,4).join(' ');S.note=inp.value.trim()}
+function closeGallery(){$('gmodal').classList.remove('on');S.pendingFiles=[];S.selFiles=new Set()}
 
-    function queueForSync(type, data) {
-      const queue = JSON.parse(localStorage.getItem(STORAGE_PREFIX + 'sync_queue') || '[]');
-      queue.push({ type, data, timestamp: Date.now() });
-      localStorage.setItem(STORAGE_PREFIX + 'sync_queue', JSON.stringify(queue));
-    }
+async function confirmUpload(){if(!S.selFiles.size){toast('Pilih minimal 1 foto');return}const theme=THEMES[S.theme],note=S.note||'memory';for(const i of S.selFiles)await procUpload(S.pendingFiles[i],theme,note);S.uploads+=S.selFiles.size;localStorage.setItem(PFX+'uploads_count',S.uploads);updQuota();closeGallery();toast(`✓ ${S.selFiles.size} foto diupload`)}
 
-    // ============================================
-    // FACE API & IMAGE PROCESSING
-    // ============================================
-    async function loadFaceApiModels() {
-      const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model/';
-      try {
-        await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
-        await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-        state.faceApiLoaded = true;
-        console.log('✓ Face-API ready');
-      } catch (e) {
-        console.error('Face-API load failed:', e);
-        state.faceApiLoaded = false;
-      }
-    }
+async function procUpload(item,theme,note){const id=crypto.randomUUID(),canvas=document.createElement('canvas'),ctx=canvas.getContext('2d'),img=new Image();await new Promise(res=>{img.onload=res;img.src=item.preview});canvas.width=img.width;canvas.height=img.height;ctx.filter=CANVAS_FILTERS[theme.filter]||CANVAS_FILTERS['fm'];ctx.drawImage(img,0,0);const blob=await new Promise(res=>canvas.toBlob(res,'image/jpeg',.85));let url=item.preview;
+if(S.online&&S.sb){try{const fn=`${S.user}/${id}.jpg`;const{error:ue}=await S.sb.storage.from(CFG.storageBucket).upload(fn,blob);if(ue)throw ue;const{data:{publicUrl}}=S.sb.storage.from(CFG.storageBucket).getPublicUrl(fn);url=publicUrl;await S.sb.from('artefacts').insert({id,url,note,faces:item.faces,has_face:item.hasFace,author:S.user,theme:theme.name,created_at:new Date().toISOString()})}catch(e){console.error(e)}}
+addArtefactFIFO({id,url,note,faces:item.faces,hasFace:item.hasFace,theme:theme.name,timestamp:Date.now(),isDummy:false})}
 
-    async function detectFaces(imageFile) {
-      if (!state.faceApiLoaded) {
-        console.warn('Face-API not loaded, skipping detection');
-        return [];
-      }
-      
-      document.getElementById('processing').classList.add('active');
-      
-      try {
-        const img = await faceapi.bufferToImage(imageFile);
-        const detections = await faceapi.detectAllFaces(img, new faceapi.TinyFaceDetectorOptions({ inputSize: CONFIG.inputSize, scoreThreshold: CONFIG.faceThreshold }));
-        
-        return detections.map(d => ({
-          box: {
-            x: d.box.x,
-            y: d.box.y,
-            width: d.box.width,
-            height: d.box.height
-          },
-          score: d.score
-        }));
-      } catch (e) {
-        console.error('Face detection error:', e);
-        return [];
-      } finally {
-        document.getElementById('processing').classList.remove('active');
-      }
-    }
+// SUBMIT
+async function submitRant(content,mood){const id=crypto.randomUUID(),ts=Date.now();const entry={id,content,mood,timestamp:ts,vibes:{relatable:0,mood:0,tea:0,hug:0,real:0,dead:0},isSpilled:false,author:S.user};addEntryFIFO(entry);if(S.online&&S.sb){try{const{error}=await S.sb.from('rants').insert({id,content,mood,author:S.user,vibes:entry.vibes,created_at:new Date(ts).toISOString()});if(error)throw error;updEntry(id,{isSpilled:true});toast('✓ Tersimpan')}catch(e){toast('⚠ Disimpan lokal');qSync('rant',entry)}}else{toast('⚠ Disimpan lokal');qSync('rant',entry)}}
 
-    function createFaceScribble(face, containerWidth, containerHeight) {
-      const div = document.createElement('div');
-      div.className = 'face-scribble';
-      
-      const scaleX = containerWidth / 416;
-      const scaleY = containerHeight / (416 * (containerHeight/containerWidth));
-      
-      const x = face.box.x * scaleX;
-      const y = face.box.y * scaleY;
-      const w = face.box.width * scaleX;
-      const h = face.box.height * scaleY;
-      
-      div.style.left = x + 'px';
-      div.style.top = y + 'px';
-      div.style.width = w + 'px';
-      div.style.height = h + 'px';
-      
-      const marker = document.createElement('div');
-      marker.className = 'marker-lines';
-      div.appendChild(marker);
-      
-      return div;
-    }
+function updEntry(id,u){const i=S.entries.findIndex(e=>e.id===id);if(i!==-1){S.entries[i]={...S.entries[i],...u};saveEntries();renderEntries()}}
+function qSync(type,data){const q=JSON.parse(localStorage.getItem(PFX+'sync_queue')||'[]');q.push({type,data,timestamp:Date.now()});localStorage.setItem(PFX+'sync_queue',JSON.stringify(q))}
 
-    // ============================================
-    // UPLOAD & GALLERY SYSTEM
-    // ============================================
-    function initUploadSystem() {
-      const uploadBtn = document.getElementById('upload-btn');
-      const fileInput = document.getElementById('file-input');
-      
-      if (!uploadBtn || !fileInput) return;
-      
-      uploadBtn.addEventListener('click', () => {
-        if (!checkQuota()) {
-          showToast('⏳ Quota habis. Tunggu window berikutnya.');
-          return;
-        }
-        fileInput.click();
-      });
-      
-      fileInput.addEventListener('change', handleFileSelect);
-    }
+// RENDER
+function getTopVibe(vibes,id){if(!vibes)return null;const ev=Object.entries(vibes).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]);if(!ev.length)return null;const top=ev[0][1],tops=ev.filter(([,v])=>v===top);if(tops.length>1){const h=id.split('').reduce((a,c)=>((a<<5)-a)+c.charCodeAt(0),0);return tops[Math.abs(h)%tops.length]}return ev[0]}
 
-    function checkQuota() {
-      if (!state.quotaStart) {
-        state.quotaStart = Date.now();
-        localStorage.setItem(STORAGE_PREFIX + 'quota_start', state.quotaStart);
-        state.uploadsThisWindow = 0;
-        localStorage.setItem(STORAGE_PREFIX + 'uploads_count', '0');
-        return true;
-      }
-      
-      const elapsed = Date.now() - parseInt(state.quotaStart);
-      const windowDuration = CONFIG.uploadWindowDays * 24 * 60 * 60 * 1000;
-      
-      if (elapsed > windowDuration) {
-        state.quotaStart = Date.now();
-        state.uploadsThisWindow = 0;
-        localStorage.setItem(STORAGE_PREFIX + 'quota_start', state.quotaStart);
-        localStorage.setItem(STORAGE_PREFIX + 'uploads_count', '0');
-        return true;
-      }
-      
-      return state.uploadsThisWindow < CONFIG.maxSelection;
-    }
+function renderEntries(){const c=$('econ');if(!c)return;const entries=getVisEntries();if(!entries.length){c.innerHTML=`<div class="es"><span class="ee">🍃</span><div class="et">Belum ada jejak</div><div class="est">Jadilah yang pertama spill your truth</div></div>`;return}
+c.innerHTML=entries.map(e=>{const m=MOODS[e.mood]||MOODS.surviving,d=new Date(e.timestamp);const t=d.toLocaleDateString('id-ID',{day:'numeric',month:'short'})+' • '+d.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});const isDum=e.isDummy||e.id?.startsWith('__d');const tv=getTopVibe(e.vibes,e.id);let emp='';if(tv&&tv[1]>0){const v=VIBES[tv[0]];emp=`<div class="etext"><span class="eemoji">${v.emoji}</span><span class="ehi">${tv[1]}</span><span>${v.empathy}</span></div>`}else if(e.vibes){const v=VIBES[Object.keys(VIBES)[0]];emp=`<div class="etext"><span class="eemoji">${v.emoji}</span><span class="ehi">0</span><span>${v.empathy}</span></div>`}
+return`<article class="entry${isDum?' entry-dummy':''}" data-id="${e.id}"><div class="ehdr"><div class="emeta"><span class="etime">${t}</span><span class="emood ${e.mood}">${m.emoji} ${m.label}</span></div>${isDum?'<span class="fifo-i">Contoh</span>':''}</div><div class="econt">${esc(e.content)}</div>${emp}</article>`}).join('')}
 
-    function updateQuotaDisplay() {
-      const timer = document.getElementById('quota-timer');
-      const counter = document.getElementById('upload-counter');
-      
-      if (!timer) return;
-      
-      if (!state.quotaStart) {
-        timer.textContent = 'Window aktif • Sisa 6 slot';
-        timer.classList.remove('urgent');
-        if (counter) counter.style.display = 'none';
-        return;
-      }
-      
-      const elapsed = Date.now() - parseInt(state.quotaStart);
-      const windowDuration = CONFIG.uploadWindowDays * 24 * 60 * 60 * 1000;
-      const remaining = Math.max(0, windowDuration - elapsed);
-      const daysLeft = Math.ceil(remaining / (24 * 60 * 60 * 1000));
-      const slotsLeft = CONFIG.maxSelection - state.uploadsThisWindow;
-      
-      if (remaining <= 0) {
-        timer.textContent = 'Window reset • Sisa 6 slot';
-        timer.classList.remove('urgent');
-      } else {
-        timer.textContent = `Window aktif • ${daysLeft} hari lagi • Sisa ${slotsLeft} slot`;
-        if (slotsLeft <= 2) timer.classList.add('urgent');
-      }
-      
-      if (counter) {
-        if (state.uploadsThisWindow > 0) {
-          counter.textContent = state.uploadsThisWindow;
-          counter.style.display = 'block';
-        } else {
-          counter.style.display = 'none';
-        }
-      }
-    }
+function renderTray(){const g=$('tgrid');if(!g)return;g.innerHTML=getVisArtefacts().map(a=>{const isDum=a.isDummy||a.id?.startsWith('__a');if(!a.url)return`<div class="ti empty" onclick="$('upbtn').click()">+</div>`;return`<div class="ti${isDum?' ti-dum':''}" onclick="setHeroFromTray('${a.id}')" style="position:relative"><img src="${a.url}" alt="${a.note}" class="${a.theme?'f'+a.theme.toLowerCase():'fm'}">${a.hasFace?'<span class="dbadge">SENSORED</span>':''}</div>`}).join('')}
 
-    async function handleFileSelect(e) {
-      const files = Array.from(e.target.files);
-      if (files.length === 0) return;
-      
-      const totalSize = files.reduce((sum, f) => sum + f.size, 0);
-      if (totalSize > CONFIG.maxFileSize * 2) {
-        showToast('⚠ Total file terlalu besar (max 10MB)');
-        return;
-      }
-      
-      const processedFiles = [];
-      for (const file of files.slice(0, CONFIG.maxSelection)) {
-        const faces = await detectFaces(file);
-        processedFiles.push({
-          file: file,
-          faces: faces,
-          hasFace: faces.length > 0,
-          preview: URL.createObjectURL(file)
-        });
-      }
-      
-      openGallery(processedFiles);
-    }
+function setHero(url,note,faces,fc='fm'){const hi=$('himg'),hn=$('hnote'),hf=$('hfaces');if(!hi||!hn)return;hi.src=url;hi.className=fc;hn.textContent=`"${note}"`;if(hf){hf.innerHTML='';if(faces?.length)faces.forEach(f=>hf.appendChild(mkScribble(f,hi.clientWidth,hi.clientHeight)))}}
 
-    function openGallery(files) {
-      state.selectedFiles = new Set(files.map((_, i) => i));
-      state.currentTheme = 0;
-      state.notationText = '';
-      
-      const grid = document.getElementById('gallery-grid');
-      if (!grid) return;
-      
-      grid.innerHTML = '';
-      
-      files.forEach((item, idx) => {
-        const div = document.createElement('div');
-        div.className = 'gallery-item' + (state.selectedFiles.has(idx) ? ' selected' : '');
-        div.innerHTML = `<img src="${item.preview}" alt="preview" class="filter-monochrome" id="preview-${idx}">`;
-        div.onclick = () => toggleSelection(idx, div);
-        
-        if (item.hasFace) {
-          const badge = document.createElement('div');
-          badge.className = 'detection-badge';
-          badge.textContent = 'WAJAH TERDETEKSI';
-          div.appendChild(badge);
-        }
-        
-        grid.appendChild(div);
-      });
-      
-      const themeSlider = document.getElementById('theme-slider');
-      const themeName = document.getElementById('theme-name');
-      const notationInput = document.getElementById('notation-input');
-      const notationCount = document.getElementById('notation-count');
-      
-      if (themeSlider) themeSlider.value = 0;
-      if (themeName) themeName.textContent = THEMES[0].name;
-      if (notationInput) notationInput.value = '';
-      if (notationCount) notationCount.textContent = '0/4';
-      
-      updateSelectedCount();
-      
-      const modal = document.getElementById('gallery-modal');
-      if (modal) modal.classList.add('active');
-      
-      state.pendingFiles = files;
-    }
+function setHeroFromTray(id){const a=S.artefacts.find(x=>x.id===id)||DA.find(x=>x.id===id);if(a)setHero(a.url,a.note,a.faces,a.theme?'f'+a.theme.toLowerCase():'fm')}
 
-    function toggleSelection(idx, element) {
-      if (state.selectedFiles.has(idx)) {
-        state.selectedFiles.delete(idx);
-        element.classList.remove('selected');
-      } else {
-        state.selectedFiles.add(idx);
-        element.classList.add('selected');
-      }
-      updateSelectedCount();
-    }
+// INTERACTIONS
+function selMood(mood){S.mood=mood;document.querySelectorAll('.mc').forEach(c=>c.classList.toggle('act',c.dataset.mood===mood))}
+function toggleMenu(){$('mdd').classList.toggle('on')}
+function logoutUser(){if(!confirm('Yakin mau logout?'))return;['jejak_username','jejak_user_id','jejak_logged_in'].forEach(k=>localStorage.removeItem(k));location.href='index.html'}
 
-    function updateSelectedCount() {
-      const el = document.getElementById('selected-count');
-      if (el) el.textContent = state.selectedFiles.size;
-    }
+document.addEventListener('click',e=>{const m=$('mdd'),t=document.querySelector('.mtrig');if(m&&t&&!m.contains(e.target)&&!t.contains(e.target))m.classList.remove('on')});
 
-    function updateThemeFromSlider(value) {
-      state.currentTheme = parseInt(value);
-      const theme = THEMES[state.currentTheme];
-      const themeName = document.getElementById('theme-name');
-      if (themeName) themeName.textContent = theme.name;
-      
-      state.pendingFiles.forEach((_, idx) => {
-        const img = document.getElementById(`preview-${idx}`);
-        if (img) {
-          img.className = '';
-          img.classList.add(theme.filter);
-        }
-      });
-    }
+// STORAGE
+const saveEntries=()=>localStorage.setItem(PFX+'entries',JSON.stringify(S.entries));
+const saveArtefacts=()=>localStorage.setItem(PFX+'artefacts',JSON.stringify(S.artefacts));
+function loadStorage(){try{const e=localStorage.getItem(PFX+'entries');if(e)S.entries=JSON.parse(e)}catch{S.entries=[]}try{const a=localStorage.getItem(PFX+'artefacts');if(a)S.artefacts=JSON.parse(a)}catch{S.artefacts=[]}}
 
-    function validateNotation(input) {
-      const words = input.value.trim().split(/\s+/).filter(w => w.length > 0);
-      const count = words.length;
-      const notationCount = document.getElementById('notation-count');
-      if (notationCount) notationCount.textContent = `${count}/4`;
-      
-      if (count > 4) {
-        input.value = words.slice(0, 4).join(' ');
-        if (notationCount) notationCount.textContent = '4/4';
-      }
-      
-      state.notationText = input.value.trim();
-    }
-
-    function closeGallery() {
-      const modal = document.getElementById('gallery-modal');
-      if (modal) modal.classList.remove('active');
-      state.pendingFiles = [];
-      state.selectedFiles = new Set();
-    }
-
-    async function confirmUpload() {
-      if (state.selectedFiles.size === 0) {
-        showToast('Pilih minimal 1 foto');
-        return;
-      }
-      
-      const theme = THEMES[state.currentTheme];
-      const notation = state.notationText || 'memory';
-      
-      for (const idx of state.selectedFiles) {
-        const item = state.pendingFiles[idx];
-        await processAndUploadArtefact(item, theme, notation);
-      }
-      
-      state.uploadsThisWindow += state.selectedFiles.size;
-      localStorage.setItem(STORAGE_PREFIX + 'uploads_count', state.uploadsThisWindow.toString());
-      updateQuotaDisplay();
-      
-      closeGallery();
-      showToast(`✓ ${state.selectedFiles.size} foto diupload`);
-    }
-
-    async function processAndUploadArtefact(item, theme, notation) {
-      const artefactId = crypto.randomUUID();
-      
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const img = new Image();
-      
-      await new Promise((resolve) => {
-        img.onload = resolve;
-        img.src = item.preview;
-      });
-      
-      canvas.width = img.width;
-      canvas.height = img.height;
-      
-      ctx.filter = getCanvasFilter(theme.filter);
-      ctx.drawImage(img, 0, 0);
-      
-      const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.85));
-      
-      let publicUrl = item.preview;
-      
-      if (state.isOnline && state.supabase) {
-        try {
-          const fileName = `${state.currentUser}/${artefactId}.jpg`;
-          const { error: uploadError } = await state.supabase
-            .storage
-            .from(CONFIG.storageBucket)
-            .upload(fileName, blob);
-          
-          if (uploadError) throw uploadError;
-          
-          const { data: { publicUrl: url } } = state.supabase
-            .storage
-            .from(CONFIG.storageBucket)
-            .getPublicUrl(fileName);
-          
-          publicUrl = url;
-          
-          await state.supabase.from('artefacts').insert({
-            id: artefactId,
-            url: publicUrl,
-            note: notation,
-            faces: item.faces,
-            has_face: item.hasFace,
-            author: state.currentUser,
-            theme: theme.name,
-            created_at: new Date().toISOString()
-          });
-          
-        } catch (e) {
-          console.error('Upload failed:', e);
-        }
-      }
-      
-      const artefact = {
-        id: artefactId,
-        url: publicUrl,
-        note: notation,
-        faces: item.faces,
-        hasFace: item.hasFace,
-        theme: theme.name,
-        timestamp: Date.now(),
-        isDummy: false
-      };
-      
-      addArtefactFIFO(artefact);
-    }
-
-    function getCanvasFilter(filterClass) {
-      const filters = {
-        'filter-monochrome': 'grayscale(100%) contrast(1.1)',
-        'filter-noir': 'grayscale(100%) contrast(1.4) brightness(0.8)',
-        'filter-sepia': 'sepia(100%) contrast(1.1) saturate(0.8)',
-        'filter-warm': 'sepia(60%) hue-rotate(-30deg) saturate(1.2)',
-        'filter-golden': 'sepia(40%) hue-rotate(-15deg) saturate(1.3) contrast(1.1)',
-        'filter-lomo': 'contrast(1.2) saturate(1.3) brightness(0.9)',
-        'filter-dream': 'blur(0.5px) saturate(1.4) brightness(1.1) contrast(0.9)',
-        'filter-cold': 'hue-rotate(180deg) saturate(0.5) brightness(1.1)',
-        'filter-cyber': 'hue-rotate(180deg) saturate(1.5) contrast(1.1)',
-        'filter-vignette': 'grayscale(100%) contrast(1.2) brightness(0.9)',
-        'filter-crisp': 'contrast(1.3) saturate(1.1)',
-        'filter-moody': 'brightness(0.8) contrast(1.2) saturate(0.7)'
-      };
-      return filters[filterClass] || filters['filter-monochrome'];
-    }
-
-    // ============================================
-    // RENDERING
-    // ============================================
-    function renderEntries() {
-      const container = document.getElementById('entries-container');
-      if (!container) return;
-      
-      const entries = getVisibleEntries();
-      
-      if (entries.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <span class="empty-emoji">🍃</span>
-            <div class="empty-text">Belum ada jejak</div>
-            <div class="empty-subtext">Jadilah yang pertama spill your truth</div>
-          </div>
-        `;
-        return;
-      }
-      
-      container.innerHTML = entries.map(entry => {
-        const mood = MOODS[entry.mood] || MOODS.surviving;
-        const date = new Date(entry.timestamp);
-        const timeStr = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) + ' • ' + 
-                       date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-        
-        const isDummy = entry.isDummy || (entry.id && entry.id.startsWith('__d'));
-        
-        // Get top vibe for empathy text - NARASI RESPON EMOJI
-        const topVibe = getTopVibe(entry.vibes, entry.id);
-        let empathyHTML = '';
-        
-        // SELALU tampilkan empathy text jika ada vibes, meskipun 0
-        // Atau tampilkan default jika tidak ada vibes
-        if (topVibe && topVibe[1] > 0) {
-          const [vibeKey, count] = topVibe;
-          const vibe = VIBES[vibeKey];
-          empathyHTML = `
-            <div class="empathy-text">
-              <span class="empathy-emoji">${vibe.emoji}</span>
-              <span class="empathy-highlight">${count}</span>
-              <span>${vibe.empathy}</span>
-            </div>
-          `;
-        } else if (entry.vibes) {
-          // Jika tidak ada reaction, tampilkan 0 untuk vibe pertama
-          const firstVibeKey = Object.keys(VIBES)[0];
-          const vibe = VIBES[firstVibeKey];
-          empathyHTML = `
-            <div class="empathy-text">
-              <span class="empathy-emoji">${vibe.emoji}</span>
-              <span class="empathy-highlight">0</span>
-              <span>${vibe.empathy}</span>
-            </div>
-          `;
-        }
-        
-        return `
-          <article class="entry ${isDummy ? 'entry-dummy' : ''}" data-id="${entry.id}">
-            <div class="entry-header">
-              <div class="entry-meta">
-                <span class="entry-time">${timeStr}</span>
-                <span class="entry-mood ${entry.mood}">${mood.emoji} ${mood.label}</span>
-              </div>
-              ${isDummy ? '<span class="fifo-indicator">Contoh</span>' : ''}
-            </div>
-            <div class="entry-content">${escapeHtml(entry.content)}</div>
-            ${empathyHTML}
-          </article>
-        `;
-      }).join('');
-    }
-
-    function getTopVibe(vibes, entryId) {
-      if (!vibes) return null;
-      const entries = Object.entries(vibes).filter(([k,v]) => v > 0);
-      if (entries.length === 0) return null;
-      
-      entries.sort((a,b) => b[1] - a[1]);
-      
-      const topCount = entries[0][1];
-      const topOnes = entries.filter(([k,v]) => v === topCount);
-      
-      if (topOnes.length > 1) {
-        const hash = entryId.split('').reduce((a,c) => ((a << 5) - a) + c.charCodeAt(0), 0);
-        return topOnes[Math.abs(hash) % topOnes.length];
-      }
-      
-      return entries[0];
-    }
-
-    function renderTray() {
-      const grid = document.getElementById('tray-grid');
-      if (!grid) return;
-      
-      const artefacts = getVisibleArtefacts();
-      
-      grid.innerHTML = artefacts.map((art, idx) => {
-        const isDummy = art.isDummy || (art.id && art.id.startsWith('__a'));
-        
-        if (!art.url) {
-          return `<div class="tray-item empty" onclick="triggerUpload()">+</div>`;
-        }
-        
-        return `
-          <div class="tray-item ${isDummy ? 'tray-item-dummy' : ''}" onclick="setHeroFromTray('${art.id}')" style="position:relative">
-            <img src="${art.url}" alt="${art.note}" class="${art.theme ? 'filter-' + art.theme.toLowerCase() : 'filter-monochrome'}">
-            ${art.hasFace ? '<span class="detection-badge">SENSORED</span>' : ''}
-          </div>
-        `;
-      }).join('');
-    }
-
-    function triggerUpload() {
-      const btn = document.getElementById('upload-btn');
-      if (btn) btn.click();
-    }
-
-    function setHero(url, note, faces, filterClass = 'filter-monochrome') {
-      const heroImg = document.getElementById('hero-img');
-      const heroNotation = document.getElementById('hero-notation');
-      const heroFaces = document.getElementById('hero-faces');
-      
-      if (!heroImg || !heroNotation) return;
-      
-      heroImg.src = url;
-      heroImg.className = filterClass;
-      heroNotation.textContent = `"${note}"`;
-      
-      if (heroFaces) {
-        heroFaces.innerHTML = '';
-        if (faces && faces.length > 0) {
-          faces.forEach(face => {
-            const scribble = createFaceScribble(face, heroImg.clientWidth, heroImg.clientHeight);
-            heroFaces.appendChild(scribble);
-          });
-        }
-      }
-    }
-
-    function setHeroFromTray(id) {
-      const art = state.artefacts.find(a => a.id === id) || DUMMY_ARTEFACTS.find(a => a.id === id);
-      if (art) {
-        setHero(art.url, art.note, art.faces, art.theme ? 'filter-' + art.theme.toLowerCase() : 'filter-monochrome');
-      }
-    }
-
-    // ============================================
-    // INTERACTIONS
-    // ============================================
-    function selectMood(mood) {
-      state.currentMood = mood;
-      document.querySelectorAll('.mood-card').forEach(card => {
-        card.classList.toggle('active', card.dataset.mood === mood);
-      });
-    }
-
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
-
-    function showToast(message) {
-      const toast = document.getElementById('toast');
-      if (!toast) return;
-      toast.textContent = message;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-
-    // ============================================
-    // MENU & AUTH
-    // ============================================
-    function toggleMenu() {
-      const menu = document.getElementById('menu-dropdown');
-      if (menu) menu.classList.toggle('active');
-    }
-
-    function logoutUser() {
-      if (!confirm('Yakin mau logout?')) return;
-      localStorage.removeItem('jejak_username');
-      localStorage.removeItem('jejak_user_id');
-      localStorage.removeItem('jejak_logged_in');
-      location.href = 'index.html';
-    }
-
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-      const menu = document.getElementById('menu-dropdown');
-      const trigger = document.querySelector('.menu-trigger');
-      if (menu && trigger && !menu.contains(e.target) && !trigger.contains(e.target)) {
-        menu.classList.remove('active');
-      }
-    });
-
-    // ============================================
-    // STORAGE HELPERS
-    // ============================================
-    function saveEntries() {
-      localStorage.setItem(STORAGE_PREFIX + 'entries', JSON.stringify(state.entries));
-    }
-
-    function saveArtefacts() {
-      localStorage.setItem(STORAGE_PREFIX + 'artefacts', JSON.stringify(state.artefacts));
-    }
-
-    function loadFromStorage() {
-      const entries = localStorage.getItem(STORAGE_PREFIX + 'entries');
-      const artefacts = localStorage.getItem(STORAGE_PREFIX + 'artefacts');
-      
-      if (entries) {
-        try {
-          state.entries = JSON.parse(entries);
-        } catch(e) {
-          state.entries = [];
-        }
-      }
-      if (artefacts) {
-        try {
-          state.artefacts = JSON.parse(artefacts);
-        } catch(e) {
-          state.artefacts = [];
-        }
-      }
-    }
-
-    // ============================================
-    // INITIALIZATION
-    // ============================================
-    document.addEventListener('DOMContentLoaded', () => {
-      // Set username display
-      const usernameEl = document.getElementById('header-username');
-      if (usernameEl) usernameEl.textContent = state.currentUser;
-      
-      // Load data
-      loadFromStorage();
-      
-      // Initialize systems
-      initSupabase();
-      loadFaceApiModels();
-      initUploadSystem();
-      
-      // Render UI
-      renderEntries();
-      renderTray();
-      updateQuotaDisplay();
-      
-      // Load from cloud if online
-      if (state.isOnline) {
-        loadUserRantsFromDB();
-        loadUserArtefactsFromDB();
-        // Load reactions from Supabase
-        loadReactionsForEntries();
-      }
-      
-      // Set initial hero - prioritize real artefacts, fallback to dummy
-      const firstReal = state.artefacts.find(a => !a.isDummy);
-      if (firstReal) {
-        setHero(firstReal.url, firstReal.note, firstReal.faces, firstReal.theme ? 'filter-' + firstReal.theme.toLowerCase() : 'filter-monochrome');
-      } else if (DUMMY_ARTEFACTS.length > 0) {
-        setHero(DUMMY_ARTEFACTS[0].url, DUMMY_ARTEFACTS[0].note, DUMMY_ARTEFACTS[0].faces);
-      }
-      
-      // Setup input listeners
-      const rantInput = document.getElementById('rant-input');
-      const charCount = document.getElementById('char-count');
-      const submitBtn = document.getElementById('submit-btn');
-      
-      if (rantInput && charCount) {
-        rantInput.addEventListener('input', () => {
-          const len = rantInput.value.length;
-          charCount.textContent = `${len}/500`;
-          if (len >= 450) {
-            charCount.style.color = 'var(--accent-tertiary)';
-          } else {
-            charCount.style.color = 'var(--text-muted)';
-          }
-        });
-      }
-      
-      if (submitBtn && rantInput) {
-        submitBtn.addEventListener('click', () => {
-          const content = rantInput.value.trim();
-          if (!content) {
-            showToast('Tulis sesuatu dulu...');
-            return;
-          }
-          submitRant(content, state.currentMood);
-          rantInput.value = '';
-          if (charCount) charCount.textContent = '0/500';
-        });
-      }
-      
-      // Periodic quota update
-      setInterval(updateQuotaDisplay, 60000);
-    });
-  </script>
+// INIT
+document.addEventListener('DOMContentLoaded',()=>{const hu=$('huser');if(hu)hu.textContent=S.user;loadStorage();initSB();loadFaceApi();initUpload();renderEntries();renderTray();updQuota();if(S.online){loadRants();loadArtefacts();loadReactions()}
+const fr=S.artefacts.find(a=>!a.isDummy);if(fr)setHero(fr.url,fr.note,fr.faces,fr.theme?'f'+fr.theme.toLowerCase():'fm');else if(DA.length)setHero(DA[0].url,DA[0].note,DA[0].faces);
+const ri=$('ri'),cc=$('ccount'),sb=$('sbtn');
+if(ri&&cc){ri.oninput=()=>{const n=ri.value.length;cc.textContent=`${n}/500`;cc.style.color=n>=450?'var(--at)':'var(--txm)'}}
+if(sb&&ri){sb.onclick=()=>{const c=ri.value.trim();if(!c){toast('Tulis sesuatu dulu...');return}submitRant(c,S.mood);ri.value='';if(cc)cc.textContent='0/500'}}
+setInterval(updQuota,60000)});
+</script>
 </body>
 </html>
