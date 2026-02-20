@@ -141,6 +141,7 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .artefak-meta{padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
 .artefak-owner{font-size:11px;color:var(--tm);text-transform:uppercase;letter-spacing:.05em}
 .artefak-date{font-size:10px;color:var(--tm)}
+.spill-counter{font-size:12px;color:var(--a);font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:.05em}
 </style>
 </head>
 <body>
@@ -180,6 +181,9 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
       <button class="mood-btn" data-mood="doom" onclick="filterMood('doom')">🛌 Doom</button>
     </div>
   </div>
+
+  <!-- Spill Counter -->
+  <div class="spill-counter" id="spill-counter" style="display:none;"></div>
 
   <div class="content-area loading" id="content-area">
     <div class="spinner"></div>
@@ -270,70 +274,66 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 
 <script>
 // ============================================
-// CONFIG
+// CONFIG & STATE (HANYA SATU DEKLARASI)
 // ============================================
 const CFG = {
   url: 'https://fuovfrdicdhnlymnacpz.supabase.co',
   key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0',
-  // ─── SCHEMA YANG BENAR (verified dari Supabase) ───────────────────────────
-  // spills   : rant_id (uuid PK), content, mood, author, created_at,
-  //            is_anonymous (bool), response_count (int), vibes (jsonb)
-  // reactions: id (uuid), rant_id (uuid), user_id (text), emoji (text),
-  //            created_at, artefact_id (uuid nullable)
-  // artefacts: id (uuid), author (text), url (text), note (text),
-  //            has_face (bool), faces (jsonb), created_at
-  // users    : username (text PK), created_at, device_id, points, badge, last_active
-  // ──────────────────────────────────────────────────────────────────────────
-  TBL_SPILLS:    'spills',
-  TBL_REACTIONS: 'reactions',
-  TBL_ARTEFACTS: 'artefacts',
-  TBL_USERS:     'users',
+  // Schema yang benar sesuai gambar:
+  TBL_SPILLS:    'spills',      // rant_id, content, mood, author, created_at, is_anonymous, response_count, vibes
+  TBL_REACTIONS: 'reactions',   // id, rant_id, user_id, emoji (bukan reaction_type), created_at, artefact_id
+  TBL_ARTEFACTS: 'artefacts',   // id, author, url (bukan image_url), note, has_face, faces, created_at
+  TBL_USERS:     'users',       // username, created_at, device_id, points, badge, last_active
 };
 
 const st = {
   sb: null,
   online: false,
   userId: null,        // anon session id (persistent per device)
+  currentUser: null,   // username dari session login (jika ada)
   spills: [],
-  reactions: {},       // { rant_id: { emoji_id: count } }
+  reactions: {},       // { rant_id: { emoji: count } }
   filter: 'all',
   vibeMatch: 87,
   loading: true,
   peakingId: null,
   artefacts: [],
-  userReacted: new Set(), // "rant_id-emoji_id"
+  userReacted: new Set(), // "rant_id-emoji"
   offset: 0,
   seed: Math.random()
 };
 
 const unlocked = new Set();
 
-// Emoji reactions — id maps to what gets stored in reactions.emoji column
+// Reactions - id adalah emoji yang disimpan di kolom reactions.emoji
 const REACTIONS = [
   { id:'💯', label:'Relatable' },
   { id:'🤗', label:'Hug'       },
-  { id:'✋', label:'Same'      },
-  { id:'😮‍💨', label:'Mood'   },
+  { id:'✋',  label:'Same'      },
+  { id:'😮‍💨', label:'Mood'    },
   { id:'🍵', label:'Tea'       },
   { id:'🔥', label:'Fire'      }
 ];
 
 const DUMMY_SPILLS = [
-  { rant_id:'d1', content:'Ada yang pernah ngerasa kalo lagi banyak kerjaan malah makin males ngerjain? Padahal deadline mepet.', mood:'chaotic',   author:'anon.mouse',       is_anonymous:true  },
-  { rant_id:'d2', content:'Hari ini gue bangun pagi, olahraga, sarapan sehat, dan ngerjain side project. Semoga konsisten.',     mood:'thriving',   author:'early.bird',       is_anonymous:false },
-  { rant_id:'d3', content:'Capek banget rasanya. Pengen tidur 3 hari 3 malam tanpa gangguan.',                                   mood:'doom',       author:'tired.soul',       is_anonymous:true  },
-  { rant_id:'d4', content:'Kenapa ya orang-orang pada sibuk banget, gue malah bingung mau ngapain.',                             mood:'chaotic',    author:'confused.one',     is_anonymous:true  },
-  { rant_id:'d5', content:'Akhirnya selesai juga project yang ngeganggu pikiran 2 bulan ini. Lega!',                             mood:'thriving',   author:'akhirnya.kelar',   is_anonymous:false },
-  { rant_id:'d6', content:'Mau cerita tapi takut dijudge. Jadi simpen sendiri aja deh.',                                        mood:'doom',       author:'silent.mode',      is_anonymous:true  },
-  { rant_id:'d7', content:'Random thought: kenapa kita selalu merasa kurang padahal udah cukup?',                                mood:'surviving',  author:'over.thinker',     is_anonymous:true  },
-  { rant_id:'d8', content:'Hari ini nothing special, tapi bersyukur masih bisa napas.',                                          mood:'surviving',  author:'cukup.bersyukur',  is_anonymous:false },
-  { rant_id:'d9', content:'Pengen delete semua sosmed dan hidup di gunung.',                                                     mood:'doom',       author:'gunung.dream',     is_anonymous:true  },
-  { rant_id:'d10',content:'Baru sadar kalo self-care itu penting banget. Jangan lupa istirahat!',                                mood:'thriving',   author:'self.care',        is_anonymous:false }
+  { rant_id:'d1', content:'Ada yang pernah ngerasa kalo lagi banyak kerjaan malah makin males ngerjain? Padahal deadline mepet.', mood:'chaotic', author:'anon.mouse', is_anonymous:true, created_at: new Date().toISOString() },
+  { rant_id:'d2', content:'Hari ini gue bangun pagi, olahraga, sarapan sehat, dan ngerjain side project. Semoga konsisten.', mood:'thriving', author:'early.bird', is_anonymous:false, created_at: new Date().toISOString() },
+  { rant_id:'d3', content:'Capek banget rasanya. Pengen tidur 3 hari 3 malam tanpa gangguan.', mood:'doom', author:'tired.soul', is_anonymous:true, created_at: new Date().toISOString() },
+  { rant_id:'d4', content:'Kenapa ya orang-orang pada sibuk banget, gue malah bingung mau ngapain.', mood:'chaotic', author:'confused.one', is_anonymous:true, created_at: new Date().toISOString() },
+  { rant_id:'d5', content:'Akhirnya selesai juga project yang ngeganggu pikiran 2 bulan ini. Lega!', mood:'thriving', author:'akhirnya.kelar', is_anonymous:false, created_at: new Date().toISOString() },
+  { rant_id:'d6', content:'Mau cerita tapi takut dijudge. Jadi simpen sendiri aja deh.', mood:'doom', author:'silent.mode', is_anonymous:true, created_at: new Date().toISOString() },
+  { rant_id:'d7', content:'Random thought: kenapa kita selalu merasa kurang padahal udah cukup?', mood:'surviving', author:'over.thinker', is_anonymous:true, created_at: new Date().toISOString() },
+  { rant_id:'d8', content:'Hari ini nothing special, tapi bersyukur masih bisa napas.', mood:'surviving', author:'cukup.bersyukur', is_anonymous:false, created_at: new Date().toISOString() },
+  { rant_id:'d9', content:'Pengen delete semua sosmed dan hidup di gunung.', mood:'doom', author:'gunung.dream', is_anonymous:true, created_at: new Date().toISOString() },
+  { rant_id:'d10',content:'Baru sadar kalo self-care itu penting banget. Jangan lupa istirahat!', mood:'thriving', author:'self.care', is_anonymous:false, created_at: new Date().toISOString() }
 ];
 
 const DUMMY_ARTS = [{ emoji:'📷' },{ emoji:'🎧' },{ emoji:'☕' },{ emoji:'📚' },{ emoji:'🌙' },{ emoji:'🎸' }];
 const MOOD_COLORS = { surviving:'#FF9500', thriving:'#39FF14', chaotic:'#00F0FF', doom:'#8B5CF6' };
 
+// ============================================
+// UTILS
+// ============================================
 function getMoodColor(m){ return MOOD_COLORS[m]||'#FFF'; }
 function esc(t){ if(!t)return''; const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
 function toast(msg,isErr=false){
@@ -354,16 +354,9 @@ function shuffle(arr,seed){
 }
 function fmtDate(ds){ return new Date(ds).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}); }
 
-// ─── USERNAME FORMAT ──────────────────────────────────────────────────────────
-// Format: dua.kata (dua kata, dipisah titik, semua huruf kecil)
-// Contoh: "aku anonim" → "aku.anonim", "alhamdulillah yes" → "alhamdulillah.yes"
-// Ini untuk display saja — nilai author di DB tidak diubah
 function formatUsername(raw){
   if(!raw) return 'anonim';
-  // Normalisasi: trim, lowercase, ganti spasi/underscore/strip dengan titik
-  const clean = raw.trim().toLowerCase().replace(/[\s_\-]+/g,'.');
-  // Jika sudah pakai titik atau tidak ada spasi, kembalikan apa adanya
-  return clean;
+  return raw.trim().toLowerCase().replace(/[\s_\-]+/g,'.');
 }
 
 function displayAuthor(author, isAnonymous){
@@ -371,23 +364,31 @@ function displayAuthor(author, isAnonymous){
   return '@' + formatUsername(author);
 }
 
-// ─── ANON SESSION ID ──────────────────────────────────────────────────────────
-// Persistent per device. Dipakai sebagai user_id di tabel reactions.
-// Tidak perlu login Supabase.
 function getSessionId(){
   let id=localStorage.getItem('stt_session');
   if(!id){ id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,9); localStorage.setItem('stt_session',id); }
   return id;
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
+// ============================================
+// INIT SUPABASE
+// ============================================
 async function initSupabase(){
   if(typeof supabase==='undefined'){ setConn(false,'❌ Library Supabase tidak ditemukan'); return false; }
   try {
     st.sb = supabase.createClient(CFG.url, CFG.key);
     st.userId = getSessionId();
 
-    // Test koneksi dengan kolom yang benar di tabel spills
+    // Cek session yang sudah login (dari halaman lain)
+    const { data:{ session }, error: sessErr } = await st.sb.auth.getSession();
+    if(sessErr) console.warn('Session error:', sessErr);
+    
+    if(session?.user){
+      st.currentUser = session.user.user_metadata?.username || session.user.email;
+      console.log('✅ Logged in as:', st.currentUser);
+    }
+
+    // Test koneksi ke tabel spills
     const { data, error } = await st.sb
       .from(CFG.TBL_SPILLS)
       .select('rant_id, content, mood, author, created_at, is_anonymous, vibes')
@@ -399,7 +400,7 @@ async function initSupabase(){
       return false;
     }
 
-    console.log('✅ Supabase OK, sample row:', data);
+    console.log('✅ Supabase OK');
     setConn(true, '🟢 Online · '+st.userId.slice(0,12)+'...');
     setupRealtime();
     return true;
@@ -418,23 +419,12 @@ function setupRealtime(){
     .subscribe();
 }
 
-document.addEventListener('DOMContentLoaded', async()=>{
-  const ok = await initSupabase();
-  document.getElementById('vibe-slider').addEventListener('input', e=>{
-    st.vibeMatch=+e.target.value;
-    document.getElementById('vibe-percentage').textContent=st.vibeMatch+'%';
-    renderSpills();
-  });
-  if(ok){ await loadArtefacts(); await loadSpills(); }
-  else { st.spills=DUMMY_SPILLS; st.artefacts=[]; setLoading(false); renderSpills(); }
-});
-
-// ─── LOAD SPILLS ──────────────────────────────────────────────────────────────
-// Tabel: spills
-// Kolom: rant_id, content, mood, author, created_at, is_anonymous, vibes
+// ============================================
+// LOAD DATA
+// ============================================
 async function loadSpills(isNew=false){
   setLoading(true);
-  if(isNew){ st.seed=Math.random(); st.offset=Math.max(0,st.offset+10); }
+  if(isNew){ st.seed=Math.random(); st.offset+=10; }
 
   if(st.online && st.sb){
     try {
@@ -447,12 +437,24 @@ async function loadSpills(isNew=false){
       if(error) throw error;
 
       if(data && data.length){
-        console.log(`✅ ${data.length} spills loaded dari Supabase`);
-        st.spills = data;
-        await loadReactions(data.map(s=>s.rant_id));
-        await loadMyReactions(data.map(s=>s.rant_id));
+        // Filter: jangan tampilkan spill milik user sendiri
+        const filtered = st.currentUser 
+          ? data.filter(s => s.author !== st.currentUser)
+          : data;
+        
+        console.log(`✅ ${filtered.length} spills loaded (dari ${data.length} total)`);
+        st.spills = filtered;
+        
+        // Update counter
+        const counter = document.getElementById('spill-counter');
+        if(counter){
+          counter.textContent = `${filtered.length} spills ditemukan`;
+          counter.style.display = 'block';
+        }
+        
+        await loadReactions(filtered.map(s=>s.rant_id));
+        await loadMyReactions(filtered.map(s=>s.rant_id));
       } else {
-        console.warn('⚠️ Tabel spills kosong, pakai dummy');
         st.spills = shuffle(DUMMY_SPILLS, st.seed);
       }
     } catch(e){
@@ -468,9 +470,6 @@ async function loadSpills(isNew=false){
   renderSpills();
 }
 
-// ─── LOAD REACTIONS ───────────────────────────────────────────────────────────
-// Tabel reactions: id, rant_id, user_id, emoji, created_at, artefact_id
-// Kolom reaksi adalah "emoji" bukan "reaction_type"
 async function loadReactions(ids){
   if(!st.sb||!ids.length) return;
   try {
@@ -481,19 +480,15 @@ async function loadReactions(ids){
 
     if(error) throw error;
 
-    // Reset counts
     ids.forEach(id=>{ st.reactions[id]={}; REACTIONS.forEach(r=>{ st.reactions[id][r.id]=0; }); });
-
     (data||[]).forEach(row=>{
       if(st.reactions[row.rant_id] && row.emoji){
         st.reactions[row.rant_id][row.emoji] = (st.reactions[row.rant_id][row.emoji]||0)+1;
       }
     });
-    console.log('✅ Reactions loaded');
   } catch(e){ console.error('❌ loadReactions:', e.message); }
 }
 
-// ─── LOAD MY REACTIONS (untuk highlight tombol) ───────────────────────────────
 async function loadMyReactions(ids){
   if(!st.sb||!ids.length||!st.userId) return;
   try {
@@ -506,12 +501,25 @@ async function loadMyReactions(ids){
     if(error) throw error;
     st.userReacted.clear();
     (data||[]).forEach(r=> st.userReacted.add(`${r.rant_id}-${r.emoji}`));
-    console.log(`✅ My reactions: ${st.userReacted.size}`);
   } catch(e){ console.error('❌ loadMyReactions:', e.message); }
 }
 
-// ─── REACT ────────────────────────────────────────────────────────────────────
-// Menyimpan ke reactions.emoji (bukan reaction_type)
+async function loadArtefacts(){
+  if(!st.online||!st.sb) return;
+  try {
+    const { data, error } = await st.sb.from(CFG.TBL_ARTEFACTS)
+      .select('id, author, url, note, created_at')
+      .eq('has_face', false)
+      .order('created_at',{ascending:false})
+      .limit(50);
+
+    if(!error && data) st.artefacts = data;
+  } catch(e){ console.error('❌ loadArtefacts:', e.message); }
+}
+
+// ============================================
+// REACTIONS
+// ============================================
 async function reactToSpill(rantId, emoji, author, btnEl){
   const key = `${rantId}-${emoji}`;
   if(st.userReacted.has(key)){ toast('Sudah bereaksi!',true); return; }
@@ -519,14 +527,12 @@ async function reactToSpill(rantId, emoji, author, btnEl){
   const countEl = document.getElementById(`count-${rantId}-${emoji}`);
   const prev = parseInt(countEl?.textContent||'0');
 
-  // Optimistic UI
   if(countEl) countEl.textContent = prev+1;
   if(btnEl) btnEl.classList.add('reacted');
   if(!st.reactions[rantId]) st.reactions[rantId]={};
   st.reactions[rantId][emoji] = prev+1;
   st.userReacted.add(key);
 
-  // Unlock peaking
   if(author && !unlocked.has(author)){ unlocked.add(author); toast('🔓 Peaking unlocked!'); }
 
   if(st.online && st.sb){
@@ -534,22 +540,19 @@ async function reactToSpill(rantId, emoji, author, btnEl){
       const { error } = await st.sb
         .from(CFG.TBL_REACTIONS)
         .insert({
-          rant_id:    rantId,
-          emoji:      emoji,        // ← kolom yang benar: "emoji"
-          user_id:    st.userId,
+          rant_id: rantId,
+          emoji: emoji,        // kolom yang benar: "emoji"
+          user_id: st.userId,
           created_at: new Date().toISOString()
         });
 
       if(error){
-        if(error.code==='23505'){ toast(emoji+' Tersimpan!'); return; } // unique constraint = sudah ada
+        if(error.code==='23505'){ toast(emoji+' Tersimpan!'); return; }
         throw error;
       }
       toast(emoji+' Tersimpan!');
-      console.log('✅ Reaction saved:', emoji, 'for', rantId);
-
     } catch(e){
-      console.error('❌ Gagal simpan reaction:', e.message);
-      // Rollback
+      console.error('❌ Gagal simpan:', e.message);
       if(countEl) countEl.textContent=prev;
       if(btnEl) btnEl.classList.remove('reacted');
       st.reactions[rantId][emoji]=prev;
@@ -557,7 +560,6 @@ async function reactToSpill(rantId, emoji, author, btnEl){
       toast('Gagal: '+e.message, true);
     }
   } else {
-    // Offline fallback
     const loc=JSON.parse(localStorage.getItem('offline_rx')||'[]');
     loc.push({ rant_id:rantId, emoji, user_id:st.userId });
     localStorage.setItem('offline_rx', JSON.stringify(loc));
@@ -565,7 +567,6 @@ async function reactToSpill(rantId, emoji, author, btnEl){
   }
 }
 
-// Realtime refresh untuk satu rant_id
 async function refreshCounts(rantId){
   if(!st.sb||!rantId) return;
   try {
@@ -577,21 +578,20 @@ async function refreshCounts(rantId){
   } catch(e){}
 }
 
-// ─── ARTEFACTS ────────────────────────────────────────────────────────────────
-// Tabel artefacts: id, author, url, note, has_face, faces, created_at
-// Kolom gambar: "url" (bukan image_url)
-async function loadArtefacts(){
-  if(!st.online||!st.sb) return;
-  try {
-    const { data, error } = await st.sb.from(CFG.TBL_ARTEFACTS)
-      .select('id, author, url, note, created_at')
-      .eq('has_face', false)    // hanya tampilkan artefak tanpa wajah
-      .order('created_at',{ascending:false})
-      .limit(50);
-
-    if(!error && data && data.length){ st.artefacts=data; console.log(`✅ ${data.length} artefacts loaded`); }
-    else { console.warn('⚠️ Artefacts kosong atau error:', error?.message); }
-  } catch(e){ console.error('❌ loadArtefacts:', e.message); }
+// ============================================
+// RENDER
+// ============================================
+function setLoading(v){
+  st.loading=v;
+  const ca=document.getElementById('content-area');
+  const s=document.getElementById('status-text');
+  if(v){ 
+    ca.className='content-area loading'; 
+    ca.innerHTML='<div class="spinner"></div><p class="loading-text">Menyedu teh...</p>'; 
+    if(s) s.textContent='Memuat spills...'; 
+  } else { 
+    if(s) s.textContent=''; 
+  }
 }
 
 function getRandArtefact(){
@@ -601,21 +601,12 @@ function getRandArtefact(){
 
 function artefactCard(a){
   const imgSrc = a.url || '';
-  const owner  = displayAuthor(a.author, false);
+  const owner = displayAuthor(a.author, false);
   return `<div class="artefak-card">
     <div class="artefak-header"><span class="artefak-icon">📸</span><span class="artefak-label">Memori dari Jejak Lain</span></div>
     <img src="${esc(imgSrc)}" class="artefak-image" alt="Artefak" onerror="this.parentNode.style.display='none'">
     <div class="artefak-meta"><span class="artefak-owner">${esc(owner)}</span><span class="artefak-date">${fmtDate(a.created_at)}</span></div>
   </div>`;
-}
-
-// ─── RENDER ───────────────────────────────────────────────────────────────────
-function setLoading(v){
-  st.loading=v;
-  const ca=document.getElementById('content-area');
-  const s=document.getElementById('status-text');
-  if(v){ ca.className='content-area loading'; ca.innerHTML='<div class="spinner"></div><p class="loading-text">Menyedu teh...</p>'; if(s)s.textContent='Memuat...'; }
-  else { if(s)s.textContent=''; }
 }
 
 function renderSpills(){
@@ -636,20 +627,28 @@ function renderSpills(){
   const html=[];
   let n=0;
 
-  for(let i=0;i<list.length;i++){
-    const s=list[i];
-    if(n>0 && n%9===0){ const a=getRandArtefact(); if(a) html.push(artefactCard(a)); n=0; }
+  // Max 10 rants per "tea brew"
+  const maxRants = 10;
+  const displayList = list.slice(0, maxRants);
 
-    const rid    = s.rant_id;
+  for(let i=0; i<displayList.length; i++){
+    const s=displayList[i];
+    
+    // Insert random artefact every 9 rants
+    if(n>0 && n%9===0){ 
+      const a=getRandArtefact(); 
+      if(a) html.push(artefactCard(a)); 
+    }
+
+    const rid = s.rant_id;
     const author = displayAuthor(s.author, s.is_anonymous);
-    const pkey   = s.is_anonymous ? null : s.author; // identifier untuk peaking
-    const safe   = (s.author||'').replace(/'/g,"\\'");
+    const pkey = s.is_anonymous ? null : s.author;
+    const safe = (s.author||'').replace(/'/g,"\\'");
     const isUnlocked = pkey && unlocked.has(pkey);
 
     const rxHtml = REACTIONS.map(r=>{
       const count = (st.reactions[rid]||{})[r.id] ?? 0;
       const reacted = st.userReacted.has(`${rid}-${r.id}`);
-      // Kirim author (bukan user_id) ke reactToSpill untuk unlock peaking
       return `<button class="reaction-btn ${reacted?'reacted':''}" onclick="reactToSpill('${rid}','${r.id}','${safe}',this)">
         <span class="reaction-emoji">${r.id}</span>
         <span class="reaction-count" id="count-${rid}-${r.id}">${count}</span>
@@ -669,11 +668,18 @@ function renderSpills(){
     n++;
   }
 
-  if(n>=5){ const a=getRandArtefact(); if(a) html.push(artefactCard(a)); }
+  // Add 1 random artefact at the end if >= 5 rants
+  if(n>=5){ 
+    const a=getRandArtefact(); 
+    if(a) html.push(artefactCard(a)); 
+  }
+  
   ca.innerHTML=html.join('');
 }
 
-// ─── PEAKING ──────────────────────────────────────────────────────────────────
+// ============================================
+// PEAKING
+// ============================================
 async function peakUser(author, displayName){
   if(!author||author==='null'){ toast('Tidak tersedia',true); return; }
   if(!unlocked.has(author)){ toast('🔒 React dulu untuk unlock peaking!',true); return; }
@@ -692,14 +698,12 @@ async function loadPeakingData(author){
 
   if(st.online && st.sb){
     try {
-      // Query spills by author
       const { data:rants } = await st.sb.from(CFG.TBL_SPILLS)
         .select('rant_id, content, mood, created_at')
         .eq('author', author)
-        .eq('is_anonymous', false)   // hanya tampilkan yang tidak anonim
+        .eq('is_anonymous', false)
         .order('created_at',{ascending:false});
 
-      // Query artefacts by author
       const { data:arts } = await st.sb.from(CFG.TBL_ARTEFACTS)
         .select('id, url, note, created_at')
         .eq('author', author)
@@ -719,20 +723,33 @@ async function loadPeakingData(author){
           <img src="${esc(a.url||'')}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">
         </div>`).join('');
       } else {
-        ac.innerHTML=DUMMY_ARTS.map(a=>`<div class="artefact-item artefact-item--empty">${a.emoji}</div>`).join('');
+        ac.innerHTML=DUMMY_ARTS.map(a=>`<div class="artefact-item">${a.emoji}</div>`).join('');
       }
-      return;
-    } catch(e){ console.error('❌ loadPeakingData:', e.message); }
+    } catch(e){ 
+      console.error('❌ loadPeakingData:', e.message);
+      loadPeakingDummy(author);
+    }
+  } else {
+    loadPeakingDummy(author);
   }
+}
 
-  // Fallback dummy
+function loadPeakingDummy(author){
+  const rc=document.getElementById('peaking-rants');
+  const ac=document.getElementById('peaking-artefacts');
   rc.innerHTML=DUMMY_SPILLS.slice(0,3).map(r=>`<div class="peaking-rant-card"><div class="peaking-rant-content">${esc(r.content)}</div><span class="peaking-rant-mood" style="color:${getMoodColor(r.mood)}">${r.mood}</span></div>`).join('');
   ac.innerHTML=DUMMY_ARTS.map(a=>`<div class="artefact-item">${a.emoji}</div>`).join('');
 }
 
-function closePeaking(){ document.getElementById('peaking-modal').classList.remove('active'); document.body.style.overflow=''; st.peakingId=null; }
+function closePeaking(){ 
+  document.getElementById('peaking-modal').classList.remove('active'); 
+  document.body.style.overflow=''; 
+  st.peakingId=null; 
+}
 
-// ─── FILTERS ──────────────────────────────────────────────────────────────────
+// ============================================
+// FILTERS & EVENTS
+// ============================================
 function filterMood(mood){
   st.filter=mood;
   document.querySelectorAll('.mood-btn').forEach(b=>b.classList.toggle('active',b.dataset.mood===mood));
@@ -752,669 +769,30 @@ function toggleMenu(){ toast('Menu coming soon'); }
 function skipVibeMatch(t){ document.getElementById(t==='chaotic'?'chaotic-good-card':'caregiver-card').style.display='none'; }
 function sendSignal(){ toast('Isyarat terkirim 🔥'); }
 
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closePeaking(); });
-document.getElementById('peaking-modal').addEventListener('click',e=>{ if(e.target.id==='peaking-modal') closePeaking(); });
-
-const st = {
-  sb: null,
-  online: false,
-  authUser: null,
-  userId: null,
-  // Anonymous session ID for reaction tracking when not logged in
-  // FIX #2: allow reactions without login via anonymous session ID
-  anonSessionId: null,
-  spills: [],
-  reactions: {},
-  filter: 'all',
-  vibeMatch: 87,
-  loading: true,
-  peakingId: null,
-  otherUsersArtefaks: [],
-  userReacted: new Set(),
-  currentOffset: 0,
-  seed: Math.random()
-};
-
-const unlocked = new Set();
-
-const REACTIONS = [
-  { id:'relatable', emoji:'💯', label:'Relatable' },
-  { id:'hug',       emoji:'🤗', label:'Hug'       },
-  { id:'same',      emoji:'✋', label:'Same'      },
-  { id:'mood',      emoji:'😮‍💨', label:'Mood'    },
-  { id:'tea',       emoji:'🍵', label:'Tea'       },
-  { id:'fire',      emoji:'🔥', label:'Fire'      }
-];
-
-const DUMMY_SPILLS = [
-  { id:'d1', content:'Ada yang pernah ngerasa kalo lagi banyak kerjaan malah makin males ngerjain? Padahal deadline mepet.', mood:'chaotic', author:'@anonymouse', user_id:'u1', timestamp:Date.now()-3600000, reactions:{relatable:5,hug:2,same:3,mood:4,tea:1,fire:0} },
-  { id:'d2', content:'Hari ini gue bangun pagi, olahraga, sarapan sehat, dan ngerjain side project. Semoga konsisten', mood:'thriving', author:'@earlybird', user_id:'u2', timestamp:Date.now()-7200000, reactions:{relatable:2,hug:1,same:0,mood:1,tea:3,fire:5} },
-  { id:'d3', content:'Capek banget rasanya. Pengen tidur 3 hari 3 malam tanpa gangguan.', mood:'doom', author:'@tiredsoul', user_id:'u3', timestamp:Date.now()-10800000, reactions:{relatable:8,hug:12,same:6,mood:9,tea:2,fire:1} },
-  { id:'d4', content:'Kenapa ya orang-orang pada sibuk banget, gue malah bingung mau ngapain', mood:'chaotic', author:'@confusedone', user_id:'u4', timestamp:Date.now()-14400000, reactions:{relatable:4,hug:1,same:5,mood:3,tea:2,fire:0} },
-  { id:'d5', content:'Akhirnya selesai juga project yang ngeganggu pikiran 2 bulan ini. Lega!', mood:'thriving', author:'@relieved', user_id:'u5', timestamp:Date.now()-18000000, reactions:{relatable:3,hug:2,same:1,mood:0,tea:4,fire:6} },
-  { id:'d6', content:'Mau cerita tapi takut dijudge. Jadi simpen sendiri aja deh.', mood:'doom', author:'@silentcries', user_id:'u6', timestamp:Date.now()-21600000, reactions:{relatable:12,hug:15,same:8,mood:10,tea:3,fire:1} },
-  { id:'d7', content:'Random thought: kenapa kita selalu merasa kurang padahal udah cukup?', mood:'surviving', author:'@overthinker', user_id:'u7', timestamp:Date.now()-25200000, reactions:{relatable:7,hug:3,same:6,mood:5,tea:2,fire:2} },
-  { id:'d8', content:'Hari ini nothing special, tapi bersyukur masih bisa napas.', mood:'surviving', author:'@grateful', user_id:'u8', timestamp:Date.now()-28800000, reactions:{relatable:5,hug:4,same:3,mood:2,tea:5,fire:1} },
-  { id:'d9', content:'Pengen delete semua sosmed dan hidup di gunung.', mood:'doom', author:'@mountaindreamer', user_id:'u9', timestamp:Date.now()-32400000, reactions:{relatable:9,hug:6,same:7,mood:8,tea:2,fire:3} },
-  { id:'d10', content:'Baru sadar kalo self-care itu penting banget. Jangan lupa istirahat!', mood:'thriving', author:'@selfcarequeen', user_id:'u10', timestamp:Date.now()-36000000, reactions:{relatable:4,hug:3,same:2,mood:1,tea:6,fire:4} }
-];
-
-const DUMMY_ARTEFAKS = [
-  { id:'a1', user_id:'u5', image_url:'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=300&fit=crop', owner:'@relieved', created_at:'2026-02-18T10:30:00Z' },
-  { id:'a2', user_id:'u3', image_url:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=300&fit=crop', owner:'@tiredsoul', created_at:'2026-02-17T14:20:00Z' },
-  { id:'a3', user_id:'u7', image_url:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop', owner:'@overthinker', created_at:'2026-02-16T22:15:00Z' }
-];
-
-const DUMMY_ARTS = [
-  { emoji:'📷' },{ emoji:'🎧' },{ emoji:'☕' },
-  { emoji:'📚' },{ emoji:'🌙' },{ emoji:'🎸' }
-];
-
-const MOOD_COLORS = { surviving:'#FF9500', thriving:'#39FF14', chaotic:'#00F0FF', doom:'#8B5CF6' };
-function getMoodColor(m){ return MOOD_COLORS[m] || '#FFF'; }
-function esc(t){ if(!t) return ''; const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
-function toast(msg, isError=false){
-  const t=document.getElementById('toast');
-  t.textContent=msg;
-  t.className='toast'+(isError?' error':'');
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3000);
-}
-function setConn(online, msg){
-  document.getElementById('online-dot').classList.toggle('offline',!online);
-  const el=document.getElementById('connection-status');
-  el.textContent=msg;
-  el.className='connection-status '+(online?'online':'offline');
-  st.online=online;
-}
-function shuffleArray(arr, seed){
-  const a=[...arr]; let s=seed;
-  for(let i=a.length-1;i>0;i--){
-    s=(s*9301+49297)%233280;
-    const j=Math.floor((s/233280)*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
-  }
-  return a;
-}
-function formatDate(ds){ return new Date(ds).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}); }
-
-// ============================================
-// ANONYMOUS SESSION ID
-// FIX #2: Generate persistent anon ID so reactions
-// can be saved even without Supabase auth login.
-// Uses localStorage so same device won't double-react.
-// ============================================
-function getAnonSessionId(){
-  let id = localStorage.getItem('spill_session_id');
-  if(!id){
-    id = 'anon_' + Date.now() + '_' + Math.random().toString(36).substr(2,9);
-    localStorage.setItem('spill_session_id', id);
-  }
-  return id;
-}
-
-// ============================================
-// INIT SUPABASE
-// FIX: Do NOT block on auth. Connect first,
-// use anon session for reactions if not logged in.
-// ============================================
-async function initSupabase(){
-  console.log('🔌 Menghubungkan ke Supabase...');
-
-  if(typeof supabase === 'undefined'){
-    setConn(false, '❌ Library tidak ditemukan');
-    return false;
-  }
-
-  try {
-    st.sb = supabase.createClient(CFG.url, CFG.key);
-
-    // Test koneksi: ambil 1 row dari rants untuk validasi akses dan kolom
-    const { data: testData, error: testErr } = await st.sb
-      .from(CFG.TABLE_RANTS)
-      .select('id, content, mood, author, created_at, vibes')
-      .limit(1);
-
-    if(testErr){
-      console.error('❌ Tabel rants tidak bisa diakses:', testErr.message, testErr);
-      setConn(false, '❌ Akses rants gagal: ' + testErr.message);
-      return false;
-    }
-    console.log('✅ Tabel rants OK, sample data:', testData);
-
-    console.log('✅ Tabel rants OK');
-
-    // Cek auth user (optional — tidak block jika tidak login)
-    const { data:{ user } } = await st.sb.auth.getUser();
-    if(user){
-      st.authUser = user;
-      st.userId   = user.id;
-      console.log('✅ Login sebagai:', user.email);
-      setConn(true, `🟢 Online · ${user.email}`);
-    } else {
-      // Pakai anon session ID
-      st.anonSessionId = getAnonSessionId();
-      st.userId = st.anonSessionId; // use this as reactor ID
-      console.log('⚠️ Tidak login — pakai anon session:', st.userId);
-      setConn(true, '🟡 Online · Mode anonim');
-    }
-
-    setupRealtime();
-    return true;
-
-  } catch(e){
-    console.error('❌ Exception:', e);
-    setConn(false, '❌ Gagal koneksi');
-    return false;
-  }
-}
-
-function setupRealtime(){
-  st.sb.channel('reactions-live')
-    .on('postgres_changes',
-      { event:'*', schema:'public', table: CFG.TABLE_REACTIONS },
-      payload => {
-        if(payload.new && payload.new.rant_id){
-          refreshReactionCount(payload.new.rant_id);
-        }
-      }
-    )
-    .subscribe();
-  console.log('📡 Realtime aktif');
-}
-
 // ============================================
 // INIT
 // ============================================
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', async()=>{
   const ok = await initSupabase();
-
-  document.getElementById('vibe-slider').addEventListener('input', e => {
-    st.vibeMatch = +e.target.value;
-    document.getElementById('vibe-percentage').textContent = st.vibeMatch + '%';
+  
+  document.getElementById('vibe-slider').addEventListener('input', e=>{
+    st.vibeMatch=+e.target.value;
+    document.getElementById('vibe-percentage').textContent=st.vibeMatch+'%';
     renderSpills();
   });
 
-  if(ok){
-    await loadArtefaks();
-    await loadSpills();
-  } else {
-    st.otherUsersArtefaks = DUMMY_ARTEFAKS;
-    st.spills = DUMMY_SPILLS;
-    setLoading(false);
-    renderSpills();
+  if(ok){ 
+    await loadArtefacts(); 
+    await loadSpills(); 
+  } else { 
+    st.spills=DUMMY_SPILLS; 
+    setLoading(false); 
+    renderSpills(); 
   }
 });
 
-// ============================================
-// LOAD RANTS
-// FIX #1: Query tabel 'rants', bukan 'spills'
-// Kolom yang dibaca: id, content, mood, author, user_id, created_at
-// ============================================
-async function loadSpills(isNewBrew=false){
-  setLoading(true);
-  if(isNewBrew){ st.seed=Math.random(); st.currentOffset+=10; }
-
-  if(st.online && st.sb){
-    try {
-      // Query tabel rants dengan join ke users via author = username
-      // Schema rants: id, content, mood, author, created_at, vibes
-      // Schema users: username (PK), created_at, device_id, points, badge, last_active
-      const { data, error } = await st.sb
-        .from(CFG.TABLE_RANTS)
-        .select(`
-          id,
-          content,
-          mood,
-          author,
-          created_at,
-          vibes,
-          users!rants_author_fkey ( username, badge, points )
-        `)
-        .order('created_at', { ascending: false })
-        .range(st.currentOffset, st.currentOffset + 49);
-
-      if(error){
-        // Jika foreign key join gagal, fallback ke query tanpa join
-        console.warn('⚠️ Join users gagal, coba tanpa join:', error.message);
-        return await loadSpillsSimple(isNewBrew);
-      }
-
-      if(data && data.length > 0){
-        st.spills = data.map(r => ({
-          id:        r.id,
-          rant_id:   r.id,
-          content:   r.content,
-          mood:      r.mood || 'surviving',
-          // author adalah username — tampilkan apa adanya
-          author:    r.author || '@anonymous',
-          // user_id untuk peaking = author/username string
-          user_id:   r.author || r.id,
-          badge:     r.users?.badge || null,
-          points:    r.users?.points || 0,
-          timestamp: new Date(r.created_at).getTime(),
-          vibes:     r.vibes || {},
-          reactions: {}
-        }));
-
-        const ids = st.spills.map(s => s.id);
-        await loadReactions(ids);
-        await loadUserReactions(ids);
-        console.log(`✅ Loaded ${st.spills.length} rants dari Supabase (dengan join users)`);
-      } else {
-        console.warn('⚠️ Tabel rants kosong, pakai dummy');
-        st.spills = shuffleArray(DUMMY_SPILLS, st.seed);
-      }
-    } catch(e){
-      console.error('❌ loadSpills error:', e.message);
-      return await loadSpillsSimple(isNewBrew);
-    }
-  } else {
-    st.spills = shuffleArray(DUMMY_SPILLS, st.seed);
-  }
-
-  if(isNewBrew && st.otherUsersArtefaks.length > 0){
-    st.otherUsersArtefaks = shuffleArray(st.otherUsersArtefaks, st.seed);
-  }
-
-  setLoading(false);
-  renderSpills();
-}
-
-// Fallback: query rants tanpa join jika foreign key tidak ada
-async function loadSpillsSimple(isNewBrew=false){
-  try {
-    const { data, error } = await st.sb
-      .from(CFG.TABLE_RANTS)
-      .select('id, content, mood, author, created_at, vibes')
-      .order('created_at', { ascending: false })
-      .range(st.currentOffset, st.currentOffset + 49);
-
-    if(error) throw error;
-
-    if(data && data.length > 0){
-      st.spills = data.map(r => ({
-        id:        r.id,
-        rant_id:   r.id,
-        content:   r.content,
-        mood:      r.mood || 'surviving',
-        author:    r.author || '@anonymous',
-        user_id:   r.author || r.id,
-        timestamp: new Date(r.created_at).getTime(),
-        vibes:     r.vibes || {},
-        reactions: {}
-      }));
-
-      const ids = st.spills.map(s => s.id);
-      await loadReactions(ids);
-      await loadUserReactions(ids);
-      console.log(`✅ Loaded ${st.spills.length} rants (simple, tanpa join)`);
-    } else {
-      st.spills = shuffleArray(DUMMY_SPILLS, st.seed);
-    }
-  } catch(e){
-    console.error('❌ loadSpillsSimple error:', e.message);
-    st.spills = shuffleArray(DUMMY_SPILLS, st.seed);
-  }
-
-  if(isNewBrew && st.otherUsersArtefaks.length > 0){
-    st.otherUsersArtefaks = shuffleArray(st.otherUsersArtefaks, st.seed);
-  }
-
-  setLoading(false);
-  renderSpills();
-}
-
-// ============================================
-// LOAD REACTIONS
-// Hitung jumlah tiap reaction per rant
-// ============================================
-async function loadReactions(ids){
-  if(!st.sb || !ids.length) return;
-  try {
-    const { data, error } = await st.sb
-      .from(CFG.TABLE_REACTIONS)
-      .select('rant_id, reaction_type')
-      .in('rant_id', ids);
-
-    if(error) throw error;
-
-    // Init semua ke 0
-    ids.forEach(id => {
-      st.reactions[id] = {};
-      REACTIONS.forEach(r => { st.reactions[id][r.id] = 0; });
-    });
-
-    (data||[]).forEach(r => {
-      if(st.reactions[r.rant_id] && r.reaction_type){
-        st.reactions[r.rant_id][r.reaction_type] = (st.reactions[r.rant_id][r.reaction_type]||0) + 1;
-      }
-    });
-
-    console.log('✅ Reactions loaded');
-  } catch(e){ console.error('❌ loadReactions error:', e); }
-}
-
-// ============================================
-// LOAD USER'S OWN REACTIONS (untuk highlight tombol)
-// FIX: Gunakan st.userId yang bisa berupa anon session
-// ============================================
-async function loadUserReactions(ids){
-  if(!st.sb || !ids.length || !st.userId) return;
-  try {
-    // user_id di tabel reactions adalah anon session ID atau author string
-    const { data, error } = await st.sb
-      .from(CFG.TABLE_REACTIONS)
-      .select('rant_id, reaction_type')
-      .eq('user_id', st.userId)
-      .in('rant_id', ids);
-
-    if(error) throw error;
-    st.userReacted.clear();
-    (data||[]).forEach(r => st.userReacted.add(`${r.rant_id}-${r.reaction_type}`));
-    console.log(`✅ User reactions loaded: ${st.userReacted.size} reacted`);
-  } catch(e){ console.error('❌ loadUserReactions error:', e.message); }
-}
-
-// ============================================
-// REACTION HANDLER
-// FIX #2: Simpan ke Supabase tanpa butuh auth login.
-// user_id menggunakan st.userId (bisa anon session ID).
-// Schema tabel reactions yang diharapkan:
-//   id (uuid, auto), rant_id (text), reaction_type (text),
-//   user_id (text), created_at (timestamptz)
-// ============================================
-async function reactToSpill(rantId, type, userId, author, btnEl){
-  const key = `${rantId}-${type}`;
-
-  // Cek double reaction
-  if(st.userReacted.has(key)){
-    toast('Sudah pernah bereaksi!', true);
-    return;
-  }
-
-  // Pastikan ada userId (anon atau login)
-  if(!st.userId){
-    st.userId = getAnonSessionId();
-  }
-
-  const countEl = document.getElementById(`count-${rantId}-${type}`);
-  const prev = parseInt(countEl?.textContent || '0');
-
-  // Optimistic update
-  if(countEl) countEl.textContent = prev + 1;
-  if(btnEl) btnEl.classList.add('reacted');
-  if(!st.reactions[rantId]) st.reactions[rantId] = {};
-  st.reactions[rantId][type] = prev + 1;
-  st.userReacted.add(key);
-
-  // Unlock peaking
-  if(userId && !unlocked.has(userId)){
-    unlocked.add(userId);
-    toast('🔓 Peaking unlocked!');
-  }
-
-  // Simpan ke Supabase
-  if(st.online && st.sb){
-    try {
-      const payload = {
-        rant_id:       rantId,
-        reaction_type: type,
-        user_id:       st.userId,          // anon session atau real user id
-        created_at:    new Date().toISOString()
-      };
-
-      console.log('💾 Saving reaction:', payload);
-
-      const { data, error } = await st.sb
-        .from(CFG.TABLE_REACTIONS)
-        .insert(payload)
-        .select();
-
-      if(error){
-        // Jika error unique constraint (sudah react), tetap OK
-        if(error.code === '23505'){
-          console.log('⚠️ Already reacted (unique constraint)');
-          toast(`${REACTIONS.find(r=>r.id===type)?.emoji||''} Tersimpan!`);
-          return;
-        }
-        throw error;
-      }
-
-      console.log('✅ Reaction saved:', data);
-      toast(`${REACTIONS.find(r=>r.id===type)?.emoji||''} Tersimpan!`);
-
-    } catch(e){
-      console.error('❌ Gagal simpan reaction:', e);
-      // Rollback UI
-      if(countEl) countEl.textContent = prev;
-      if(btnEl) btnEl.classList.remove('reacted');
-      st.reactions[rantId][type] = prev;
-      st.userReacted.delete(key);
-      toast('Gagal: ' + (e.message||'error'), true);
-    }
-  } else {
-    // Offline — simpan ke localStorage sebagai fallback
-    const local = JSON.parse(localStorage.getItem('offline_reactions')||'[]');
-    local.push({ rant_id:rantId, reaction_type:type, user_id:st.userId, ts:Date.now() });
-    localStorage.setItem('offline_reactions', JSON.stringify(local));
-    toast(`${REACTIONS.find(r=>r.id===type)?.emoji||''} Tersimpan lokal`);
-  }
-}
-
-// Refresh realtime reaction count
-async function refreshReactionCount(rantId){
-  if(!st.sb || !rantId) return;
-  try {
-    const { data } = await st.sb
-      .from(CFG.TABLE_REACTIONS)
-      .select('reaction_type')
-      .eq('rant_id', rantId);
-
-    const counts = {};
-    REACTIONS.forEach(r => counts[r.id] = 0);
-    (data||[]).forEach(r => { if(counts[r.reaction_type]!==undefined) counts[r.reaction_type]++; });
-    REACTIONS.forEach(r => {
-      const el = document.getElementById(`count-${rantId}-${r.id}`);
-      if(el) el.textContent = counts[r.id];
-    });
-  } catch(e){}
-}
-
-// ============================================
-// ARTEFAKS
-// ============================================
-async function loadArtefaks(){
-  if(!st.online || !st.sb) return;
-  try {
-    const { data } = await st.sb.from(CFG.TABLE_ARTEFAKS)
-      .select('*')
-      .order('created_at',{ascending:false})
-      .limit(50);
-    if(data && data.length) st.otherUsersArtefaks = data;
-    else st.otherUsersArtefaks = DUMMY_ARTEFAKS;
-  } catch(e){ st.otherUsersArtefaks = DUMMY_ARTEFAKS; }
-}
-
-function getRandomArtefak(){
-  if(!st.otherUsersArtefaks.length) return null;
-  return st.otherUsersArtefaks[Math.floor(Math.random()*st.otherUsersArtefaks.length)];
-}
-
-function createArtefakCard(a){
-  return `<div class="artefak-card">
-    <div class="artefak-header"><span class="artefak-icon">📸</span><span class="artefak-label">Memori dari Jejak Lain</span></div>
-    <img src="${a.image_url}" class="artefak-image" alt="Artefak" onerror="this.src='https://via.placeholder.com/400x300/1E1E1E/888?text=Memori'">
-    <div class="artefak-meta"><span class="artefak-owner">${esc(a.owner||'@anonymous')}</span><span class="artefak-date">${formatDate(a.created_at)}</span></div>
-  </div>`;
-}
-
-// ============================================
-// RENDER
-// ============================================
-function setLoading(v){
-  st.loading = v;
-  const ca = document.getElementById('content-area');
-  const s  = document.getElementById('status-text');
-  if(v){
-    ca.className='content-area loading';
-    ca.innerHTML='<div class="spinner"></div><p class="loading-text">Menyedu teh...</p>';
-    if(s) s.textContent='Memuat spills...';
-  } else {
-    if(s) s.textContent='';
-  }
-}
-
-function renderSpills(){
-  const ca = document.getElementById('content-area');
-  if(!ca || st.loading) return;
-
-  let list = st.spills;
-  if(st.filter !== 'all') list = list.filter(s => s.mood === st.filter);
-  if(st.vibeMatch < 100) list = list.filter(() => Math.random() < st.vibeMatch/100);
-
-  if(!list.length){
-    ca.className='content-area';
-    ca.innerHTML='<div class="empty-state"><div class="empty-icon">🍃</div><div class="empty-text">Belum ada teh yang tumpah...</div><div class="empty-subtext">Jadilah yang pertama!</div></div>';
-    return;
-  }
-
-  ca.className='content-area has-content';
-  const html = [];
-  let rantCount = 0;
-
-  for(let i=0; i<list.length; i++){
-    const s = list[i];
-    if(rantCount > 0 && rantCount % 9 === 0){
-      const a = getRandomArtefak();
-      if(a) html.push(createArtefakCard(a));
-      rantCount = 0;
-    }
-
-    const isUnlocked = unlocked.has(s.user_id);
-    const sa = (s.author||'@anonymous').replace(/'/g,"\\'");
-    const su = (s.user_id||'').replace(/'/g,"\\'");
-
-    const rxHtml = REACTIONS.map(r => {
-      // Priority: live reaction count > spill's stored reactions
-      const count = (st.reactions[s.rant_id]||{})[r.id] ?? (s.reactions||{})[r.id] ?? 0;
-      const reacted = st.userReacted.has(`${s.rant_id}-${r.id}`);
-      return `<button class="reaction-btn ${reacted?'reacted':''}" onclick="reactToSpill('${s.rant_id}','${r.id}','${su}','${sa}',this)"><span class="reaction-emoji">${r.emoji}</span><span class="reaction-count" id="count-${s.rant_id}-${r.id}">${count}</span></button>`;
-    }).join('');
-
-    html.push(`<div class="spill-card">
-      <div class="spill-header">
-        <span class="spill-author ${isUnlocked?'unlocked':'locked'}" onclick="peakUser('${su}','${sa}')">${esc(s.author)}</span>
-        <span class="spill-mood" style="color:${getMoodColor(s.mood)}">${s.mood||''}</span>
-      </div>
-      <div class="spill-content">${esc(s.content)}</div>
-      <div class="spill-reactions">${rxHtml}</div>
-    </div>`);
-    rantCount++;
-  }
-
-  if(rantCount >= 5){ const a=getRandomArtefak(); if(a) html.push(createArtefakCard(a)); }
-  ca.innerHTML = html.join('');
-}
-
-// ============================================
-// PEAKING
-// ============================================
-async function peakUser(userId, author){
-  if(!userId||userId==='null'||userId==='undefined'||userId===''){
-    toast('User ID tidak tersedia',true); return;
-  }
-  if(!unlocked.has(userId)){ toast('🔒 React dulu untuk unlock peaking!',true); return; }
-  st.peakingId = userId;
-  document.getElementById('peaking-username').textContent = author||'@anonymous';
-  await loadPeakingData(userId);
-  document.getElementById('peaking-modal').classList.add('active');
-  document.body.style.overflow='hidden';
-}
-
-async function loadPeakingData(userId){
-  // userId = nilai dari rants.author = users.username
-  const rc = document.getElementById('peaking-rants');
-  const ac = document.getElementById('peaking-artefacts');
-  rc.innerHTML='<div class="loading-text">Loading...</div>';
-  ac.innerHTML='';
-
-  if(st.online && st.sb){
-    try {
-      // Query rants by author (= username)
-      const { data: rants, error: rantErr } = await st.sb
-        .from(CFG.TABLE_RANTS)
-        .select('id, content, mood, author, created_at')
-        .eq('author', userId)
-        .order('created_at', {ascending:false});
-
-      if(rantErr) console.warn('Rants query error:', rantErr.message);
-
-      // Query user profile dari tabel users by username
-      const { data: userProfile } = await st.sb
-        .from('users')
-        .select('username, badge, points')
-        .eq('username', userId)
-        .single();
-
-      if(userProfile){
-        document.getElementById('peaking-vibe').textContent =
-          `${userProfile.badge || 'NEW'} · ${userProfile.points || 0} pts`;
-      }
-
-      // Artefaks
-      const { data: arts } = await st.sb
-        .from(CFG.TABLE_ARTEFAKS)
-        .select('*').limit(6);
-
-      rc.innerHTML = (rants && rants.length)
-        ? rants.map(r=>`<div class="peaking-rant-card"><div class="peaking-rant-date">${new Date(r.created_at).toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div><div class="peaking-rant-content">${esc(r.content)}</div><span class="peaking-rant-mood" style="color:${getMoodColor(r.mood)};border-color:${getMoodColor(r.mood)}">${r.mood||''}</span></div>`).join('')
-        : '<div class="empty-text" style="color:var(--ts);padding:20px;text-align:center">Belum ada rants.</div>';
-
-      const show = (arts && arts.length) ? arts : DUMMY_ARTS;
-      ac.innerHTML = show.map((a,i)=>`<div class="artefact-item" title="Artefak ${i+1}">${a.image_url ? `<img src="${a.image_url}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">` : (a.emoji||'📦')}</div>`).join('');
-      return;
-    } catch(e){ console.error('❌ loadPeakingData error:', e.message); }
-  }
-
-  // Fallback dummy
-  const ur = DUMMY_SPILLS.filter(s=>s.user_id===userId);
-  rc.innerHTML = ur.length
-    ? ur.map(r=>`<div class="peaking-rant-card"><div class="peaking-rant-content">${esc(r.content)}</div><span class="peaking-rant-mood" style="color:${getMoodColor(r.mood)}">${r.mood}</span></div>`).join('')
-    : '<div class="empty-text" style="color:var(--ts);padding:20px;text-align:center">Belum ada rants.</div>';
-  ac.innerHTML = DUMMY_ARTS.map(a=>`<div class="artefact-item">${a.emoji}</div>`).join('');
-}
-
-function closePeaking(){
-  document.getElementById('peaking-modal').classList.remove('active');
-  document.body.style.overflow='';
-  st.peakingId=null;
-}
-
-// ============================================
-// FILTERS
-// ============================================
-function filterMood(mood){
-  st.filter=mood;
-  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.toggle('active',b.dataset.mood===mood));
-  renderSpills();
-}
-
-function resetFilters(){
-  st.filter='all'; st.vibeMatch=87; st.currentOffset=0; st.seed=Math.random();
-  document.getElementById('vibe-slider').value=87;
-  document.getElementById('vibe-percentage').textContent='87%';
-  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.toggle('active',b.dataset.mood==='all'));
-  loadSpills();
-}
-
-function createNewSpill(){ loadSpills(true); }
-function toggleMenu(){ toast('Menu coming soon'); }
-function skipVibeMatch(t){ document.getElementById(t==='chaotic'?'chaotic-good-card':'caregiver-card').style.display='none'; }
-function sendSignal(t){ toast('Isyarat terkirim 🔥'); }
-
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') closePeaking(); });
-document.getElementById('peaking-modal').addEventListener('click', e=>{ if(e.target.id==='peaking-modal') closePeaking(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closePeaking(); });
+document.getElementById('peaking-modal').addEventListener('click',e=>{ if(e.target.id==='peaking-modal') closePeaking(); });
 </script>
 </body>
 </html>
