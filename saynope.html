@@ -359,11 +359,10 @@ async function initSupabase(){
       st.currentUser = session.user.user_metadata?.username || session.user.email;
     }
 
-    // Test koneksi
     const { data, error } = await st.sb.from(CFG.TBL_RANTS).select('id').limit(1);
     if(error) throw error;
 
-    console.log('✅ Supabase OK - Rants accessible');
+    console.log('✅ Supabase OK');
     setConn(true, '🟢 Online');
     setupRealtime();
     return true;
@@ -382,7 +381,7 @@ function setupRealtime(){
 }
 
 // ============================================
-// LOAD DATA - ALUR: Rants -> Spills -> Reactions
+// LOAD DATA
 // ============================================
 async function loadSpills(isNew=false){
   setLoading(true);
@@ -395,48 +394,39 @@ async function loadSpills(isNew=false){
   }
 
   try {
-    // STEP 1: Ambil RANTS (hanya kolom yang ada)
-    console.log('📥 Loading rants...');
+    // Ambil RANTS
     const { data: rantsData, error: rantsError } = await st.sb
       .from(CFG.TBL_RANTS)
-      .select('id, content, mood, author, created_at, vibes')  // Tanpa is_anonymous
+      .select('id, content, mood, author, created_at, vibes')
       .order('created_at', { ascending: false })
       .range(st.offset, st.offset + 99);
 
     if(rantsError) throw rantsError;
     
     if(!rantsData || rantsData.length === 0){
-      console.warn('⚠️ No rants found');
       setLoading(false);
       renderSpills();
       return;
     }
 
-    console.log(`✅ Loaded ${rantsData.length} rants`);
-
-    // STEP 2: Ambil SPILLS (filter dari rants)
+    // Ambil SPILLS (filter)
     const rantIds = rantsData.map(r => r.id);
     const { data: spillsData, error: spillsError } = await st.sb
       .from(CFG.TBL_SPILLS)
-      .select('rant_id, is_anonymous, response_count, vibes')  // is_anonymous ada di spills
+      .select('rant_id, is_anonymous, response_count, vibes')
       .in('rant_id', rantIds);
 
-    if(spillsError) {
-      console.warn('⚠️ Spills error:', spillsError);
-    }
+    if(spillsError) console.warn('Spills error:', spillsError);
 
-    // Map spills
     const spillsMap = {};
     if(spillsData){
       spillsData.forEach(s => { spillsMap[s.rant_id] = s; });
-      console.log(`✅ Found ${spillsData.length} spills`);
     }
 
-    // STEP 3: Merge data
+    // Merge data
     let mergedData = [];
     
     if(spillsData && spillsData.length > 0){
-      // Mode filtered: hanya rants yang ada di spills
       mergedData = rantsData
         .filter(r => spillsMap[r.id])
         .map(r => ({
@@ -445,19 +435,18 @@ async function loadSpills(isNew=false){
           mood: r.mood || 'surviving',
           author: r.author,
           created_at: r.created_at,
-          is_anonymous: spillsMap[r.id].is_anonymous || false,  // Ambil dari spills
+          is_anonymous: spillsMap[r.id].is_anonymous || false,
           vibes: spillsMap[r.id].vibes || r.vibes || {},
           response_count: spillsMap[r.id].response_count || 0
         }));
     } else {
-      // Fallback: semua rants dianggap spills (is_anonymous default false)
       mergedData = rantsData.map(r => ({
         rant_id: r.id,
         content: r.content,
         mood: r.mood || 'surviving',
         author: r.author,
         created_at: r.created_at,
-        is_anonymous: false,  // Default
+        is_anonymous: false,
         vibes: r.vibes || {},
         response_count: 0
       }));
@@ -470,14 +459,12 @@ async function loadSpills(isNew=false){
 
     st.spills = mergedData;
     
-    // Update counter
     const counter = document.getElementById('spill-counter');
     if(counter){
       counter.textContent = `${mergedData.length} spills ditemukan`;
       counter.style.display = 'block';
     }
 
-    // STEP 4: Load reactions
     if(mergedData.length > 0){
       const spillIds = mergedData.map(s => s.rant_id);
       await loadReactions(spillIds);
@@ -510,8 +497,6 @@ async function loadReactions(ids){
         st.reactions[row.rant_id][row.emoji] = (st.reactions[row.rant_id][row.emoji]||0)+1;
       }
     });
-    
-    console.log(`✅ Reactions loaded for ${ids.length} spills`);
   } catch(e){ console.error('❌ loadReactions:', e.message); }
 }
 
@@ -543,47 +528,82 @@ async function loadArtefacts(){
 }
 
 // ============================================
-// REACTIONS
+// REACTIONS - FIX: Simpan ke Supabase & Unlock Peaking
 // ============================================
 async function reactToSpill(rantId, emoji, author, btnEl){
   const key = `${rantId}-${emoji}`;
-  if(st.userReacted.has(key)){ toast('Sudah bereaksi!',true); return; }
+  
+  // Cek sudah pernah react belum
+  if(st.userReacted.has(key)){
+    toast('Sudah bereaksi!',true);
+    return;
+  }
 
   const countEl = document.getElementById(`count-${rantId}-${emoji}`);
   const prev = parseInt(countEl?.textContent||'0');
 
-  if(countEl) countEl.textContent = prev+1;
+  // Optimistic UI update
+  if(countEl) countEl.textContent = prev + 1;
   if(btnEl) btnEl.classList.add('reacted');
-  if(!st.reactions[rantId]) st.reactions[rantId]={};
-  st.reactions[rantId][emoji] = prev+1;
+  if(!st.reactions[rantId]) st.reactions[rantId] = {};
+  st.reactions[rantId][emoji] = prev + 1;
   st.userReacted.add(key);
 
-  if(author && !unlocked.has(author)){ unlocked.add(author); toast('🔓 Peaking unlocked!'); }
+  // FIX 2: Unlock peaking saat react (jika bukan anonim)
+  if(author && author !== 'anonim' && !unlocked.has(author)){
+    unlocked.add(author);
+    toast('🔓 Peaking unlocked!');
+    console.log('🔓 Unlocked peaking for:', author);
+  }
 
+  // FIX 3: Simpan ke Supabase reactions
   if(st.online && st.sb){
     try {
-      const { error } = await st.sb
+      console.log('💾 Saving reaction:', { rant_id: rantId, emoji: emoji, user_id: st.userId });
+      
+      const { data, error } = await st.sb
         .from(CFG.TBL_REACTIONS)
         .insert({
           rant_id: rantId,
           emoji: emoji,
           user_id: st.userId,
           created_at: new Date().toISOString()
-        });
+        })
+        .select();
 
       if(error){
-        if(error.code==='23505'){ toast(emoji+' Tersimpan!'); return; }
+        // Error code 23505 = unique constraint violation (sudah pernah react)
+        if(error.code === '23505'){
+          console.log('⚠️ Already reacted (constraint)');
+          toast(emoji+' Tersimpan!');
+          return;
+        }
         throw error;
       }
+
+      console.log('✅ Reaction saved:', data);
       toast(emoji+' Tersimpan!');
+
     } catch(e){
-      console.error('❌ React error:', e);
-      if(countEl) countEl.textContent=prev;
+      console.error('❌ Gagal simpan reaction:', e);
+      // Rollback UI jika gagal
+      if(countEl) countEl.textContent = prev;
       if(btnEl) btnEl.classList.remove('reacted');
-      st.reactions[rantId][emoji]=prev;
+      st.reactions[rantId][emoji] = prev;
       st.userReacted.delete(key);
       toast('Gagal: '+e.message, true);
     }
+  } else {
+    // Offline mode - simpan ke localStorage
+    const offline = JSON.parse(localStorage.getItem('offline_reactions')||'[]');
+    offline.push({ 
+      rant_id: rantId, 
+      emoji: emoji, 
+      user_id: st.userId,
+      created_at: new Date().toISOString()
+    });
+    localStorage.setItem('offline_reactions', JSON.stringify(offline));
+    toast(emoji+' Tersimpan (offline)');
   }
 }
 
@@ -599,7 +619,7 @@ async function refreshCounts(rantId){
 }
 
 // ============================================
-// RENDER
+// RENDER - FIX: 1 artefak setiap 9 rant
 // ============================================
 function setLoading(v){
   st.loading=v;
@@ -646,7 +666,8 @@ function renderSpills(){
 
   ca.className='content-area has-content';
   const html=[];
-  let n=0;
+  let rantCount = 0;
+  let artefactInserted = false;
 
   const maxRants = 10;
   const displayList = list.slice(0, maxRants);
@@ -654,9 +675,14 @@ function renderSpills(){
   for(let i=0; i<displayList.length; i++){
     const s=displayList[i];
     
-    if(n>0 && n%9===0){ 
-      const a=getRandArtefact(); 
-      if(a) html.push(artefactCard(a)); 
+    // FIX 1: Insert 1 artefak random setelah rant ke-9 (index 8)
+    if(rantCount === 9 && !artefactInserted){ 
+      const a = getRandArtefact(); 
+      if(a){
+        html.push(artefactCard(a));
+        artefactInserted = true;
+        console.log('📸 Inserted artefact after 9th rant');
+      }
     }
 
     const rid = s.rant_id;
@@ -684,14 +710,10 @@ function renderSpills(){
       <div class="spill-content">${esc(s.content)}</div>
       <div class="spill-reactions">${rxHtml}</div>
     </div>`);
-    n++;
+    
+    rantCount++;
   }
 
-  if(n>=5){ 
-    const a=getRandArtefact(); 
-    if(a) html.push(artefactCard(a)); 
-  }
-  
   ca.innerHTML=html.join('');
 }
 
@@ -699,16 +721,23 @@ function renderSpills(){
 // PEAKING
 // ============================================
 async function peakUser(author, displayName){
-  if(!author||author==='null'){ toast('Tidak tersedia',true); return; }
-  if(!unlocked.has(author)){ toast('🔒 React dulu untuk unlock!',true); return; }
+  if(!author || author === 'null' || author === 'anonim'){ 
+    toast('Tidak tersedia',true); 
+    return; 
+  }
   
-  st.peakingId=author;
-  document.getElementById('peaking-username').textContent=displayName||('@'+formatUsername(author));
+  if(!unlocked.has(author)){ 
+    toast('🔒 React dulu untuk unlock peaking!',true); 
+    return; 
+  }
   
-  const rc=document.getElementById('peaking-rants');
-  const ac=document.getElementById('peaking-artefacts');
-  rc.innerHTML='<div class="loading-text">Loading...</div>';
-  ac.innerHTML='';
+  st.peakingId = author;
+  document.getElementById('peaking-username').textContent = displayName || ('@'+formatUsername(author));
+  
+  const rc = document.getElementById('peaking-rants');
+  const ac = document.getElementById('peaking-artefacts');
+  rc.innerHTML = '<div class="loading-text">Loading...</div>';
+  ac.innerHTML = '';
 
   if(st.online && st.sb){
     try {
@@ -723,20 +752,20 @@ async function peakUser(author, displayName){
         .eq('has_face', false)
         .limit(6);
 
-      rc.innerHTML=(rants&&rants.length)
+      rc.innerHTML = (rants && rants.length)
         ? rants.map(r=>`<div class="peaking-rant-card">
             <div class="peaking-rant-date">${fmtDate(r.created_at)}</div>
             <div class="peaking-rant-content">${esc(r.content)}</div>
             <span class="peaking-rant-mood" style="color:${getMoodColor(r.mood)};border-color:${getMoodColor(r.mood)}">${r.mood}</span>
           </div>`).join('')
-        : '<div class="empty-text">Tidak ada rants.</div>';
+        : '<div class="empty-text">Tidak ada rants publik.</div>';
 
-      ac.innerHTML=(arts&&arts.length)
+      ac.innerHTML = (arts && arts.length)
         ? arts.map(a=>`<div class="artefact-item"><img src="${esc(a.url||'')}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'"></div>`).join('')
         : '<div class="empty-text">Tidak ada artefak.</div>';
     } catch(e){ 
       console.error('❌ Peaking error:', e);
-      rc.innerHTML='<div class="empty-text">Error.</div>';
+      rc.innerHTML='<div class="empty-text">Error loading data.</div>';
     }
   }
 
@@ -747,7 +776,7 @@ async function peakUser(author, displayName){
 function closePeaking(){ 
   document.getElementById('peaking-modal').classList.remove('active'); 
   document.body.style.overflow=''; 
-  st.peakingId=null; 
+  st.peakingId = null; 
 }
 
 // ============================================
@@ -767,7 +796,11 @@ function resetFilters(){
   loadSpills();
 }
 
-function createNewSpill(){ loadSpills(true); }
+function createNewSpill(){ 
+  st.offset = 0; // Reset offset untuk tea brew baru
+  loadSpills(true); 
+}
+
 function toggleMenu(){ toast('Menu coming soon'); }
 function skipVibeMatch(t){ document.getElementById(t==='chaotic'?'chaotic-good-card':'caregiver-card').style.display='none'; }
 function sendSignal(){ toast('Isyarat terkirim 🔥'); }
