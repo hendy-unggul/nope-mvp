@@ -274,38 +274,39 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 
 <script>
 // ============================================
-// CONFIG & STATE (HANYA SATU DEKLARASI)
+// CONFIG & STATE
 // ============================================
 const CFG = {
   url: 'https://fuovfrdicdhnlymnacpz.supabase.co',
   key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0',
-  // Schema yang benar sesuai gambar:
-  TBL_SPILLS:    'spills',      // rant_id, content, mood, author, created_at, is_anonymous, response_count, vibes
-  TBL_REACTIONS: 'reactions',   // id, rant_id, user_id, emoji (bukan reaction_type), created_at, artefact_id
-  TBL_ARTEFACTS: 'artefacts',   // id, author, url (bukan image_url), note, has_face, faces, created_at
-  TBL_USERS:     'users',       // username, created_at, device_id, points, badge, last_active
+  // ALUR: rants -> spills (filtered) -> reactions
+  TBL_RANTS:     'rants',       // Sumber data utama
+  TBL_SPILLS:    'spills',      // Hasil filter dari rants (rant_id references rants.id)
+  TBL_REACTIONS: 'reactions',   // emoji reactions ke spills
+  TBL_ARTEFACTS: 'artefacts',   // artefacts dari users
+  TBL_USERS:     'users',
 };
 
 const st = {
   sb: null,
   online: false,
-  userId: null,        // anon session id (persistent per device)
-  currentUser: null,   // username dari session login (jika ada)
-  spills: [],
+  userId: null,        // anon session id
+  currentUser: null,   // username dari session login
+  spills: [],          // Data dari tabel spills (yang sudah difilter dari rants)
+  rants: [],           // Data asli dari tabel rants
   reactions: {},       // { rant_id: { emoji: count } }
   filter: 'all',
   vibeMatch: 87,
   loading: true,
   peakingId: null,
   artefacts: [],
-  userReacted: new Set(), // "rant_id-emoji"
+  userReacted: new Set(),
   offset: 0,
   seed: Math.random()
 };
 
 const unlocked = new Set();
 
-// Reactions - id adalah emoji yang disimpan di kolom reactions.emoji
 const REACTIONS = [
   { id:'💯', label:'Relatable' },
   { id:'🤗', label:'Hug'       },
@@ -315,20 +316,6 @@ const REACTIONS = [
   { id:'🔥', label:'Fire'      }
 ];
 
-const DUMMY_SPILLS = [
-  { rant_id:'d1', content:'Ada yang pernah ngerasa kalo lagi banyak kerjaan malah makin males ngerjain? Padahal deadline mepet.', mood:'chaotic', author:'anon.mouse', is_anonymous:true, created_at: new Date().toISOString() },
-  { rant_id:'d2', content:'Hari ini gue bangun pagi, olahraga, sarapan sehat, dan ngerjain side project. Semoga konsisten.', mood:'thriving', author:'early.bird', is_anonymous:false, created_at: new Date().toISOString() },
-  { rant_id:'d3', content:'Capek banget rasanya. Pengen tidur 3 hari 3 malam tanpa gangguan.', mood:'doom', author:'tired.soul', is_anonymous:true, created_at: new Date().toISOString() },
-  { rant_id:'d4', content:'Kenapa ya orang-orang pada sibuk banget, gue malah bingung mau ngapain.', mood:'chaotic', author:'confused.one', is_anonymous:true, created_at: new Date().toISOString() },
-  { rant_id:'d5', content:'Akhirnya selesai juga project yang ngeganggu pikiran 2 bulan ini. Lega!', mood:'thriving', author:'akhirnya.kelar', is_anonymous:false, created_at: new Date().toISOString() },
-  { rant_id:'d6', content:'Mau cerita tapi takut dijudge. Jadi simpen sendiri aja deh.', mood:'doom', author:'silent.mode', is_anonymous:true, created_at: new Date().toISOString() },
-  { rant_id:'d7', content:'Random thought: kenapa kita selalu merasa kurang padahal udah cukup?', mood:'surviving', author:'over.thinker', is_anonymous:true, created_at: new Date().toISOString() },
-  { rant_id:'d8', content:'Hari ini nothing special, tapi bersyukur masih bisa napas.', mood:'surviving', author:'cukup.bersyukur', is_anonymous:false, created_at: new Date().toISOString() },
-  { rant_id:'d9', content:'Pengen delete semua sosmed dan hidup di gunung.', mood:'doom', author:'gunung.dream', is_anonymous:true, created_at: new Date().toISOString() },
-  { rant_id:'d10',content:'Baru sadar kalo self-care itu penting banget. Jangan lupa istirahat!', mood:'thriving', author:'self.care', is_anonymous:false, created_at: new Date().toISOString() }
-];
-
-const DUMMY_ARTS = [{ emoji:'📷' },{ emoji:'🎧' },{ emoji:'☕' },{ emoji:'📚' },{ emoji:'🌙' },{ emoji:'🎸' }];
 const MOOD_COLORS = { surviving:'#FF9500', thriving:'#39FF14', chaotic:'#00F0FF', doom:'#8B5CF6' };
 
 // ============================================
@@ -353,16 +340,8 @@ function shuffle(arr,seed){
   return a;
 }
 function fmtDate(ds){ return new Date(ds).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}); }
-
-function formatUsername(raw){
-  if(!raw) return 'anonim';
-  return raw.trim().toLowerCase().replace(/[\s_\-]+/g,'.');
-}
-
-function displayAuthor(author, isAnonymous){
-  if(isAnonymous) return '@anonim';
-  return '@' + formatUsername(author);
-}
+function formatUsername(raw){ return raw?raw.trim().toLowerCase().replace(/[\s_\-]+/g,'.'):'anonim'; }
+function displayAuthor(author, isAnonymous){ return isAnonymous?'@anonim':'@'+formatUsername(author); }
 
 function getSessionId(){
   let id=localStorage.getItem('stt_session');
@@ -374,45 +353,34 @@ function getSessionId(){
 // INIT SUPABASE
 // ============================================
 async function initSupabase(){
-  if(typeof supabase==='undefined'){ setConn(false,'❌ Library Supabase tidak ditemukan'); return false; }
+  if(typeof supabase==='undefined'){ setConn(false,'❌ Library tidak ditemukan'); return false; }
   try {
     st.sb = supabase.createClient(CFG.url, CFG.key);
     st.userId = getSessionId();
 
-    // Cek session yang sudah login (dari halaman lain)
-    const { data:{ session }, error: sessErr } = await st.sb.auth.getSession();
-    if(sessErr) console.warn('Session error:', sessErr);
-    
+    // Cek session login
+    const { data:{ session } } = await st.sb.auth.getSession();
     if(session?.user){
       st.currentUser = session.user.user_metadata?.username || session.user.email;
-      console.log('✅ Logged in as:', st.currentUser);
     }
 
-    // Test koneksi ke tabel spills
-    const { data, error } = await st.sb
-      .from(CFG.TBL_SPILLS)
-      .select('rant_id, content, mood, author, created_at, is_anonymous, vibes')
-      .limit(1);
+    // Test koneksi ke tabel rants (sumber utama)
+    const { data, error } = await st.sb.from(CFG.TBL_RANTS).select('id').limit(1);
+    if(error) throw error;
 
-    if(error){
-      console.error('❌ Koneksi spills gagal:', error.message);
-      setConn(false, '❌ '+error.message);
-      return false;
-    }
-
-    console.log('✅ Supabase OK');
-    setConn(true, '🟢 Online · '+st.userId.slice(0,12)+'...');
+    console.log('✅ Supabase OK - Rants table accessible');
+    setConn(true, '🟢 Online');
     setupRealtime();
     return true;
-
   } catch(e){
-    console.error('❌ Exception init:', e);
-    setConn(false, '❌ Gagal koneksi');
+    console.error('❌ Init error:', e);
+    setConn(false, '❌ '+e.message);
     return false;
   }
 }
 
 function setupRealtime(){
+  // Listen ke perubahan reactions realtime
   st.sb.channel('rx-live')
     .on('postgres_changes',{ event:'INSERT', schema:'public', table:CFG.TBL_REACTIONS },
       p => { if(p.new?.rant_id) refreshCounts(p.new.rant_id); })
@@ -420,52 +388,116 @@ function setupRealtime(){
 }
 
 // ============================================
-// LOAD DATA
+// LOAD DATA - ALUR: Rants -> Spills -> Reactions
 // ============================================
 async function loadSpills(isNew=false){
   setLoading(true);
   if(isNew){ st.seed=Math.random(); st.offset+=10; }
 
-  if(st.online && st.sb){
-    try {
-      const { data, error } = await st.sb
-        .from(CFG.TBL_SPILLS)
-        .select('rant_id, content, mood, author, created_at, is_anonymous, vibes')
-        .order('created_at',{ ascending:false })
-        .range(st.offset, st.offset+49);
-
-      if(error) throw error;
-
-      if(data && data.length){
-        // Filter: jangan tampilkan spill milik user sendiri
-        const filtered = st.currentUser 
-          ? data.filter(s => s.author !== st.currentUser)
-          : data;
-        
-        console.log(`✅ ${filtered.length} spills loaded (dari ${data.length} total)`);
-        st.spills = filtered;
-        
-        // Update counter
-        const counter = document.getElementById('spill-counter');
-        if(counter){
-          counter.textContent = `${filtered.length} spills ditemukan`;
-          counter.style.display = 'block';
-        }
-        
-        await loadReactions(filtered.map(s=>s.rant_id));
-        await loadMyReactions(filtered.map(s=>s.rant_id));
-      } else {
-        st.spills = shuffle(DUMMY_SPILLS, st.seed);
-      }
-    } catch(e){
-      console.error('❌ loadSpills:', e.message);
-      st.spills = shuffle(DUMMY_SPILLS, st.seed);
-    }
-  } else {
-    st.spills = shuffle(DUMMY_SPILLS, st.seed);
+  if(!st.online || !st.sb){
+    setLoading(false);
+    renderSpills();
+    return;
   }
 
-  if(isNew) st.artefacts = shuffle(st.artefacts, st.seed);
+  try {
+    // STEP 1: Ambil data dari tabel RANTS (sumber utama)
+    console.log('📥 Loading rants from Supabase...');
+    const { data: rantsData, error: rantsError } = await st.sb
+      .from(CFG.TBL_RANTS)
+      .select('id, content, mood, author, created_at, is_anonymous, vibes')
+      .order('created_at', { ascending: false })
+      .range(st.offset, st.offset + 99);
+
+    if(rantsError) throw rantsError;
+    
+    if(!rantsData || rantsData.length === 0){
+      console.warn('⚠️ No rants found');
+      setLoading(false);
+      renderSpills();
+      return;
+    }
+
+    console.log(`✅ Loaded ${rantsData.length} rants`);
+
+    // STEP 2: Ambil data dari tabel SPILLS (filter yang sudah lolos moderasi)
+    // Spills mereferensi rants via rant_id
+    const rantIds = rantsData.map(r => r.id);
+    const { data: spillsData, error: spillsError } = await st.sb
+      .from(CFG.TBL_SPILLS)
+      .select('rant_id, response_count, vibes')
+      .in('rant_id', rantIds);
+
+    if(spillsError) {
+      console.warn('⚠️ Spills query error:', spillsError);
+      // Lanjutkan dengan rants saja, anggap semua rants adalah spills
+    }
+
+    // Buat map spills untuk lookup cepat
+    const spillsMap = {};
+    if(spillsData){
+      spillsData.forEach(s => { spillsMap[s.rant_id] = s; });
+      console.log(`✅ Found ${spillsData.length} spills (filtered from rants)`);
+    }
+
+    // STEP 3: Gabungkan data - hanya rants yang ada di spills yang ditampilkan
+    // Jika tidak ada spills table, tampilkan semua rants
+    let mergedData = [];
+    
+    if(spillsData && spillsData.length > 0){
+      // Mode: hanya tampilkan yang sudah di-spill (filtered)
+      mergedData = rantsData
+        .filter(r => spillsMap[r.id]) // Hanya yang ada di tabel spills
+        .map(r => ({
+          rant_id: r.id,
+          content: r.content,
+          mood: r.mood || 'surviving',
+          author: r.author,
+          created_at: r.created_at,
+          is_anonymous: r.is_anonymous,
+          vibes: spillsMap[r.id].vibes || r.vibes || {},
+          response_count: spillsMap[r.id].response_count || 0
+        }));
+    } else {
+      // Mode: tampilkan semua rants (fallback)
+      mergedData = rantsData.map(r => ({
+        rant_id: r.id,
+        content: r.content,
+        mood: r.mood || 'surviving',
+        author: r.author,
+        created_at: r.created_at,
+        is_anonymous: r.is_anonymous,
+        vibes: r.vibes || {},
+        response_count: 0
+      }));
+    }
+
+    // Filter: jangan tampilkan spill milik user sendiri
+    if(st.currentUser){
+      mergedData = mergedData.filter(s => s.author !== st.currentUser);
+    }
+
+    st.spills = mergedData;
+    
+    // Update counter
+    const counter = document.getElementById('spill-counter');
+    if(counter){
+      counter.textContent = `${mergedData.length} spills ditemukan`;
+      counter.style.display = 'block';
+    }
+
+    // STEP 4: Load reactions untuk spills yang ditampilkan
+    if(mergedData.length > 0){
+      const spillIds = mergedData.map(s => s.rant_id);
+      await loadReactions(spillIds);
+      await loadMyReactions(spillIds);
+    }
+
+  } catch(e){
+    console.error('❌ loadSpills error:', e);
+    toast('Gagal memuat data: '+e.message, true);
+  }
+
   setLoading(false);
   renderSpills();
 }
@@ -473,6 +505,7 @@ async function loadSpills(isNew=false){
 async function loadReactions(ids){
   if(!st.sb||!ids.length) return;
   try {
+    // Reactions mereferensi ke rant_id (dari spills)
     const { data, error } = await st.sb
       .from(CFG.TBL_REACTIONS)
       .select('rant_id, emoji')
@@ -480,12 +513,17 @@ async function loadReactions(ids){
 
     if(error) throw error;
 
+    // Init counts
     ids.forEach(id=>{ st.reactions[id]={}; REACTIONS.forEach(r=>{ st.reactions[id][r.id]=0; }); });
+    
+    // Count reactions
     (data||[]).forEach(row=>{
       if(st.reactions[row.rant_id] && row.emoji){
         st.reactions[row.rant_id][row.emoji] = (st.reactions[row.rant_id][row.emoji]||0)+1;
       }
     });
+    
+    console.log(`✅ Loaded reactions for ${ids.length} spills`);
   } catch(e){ console.error('❌ loadReactions:', e.message); }
 }
 
@@ -507,18 +545,17 @@ async function loadMyReactions(ids){
 async function loadArtefacts(){
   if(!st.online||!st.sb) return;
   try {
-    const { data, error } = await st.sb.from(CFG.TBL_ARTEFACTS)
+    const { data } = await st.sb.from(CFG.TBL_ARTEFACTS)
       .select('id, author, url, note, created_at')
       .eq('has_face', false)
       .order('created_at',{ascending:false})
       .limit(50);
-
-    if(!error && data) st.artefacts = data;
+    if(data) st.artefacts = data;
   } catch(e){ console.error('❌ loadArtefacts:', e.message); }
 }
 
 // ============================================
-// REACTIONS
+// REACTIONS HANDLER
 // ============================================
 async function reactToSpill(rantId, emoji, author, btnEl){
   const key = `${rantId}-${emoji}`;
@@ -527,12 +564,14 @@ async function reactToSpill(rantId, emoji, author, btnEl){
   const countEl = document.getElementById(`count-${rantId}-${emoji}`);
   const prev = parseInt(countEl?.textContent||'0');
 
+  // Optimistic update
   if(countEl) countEl.textContent = prev+1;
   if(btnEl) btnEl.classList.add('reacted');
   if(!st.reactions[rantId]) st.reactions[rantId]={};
   st.reactions[rantId][emoji] = prev+1;
   st.userReacted.add(key);
 
+  // Unlock peaking
   if(author && !unlocked.has(author)){ unlocked.add(author); toast('🔓 Peaking unlocked!'); }
 
   if(st.online && st.sb){
@@ -540,8 +579,8 @@ async function reactToSpill(rantId, emoji, author, btnEl){
       const { error } = await st.sb
         .from(CFG.TBL_REACTIONS)
         .insert({
-          rant_id: rantId,
-          emoji: emoji,        // kolom yang benar: "emoji"
+          rant_id: rantId,  // referensi ke rant_id di spills
+          emoji: emoji,
           user_id: st.userId,
           created_at: new Date().toISOString()
         });
@@ -552,18 +591,14 @@ async function reactToSpill(rantId, emoji, author, btnEl){
       }
       toast(emoji+' Tersimpan!');
     } catch(e){
-      console.error('❌ Gagal simpan:', e.message);
+      console.error('❌ React error:', e);
+      // Rollback
       if(countEl) countEl.textContent=prev;
       if(btnEl) btnEl.classList.remove('reacted');
       st.reactions[rantId][emoji]=prev;
       st.userReacted.delete(key);
       toast('Gagal: '+e.message, true);
     }
-  } else {
-    const loc=JSON.parse(localStorage.getItem('offline_rx')||'[]');
-    loc.push({ rant_id:rantId, emoji, user_id:st.userId });
-    localStorage.setItem('offline_rx', JSON.stringify(loc));
-    toast(emoji+' Tersimpan lokal');
   }
 }
 
@@ -614,7 +649,11 @@ function renderSpills(){
   if(!ca||st.loading) return;
 
   let list=[...st.spills];
+  
+  // Filter mood
   if(st.filter!=='all') list=list.filter(s=>s.mood===st.filter);
+  
+  // Filter vibe match (random filter)
   if(st.vibeMatch<100) list=list.filter(()=>Math.random()<st.vibeMatch/100);
 
   if(!list.length){
@@ -627,14 +666,14 @@ function renderSpills(){
   const html=[];
   let n=0;
 
-  // Max 10 rants per "tea brew"
+  // Max 10 rants per brew
   const maxRants = 10;
   const displayList = list.slice(0, maxRants);
 
   for(let i=0; i<displayList.length; i++){
     const s=displayList[i];
     
-    // Insert random artefact every 9 rants
+    // Insert artefact setiap 9 rants
     if(n>0 && n%9===0){ 
       const a=getRandArtefact(); 
       if(a) html.push(artefactCard(a)); 
@@ -646,6 +685,7 @@ function renderSpills(){
     const safe = (s.author||'').replace(/'/g,"\\'");
     const isUnlocked = pkey && unlocked.has(pkey);
 
+    // Render 6 emoji reactions dengan counter
     const rxHtml = REACTIONS.map(r=>{
       const count = (st.reactions[rid]||{})[r.id] ?? 0;
       const reacted = st.userReacted.has(`${rid}-${r.id}`);
@@ -668,7 +708,7 @@ function renderSpills(){
     n++;
   }
 
-  // Add 1 random artefact at the end if >= 5 rants
+  // Add artefact di akhir jika >= 5 rants
   if(n>=5){ 
     const a=getRandArtefact(); 
     if(a) html.push(artefactCard(a)); 
@@ -683,14 +723,11 @@ function renderSpills(){
 async function peakUser(author, displayName){
   if(!author||author==='null'){ toast('Tidak tersedia',true); return; }
   if(!unlocked.has(author)){ toast('🔒 React dulu untuk unlock peaking!',true); return; }
+  
   st.peakingId=author;
   document.getElementById('peaking-username').textContent=displayName||('@'+formatUsername(author));
-  await loadPeakingData(author);
-  document.getElementById('peaking-modal').classList.add('active');
-  document.body.style.overflow='hidden';
-}
-
-async function loadPeakingData(author){
+  
+  // Load data dari tabel rants (bukan spills) untuk peaking
   const rc=document.getElementById('peaking-rants');
   const ac=document.getElementById('peaking-artefacts');
   rc.innerHTML='<div class="loading-text">Loading...</div>';
@@ -698,8 +735,9 @@ async function loadPeakingData(author){
 
   if(st.online && st.sb){
     try {
-      const { data:rants } = await st.sb.from(CFG.TBL_SPILLS)
-        .select('rant_id, content, mood, created_at')
+      // Ambil rants dari user ini (yang tidak anonim)
+      const { data:rants } = await st.sb.from(CFG.TBL_RANTS)
+        .select('id, content, mood, created_at')
         .eq('author', author)
         .eq('is_anonymous', false)
         .order('created_at',{ascending:false});
@@ -718,27 +756,17 @@ async function loadPeakingData(author){
           </div>`).join('')
         : '<div class="empty-text">Tidak ada rants publik.</div>';
 
-      if(arts&&arts.length){
-        ac.innerHTML=arts.map(a=>`<div class="artefact-item">
-          <img src="${esc(a.url||'')}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">
-        </div>`).join('');
-      } else {
-        ac.innerHTML=DUMMY_ARTS.map(a=>`<div class="artefact-item">${a.emoji}</div>`).join('');
-      }
+      ac.innerHTML=(arts&&arts.length)
+        ? arts.map(a=>`<div class="artefact-item"><img src="${esc(a.url||'')}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'"></div>`).join('')
+        : '<div class="empty-text">Tidak ada artefak.</div>';
     } catch(e){ 
-      console.error('❌ loadPeakingData:', e.message);
-      loadPeakingDummy(author);
+      console.error('❌ Peaking error:', e);
+      rc.innerHTML='<div class="empty-text">Error loading data.</div>';
     }
-  } else {
-    loadPeakingDummy(author);
   }
-}
 
-function loadPeakingDummy(author){
-  const rc=document.getElementById('peaking-rants');
-  const ac=document.getElementById('peaking-artefacts');
-  rc.innerHTML=DUMMY_SPILLS.slice(0,3).map(r=>`<div class="peaking-rant-card"><div class="peaking-rant-content">${esc(r.content)}</div><span class="peaking-rant-mood" style="color:${getMoodColor(r.mood)}">${r.mood}</span></div>`).join('');
-  ac.innerHTML=DUMMY_ARTS.map(a=>`<div class="artefact-item">${a.emoji}</div>`).join('');
+  document.getElementById('peaking-modal').classList.add('active');
+  document.body.style.overflow='hidden';
 }
 
 function closePeaking(){ 
@@ -785,8 +813,7 @@ document.addEventListener('DOMContentLoaded', async()=>{
     await loadArtefacts(); 
     await loadSpills(); 
   } else { 
-    st.spills=DUMMY_SPILLS; 
-    setLoading(false); 
+    setLoading(false);
     renderSpills(); 
   }
 });
