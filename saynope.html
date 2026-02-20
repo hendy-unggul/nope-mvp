@@ -17,11 +17,15 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .brand-text{font-size:28px;font-weight:800;letter-spacing:-.02em}
 .header-actions{display:flex;align-items:center;gap:12px}
 .online-dot{width:8px;height:8px;background:var(--as);border-radius:50%;animation:blink 2s infinite}
+.online-dot.offline{background:var(--tm);animation:none}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .menu-trigger{width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:transparent;border:none;cursor:pointer}
 .menu-trigger span{width:4px;height:4px;background:var(--txt);border-radius:50%}
 .tagline{font-style:italic;color:var(--ts);margin-bottom:8px}
 .status-text{color:var(--a);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:24px}
+.connection-status{font-size:10px;color:var(--tm);text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:.1em}
+.connection-status.online{color:var(--aq)}
+.connection-status.offline{color:var(--at)}
 .filter-section{background:var(--surface);border:1px solid var(--border);padding:20px;margin-bottom:24px}
 .filter-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .filter-title{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:8px}
@@ -63,6 +67,7 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .empty-subtext{color:var(--tm);font-size:12px}
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--txt);color:var(--bg);padding:12px 24px;font-size:13px;font-weight:600;z-index:10000;opacity:0;transition:all .3s}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.error{background:var(--at);color:var(--txt)}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:1000}
 .nav-container{max-width:480px;margin:0 auto;display:flex;justify-content:space-around;align-items:center;height:60px}
 .nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:transparent;border:none;color:var(--ts);cursor:pointer;padding:8px 24px;transition:all .2s;text-decoration:none;flex:1;position:relative}
@@ -130,7 +135,7 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .peaking-hint{text-align:center;padding:24px;border:1px dashed var(--border);margin-bottom:24px;background:var(--surface)}
 .peaking-hint-text{font-size:12px;color:var(--ts);font-style:italic;line-height:1.6}
 .reaction-unlock{display:inline-flex;align-items:center;gap:8px;background:var(--a);color:var(--bg);padding:8px 16px;font-size:11px;font-weight:700;text-transform:uppercase;margin-top:16px;letter-spacing:.05em}
-/* ARTEFAK CARD IN FEED - Photo Memory from other users */
+/* ARTEFAK CARD IN FEED */
 .artefak-card{background:var(--surface);border:1px solid var(--border);animation:fadeIn .4s ease;position:relative;overflow:hidden}
 .artefak-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--a),var(--as))}
 .artefak-header{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--se)}
@@ -160,6 +165,7 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
   </header>
 
   <p class="tagline">Curhatan dari komunitas yang selaras dengan vibrasimu</p>
+  <p class="connection-status" id="connection-status">Menghubungkan...</p>
   <p class="status-text" id="status-text">Memuat spills...</p>
 
   <div class="filter-section">
@@ -198,7 +204,7 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
       <div class="vibe-match-title">Seseorang dengan pola "chaotic good" sering muncul di timeline kamu.</div>
       <div class="vibe-match-graph">
         <div class="vibe-match-bar"></div><div class="vibe-match-bar"></div>
-        <div class="vige-match-bar"></div><div class="vibe-match-bar"></div>
+        <div class="vibe-match-bar"></div><div class="vibe-match-bar"></div>
         <div class="vibe-match-bar"></div>
       </div>
       <ul class="vibe-match-traits">
@@ -271,20 +277,34 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 </nav>
 
 <script>
+// ============================================
+// KONFIGURASI SUPABASE - PASTIKAN URL BENAR!
+// ============================================
 const CFG = {
   url: 'https://fuovfrdicdhnlymnacpz.supabase.co',
   key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0'
 };
 
 const st = {
-  sb: null, online: false, spills: [], reactions: {},
-  userId: null, userEmail: null, filter: 'all',
-  vibeMatch: 87, loading: true, peakingId: null,
-  vibeMatches: { chaotic: { shown: true, user: null }, caregiver: { shown: true, user: null } },
-  otherUsersArtefaks: [],
-  userReacted: new Set(), // Track which rants user has reacted to
-  currentOffset: 0, // For pagination when "Seduh Teh Baru"
-  seed: Math.random() // Random seed for shuffling
+  sb: null,                    // Supabase client
+  online: false,               // Connection status
+  authUser: null,              // Current authenticated user
+  userId: null,                // User ID
+  userEmail: null,             // User email
+  spills: [],                  // List of spills
+  reactions: {},               // Reaction counts
+  filter: 'all',               // Current mood filter
+  vibeMatch: 87,               // Vibe match percentage
+  loading: true,               // Loading state
+  peakingId: null,             // Current peaking user ID
+  vibeMatches: { 
+    chaotic: { shown: true, user: null }, 
+    caregiver: { shown: true, user: null } 
+  },
+  otherUsersArtefaks: [],      // Artefaks from other users
+  userReacted: new Set(),      // Track user reactions
+  currentOffset: 0,            // Pagination offset
+  seed: Math.random()          // Random seed
 };
 
 const unlocked = new Set();
@@ -311,7 +331,6 @@ const DUMMY_SPILLS = [
   { id:'d10', rant_id:'d10', content:'Baru sadar kalo self-care itu penting banget. Jangan lupa istirahat!', mood:'thriving', author:'@selfcarequeen', user_id:'u10', timestamp:Date.now()-36000000, reactions:{relatable:4,hug:3,same:2,mood:1,tea:6,fire:4} }
 ];
 
-// Dummy artefaks from other users (simulating Supabase 'artefaks' table)
 const DUMMY_ARTEFAKS = [
   { id:'a1', user_id:'u5', image_url:'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=300&fit=crop', owner:'@relieved', created_at:'2026-02-18T10:30:00Z' },
   { id:'a2', user_id:'u3', image_url:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=300&fit=crop', owner:'@tiredsoul', created_at:'2026-02-17T14:20:00Z' },
@@ -330,7 +349,31 @@ const MOOD_COLORS = { surviving:'#FF9500', thriving:'#39FF14', chaotic:'#00F0FF'
 
 function getMoodColor(m){ return MOOD_COLORS[m] || '#FFF'; }
 function esc(t){ if(!t) return ''; const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
-function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+
+function toast(msg, isError = false){ 
+  const t=document.getElementById('toast'); 
+  t.textContent=msg; 
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.classList.add('show'); 
+  setTimeout(()=>t.classList.remove('show'),3000); 
+}
+
+function updateConnectionStatus(isOnline, message) {
+  const dot = document.getElementById('online-dot');
+  const status = document.getElementById('connection-status');
+  
+  if(isOnline) {
+    dot.classList.remove('offline');
+    status.textContent = message || '🟢 Terhubung - Reaksi REALTIME aktif';
+    status.className = 'connection-status online';
+    st.online = true;
+  } else {
+    dot.classList.add('offline');
+    status.textContent = message || '🔴 Offline - Reaksi tersimpan lokal';
+    status.className = 'connection-status offline';
+    st.online = false;
+  }
+}
 
 function updateVibePercentage(val){
   const el = document.getElementById('vibe-percentage');
@@ -357,7 +400,6 @@ function createArtefakCard(artefak){
   </div>`;
 }
 
-// Fisher-Yates shuffle algorithm
 function shuffleArray(array, seed) {
   const arr = [...array];
   let currentSeed = seed;
@@ -369,131 +411,285 @@ function shuffleArray(array, seed) {
   return arr;
 }
 
-// ---- INIT ----
-document.addEventListener('DOMContentLoaded', () => {
-  if(typeof supabase !== 'undefined'){
-    st.sb = supabase.createClient(CFG.url, CFG.key);
-    st.online = true;
+// ============================================
+// INISIALISASI SUPABASE DAN AUTH
+// ============================================
+async function initializeSupabase() {
+  console.log('🔌 Mencoba menghubungkan ke Supabase...');
+  console.log('URL:', CFG.url);
+  
+  if(typeof supabase === 'undefined'){
+    console.error('❌ Supabase library tidak ditemukan!');
+    updateConnectionStatus(false, '❌ Library Supabase tidak ditemukan');
+    return false;
   }
-  const dot = document.getElementById('online-dot');
-  dot.style.background = st.online ? 'var(--as)' : 'var(--tm)';
-  dot.style.animation = st.online ? 'blink 2s infinite' : 'none';
+  
+  try {
+    // Buat client
+    st.sb = supabase.createClient(CFG.url, CFG.key);
+    console.log('✅ Client Supabase dibuat');
+    
+    // CEK KONEKSI dengan query sederhana
+    const { data: testData, error: testError } = await st.sb
+      .from('reactions')
+      .select('count', { count: 'exact', head: true });
+      
+    if(testError) {
+      console.error('❌ Gagal koneksi ke tabel reactions:', testError);
+      updateConnectionStatus(false, '❌ Tidak bisa akses tabel reactions');
+      return false;
+    }
+    
+    console.log('✅ Koneksi ke tabel reactions berhasil!');
+    
+    // CEK AUTH USER
+    const { data: { user }, error: authError } = await st.sb.auth.getUser();
+    
+    if(authError) {
+      console.error('❌ Auth error:', authError);
+      updateConnectionStatus(false, '❌ Error autentikasi');
+      return false;
+    }
+    
+    if(!user) {
+      console.warn('⚠️ Tidak ada user yang login');
+      updateConnectionStatus(false, '⚠️ Login untuk reaksi REALTIME');
+      return false;
+    }
+    
+    st.authUser = user;
+    st.userId = user.id;
+    st.userEmail = user.email;
+    
+    console.log('✅ User terautentikasi:', st.userEmail);
+    updateConnectionStatus(true, `🟢 REALTIME - ${st.userEmail}`);
+    
+    // Setup realtime subscription untuk reactions
+    setupRealtimeSubscription();
+    
+    return true;
+    
+  } catch(e) {
+    console.error('❌ Exception saat inisialisasi:', e);
+    updateConnectionStatus(false, '❌ Gagal koneksi ke Supabase');
+    return false;
+  }
+}
 
+// Setup realtime subscription
+function setupRealtimeSubscription() {
+  if(!st.sb) return;
+  
+  console.log('📡 Setup realtime subscription...');
+  
+  const subscription = st.sb
+    .channel('reactions-channel')
+    .on('postgres_changes', 
+      { event: '*', schema: 'public', table: 'reactions' },
+      (payload) => {
+        console.log('🔄 Realtime update:', payload);
+        // Refresh reactions jika ada perubahan
+        if(payload.new && payload.new.rant_id) {
+          refreshReactionCount(payload.new.rant_id);
+        }
+      }
+    )
+    .subscribe();
+    
+  console.log('✅ Realtime subscription aktif');
+}
+
+// ============================================
+// INIT
+// ============================================
+document.addEventListener('DOMContentLoaded', async () => {
+  // Inisialisasi Supabase terlebih dahulu
+  const connected = await initializeSupabase();
+  
+  // Setup event listeners
   document.getElementById('vibe-slider').addEventListener('input', e => {
     st.vibeMatch = +e.target.value;
     updateVibePercentage(st.vibeMatch);
     renderSpills();
   });
 
-  loadOtherUsersArtefaks().then(() => {
-    loadSpills();
-  });
-  analyzeVibeMatches();
+  // Load data
+  if(connected) {
+    await loadOtherUsersArtefaks();
+    await loadSpills();
+    analyzeVibeMatches();
+  } else {
+    // Fallback ke dummy data
+    st.otherUsersArtefaks = DUMMY_ARTEFAKS;
+    st.spills = DUMMY_SPILLS;
+    setLoading(false);
+    renderSpills();
+  }
 });
 
-// ---- LOAD RANDOM ARTEFAKS FROM OTHER USERS ----
 async function loadOtherUsersArtefaks(){
-  if(st.online && st.sb){
-    try {
-      // Get current user
-      const { data: { user } } = await st.sb.auth.getUser();
-      st.userId = user?.id || null;
-      
-      // Fetch artefaks from OTHER users (exclude current user)
-      const { data, error } = await st.sb.from('artefaks')
-        .select('*')
-        .neq('user_id', st.userId || 'no-user')
-        .order('created_at', { ascending: false })
-        .limit(50);
-      
-      if(error) throw error;
-      
-      if(data && data.length > 0){
-        st.otherUsersArtefaks = data;
-      } else {
-        // Use dummy data excluding current user's potential ID
-        st.otherUsersArtefaks = DUMMY_ARTEFAKS.filter(a => a.user_id !== st.userId);
-      }
-    } catch(e){
-      console.error('Error loading artefaks:', e);
-      st.otherUsersArtefaks = DUMMY_ARTEFAKS;
-    }
-  } else {
+  if(!st.online || !st.sb) return;
+  
+  try {
+    const { data, error } = await st.sb.from('artefaks')
+      .select('*')
+      .neq('user_id', st.userId || 'no-user')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    
+    if(error) throw error;
+    st.otherUsersArtefaks = data || DUMMY_ARTEFAKS;
+  } catch(e){
+    console.error('Error loading artefaks:', e);
     st.otherUsersArtefaks = DUMMY_ARTEFAKS;
   }
 }
 
 function getRandomArtefak(){
   if(!st.otherUsersArtefaks || st.otherUsersArtefaks.length === 0) return null;
-  // Use current seed to get deterministic but varied selection
   const index = Math.floor(Math.random() * st.otherUsersArtefaks.length);
   return st.otherUsersArtefaks[index];
 }
 
-// ---- VIBE MATCH ----
 async function analyzeVibeMatches(){
-  if(st.online && st.sb){
-    try {
-      await st.sb.from('reactions').select('*').eq('user_id', st.userId);
-      await st.sb.from('rants').select('*').eq('author', st.userEmail);
-    } catch(e) {}
+  if(!st.online || !st.sb) return;
+  // ... existing code
+}
+
+// ============================================
+// REACTION HANDLER - REALTIME KE SUPABASE
+// ============================================
+async function reactToSpill(rantId, type, userId, author, btnElement){
+  console.log('🎯 React clicked:', { rantId, type, userId, currentUser: st.userId });
+  
+  // Cek apakah sudah pernah reaksi
+  const reactionKey = `${rantId}-${type}`;
+  if(st.userReacted.has(reactionKey)) {
+    toast('Kamu sudah memberi reaksi ini!', true);
+    return;
   }
-  st.vibeMatches.chaotic.user = { id:'chaotic-u1', username:'@chaotic_good_angel', matchScore:87 };
-  st.vibeMatches.caregiver.user = { id:'caregiver-u1', username:'@silent_hugger', hugsGiven:23, storiesShared:1 };
-}
+  
+  // Cek apakah user sudah login
+  if(!st.userId) {
+    toast('⚠️ Login terlebih dahulu untuk memberi reaksi!', true);
+    return;
+  }
+  
+  const countEl = document.getElementById(`count-${rantId}-${type}`);
+  const currentCount = parseInt(countEl?.textContent || '0');
+  
+  // Optimistic UI update
+  if(countEl) countEl.textContent = currentCount + 1;
+  if(btnElement) btnElement.classList.add('reacted');
+  
+  // Update local state
+  if(!st.reactions[rantId]) st.reactions[rantId] = {};
+  st.reactions[rantId][type] = currentCount + 1;
+  st.userReacted.add(reactionKey);
+  
+  // Unlock peaking
+  if(userId && !unlocked.has(userId)){
+    unlocked.add(userId);
+    toast('🔓 Peaking unlocked!');
+  }
 
-function skipVibeMatch(type){
-  const id = type==='chaotic' ? 'chaotic-good-card' : 'caregiver-card';
-  const card = document.getElementById(id);
-  if(card){ card.style.opacity='0'; card.style.transform='translateX(-100%)'; setTimeout(()=>card.style.display='none',300); }
-  st.vibeMatches[type].shown = false;
-  toast(`Card ${type} dilewati. Mungkin lain kali.`);
-}
-
-function sendSignal(type){
-  const match = st.vibeMatches[type];
-  if(!match.user) return;
-  toast(`📡 Isyarat terkirim ke ${match.user.username}! Tunggu responsnya...`);
-  const id = type==='chaotic' ? 'chaotic-good-card' : 'caregiver-card';
-  const card = document.getElementById(id);
-  if(card){
-    card.style.borderColor = 'var(--aq)';
-    setTimeout(()=>{ card.style.opacity='0'; card.style.transform='scale(.95)'; setTimeout(()=>card.style.display='none',300); },1500);
+  // SIMPAN KE SUPABASE - REALTIME!
+  console.log('💾 Menyimpan ke Supabase...');
+  
+  try {
+    const reactionData = {
+      rant_id: rantId,
+      reaction_type: type,
+      user_id: st.userId,
+      created_at: new Date().toISOString()
+    };
+    
+    console.log('Data yang akan disimpan:', reactionData);
+    
+    const { data, error } = await st.sb
+      .from('reactions')
+      .insert(reactionData)
+      .select();
+      
+    if(error) {
+      console.error('❌ Supabase error:', error);
+      throw error;
+    }
+    
+    console.log('✅ Reaksi tersimpan REALTIME:', data);
+    toast(`${REACTIONS.find(r=>r.id===type)?.emoji || ''} Reaksi REALTIME tersimpan!`);
+    
+  } catch(e){ 
+    console.error('❌ Gagal menyimpan:', e);
+    
+    // Revert UI
+    if(countEl) countEl.textContent = currentCount;
+    if(btnElement) btnElement.classList.remove('reacted');
+    st.reactions[rantId][type] = currentCount;
+    st.userReacted.delete(reactionKey);
+    
+    toast('❌ Gagal menyimpan: ' + e.message, true);
   }
 }
 
-// ---- LOAD SPILLS WITH PAGINATION FOR "SEDUH TEH BARU" ----
+// Refresh reaction count dari Supabase
+async function refreshReactionCount(rantId) {
+  if(!st.sb || !rantId) return;
+  
+  try {
+    const { data, error } = await st.sb
+      .from('reactions')
+      .select('reaction_type')
+      .eq('rant_id', rantId);
+      
+    if(error) return;
+    
+    // Count reactions
+    const counts = {};
+    REACTIONS.forEach(r => counts[r.id] = 0);
+    (data || []).forEach(r => {
+      if(counts[r.reaction_type] !== undefined) {
+        counts[r.reaction_type]++;
+      }
+    });
+    
+    // Update UI
+    REACTIONS.forEach(r => {
+      const el = document.getElementById(`count-${rantId}-${r.id}`);
+      if(el) el.textContent = counts[r.id];
+    });
+    
+  } catch(e) {
+    console.error('Error refreshing counts:', e);
+  }
+}
+
+// ============================================
+// LOAD SPILLS
+// ============================================
 async function loadSpills(isNewBrew = false){
   setLoading(true);
   
-  // Generate new seed for randomization on "Seduh Teh Baru"
   if(isNewBrew){
     st.seed = Math.random();
-    st.currentOffset += 10; // Move to next batch
-    toast('🍵 Menyeduh teh baru...');
+    st.currentOffset += 10;
   }
   
   if(st.online && st.sb){
     try {
-      const { data: { user } } = await st.sb.auth.getUser();
-      st.userId = user?.id || null;
-      st.userEmail = user?.email || null;
-
-      // Fetch spills with offset for "Seduh Teh Baru" - get NEW data
       const { data, error } = await st.sb
         .from('spills')
         .select('*')
-        .neq('user_id', st.userId || '') // Exclude user's own spills
+        .neq('user_id', st.userId || '')
         .order('created_at', { ascending: false })
-        .range(st.currentOffset, st.currentOffset + 49) // Get next batch
-        .limit(50);
+        .range(st.currentOffset, st.currentOffset + 49);
         
       if(error) throw error;
 
       if(data && data.length > 0){
         st.spills = data.map(s => ({
           id: s.id, 
-          rant_id: s.rant_id || s.id, // Ensure rant_id exists
+          rant_id: s.rant_id || s.id,
           content: s.content, 
           mood: s.mood,
           author: s.author || '@anonymous', 
@@ -502,34 +698,22 @@ async function loadSpills(isNewBrew = false){
           reactions: s.reactions || {}
         }));
 
-        // Load reactions for these specific rants
         const ids = st.spills.map(s => s.rant_id).filter(Boolean);
-        if(ids.length) await loadReactions(ids);
-        
-        // Load user's existing reactions to mark them
-        await loadUserReactions(ids);
-      } else {
-        // If no more data, reset offset and shuffle dummy data
-        if(isNewBrew && st.currentOffset > 0){
-          st.currentOffset = 0;
-          toast('🔄 Memutar ulang dari awal...');
+        if(ids.length) {
+          await loadReactions(ids);
+          await loadUserReactions(ids);
         }
-        // Shuffle dummy data with new seed
+      } else {
         st.spills = shuffleArray(DUMMY_SPILLS, st.seed);
       }
     } catch(e){
-      console.error('Error loading spills:', e);
-      // Shuffle dummy data on error
+      console.error(e);
       st.spills = shuffleArray(DUMMY_SPILLS, st.seed);
-      if(isNewBrew) toast('Mode offline - menampilkan data acak');
     }
   } else {
-    // Offline mode - shuffle dummy data
     st.spills = shuffleArray(DUMMY_SPILLS, st.seed);
-    if(isNewBrew) toast('Mode offline - menampilkan data acak');
   }
   
-  // Also refresh artefaks for variety
   if(isNewBrew && st.otherUsersArtefaks.length > 0){
     st.otherUsersArtefaks = shuffleArray(st.otherUsersArtefaks, st.seed);
   }
@@ -543,33 +727,10 @@ async function loadReactions(ids){
   try {
     const { data, error } = await st.sb
       .from('reactions')
-      .select('rant_id, reaction_type, count')
-      .in('rant_id', ids)
-      .group('rant_id, reaction_type');
+      .select('rant_id, reaction_type')
+      .in('rant_id', ids);
       
-    if(error) {
-      // Try alternative query if group doesn't work
-      const { data: rawData, error: rawError } = await st.sb
-        .from('reactions')
-        .select('*')
-        .in('rant_id', ids);
-        
-      if(rawError) throw rawError;
-      
-      // Count manually
-      st.reactions = {};
-      ids.forEach(id => { 
-        st.reactions[id] = {}; 
-        REACTIONS.forEach(r => { st.reactions[id][r.id] = 0; }); 
-      });
-      
-      (rawData||[]).forEach(r => {
-        if(st.reactions[r.rant_id] && r.reaction_type) {
-          st.reactions[r.rant_id][r.reaction_type] = (st.reactions[r.rant_id][r.reaction_type] || 0) + 1;
-        }
-      });
-      return;
-    }
+    if(error) throw error;
     
     st.reactions = {};
     ids.forEach(id => { 
@@ -579,7 +740,7 @@ async function loadReactions(ids){
     
     (data||[]).forEach(r => {
       if(st.reactions[r.rant_id] && r.reaction_type) {
-        st.reactions[r.rant_id][r.reaction_type] = parseInt(r.count) || 0;
+        st.reactions[r.rant_id][r.reaction_type] = (st.reactions[r.rant_id][r.reaction_type] || 0) + 1;
       }
     });
   } catch(e){ 
@@ -587,7 +748,6 @@ async function loadReactions(ids){
   }
 }
 
-// Load which rants current user has already reacted to
 async function loadUserReactions(ids){
   if(!st.sb || !ids.length || !st.userId) return;
   try {
@@ -637,24 +797,19 @@ function renderSpills(){
 
   ca.className = 'content-area has-content';
   
-  // Process spills in batches of 10 (one tea brew)
-  const INSERT_EVERY = 9; // Insert artefak every 9 rants
+  const INSERT_EVERY = 9;
   let html = [];
   let rantCount = 0;
   
   for(let i = 0; i < list.length; i++){
     const spill = list[i];
     
-    // Insert artefak at position 9 (every 9 rants)
     if(rantCount > 0 && rantCount % INSERT_EVERY === 0){
       const randomArtefak = getRandomArtefak();
-      if(randomArtefak){
-        html.push(createArtefakCard(randomArtefak));
-      }
-      rantCount = 0; // Reset counter after inserting artefak
+      if(randomArtefak) html.push(createArtefakCard(randomArtefak));
+      rantCount = 0;
     }
     
-    // Render the spill card
     const isUnlocked = unlocked.has(spill.user_id);
     const sa = (spill.author||'@anonymous').replace(/'/g,"\\'");
     const su = (spill.user_id||'').replace(/'/g,"\\'");
@@ -671,94 +826,19 @@ function renderSpills(){
     rantCount++;
   }
   
-  // If we have remaining rants without an artefak and enough rants, insert one at the end
   if(rantCount >= 5){
     const randomArtefak = getRandomArtefak();
-    if(randomArtefak){
-      html.push(createArtefakCard(randomArtefak));
-    }
+    if(randomArtefak) html.push(createArtefakCard(randomArtefak));
   }
   
   ca.innerHTML = html.join('');
 }
 
-// ---- REACTION HANDLER - FIXED TO PROPERLY SAVE TO SUPABASE ----
-async function reactToSpill(rantId, type, userId, author, btnElement){
-  // Prevent double-clicking
-  if(btnElement && btnElement.classList.contains('reacted')) {
-    toast('Kamu sudah memberi reaksi ini!');
-    return;
-  }
-  
-  const countEl = document.getElementById(`count-${rantId}-${type}`);
-  const currentCount = parseInt(countEl?.textContent || '0');
-  
-  // Optimistic UI update
-  if(countEl) countEl.textContent = currentCount + 1;
-  if(btnElement) btnElement.classList.add('reacted');
-  
-  // Update local state
-  if(!st.reactions[rantId]) st.reactions[rantId] = {};
-  st.reactions[rantId][type] = currentCount + 1;
-  st.userReacted.add(`${rantId}-${type}`);
-  
-  // Unlock peaking if first reaction to this user
-  if(userId && userId!=='null' && userId!=='undefined' && userId!=='' && !unlocked.has(userId)){
-    unlocked.add(userId);
-    toast('🔓 Peaking unlocked! Click username to view their profile.');
-  }
-
-  // Save to Supabase - FIXED: proper error handling and data structure
-  if(st.online && st.sb && st.userId){
-    try {
-      const reactionData = {
-        rant_id: rantId,
-        reaction_type: type,
-        user_id: st.userId,
-        created_at: new Date().toISOString()
-      };
-      
-      console.log('Saving reaction:', reactionData);
-      
-      const { data, error } = await st.sb
-        .from('reactions')
-        .insert(reactionData)
-        .select();
-        
-      if(error) {
-        console.error('Supabase error saving reaction:', error);
-        // Revert UI if failed
-        if(countEl) countEl.textContent = currentCount;
-        if(btnElement) btnElement.classList.remove('reacted');
-        st.reactions[rantId][type] = currentCount;
-        st.userReacted.delete(`${rantId}-${type}`);
-        toast('Gagal menyimpan reaksi. Coba lagi.');
-        return;
-      }
-      
-      console.log('Reaction saved successfully:', data);
-      toast(`${REACTIONS.find(r=>r.id===type)?.emoji || ''} Reaksi tersimpan!`);
-      
-    } catch(e){ 
-      console.error('Exception saving reaction:', e);
-      // Revert UI on exception
-      if(countEl) countEl.textContent = currentCount;
-      if(btnElement) btnElement.classList.remove('reacted');
-      st.reactions[rantId][type] = currentCount;
-      st.userReacted.delete(`${rantId}-${type}`);
-      toast('Gagal menyimpan reaksi. Coba lagi.');
-    }
-  } else {
-    // Offline mode - just show toast
-    toast(`${REACTIONS.find(r=>r.id===type)?.emoji || ''} Reaksi dicatat (offline)`);
-  }
-}
-
 async function peakUser(userId, author){
   if(!userId || userId==='null' || userId==='undefined' || userId===''){
-    toast('Cannot peak: User ID not available'); return;
+    toast('Cannot peak: User ID not available', true); return;
   }
-  if(!unlocked.has(userId)){ toast('🔒 React to their rant first to unlock peaking!'); return; }
+  if(!unlocked.has(userId)){ toast('🔒 React to their rant first to unlock peaking!', true); return; }
   st.peakingId = userId;
   document.getElementById('peaking-username').textContent = author || '@anonymous';
   await loadPeakingData(userId);
@@ -803,7 +883,6 @@ function closePeaking(){
   st.peakingId = null;
 }
 
-// ---- FILTERS & MISC ----
 function filterMood(mood){
   st.filter = mood;
   document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('active', b.dataset.mood === mood));
@@ -820,15 +899,12 @@ function resetFilters(){
   loadSpills();
 }
 
-// ---- SEDUH TEH BARU - FETCH NEW DATA ----
 function createNewSpill(){ 
-  // Instead of redirecting, fetch new batch of spills
-  loadSpills(true); // true = isNewBrew
+  loadSpills(true);
 }
 
 function toggleMenu(){ toast('Menu clicked'); }
 
-// ---- KEYBOARD / CLICK OUTSIDE ----
 document.addEventListener('keydown', e => { if(e.key==='Escape') closePeaking(); });
 document.getElementById('peaking-modal').addEventListener('click', e => { if(e.target.id==='peaking-modal') closePeaking(); });
 </script>
