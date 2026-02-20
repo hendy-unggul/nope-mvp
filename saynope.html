@@ -129,16 +129,18 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .peaking-hint{text-align:center;padding:24px;border:1px dashed var(--border);margin-bottom:24px;background:var(--surface)}
 .peaking-hint-text{font-size:12px;color:var(--ts);font-style:italic;line-height:1.6}
 .reaction-unlock{display:inline-flex;align-items:center;gap:8px;background:var(--a);color:var(--bg);padding:8px 16px;font-size:11px;font-weight:700;text-transform:uppercase;margin-top:16px;letter-spacing:.05em}
-/* ARTEFACT CARD IN FEED */
-.artefact-card{background:linear-gradient(135deg,var(--surface) 0%,var(--se) 100%);border:1px solid var(--border);padding:24px;text-align:center;animation:fadeIn .4s ease;position:relative;overflow:hidden}
-.artefact-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--a),var(--as),var(--aq))}
-.artefact-label{font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.15em;margin-bottom:12px}
-.artefact-emoji{font-size:48px;margin-bottom:8px;display:block;animation:float 3s ease-in-out infinite}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.artefact-name{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:4px}
-.artefact-desc{font-size:11px;color:var(--ts);font-style:italic}
-.artefact-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100px;height:100px;background:radial-gradient(circle,rgba(255,77,0,.2) 0%,transparent 70%);pointer-events:none;animation:pulse-glow 2s ease-in-out infinite}
-@keyframes pulse-glow{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}}
+/* ARTEFAK CARD IN FEED - Photo Memory from other users */
+.artefak-card{background:var(--surface);border:1px solid var(--border);animation:fadeIn .4s ease;position:relative;overflow:hidden}
+.artefak-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--a),var(--as))}
+.artefak-header{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--se)}
+.artefak-icon{font-size:16px}
+.artefak-label{font-size:10px;color:var(--ts);text-transform:uppercase;letter-spacing:.15em;font-weight:600}
+.artefak-image{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--se)}
+.artefak-meta{padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.artefak-owner{font-size:11px;color:var(--tm);text-transform:uppercase;letter-spacing:.05em}
+.artefak-date{font-size:10px;color:var(--tm)}
+.artefak-glow{position:absolute;inset:0;background:radial-gradient(circle at center,rgba(255,77,0,.1) 0%,transparent 70%);pointer-events:none;animation:pulse-glow 3s ease-in-out infinite}
+@keyframes pulse-glow{0%,100%{opacity:.3}50%{opacity:.6}}
 </style>
 </head>
 <body>
@@ -278,7 +280,7 @@ const st = {
   userId: null, userEmail: null, filter: 'all',
   vibeMatch: 87, loading: true, peakingId: null,
   vibeMatches: { chaotic: { shown: true, user: null }, caregiver: { shown: true, user: null } },
-  currentBrewArtefact: null
+  otherUsersArtefaks: [] // Store random artefaks from other users
 };
 
 const unlocked = new Set();
@@ -292,21 +294,6 @@ const REACTIONS = [
   { id:'fire',      emoji:'🔥', label:'Fire'      }
 ];
 
-const RANDOM_ARTEFACTS = [
-  { emoji: '📷', name: 'Kamera Analog', desc: 'Menangkap momen yang tak terucap' },
-  { emoji: '🎧', name: 'Headphone Tua', desc: 'Menyimpan playlist 3AM' },
-  { emoji: '☕', name: 'Gelas Retak', desc: 'Saksi bisu setiap curhat' },
-  { emoji: '📚', name: 'Buku Basah', desc: 'Dibaca saat hujan dan galau' },
-  { emoji: '🌙', name: 'Bulan Purnama', desc: 'Peneman insomnia' },
-  { emoji: '🎸', name: 'Gitar Senar Putus', desc: 'Pernah dipakai untuk lagu tak selesai' },
-  { emoji: '🕯️', name: 'Lilin Aromaterapi', desc: 'Aroma lavender dan penyesalan' },
-  { emoji: '📝', name: 'Post-it Kuning', desc: 'Catatan to-do yang tak pernah selesai' },
-  { emoji: '🧸', name: 'Boneka Beruang', desc: 'Dari masa yang lebih sederhana' },
-  { emoji: '🌿', name: 'Tanaman Layu', desc: 'Lupa disiram, tapi bertahan' },
-  { emoji: '🔮', name: 'Bola Kristal', desc: 'Melihat masa depan yang kabur' },
-  { emoji: '📻', name: 'Radio AM', desc: 'Stasiun yang tak pernah jelas' }
-];
-
 const DUMMY_SPILLS = [
   { id:'d1', rant_id:'d1', content:'Ada yang pernah ngerasa kalo lagi banyak kerjaan malah makin males ngerjain? Padahal deadline mepet. Help', mood:'chaotic', author:'@anonymouse', user_id:'u1', timestamp:Date.now()-3600000, reactions:{relatable:5,hug:2,same:3,mood:4,tea:1,fire:0} },
   { id:'d2', rant_id:'d2', content:'Hari ini gue bangun pagi, olahraga, sarapan sehat, dan ngerjain side project. Semoga konsisten', mood:'thriving', author:'@earlybird', user_id:'u2', timestamp:Date.now()-7200000, reactions:{relatable:2,hug:1,same:0,mood:1,tea:3,fire:5} },
@@ -318,6 +305,16 @@ const DUMMY_SPILLS = [
   { id:'d8', rant_id:'d8', content:'Hari ini nothing special, tapi bersyukur masih bisa napas.', mood:'surviving', author:'@grateful', user_id:'u8', timestamp:Date.now()-28800000, reactions:{relatable:5,hug:4,same:3,mood:2,tea:5,fire:1} },
   { id:'d9', rant_id:'d9', content:'Pengen delete semua sosmed dan hidup di gunung.', mood:'doom', author:'@mountaindreamer', user_id:'u9', timestamp:Date.now()-32400000, reactions:{relatable:9,hug:6,same:7,mood:8,tea:2,fire:3} },
   { id:'d10', rant_id:'d10', content:'Baru sadar kalo self-care itu penting banget. Jangan lupa istirahat!', mood:'thriving', author:'@selfcarequeen', user_id:'u10', timestamp:Date.now()-36000000, reactions:{relatable:4,hug:3,same:2,mood:1,tea:6,fire:4} }
+];
+
+// Dummy artefaks from other users (simulating Supabase 'artefaks' table)
+const DUMMY_ARTEFAKS = [
+  { id:'a1', user_id:'u5', image_url:'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=300&fit=crop', owner:'@relieved', created_at:'2026-02-18T10:30:00Z' },
+  { id:'a2', user_id:'u3', image_url:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=300&fit=crop', owner:'@tiredsoul', created_at:'2026-02-17T14:20:00Z' },
+  { id:'a3', user_id:'u7', image_url:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop', owner:'@overthinker', created_at:'2026-02-16T22:15:00Z' },
+  { id:'a4', user_id:'u2', image_url:'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&h=300&fit=crop', owner:'@earlybird', created_at:'2026-02-15T06:45:00Z' },
+  { id:'a5', user_id:'u9', image_url:'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?w=400&h=300&fit=crop', owner:'@mountaindreamer', created_at:'2026-02-14T18:30:00Z' },
+  { id:'a6', user_id:'u4', image_url:'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&h=300&fit=crop', owner:'@confusedone', created_at:'2026-02-13T12:00:00Z' }
 ];
 
 const DUMMY_ARTS = [
@@ -336,17 +333,23 @@ function updateVibePercentage(val){
   if(el) el.textContent = val + '%';
 }
 
-function getRandomArtefact(){
-  return RANDOM_ARTEFACTS[Math.floor(Math.random() * RANDOM_ARTEFACTS.length)];
+function formatDate(dateStr){
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' });
 }
 
-function createArtefactCard(artefact){
-  return `<div class="artefact-card">
-    <div class="artefact-glow"></div>
-    <div class="artefact-label">✨ Artefak Ditemukan</div>
-    <span class="artefact-emoji">${artefact.emoji}</span>
-    <div class="artefact-name">${artefact.name}</div>
-    <div class="artefact-desc">${artefact.desc}</div>
+function createArtefakCard(artefak){
+  return `<div class="artefak-card">
+    <div class="artefak-glow"></div>
+    <div class="artefak-header">
+      <span class="artefak-icon">📸</span>
+      <span class="artefak-label">Memori dari Jejak Lain</span>
+    </div>
+    <img src="${artefak.image_url}" class="artefak-image" alt="Artefak" onerror="this.src='https://via.placeholder.com/400x300/1E1E1E/888?text=Memori'">
+    <div class="artefak-meta">
+      <span class="artefak-owner">${esc(artefak.owner || '@anonymous')}</span>
+      <span class="artefak-date">${formatDate(artefak.created_at)}</span>
+    </div>
   </div>`;
 }
 
@@ -366,9 +369,48 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSpills();
   });
 
-  loadSpills();
+  loadOtherUsersArtefaks().then(() => {
+    loadSpills();
+  });
   analyzeVibeMatches();
 });
+
+// ---- LOAD RANDOM ARTEFAKS FROM OTHER USERS ----
+async function loadOtherUsersArtefaks(){
+  if(st.online && st.sb){
+    try {
+      // Get current user
+      const { data: { user } } = await st.sb.auth.getUser();
+      st.userId = user?.id || null;
+      
+      // Fetch artefaks from OTHER users (exclude current user)
+      const { data, error } = await st.sb.from('artefaks')
+        .select('*')
+        .neq('user_id', st.userId || 'no-user')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      
+      if(error) throw error;
+      
+      if(data && data.length > 0){
+        st.otherUsersArtefaks = data;
+      } else {
+        // Use dummy data excluding current user's potential ID
+        st.otherUsersArtefaks = DUMMY_ARTEFAKS.filter(a => a.user_id !== st.userId);
+      }
+    } catch(e){
+      console.error('Error loading artefaks:', e);
+      st.otherUsersArtefaks = DUMMY_ARTEFAKS;
+    }
+  } else {
+    st.otherUsersArtefaks = DUMMY_ARTEFAKS;
+  }
+}
+
+function getRandomArtefak(){
+  if(!st.otherUsersArtefaks || st.otherUsersArtefaks.length === 0) return null;
+  return st.otherUsersArtefaks[Math.floor(Math.random() * st.otherUsersArtefaks.length)];
+}
 
 // ---- VIBE MATCH ----
 async function analyzeVibeMatches(){
@@ -491,25 +533,20 @@ function renderSpills(){
   
   // Process spills in batches of 10 (one tea brew)
   const BREW_SIZE = 10;
-  const INSERT_EVERY = 9; // Insert artefact every 9 rants
+  const INSERT_EVERY = 9; // Insert artefak every 9 rants
   let html = [];
   let rantCount = 0;
-  let currentBrewArtefact = null;
   
   for(let i = 0; i < list.length; i++){
     const spill = list[i];
     
-    // Generate new artefact for each brew
-    if(rantCount === 0){
-      currentBrewArtefact = getRandomArtefact();
-    }
-    
-    // Insert artefact at random position within the 9-rant window
-    // Position is 0-8 (before the 9th rant) or we insert after if it's the last
+    // Insert artefak at position 9 (every 9 rants)
     if(rantCount > 0 && rantCount % INSERT_EVERY === 0){
-      html.push(createArtefactCard(currentBrewArtefact));
-      rantCount = 0; // Reset counter after inserting artefact
-      currentBrewArtefact = getRandomArtefact(); // New artefact for next batch
+      const randomArtefak = getRandomArtefak();
+      if(randomArtefak){
+        html.push(createArtefakCard(randomArtefak));
+      }
+      rantCount = 0; // Reset counter after inserting artefak
     }
     
     // Render the spill card
@@ -526,9 +563,12 @@ function renderSpills(){
     rantCount++;
   }
   
-  // If we have remaining rants without an artefact, insert one at the end
-  if(rantCount > 0 && rantCount >= 5 && currentBrewArtefact){
-    html.push(createArtefactCard(currentBrewArtefact));
+  // If we have remaining rants without an artefak and enough rants, insert one at the end
+  if(rantCount >= 5){
+    const randomArtefak = getRandomArtefak();
+    if(randomArtefak){
+      html.push(createArtefakCard(randomArtefak));
+    }
   }
   
   ca.innerHTML = html.join('');
@@ -575,14 +615,14 @@ async function loadPeakingData(userId){
   if(st.online && st.sb){
     try {
       const { data: rants } = await st.sb.from('spills').select('*').eq('user_id',userId).order('created_at',{ascending:false});
-      const { data: arts } = await st.sb.from('artefacts').select('*').eq('user_id',userId).limit(6);
+      const { data: arts } = await st.sb.from('artefaks').select('*').eq('user_id',userId).limit(6);
 
       rc.innerHTML = (rants && rants.length)
         ? rants.map(r=>`<div class="peaking-rant-card"><div class="peaking-rant-date">${new Date(r.created_at).toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div><div class="peaking-rant-content">${esc(r.content)}</div><span class="peaking-rant-mood" style="color:${getMoodColor(r.mood)};border-color:${getMoodColor(r.mood)}">${r.mood}</span></div>`).join('')
         : '<div class="empty-text">No rants yet...</div>';
 
       const show = (arts && arts.length) ? arts : DUMMY_ARTS;
-      ac.innerHTML = show.map((a,i)=>`<div class="artefact-item" title="${a.name||'Artefact '+(i+1)}">${a.emoji||a.icon||'📦'}</div>`).join('');
+      ac.innerHTML = show.map((a,i)=>`<div class="artefact-item" title="${a.name||'Artefak '+(i+1)}">${a.emoji||'<img src="'+(a.image_url||'')+'" onerror="this.style.display=\'none\';this.parentNode.textContent=\'📦\'">'}"></div>`).join('');
       return;
     } catch(e){ console.error(e); }
   }
@@ -594,7 +634,7 @@ function renderDummyPeaking(userId, rc, ac){
   rc.innerHTML = ur.length
     ? ur.map(r=>`<div class="peaking-rant-card"><div class="peaking-rant-date">${new Date(r.timestamp).toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</div><div class="peaking-rant-content">${esc(r.content)}</div><span class="peaking-rant-mood" style="color:${getMoodColor(r.mood)};border-color:${getMoodColor(r.mood)}">${r.mood}</span></div>`).join('')
     : '<div class="empty-text">No rants yet...</div>';
-  ac.innerHTML = DUMMY_ARTS.map((a,i)=>`<div class="artefact-item" title="Artefact ${i+1}">${a.emoji}</div>`).join('');
+  ac.innerHTML = DUMMY_ARTS.map((a,i)=>`<div class="artefact-item" title="Artefak ${i+1}">${a.emoji}</div>`).join('');
 }
 
 function closePeaking(){
