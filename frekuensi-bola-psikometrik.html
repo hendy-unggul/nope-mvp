@@ -37,92 +37,6 @@
       min-height: 100vh;
     }
 
-    /* BRUTALIST HEADER */
-    .brutal-header {
-      border-bottom: 2px solid var(--border-strong);
-      background: var(--surface);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .header-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .logo-block {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      text-decoration: none;
-    }
-
-    .logo-mark {
-      width: 40px;
-      height: 40px;
-      background: var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 20px;
-      color: #000;
-      border: 2px solid #000;
-      box-shadow: 4px 4px 0 #000;
-      transition: all 0.2s;
-    }
-
-    .logo-block:hover .logo-mark {
-      transform: translate(-2px, -2px);
-      box-shadow: 6px 6px 0 #000;
-    }
-
-    .logo-text {
-      font-family: var(--display);
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: -1px;
-      color: var(--text);
-    }
-
-    .nav-brutal {
-      display: flex;
-      gap: 4px;
-      background: var(--surface-2);
-      padding: 4px;
-      border: 2px solid var(--border-strong);
-    }
-
-    .nav-item {
-      padding: 8px 16px;
-      text-decoration: none;
-      color: var(--text-secondary);
-      font-size: 13px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      transition: all 0.2s;
-      border: 1px solid transparent;
-    }
-
-    .nav-item:hover {
-      color: var(--text);
-      background: var(--surface);
-    }
-
-    .nav-item.active {
-      color: #000;
-      background: var(--accent);
-      border-color: #000;
-      font-weight: 600;
-    }
-
     /* MAIN CONTAINER */
     .container {
       max-width: 800px;
@@ -324,7 +238,6 @@
 
     @media (max-width: 600px) {
       .form-grid { grid-template-columns: 1fr; }
-      .nav-brutal { display: none; }
     }
 
     .form-group {
@@ -793,22 +706,6 @@
   </style>
 </head>
 <body>
-  <header class="brutal-header">
-    <div class="header-inner">
-      <a href="index.html" class="logo-block">
-        <div class="logo-mark">N</div>
-        <div class="logo-text">NOPE</div>
-      </a>
-      
-      <nav class="nav-brutal">
-        <a href="jejak.html" class="nav-item">Jurnal</a>
-        <a href="frekuensi-bola-komunitas.html" class="nav-item active">Frekuensi</a>
-        <a href="saynope.html" class="nav-item">SayNOPE</a>
-        <a href="glitch.html" class="nav-item">GLITCH</a>
-      </nav>
-    </div>
-  </header>
-
   <div class="container">
     <a href="frekuensi-bola-komunitas.html" class="back-link">← Kembali ke Komunitas</a>
     
@@ -951,20 +848,20 @@
 
   <script>
     // ==================== DATA KLUB ====================
-    const klubData = {
+    var klubData = {
       'U15': ['Persija Jakarta U15', 'Villa U15', 'Bintang Timur U15', 'Arsenal Academy U15'],
       'U17': ['Persija Jakarta U17', 'Villa U17', 'Bintang Timur U17', 'Chelsea Academy U17']
     };
 
     function updateKlub() {
-      const liga = document.getElementById('liga').value;
-      const klubSelect = document.getElementById('klub');
+      var liga = document.getElementById('liga').value;
+      var klubSelect = document.getElementById('klub');
       
       klubSelect.innerHTML = '<option value="">Pilih Klub...</option>';
       
       if (liga && klubData[liga]) {
-        klubData[liga].forEach(klub => {
-          const opt = document.createElement('option');
+        klubData[liga].forEach(function(klub) {
+          var opt = document.createElement('option');
           opt.value = klub.toLowerCase().replace(/\s+/g, '-');
           opt.textContent = klub;
           klubSelect.appendChild(opt);
@@ -976,7 +873,7 @@
     }
 
     // ==================== IPIP-50 QUESTIONS ====================
-    const questions = [
+    var questions = [
       // OPENNESS (O)
       { id: 1, dim: 'O', text: "Saya memiliki imajinasi yang aktif", reverse: false },
       { id: 2, dim: 'O', text: "Saya tertarik pada ide-ide abstrak dan teori", reverse: false },
@@ -1038,7 +935,7 @@
       { id: 50, dim: 'N', text: "Saya tenang dan stabil dalam situasi sulit", reverse: true }
     ];
 
-    const dimensions = {
+    var dimensions = {
       'O': { name: 'Openness', full: 'Openness to Experience', icon: '🎨', desc: 'Kreativitas, imajinasi, apresiasi seni' },
       'C': { name: 'Conscientiousness', full: 'Conscientiousness', icon: '📋', desc: 'Kedisiplinan, organisasi, ketekunan' },
       'E': { name: 'Extraversion', full: 'Extraversion', icon: '⚡', desc: 'Energi sosial, antusiasme, assertiveness' },
@@ -1046,18 +943,18 @@
       'N': { name: 'Emotional Stability', full: 'Emotional Stability', icon: '🧘', desc: 'Kestabilan emosi, ketenangan (reverse Neuroticism)' }
     };
 
-    let currentQ = 0;
-    let answers = {};
-    let timerInterval;
+    var currentQ = 0;
+    var answers = {};
+    var timerInterval;
 
     // ==================== TEST FUNCTIONS ====================
     function startTest() {
-      const fields = ['liga', 'klub', 'posisi', 'tinggi'];
-      const labels = { liga: 'Liga', klub: 'Klub', posisi: 'Posisi', tinggi: 'Tinggi badan' };
+      var fields = ['liga', 'klub', 'posisi', 'tinggi'];
+      var labels = { liga: 'Liga', klub: 'Klub', posisi: 'Posisi', tinggi: 'Tinggi badan' };
       
-      for (let f of fields) {
-        if (!document.getElementById(f).value) {
-          alert(`Mohon isi ${labels[f]} terlebih dahulu`);
+      for (var i = 0; i < fields.length; i++) {
+        if (!document.getElementById(fields[i]).value) {
+          alert('Mohon isi ' + labels[fields[i]] + ' terlebih dahulu');
           return;
         }
       }
@@ -1072,17 +969,17 @@
     }
 
     function startTimer(minutes) {
-      let secs = minutes * 60;
-      timerInterval = setInterval(() => {
+      var secs = minutes * 60;
+      timerInterval = setInterval(function() {
         secs--;
         if (secs <= 0) {
           clearInterval(timerInterval);
           finishTest();
           return;
         }
-        const m = Math.floor(secs / 60).toString().padStart(2, '0');
-        const s = (secs % 60).toString().padStart(2, '0');
-        document.getElementById('timer').textContent = `${m}:${s}`;
+        var m = Math.floor(secs / 60).toString().padStart(2, '0');
+        var s = (secs % 60).toString().padStart(2, '0');
+        document.getElementById('timer').textContent = m + ':' + s;
         
         if (secs < 60) {
           document.getElementById('timer').style.color = 'var(--accent)';
@@ -1092,17 +989,17 @@
     }
 
     function renderQuestion() {
-      const q = questions[currentQ];
-      const dim = dimensions[q.dim];
+      var q = questions[currentQ];
+      var dim = dimensions[q.dim];
       
-      document.getElementById('dim-label').textContent = `Dimensi: ${dim.name}`;
+      document.getElementById('dim-label').textContent = 'Dimensi: ' + dim.name;
       document.getElementById('dim-name').textContent = dim.full;
       document.getElementById('dim-desc').textContent = dim.desc;
       document.getElementById('q-current').textContent = currentQ + 1;
       document.getElementById('q-total').textContent = questions.length;
       document.getElementById('q-text').textContent = q.text;
       
-      const scale = [
+      var scale = [
         { val: 1, label: 'Sangat Tidak Setuju' },
         { val: 2, label: 'Tidak Setuju' },
         { val: 3, label: 'Netral' },
@@ -1110,24 +1007,26 @@
         { val: 5, label: 'Sangat Setuju' }
       ];
       
-      document.getElementById('q-options').innerHTML = scale.map(s => `
-        <div class="likert-option ${answers[q.id] === s.val ? 'selected' : ''}" 
-             onclick="selectAnswer(${s.val})">
-          <div class="likert-num">${s.val}</div>
-          <div class="likert-label">${s.label}</div>
-        </div>
-      `).join('');
+      var html = '';
+      for (var i = 0; i < scale.length; i++) {
+        var s = scale[i];
+        var selectedClass = answers[q.id] === s.val ? 'selected' : '';
+        html += '<div class="likert-option ' + selectedClass + '" onclick="selectAnswer(' + s.val + ')">' +
+          '<div class="likert-num">' + s.val + '</div>' +
+          '<div class="likert-label">' + s.label + '</div>' +
+        '</div>';
+      }
+      document.getElementById('q-options').innerHTML = html;
       
       document.getElementById('btn-prev').disabled = currentQ === 0;
-      document.getElementById('btn-next').textContent = 
-        currentQ === questions.length - 1 ? 'Selesai ✓' : 'Selanjutnya →';
+      document.getElementById('btn-next').textContent = currentQ === questions.length - 1 ? 'Selesai ✓' : 'Selanjutnya →';
     }
 
     function selectAnswer(val) {
       answers[questions[currentQ].id] = val;
       renderQuestion();
       
-      setTimeout(() => {
+      setTimeout(function() {
         if (currentQ < questions.length - 1) nextQuestion();
       }, 250);
     }
@@ -1156,10 +1055,9 @@
     }
 
     function updateProgress() {
-      const pct = ((currentQ + 1) / questions.length) * 100;
-      document.getElementById('progress-fill').style.width = `${pct}%`;
-      document.getElementById('progress-text').textContent = 
-        `${currentQ + 1}/${questions.length} SELESAI`;
+      var pct = ((currentQ + 1) / questions.length) * 100;
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('progress-text').textContent = (currentQ + 1) + '/' + questions.length + ' SELESAI';
     }
 
     function finishTest() {
@@ -1168,21 +1066,22 @@
       document.getElementById('progress-container').classList.remove('active');
       document.getElementById('result-section').classList.add('active');
       
-      const scores = calculateScores();
+      var scores = calculateScores();
       renderResults(scores);
     }
 
     function calculateScores() {
-      const scores = { O: 0, C: 0, E: 0, A: 0, N: 0 };
+      var scores = { O: 0, C: 0, E: 0, A: 0, N: 0 };
       
-      questions.forEach(q => {
-        let val = answers[q.id];
+      for (var i = 0; i < questions.length; i++) {
+        var q = questions[i];
+        var val = answers[q.id];
         if (q.reverse) val = 6 - val;
         scores[q.dim] += val;
-      });
+      }
       
-      const percentages = {};
-      for (let d in scores) {
+      var percentages = {};
+      for (var d in scores) {
         percentages[d] = Math.round(((scores[d] - 10) / 40) * 100);
       }
       
@@ -1190,29 +1089,33 @@
     }
 
     function renderResults(scores) {
-      document.getElementById('result-bigfive').innerHTML = Object.entries(scores).map(([dim, score]) => {
-        const info = dimensions[dim];
-        const isHigh = score >= 60;
-        return `
-          <div class="dimension-card ${isHigh ? 'high' : ''}">
-            <span class="dim-icon">${info.icon}</span>
-            <div class="dim-name">${info.name}</div>
-            <div class="dim-value">${score}%</div>
-            <div class="dim-bar">
-              <div class="dim-fill" style="width: ${score}%"></div>
-            </div>
-          </div>
-        `;
-      }).join('');
+      var html = '';
+      for (var dim in scores) {
+        var score = scores[dim];
+        var info = dimensions[dim];
+        var isHigh = score >= 60;
+        var highClass = isHigh ? 'high' : '';
+        html += '<div class="dimension-card ' + highClass + '">' +
+          '<span class="dim-icon">' + info.icon + '</span>' +
+          '<div class="dim-name">' + info.name + '</div>' +
+          '<div class="dim-value">' + score + '%</div>' +
+          '<div class="dim-bar">' +
+            '<div class="dim-fill" style="width: ' + score + '%"></div>' +
+          '</div>' +
+        '</div>';
+      }
+      document.getElementById('result-bigfive').innerHTML = html;
       
-      const strengths = calculateStrengths(scores);
-      document.getElementById('result-strengths').innerHTML = strengths.map(s => 
-        `<span class="strength-tag">${s}</span>`
-      ).join('');
+      var strengths = calculateStrengths(scores);
+      var strengthsHtml = '';
+      for (var i = 0; i < strengths.length; i++) {
+        strengthsHtml += '<span class="strength-tag">' + strengths[i] + '</span>';
+      }
+      document.getElementById('result-strengths').innerHTML = strengthsHtml;
     }
 
     function calculateStrengths(scores) {
-      const s = [];
+      var s = [];
       if (scores.O >= 70) s.push('🎨 Kreatif & Inovatif');
       if (scores.C >= 70) s.push('💪 Disiplin & Konsisten');
       if (scores.E >= 70) s.push('⚡ Energik & Dominan');
