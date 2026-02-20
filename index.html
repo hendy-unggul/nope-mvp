@@ -74,7 +74,6 @@
     }
 
     .container { max-width: 480px; width: 100%; position: relative; z-index: 1; }
-
     .logo-zone { text-align: center; margin-bottom: 16px; position: relative; }
 
     .logo-big {
@@ -109,8 +108,6 @@
       border-radius: 20px; display: inline-block; width: 100%;
       transform: rotate(-1deg);
     }
-    .tagline::before { content: '⚡'; position: absolute; left: 10px; font-size: 16px; }
-    .tagline::after { content: '⚡'; position: absolute; right: 10px; font-size: 16px; }
 
     .vibe-picker { display: flex; gap: 10px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap; }
 
@@ -140,36 +137,60 @@
 
     .input-label {
       text-align: center; font-family: var(--font-display); font-size: 24px;
-      color: var(--text); margin-bottom: 16px; text-transform: lowercase;
-      letter-spacing: 1px;
+      color: var(--text); margin-bottom: 4px; text-transform: lowercase; letter-spacing: 1px;
     }
     .input-label::after { content: '⭐'; margin-left: 8px; font-size: 16px; animation: pulse 2s ease-in-out infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } }
+
+    /* FORMAT HINT — jelas sejak awal */
+    .format-hint {
+      text-align: center; font-family: var(--font-mono); font-size: 11px;
+      color: var(--muted); margin-bottom: 16px; letter-spacing: 0.05em;
+    }
+    .format-hint b { color: var(--accent); }
 
     .form-group { margin-bottom: 20px; position: relative; }
 
     .form-group input {
       width: 100%; background: rgba(255,255,255,0.05); border: 3px solid var(--border);
-      border-radius: 16px; padding: 20px; color: var(--text); font-family: var(--font-main);
+      border-radius: 16px; padding: 20px; color: var(--text);
+      font-family: var(--font-mono); /* mono supaya titik kelihatan jelas */
       font-size: 18px; font-weight: 500; text-align: center; text-transform: lowercase;
-      transition: all 0.3s cubic-bezier(0.68,-0.55,0.27,1.55);
+      transition: all 0.3s cubic-bezier(0.68,-0.55,0.27,1.55); letter-spacing: 0.08em;
     }
     .form-group input:focus {
       outline: none; border-color: var(--accent); background: rgba(0,255,136,0.1);
       transform: translateY(-4px) rotate(1deg);
       box-shadow: 0 0 0 4px rgba(0,255,136,0.2), 6px 6px 0px rgba(0,255,136,0.3);
     }
-    .form-group input::placeholder { color: var(--muted); font-weight: 400; }
+    .form-group input::placeholder { color: var(--muted); font-weight: 400; letter-spacing: 0.05em; }
+    .form-group input.is-valid   { border-color: var(--accent); }
+    .form-group input.is-invalid { border-color: var(--accent-2); }
+    .form-group input.is-checking{ border-color: var(--accent-3); }
 
-    .error-msg, .success-msg {
-      margin-top: 12px; padding: 12px 16px; border-radius: 12px;
-      font-size: 13px; font-family: var(--font-mono); text-align: center;
-      display: none; border: 2px solid;
+    /* SINGLE FEEDBACK ELEMENT — gantikan error-msg + success-msg */
+    .field-feedback {
+      margin-top: 10px; padding: 10px 16px; border-radius: 12px;
+      font-size: 12px; font-family: var(--font-mono); text-align: center;
+      border: 2px solid; display: none; line-height: 1.5;
+      animation: slideIn 0.4s cubic-bezier(0.68,-0.55,0.27,1.55);
     }
-    .error-msg { background: rgba(255,51,102,0.1); border-color: var(--accent-2); color: var(--accent-2); }
-    .success-msg { background: rgba(0,255,136,0.1); border-color: var(--accent); color: var(--accent); }
-    .error-msg.show, .success-msg.show { display: block; animation: slideIn 0.5s cubic-bezier(0.68,-0.55,0.27,1.55); }
-    @keyframes slideIn { from { opacity: 0; transform: translateY(-20px) rotate(-5deg); } to { opacity: 1; transform: translateY(0) rotate(0deg); } }
+    .field-feedback.show { display: block; }
+    .field-feedback.error    { background: rgba(255,51,102,0.1);  border-color: var(--accent-2); color: var(--accent-2); }
+    .field-feedback.success  { background: rgba(0,255,136,0.1);   border-color: var(--accent);   color: var(--accent);   }
+    .field-feedback.checking { background: rgba(255,255,0,0.08);  border-color: var(--accent-3); color: var(--accent-3); }
+    @keyframes slideIn { from { opacity:0; transform: translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+
+    /* SUGGESTION CHIP — klik untuk apply */
+    .suggestion-chip {
+      display: none; margin-top: 8px; padding: 6px 16px;
+      background: rgba(0,212,255,0.1); border: 1px solid var(--accent-4);
+      border-radius: 20px; font-family: var(--font-mono); font-size: 12px;
+      color: var(--accent-4); cursor: pointer; transition: all 0.2s;
+      text-align: center;
+    }
+    .suggestion-chip.show { display: block; }
+    .suggestion-chip:hover { background: rgba(0,212,255,0.2); }
 
     .btn {
       width: 100%; background: var(--accent); color: #000; border: none;
@@ -184,7 +205,7 @@
     @keyframes rocket { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-5px) rotate(15deg); } }
     .btn:hover { transform: translateY(-6px) rotate(1deg) scale(1.02); }
     .btn:active { transform: translateY(-2px) rotate(0deg); }
-    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 
     .notif-box {
       margin-top: 24px; padding: 20px;
@@ -202,17 +223,13 @@
     .soul-footer { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); text-align: center; }
     .soul-brand { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-bottom: 8px; opacity: 0.6; }
 
-    /* Loading overlay */
     .loading-overlay {
       position: fixed; inset: 0; background: var(--bg); z-index: 9999;
       display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
     }
     .loading-overlay.hidden { display: none; }
     .loading-text { font-family: var(--font-mono); font-size: 14px; color: var(--muted); }
-    .loading-spinner {
-      width: 32px; height: 32px; border: 3px solid var(--border);
-      border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite;
-    }
+    .loading-spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
 
     @media (max-width: 480px) {
       .logo-big { font-size: 64px; }
@@ -222,7 +239,6 @@
   </style>
 </head>
 <body>
-  <!-- Loading overlay for auto-login check -->
   <div class="loading-overlay" id="loading-overlay">
     <div class="loading-spinner"></div>
     <div class="loading-text">checking session...</div>
@@ -258,22 +274,28 @@
 
       <form id="login-form">
         <div class="input-label">ur username vibes</div>
-        
+
+        <!-- Format hint yang jelas -->
+        <div class="format-hint">format: <b>kata.kata</b> &nbsp;·&nbsp; contoh: <b>over.thinker</b></div>
+
         <div class="form-group">
-          <input 
-            type="text" 
-            id="username" 
-            placeholder="ex: vibe checker" 
-            autocomplete="off" 
-            autofocus 
-            maxlength="40"
+          <input
+            type="text"
+            id="username"
+            placeholder="over.thinker"
+            autocomplete="off"
+            autofocus
+            maxlength="30"
+            spellcheck="false"
           >
-          <div class="error-msg" id="error-msg"></div>
-          <div class="success-msg" id="success-msg"></div>
+          <!-- Single feedback element -->
+          <div class="field-feedback" id="field-feedback"></div>
+          <!-- Suggestion chip: klik untuk apply -->
+          <div class="suggestion-chip" id="suggestion-chip"></div>
         </div>
-        
-        <button type="submit" class="btn" id="login-btn">let's goooo</button>
-        
+
+        <button type="submit" class="btn" id="login-btn" disabled>let's goooo</button>
+
         <div class="notif-box" id="notif-box">
           <h4>real talk: stay safe bestie 🔒</h4>
           <p>no <span class="highlight">real names</span> fr fr</p>
@@ -290,344 +312,385 @@
   </div>
 
   <script>
-    // ============================================
-    // SUPABASE CONFIG — UPDATE DENGAN CREDENTIALS KAMU
-    // ============================================
-    const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+  // ================================================================
+  // CONFIG
+  // ================================================================
+  const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-    // ============================================
-    // SESSION KEYS — Konsisten dengan jejak.html
-    // ============================================
-    const SESSION_KEYS = {
-      username: 'jejak_username',
-      deviceId: 'jejak_device_id',
-      userId: 'jejak_user_id',       // UUID dari tabel users
-      vibe: 'jejak_vibe',
-      loggedIn: 'jejak_logged_in'    // Flag session valid
-    };
+  // FIX: nama tabel yang benar adalah 'users', bukan 'jejak_users'
+  const TABLE = 'users';
 
-    // ============================================
-    // VIBE MANAGEMENT
-    // ============================================
-    const vibes = {
-      cyber:  { accent: '#00ff88', accent2: '#ff3366', accent3: '#ffff00', accent4: '#00d4ff' },
-      neon:   { accent: '#ff10f0', accent2: '#00ff88', accent3: '#ffff00', accent4: '#00d4ff' },
-      retro:  { accent: '#ff6b35', accent2: '#f7b801', accent3: '#6a994e', accent4: '#bc4749' },
-      pastel: { accent: '#ffc8dd', accent2: '#bde0fe', accent3: '#a2d2ff', accent4: '#ffafcc' }
-    };
+  const SK = {
+    username: 'jejak_username',
+    deviceId: 'jejak_device_id',
+    loggedIn: 'jejak_logged_in',
+    vibe:     'jejak_vibe',
+  };
 
-    function setVibe(vibe) {
-      const colors = vibes[vibe];
-      if (!colors) return;
-      document.documentElement.style.setProperty('--accent', colors.accent);
-      document.documentElement.style.setProperty('--accent-2', colors.accent2);
-      document.documentElement.style.setProperty('--accent-3', colors.accent3);
-      document.documentElement.style.setProperty('--accent-4', colors.accent4);
-      document.querySelectorAll('.vibe-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.textContent.includes(vibe));
-      });
-      localStorage.setItem(SESSION_KEYS.vibe, vibe);
+  // ================================================================
+  // USERNAME VALIDATION
+  // Format wajib: kata.kata
+  //   ✓ over.thinker  ✓ tired.soul  ✓ aku.anonim  ✓ self.care99
+  //   ✗ "aku anonim"  ✗ akunonim    ✗ .aku        ✗ aku.        ✗ 1.abc
+  // ================================================================
+  const UN_PATTERN = /^[a-z][a-z0-9]*\.[a-z][a-z0-9]*$/;
+
+  function validateUsername(raw) {
+    if (!raw || !raw.trim()) {
+      return { ok: false, msg: 'username tidak boleh kosong', suggestion: null };
+    }
+    const val = raw.trim().toLowerCase();
+
+    if (val.length > 30) {
+      return { ok: false, msg: 'maksimal 30 karakter', suggestion: null };
     }
 
-    // ============================================
-    // SUPABASE REST API
-    // ============================================
-    async function supabaseFetch(table, method = 'GET', body = null, filter = '') {
-      const headers = {
+    // Jika user ketik pakai spasi → sarankan konversi ke titik
+    if (val.includes(' ')) {
+      const sug = val.trim().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '');
+      return { ok: false, msg: 'gunakan titik bukan spasi — format: kata.kata', suggestion: sug };
+    }
+
+    if (!val.includes('.')) {
+      return { ok: false, msg: 'harus dua kata dipisah titik · contoh: over.thinker', suggestion: null };
+    }
+    if ((val.match(/\./g) || []).length > 1) {
+      return { ok: false, msg: 'hanya boleh satu titik pemisah', suggestion: null };
+    }
+    if (!UN_PATTERN.test(val)) {
+      if (/^\d/.test(val) || /\.\d/.test(val)) {
+        return { ok: false, msg: 'tidak boleh diawali angka', suggestion: null };
+      }
+      return { ok: false, msg: 'hanya huruf kecil a-z, angka, dan satu titik', suggestion: null };
+    }
+    const [p1, p2] = val.split('.');
+    if (p1.length < 2 || p2.length < 2) {
+      return { ok: false, msg: 'masing-masing kata minimal 2 huruf', suggestion: null };
+    }
+
+    return { ok: true, msg: null, suggestion: null, value: val };
+  }
+
+  // ================================================================
+  // SUPABASE REST
+  // ================================================================
+  async function sbFetch(table, method = 'GET', body = null, qs = '') {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${qs}`, {
+      method,
+      headers: {
         'apikey': SUPABASE_KEY,
         'Authorization': `Bearer ${SUPABASE_KEY}`,
         'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      };
-      const url = `${SUPABASE_URL}/rest/v1/${table}${filter}`;
-      const options = { method, headers };
-      if (body) options.body = JSON.stringify(body);
-      const res = await fetch(url, options);
-      const text = await res.text();
-      if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
-      return text ? JSON.parse(text) : [];
-    }
+        'Prefer': method === 'POST' ? 'return=representation' : ''
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const text = await res.text();
+    if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+    return text ? JSON.parse(text) : [];
+  }
 
-    // ============================================
-    // DEVICE FINGERPRINT
-    // ============================================
-    async function generateDeviceFingerprint() {
-      const components = [
-        navigator.userAgent, navigator.language, screen.width,
-        screen.height, screen.colorDepth,
-        new Date().getTimezoneOffset(), navigator.platform
-      ];
-      const fingerprint = components.join('|');
-      const data = new TextEncoder().encode(fingerprint);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+  // ================================================================
+  // DEVICE ID
+  // ================================================================
+  async function getDeviceId() {
+    let id = localStorage.getItem(SK.deviceId);
+    if (!id) {
+      const raw = [navigator.userAgent, navigator.language, screen.width,
+        screen.height, new Date().getTimezoneOffset()].join('|');
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+      id = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      localStorage.setItem(SK.deviceId, id);
     }
+    return id;
+  }
 
-    async function getDeviceId() {
-      let deviceId = localStorage.getItem(SESSION_KEYS.deviceId);
-      if (!deviceId) {
-        deviceId = await generateDeviceFingerprint();
-        localStorage.setItem(SESSION_KEYS.deviceId, deviceId);
+  // ================================================================
+  // SESSION
+  // ================================================================
+  function setSession(username) {
+    localStorage.setItem(SK.username, username);
+    localStorage.setItem(SK.loggedIn, 'true');
+  }
+  function clearSession() {
+    localStorage.removeItem(SK.username);
+    localStorage.removeItem(SK.loggedIn);
+  }
+  function getSession() {
+    return {
+      username: localStorage.getItem(SK.username),
+      loggedIn: localStorage.getItem(SK.loggedIn) === 'true'
+    };
+  }
+
+  // ================================================================
+  // UI HELPERS
+  // ================================================================
+  const $input    = () => document.getElementById('username');
+  const $feedback = () => document.getElementById('field-feedback');
+  const $suggest  = () => document.getElementById('suggestion-chip');
+  const $btn      = () => document.getElementById('login-btn');
+
+  function setFeedback(type, msg) {
+    // type: 'error' | 'success' | 'checking' | ''
+    const el = $feedback();
+    if (!type || !msg) { el.className = 'field-feedback'; el.textContent = ''; return; }
+    el.className = 'field-feedback show ' + type;
+    el.textContent = msg;
+    // Border warna input
+    $input().className = type === 'success' ? 'is-valid' : type === 'checking' ? 'is-checking' : 'is-invalid';
+  }
+
+  function setSuggestion(text) {
+    const el = $suggest();
+    if (!text) { el.className = 'suggestion-chip'; return; }
+    el.className = 'suggestion-chip show';
+    el.textContent = '👉 maksud kamu: ' + text + '? (klik untuk apply)';
+    el.onclick = () => {
+      $input().value = text;
+      el.className = 'suggestion-chip';
+      $input().dispatchEvent(new Event('input'));
+    };
+  }
+
+  // ================================================================
+  // AVAILABILITY CHECK (debounced 600ms)
+  // Query ke tabel 'users' dengan kolom 'username'
+  // ================================================================
+  let _debounce = null;
+  let _lastChecked = null;
+
+  async function checkAvailability(username) {
+    if (username === _lastChecked) return;
+    _lastChecked = username;
+    $btn().disabled = true;
+    setFeedback('checking', '⏳ mengecek ketersediaan...');
+
+    try {
+      // FIX: tabel 'users', bukan 'jejak_users'
+      const data = await sbFetch(TABLE, 'GET', null,
+        `?username=eq.${encodeURIComponent(username)}&select=username&limit=1`
+      );
+
+      if (data.length === 0) {
+        setFeedback('success', '✓ ' + username + ' tersedia — siap daftar!');
+      } else {
+        setFeedback('success', '✓ ' + username + ' ditemukan — welcome back!');
       }
-      return deviceId;
+      $btn().disabled = false;
+
+    } catch (e) {
+      console.error('Check error:', e.message);
+      // Jika cek gagal, tetap izinkan submit
+      setFeedback('checking', '⚠️ koneksi lambat, coba submit langsung');
+      $btn().disabled = false;
+    }
+  }
+
+  // ================================================================
+  // INPUT LISTENER — format paksa + validasi realtime
+  // ================================================================
+  $input().addEventListener('input', (e) => {
+    let val = e.target.value;
+
+    // FORMAT PAKSA saat mengetik:
+    // 1. Lowercase
+    // 2. Spasi → titik (auto-convert)
+    // 3. Hapus karakter selain a-z, 0-9, titik
+    // 4. Titik ganda → satu titik
+    const formatted = val
+      .toLowerCase()
+      .replace(/\s+/g, '.')
+      .replace(/[^a-z0-9.]/g, '')
+      .replace(/\.{2,}/g, '.');
+
+    if (formatted !== val) {
+      const pos = e.target.selectionStart;
+      e.target.value = formatted;
+      try { e.target.setSelectionRange(pos, pos); } catch(_) {}
     }
 
-    // ============================================
-    // SESSION MANAGEMENT
-    // ============================================
-    function setSession(user) {
-      // users table hanya punya: username, device_id
-      // Gunakan username sebagai userId (tidak ada kolom id)
-      localStorage.setItem(SESSION_KEYS.username, user.username);
-      localStorage.setItem(SESSION_KEYS.userId, user.username); // username IS the ID
-      localStorage.setItem(SESSION_KEYS.loggedIn, 'true');
-      console.log('✅ Session set for:', user.username);
+    val = formatted;
+
+    // Kosong → reset
+    if (!val) {
+      setFeedback('', '');
+      setSuggestion(null);
+      $btn().disabled = true;
+      $input().className = '';
+      _lastChecked = null;
+      return;
     }
 
-    function clearSession() {
-      localStorage.removeItem(SESSION_KEYS.username);
-      localStorage.removeItem(SESSION_KEYS.userId);
-      localStorage.removeItem(SESSION_KEYS.loggedIn);
-      console.log('🔒 Session cleared');
+    // Tampilkan notif box
+    document.getElementById('notif-box').classList.add('show');
+
+    // Validasi format
+    const result = validateUsername(val);
+    if (!result.ok) {
+      setFeedback('error', result.msg);
+      setSuggestion(result.suggestion);
+      $btn().disabled = true;
+      clearTimeout(_debounce);
+      _lastChecked = null;
+      return;
     }
 
-    function getSession() {
-      return {
-        username: localStorage.getItem(SESSION_KEYS.username),
-        userId: localStorage.getItem(SESSION_KEYS.userId),
-        loggedIn: localStorage.getItem(SESSION_KEYS.loggedIn) === 'true'
-      };
-    }
+    // Format valid — cek ketersediaan (debounced)
+    setSuggestion(null);
+    clearTimeout(_debounce);
+    _debounce = setTimeout(() => checkAvailability(result.value), 600);
+  });
 
-    // ============================================
-    // UI HELPERS
-    // ============================================
-    function showError(msg) {
-      const el = document.getElementById('error-msg');
-      el.textContent = msg;
-      el.classList.add('show');
-      document.getElementById('success-msg').classList.remove('show');
-    }
+  // Cegah paste karakter invalid
+  $input().addEventListener('paste', (e) => {
+    e.preventDefault();
+    const pasted = (e.clipboardData || window.clipboardData).getData('text');
+    const clean = pasted.trim().toLowerCase()
+      .replace(/[\s_\-]+/g, '.')
+      .replace(/[^a-z0-9.]/g, '')
+      .replace(/\.{2,}/g, '.')
+      .slice(0, 30);
+    e.target.value = clean;
+    e.target.dispatchEvent(new Event('input'));
+  });
 
-    function showSuccess(msg) {
-      const el = document.getElementById('success-msg');
-      el.textContent = msg;
-      el.classList.add('show');
-      document.getElementById('error-msg').classList.remove('show');
-    }
+  // ================================================================
+  // VIBE
+  // ================================================================
+  const VIBES = {
+    cyber:  { accent:'#00ff88', accent2:'#ff3366', accent3:'#ffff00', accent4:'#00d4ff' },
+    neon:   { accent:'#ff10f0', accent2:'#00ff88', accent3:'#ffff00', accent4:'#00d4ff' },
+    retro:  { accent:'#ff6b35', accent2:'#f7b801', accent3:'#6a994e', accent4:'#bc4749' },
+    pastel: { accent:'#ffc8dd', accent2:'#bde0fe', accent3:'#a2d2ff', accent4:'#ffafcc' }
+  };
+  function setVibe(v) {
+    const c = VIBES[v]; if (!c) return;
+    document.documentElement.style.setProperty('--accent',   c.accent);
+    document.documentElement.style.setProperty('--accent-2', c.accent2);
+    document.documentElement.style.setProperty('--accent-3', c.accent3);
+    document.documentElement.style.setProperty('--accent-4', c.accent4);
+    document.querySelectorAll('.vibe-btn').forEach(b =>
+      b.classList.toggle('active', b.textContent.includes(v))
+    );
+    localStorage.setItem(SK.vibe, v);
+  }
 
-    function hideMessages() {
-      document.getElementById('error-msg').classList.remove('show');
-      document.getElementById('success-msg').classList.remove('show');
-    }
+  // ================================================================
+  // FORM SUBMIT
+  // ================================================================
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-    function showNotif() { document.getElementById('notif-box').classList.add('show'); }
+    const raw    = $input().value;
+    const result = validateUsername(raw);
+    if (!result.ok) { setFeedback('error', result.msg); return; }
 
-    // ============================================
-    // USERNAME VALIDATION
-    // ============================================
-    function normalizeUsername(input) {
-      return input.trim().toLowerCase().replace(/\s+/g, ' ');
-    }
+    const username = result.value;
+    const btn = $btn();
+    btn.disabled = true;
+    btn.textContent = 'checking vibes...';
 
-    function validateUsername(username) {
-      const words = username.split(' ');
-      if (words.length !== 2) return 'need exactly 2 words bestie (use space)';
-      if (words[0].length < 2 || words[1].length < 2) return 'each word needs 2+ letters fr';
-      if (!/^[a-z ]+$/.test(username)) return 'only lowercase letters + space, no numbers/symbols';
-      return null;
-    }
+    try {
+      const deviceId = await getDeviceId();
 
-    // ============================================
-    // AUTO-LOGIN CHECK — Cek session yang ada
-    // ============================================
-    async function checkAutoLogin() {
-      const session = getSession();
-      
-      // Tidak ada session tersimpan
-      if (!session.loggedIn || !session.username || !session.userId) {
-        document.getElementById('loading-overlay').classList.add('hidden');
-        
-        // Pre-fill username kalau ada
-        const savedUsername = localStorage.getItem(SESSION_KEYS.username);
-        if (savedUsername) {
-          document.getElementById('username').value = savedUsername;
-          showNotif();
-        }
-        return;
-      }
+      // FIX: tabel 'users', kolom 'username' dan 'device_id'
+      const existing = await sbFetch(TABLE, 'GET', null,
+        `?username=eq.${encodeURIComponent(username)}&select=username,device_id&limit=1`
+      );
 
-      try {
-        const deviceId = await getDeviceId();
-        
-        // Verify user masih ada di database dan device sama
-        const users = await supabaseFetch('jejak_users', 'GET', null,
-          `?username=eq.${encodeURIComponent(session.username)}&select=username,device_id`
-        );
+      if (existing.length === 0) {
+        // ── REGISTER BARU ────────────────────────────────────────
+        await sbFetch(TABLE, 'POST', { username, device_id: deviceId });
+        setFeedback('success', '🎉 account created! welcome bestie');
 
-        if (users.length > 0 && users[0].device_id === deviceId) {
-          // Session valid — langsung redirect ke jejak.html
-          console.log('✅ Auto-login success:', session.username);
-          window.location.href = 'jejak.html';
+      } else {
+        // ── LOGIN ────────────────────────────────────────────────
+        const user = existing[0];
+
+        if (user.device_id && user.device_id !== deviceId) {
+          setFeedback('error', '⚠️ username ini terdaftar di device lain');
+          btn.disabled = false;
+          btn.textContent = "let's goooo";
           return;
         }
 
-        // Session tidak valid — clear dan tampilkan login form
-        console.log('⚠️ Session invalid, clearing...');
-        clearSession();
-        
-      } catch (e) {
-        console.error('Auto-login check failed:', e);
-        // Kalau gagal, tetap tampilkan login form (jangan block user)
+        // Patch device_id jika belum ada
+        if (!user.device_id) {
+          await sbFetch(TABLE, 'PATCH',
+            { device_id: deviceId },
+            `?username=eq.${encodeURIComponent(username)}`
+          );
+        }
+
+        setFeedback('success', '✅ welcome back, @' + username + '!');
       }
 
-      document.getElementById('loading-overlay').classList.add('hidden');
-      
-      const savedUsername = localStorage.getItem(SESSION_KEYS.username);
-      if (savedUsername) {
-        document.getElementById('username').value = savedUsername;
-        showNotif();
+      setSession(username);
+      setTimeout(() => { window.location.href = 'jejak.html'; }, 700);
+
+    } catch (err) {
+      console.error('Submit error:', err);
+      if (err.message.includes('duplicate key')) {
+        setFeedback('error', 'username sudah dipakai di device lain');
+      } else {
+        setFeedback('error', 'error: ' + err.message);
       }
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "let's goooo";
+    }
+  });
+
+  // ================================================================
+  // AUTO-LOGIN CHECK
+  // ================================================================
+  async function checkAutoLogin() {
+    const session = getSession();
+
+    if (!session.loggedIn || !session.username) {
+      document.getElementById('loading-overlay').classList.add('hidden');
+      const saved = localStorage.getItem(SK.username);
+      if (saved) {
+        $input().value = saved;
+        $input().dispatchEvent(new Event('input'));
+      }
+      return;
     }
 
-    // ============================================
-    // INPUT LISTENER
-    // ============================================
-    document.getElementById('username').addEventListener('input', (e) => {
-      let value = e.target.value.toLowerCase();
-      value = value.replace(/[^a-z\s]/g, '').replace(/\s+/g, ' ');
-      e.target.value = value;
-      if (value.length > 0) showNotif();
-      hideMessages();
-    });
+    try {
+      const deviceId = await getDeviceId();
+      // FIX: tabel 'users'
+      const data = await sbFetch(TABLE, 'GET', null,
+        `?username=eq.${encodeURIComponent(session.username)}&select=username,device_id&limit=1`
+      );
 
-    // ============================================
-    // FORM SUBMIT — Login / Register
-    // ============================================
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const input = document.getElementById('username').value;
-      const btn = document.getElementById('login-btn');
-      
-      hideMessages();
-      
-      if (!input.trim()) {
-        showError('username can\'t be empty bestie 😅');
+      if (data.length > 0 && data[0].device_id === deviceId) {
+        window.location.href = 'jejak.html';
         return;
       }
-      
-      const username = normalizeUsername(input);
-      const validationError = validateUsername(username);
-      
-      if (validationError) {
-        showError(validationError);
-        return;
-      }
-      
-      btn.disabled = true;
-      btn.textContent = 'checking vibes...';
-      
-      try {
-        const deviceId = await getDeviceId();
-        
-        // Cek username sudah ada atau belum
-        const users = await supabaseFetch('jejak_users', 'GET', null,
-          `?username=eq.${encodeURIComponent(username)}&select=username,device_id`
-        );
 
-        let user;
-        
-        if (users.length === 0) {
-          // ===== REGISTER USER BARU =====
-          console.log('📝 Registering new user:', username);
-          
-          // Insert user baru - only username dan device_id
-          try {
-            await supabaseFetch('jejak_users', 'POST', {
-              username: username,
-              device_id: deviceId
-            });
-          } catch(insertErr) {
-            // Ignore - might be duplicate or Prefer header issue
-            console.warn('Insert note:', insertErr.message);
-          }
-          
-          // Fetch user yang baru dibuat
-          const created = await supabaseFetch('jejak_users', 'GET', null,
-            `?username=eq.${encodeURIComponent(username)}&select=username,device_id`
-          );
-          user = created[0] || { username: username, id: null };
-          
-          showSuccess('✅ account created! welcome bestie 🎉');
-          
-        } else {
-          // ===== LOGIN USER LAMA =====
-          user = users[0];
-          
-          // Cek apakah device sama
-          if (user.device_id && user.device_id !== deviceId) {
-            showError('⚠️ this username is registered on another device fr');
-            btn.disabled = false;
-            btn.textContent = 'let\'s goooo';
-            return;
-          }
-          
-          // Update device_id kalau belum ada
-          if (!user.device_id) {
-            try {
-              await supabaseFetch('jejak_users', 'PATCH',
-                { device_id: deviceId },
-                `?username=eq.${encodeURIComponent(username)}`
-              );
-            } catch(patchErr) {
-              console.warn('Patch note:', patchErr.message);
-            }
-            user.device_id = deviceId;
-          }
-          
-          showSuccess('✅ welcome back bestie! 🚀');
-        }
-        
-        // Simpan session — pakai username sebagai fallback ID
-        if (user && user.username) {
-          setSession(user);
-          
-          setTimeout(() => {
-            window.location.href = 'jejak.html';
-          }, 800);
-        } else {
-          throw new Error('User data not found after login');
-        }
-        
-      } catch (err) {
-        console.error('Login error:', err);
-        
-        if (err.message.includes('duplicate key')) {
-          showError('username taken on another device bestie');
-        } else if (err.message.includes('network') || err.message.includes('fetch')) {
-          showError('connection failed, check ur internet');
-        } else {
-          showError('something went wrong: ' + err.message);
-        }
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'let\'s goooo';
-      }
-    });
+      clearSession();
+    } catch (e) {
+      console.error('Auto-login error:', e.message);
+    }
 
-    // ============================================
-    // INIT
-    // ============================================
-    window.addEventListener('DOMContentLoaded', () => {
-      // Load saved vibe
-      const savedVibe = localStorage.getItem(SESSION_KEYS.vibe) || 'cyber';
-      setVibe(savedVibe);
-      
-      // Check auto-login
-      checkAutoLogin();
-    });
+    document.getElementById('loading-overlay').classList.add('hidden');
+    const saved = localStorage.getItem(SK.username);
+    if (saved) {
+      $input().value = saved;
+      $input().dispatchEvent(new Event('input'));
+    }
+  }
+
+  // ================================================================
+  // INIT
+  // ================================================================
+  window.addEventListener('DOMContentLoaded', () => {
+    setVibe(localStorage.getItem(SK.vibe) || 'cyber');
+    checkAutoLogin();
+  });
   </script>
 </body>
 </html>
