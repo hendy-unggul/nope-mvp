@@ -23,8 +23,9 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .tagline{font-style:italic;color:var(--ts);margin-bottom:8px}
 .status-text{color:var(--a);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:24px}
 .filter-section{background:var(--surface);border:1px solid var(--border);padding:20px;margin-bottom:24px}
-.filter-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.filter-title{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.filter-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.filter-title{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:8px}
+.vibe-percentage{color:var(--a);font-weight:800}
 .reset-btn{background:transparent;border:1px solid var(--a);color:var(--a);padding:6px 12px;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer}
 .vibe-slider{width:100%;height:4px;background:var(--border);outline:none;-webkit-appearance:none;margin-bottom:8px;display:block}
 .vibe-slider::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;background:var(--a);border:2px solid var(--txt);cursor:pointer}
@@ -47,12 +48,12 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .spill-author.unlocked::after{content:'👁️';margin-left:6px;font-size:10px}
 .spill-mood{font-size:10px;padding:4px 8px;border:1px solid currentColor;text-transform:uppercase}
 .spill-content{font-size:15px;line-height:1.6;margin-bottom:16px}
-.spill-reactions{display:flex;gap:8px;flex-wrap:wrap}
-.reaction-btn{display:flex;align-items:center;gap:6px;background:var(--se);border:1px solid var(--border);color:var(--ts);padding:8px 12px;font-size:13px;cursor:pointer;transition:all .2s;border-radius:20px}
+.spill-reactions{display:flex;gap:6px;flex-wrap:nowrap;justify-content:space-between}
+.reaction-btn{display:flex;align-items:center;gap:4px;background:var(--se);border:1px solid var(--border);color:var(--ts);padding:6px 10px;font-size:12px;cursor:pointer;transition:all .2s;border-radius:16px;flex:1;justify-content:center;min-width:0}
 .reaction-btn:hover{border-color:var(--a);background:var(--a);color:var(--bg);transform:scale(1.05)}
 .reaction-btn:active{transform:scale(.95)}
-.reaction-emoji{font-size:16px}
-.reaction-count{font-weight:600;font-size:12px;min-width:16px;text-align:center}
+.reaction-emoji{font-size:14px}
+.reaction-count{font-weight:600;font-size:11px;min-width:14px;text-align:center}
 .new-spill-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:16px;background:transparent;border:2px solid var(--a);color:var(--a);font-size:14px;font-weight:700;text-transform:uppercase;cursor:pointer;margin-top:24px;margin-bottom:32px;transition:all .2s}
 .new-spill-btn:hover{background:var(--a);color:var(--bg)}
 .empty-state{text-align:center;padding:40px}
@@ -128,6 +129,16 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .peaking-hint{text-align:center;padding:24px;border:1px dashed var(--border);margin-bottom:24px;background:var(--surface)}
 .peaking-hint-text{font-size:12px;color:var(--ts);font-style:italic;line-height:1.6}
 .reaction-unlock{display:inline-flex;align-items:center;gap:8px;background:var(--a);color:var(--bg);padding:8px 16px;font-size:11px;font-weight:700;text-transform:uppercase;margin-top:16px;letter-spacing:.05em}
+/* ARTEFACT CARD IN FEED */
+.artefact-card{background:linear-gradient(135deg,var(--surface) 0%,var(--se) 100%);border:1px solid var(--border);padding:24px;text-align:center;animation:fadeIn .4s ease;position:relative;overflow:hidden}
+.artefact-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--a),var(--as),var(--aq))}
+.artefact-label{font-size:10px;color:var(--tm);text-transform:uppercase;letter-spacing:.15em;margin-bottom:12px}
+.artefact-emoji{font-size:48px;margin-bottom:8px;display:block;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.artefact-name{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:4px}
+.artefact-desc{font-size:11px;color:var(--ts);font-style:italic}
+.artefact-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100px;height:100px;background:radial-gradient(circle,rgba(255,77,0,.2) 0%,transparent 70%);pointer-events:none;animation:pulse-glow 2s ease-in-out infinite}
+@keyframes pulse-glow{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}}
 </style>
 </head>
 <body>
@@ -150,10 +161,13 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 
   <div class="filter-section">
     <div class="filter-header">
-      <span class="filter-title">Kesamaan Vibrasi</span>
+      <span class="filter-title">
+        <span id="vibe-percentage" class="vibe-percentage">87%</span>
+        <span>Keselarasan</span>
+      </span>
       <button class="reset-btn" onclick="resetFilters()">Reset</button>
     </div>
-    <input type="range" class="vibe-slider" id="vibe-slider" min="0" max="100" value="100">
+    <input type="range" class="vibe-slider" id="vibe-slider" min="0" max="100" value="87">
     <div class="vibe-labels"><span>Homie Only</span><span>Semi-Selaras</span><span>Semua</span></div>
     <div class="mood-filters" id="mood-filters">
       <button class="mood-btn active" data-mood="all" onclick="filterMood('all')">Semua</button>
@@ -262,8 +276,9 @@ const CFG = {
 const st = {
   sb: null, online: false, spills: [], reactions: {},
   userId: null, userEmail: null, filter: 'all',
-  vibeMatch: 100, loading: true, peakingId: null,
-  vibeMatches: { chaotic: { shown: true, user: null }, caregiver: { shown: true, user: null } }
+  vibeMatch: 87, loading: true, peakingId: null,
+  vibeMatches: { chaotic: { shown: true, user: null }, caregiver: { shown: true, user: null } },
+  currentBrewArtefact: null
 };
 
 const unlocked = new Set();
@@ -277,10 +292,32 @@ const REACTIONS = [
   { id:'fire',      emoji:'🔥', label:'Fire'      }
 ];
 
+const RANDOM_ARTEFACTS = [
+  { emoji: '📷', name: 'Kamera Analog', desc: 'Menangkap momen yang tak terucap' },
+  { emoji: '🎧', name: 'Headphone Tua', desc: 'Menyimpan playlist 3AM' },
+  { emoji: '☕', name: 'Gelas Retak', desc: 'Saksi bisu setiap curhat' },
+  { emoji: '📚', name: 'Buku Basah', desc: 'Dibaca saat hujan dan galau' },
+  { emoji: '🌙', name: 'Bulan Purnama', desc: 'Peneman insomnia' },
+  { emoji: '🎸', name: 'Gitar Senar Putus', desc: 'Pernah dipakai untuk lagu tak selesai' },
+  { emoji: '🕯️', name: 'Lilin Aromaterapi', desc: 'Aroma lavender dan penyesalan' },
+  { emoji: '📝', name: 'Post-it Kuning', desc: 'Catatan to-do yang tak pernah selesai' },
+  { emoji: '🧸', name: 'Boneka Beruang', desc: 'Dari masa yang lebih sederhana' },
+  { emoji: '🌿', name: 'Tanaman Layu', desc: 'Lupa disiram, tapi bertahan' },
+  { emoji: '🔮', name: 'Bola Kristal', desc: 'Melihat masa depan yang kabur' },
+  { emoji: '📻', name: 'Radio AM', desc: 'Stasiun yang tak pernah jelas' }
+];
+
 const DUMMY_SPILLS = [
   { id:'d1', rant_id:'d1', content:'Ada yang pernah ngerasa kalo lagi banyak kerjaan malah makin males ngerjain? Padahal deadline mepet. Help', mood:'chaotic', author:'@anonymouse', user_id:'u1', timestamp:Date.now()-3600000, reactions:{relatable:5,hug:2,same:3,mood:4,tea:1,fire:0} },
   { id:'d2', rant_id:'d2', content:'Hari ini gue bangun pagi, olahraga, sarapan sehat, dan ngerjain side project. Semoga konsisten', mood:'thriving', author:'@earlybird', user_id:'u2', timestamp:Date.now()-7200000, reactions:{relatable:2,hug:1,same:0,mood:1,tea:3,fire:5} },
-  { id:'d3', rant_id:'d3', content:'Capek banget rasanya. Pengen tidur 3 hari 3 malam tanpa gangguan.', mood:'doom', author:'@tiredsoul', user_id:'u3', timestamp:Date.now()-10800000, reactions:{relatable:8,hug:12,same:6,mood:9,tea:2,fire:1} }
+  { id:'d3', rant_id:'d3', content:'Capek banget rasanya. Pengen tidur 3 hari 3 malam tanpa gangguan.', mood:'doom', author:'@tiredsoul', user_id:'u3', timestamp:Date.now()-10800000, reactions:{relatable:8,hug:12,same:6,mood:9,tea:2,fire:1} },
+  { id:'d4', rant_id:'d4', content:'Kenapa ya orang-orang pada sibuk banget, gue malah bingung mau ngapain', mood:'chaotic', author:'@confusedone', user_id:'u4', timestamp:Date.now()-14400000, reactions:{relatable:4,hug:1,same:5,mood:3,tea:2,fire:0} },
+  { id:'d5', rant_id:'d5', content:'Akhirnya selesai juga project yang ngeganggu pikiran 2 bulan ini. Lega!', mood:'thriving', author:'@relieved', user_id:'u5', timestamp:Date.now()-18000000, reactions:{relatable:3,hug:2,same:1,mood:0,tea:4,fire:6} },
+  { id:'d6', rant_id:'d6', content:'Mau cerita tapi takut dijudge. Jadi simpen sendiri aja deh.', mood:'doom', author:'@silentcries', user_id:'u6', timestamp:Date.now()-21600000, reactions:{relatable:12,hug:15,same:8,mood:10,tea:3,fire:1} },
+  { id:'d7', rant_id:'d7', content:'Random thought: kenapa kita selalu merasa kurang padahal udah cukup?', mood:'surviving', author:'@overthinker', user_id:'u7', timestamp:Date.now()-25200000, reactions:{relatable:7,hug:3,same:6,mood:5,tea:2,fire:2} },
+  { id:'d8', rant_id:'d8', content:'Hari ini nothing special, tapi bersyukur masih bisa napas.', mood:'surviving', author:'@grateful', user_id:'u8', timestamp:Date.now()-28800000, reactions:{relatable:5,hug:4,same:3,mood:2,tea:5,fire:1} },
+  { id:'d9', rant_id:'d9', content:'Pengen delete semua sosmed dan hidup di gunung.', mood:'doom', author:'@mountaindreamer', user_id:'u9', timestamp:Date.now()-32400000, reactions:{relatable:9,hug:6,same:7,mood:8,tea:2,fire:3} },
+  { id:'d10', rant_id:'d10', content:'Baru sadar kalo self-care itu penting banget. Jangan lupa istirahat!', mood:'thriving', author:'@selfcarequeen', user_id:'u10', timestamp:Date.now()-36000000, reactions:{relatable:4,hug:3,same:2,mood:1,tea:6,fire:4} }
 ];
 
 const DUMMY_ARTS = [
@@ -294,6 +331,25 @@ function getMoodColor(m){ return MOOD_COLORS[m] || '#FFF'; }
 function esc(t){ if(!t) return ''; const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
 
+function updateVibePercentage(val){
+  const el = document.getElementById('vibe-percentage');
+  if(el) el.textContent = val + '%';
+}
+
+function getRandomArtefact(){
+  return RANDOM_ARTEFACTS[Math.floor(Math.random() * RANDOM_ARTEFACTS.length)];
+}
+
+function createArtefactCard(artefact){
+  return `<div class="artefact-card">
+    <div class="artefact-glow"></div>
+    <div class="artefact-label">✨ Artefak Ditemukan</div>
+    <span class="artefact-emoji">${artefact.emoji}</span>
+    <div class="artefact-name">${artefact.name}</div>
+    <div class="artefact-desc">${artefact.desc}</div>
+  </div>`;
+}
+
 // ---- INIT ----
 document.addEventListener('DOMContentLoaded', () => {
   if(typeof supabase !== 'undefined'){
@@ -306,6 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('vibe-slider').addEventListener('input', e => {
     st.vibeMatch = +e.target.value;
+    updateVibePercentage(st.vibeMatch);
     renderSpills();
   });
 
@@ -412,7 +469,7 @@ function setLoading(v){
     ca.innerHTML = '<div class="spinner"></div><p class="loading-text">Menyedu teh...</p>';
     if(s) s.textContent = 'Memuat spills...';
   } else {
-    if(s) s.textContent = st.spills.length + ' spills ditemukan';
+    if(s) s.textContent = '';
   }
 }
 
@@ -431,7 +488,31 @@ function renderSpills(){
   }
 
   ca.className = 'content-area has-content';
-  ca.innerHTML = list.map(spill => {
+  
+  // Process spills in batches of 10 (one tea brew)
+  const BREW_SIZE = 10;
+  const INSERT_EVERY = 9; // Insert artefact every 9 rants
+  let html = [];
+  let rantCount = 0;
+  let currentBrewArtefact = null;
+  
+  for(let i = 0; i < list.length; i++){
+    const spill = list[i];
+    
+    // Generate new artefact for each brew
+    if(rantCount === 0){
+      currentBrewArtefact = getRandomArtefact();
+    }
+    
+    // Insert artefact at random position within the 9-rant window
+    // Position is 0-8 (before the 9th rant) or we insert after if it's the last
+    if(rantCount > 0 && rantCount % INSERT_EVERY === 0){
+      html.push(createArtefactCard(currentBrewArtefact));
+      rantCount = 0; // Reset counter after inserting artefact
+      currentBrewArtefact = getRandomArtefact(); // New artefact for next batch
+    }
+    
+    // Render the spill card
     const isUnlocked = unlocked.has(spill.user_id);
     const sa = (spill.author||'@anonymous').replace(/'/g,"\\'");
     const su = (spill.user_id||'').replace(/'/g,"\\'");
@@ -439,8 +520,18 @@ function renderSpills(){
       let c = (st.reactions[spill.rant_id]||{})[r.id] || (spill.reactions||{})[r.id] || 0;
       return `<button class="reaction-btn" onclick="reactToSpill('${spill.rant_id}','${r.id}','${su}','${sa}')"><span class="reaction-emoji">${r.emoji}</span><span class="reaction-count" id="count-${spill.rant_id}-${r.id}">${c}</span></button>`;
     }).join('');
-    return `<div class="spill-card"><div class="spill-header"><span class="spill-author ${isUnlocked?'unlocked':'locked'}" onclick="peakUser('${su}','${sa}')">${esc(spill.author)}</span><span class="spill-mood" style="color:${getMoodColor(spill.mood)}">${spill.mood}</span></div><div class="spill-content">${esc(spill.content)}</div><div class="spill-reactions">${rxHtml}</div></div>`;
-  }).join('');
+    
+    html.push(`<div class="spill-card"><div class="spill-header"><span class="spill-author ${isUnlocked?'unlocked':'locked'}" onclick="peakUser('${su}','${sa}')">${esc(spill.author)}</span><span class="spill-mood" style="color:${getMoodColor(spill.mood)}">${spill.mood}</span></div><div class="spill-content">${esc(spill.content)}</div><div class="spill-reactions">${rxHtml}</div></div>`);
+    
+    rantCount++;
+  }
+  
+  // If we have remaining rants without an artefact, insert one at the end
+  if(rantCount > 0 && rantCount >= 5 && currentBrewArtefact){
+    html.push(createArtefactCard(currentBrewArtefact));
+  }
+  
+  ca.innerHTML = html.join('');
 }
 
 // ---- PEAKING ----
@@ -520,8 +611,9 @@ function filterMood(mood){
 }
 
 function resetFilters(){
-  st.filter = 'all'; st.vibeMatch = 100;
-  document.getElementById('vibe-slider').value = 100;
+  st.filter = 'all'; st.vibeMatch = 87;
+  document.getElementById('vibe-slider').value = 87;
+  updateVibePercentage(87);
   document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('active', b.dataset.mood === 'all'));
   renderSpills();
 }
