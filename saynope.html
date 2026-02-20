@@ -52,6 +52,7 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .reaction-btn{display:flex;align-items:center;gap:4px;background:var(--se);border:1px solid var(--border);color:var(--ts);padding:6px 10px;font-size:12px;cursor:pointer;transition:all .2s;border-radius:16px;flex:1;justify-content:center;min-width:0}
 .reaction-btn:hover{border-color:var(--a);background:var(--a);color:var(--bg);transform:scale(1.05)}
 .reaction-btn:active{transform:scale(.95)}
+.reaction-btn.reacted{background:var(--a);border-color:var(--a);color:var(--bg)}
 .reaction-emoji{font-size:14px}
 .reaction-count{font-weight:600;font-size:11px;min-width:14px;text-align:center}
 .new-spill-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:16px;background:transparent;border:2px solid var(--a);color:var(--a);font-size:14px;font-weight:700;text-transform:uppercase;cursor:pointer;margin-top:24px;margin-bottom:32px;transition:all .2s}
@@ -197,7 +198,7 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
       <div class="vibe-match-title">Seseorang dengan pola "chaotic good" sering muncul di timeline kamu.</div>
       <div class="vibe-match-graph">
         <div class="vibe-match-bar"></div><div class="vibe-match-bar"></div>
-        <div class="vibe-match-bar"></div><div class="vibe-match-bar"></div>
+        <div class="vige-match-bar"></div><div class="vibe-match-bar"></div>
         <div class="vibe-match-bar"></div>
       </div>
       <ul class="vibe-match-traits">
@@ -280,7 +281,10 @@ const st = {
   userId: null, userEmail: null, filter: 'all',
   vibeMatch: 87, loading: true, peakingId: null,
   vibeMatches: { chaotic: { shown: true, user: null }, caregiver: { shown: true, user: null } },
-  otherUsersArtefaks: [] // Store random artefaks from other users
+  otherUsersArtefaks: [],
+  userReacted: new Set(), // Track which rants user has reacted to
+  currentOffset: 0, // For pagination when "Seduh Teh Baru"
+  seed: Math.random() // Random seed for shuffling
 };
 
 const unlocked = new Set();
@@ -353,6 +357,18 @@ function createArtefakCard(artefak){
   </div>`;
 }
 
+// Fisher-Yates shuffle algorithm
+function shuffleArray(array, seed) {
+  const arr = [...array];
+  let currentSeed = seed;
+  for (let i = arr.length - 1; i > 0; i--) {
+    currentSeed = (currentSeed * 9301 + 49297) % 233280;
+    const j = Math.floor((currentSeed / 233280) * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 // ---- INIT ----
 document.addEventListener('DOMContentLoaded', () => {
   if(typeof supabase !== 'undefined'){
@@ -388,7 +404,7 @@ async function loadOtherUsersArtefaks(){
         .select('*')
         .neq('user_id', st.userId || 'no-user')
         .order('created_at', { ascending: false })
-        .limit(20);
+        .limit(50);
       
       if(error) throw error;
       
@@ -409,7 +425,9 @@ async function loadOtherUsersArtefaks(){
 
 function getRandomArtefak(){
   if(!st.otherUsersArtefaks || st.otherUsersArtefaks.length === 0) return null;
-  return st.otherUsersArtefaks[Math.floor(Math.random() * st.otherUsersArtefaks.length)];
+  // Use current seed to get deterministic but varied selection
+  const index = Math.floor(Math.random() * st.otherUsersArtefaks.length);
+  return st.otherUsersArtefaks[index];
 }
 
 // ---- VIBE MATCH ----
@@ -444,46 +462,78 @@ function sendSignal(type){
   }
 }
 
-// ---- LOAD SPILLS ----
-async function loadSpills(){
+// ---- LOAD SPILLS WITH PAGINATION FOR "SEDUH TEH BARU" ----
+async function loadSpills(isNewBrew = false){
   setLoading(true);
+  
+  // Generate new seed for randomization on "Seduh Teh Baru"
+  if(isNewBrew){
+    st.seed = Math.random();
+    st.currentOffset += 10; // Move to next batch
+    toast('🍵 Menyeduh teh baru...');
+  }
+  
   if(st.online && st.sb){
     try {
       const { data: { user } } = await st.sb.auth.getUser();
       st.userId = user?.id || null;
       st.userEmail = user?.email || null;
 
-      const { data, error } = await st.sb.from('spills').select('*').order('created_at',{ascending:false}).limit(50);
+      // Fetch spills with offset for "Seduh Teh Baru" - get NEW data
+      const { data, error } = await st.sb
+        .from('spills')
+        .select('*')
+        .neq('user_id', st.userId || '') // Exclude user's own spills
+        .order('created_at', { ascending: false })
+        .range(st.currentOffset, st.currentOffset + 49) // Get next batch
+        .limit(50);
+        
       if(error) throw error;
 
       if(data && data.length > 0){
-        const emailName = st.userEmail ? st.userEmail.split('@')[0].toLowerCase() : '';
-        st.spills = data.filter(s => {
-          if(s.user_id && st.userId && s.user_id === st.userId) return false;
-          const a = (s.author||'').replace('@','').toLowerCase();
-          if(a && emailName && (a === emailName || a.includes(emailName))) return false;
-          if(!s.user_id && a === 'kaya raya') return false;
-          return true;
-        }).map(s => ({
-          id: s.id, rant_id: s.rant_id, content: s.content, mood: s.mood,
-          author: s.author || '@anonymous', user_id: s.user_id || s.author,
-          timestamp: new Date(s.created_at).getTime(), reactions: s.reactions || {}
+        st.spills = data.map(s => ({
+          id: s.id, 
+          rant_id: s.rant_id || s.id, // Ensure rant_id exists
+          content: s.content, 
+          mood: s.mood,
+          author: s.author || '@anonymous', 
+          user_id: s.user_id || s.author,
+          timestamp: new Date(s.created_at).getTime(), 
+          reactions: s.reactions || {}
         }));
 
-        const ids = st.spills.map(s=>s.rant_id).filter(Boolean);
+        // Load reactions for these specific rants
+        const ids = st.spills.map(s => s.rant_id).filter(Boolean);
         if(ids.length) await loadReactions(ids);
+        
+        // Load user's existing reactions to mark them
+        await loadUserReactions(ids);
       } else {
-        st.spills = DUMMY_SPILLS;
+        // If no more data, reset offset and shuffle dummy data
+        if(isNewBrew && st.currentOffset > 0){
+          st.currentOffset = 0;
+          toast('🔄 Memutar ulang dari awal...');
+        }
+        // Shuffle dummy data with new seed
+        st.spills = shuffleArray(DUMMY_SPILLS, st.seed);
       }
     } catch(e){
-      console.error(e);
-      st.spills = DUMMY_SPILLS;
-      toast('Gagal memuat data, menampilkan contoh');
+      console.error('Error loading spills:', e);
+      // Shuffle dummy data on error
+      st.spills = shuffleArray(DUMMY_SPILLS, st.seed);
+      if(isNewBrew) toast('Mode offline - menampilkan data acak');
     }
   } else {
-    st.spills = DUMMY_SPILLS;
-    toast('Mode offline - menampilkan contoh');
+    // Offline mode - shuffle dummy data
+    st.spills = shuffleArray(DUMMY_SPILLS, st.seed);
+    if(isNewBrew) toast('Mode offline - menampilkan data acak');
   }
+  
+  // Also refresh artefaks for variety
+  if(isNewBrew && st.otherUsersArtefaks.length > 0){
+    st.otherUsersArtefaks = shuffleArray(st.otherUsersArtefaks, st.seed);
+  }
+  
   setLoading(false);
   renderSpills();
 }
@@ -491,15 +541,71 @@ async function loadSpills(){
 async function loadReactions(ids){
   if(!st.sb || !ids.length) return;
   try {
-    const { data, error } = await st.sb.from('reactions').select('*').in('rant_id', ids);
-    if(error) return;
+    const { data, error } = await st.sb
+      .from('reactions')
+      .select('rant_id, reaction_type, count')
+      .in('rant_id', ids)
+      .group('rant_id, reaction_type');
+      
+    if(error) {
+      // Try alternative query if group doesn't work
+      const { data: rawData, error: rawError } = await st.sb
+        .from('reactions')
+        .select('*')
+        .in('rant_id', ids);
+        
+      if(rawError) throw rawError;
+      
+      // Count manually
+      st.reactions = {};
+      ids.forEach(id => { 
+        st.reactions[id] = {}; 
+        REACTIONS.forEach(r => { st.reactions[id][r.id] = 0; }); 
+      });
+      
+      (rawData||[]).forEach(r => {
+        if(st.reactions[r.rant_id] && r.reaction_type) {
+          st.reactions[r.rant_id][r.reaction_type] = (st.reactions[r.rant_id][r.reaction_type] || 0) + 1;
+        }
+      });
+      return;
+    }
+    
     st.reactions = {};
-    ids.forEach(id => { st.reactions[id] = {}; REACTIONS.forEach(r => { st.reactions[id][r.id] = 0; }); });
-    (data||[]).forEach(r => {
-      if(st.reactions[r.rant_id] && r.reaction_type && st.reactions[r.rant_id][r.reaction_type] !== undefined)
-        st.reactions[r.rant_id][r.reaction_type]++;
+    ids.forEach(id => { 
+      st.reactions[id] = {}; 
+      REACTIONS.forEach(r => { st.reactions[id][r.id] = 0; }); 
     });
-  } catch(e){ console.error(e); }
+    
+    (data||[]).forEach(r => {
+      if(st.reactions[r.rant_id] && r.reaction_type) {
+        st.reactions[r.rant_id][r.reaction_type] = parseInt(r.count) || 0;
+      }
+    });
+  } catch(e){ 
+    console.error('Error loading reactions:', e); 
+  }
+}
+
+// Load which rants current user has already reacted to
+async function loadUserReactions(ids){
+  if(!st.sb || !ids.length || !st.userId) return;
+  try {
+    const { data, error } = await st.sb
+      .from('reactions')
+      .select('rant_id, reaction_type')
+      .eq('user_id', st.userId)
+      .in('rant_id', ids);
+      
+    if(error) throw error;
+    
+    st.userReacted.clear();
+    (data||[]).forEach(r => {
+      st.userReacted.add(`${r.rant_id}-${r.reaction_type}`);
+    });
+  } catch(e) {
+    console.error('Error loading user reactions:', e);
+  }
 }
 
 function setLoading(v){
@@ -532,7 +638,6 @@ function renderSpills(){
   ca.className = 'content-area has-content';
   
   // Process spills in batches of 10 (one tea brew)
-  const BREW_SIZE = 10;
   const INSERT_EVERY = 9; // Insert artefak every 9 rants
   let html = [];
   let rantCount = 0;
@@ -553,9 +658,12 @@ function renderSpills(){
     const isUnlocked = unlocked.has(spill.user_id);
     const sa = (spill.author||'@anonymous').replace(/'/g,"\\'");
     const su = (spill.user_id||'').replace(/'/g,"\\'");
+    
     const rxHtml = REACTIONS.map(r => {
-      let c = (st.reactions[spill.rant_id]||{})[r.id] || (spill.reactions||{})[r.id] || 0;
-      return `<button class="reaction-btn" onclick="reactToSpill('${spill.rant_id}','${r.id}','${su}','${sa}')"><span class="reaction-emoji">${r.emoji}</span><span class="reaction-count" id="count-${spill.rant_id}-${r.id}">${c}</span></button>`;
+      const count = (st.reactions[spill.rant_id]||{})[r.id] || (spill.reactions||{})[r.id] || 0;
+      const hasReacted = st.userReacted.has(`${spill.rant_id}-${r.id}`);
+      const reactedClass = hasReacted ? 'reacted' : '';
+      return `<button class="reaction-btn ${reactedClass}" onclick="reactToSpill('${spill.rant_id}','${r.id}','${su}','${sa}',this)" data-rant="${spill.rant_id}" data-type="${r.id}"><span class="reaction-emoji">${r.emoji}</span><span class="reaction-count" id="count-${spill.rant_id}-${r.id}">${count}</span></button>`;
     }).join('');
     
     html.push(`<div class="spill-card"><div class="spill-header"><span class="spill-author ${isUnlocked?'unlocked':'locked'}" onclick="peakUser('${su}','${sa}')">${esc(spill.author)}</span><span class="spill-mood" style="color:${getMoodColor(spill.mood)}">${spill.mood}</span></div><div class="spill-content">${esc(spill.content)}</div><div class="spill-reactions">${rxHtml}</div></div>`);
@@ -574,23 +682,75 @@ function renderSpills(){
   ca.innerHTML = html.join('');
 }
 
-// ---- PEAKING ----
-async function reactToSpill(rantId, type, userId, author){
-  const el = document.getElementById(`count-${rantId}-${type}`);
-  if(el) el.textContent = +el.textContent + 1;
+// ---- REACTION HANDLER - FIXED TO PROPERLY SAVE TO SUPABASE ----
+async function reactToSpill(rantId, type, userId, author, btnElement){
+  // Prevent double-clicking
+  if(btnElement && btnElement.classList.contains('reacted')) {
+    toast('Kamu sudah memberi reaksi ini!');
+    return;
+  }
+  
+  const countEl = document.getElementById(`count-${rantId}-${type}`);
+  const currentCount = parseInt(countEl?.textContent || '0');
+  
+  // Optimistic UI update
+  if(countEl) countEl.textContent = currentCount + 1;
+  if(btnElement) btnElement.classList.add('reacted');
+  
+  // Update local state
   if(!st.reactions[rantId]) st.reactions[rantId] = {};
-  st.reactions[rantId][type] = (st.reactions[rantId][type]||0) + 1;
-
+  st.reactions[rantId][type] = currentCount + 1;
+  st.userReacted.add(`${rantId}-${type}`);
+  
+  // Unlock peaking if first reaction to this user
   if(userId && userId!=='null' && userId!=='undefined' && userId!=='' && !unlocked.has(userId)){
     unlocked.add(userId);
     toast('🔓 Peaking unlocked! Click username to view their profile.');
-    renderSpills();
   }
 
-  if(st.online && st.sb){
+  // Save to Supabase - FIXED: proper error handling and data structure
+  if(st.online && st.sb && st.userId){
     try {
-      await st.sb.from('reactions').insert({ rant_id:rantId, reaction_type:type, created_at:new Date().toISOString() });
-    } catch(e){ console.error(e); }
+      const reactionData = {
+        rant_id: rantId,
+        reaction_type: type,
+        user_id: st.userId,
+        created_at: new Date().toISOString()
+      };
+      
+      console.log('Saving reaction:', reactionData);
+      
+      const { data, error } = await st.sb
+        .from('reactions')
+        .insert(reactionData)
+        .select();
+        
+      if(error) {
+        console.error('Supabase error saving reaction:', error);
+        // Revert UI if failed
+        if(countEl) countEl.textContent = currentCount;
+        if(btnElement) btnElement.classList.remove('reacted');
+        st.reactions[rantId][type] = currentCount;
+        st.userReacted.delete(`${rantId}-${type}`);
+        toast('Gagal menyimpan reaksi. Coba lagi.');
+        return;
+      }
+      
+      console.log('Reaction saved successfully:', data);
+      toast(`${REACTIONS.find(r=>r.id===type)?.emoji || ''} Reaksi tersimpan!`);
+      
+    } catch(e){ 
+      console.error('Exception saving reaction:', e);
+      // Revert UI on exception
+      if(countEl) countEl.textContent = currentCount;
+      if(btnElement) btnElement.classList.remove('reacted');
+      st.reactions[rantId][type] = currentCount;
+      st.userReacted.delete(`${rantId}-${type}`);
+      toast('Gagal menyimpan reaksi. Coba lagi.');
+    }
+  } else {
+    // Offline mode - just show toast
+    toast(`${REACTIONS.find(r=>r.id===type)?.emoji || ''} Reaksi dicatat (offline)`);
   }
 }
 
@@ -652,13 +812,20 @@ function filterMood(mood){
 
 function resetFilters(){
   st.filter = 'all'; st.vibeMatch = 87;
+  st.currentOffset = 0;
+  st.seed = Math.random();
   document.getElementById('vibe-slider').value = 87;
   updateVibePercentage(87);
   document.querySelectorAll('.mood-btn').forEach(b => b.classList.toggle('active', b.dataset.mood === 'all'));
-  renderSpills();
+  loadSpills();
 }
 
-function createNewSpill(){ window.location.href = 'jejak.html'; }
+// ---- SEDUH TEH BARU - FETCH NEW DATA ----
+function createNewSpill(){ 
+  // Instead of redirecting, fetch new batch of spills
+  loadSpills(true); // true = isNewBrew
+}
+
 function toggleMenu(){ toast('Menu clicked'); }
 
 // ---- KEYBOARD / CLICK OUTSIDE ----
