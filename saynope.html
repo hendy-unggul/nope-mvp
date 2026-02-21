@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Spill the Tea</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"><\/script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 :root{--bg:#0A0A0A;--surface:#141414;--se:#1E1E1E;--border:#2A2A2A;--txt:#FFF;--ts:#888;--tm:#555;--a:#FF4D00;--as:#00F0FF;--at:#FF006E;--aq:#39FF14}
@@ -24,8 +24,7 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .tagline{font-style:italic;color:var(--ts);margin-bottom:8px}
 .status-text{color:var(--a);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:24px}
 .connection-status{font-size:10px;color:var(--tm);text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:.1em}
-.connection-status.online{color:var(--aq)}
-.connection-status.offline{color:var(--at)}
+.connection-status.online{color:var(--aq)}.connection-status.offline{color:var(--at)}
 .filter-section{background:var(--surface);border:1px solid var(--border);padding:20px;margin-bottom:24px}
 .filter-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .filter-title{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:8px}
@@ -46,17 +45,19 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .spill-card{background:var(--surface);border:1px solid var(--border);padding:20px;animation:fadeIn .4s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .spill-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-.spill-author{font-size:12px;font-weight:700;color:var(--ts);cursor:pointer;transition:color .2s}
-.spill-author:hover{color:var(--a)}
+.spill-author{font-size:12px;font-weight:700;color:var(--ts);transition:color .2s}
+.spill-author.clickable{cursor:pointer}
+.spill-author.clickable:hover{color:var(--a)}
 .spill-author.locked::after{content:'🔒';margin-left:6px;font-size:10px}
-.spill-author.unlocked::after{content:'👁️';margin-left:6px;font-size:10px}
+.spill-author.peeked::after{content:'👁️';margin-left:6px;font-size:10px}
 .spill-mood{font-size:10px;padding:4px 8px;border:1px solid currentColor;text-transform:uppercase}
 .spill-content{font-size:15px;line-height:1.6;margin-bottom:16px}
 .spill-reactions{display:flex;gap:6px;flex-wrap:nowrap;justify-content:space-between}
 .reaction-btn{display:flex;align-items:center;gap:4px;background:var(--se);border:1px solid var(--border);color:var(--ts);padding:6px 10px;font-size:12px;cursor:pointer;transition:all .2s;border-radius:16px;flex:1;justify-content:center;min-width:0}
-.reaction-btn:hover{border-color:var(--a);background:var(--a);color:var(--bg);transform:scale(1.05)}
+.reaction-btn:not(:disabled):hover{border-color:var(--a);background:var(--a);color:var(--bg);transform:scale(1.05)}
 .reaction-btn:active{transform:scale(.95)}
 .reaction-btn.reacted{background:var(--a);border-color:var(--a);color:var(--bg)}
+.reaction-btn:disabled{opacity:0.2;cursor:not-allowed;pointer-events:none}
 .reaction-emoji{font-size:14px}
 .reaction-count{font-weight:600;font-size:11px;min-width:14px;text-align:center}
 .new-spill-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:16px;background:transparent;border:2px solid var(--a);color:var(--a);font-size:14px;font-weight:700;text-transform:uppercase;cursor:pointer;margin-top:24px;margin-bottom:32px;transition:all .2s}
@@ -65,7 +66,7 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .empty-icon{font-size:48px;margin-bottom:16px}
 .empty-text{color:var(--ts);font-style:italic;margin-bottom:8px}
 .empty-subtext{color:var(--tm);font-size:12px}
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--txt);color:var(--bg);padding:12px 24px;font-size:13px;font-weight:600;z-index:10000;opacity:0;transition:all .3s}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--txt);color:var(--bg);padding:12px 24px;font-size:13px;font-weight:600;z-index:10000;opacity:0;transition:all .3s;border-radius:4px;white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.error{background:var(--at);color:var(--txt)}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:1000}
@@ -78,19 +79,17 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .nav-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
 .vibe-match-section{margin-top:8px;padding-top:32px;border-top:1px solid var(--border)}
 .vibe-match-header{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--tm);margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.vibe-match-header::before{content:'〰️'}
+.vibe-match-header::before{content:'~'}
 .vibe-match-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden;transition:border-color .3s}
 .vibe-match-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--a),var(--as));opacity:0;transition:opacity .3s}
 .vibe-match-card:hover::before{opacity:1}
 .vibe-match-icon{width:48px;height:48px;background:var(--se);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px;border:2px solid var(--border)}
-.vibe-match-icon.chaotic{border-color:var(--as);animation:spin-slow 8s linear infinite}
-.vibe-match-icon.caregiver{border-color:var(--aq);animation:pulse 2s ease-in-out infinite}
-@keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(57,255,20,.4)}50%{transform:scale(1.05);box-shadow:0 0 20px 5px rgba(57,255,20,.2)}}
+.vibe-match-icon.chaotic{border-color:var(--as)}
+.vibe-match-icon.caregiver{border-color:var(--aq)}
 .vibe-match-title{font-size:15px;font-weight:700;margin-bottom:12px;line-height:1.4}
 .vibe-match-traits{list-style:none;margin-bottom:16px}
 .vibe-match-traits li{font-size:13px;color:var(--ts);margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.vibe-match-traits li::before{content:'✓';color:var(--aq);font-weight:700}
+.vibe-match-traits li::before{content:'checkmark';color:var(--aq);font-weight:700;content:'\2713'}
 .vibe-match-graph{display:flex;align-items:flex-end;gap:3px;height:24px;margin-bottom:16px;opacity:.6}
 .vibe-match-bar{width:4px;background:linear-gradient(to top,var(--a),var(--as));border-radius:2px;animation:equalizer 1.5s ease-in-out infinite}
 .vibe-match-bar:nth-child(1){height:40%;animation-delay:0s}
@@ -114,9 +113,10 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .peaking-close:hover{border-color:var(--a);color:var(--a)}
 .peaking-profile{text-align:center;margin-bottom:32px;padding:32px;background:var(--surface);border:1px solid var(--border);position:relative;overflow:hidden}
 .peaking-profile::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--a),var(--as))}
-.peaking-avatar{width:80px;height:80px;background:var(--se);border:2px solid var(--a);border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:32px;position:relative}
+.peaking-avatar{width:80px;height:80px;background:var(--se);border:2px solid var(--a);border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:32px}
 .peaking-username{font-size:18px;font-weight:700;margin-bottom:8px}
 .peaking-vibe{font-size:12px;color:var(--ts);text-transform:uppercase;letter-spacing:.1em}
+.reaction-unlock{display:inline-flex;align-items:center;gap:8px;background:var(--a);color:var(--bg);padding:8px 16px;font-size:11px;font-weight:700;text-transform:uppercase;margin-top:16px;letter-spacing:.05em}
 .peaking-section{margin-bottom:24px}
 .peaking-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--tm);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
 .peaking-rants{display:flex;flex-direction:column;gap:16px}
@@ -127,11 +127,9 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .peaking-rant-mood{display:inline-block;font-size:10px;padding:4px 8px;border:1px solid var(--border);text-transform:uppercase;letter-spacing:.05em}
 .artefact-tray{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .artefact-item{aspect-ratio:1;background:var(--se);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
-.artefact-item:hover{border-color:var(--a);transform:translateY(-4px);box-shadow:0 4px 20px rgba(255,77,0,.3)}
-.artefact-item.empty{border-style:dashed;opacity:.3}
+.artefact-item:hover{border-color:var(--a);transform:translateY(-4px)}
 .peaking-hint{text-align:center;padding:24px;border:1px dashed var(--border);margin-bottom:24px;background:var(--surface)}
 .peaking-hint-text{font-size:12px;color:var(--ts);font-style:italic;line-height:1.6}
-.reaction-unlock{display:inline-flex;align-items:center;gap:8px;background:var(--a);color:var(--bg);padding:8px 16px;font-size:11px;font-weight:700;text-transform:uppercase;margin-top:16px;letter-spacing:.05em}
 .artefak-card{background:var(--surface);border:1px solid var(--border);animation:fadeIn .4s ease;position:relative;overflow:hidden}
 .artefak-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--a),var(--as))}
 .artefak-header{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--se)}
@@ -143,7 +141,6 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .artefak-date{font-size:10px;color:var(--tm)}
 .spill-counter{font-size:12px;color:var(--a);font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:.05em}
 </style>
-<base target="_blank">
 </head>
 <body>
 <div class="wrapper">
@@ -159,77 +156,45 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
       </button>
     </div>
   </header>
-
   <p class="tagline">Curhatan dari komunitas yang selaras dengan vibrasimu</p>
   <p class="connection-status" id="connection-status">Menghubungkan...</p>
   <p class="status-text" id="status-text">Memuat spills...</p>
-
   <div class="filter-section">
     <div class="filter-header">
-      <span class="filter-title">
-        <span id="vibe-percentage" class="vibe-percentage">87%</span>
-        <span>Keselarasan</span>
-      </span>
+      <span class="filter-title"><span id="vibe-percentage" class="vibe-percentage">87%</span><span>Keselarasan</span></span>
       <button class="reset-btn" onclick="resetFilters()">Reset</button>
     </div>
     <input type="range" class="vibe-slider" id="vibe-slider" min="0" max="100" value="87">
     <div class="vibe-labels"><span>Homie Only</span><span>Semi-Selaras</span><span>Semua</span></div>
-    <div class="mood-filters" id="mood-filters">
+    <div class="mood-filters">
       <button class="mood-btn active" data-mood="all" onclick="filterMood('all')">Semua</button>
-      <button class="mood-btn" data-mood="surviving" onclick="filterMood('surviving')">😮‍💨 Surviving</button>
-      <button class="mood-btn" data-mood="thriving" onclick="filterMood('thriving')">✨ Thriving</button>
-      <button class="mood-btn" data-mood="chaotic" onclick="filterMood('chaotic')">🌀 Chaotic</button>
-      <button class="mood-btn" data-mood="doom" onclick="filterMood('doom')">🛌 Doom</button>
+      <button class="mood-btn" data-mood="surviving" onclick="filterMood('surviving')">Surviving</button>
+      <button class="mood-btn" data-mood="thriving" onclick="filterMood('thriving')">Thriving</button>
+      <button class="mood-btn" data-mood="chaotic" onclick="filterMood('chaotic')">Chaotic</button>
+      <button class="mood-btn" data-mood="doom" onclick="filterMood('doom')">Doom</button>
     </div>
   </div>
-
-  <div class="spill-counter" id="spill-counter" style="display:none;"></div>
-
+  <div class="spill-counter" id="spill-counter" style="display:none"></div>
   <div class="content-area loading" id="content-area">
     <div class="spinner"></div>
     <p class="loading-text">Menyedu teh...</p>
   </div>
-
-  <button class="new-spill-btn" onclick="createNewSpill()">
-    <span>🔄</span><span>Seduh Teh Baru</span>
-  </button>
-
-  <div class="vibe-match-section" id="vibe-match-section">
+  <button class="new-spill-btn" onclick="createNewSpill()"><span>🔄</span><span>Seduh Teh Baru</span></button>
+  <div class="vibe-match-section">
     <div class="vibe-match-header">Getaran yang Cocok</div>
     <div class="vibe-match-card" id="chaotic-good-card">
       <div class="vibe-match-icon chaotic">🌀</div>
       <div class="vibe-match-title">Seseorang dengan pola "chaotic good" sering muncul di timeline kamu.</div>
-      <div class="vibe-match-graph">
-        <div class="vibe-match-bar"></div><div class="vibe-match-bar"></div>
-        <div class="vibe-match-bar"></div><div class="vibe-match-bar"></div>
-        <div class="vibe-match-bar"></div>
-      </div>
-      <ul class="vibe-match-traits">
-        <li>Sama-sama aktif jam aneh</li>
-        <li>Sama-sama react 😂 tapi jarang post</li>
-        <li>Sama-sama "surviving" mode</li>
-      </ul>
-      <div class="vibe-match-actions">
-        <button class="vibe-match-btn skip" onclick="skipVibeMatch('chaotic')">Lewati</button>
-        <button class="vibe-match-btn signal" onclick="sendSignal('chaotic')">Beri Isyarat</button>
-      </div>
+      <div class="vibe-match-graph"><div class="vibe-match-bar"></div><div class="vibe-match-bar"></div><div class="vibe-match-bar"></div><div class="vibe-match-bar"></div><div class="vibe-match-bar"></div></div>
+      <ul class="vibe-match-traits"><li>Sama-sama aktif jam aneh</li><li>Sama-sama react tapi jarang post</li><li>Sama-sama "surviving" mode</li></ul>
+      <div class="vibe-match-actions"><button class="vibe-match-btn skip" onclick="skipVibeMatch('chaotic')">Lewati</button><button class="vibe-match-btn signal" onclick="sendSignal()">Beri Isyarat</button></div>
     </div>
     <div class="vibe-match-card" id="caregiver-card">
       <div class="vibe-match-icon caregiver">🫂</div>
       <div class="vibe-match-title">Ada yang sering kasih hug ke curhatanmu, tapi jarang cerita balik.</div>
-      <div class="vibe-match-graph">
-        <div class="vibe-match-bar"></div><div class="vibe-match-bar"></div>
-        <div class="vibe-match-bar"></div><div class="vibe-match-bar"></div>
-        <div class="vibe-match-bar"></div>
-      </div>
-      <ul class="vibe-match-traits">
-        <li>Pola "caregiver" yang sama</li>
-        <li>Sama-sama burnout tapi diam</li>
-      </ul>
-      <div class="vibe-match-actions">
-        <button class="vibe-match-btn skip" onclick="skipVibeMatch('caregiver')">Lewati</button>
-        <button class="vibe-match-btn signal" onclick="sendSignal('caregiver')">Beri Isyarat</button>
-      </div>
+      <div class="vibe-match-graph"><div class="vibe-match-bar"></div><div class="vibe-match-bar"></div><div class="vibe-match-bar"></div><div class="vibe-match-bar"></div><div class="vibe-match-bar"></div></div>
+      <ul class="vibe-match-traits"><li>Pola "caregiver" yang sama</li><li>Sama-sama burnout tapi diam</li></ul>
+      <div class="vibe-match-actions"><button class="vibe-match-btn skip" onclick="skipVibeMatch('caregiver')">Lewati</button><button class="vibe-match-btn signal" onclick="sendSignal()">Beri Isyarat</button></div>
     </div>
   </div>
 </div>
@@ -243,20 +208,20 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
       <button class="peaking-close" onclick="closePeaking()">✕</button>
     </div>
     <div class="peaking-profile">
-      <div class="peaking-avatar" id="peaking-avatar">👤</div>
+      <div class="peaking-avatar">👤</div>
       <div class="peaking-username" id="peaking-username">@anonymous</div>
-      <div class="peaking-vibe" id="peaking-vibe">Vibe Connection Unlocked</div>
+      <div class="peaking-vibe">Vibe Connection Unlocked</div>
       <div class="reaction-unlock"><span>🔓</span><span>Unlocked via Reaction</span></div>
     </div>
     <div class="peaking-hint">
       <p class="peaking-hint-text">"Di balik anonimitas, kita terhubung melalui kesamaan rants, vibe, dan memori benda."</p>
     </div>
     <div class="peaking-section">
-      <h3 class="peaking-section-title"><span>📦</span><span>Artefact Tray</span></h3>
+      <h3 class="peaking-section-title"><span>Artefact Tray</span></h3>
       <div class="artefact-tray" id="peaking-artefacts"></div>
     </div>
     <div class="peaking-section">
-      <h3 class="peaking-section-title"><span>📝</span><span>All Rants</span></h3>
+      <h3 class="peaking-section-title"><span>All Rants</span></h3>
       <div class="peaking-rants" id="peaking-rants"></div>
     </div>
   </div>
@@ -264,7 +229,7 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 
 <nav class="bottom-nav">
   <div class="nav-container">
-    <a href="jejak.html" class="nav-item"><span class="nav-icon">✦</span><span class="nav-label">Jejak</span></a>
+    <a href="jejak.html" class="nav-item"><span class="nav-icon">✴</span><span class="nav-label">Jejak</span></a>
     <a href="cocomeo.html" class="nav-item"><span class="nav-icon">〜</span><span class="nav-label">Cocomeo</span></a>
     <a href="saynope.html" class="nav-item active"><span class="nav-icon">✕</span><span class="nav-label">Spill</span></a>
     <a href="glitch.html" class="nav-item"><span class="nav-icon">⚡</span><span class="nav-label">Glitch</span></a>
@@ -272,53 +237,59 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 </nav>
 
 <script>
-// ============================================
-// CONFIG & STATE
-// ============================================
+// ============================================================
+// CONFIG
+// ============================================================
 const CFG = {
   url: 'https://fuovfrdicdhnlymnacpz.supabase.co',
   key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0',
-  TBL_RANTS:     'rants',
-  TBL_SPILLS:    'spills',
-  TBL_REACTIONS: 'reactions',
-  TBL_ARTEFACTS: 'artefacts',
-  TBL_USERS:     'users',
+  RANTS:     'rants',
+  SPILLS:    'spills',
+  REACTIONS: 'reactions',
+  ARTEFACTS: 'artefacts',
 };
 
-const st = {
-  sb: null,
-  online: false,
-  userId: null,
-  currentUser: null,
-  spills: [],
-  reactions: {},
-  filter: 'all',
-  vibeMatch: 87,
-  loading: true,
-  peakingId: null,
-  artefacts: [],
-  userReacted: new Set(),
-  offset: 0,
-  seed: Math.random()
-};
-
-const unlocked = new Set();
-
-// REACTIONS - Mapping emoji ke reaction_type untuk database
+// ============================================================
+// REACTIONS
+// KEY = nilai TEXT yang disimpan ke DB (sesuai constraint reactions_emoji_check)
+// EMOJI = karakter yang tampil di UI saja
+// ============================================================
 const REACTIONS = [
-  { id:'💯', type:'relatable', label:'Relatable' },
-  { id:'🤗', type:'hug',       label:'Hug'       },
-  { id:'✋',  type:'same',      label:'Same'      },
-  { id:'😮‍💨', type:'mood',      label:'Mood'      },
-  { id:'🍵', type:'tea',       label:'Tea'       },
-  { id:'🔥', type:'fire',      label:'Fire'      }
+  { key:'relatable', emoji:'\u{1F4AF}' },
+  { key:'hug',       emoji:'\u{1F917}' },
+  { key:'same',      emoji:'\u270B'    },
+  { key:'mood',      emoji:'\u{1F62E}' },
+  { key:'tea',       emoji:'\u{1F375}' },
+  { key:'fire',      emoji:'\u{1F525}' }
 ];
+
+// ============================================================
+// STATE
+// ============================================================
+const st = {
+  sb:          null,
+  online:      false,
+  sessionId:   null,
+  currentUser: null,
+  spills:      [],
+  reactions:   {},
+  filter:      'all',
+  vibeMatch:   87,
+  loading:     true,
+  artefacts:   [],
+  userReacted: new Set(),
+  offset:      0,
+  seed:        Math.random()
+};
+
+// Set berisi rawAuthor (string dari DB) yang sudah unlock peaking
+const unlocked = new Set();
 
 const MOOD_COLORS = { surviving:'#FF9500', thriving:'#39FF14', chaotic:'#00F0FF', doom:'#8B5CF6' };
 
-// ============================================
+// ============================================================
 // UTILS
-// ============================================
+// ============================================================
 function getMoodColor(m){ return MOOD_COLORS[m]||'#FFF'; }
 function esc(t){ if(!t)return''; const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
 function toast(msg,isErr=false){
@@ -332,145 +303,118 @@ function setConn(online,msg){
   el.textContent=msg; el.className='connection-status '+(online?'online':'offline');
   st.online=online;
 }
-function shuffle(arr,seed){
-  const a=[...arr]; let s=seed;
-  for(let i=a.length-1;i>0;i--){ s=(s*9301+49297)%233280; const j=Math.floor(s/233280*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
-  return a;
-}
 function fmtDate(ds){ return new Date(ds).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}); }
-function formatUsername(raw){ return raw?raw.trim().toLowerCase().replace(/[\s_\-]+/g,'.'):'anonim'; }
-function displayAuthor(author, isAnon){ return isAnon?'@anonim':'@'+formatUsername(author); }
+function fmtAuthor(raw,isAnon){
+  if(isAnon||!raw) return '@anonim';
+  return '@'+raw.trim().toLowerCase().replace(/[\s_\-]+/g,'.');
+}
 
+// Persistent anon session ID untuk reactions.user_id
 function getSessionId(){
   let id=localStorage.getItem('stt_session');
   if(!id){ id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,9); localStorage.setItem('stt_session',id); }
   return id;
 }
 
-// ============================================
+// ============================================================
+// FIX #1: Baca currentUser dari localStorage jejak session
+// Set oleh index.html saat login dengan key 'jejak_username'
+// ============================================================
+function loadCurrentUser(){
+  const u = localStorage.getItem('jejak_username');
+  st.currentUser = u ? u.trim().toLowerCase() : null;
+  console.log('[AUTH] currentUser:', st.currentUser || '(tidak ada session)');
+}
+
+// ============================================================
 // INIT SUPABASE
-// ============================================
+// ============================================================
 async function initSupabase(){
-  if(typeof supabase==='undefined'){ setConn(false,'❌ Library tidak ditemukan'); return false; }
+  if(typeof supabase==='undefined'){ setConn(false,'Library error'); return false; }
   try {
-    st.sb = supabase.createClient(CFG.url, CFG.key);
-    st.userId = getSessionId();
+    st.sb        = supabase.createClient(CFG.url, CFG.key);
+    st.sessionId = getSessionId();
+    loadCurrentUser();
 
-    const { data:{ session } } = await st.sb.auth.getSession();
-    if(session?.user){
-      st.currentUser = session.user.user_metadata?.username || session.user.email;
-    }
-
-    const { data, error } = await st.sb.from(CFG.TBL_RANTS).select('id').limit(1);
+    // Test koneksi ke tabel spills (bukan rants, karena kita tau spills ada)
+    const { error } = await st.sb.from(CFG.SPILLS).select('rant_id',{count:'exact',head:true});
     if(error) throw error;
 
-    console.log('✅ Supabase OK');
-    setConn(true, '🟢 Online');
+    const label = st.currentUser ? ('Online as @'+st.currentUser) : 'Online';
+    setConn(true, label);
     setupRealtime();
     return true;
   } catch(e){
-    console.error('❌ Init error:', e);
-    setConn(false, '❌ '+e.message);
+    console.error('[INIT]', e.message);
+    setConn(false, 'Error: '+e.message);
     return false;
   }
 }
 
 function setupRealtime(){
-  st.sb.channel('rx-live')
-    .on('postgres_changes',{ event:'INSERT', schema:'public', table:CFG.TBL_REACTIONS },
-      p => { if(p.new?.rant_id) refreshCounts(p.new.rant_id); })
+  st.sb.channel('rx')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:CFG.REACTIONS},
+      p=>{ if(p.new?.rant_id) refreshCounts(p.new.rant_id); })
     .subscribe();
 }
 
-// ============================================
-// LOAD DATA
-// ============================================
+// ============================================================
+// LOAD SPILLS
+// FIX #1: Exclude rants milik currentUser dengan .neq()
+// ============================================================
 async function loadSpills(isNew=false){
   setLoading(true);
   if(isNew){ st.seed=Math.random(); st.offset+=10; }
-
-  if(!st.online || !st.sb){
-    setLoading(false);
-    renderSpills();
-    return;
-  }
+  if(!st.online||!st.sb){ setLoading(false); renderSpills(); return; }
 
   try {
-    const { data: rantsData, error: rantsError } = await st.sb
-      .from(CFG.TBL_RANTS)
-      .select('id, content, mood, author, created_at, vibes')
-      .order('created_at', { ascending: false })
-      .range(st.offset, st.offset + 99);
+    // Step 1: ambil spills (is_anonymous flag)
+    const { data:spillsData, error:se } = await st.sb
+      .from(CFG.SPILLS)
+      .select('rant_id, is_anonymous')
+      .order('rant_id',{ascending:false})
+      .range(st.offset, st.offset+99);
+    if(se) throw se;
+    if(!spillsData||!spillsData.length){ setLoading(false); renderSpills(); return; }
 
-    if(rantsError) throw rantsError;
-    
-    if(!rantsData || rantsData.length === 0){
-      setLoading(false);
-      renderSpills();
-      return;
-    }
+    const spillMap={};
+    spillsData.forEach(s=>{ spillMap[s.rant_id]=s; });
+    const ids=spillsData.map(s=>s.rant_id);
 
-    const rantIds = rantsData.map(r => r.id);
-    const { data: spillsData, error: spillsError } = await st.sb
-      .from(CFG.TBL_SPILLS)
-      .select('rant_id, is_anonymous, response_count, vibes')
-      .in('rant_id', rantIds);
+    // Step 2: ambil rant content, filter milik sendiri
+    let q = st.sb.from(CFG.RANTS)
+      .select('id, content, mood, author, created_at')
+      .in('id', ids)
+      .order('created_at',{ascending:false});
 
-    if(spillsError) console.warn('Spills error:', spillsError);
-
-    const spillsMap = {};
-    if(spillsData){
-      spillsData.forEach(s => { spillsMap[s.rant_id] = s; });
-    }
-
-    let mergedData = [];
-    
-    if(spillsData && spillsData.length > 0){
-      mergedData = rantsData
-        .filter(r => spillsMap[r.id])
-        .map(r => ({
-          rant_id: r.id,
-          content: r.content,
-          mood: r.mood || 'surviving',
-          author: r.author,
-          created_at: r.created_at,
-          is_anonymous: spillsMap[r.id].is_anonymous || false,
-          vibes: spillsMap[r.id].vibes || r.vibes || {},
-          response_count: spillsMap[r.id].response_count || 0
-        }));
-    } else {
-      mergedData = rantsData.map(r => ({
-        rant_id: r.id,
-        content: r.content,
-        mood: r.mood || 'surviving',
-        author: r.author,
-        created_at: r.created_at,
-        is_anonymous: false,
-        vibes: r.vibes || {},
-        response_count: 0
-      }));
-    }
-
+    // FIX #1: buang rants milik user sendiri dari query
     if(st.currentUser){
-      mergedData = mergedData.filter(s => s.author !== st.currentUser);
+      q = q.neq('author', st.currentUser);
     }
 
-    st.spills = mergedData;
-    
-    const counter = document.getElementById('spill-counter');
-    if(counter){
-      counter.textContent = `${mergedData.length} spills ditemukan`;
-      counter.style.display = 'block';
-    }
+    const { data:rantsData, error:re } = await q;
+    if(re) throw re;
 
-    if(mergedData.length > 0){
-      const spillIds = mergedData.map(s => s.rant_id);
-      await loadReactions(spillIds);
-      await loadMyReactions(spillIds);
-    }
+    st.spills = (rantsData||[]).map(r=>({
+      rant_id:      r.id,
+      content:      r.content,
+      mood:         r.mood||'surviving',
+      author:       r.author||'',
+      created_at:   r.created_at,
+      is_anonymous: spillMap[r.id]?.is_anonymous||false,
+    }));
 
+    console.log('[LOAD]', st.spills.length, 'spills (sendiri difilter)');
+    const ctr=document.getElementById('spill-counter');
+    if(ctr){ ctr.textContent=st.spills.length+' spills'; ctr.style.display='block'; }
+
+    if(st.spills.length){
+      const rids=st.spills.map(s=>s.rant_id);
+      await loadReactions(rids);
+      await loadMyReactions(rids);
+    }
   } catch(e){
-    console.error('❌ loadSpills error:', e);
+    console.error('[LOAD]', e.message);
     toast('Gagal memuat: '+e.message, true);
   }
 
@@ -478,198 +422,150 @@ async function loadSpills(isNew=false){
   renderSpills();
 }
 
+// ============================================================
+// LOAD REACTIONS
+// FIX #2: Select hanya kolom 'emoji' (reaction_type tidak ada)
+// ============================================================
 async function loadReactions(ids){
   if(!st.sb||!ids.length) return;
   try {
-    // Coba load dengan reaction_type (untuk constraint yang pakai text)
     const { data, error } = await st.sb
-      .from(CFG.TBL_REACTIONS)
-      .select('rant_id, reaction_type, emoji')
+      .from(CFG.REACTIONS)
+      .select('rant_id, emoji')
       .in('rant_id', ids);
 
     if(error) throw error;
 
-    ids.forEach(id=>{ st.reactions[id]={}; REACTIONS.forEach(r=>{ st.reactions[id][r.id]=0; }); });
-    
+    // Init counters
+    ids.forEach(id=>{ st.reactions[id]={}; REACTIONS.forEach(r=>{ st.reactions[id][r.key]=0; }); });
+
+    // emoji kolom berisi TEXT keyword: 'relatable', 'hug', dst
     (data||[]).forEach(row=>{
-      // Cari emoji yang match dengan reaction_type
-      const reaction = REACTIONS.find(r => r.type === row.reaction_type || r.id === row.emoji);
-      if(reaction && st.reactions[row.rant_id]){
-        st.reactions[row.rant_id][reaction.id] = (st.reactions[row.rant_id][reaction.id]||0)+1;
+      if(row.rant_id && row.emoji && st.reactions[row.rant_id]?.[row.emoji]!==undefined){
+        st.reactions[row.rant_id][row.emoji]++;
       }
     });
-  } catch(e){ console.error('❌ loadReactions:', e.message); }
+  } catch(e){ console.error('[REACTIONS]', e.message); }
 }
 
+// ============================================================
+// LOAD MY REACTIONS
+// FIX #2: Select hanya kolom 'emoji'
+// ============================================================
 async function loadMyReactions(ids){
-  if(!st.sb||!ids.length||!st.userId) return;
+  if(!st.sb||!ids.length||!st.sessionId) return;
   try {
     const { data, error } = await st.sb
-      .from(CFG.TBL_REACTIONS)
-      .select('rant_id, reaction_type, emoji')
-      .eq('user_id', st.userId)
+      .from(CFG.REACTIONS)
+      .select('rant_id, emoji')
+      .eq('user_id', st.sessionId)
       .in('rant_id', ids);
 
     if(error) throw error;
     st.userReacted.clear();
-    (data||[]).forEach(r=> {
-      const reaction = REACTIONS.find(rx => rx.type === r.reaction_type || rx.id === r.emoji);
-      if(reaction) st.userReacted.add(`${r.rant_id}-${reaction.id}`);
-    });
-  } catch(e){ console.error('❌ loadMyReactions:', e.message); }
+    // emoji berisi TEXT keyword
+    (data||[]).forEach(r=>{ if(r.emoji) st.userReacted.add(r.rant_id+'-'+r.emoji); });
+    console.log('[MY_REACTIONS]', st.userReacted.size, 'reactions');
+  } catch(e){ console.error('[MY_REACTIONS]', e.message); }
 }
 
-async function loadArtefacts(){
-  if(!st.online||!st.sb) return;
-  try {
-    const { data } = await st.sb.from(CFG.TBL_ARTEFACTS)
-      .select('id, author, url, note, created_at')
-      .eq('has_face', false)
-      .order('created_at',{ascending:false})
-      .limit(50);
-    if(data) st.artefacts = data;
-  } catch(e){ console.error('❌ loadArtefacts:', e.message); }
-}
+// ============================================================
+// REACT TO SPILL
+// FIX #2: Insert reactions.emoji dengan TEXT keyword bukan emoji char
+// FIX #3: Unlock peaking menggunakan rawAuthor konsisten
+// ============================================================
+async function reactToSpill(rantId, reactionKey, rawAuthor, btnEl){
+  // reactionKey = 'relatable'|'hug'|'same'|'mood'|'tea'|'fire'
+  const uiKey = rantId+'-'+reactionKey;
 
-// ============================================
-// REACTIONS - FIX: Gunakan reaction_type bukan emoji
-// ============================================
-async function reactToSpill(rantId, emoji, author, btnEl){
-  const key = `${rantId}-${emoji}`;
-  
-  if(st.userReacted.has(key)){
-    toast('Sudah bereaksi!',true);
-    return;
+  if(st.userReacted.has(uiKey)){ toast('Sudah bereaksi!',true); return; }
+
+  const rx = REACTIONS.find(r=>r.key===reactionKey);
+  if(!rx) return;
+
+  // Cegah bereaksi ke rant sendiri (double check)
+  if(st.currentUser && rawAuthor === st.currentUser){
+    toast('Tidak bisa bereaksi ke rant sendiri',true); return;
   }
 
-  // Cari reaction_type dari emoji
-  const reactionDef = REACTIONS.find(r => r.id === emoji);
-  if(!reactionDef){
-    toast('Emoji tidak valid', true);
-    return;
-  }
-
-  const countEl = document.getElementById(`count-${rantId}-${emoji}`);
+  const countEl = document.getElementById('count-'+rantId+'-'+reactionKey);
   const prev = parseInt(countEl?.textContent||'0');
 
   // Optimistic UI
-  if(countEl) countEl.textContent = prev + 1;
-  if(btnEl) btnEl.classList.add('reacted');
-  if(!st.reactions[rantId]) st.reactions[rantId] = {};
-  st.reactions[rantId][emoji] = prev + 1;
-  st.userReacted.add(key);
+  if(countEl) countEl.textContent = prev+1;
+  if(btnEl)   btnEl.classList.add('reacted');
+  if(!st.reactions[rantId]) st.reactions[rantId]={};
+  st.reactions[rantId][reactionKey] = prev+1;
+  st.userReacted.add(uiKey);
 
-  // Unlock peaking
-  if(author && author !== 'anonim' && !unlocked.has(author)){
-    unlocked.add(author);
-    toast('🔓 Peaking unlocked!');
-    console.log('🔓 Unlocked peaking for:', author);
+  // FIX #3: Unlock peaking pakai rawAuthor (sama dengan yang disimpan di DB)
+  // unlocked.has() harus pakai key yang IDENTIK dengan yang di-add di sini
+  let justUnlocked = false;
+  if(rawAuthor && !unlocked.has(rawAuthor)){
+    unlocked.add(rawAuthor);
+    justUnlocked = true;
+    console.log('[PEAKING] Unlocked:', rawAuthor);
+    // Re-render supaya icon kunci berubah menjadi mata
+    renderSpills();
+    toast('Unlocked! Klik nama untuk lihat profil.');
   }
 
-  // Simpan ke Supabase dengan reaction_type
+  // Simpan ke Supabase
   if(st.online && st.sb){
     try {
-      const payload = {
-        rant_id: rantId,
-        reaction_type: reactionDef.type,  // Gunakan type (text) bukan emoji
-        user_id: st.userId,
-        created_at: new Date().toISOString()
-      };
-
-      // Coba insert dengan reaction_type dulu
-      console.log('💾 Saving reaction:', payload);
-      
-      let { data, error } = await st.sb
-        .from(CFG.TBL_REACTIONS)
-        .insert(payload)
-        .select();
-
-      // Jika error karena kolom reaction_type tidak ada, coba dengan emoji
-      if(error && error.message && error.message.includes('reaction_type')){
-        console.log('⚠️ reaction_type not found, trying emoji column...');
-        const payloadEmoji = {
-          rant_id: rantId,
-          emoji: emoji,
-          user_id: st.userId,
-          created_at: new Date().toISOString()
-        };
-        const result = await st.sb.from(CFG.TBL_REACTIONS).insert(payloadEmoji).select();
-        data = result.data;
-        error = result.error;
-      }
+      const { error } = await st.sb.from(CFG.REACTIONS).insert({
+        rant_id:      rantId,
+        artefact_id:  null,          // FIX: constraint check_rant_or_artefact wajib explicit null
+        emoji:        reactionKey,
+        user_id:      st.sessionId,
+        created_at:   new Date().toISOString()
+      });
 
       if(error){
-        if(error.code === '23505' || error.code === '23514'){
-          console.log('⚠️ Constraint violation:', error.message);
-          toast(emoji+' Tersimpan!');
-          return;
-        }
+        // 23505 = unique constraint (sudah react) = OK
+        // 23514 = check constraint = berarti nilai keyword salah
+        if(error.code==='23505'){ toast(rx.emoji+' OK'); return; }
         throw error;
       }
-
-      console.log('✅ Reaction saved:', data);
-      toast(emoji+' Tersimpan!');
-
+      if(!justUnlocked) toast(rx.emoji+' Tersimpan!');
+      console.log('[REACT] Saved:', reactionKey, 'for', rantId);
     } catch(e){
-      console.error('❌ Gagal simpan reaction:', e);
+      console.error('[REACT]', e.message);
       // Rollback
-      if(countEl) countEl.textContent = prev;
-      if(btnEl) btnEl.classList.remove('reacted');
-      st.reactions[rantId][emoji] = prev;
-      st.userReacted.delete(key);
+      if(countEl) countEl.textContent=prev;
+      if(btnEl)   btnEl.classList.remove('reacted');
+      st.reactions[rantId][reactionKey]=prev;
+      st.userReacted.delete(uiKey);
+      if(justUnlocked){ unlocked.delete(rawAuthor); }
       toast('Gagal: '+e.message, true);
     }
-  } else {
-    // Offline
-    const offline = JSON.parse(localStorage.getItem('offline_reactions')||'[]');
-    offline.push({ 
-      rant_id: rantId, 
-      reaction_type: reactionDef.type,
-      emoji: emoji,
-      user_id: st.userId,
-      created_at: new Date().toISOString()
-    });
-    localStorage.setItem('offline_reactions', JSON.stringify(offline));
-    toast(emoji+' Tersimpan (offline)');
   }
 }
 
 async function refreshCounts(rantId){
   if(!st.sb||!rantId) return;
   try {
-    const { data } = await st.sb.from(CFG.TBL_REACTIONS)
-      .select('reaction_type, emoji')
-      .eq('rant_id',rantId);
-    
+    const { data } = await st.sb.from(CFG.REACTIONS).select('emoji').eq('rant_id',rantId);
     const c={};
-    REACTIONS.forEach(r=>c[r.id]=0);
-    
-    (data||[]).forEach(r=>{
-      const reaction = REACTIONS.find(rx => rx.type === r.reaction_type || rx.id === r.emoji);
-      if(reaction) c[reaction.id]++;
-    });
-    
-    REACTIONS.forEach(r=>{ 
-      const el=document.getElementById(`count-${rantId}-${r.id}`); 
-      if(el) el.textContent=c[r.id]; 
-    });
+    REACTIONS.forEach(r=>c[r.key]=0);
+    (data||[]).forEach(r=>{ if(r.emoji&&c[r.emoji]!==undefined) c[r.emoji]++; });
+    REACTIONS.forEach(r=>{ const el=document.getElementById('count-'+rantId+'-'+r.key); if(el) el.textContent=c[r.key]; });
   } catch(e){}
 }
 
-// ============================================
-// RENDER
-// ============================================
-function setLoading(v){
-  st.loading=v;
-  const ca=document.getElementById('content-area');
-  const s=document.getElementById('status-text');
-  if(v){ 
-    ca.className='content-area loading'; 
-    ca.innerHTML='<div class="spinner"></div><p class="loading-text">Menyedu teh...</p>'; 
-    if(s) s.textContent='Memuat spills...'; 
-  } else { 
-    if(s) s.textContent=''; 
-  }
+// ============================================================
+// ARTEFACTS
+// ============================================================
+async function loadArtefacts(){
+  if(!st.online||!st.sb) return;
+  try {
+    const { data } = await st.sb.from(CFG.ARTEFACTS)
+      .select('id, author, url, note, created_at')
+      .eq('has_face',false)
+      .order('created_at',{ascending:false})
+      .limit(50);
+    if(data) st.artefacts=data;
+  } catch(e){ console.error('[ARTEFACTS]', e.message); }
 }
 
 function getRandArtefact(){
@@ -678,13 +574,22 @@ function getRandArtefact(){
 }
 
 function artefactCard(a){
-  const imgSrc = a.url || '';
-  const owner = displayAuthor(a.author, false);
-  return `<div class="artefak-card">
-    <div class="artefak-header"><span class="artefak-icon">📸</span><span class="artefak-label">Memori dari Jejak Lain</span></div>
-    <img src="${esc(imgSrc)}" class="artefak-image" alt="Artefak" onerror="this.parentNode.style.display='none'">
-    <div class="artefak-meta"><span class="artefak-owner">${esc(owner)}</span><span class="artefak-date">${fmtDate(a.created_at)}</span></div>
-  </div>`;
+  return '<div class="artefak-card">'
+    +'<div class="artefak-header"><span class="artefak-icon">📸</span><span class="artefak-label">Memori dari Jejak Lain</span></div>'
+    +'<img src="'+esc(a.url||'')+'" class="artefak-image" alt="Artefak" onerror="this.parentNode.style.display=\'none\'">'
+    +'<div class="artefak-meta"><span class="artefak-owner">'+esc(fmtAuthor(a.author,false))+'</span>'
+    +'<span class="artefak-date">'+fmtDate(a.created_at)+'</span></div></div>';
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function setLoading(v){
+  st.loading=v;
+  const ca=document.getElementById('content-area');
+  if(v){ ca.className='content-area loading'; ca.innerHTML='<div class="spinner"></div><p class="loading-text">Menyedu teh...</p>'; }
+  const s=document.getElementById('status-text');
+  if(s) s.textContent=v?'Memuat...':'';
 }
 
 function renderSpills(){
@@ -692,139 +597,158 @@ function renderSpills(){
   if(!ca||st.loading) return;
 
   let list=[...st.spills];
-  
+  // Safety net: buang rants sendiri di render layer juga
+  if(st.currentUser) list=list.filter(s=>s.author!==st.currentUser);
   if(st.filter!=='all') list=list.filter(s=>s.mood===st.filter);
   if(st.vibeMatch<100) list=list.filter(()=>Math.random()<st.vibeMatch/100);
 
   if(!list.length){
     ca.className='content-area';
-    ca.innerHTML='<div class="empty-state"><div class="empty-icon">🍃</div><div class="empty-text">Belum ada teh yang tumpah...</div><div class="empty-subtext">Jadilah yang pertama!</div></div>';
+    ca.innerHTML='<div class="empty-state"><div class="empty-icon">🍵</div>'
+      +'<div class="empty-text">Belum ada teh yang tumpah...</div>'
+      +'<div class="empty-subtext">Coba reset filter!</div></div>';
     return;
   }
 
   ca.className='content-area has-content';
   const html=[];
-  let rantCount = 0;
-  let artefactInserted = false;
 
-  const maxRants = 10;
-  const displayList = list.slice(0, maxRants);
+  // Bangun posisi artefak: setiap blok 7 rants, 1 artefak di posisi random dalam blok
+  const artefakPositions = new Set();
+  const totalRants = list.length;
+  for(let blok=0; blok<Math.ceil(totalRants/7); blok++){
+    const blokStart = blok*7;
+    const blokSize  = Math.min(7, totalRants - blokStart);
+    // Posisi random di dalam blok (0 sampai blokSize-1), geser 1 ke kanan supaya tidak di posisi 0 blok pertama
+    const randOffset = (blok===0) ? Math.floor(Math.random()*(blokSize-1))+1 : Math.floor(Math.random()*blokSize);
+    artefakPositions.add(blokStart + randOffset);
+  }
 
-  for(let i=0; i<displayList.length; i++){
-    const s=displayList[i];
-    
-    // Insert artefak setelah rant ke-9
-    if(rantCount === 9 && !artefactInserted){ 
-      const a = getRandArtefact(); 
-      if(a){
-        html.push(artefactCard(a));
-        artefactInserted = true;
-      }
-    }
+  let rantIdx = 0; // index ke dalam list (rants saja, tidak termasuk artefak)
+  for(let i=0;i<list.length;i++){
+    // Sisipkan artefak SEBELUM rant ini jika posisi ini terpilih
+    if(artefakPositions.has(i)){ const a=getRandArtefact(); if(a) html.push(artefactCard(a)); }
 
-    const rid = s.rant_id;
-    const author = displayAuthor(s.author, s.is_anonymous);
-    const pkey = s.is_anonymous ? null : s.author;
-    const safe = (s.author||'').replace(/'/g,"\\'");
-    const isUnlocked = pkey && unlocked.has(pkey);
+    const s=list[i];
+
+    const rid       = s.rant_id;
+    const rawAuthor = s.author;         // nilai mentah dari DB
+    const dispName  = fmtAuthor(rawAuthor, s.is_anonymous);
+    const canPeak   = !s.is_anonymous && rawAuthor;
+    const isOwn     = st.currentUser && rawAuthor===st.currentUser;
+
+    // FIX #3: cek unlocked pakai rawAuthor (sama persis dengan yang di-add)
+    const isPeeked  = canPeak && unlocked.has(rawAuthor);
+
+    // Escape untuk onclick attribute
+    const safeKey = JSON.stringify(rawAuthor);
 
     const rxHtml = REACTIONS.map(r=>{
-      const count = (st.reactions[rid]||{})[r.id] ?? 0;
-      const reacted = st.userReacted.has(`${rid}-${r.id}`);
-      return `<button class="reaction-btn ${reacted?'reacted':''}" onclick="reactToSpill('${rid}','${r.id}','${safe}',this)">
-        <span class="reaction-emoji">${r.id}</span>
-        <span class="reaction-count" id="count-${rid}-${r.id}">${count}</span>
-      </button>`;
+      const count   = (st.reactions[rid]||{})[r.key]||0;
+      const reacted = st.userReacted.has(rid+'-'+r.key);
+      // FIX #1: disable jika rant sendiri
+      if(isOwn){
+        return '<button class="reaction-btn" disabled title="Tidak bisa bereaksi ke rant sendiri">'
+          +'<span class="reaction-emoji">'+r.emoji+'</span>'
+          +'<span class="reaction-count">'+count+'</span></button>';
+      }
+      // onclick kirim reactionKey (TEXT), bukan emoji
+      return '<button class="reaction-btn'+(reacted?' reacted':'')+'"'
+        +' onclick="reactToSpill(\''+esc(rid)+'\',\''+r.key+'\','+safeKey+',this)">'
+        +'<span class="reaction-emoji">'+r.emoji+'</span>'
+        +'<span class="reaction-count" id="count-'+rid+'-'+r.key+'">'+count+'</span></button>';
     }).join('');
 
-    html.push(`<div class="spill-card">
-      <div class="spill-header">
-        <span class="spill-author ${pkey?(isUnlocked?'unlocked':'locked'):''}"
-          onclick="${pkey?`peakUser('${safe}','${author}')`:''}"
-          style="${pkey?'':'cursor:default'}">${esc(author)}</span>
-        <span class="spill-mood" style="color:${getMoodColor(s.mood)}">${s.mood||''}</span>
-      </div>
-      <div class="spill-content">${esc(s.content)}</div>
-      <div class="spill-reactions">${rxHtml}</div>
-    </div>`);
-    
-    rantCount++;
+    html.push('<div class="spill-card">'
+      +'<div class="spill-header">'
+      +'<span class="spill-author'
+        +(canPeak?' clickable':'')
+        +(canPeak?(isPeeked?' peeked':' locked'):'')
+        +'"'
+        +(canPeak?' onclick="peakUser('+safeKey+',\''+esc(dispName)+'\')\"':'')
+        +(canPeak?'':' style="cursor:default"')
+        +'>'+esc(dispName)+'</span>'
+      +'<span class="spill-mood" style="color:'+getMoodColor(s.mood)+'">'+esc(s.mood)+'</span>'
+      +'</div>'
+      +'<div class="spill-content">'+esc(s.content)+'</div>'
+      +'<div class="spill-reactions">'+rxHtml+'</div>'
+      +'</div>');
   }
 
   ca.innerHTML=html.join('');
 }
 
-// ============================================
+// ============================================================
 // PEAKING
-// ============================================
-async function peakUser(author, displayName){
-  if(!author || author === 'null' || author === 'anonim'){ 
-    toast('Tidak tersedia',true); 
-    return; 
-  }
-  
-  if(!unlocked.has(author)){ 
-    toast('🔒 React dulu untuk unlock peaking!',true); 
-    return; 
-  }
-  
-  st.peakingId = author;
-  document.getElementById('peaking-username').textContent = displayName || ('@'+formatUsername(author));
-  
-  const rc = document.getElementById('peaking-rants');
-  const ac = document.getElementById('peaking-artefacts');
-  rc.innerHTML = '<div class="loading-text">Loading...</div>';
-  ac.innerHTML = '';
+// FIX #3: rawAuthor sebagai lookup key (identik dengan unlocked Set)
+// ============================================================
+async function peakUser(rawAuthor, displayName){
+  if(!rawAuthor){ toast('Tidak tersedia',true); return; }
+  if(!unlocked.has(rawAuthor)){ toast('React dulu untuk unlock peaking!',true); return; }
 
-  if(st.online && st.sb){
-    try {
-      const { data:rants } = await st.sb.from(CFG.TBL_RANTS)
-        .select('id, content, mood, created_at')
-        .eq('author', author)
-        .order('created_at',{ascending:false});
+  document.getElementById('peaking-username').textContent = displayName || fmtAuthor(rawAuthor,false);
 
-      const { data:arts } = await st.sb.from(CFG.TBL_ARTEFACTS)
-        .select('id, url, note, created_at')
-        .eq('author', author)
-        .eq('has_face', false)
-        .limit(6);
-
-      rc.innerHTML = (rants && rants.length)
-        ? rants.map(r=>`<div class="peaking-rant-card">
-            <div class="peaking-rant-date">${fmtDate(r.created_at)}</div>
-            <div class="peaking-rant-content">${esc(r.content)}</div>
-            <span class="peaking-rant-mood" style="color:${getMoodColor(r.mood)};border-color:${getMoodColor(r.mood)}">${r.mood}</span>
-          </div>`).join('')
-        : '<div class="empty-text">Tidak ada rants publik.</div>';
-
-      ac.innerHTML = (arts && arts.length)
-        ? arts.map(a=>`<div class="artefact-item"><img src="${esc(a.url||'')}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'"></div>`).join('')
-        : '<div class="empty-text">Tidak ada artefak.</div>';
-    } catch(e){ 
-      console.error('❌ Peaking error:', e);
-      rc.innerHTML='<div class="empty-text">Error loading data.</div>';
-    }
-  }
+  const rc=document.getElementById('peaking-rants');
+  const ac=document.getElementById('peaking-artefacts');
+  rc.innerHTML='<div class="loading-text" style="padding:20px;text-align:center">Loading...</div>';
+  ac.innerHTML='';
 
   document.getElementById('peaking-modal').classList.add('active');
   document.body.style.overflow='hidden';
+
+  if(!st.online||!st.sb){
+    rc.innerHTML='<div style="color:var(--ts);padding:20px;text-align:center">Offline</div>';
+    return;
+  }
+
+  try {
+    // Query pakai rawAuthor (nilai DB asli)
+    const { data:rants, error:re } = await st.sb.from(CFG.RANTS)
+      .select('id, content, mood, created_at')
+      .eq('author', rawAuthor)
+      .order('created_at',{ascending:false})
+      .limit(20);
+    if(re) throw re;
+
+    const { data:arts } = await st.sb.from(CFG.ARTEFACTS)
+      .select('id, url, note, created_at')
+      .eq('author', rawAuthor)
+      .eq('has_face',false)
+      .limit(6);
+
+    rc.innerHTML = (rants&&rants.length)
+      ? rants.map(r=>'<div class="peaking-rant-card">'
+          +'<div class="peaking-rant-date">'+fmtDate(r.created_at)+'</div>'
+          +'<div class="peaking-rant-content">'+esc(r.content)+'</div>'
+          +'<span class="peaking-rant-mood" style="color:'+getMoodColor(r.mood)+';border-color:'+getMoodColor(r.mood)+'">'+esc(r.mood)+'</span>'
+          +'</div>').join('')
+      : '<div style="color:var(--ts);padding:20px;text-align:center">Tidak ada rants publik.</div>';
+
+    ac.innerHTML = (arts&&arts.length)
+      ? arts.map(a=>'<div class="artefact-item">'
+          +'<img src="'+esc(a.url||'')+'" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML=\'box\'">'
+          +'</div>').join('')
+      : '<div style="color:var(--ts);font-size:12px;padding:20px;text-align:center;grid-column:1/-1">Tidak ada artefak.</div>';
+
+  } catch(e){
+    console.error('[PEAKING]', e.message);
+    rc.innerHTML='<div style="color:var(--at);padding:20px;text-align:center">Error: '+esc(e.message)+'</div>';
+  }
 }
 
-function closePeaking(){ 
-  document.getElementById('peaking-modal').classList.remove('active'); 
-  document.body.style.overflow=''; 
-  st.peakingId = null; 
+function closePeaking(){
+  document.getElementById('peaking-modal').classList.remove('active');
+  document.body.style.overflow='';
 }
 
-// ============================================
-// FILTERS & EVENTS
-// ============================================
-function filterMood(mood){
-  st.filter=mood;
-  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.toggle('active',b.dataset.mood===mood));
+// ============================================================
+// FILTERS & MISC
+// ============================================================
+function filterMood(m){
+  st.filter=m;
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.toggle('active',b.dataset.mood===m));
   renderSpills();
 }
-
 function resetFilters(){
   st.filter='all'; st.vibeMatch=87; st.offset=0; st.seed=Math.random();
   document.getElementById('vibe-slider').value=87;
@@ -832,39 +756,27 @@ function resetFilters(){
   document.querySelectorAll('.mood-btn').forEach(b=>b.classList.toggle('active',b.dataset.mood==='all'));
   loadSpills();
 }
-
-function createNewSpill(){ 
-  st.offset = 0;
-  loadSpills(true); 
-}
-
+function createNewSpill(){ st.offset=0; loadSpills(true); }
 function toggleMenu(){ toast('Menu coming soon'); }
 function skipVibeMatch(t){ document.getElementById(t==='chaotic'?'chaotic-good-card':'caregiver-card').style.display='none'; }
-function sendSignal(){ toast('Isyarat terkirim 🔥'); }
+function sendSignal(){ toast('Isyarat terkirim!'); }
 
-// ============================================
+// ============================================================
 // INIT
-// ============================================
+// ============================================================
 document.addEventListener('DOMContentLoaded', async()=>{
   const ok = await initSupabase();
-  
-  document.getElementById('vibe-slider').addEventListener('input', e=>{
+  document.getElementById('vibe-slider').addEventListener('input',e=>{
     st.vibeMatch=+e.target.value;
     document.getElementById('vibe-percentage').textContent=st.vibeMatch+'%';
     renderSpills();
   });
-
-  if(ok){ 
-    await loadArtefacts(); 
-    await loadSpills(); 
-  } else { 
-    setLoading(false);
-    renderSpills(); 
-  }
+  if(ok){ await loadArtefacts(); await loadSpills(); }
+  else   { setLoading(false); renderSpills(); }
 });
 
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closePeaking(); });
 document.getElementById('peaking-modal').addEventListener('click',e=>{ if(e.target.id==='peaking-modal') closePeaking(); });
-</script>
+<\/script>
 </body>
 </html>
