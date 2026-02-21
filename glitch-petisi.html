@@ -686,6 +686,7 @@
     }
   </style>
 <base target="_blank">
+<base target="_blank">
 </head>
 <body>
   <div class="wrapper">
@@ -936,35 +937,15 @@
     </div>
   </div>
 
-  <script>
-    // Supabase Config
+  <script type="module">
+    // Supabase Config - PERBAIKAN: hapus spasi di URL
     const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-    async function supabaseFetch(table, method = 'GET', body = null, filter = '') {
-      const headers = {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      };
-      
-      let url = `${SUPABASE_URL}/rest/v1/${table}${filter}`;
-      let options = { method, headers };
-      
-      if (body) {
-        options.body = JSON.stringify(body);
-      }
-      
-      const res = await fetch(url, options);
-      const text = await res.text();
-      
-      if (!res.ok) {
-        throw new Error(text || `HTTP ${res.status}`);
-      }
-      
-      return text ? JSON.parse(text) : [];
-    }
+    // Import Supabase client
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+    
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // Stance templates
     const stanceTexts = {
@@ -974,8 +955,8 @@
     };
 
     // State
-    let currentUsername = localStorage.getItem('nope_username');
-    let isNewUser = !currentUsername;
+    let currentUsername = null;
+    let isNewUser = false;
     let selectedStance = null;
     let customStanceText = null;
     let tempUsername = null;
@@ -993,8 +974,54 @@
     const signBtnNew = document.getElementById('signBtnNew');
     const signBtnExisting = document.getElementById('signBtnExisting');
 
+    // Check existing session from Supabase
+    async function checkSession() {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Session error:', error);
+          return false;
+        }
+        
+        if (session?.user) {
+          // User is logged in via Supabase
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (profile?.username) {
+            currentUsername = profile.username;
+            localStorage.setItem('nope_username', currentUsername);
+            return true;
+          }
+        }
+        
+        // Fallback to localStorage if no Supabase session
+        const storedUsername = localStorage.getItem('nope_username');
+        if (storedUsername) {
+          currentUsername = storedUsername;
+          return true;
+        }
+        
+        return false;
+      } catch (e) {
+        console.error('Check session error:', e);
+        // Fallback to localStorage
+        const storedUsername = localStorage.getItem('nope_username');
+        if (storedUsername) {
+          currentUsername = storedUsername;
+          return true;
+        }
+        return false;
+      }
+    }
+
     // Initialize View
-    function initializeView() {
+    async function initializeView() {
+      const isLoggedIn = await checkSession();
       const hasSigned = localStorage.getItem('nope_petisi_signed') === 'true';
       
       if (hasSigned) {
@@ -1002,7 +1029,7 @@
         newUserView.style.display = 'none';
         existingUserView.style.display = 'none';
         alreadySignedView.style.display = 'block';
-      } else if (currentUsername) {
+      } else if (isLoggedIn && currentUsername) {
         // Existing user - show existing user CTA
         newUserView.style.display = 'none';
         existingUserView.style.display = 'block';
@@ -1068,7 +1095,7 @@
     });
 
     // Stance selection handlers
-    function setupStanceHandlers(containerId, confirmBtnId, inputId, isNewUser) {
+    function setupStanceHandlers(containerId, confirmBtnId, inputId) {
       const container = document.getElementById(containerId);
       const confirmBtn = document.getElementById(confirmBtnId);
       const customInput = document.getElementById(inputId);
@@ -1102,11 +1129,10 @@
       });
     }
 
-    setupStanceHandlers('stanceOptions', 'confirmStanceBtn', 'customStanceInput', false);
-    setupStanceHandlers('newUserStanceOptions', 'confirmNewUserStanceBtn', 'newUserCustomStanceInput', true);
+    setupStanceHandlers('stanceOptions', 'confirmStanceBtn', 'customStanceInput');
+    setupStanceHandlers('newUserStanceOptions', 'confirmNewUserStanceBtn', 'newUserCustomStanceInput');
 
     function resetStanceSelection(type) {
-      const suffix = type === 'newUser' ? 'newUser' : '';
       const container = document.getElementById(type === 'newUser' ? 'newUserStanceOptions' : 'stanceOptions');
       const customInput = document.getElementById(type === 'newUser' ? 'newUserCustomStanceInput' : 'customStanceInput');
       const confirmBtn = document.getElementById(type === 'newUser' ? 'confirmNewUserStanceBtn' : 'confirmStanceBtn');
@@ -1148,11 +1174,17 @@
           content = stanceTexts[selectedStance];
         }
 
-        await supabaseFetch('rants', 'POST', {
-          username: username,
-          content: content,
-          zone: 'nyambat'
-        });
+        // Insert to rants table via Supabase client
+        const { error } = await supabase
+          .from('rants')
+          .insert([{
+            username: username,
+            content: content,
+            zone: 'nyambat',
+            created_at: new Date().toISOString()
+          }]);
+
+        if (error) throw error;
 
         // Mark as signed
         localStorage.setItem('nope_petisi_signed', 'true');
@@ -1169,13 +1201,10 @@
         initializeView();
 
         alert('✅ Terima kasih! Suaramu sudah tercatat.\n\nLihat suaramu dan bergabung dengan komunitas NOPE!');
-        
-        // Optional: redirect to community
-        // window.location.href = 'saynope-nyambat.html';
 
       } catch (e) {
         console.error('Error:', e);
-        alert('Gagal memproses. Coba lagi.');
+        alert('Gagal memproses: ' + e.message);
         confirmBtn.disabled = false;
         confirmBtn.textContent = modalId === 'newUserStanceModal' ? 'Tanda Tangani Petisi' : 'Tanda Tangani';
       }
@@ -1184,11 +1213,15 @@
     // Load signature count
     async function loadSignatureCount() {
       try {
-        const rants = await supabaseFetch('rants', 'GET', null,
-          `?zone=eq.nyambat&content=ilike.*%23MakanBergiziGratis*&select=id`
-        );
+        const { data: rants, error } = await supabase
+          .from('rants')
+          .select('id')
+          .eq('zone', 'nyambat')
+          .ilike('content', '%#MakanBergiziGratis%');
         
-        const count = rants.length + 2800;
+        if (error) throw error;
+        
+        const count = (rants?.length || 0) + 2800;
         document.getElementById('signatureCount').textContent = count.toLocaleString('id-ID');
       } catch (e) {
         console.error('Failed to load count:', e);
@@ -1200,7 +1233,9 @@
     loadSignatureCount();
 
     // Share functionality
-    const shareMessage = `🔥 PETISI GEN Z: MAKAN BERGIZI GRATIS HARUS EFISIEN!
+    const getShareMessage = () => {
+      const count = document.getElementById('signatureCount').textContent;
+      return `🔥 PETISI GEN Z: MAKAN BERGIZI GRATIS HARUS EFISIEN!
 
 Pemerintah mau kasih makan gratis ke 27 juta anak.
 Tapi sistemnya boros dan nggak adil! 😤
@@ -1213,19 +1248,21 @@ Kita butuh solusi yang lebih baik:
 ✍️ Tanda tangan di sini:
 ${window.location.href}
 
-Sudah ${document.getElementById('signatureCount').textContent}+ Gen Z bersuara.
+Sudah ${count}+ Gen Z bersuara.
 Target: 10.000 untuk dikirim ke pemerintah.
 
 Suara lo, buat masa depan lo.
 — NOPE (Platform Gen Z Indonesia)`;
+    };
 
     document.getElementById('shareWhatsApp').addEventListener('click', () => {
-      const url = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
+      const url = `https://wa.me/?text=${encodeURIComponent(getShareMessage())}`;
       window.open(url, '_blank');
     });
 
     document.getElementById('shareTwitter').addEventListener('click', () => {
-      const tweetText = `🔥 Gen Z Indonesia bersuara! Petisi #MakanBergiziGratis harus efisien & transparan. Sudah ${document.getElementById('signatureCount').textContent}+ tanda tangan!
+      const count = document.getElementById('signatureCount').textContent;
+      const tweetText = `🔥 Gen Z Indonesia bersuara! Petisi #MakanBergiziGratis harus efisien & transparan. Sudah ${count}+ tanda tangan!
 
 Ikut dukung: ${window.location.href}
 
