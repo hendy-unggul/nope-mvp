@@ -590,7 +590,6 @@
     let selectedStance = null;
     let customStanceText = null;
     let tempUsername = null;
-    let dbError = false;
 
     // Stance texts
     const stanceTexts = {
@@ -614,10 +613,8 @@
         showView('newUserView');
       }
 
-      // Try to load count, but don't fail if DB error
-      loadCount().catch(() => {
-        // Silent fail - use default count
-      });
+      // Load count
+      loadCount();
     }
 
     function showView(viewId) {
@@ -631,7 +628,7 @@
       showView('errorView');
     }
 
-    // Supabase fetch with better error handling
+    // Supabase fetch
     async function supabaseFetch(table, method, body, query) {
       const url = SUPABASE_URL + '/rest/v1/' + table + (query || '');
       const options = {
@@ -657,15 +654,13 @@
       return text ? JSON.parse(text) : [];
     }
 
-    // Load signature count - try multiple approaches
+    // Load signature count - count all rants
     async function loadCount() {
       try {
-        // Try with zone filter first
-        const data = await supabaseFetch('rants', 'GET', null, '?select=id&zone=eq.nyambat');
+        const data = await supabaseFetch('rants', 'GET', null, '?select=id');
         updateCount(data.length + 2800);
       } catch (e) {
         console.log('Count query failed:', e.message);
-        // Don't show error to user, just keep default
       }
     }
 
@@ -802,7 +797,7 @@
     }
 
     // Submit signature
-    async function submitSignature(username, modalId) {
+    async function submitSignature(username, modalId, isNewUser = false) {
       const btn = document.querySelector('#' + modalId + ' .modal-btn.primary');
       btn.disabled = true;
       btn.textContent = 'MEMPROSES...';
@@ -811,33 +806,38 @@
         let content = selectedStance === 'custom' ? customStanceText : stanceTexts[selectedStance];
         if (!content.includes('#MakanBergiziGratis')) content += ' #MakanBergiziGratis';
 
-        // Try to insert - use minimal columns first
-        try {
-          await supabaseFetch('rants', 'POST', {
-            username: username,
-            content: content
-            // Removed zone column - might not exist
-          });
-        } catch (dbError) {
-          console.error('DB Error:', dbError);
-          // If DB fails, still save locally and show success
-          // This ensures user experience even if DB has issues
+        // 1. Insert user ke tabel users jika user baru
+        if (isNewUser) {
+          try {
+            await supabaseFetch('users', 'POST', {
+              username: username,
+              created_at: new Date().toISOString()
+            });
+          } catch (userError) {
+            // Jika error karena username sudah ada, lanjutkan saja
+            console.log('User might already exist:', userError.message);
+          }
         }
 
-        // Always save locally
+        // 2. Insert rant ke tabel rants dengan kolom yang benar (author, bukan username)
+        await supabaseFetch('rants', 'POST', {
+          author: username,
+          content: content,
+          mood: 'chaotic',
+          created_at: new Date().toISOString()
+        });
+
+        // 3. Simpan ke localStorage
         localStorage.setItem('nope_petisi_signed', 'true');
+        localStorage.setItem('nope_username', username);
         
-        // Update UI
-        document.getElementById(modalId).classList.remove('active');
-        
-        // Update count locally
+        // 4. Update UI count
         const currentCount = parseInt(document.getElementById('signatureCount').textContent.replace(/[.,]/g, ''));
         updateCount(currentCount + 1);
         
-        // Re-init view
-        init();
-        
-        alert('✅ Terima kasih! Suaramu sudah tercatat.');
+        // 5. Redirect ke jejak.html dengan parameter rant
+        const rantParam = encodeURIComponent(content);
+        window.location.href = `jejak.html?rant=${rantParam}&username=${encodeURIComponent(username)}`;
 
       } catch (e) {
         alert('Gagal: ' + e.message);
@@ -846,11 +846,8 @@
       }
     }
 
-    document.getElementById('confirmStanceBtn').onclick = () => submitSignature(currentUsername, 'stanceModal');
-    document.getElementById('confirmNewUserStanceBtn').onclick = () => {
-      localStorage.setItem('nope_username', tempUsername);
-      submitSignature(tempUsername, 'newUserStanceModal');
-    };
+    document.getElementById('confirmStanceBtn').onclick = () => submitSignature(currentUsername, 'stanceModal', false);
+    document.getElementById('confirmNewUserStanceBtn').onclick = () => submitSignature(tempUsername, 'newUserStanceModal', true);
 
     // Start
     init();
