@@ -513,14 +513,24 @@ function getRandArtefact() {
 }
 
 function artefactCard(a) {
-  const owner = fmtAuthor(a.author, false);
-  const url = esc(a.url || '');
-  const date = fmtDate(a.created_at);
-  return '<div class="artefak-card">'
-    + '<div class="artefak-header"><span class="artefak-label">📸 Memori dari Jejak Lain</span></div>'
-    + '<img src="' + url + '" class="artefak-image" alt="Artefak" onerror="this.style.display='none'">'
-    + '<div class="artefak-meta"><span class="artefak-owner">' + esc(owner) + '</span>'
-    + '<span class="artefak-date">' + date + '</span></div></div>';
+  const d = document.createElement("div");
+  d.className = "artefak-card";
+  const header = document.createElement("div");
+  header.className = "artefak-header";
+  header.innerHTML = "<span class=\"artefak-label\">\uD83D\uDCF8 Memori dari Jejak Lain</span>";
+  const img = document.createElement("img");
+  img.className = "artefak-image";
+  img.alt = "Artefak";
+  img.src = a.url || "";
+  img.onerror = function() { this.style.display = "none"; };
+  const meta = document.createElement("div");
+  meta.className = "artefak-meta";
+  meta.innerHTML = "<span class=\"artefak-owner\">" + esc(fmtAuthor(a.author, false)) + "</span>"
+    + "<span class=\"artefak-date\">" + fmtDate(a.created_at) + "</span>";
+  d.appendChild(header);
+  d.appendChild(img);
+  d.appendChild(meta);
+  return d.outerHTML;
 }
 
 function setLoading(v) {
@@ -676,13 +686,21 @@ async function peakUser(rawAuthor, displayName) {
         ).join('')
       : '<div style="color:var(--ts);padding:20px;text-align:center">Tidak ada rants publik.</div>';
 
-    ac.innerHTML = (arts && arts.length)
-      ? arts.map(a =>
-          '<div class="artefact-item">'
-          + '<img src="' + esc(a.url || '') + '" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'">'
-          + '</div>'
-        ).join('')
-      : '<div style="color:var(--ts);font-size:12px;padding:20px;text-align:center;grid-column:1/-1">Tidak ada artefak.</div>';
+    ac.innerHTML = "";
+    if (arts && arts.length) {
+      arts.forEach(function(a) {
+        const wrap = document.createElement("div");
+        wrap.className = "artefact-item";
+        const img = document.createElement("img");
+        img.src = a.url || "";
+        img.style.cssText = "width:100%;height:100%;object-fit:cover";
+        img.onerror = function() { this.style.display = "none"; };
+        wrap.appendChild(img);
+        ac.appendChild(wrap);
+      });
+    } else {
+      ac.innerHTML = "<div style=\"color:var(--ts);font-size:12px;padding:20px;text-align:center;grid-column:1/-1\">Tidak ada artefak.</div>";
+    }
   } catch (e) {
     rc.innerHTML = '<div style="color:var(--at);padding:20px;text-align:center">Error: ' + esc(e.message) + '</div>';
   }
