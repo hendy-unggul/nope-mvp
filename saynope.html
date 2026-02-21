@@ -143,6 +143,7 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .artefak-date{font-size:10px;color:var(--tm)}
 .spill-counter{font-size:12px;color:var(--a);font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:.05em}
 </style>
+<base target="_blank">
 </head>
 <body>
 <div class="wrapper">
@@ -303,13 +304,14 @@ const st = {
 
 const unlocked = new Set();
 
+// REACTIONS - Mapping emoji ke reaction_type untuk database
 const REACTIONS = [
-  { id:'💯', label:'Relatable' },
-  { id:'🤗', label:'Hug'       },
-  { id:'✋',  label:'Same'      },
-  { id:'😮‍💨', label:'Mood'    },
-  { id:'🍵', label:'Tea'       },
-  { id:'🔥', label:'Fire'      }
+  { id:'💯', type:'relatable', label:'Relatable' },
+  { id:'🤗', type:'hug',       label:'Hug'       },
+  { id:'✋',  type:'same',      label:'Same'      },
+  { id:'😮‍💨', type:'mood',      label:'Mood'      },
+  { id:'🍵', type:'tea',       label:'Tea'       },
+  { id:'🔥', type:'fire',      label:'Fire'      }
 ];
 
 const MOOD_COLORS = { surviving:'#FF9500', thriving:'#39FF14', chaotic:'#00F0FF', doom:'#8B5CF6' };
@@ -394,7 +396,6 @@ async function loadSpills(isNew=false){
   }
 
   try {
-    // Ambil RANTS
     const { data: rantsData, error: rantsError } = await st.sb
       .from(CFG.TBL_RANTS)
       .select('id, content, mood, author, created_at, vibes')
@@ -409,7 +410,6 @@ async function loadSpills(isNew=false){
       return;
     }
 
-    // Ambil SPILLS (filter)
     const rantIds = rantsData.map(r => r.id);
     const { data: spillsData, error: spillsError } = await st.sb
       .from(CFG.TBL_SPILLS)
@@ -423,7 +423,6 @@ async function loadSpills(isNew=false){
       spillsData.forEach(s => { spillsMap[s.rant_id] = s; });
     }
 
-    // Merge data
     let mergedData = [];
     
     if(spillsData && spillsData.length > 0){
@@ -452,7 +451,6 @@ async function loadSpills(isNew=false){
       }));
     }
 
-    // Filter user sendiri
     if(st.currentUser){
       mergedData = mergedData.filter(s => s.author !== st.currentUser);
     }
@@ -483,9 +481,10 @@ async function loadSpills(isNew=false){
 async function loadReactions(ids){
   if(!st.sb||!ids.length) return;
   try {
+    // Coba load dengan reaction_type (untuk constraint yang pakai text)
     const { data, error } = await st.sb
       .from(CFG.TBL_REACTIONS)
-      .select('rant_id, emoji')
+      .select('rant_id, reaction_type, emoji')
       .in('rant_id', ids);
 
     if(error) throw error;
@@ -493,8 +492,10 @@ async function loadReactions(ids){
     ids.forEach(id=>{ st.reactions[id]={}; REACTIONS.forEach(r=>{ st.reactions[id][r.id]=0; }); });
     
     (data||[]).forEach(row=>{
-      if(st.reactions[row.rant_id] && row.emoji){
-        st.reactions[row.rant_id][row.emoji] = (st.reactions[row.rant_id][row.emoji]||0)+1;
+      // Cari emoji yang match dengan reaction_type
+      const reaction = REACTIONS.find(r => r.type === row.reaction_type || r.id === row.emoji);
+      if(reaction && st.reactions[row.rant_id]){
+        st.reactions[row.rant_id][reaction.id] = (st.reactions[row.rant_id][reaction.id]||0)+1;
       }
     });
   } catch(e){ console.error('❌ loadReactions:', e.message); }
@@ -505,13 +506,16 @@ async function loadMyReactions(ids){
   try {
     const { data, error } = await st.sb
       .from(CFG.TBL_REACTIONS)
-      .select('rant_id, emoji')
+      .select('rant_id, reaction_type, emoji')
       .eq('user_id', st.userId)
       .in('rant_id', ids);
 
     if(error) throw error;
     st.userReacted.clear();
-    (data||[]).forEach(r=> st.userReacted.add(`${r.rant_id}-${r.emoji}`));
+    (data||[]).forEach(r=> {
+      const reaction = REACTIONS.find(rx => rx.type === r.reaction_type || rx.id === r.emoji);
+      if(reaction) st.userReacted.add(`${r.rant_id}-${reaction.id}`);
+    });
   } catch(e){ console.error('❌ loadMyReactions:', e.message); }
 }
 
@@ -528,53 +532,75 @@ async function loadArtefacts(){
 }
 
 // ============================================
-// REACTIONS - FIX: Simpan ke Supabase & Unlock Peaking
+// REACTIONS - FIX: Gunakan reaction_type bukan emoji
 // ============================================
 async function reactToSpill(rantId, emoji, author, btnEl){
   const key = `${rantId}-${emoji}`;
   
-  // Cek sudah pernah react belum
   if(st.userReacted.has(key)){
     toast('Sudah bereaksi!',true);
+    return;
+  }
+
+  // Cari reaction_type dari emoji
+  const reactionDef = REACTIONS.find(r => r.id === emoji);
+  if(!reactionDef){
+    toast('Emoji tidak valid', true);
     return;
   }
 
   const countEl = document.getElementById(`count-${rantId}-${emoji}`);
   const prev = parseInt(countEl?.textContent||'0');
 
-  // Optimistic UI update
+  // Optimistic UI
   if(countEl) countEl.textContent = prev + 1;
   if(btnEl) btnEl.classList.add('reacted');
   if(!st.reactions[rantId]) st.reactions[rantId] = {};
   st.reactions[rantId][emoji] = prev + 1;
   st.userReacted.add(key);
 
-  // FIX 2: Unlock peaking saat react (jika bukan anonim)
+  // Unlock peaking
   if(author && author !== 'anonim' && !unlocked.has(author)){
     unlocked.add(author);
     toast('🔓 Peaking unlocked!');
     console.log('🔓 Unlocked peaking for:', author);
   }
 
-  // FIX 3: Simpan ke Supabase reactions
+  // Simpan ke Supabase dengan reaction_type
   if(st.online && st.sb){
     try {
-      console.log('💾 Saving reaction:', { rant_id: rantId, emoji: emoji, user_id: st.userId });
+      const payload = {
+        rant_id: rantId,
+        reaction_type: reactionDef.type,  // Gunakan type (text) bukan emoji
+        user_id: st.userId,
+        created_at: new Date().toISOString()
+      };
+
+      // Coba insert dengan reaction_type dulu
+      console.log('💾 Saving reaction:', payload);
       
-      const { data, error } = await st.sb
+      let { data, error } = await st.sb
         .from(CFG.TBL_REACTIONS)
-        .insert({
+        .insert(payload)
+        .select();
+
+      // Jika error karena kolom reaction_type tidak ada, coba dengan emoji
+      if(error && error.message && error.message.includes('reaction_type')){
+        console.log('⚠️ reaction_type not found, trying emoji column...');
+        const payloadEmoji = {
           rant_id: rantId,
           emoji: emoji,
           user_id: st.userId,
           created_at: new Date().toISOString()
-        })
-        .select();
+        };
+        const result = await st.sb.from(CFG.TBL_REACTIONS).insert(payloadEmoji).select();
+        data = result.data;
+        error = result.error;
+      }
 
       if(error){
-        // Error code 23505 = unique constraint violation (sudah pernah react)
-        if(error.code === '23505'){
-          console.log('⚠️ Already reacted (constraint)');
+        if(error.code === '23505' || error.code === '23514'){
+          console.log('⚠️ Constraint violation:', error.message);
           toast(emoji+' Tersimpan!');
           return;
         }
@@ -586,7 +612,7 @@ async function reactToSpill(rantId, emoji, author, btnEl){
 
     } catch(e){
       console.error('❌ Gagal simpan reaction:', e);
-      // Rollback UI jika gagal
+      // Rollback
       if(countEl) countEl.textContent = prev;
       if(btnEl) btnEl.classList.remove('reacted');
       st.reactions[rantId][emoji] = prev;
@@ -594,11 +620,12 @@ async function reactToSpill(rantId, emoji, author, btnEl){
       toast('Gagal: '+e.message, true);
     }
   } else {
-    // Offline mode - simpan ke localStorage
+    // Offline
     const offline = JSON.parse(localStorage.getItem('offline_reactions')||'[]');
     offline.push({ 
       rant_id: rantId, 
-      emoji: emoji, 
+      reaction_type: reactionDef.type,
+      emoji: emoji,
       user_id: st.userId,
       created_at: new Date().toISOString()
     });
@@ -610,16 +637,27 @@ async function reactToSpill(rantId, emoji, author, btnEl){
 async function refreshCounts(rantId){
   if(!st.sb||!rantId) return;
   try {
-    const { data } = await st.sb.from(CFG.TBL_REACTIONS).select('emoji').eq('rant_id',rantId);
+    const { data } = await st.sb.from(CFG.TBL_REACTIONS)
+      .select('reaction_type, emoji')
+      .eq('rant_id',rantId);
+    
     const c={};
     REACTIONS.forEach(r=>c[r.id]=0);
-    (data||[]).forEach(r=>{ if(c[r.emoji]!==undefined) c[r.emoji]++; });
-    REACTIONS.forEach(r=>{ const el=document.getElementById(`count-${rantId}-${r.id}`); if(el) el.textContent=c[r.id]; });
+    
+    (data||[]).forEach(r=>{
+      const reaction = REACTIONS.find(rx => rx.type === r.reaction_type || rx.id === r.emoji);
+      if(reaction) c[reaction.id]++;
+    });
+    
+    REACTIONS.forEach(r=>{ 
+      const el=document.getElementById(`count-${rantId}-${r.id}`); 
+      if(el) el.textContent=c[r.id]; 
+    });
   } catch(e){}
 }
 
 // ============================================
-// RENDER - FIX: 1 artefak setiap 9 rant
+// RENDER
 // ============================================
 function setLoading(v){
   st.loading=v;
@@ -675,13 +713,12 @@ function renderSpills(){
   for(let i=0; i<displayList.length; i++){
     const s=displayList[i];
     
-    // FIX 1: Insert 1 artefak random setelah rant ke-9 (index 8)
+    // Insert artefak setelah rant ke-9
     if(rantCount === 9 && !artefactInserted){ 
       const a = getRandArtefact(); 
       if(a){
         html.push(artefactCard(a));
         artefactInserted = true;
-        console.log('📸 Inserted artefact after 9th rant');
       }
     }
 
@@ -797,7 +834,7 @@ function resetFilters(){
 }
 
 function createNewSpill(){ 
-  st.offset = 0; // Reset offset untuk tea brew baru
+  st.offset = 0;
   loadSpills(true); 
 }
 
