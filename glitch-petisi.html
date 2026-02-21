@@ -645,6 +645,39 @@
       content: '👤';
     }
 
+    /* Loading overlay */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .loading-overlay.active {
+      display: flex;
+    }
+
+    .loading-text {
+      font-size: 18px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
     @media (max-width: 640px) {
       .petition-title {
         font-size: 24px;
@@ -689,6 +722,11 @@
 <base target="_blank">
 </head>
 <body>
+  <!-- Loading Overlay -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-text">MENUJU FORM PETISI...</div>
+  </div>
+
   <div class="wrapper">
     <header>
       <div class="logo">NOPE</div>
@@ -937,15 +975,16 @@
     </div>
   </div>
 
-  <script type="module">
-    // Supabase Config - PERBAIKAN: hapus spasi di URL
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  
+  <script>
+    // Supabase Config
     const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-    // Import Supabase client
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-    
-    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+    // Create Supabase client using UMD build
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // Stance templates
     const stanceTexts = {
@@ -966,6 +1005,7 @@
     const existingUserView = document.getElementById('existingUserView');
     const alreadySignedView = document.getElementById('alreadySignedView');
     const displayUsername = document.getElementById('displayUsername');
+    const loadingOverlay = document.getElementById('loadingOverlay');
     
     const newUserModal = document.getElementById('newUserModal');
     const stanceModal = document.getElementById('stanceModal');
@@ -973,6 +1013,15 @@
     
     const signBtnNew = document.getElementById('signBtnNew');
     const signBtnExisting = document.getElementById('signBtnExisting');
+
+    // Show/hide loading
+    function showLoading() {
+      loadingOverlay.classList.add('active');
+    }
+
+    function hideLoading() {
+      loadingOverlay.classList.remove('active');
+    }
 
     // Check existing session from Supabase
     async function checkSession() {
@@ -986,11 +1035,15 @@
         
         if (session?.user) {
           // User is logged in via Supabase
-          const { data: profile } = await supabase
+          const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('username')
             .eq('id', session.user.id)
             .single();
+          
+          if (profileError) {
+            console.error('Profile error:', profileError);
+          }
           
           if (profile?.username) {
             currentUsername = profile.username;
@@ -1021,22 +1074,30 @@
 
     // Initialize View
     async function initializeView() {
-      const isLoggedIn = await checkSession();
-      const hasSigned = localStorage.getItem('nope_petisi_signed') === 'true';
-      
-      if (hasSigned) {
-        // Already signed - show signed view
-        newUserView.style.display = 'none';
-        existingUserView.style.display = 'none';
-        alreadySignedView.style.display = 'block';
-      } else if (isLoggedIn && currentUsername) {
-        // Existing user - show existing user CTA
-        newUserView.style.display = 'none';
-        existingUserView.style.display = 'block';
-        alreadySignedView.style.display = 'none';
-        displayUsername.textContent = `@${currentUsername}`;
-      } else {
-        // New user - show new user CTA
+      try {
+        const isLoggedIn = await checkSession();
+        const hasSigned = localStorage.getItem('nope_petisi_signed') === 'true';
+        
+        if (hasSigned) {
+          // Already signed - show signed view
+          newUserView.style.display = 'none';
+          existingUserView.style.display = 'none';
+          alreadySignedView.style.display = 'block';
+        } else if (isLoggedIn && currentUsername) {
+          // Existing user - show existing user CTA
+          newUserView.style.display = 'none';
+          existingUserView.style.display = 'block';
+          alreadySignedView.style.display = 'none';
+          displayUsername.textContent = `@${currentUsername}`;
+        } else {
+          // New user - show new user CTA
+          newUserView.style.display = 'block';
+          existingUserView.style.display = 'none';
+          alreadySignedView.style.display = 'none';
+        }
+      } catch (e) {
+        console.error('Initialize error:', e);
+        // Default to new user view on error
         newUserView.style.display = 'block';
         existingUserView.style.display = 'none';
         alreadySignedView.style.display = 'none';
@@ -1198,7 +1259,7 @@
         document.getElementById(modalId).classList.remove('active');
 
         // Update view
-        initializeView();
+        await initializeView();
 
         alert('✅ Terima kasih! Suaramu sudah tercatat.\n\nLihat suaramu dan bergabung dengan komunitas NOPE!');
 
@@ -1228,9 +1289,11 @@
       }
     }
 
-    // Initialize
-    initializeView();
-    loadSignatureCount();
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initializeView();
+      await loadSignatureCount();
+    });
 
     // Share functionality
     const getShareMessage = () => {
