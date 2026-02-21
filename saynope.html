@@ -143,7 +143,6 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .artefak-date{font-size:10px;color:var(--tm)}
 .spill-counter{font-size:12px;color:var(--a);font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:.05em}
 </style>
-<base target="_blank">
 </head>
 <body>
 <div class="wrapper">
@@ -289,7 +288,8 @@ const st = {
   sb: null,
   online: false,
   userId: null,
-  currentUser: null,
+  currentUser: null,        // Username dari session
+  currentUserId: null,      // UUID dari auth session
   spills: [],
   reactions: {},
   filter: 'all',
@@ -304,7 +304,6 @@ const st = {
 
 const unlocked = new Set();
 
-// REACTIONS - Mapping emoji ke reaction_type untuk database
 const REACTIONS = [
   { id:'💯', type:'relatable', label:'Relatable' },
   { id:'🤗', type:'hug',       label:'Hug'       },
@@ -348,7 +347,7 @@ function getSessionId(){
 }
 
 // ============================================
-// INIT SUPABASE
+// INIT SUPABASE - FIX: Dapatkan currentUser dengan benar
 // ============================================
 async function initSupabase(){
   if(typeof supabase==='undefined'){ setConn(false,'❌ Library tidak ditemukan'); return false; }
@@ -356,16 +355,26 @@ async function initSupabase(){
     st.sb = supabase.createClient(CFG.url, CFG.key);
     st.userId = getSessionId();
 
-    const { data:{ session } } = await st.sb.auth.getSession();
+    // FIX 1: Dapatkan user yang sedang login dengan benar
+    const { data:{ session }, error: sessionError } = await st.sb.auth.getSession();
+    
+    if(sessionError){
+      console.error('Session error:', sessionError);
+    }
+    
     if(session?.user){
+      st.currentUserId = session.user.id;  // UUID
       st.currentUser = session.user.user_metadata?.username || session.user.email;
+      console.log('✅ Logged in as:', st.currentUser, 'ID:', st.currentUserId);
+    } else {
+      console.log('⚠️ Not logged in, using anon session');
     }
 
     const { data, error } = await st.sb.from(CFG.TBL_RANTS).select('id').limit(1);
     if(error) throw error;
 
     console.log('✅ Supabase OK');
-    setConn(true, '🟢 Online');
+    setConn(true, '🟢 Online' + (st.currentUser ? ' · ' + st.currentUser : ''));
     setupRealtime();
     return true;
   } catch(e){
@@ -383,7 +392,7 @@ function setupRealtime(){
 }
 
 // ============================================
-// LOAD DATA
+// LOAD DATA - FIX: Filter rant user sendiri
 // ============================================
 async function loadSpills(isNew=false){
   setLoading(true);
@@ -396,9 +405,11 @@ async function loadSpills(isNew=false){
   }
 
   try {
+    console.log('📥 Loading rants... Current user:', st.currentUser);
+    
     const { data: rantsData, error: rantsError } = await st.sb
       .from(CFG.TBL_RANTS)
-      .select('id, content, mood, author, created_at, vibes')
+      .select('id, content, mood, author, created_at, vibes, user_id')  // Ambil user_id juga
       .order('created_at', { ascending: false })
       .range(st.offset, st.offset + 99);
 
@@ -410,7 +421,29 @@ async function loadSpills(isNew=false){
       return;
     }
 
-    const rantIds = rantsData.map(r => r.id);
+    console.log(`✅ Loaded ${rantsData.length} rants`);
+
+    // FIX 1: Filter rant user sendiri SEBELUM join dengan spills
+    // Filter berdasarkan author (username) atau user_id (UUID)
+    let filteredRants = rantsData;
+    if(st.currentUser){
+      filteredRants = rantsData.filter(r => {
+        // Cek berdasarkan author (username) atau user_id
+        const isOwnRant = (r.author === st.currentUser) || (r.user_id === st.currentUserId);
+        if(isOwnRant) console.log('🚫 Filtered out own rant:', r.id, r.author);
+        return !isOwnRant;
+      });
+      console.log(`📝 After filtering: ${filteredRants.length} rants (removed ${rantsData.length - filteredRants.length} own rants)`);
+    }
+
+    if(filteredRants.length === 0){
+      setLoading(false);
+      renderSpills();
+      return;
+    }
+
+    // Ambil spills untuk rants yang tersisa
+    const rantIds = filteredRants.map(r => r.id);
     const { data: spillsData, error: spillsError } = await st.sb
       .from(CFG.TBL_SPILLS)
       .select('rant_id, is_anonymous, response_count, vibes')
@@ -421,38 +454,38 @@ async function loadSpills(isNew=false){
     const spillsMap = {};
     if(spillsData){
       spillsData.forEach(s => { spillsMap[s.rant_id] = s; });
+      console.log(`✅ Found ${spillsData.length} spills`);
     }
 
+    // Merge data
     let mergedData = [];
     
     if(spillsData && spillsData.length > 0){
-      mergedData = rantsData
+      mergedData = filteredRants
         .filter(r => spillsMap[r.id])
         .map(r => ({
           rant_id: r.id,
           content: r.content,
           mood: r.mood || 'surviving',
           author: r.author,
+          user_id: r.user_id,  // Simpan untuk referensi
           created_at: r.created_at,
           is_anonymous: spillsMap[r.id].is_anonymous || false,
           vibes: spillsMap[r.id].vibes || r.vibes || {},
           response_count: spillsMap[r.id].response_count || 0
         }));
     } else {
-      mergedData = rantsData.map(r => ({
+      mergedData = filteredRants.map(r => ({
         rant_id: r.id,
         content: r.content,
         mood: r.mood || 'surviving',
         author: r.author,
+        user_id: r.user_id,
         created_at: r.created_at,
         is_anonymous: false,
         vibes: r.vibes || {},
         response_count: 0
       }));
-    }
-
-    if(st.currentUser){
-      mergedData = mergedData.filter(s => s.author !== st.currentUser);
     }
 
     st.spills = mergedData;
@@ -481,7 +514,6 @@ async function loadSpills(isNew=false){
 async function loadReactions(ids){
   if(!st.sb||!ids.length) return;
   try {
-    // Coba load dengan reaction_type (untuk constraint yang pakai text)
     const { data, error } = await st.sb
       .from(CFG.TBL_REACTIONS)
       .select('rant_id, reaction_type, emoji')
@@ -492,7 +524,6 @@ async function loadReactions(ids){
     ids.forEach(id=>{ st.reactions[id]={}; REACTIONS.forEach(r=>{ st.reactions[id][r.id]=0; }); });
     
     (data||[]).forEach(row=>{
-      // Cari emoji yang match dengan reaction_type
       const reaction = REACTIONS.find(r => r.type === row.reaction_type || r.id === row.emoji);
       if(reaction && st.reactions[row.rant_id]){
         st.reactions[row.rant_id][reaction.id] = (st.reactions[row.rant_id][reaction.id]||0)+1;
@@ -532,9 +563,9 @@ async function loadArtefacts(){
 }
 
 // ============================================
-// REACTIONS - FIX: Gunakan reaction_type bukan emoji
+// REACTIONS - FIX: Simpan dengan benar & unlock peaking
 // ============================================
-async function reactToSpill(rantId, emoji, author, btnEl){
+async function reactToSpill(rantId, emoji, authorRaw, btnEl){
   const key = `${rantId}-${emoji}`;
   
   if(st.userReacted.has(key)){
@@ -542,7 +573,6 @@ async function reactToSpill(rantId, emoji, author, btnEl){
     return;
   }
 
-  // Cari reaction_type dari emoji
   const reactionDef = REACTIONS.find(r => r.id === emoji);
   if(!reactionDef){
     toast('Emoji tidak valid', true);
@@ -559,49 +589,39 @@ async function reactToSpill(rantId, emoji, author, btnEl){
   st.reactions[rantId][emoji] = prev + 1;
   st.userReacted.add(key);
 
-  // Unlock peaking
-  if(author && author !== 'anonim' && !unlocked.has(author)){
-    unlocked.add(author);
+  // FIX 2: Unlock peaking - authorRaw adalah username (bukan 'anonim')
+  // Bersihkan authorRaw dari karakter escape
+  const cleanAuthor = authorRaw.replace(/\\/g, '');
+  console.log('🔍 Reacting to author:', cleanAuthor, 'is_anon:', cleanAuthor === 'anonim');
+  
+  if(cleanAuthor && cleanAuthor !== 'anonim' && !unlocked.has(cleanAuthor)){
+    unlocked.add(cleanAuthor);
     toast('🔓 Peaking unlocked!');
-    console.log('🔓 Unlocked peaking for:', author);
+    console.log('🔓 Unlocked peaking for:', cleanAuthor);
+    console.log('🔓 Current unlocked:', Array.from(unlocked));
   }
 
-  // Simpan ke Supabase dengan reaction_type
+  // FIX 3: Simpan ke Supabase dengan await yang benar
   if(st.online && st.sb){
     try {
       const payload = {
         rant_id: rantId,
-        reaction_type: reactionDef.type,  // Gunakan type (text) bukan emoji
+        reaction_type: reactionDef.type,
         user_id: st.userId,
         created_at: new Date().toISOString()
       };
 
-      // Coba insert dengan reaction_type dulu
       console.log('💾 Saving reaction:', payload);
       
-      let { data, error } = await st.sb
+      const { data, error } = await st.sb
         .from(CFG.TBL_REACTIONS)
         .insert(payload)
         .select();
 
-      // Jika error karena kolom reaction_type tidak ada, coba dengan emoji
-      if(error && error.message && error.message.includes('reaction_type')){
-        console.log('⚠️ reaction_type not found, trying emoji column...');
-        const payloadEmoji = {
-          rant_id: rantId,
-          emoji: emoji,
-          user_id: st.userId,
-          created_at: new Date().toISOString()
-        };
-        const result = await st.sb.from(CFG.TBL_REACTIONS).insert(payloadEmoji).select();
-        data = result.data;
-        error = result.error;
-      }
-
       if(error){
-        if(error.code === '23505' || error.code === '23514'){
-          console.log('⚠️ Constraint violation:', error.message);
-          toast(emoji+' Tersimpan!');
+        console.error('❌ Supabase error:', error);
+        if(error.code === '23505'){
+          toast(emoji+' Sudah pernah direact!');
           return;
         }
         throw error;
@@ -612,7 +632,7 @@ async function reactToSpill(rantId, emoji, author, btnEl){
 
     } catch(e){
       console.error('❌ Gagal simpan reaction:', e);
-      // Rollback
+      // Rollback UI
       if(countEl) countEl.textContent = prev;
       if(btnEl) btnEl.classList.remove('reacted');
       st.reactions[rantId][emoji] = prev;
@@ -620,16 +640,6 @@ async function reactToSpill(rantId, emoji, author, btnEl){
       toast('Gagal: '+e.message, true);
     }
   } else {
-    // Offline
-    const offline = JSON.parse(localStorage.getItem('offline_reactions')||'[]');
-    offline.push({ 
-      rant_id: rantId, 
-      reaction_type: reactionDef.type,
-      emoji: emoji,
-      user_id: st.userId,
-      created_at: new Date().toISOString()
-    });
-    localStorage.setItem('offline_reactions', JSON.stringify(offline));
     toast(emoji+' Tersimpan (offline)');
   }
 }
@@ -725,13 +735,14 @@ function renderSpills(){
     const rid = s.rant_id;
     const author = displayAuthor(s.author, s.is_anonymous);
     const pkey = s.is_anonymous ? null : s.author;
-    const safe = (s.author||'').replace(/'/g,"\\'");
+    // Escape author untuk onclick handler
+    const safeAuthor = pkey ? pkey.replace(/'/g,"\\'") : '';
     const isUnlocked = pkey && unlocked.has(pkey);
 
     const rxHtml = REACTIONS.map(r=>{
       const count = (st.reactions[rid]||{})[r.id] ?? 0;
       const reacted = st.userReacted.has(`${rid}-${r.id}`);
-      return `<button class="reaction-btn ${reacted?'reacted':''}" onclick="reactToSpill('${rid}','${r.id}','${safe}',this)">
+      return `<button class="reaction-btn ${reacted?'reacted':''}" onclick="reactToSpill('${rid}','${r.id}','${safeAuthor}',this)">
         <span class="reaction-emoji">${r.id}</span>
         <span class="reaction-count" id="count-${rid}-${r.id}">${count}</span>
       </button>`;
@@ -740,7 +751,7 @@ function renderSpills(){
     html.push(`<div class="spill-card">
       <div class="spill-header">
         <span class="spill-author ${pkey?(isUnlocked?'unlocked':'locked'):''}"
-          onclick="${pkey?`peakUser('${safe}','${author}')`:''}"
+          onclick="${pkey?`peakUser('${safeAuthor}','${author}')`:''}"
           style="${pkey?'':'cursor:default'}">${esc(author)}</span>
         <span class="spill-mood" style="color:${getMoodColor(s.mood)}">${s.mood||''}</span>
       </div>
@@ -755,11 +766,18 @@ function renderSpills(){
 }
 
 // ============================================
-// PEAKING
+// PEAKING - FIX: Cek unlocked dengan benar
 // ============================================
-async function peakUser(author, displayName){
+async function peakUser(authorRaw, displayName){
+  // Bersihkan author dari escape characters
+  const author = authorRaw.replace(/\\/g, '');
+  
+  console.log('🔍 Peaking attempt for:', author);
+  console.log('🔍 Currently unlocked:', Array.from(unlocked));
+  console.log('🔍 Is unlocked?', unlocked.has(author));
+  
   if(!author || author === 'null' || author === 'anonim'){ 
-    toast('Tidak tersedia',true); 
+    toast('Profil anonim tidak dapat diakses',true); 
     return; 
   }
   
