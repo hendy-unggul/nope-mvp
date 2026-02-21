@@ -629,6 +629,18 @@
       margin-bottom: 16px;
     }
 
+    .username-error {
+      color: var(--brutalist-red);
+      font-size: 12px;
+      margin-top: -12px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .username-error.show {
+      display: block;
+    }
+
     .existing-user-badge {
       display: inline-flex;
       align-items: center;
@@ -694,6 +706,7 @@
       animation: glitch 0.3s ease;
     }
   </style>
+<base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -860,10 +873,11 @@
         type="text" 
         class="username-input" 
         id="newUsernameInput" 
-        placeholder="Contoh: glitch_rebel, nope_warrior"
-        maxlength="20"
+        placeholder="Contoh: user.name, bajaj.bajuri"
+        maxlength="30"
       />
-      <p class="username-hint">• 3-20 karakter • Huruf, angka, underscore • Bisa diubah nanti</p>
+      <p class="username-hint">• Format: kata1.kata2 • Huruf kecil & titik saja • Contoh: anna.marie, john.doe</p>
+      <p class="username-error" id="usernameError">Format username tidak valid. Gunakan format: nama.nama (huruf kecil & titik)</p>
 
       <div class="modal-actions">
         <button class="modal-btn secondary" id="cancelNewUserBtn">Batal</button>
@@ -1069,17 +1083,78 @@
       document.getElementById('newUsernameInput').focus();
     });
 
-    // Username validation
+    // Username validation - PROTOCOL BARU: 2 kata dengan titik
+    // Format: kata1.kata2 (huruf kecil, angka, titik)
+    // Contoh: user.name, bajaj.bajuri, anna.marie
     const newUsernameInput = document.getElementById('newUsernameInput');
     const confirmNewUserBtn = document.getElementById('confirmNewUserBtn');
+    const usernameError = document.getElementById('usernameError');
+
+    function validateUsername(value) {
+      // Hapus spasi di awal dan akhir
+      value = value.trim().toLowerCase();
+      
+      // Protocol: 2 kata dengan titik sebagai pemisah
+      // Format: [a-z0-9]+.[a-z0-9]+
+      // Minimal 3 karakter total (a.b), maksimal 30 karakter
+      const regex = /^[a-z0-9]+\.[a-z0-9]+$/;
+      
+      if (!regex.test(value)) {
+        return { valid: false, message: 'Format: kata1.kata2 (huruf kecil, angka, titik)' };
+      }
+      
+      // Cek panjang setiap bagian (minimal 1 karakter sudah ter-cover regex)
+      const parts = value.split('.');
+      if (parts.length !== 2) {
+        return { valid: false, message: 'Harus ada tepat 2 kata dipisahkan titik' };
+      }
+      
+      if (value.length < 3) {
+        return { valid: false, message: 'Minimal 3 karakter (contoh: a.b)' };
+      }
+      
+      if (value.length > 30) {
+        return { valid: false, message: 'Maksimal 30 karakter' };
+      }
+      
+      return { valid: true, value: value };
+    }
 
     newUsernameInput.addEventListener('input', function() {
-      const value = newUsernameInput.value.trim();
-      const isValid = /^[a-zA-Z0-9_]{3,20}$/.test(value);
-      confirmNewUserBtn.disabled = !isValid;
-      if (isValid) {
-        tempUsername = value;
+      const rawValue = newUsernameInput.value;
+      const result = validateUsername(rawValue);
+      
+      if (result.valid) {
+        tempUsername = result.value;
+        confirmNewUserBtn.disabled = false;
+        usernameError.classList.remove('show');
+        newUsernameInput.style.borderColor = 'var(--brutalist-red)';
         log('Valid username: ' + tempUsername);
+      } else {
+        tempUsername = null;
+        confirmNewUserBtn.disabled = true;
+        // Hanya tampilkan error jika user sudah mengetik cukup banyak
+        if (rawValue.length >= 3) {
+          usernameError.textContent = result.message;
+          usernameError.classList.add('show');
+          newUsernameInput.style.borderColor = '#ff0000';
+        } else {
+          usernameError.classList.remove('show');
+          newUsernameInput.style.borderColor = 'var(--border)';
+        }
+      }
+    });
+
+    // Auto-convert spasi ke titik saat user mengetik
+    newUsernameInput.addEventListener('keydown', function(e) {
+      if (e.key === ' ') {
+        e.preventDefault();
+        // Insert titik instead of spasi
+        const start = this.selectionStart;
+        const end = this.selectionEnd;
+        const value = this.value;
+        this.value = value.substring(0, start) + '.' + value.substring(end);
+        this.selectionStart = this.selectionEnd = start + 1;
       }
     });
 
@@ -1089,6 +1164,8 @@
       newUserModal.classList.remove('active');
       newUsernameInput.value = '';
       confirmNewUserBtn.disabled = true;
+      usernameError.classList.remove('show');
+      newUsernameInput.style.borderColor = 'var(--border)';
     });
 
     // Proceed to stance selection (new user)
@@ -1183,6 +1260,7 @@
 
     // Submit signature (New User)
     document.getElementById('confirmNewUserStanceBtn').addEventListener('click', function() {
+      // Save new username
       localStorage.setItem('nope_username', tempUsername);
       currentUsername = tempUsername;
       submitSignature(tempUsername, 'newUserStanceModal');
