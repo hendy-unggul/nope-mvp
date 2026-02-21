@@ -468,7 +468,7 @@
     }
 
     .modal-overlay.active {
-      display: flex;
+      display: flex !important;
       align-items: center;
       justify-content: center;
     }
@@ -643,6 +643,15 @@
 
     .existing-user-badge::before {
       content: '👤';
+    }
+
+    /* HAPUS SEMUA OVERLAY YANG MUNGKIN ADA */
+    .loading-overlay, 
+    [class*="loading"], 
+    [class*="overlay"],
+    [id*="loading"],
+    [id*="overlay"] {
+      display: none !important;
     }
 
     @media (max-width: 640px) {
@@ -937,15 +946,33 @@
   </div>
 
   <script>
+    // HAPUS SEMUA OVERLAY YANG MUNGKIN DIBUAT OLEH SCRIPT LAIN
+    (function() {
+      // Hapus semua elemen dengan class atau id yang mengandung 'loading' atau 'overlay'
+      var allElements = document.querySelectorAll('*');
+      for (var i = 0; i < allElements.length; i++) {
+        var el = allElements[i];
+        var className = el.className || '';
+        var id = el.id || '';
+        if (className.toString().toLowerCase().indexOf('loading') !== -1 || 
+            id.toLowerCase().indexOf('loading') !== -1 ||
+            className.toString().toLowerCase().indexOf('overlay') !== -1 && 
+            id !== 'newUserModal' && id !== 'stanceModal' && id !== 'newUserStanceModal') {
+          el.style.display = 'none';
+          if (el.parentNode) el.parentNode.removeChild(el);
+        }
+      }
+    })();
+
     // Debug mode
     const DEBUG = true;
     function log(msg) {
-      if (DEBUG) console.log('[NOPE]', msg);
+      if (DEBUG) console.log('[JEJAK]', msg);
     }
 
     log('Script started');
 
-    // Supabase Config
+    // Supabase Config - PERBAIKAN: Hapus spasi di URL!
     const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
