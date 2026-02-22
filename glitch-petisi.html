@@ -295,6 +295,27 @@
       color: var(--brutalist-red);
     }
 
+    .btn-yellow {
+      background: var(--brutalist-yellow);
+      color: var(--brutalist-black);
+      border: 3px solid var(--brutalist-black);
+      padding: 16px 32px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 6px 6px 0 var(--brutalist-black);
+      transition: all 0.2s;
+      font-family: 'Space Grotesk', sans-serif;
+      margin-top: 16px;
+    }
+
+    .btn-yellow:hover {
+      transform: translate(2px, 2px);
+      box-shadow: 4px 4px 0 var(--brutalist-black);
+    }
+
     .modal-overlay {
       display: none;
       position: fixed;
@@ -318,6 +339,8 @@
       padding: 32px 24px;
       max-width: 500px;
       width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
       box-shadow: 8px 8px 0 var(--brutalist-black);
     }
 
@@ -353,7 +376,7 @@
     .stance-btn:hover { border-color: var(--brutalist-red); background: rgba(255, 0, 0, 0.1); }
     .stance-btn.selected { border-color: var(--brutalist-red); background: rgba(255, 0, 0, 0.2); border-width: 3px; }
 
-    .username-input {
+    .username-input, .email-input {
       width: 100%;
       padding: 14px 16px;
       border: 2px solid var(--border);
@@ -364,7 +387,7 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
-    .username-input:focus { outline: none; border-color: var(--brutalist-red); }
+    .username-input:focus, .email-input:focus { outline: none; border-color: var(--brutalist-red); }
 
     .modal-actions {
       display: flex;
@@ -406,7 +429,7 @@
       border: 2px solid var(--brutalist-black);
     }
 
-    .username-label {
+    .username-label, .email-label {
       text-align: left;
       font-size: 12px;
       font-weight: 700;
@@ -417,7 +440,7 @@
       display: block;
     }
 
-    .username-hint {
+    .username-hint, .email-hint {
       text-align: left;
       font-size: 12px;
       color: var(--muted);
@@ -425,7 +448,7 @@
       margin-bottom: 16px;
     }
 
-    .username-error {
+    .username-error, .email-error {
       color: var(--brutalist-red);
       font-size: 12px;
       margin-top: -12px;
@@ -433,7 +456,7 @@
       display: none;
     }
 
-    .username-error.show { display: block; }
+    .username-error.show, .email-error.show { display: block; }
 
     .existing-user-badge {
       display: inline-flex;
@@ -478,6 +501,38 @@
       color: var(--text-secondary);
       margin-top: 12px;
       font-family: 'JetBrains Mono', monospace;
+    }
+
+    .success-box {
+      background: var(--brutalist-yellow);
+      color: var(--brutalist-black);
+      border: 4px solid var(--brutalist-black);
+      padding: 24px;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .success-box h4 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .success-box p {
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .genz-text {
+      font-style: italic;
+      font-weight: 600;
+    }
+
+    .divider {
+      border-top: 2px solid var(--brutalist-black);
+      margin: 16px 0;
     }
 
     @media (max-width: 640px) {
@@ -575,6 +630,32 @@
         <button class="btn-secondary" onclick="window.location.href='jejak.html'" style="margin-top: 8px;">Kembali ke JEJAK</button>
       </div>
 
+      <!-- View sukses tanda tangan dengan narasi Gen Z -->
+      <div id="successView" style="display: none;">
+        <div class="success-box">
+          <h4>✅ Tanda Tangan Tercatat!</h4>
+          <p>Suaramu udah ke-record di database kita. Makasih udah peduli sama isu ini!</p>
+          
+          <div class="divider"></div>
+          
+          <p class="genz-text">"Eh, btw, kalo lo pengen spill the tea lebih sering, curhat, atau sekadar nge-rant bareng komunitas yang *actually* ngerti..."</p>
+          
+          <p style="margin-top: 12px; font-weight: 700;">
+            Join JEJAK App sekarang! 🚀
+          </p>
+          <p style="font-size: 13px; margin-top: 8px;">
+            Tempatnya Gen Z Indonesia buat bersuara tanpa filter.
+          </p>
+        </div>
+        <button class="btn-yellow" onclick="window.location.href='index.html'">
+          GAS KE JEJAK APP →
+        </button>
+        <br>
+        <button class="btn-secondary" onclick="window.location.href='jejak.html'" style="margin-top: 12px;">
+          Lihat Petisi Dulu
+        </button>
+      </div>
+
       <div id="errorView" style="display: none;" class="error-box">
         <strong>⚠️ ERROR DATABASE</strong><br>
         <span id="errorMessage">Tidak dapat terhubung ke server. Silakan coba lagi nanti.</span>
@@ -582,26 +663,33 @@
     </div>
   </div>
 
-  <!-- MODAL: New User Registration (dari broadcast) -->
-  <div class="modal-overlay" id="newUserModal">
+  <!-- MODAL: Email & Data Collection untuk semua user -->
+  <div class="modal-overlay" id="emailModal">
     <div class="modal">
-      <div class="new-user-badge">PENGGUNA BARU</div>
-      <h3>Silent Register & Tanda Tangan</h3>
-      <p style="text-align: center; margin-bottom: 24px;">Buat username untuk tanda tangan petisi<br>(otomatis menjadi akun JEJAK)</p>
+      <div class="new-user-badge">VERIFIKASI DIGITAL</div>
+      <h3>Data Tanda Tangan</h3>
+      <p style="text-align: center; margin-bottom: 24px; font-size: 14px; color: var(--text-secondary);">
+        Email diperlukan untuk validasi audit trail digital petisi ini.
+      </p>
       
-      <label class="username-label">Username *</label>
-      <input type="text" class="username-input" id="newUsernameInput" placeholder="Contoh: user.name, bajaj.bajuri" maxlength="30"/>
-      <p class="username-hint">• Format: kata1.kata2 • Huruf kecil & titik saja</p>
-      <p class="username-error" id="usernameError">Format tidak valid. Gunakan: nama.nama</p>
+      <label class="username-label">Nama Lengkap / Username *</label>
+      <input type="text" class="username-input" id="signerNameInput" placeholder="Contoh: Budi Santoso / budi.santoso" maxlength="50"/>
+      <p class="username-hint">• Bisa nama lengkap atau format username (nama.nama)</p>
+      <p class="username-error" id="nameError">Nama tidak boleh kosong</p>
+
+      <label class="email-label">Email Address *</label>
+      <input type="email" class="email-input" id="signerEmailInput" placeholder="contoh@email.com" maxlength="100"/>
+      <p class="email-hint">• Untuk verifikasi & update perkembangan petisi</p>
+      <p class="email-error" id="emailError">Format email tidak valid</p>
 
       <div class="modal-actions">
-        <button class="modal-btn secondary" id="cancelNewUserBtn">Batal</button>
-        <button class="modal-btn primary" id="confirmNewUserBtn" disabled>Lanjut Pilih Sikap</button>
+        <button class="modal-btn secondary" id="cancelEmailBtn">Batal</button>
+        <button class="modal-btn primary" id="confirmEmailBtn" disabled>Lanjut Pilih Sikap</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: Stance Selection untuk user yang sudah login/existing -->
+  <!-- MODAL: Stance Selection -->
   <div class="modal-overlay" id="stanceModal">
     <div class="modal">
       <h3>Pilih Sikapmu</h3>
@@ -613,27 +701,8 @@
       </div>
       <textarea class="username-input" id="customStanceInput" placeholder="Tulis pendapatmu..." style="display: none; height: 80px; resize: vertical;" maxlength="280"></textarea>
       <div class="modal-actions">
-        <button class="modal-btn secondary" id="cancelStanceBtn">Batal</button>
-        <button class="modal-btn primary" id="confirmStanceBtn" disabled>Tanda Tangani</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: Stance Selection untuk user baru (setelah input username) -->
-  <div class="modal-overlay" id="newUserStanceModal">
-    <div class="modal">
-      <div class="existing-user-badge" id="newUserDisplayName"></div>
-      <h3>Pilih Sikap Pertamamu</h3>
-      <div class="stance-options" id="newUserStanceOptions">
-        <button class="stance-btn" data-stance="1">👨‍🏫 Kasih ke guru sekolah biar dikelola</button>
-        <button class="stance-btn" data-stance="2">🍱 Biarin katering yang siapin, asal transparan</button>
-        <button class="stance-btn" data-stance="3">💰 TUNAI ke ortu biar mereka yang beliin</button>
-        <button class="stance-btn" data-stance="custom">✍️ Tulis pendapat sendiri</button>
-      </div>
-      <textarea class="username-input" id="newUserCustomStanceInput" placeholder="Tulis pendapatmu..." style="display: none; height: 80px; resize: vertical;" maxlength="280"></textarea>
-      <div class="modal-actions">
-        <button class="modal-btn secondary" id="backToUsernameBtn">Kembali</button>
-        <button class="modal-btn primary" id="confirmNewUserStanceBtn" disabled>Tanda Tangani & Register</button>
+        <button class="modal-btn secondary" id="backToEmailBtn">Kembali</button>
+        <button class="modal-btn primary" id="confirmStanceBtn" disabled>Konfirmasi Tanda Tangan</button>
       </div>
     </div>
   </div>
@@ -647,8 +716,11 @@
     let currentUsername = null;
     let selectedStance = null;
     let customStanceText = null;
-    let tempUsername = null;
-    let isLoggedIn = false;
+    let signerData = {
+      name: '',
+      email: '',
+      isFromApp: false
+    };
 
     // Stance texts
     const stanceTexts = {
@@ -674,12 +746,14 @@
         showView('alreadySignedView');
       } else if (sessionUsername && sessionToken) {
         // User sudah login dari dalam aplikasi
-        isLoggedIn = true;
+        signerData.isFromApp = true;
+        signerData.name = sessionUsername;
         currentUsername = sessionUsername;
         document.getElementById('loggedInUsername').textContent = '@' + currentUsername;
         showView('loggedInView');
       } else if (sessionUsername) {
         // User pernah register tapi belum login (atau dari localStorage lama)
+        signerData.name = sessionUsername;
         currentUsername = sessionUsername;
         document.getElementById('displayUsername').textContent = '@' + currentUsername;
         showView('existingUserView');
@@ -693,7 +767,7 @@
     }
 
     function showView(viewId) {
-      ['loggedInView', 'existingUserView', 'newUserView', 'alreadySignedView', 'errorView'].forEach(id => {
+      ['loggedInView', 'existingUserView', 'newUserView', 'alreadySignedView', 'successView', 'errorView'].forEach(id => {
         document.getElementById(id).style.display = id === viewId ? 'block' : 'none';
       });
     }
@@ -729,13 +803,21 @@
       return text ? JSON.parse(text) : [];
     }
 
-    // Load signature count
+    // Load signature count dari tabel petition_signatures
     async function loadCount() {
       try {
-        const data = await supabaseFetch('rants', 'GET', null, '?select=id');
-        updateCount(data.length + 2800);
+        const data = await supabaseFetch('petition_signatures', 'GET', null, '?select=id');
+        // Base count 2847 + actual signatures
+        updateCount(data.length + 2847);
       } catch (e) {
         console.log('Count query failed:', e.message);
+        // Fallback ke rants kalau tabel petition_signatures belum ada
+        try {
+          const rantsData = await supabaseFetch('rants', 'GET', null, '?select=id');
+          updateCount(rantsData.length + 2800);
+        } catch (e2) {
+          console.log('Rants count also failed:', e2.message);
+        }
       }
     }
 
@@ -743,107 +825,102 @@
       document.getElementById('signatureCount').textContent = count.toLocaleString('id-ID');
     }
 
-    // Username validation: kata1.kata2 (lowercase, dot only)
-    function validateUsername(value) {
-      value = value.trim().toLowerCase();
-      const regex = /^[a-z0-9]+\.[a-z0-9]+$/;
-      
-      if (!regex.test(value)) return { valid: false };
-      if (value.length < 3 || value.length > 30) return { valid: false };
-      
-      return { valid: true, value: value };
+    // Email validation
+    function validateEmail(email) {
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return regex.test(email.trim());
+    }
+
+    // Name validation
+    function validateName(name) {
+      return name.trim().length >= 2;
     }
 
     // Event Listeners
     
-    // 1. User sudah login dari dalam app → langsung ke stance modal
-    document.getElementById('signBtnLoggedIn').onclick = () => {
+    // Semua tombol tanda tangan membuka modal email dulu
+    document.getElementById('signBtnLoggedIn').onclick = openEmailModal;
+    document.getElementById('signBtnExisting').onclick = openEmailModal;
+    document.getElementById('signBtnNew').onclick = openEmailModal;
+
+    function openEmailModal() {
+      // Pre-fill nama kalau sudah ada
+      if (signerData.name) {
+        document.getElementById('signerNameInput').value = signerData.name;
+      }
+      document.getElementById('emailModal').classList.add('active');
+      validateEmailForm();
+    }
+
+    // Email form validation
+    const nameInput = document.getElementById('signerNameInput');
+    const emailInput = document.getElementById('signerEmailInput');
+    const confirmEmailBtn = document.getElementById('confirmEmailBtn');
+
+    function validateEmailForm() {
+      const nameValid = validateName(nameInput.value);
+      const emailValid = validateEmail(emailInput.value);
+      
+      if (nameValid && emailValid) {
+        confirmEmailBtn.disabled = false;
+      } else {
+        confirmEmailBtn.disabled = true;
+      }
+
+      // Show/hide errors
+      if (nameInput.value.length > 0 && !nameValid) {
+        document.getElementById('nameError').classList.add('show');
+      } else {
+        document.getElementById('nameError').classList.remove('show');
+      }
+
+      if (emailInput.value.length > 0 && !emailValid) {
+        document.getElementById('emailError').classList.add('show');
+      } else {
+        document.getElementById('emailError').classList.remove('show');
+      }
+    }
+
+    nameInput.oninput = validateEmailForm;
+    emailInput.oninput = validateEmailForm;
+
+    document.getElementById('cancelEmailBtn').onclick = () => {
+      document.getElementById('emailModal').classList.remove('active');
+      // Clear inputs
+      if (!signerData.isFromApp) {
+        nameInput.value = '';
+      }
+      emailInput.value = '';
+      validateEmailForm();
+    };
+
+    document.getElementById('confirmEmailBtn').onclick = () => {
+      signerData.name = nameInput.value.trim();
+      signerData.email = emailInput.value.trim();
+      
+      document.getElementById('emailModal').classList.remove('active');
       document.getElementById('stanceModal').classList.add('active');
     };
 
-    // 2. User existing (pernah register tapi belum login) → langsung ke stance modal
-    document.getElementById('signBtnExisting').onclick = () => {
-      document.getElementById('stanceModal').classList.add('active');
+    document.getElementById('backToEmailBtn').onclick = () => {
+      document.getElementById('stanceModal').classList.remove('active');
+      document.getElementById('emailModal').classList.add('active');
+      resetStance();
     };
 
-    // 3. User baru dari broadcast → harus register dulu
-    document.getElementById('signBtnNew').onclick = () => {
-      document.getElementById('newUserModal').classList.add('active');
-      document.getElementById('newUsernameInput').focus();
-    };
-
-    // 4. Tanda tangan lagi dengan akun lain
+    // Tanda tangan lagi dengan akun lain
     document.getElementById('signAgainBtn').onclick = () => {
-      // Clear hanya petisi sign, tapi jangan clear username/session
       localStorage.removeItem('nope_petisi_signed');
       localStorage.removeItem('nope_petisi_signed_by');
-      
-      // Reload untuk determine view yang benar
+      signerData = { name: '', email: '', isFromApp: false };
       init();
     };
 
-    // Username input handling untuk new user
-    const usernameInput = document.getElementById('newUsernameInput');
-    const usernameError = document.getElementById('usernameError');
-    const confirmBtn = document.getElementById('confirmNewUserBtn');
-
-    usernameInput.oninput = () => {
-      const result = validateUsername(usernameInput.value);
-      if (result.valid) {
-        tempUsername = result.value;
-        confirmBtn.disabled = false;
-        usernameError.classList.remove('show');
-      } else {
-        tempUsername = null;
-        confirmBtn.disabled = true;
-        if (usernameInput.value.length >= 3) {
-          usernameError.classList.add('show');
-        } else {
-          usernameError.classList.remove('show');
-        }
-      }
-    };
-
-    // Auto-convert space to dot
-    usernameInput.onkeydown = (e) => {
-      if (e.key === ' ') {
-        e.preventDefault();
-        const start = usernameInput.selectionStart;
-        usernameInput.value = usernameInput.value.slice(0, start) + '.' + usernameInput.value.slice(start);
-        usernameInput.selectionStart = usernameInput.selectionEnd = start + 1;
-        usernameInput.oninput();
-      }
-    };
-
-    document.getElementById('cancelNewUserBtn').onclick = () => {
-      document.getElementById('newUserModal').classList.remove('active');
-      usernameInput.value = '';
-      confirmBtn.disabled = true;
-    };
-
-    // New user: dari username modal ke stance modal
-    document.getElementById('confirmNewUserBtn').onclick = () => {
-      document.getElementById('newUserModal').classList.remove('active');
-      document.getElementById('newUserDisplayName').textContent = '@' + tempUsername;
-      document.getElementById('newUserStanceModal').classList.add('active');
-    };
-
-    document.getElementById('backToUsernameBtn').onclick = () => {
-      document.getElementById('newUserStanceModal').classList.remove('active');
-      document.getElementById('newUserModal').classList.add('active');
-      resetStance('newUser');
-    };
-
-    document.getElementById('cancelStanceBtn').onclick = () => {
-      document.getElementById('stanceModal').classList.remove('active');
-      resetStance('existing');
-    };
-
     // Setup stance selection
-    function setupStance(containerId, confirmId, inputId) {
-      const container = document.getElementById(containerId);
-      const confirmBtn = document.getElementById(confirmId);
-      const input = document.getElementById(inputId);
+    function setupStance() {
+      const container = document.getElementById('stanceOptions');
+      const confirmBtn = document.getElementById('confirmStanceBtn');
+      const input = document.getElementById('customStanceInput');
 
       container.querySelectorAll('.stance-btn').forEach(btn => {
         btn.onclick = () => {
@@ -874,13 +951,12 @@
       };
     }
 
-    setupStance('stanceOptions', 'confirmStanceBtn', 'customStanceInput');
-    setupStance('newUserStanceOptions', 'confirmNewUserStanceBtn', 'newUserCustomStanceInput');
+    setupStance();
 
-    function resetStance(type) {
-      const container = document.getElementById(type === 'newUser' ? 'newUserStanceOptions' : 'stanceOptions');
-      const input = document.getElementById(type === 'newUser' ? 'newUserCustomStanceInput' : 'customStanceInput');
-      const btn = document.getElementById(type === 'newUser' ? 'confirmNewUserStanceBtn' : 'confirmStanceBtn');
+    function resetStance() {
+      const container = document.getElementById('stanceOptions');
+      const input = document.getElementById('customStanceInput');
+      const btn = document.getElementById('confirmStanceBtn');
       
       container.querySelectorAll('.stance-btn').forEach(b => b.classList.remove('selected'));
       input.value = '';
@@ -891,9 +967,8 @@
     }
 
     // Submit signature
-    async function submitSignature(username, modalId, isNewUser = false, isFromApp = false) {
-      const btn = document.querySelector('#' + modalId + ' .modal-btn.primary');
-      const originalText = btn.textContent;
+    document.getElementById('confirmStanceBtn').onclick = async () => {
+      const btn = document.getElementById('confirmStanceBtn');
       btn.disabled = true;
       btn.textContent = 'MEMPROSES...';
 
@@ -901,24 +976,25 @@
         let content = selectedStance === 'custom' ? customStanceText : stanceTexts[selectedStance];
         if (!content.includes('#MakanBergiziGratis')) content += ' #MakanBergiziGratis';
 
-        // 1. Jika user baru (dari broadcast), insert ke tabel users (silent register)
-        if (isNewUser) {
-          try {
-            await supabaseFetch('users', 'POST', {
-              username: username,
-              created_at: new Date().toISOString()
-            });
-          } catch (userError) {
-            // Jika error karena username sudah ada, lanjutkan saja
-            console.log('User might already exist:', userError.message);
-          }
-          
-          // Set session untuk user baru
-          localStorage.setItem('nope_username', username);
-          localStorage.setItem('nope_session', 'broadcast_' + Date.now());
+        // Generate username dari nama (untuk consistency)
+        let username = signerData.name.toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '');
+        if (username.length < 3) username = 'user.' + Date.now();
+        
+        // 1. Insert ke tabel petition_signatures (untuk audit trail)
+        try {
+          await supabaseFetch('petition_signatures', 'POST', {
+            signer_name: signerData.name,
+            signer_email: signerData.email,
+            stance: content,
+            source: signerData.isFromApp ? 'jejak_app' : 'broadcast',
+            created_at: new Date().toISOString()
+          });
+        } catch (e) {
+          console.log('petition_signatures error (might be new table):', e.message);
+          // Fallback: insert ke rants kalau tabel petition_signatures belum ada
         }
 
-        // 2. Insert rant ke tabel rants
+        // 2. Insert ke tabel rants (untuk ditampilkan di feed)
         await supabaseFetch('rants', 'POST', {
           author: username,
           content: content,
@@ -926,37 +1002,29 @@
           created_at: new Date().toISOString()
         });
 
-        // 3. Tandai sudah tanda tangan dengan username yang bersangkutan
+        // 3. Kalau user dari app, update localStorage
+        if (signerData.isFromApp) {
+          localStorage.setItem('nope_username', username);
+          localStorage.setItem('nope_session', 'app_' + Date.now());
+        }
+
+        // 4. Tandai sudah tanda tangan
         localStorage.setItem('nope_petisi_signed', 'true');
         localStorage.setItem('nope_petisi_signed_by', username);
         
-        // 4. Update UI count
+        // 5. Update count
         const currentCount = parseInt(document.getElementById('signatureCount').textContent.replace(/[.,]/g, ''));
         updateCount(currentCount + 1);
         
-        // 5. Tutup modal
-        document.getElementById(modalId).classList.remove('active');
-        
-        // 6. Redirect ke jejak.html dengan rant yang dipilih
-        setTimeout(() => {
-          window.location.href = `jejak.html?rant=${encodeURIComponent(content)}&username=${encodeURIComponent(username)}`;
-        }, 500);
+        // 6. Tutup modal dan show success view
+        document.getElementById('stanceModal').classList.remove('active');
+        showView('successView');
 
       } catch (e) {
         alert('Gagal: ' + e.message);
         btn.disabled = false;
-        btn.textContent = originalText;
+        btn.textContent = 'Konfirmasi Tanda Tangan';
       }
-    }
-
-    // Submit untuk user yang sudah login/existing (dari dalam app)
-    document.getElementById('confirmStanceBtn').onclick = () => {
-      submitSignature(currentUsername, 'stanceModal', false, isLoggedIn);
-    };
-
-    // Submit untuk user baru (dari broadcast) - silent register + tanda tangan
-    document.getElementById('confirmNewUserStanceBtn').onclick = () => {
-      submitSignature(tempUsername, 'newUserStanceModal', true, false);
     };
 
     // Start
