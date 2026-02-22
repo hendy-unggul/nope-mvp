@@ -278,6 +278,23 @@
       box-shadow: none;
     }
 
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 2px solid var(--border);
+      padding: 12px 24px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 16px;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--brutalist-red);
+      color: var(--brutalist-red);
+    }
+
     .modal-overlay {
       display: none;
       position: fixed;
@@ -456,6 +473,13 @@
       font-size: 14px;
     }
 
+    .signed-info {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 12px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
     @media (max-width: 640px) {
       .petition-title { font-size: 24px; }
       .counter-number { font-size: 60px; }
@@ -540,10 +564,15 @@
         <button class="btn-sign" id="signBtnNew">TANDA TANGAN SEKARANG</button>
       </div>
 
-      <!-- View sudah tanda tangan -->
+      <!-- View sudah tanda tangan - dengan opsi tanda tangan lagi -->
       <div id="alreadySignedView" style="display: none;">
         <h3>✓ SUDAH DITANDATANGANI</h3>
-        <button class="btn-sign" disabled>SUDAH DITANDATANGANI</button>
+        <p class="signed-info" id="signedAsUser"></p>
+        <button class="btn-sign" disabled style="margin-bottom: 12px;">SUDAH DITANDATANGANI</button>
+        <br>
+        <button class="btn-secondary" id="signAgainBtn">Tanda Tangan dengan Akun Lain</button>
+        <br>
+        <button class="btn-secondary" onclick="window.location.href='jejak.html'" style="margin-top: 8px;">Kembali ke JEJAK</button>
       </div>
 
       <div id="errorView" style="display: none;" class="error-box">
@@ -634,10 +663,14 @@
       const sessionUsername = localStorage.getItem('nope_username');
       const sessionToken = localStorage.getItem('nope_session');
       
-      // Cek apakah sudah pernah tanda tangan
+      // Cek apakah sudah pernah tanda tangan di device ini
       const hasSigned = localStorage.getItem('nope_petisi_signed') === 'true';
+      const lastSignedUser = localStorage.getItem('nope_petisi_signed_by');
 
       if (hasSigned) {
+        // Tampilkan view sudah tanda tangan tapi dengan opsi tanda tangan lagi
+        document.getElementById('signedAsUser').textContent = lastSignedUser ? 
+          `Ditandatangani sebagai: @${lastSignedUser}` : '';
         showView('alreadySignedView');
       } else if (sessionUsername && sessionToken) {
         // User sudah login dari dalam aplikasi
@@ -737,6 +770,16 @@
     document.getElementById('signBtnNew').onclick = () => {
       document.getElementById('newUserModal').classList.add('active');
       document.getElementById('newUsernameInput').focus();
+    };
+
+    // 4. Tanda tangan lagi dengan akun lain
+    document.getElementById('signAgainBtn').onclick = () => {
+      // Clear hanya petisi sign, tapi jangan clear username/session
+      localStorage.removeItem('nope_petisi_signed');
+      localStorage.removeItem('nope_petisi_signed_by');
+      
+      // Reload untuk determine view yang benar
+      init();
     };
 
     // Username input handling untuk new user
@@ -883,8 +926,9 @@
           created_at: new Date().toISOString()
         });
 
-        // 3. Tandai sudah tanda tangan
+        // 3. Tandai sudah tanda tangan dengan username yang bersangkutan
         localStorage.setItem('nope_petisi_signed', 'true');
+        localStorage.setItem('nope_petisi_signed_by', username);
         
         // 4. Update UI count
         const currentCount = parseInt(document.getElementById('signatureCount').textContent.replace(/[.,]/g, ''));
@@ -894,7 +938,6 @@
         document.getElementById(modalId).classList.remove('active');
         
         // 6. Redirect ke jejak.html dengan rant yang dipilih
-        // Jika dari app, kembali ke app. Jika dari broadcast, masuk ke app.
         setTimeout(() => {
           window.location.href = `jejak.html?rant=${encodeURIComponent(content)}&username=${encodeURIComponent(username)}`;
         }, 500);
