@@ -16,7 +16,6 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .brand-icon{font-size:32px}
 .brand-text{font-size:28px;font-weight:800;letter-spacing:-.02em}
 .header-actions{display:flex;align-items:center;gap:12px}
-/* Removed online-dot styles - using connection-status instead */
 .menu-trigger{width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:transparent;border:none;cursor:pointer}
 .menu-trigger span{width:4px;height:4px;background:var(--txt);border-radius:50%}
 .tagline{font-style:italic;color:var(--ts);margin-bottom:8px}
@@ -143,8 +142,6 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .artefak-owner{font-size:11px;color:var(--tm);text-transform:uppercase;letter-spacing:.05em}
 .artefak-date{font-size:10px;color:var(--tm)}
 </style>
-<base target="_blank">
-<base target="_blank">
 </head>
 <body>
 <div class="wrapper">
@@ -154,7 +151,6 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
       <span class="brand-text">Spill the Tea</span>
     </div>
     <div class="header-actions">
-      <!-- Removed online-dot, using connection-status instead -->
       <button class="menu-trigger" onclick="toggleMenu()">
         <span></span><span></span><span></span>
       </button>
@@ -318,7 +314,6 @@ function toast(msg,isErr=false){
   t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000);
 }
 function setConn(online,msg){
-  // Removed online-dot toggle, only update connection-status text
   const el=document.getElementById('connection-status');
   el.textContent=online ? 'ONLINE' : msg; 
   el.className='connection-status '+(online?'online':'offline');
@@ -382,11 +377,11 @@ function setupRealtime(){
 }
 
 // ============================================
-// LOAD DATA
+// LOAD DATA - REVISED TO ONLY SHOW OTHERS' SPILLS
 // ============================================
 async function loadSpills(isNew=false){
   setLoading(true);
-  if(isNew){ st.seed=Math.random(); st.offset+=6; } // Changed from 10 to 6
+  if(isNew){ st.seed=Math.random(); st.offset+=6; }
 
   if(!st.online || !st.sb){
     setLoading(false);
@@ -395,70 +390,63 @@ async function loadSpills(isNew=false){
   }
 
   try {
-    const { data: rantsData, error: rantsError } = await st.sb
-      .from(CFG.TBL_RANTS)
-      .select('id, content, mood, author, created_at, vibes')
+    // First, get all public spills from the spills table
+    const { data: spillsData, error: spillsError } = await st.sb
+      .from(CFG.TBL_SPILLS)
+      .select('rant_id, is_anonymous, response_count, vibes, created_at')
       .order('created_at', { ascending: false })
       .range(st.offset, st.offset + 99);
 
-    if(rantsError) throw rantsError;
+    if(spillsError) throw spillsError;
     
-    if(!rantsData || rantsData.length === 0){
+    if(!spillsData || spillsData.length === 0){
       setLoading(false);
       renderSpills();
       return;
     }
 
-    const rantIds = rantsData.map(r => r.id);
-    const { data: spillsData, error: spillsError } = await st.sb
-      .from(CFG.TBL_SPILLS)
-      .select('rant_id, is_anonymous, response_count, vibes')
-      .in('rant_id', rantIds);
-
-    if(spillsError) console.warn('Spills error:', spillsError);
-
-    const spillsMap = {};
-    if(spillsData){
-      spillsData.forEach(s => { spillsMap[s.rant_id] = s; });
-    }
-
-    let mergedData = [];
+    // Get the rant IDs from spills
+    const rantIds = spillsData.map(s => s.rant_id);
     
-    if(spillsData && spillsData.length > 0){
-      mergedData = rantsData
-        .filter(r => spillsMap[r.id])
-        .map(r => ({
-          rant_id: r.id,
-          content: r.content,
-          mood: r.mood || 'surviving',
-          author: r.author,
-          created_at: r.created_at,
-          is_anonymous: spillsMap[r.id].is_anonymous || false,
-          vibes: spillsMap[r.id].vibes || r.vibes || {},
-          response_count: spillsMap[r.id].response_count || 0
-        }));
-    } else {
-      mergedData = rantsData.map(r => ({
-        rant_id: r.id,
-        content: r.content,
-        mood: r.mood || 'surviving',
-        author: r.author,
-        created_at: r.created_at,
-        is_anonymous: false,
-        vibes: r.vibes || {},
-        response_count: 0
-      }));
+    // Now get the actual rant content from rants table
+    const { data: rantsData, error: rantsError } = await st.sb
+      .from(CFG.TBL_RANTS)
+      .select('id, content, mood, author, created_at, vibes')
+      .in('id', rantIds);
+
+    if(rantsError) throw rantsError;
+
+    // Create a map for quick lookup
+    const rantsMap = {};
+    if(rantsData) {
+      rantsData.forEach(r => { rantsMap[r.id] = r; });
     }
 
+    // Merge spills with their rant content
+    let mergedData = spillsData
+      .filter(spill => rantsMap[spill.rant_id]) // Only include if rant exists
+      .map(spill => ({
+        rant_id: spill.rant_id,
+        content: rantsMap[spill.rant_id].content,
+        mood: rantsMap[spill.rant_id].mood || 'surviving',
+        author: rantsMap[spill.rant_id].author,
+        created_at: rantsMap[spill.rant_id].created_at,
+        is_anonymous: spill.is_anonymous || false,
+        vibes: spill.vibes || rantsMap[spill.rant_id].vibes || {},
+        response_count: spill.response_count || 0
+      }));
+
+    // CRITICAL: Filter out current user's own spills
     if(st.currentUser){
       mergedData = mergedData.filter(s => s.author !== st.currentUser);
+      console.log(`Filtered out current user's spills, remaining: ${mergedData.length}`);
     }
 
     st.spills = mergedData;
     
     const counter = document.getElementById('spill-counter');
     if(counter){
-      counter.textContent = `${mergedData.length} spills ditemukan`;
+      counter.textContent = `${mergedData.length} spills dari komunitas`;
       counter.style.display = 'block';
     }
 
@@ -841,7 +829,7 @@ function renderSpills(){
   let rantCount = 0;
   let artefactInserted = false;
 
-  // CHANGED: max 6 rants per brew (was 10)
+  // Max 6 rants per brew
   const maxRants = 6;
   const displayList = list.slice(0, maxRants);
 
