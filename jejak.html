@@ -205,7 +205,6 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 .conn-btn-mini.pri{background:var(--tx);border-color:var(--tx);color:var(--bg)}
 .conn-btn-mini.pri:hover{background:var(--ap);border-color:var(--ap)}
 .conn-btn-mini:disabled{opacity:.5;cursor:not-allowed}
-/* status badge for insert result */
 .sync-badge{font-size:9px;font-weight:700;padding:2px 7px;border:1px solid;text-transform:uppercase;letter-spacing:.08em;display:inline-block;margin-left:6px;}
 .sync-badge.ok{color:var(--aq);border-color:rgba(57,255,20,.3);background:rgba(57,255,20,.06);}
 .sync-badge.fail{color:var(--at);border-color:rgba(255,0,110,.3);background:rgba(255,0,110,.06);}
@@ -397,6 +396,22 @@ async function sbUpdate(table, matchParam, payload) {
 }
 
 /**
+ * sbDelete — lightweight REST DELETE
+ */
+async function sbDelete(table, matchParam) {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/${table}?${matchParam}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Prefer': 'return=minimal' }
+    });
+    return r.ok;
+  } catch (e) {
+    console.error(`[sbDelete:${table}]`, e);
+    return false;
+  }
+}
+
+/**
  * sbUploadFile — upload to Supabase Storage via REST
  */
 async function sbUploadFile(bucket, path, blob) {
@@ -489,16 +504,34 @@ async function initOnline(){
 
 // ─── LOAD FROM SUPABASE (REST) ────────────────────────────────────────────────
 async function loadRants(){
+  // Load rants
   const data = await sbSelect('rants',
     `author=eq.${encodeURIComponent(S.user)}&order=created_at.desc&limit=${CFG.maxEntries}`);
   if(!data||!data.length)return;
+  
+  // Load reactions untuk rants ini
+  const rantIds = data.map(r => r.id);
+  let reactionsData = [];
+  if (rantIds.length > 0) {
+    const reactionsParams = rantIds.map(id => `rant_id=eq.${id}`).join('&or=');
+    reactionsData = await sbSelect('reactions', reactionsParams) || [];
+  }
+  
+  // Map reactions ke rants
+  const reactionsMap = {};
+  reactionsData.forEach(r => {
+    if (!reactionsMap[r.rant_id]) reactionsMap[r.rant_id] = {};
+    reactionsMap[r.rant_id][r.reaction_type] = (reactionsMap[r.rant_id][r.reaction_type] || 0) + 1;
+  });
+  
   const ids=new Set(S.entries.map(e=>e.id));
   const ne=data.filter(r=>!ids.has(r.id)).map(r=>({
     id:r.id, content:r.content, mood:r.mood,
     timestamp:new Date(r.created_at).getTime(),
-    reactions:r.reactions||{skull:0,cry:0,fire:0,upside:0},
+    reactions:reactionsMap[r.id] || {skull:0,cry:0,fire:0,upside:0},
     userReacted:null, isSpilled:true, author:r.author
   }));
+  
   if(ne.length){S.entries=[...S.entries,...ne].sort((a,b)=>b.timestamp-a.timestamp).slice(0,CFG.maxEntries);saveEntries();renderEntries()}
 }
 
@@ -529,9 +562,9 @@ async function submitRant(content, mood){
   addEntryFIFO(entry);
 
   if(S.online){
+    // Insert rant TANPA kolom reactions (karena tabel rants tidak punya kolom ini)
     const ok = await sbInsert('rants', {
       id, content, mood, author:S.user,
-      reactions:entry.reactions,
       created_at:new Date(ts).toISOString()
     });
 
@@ -546,7 +579,10 @@ async function submitRant(content, mood){
     // Retry connectivity then queue
     S.online = await checkOnline();
     if(S.online){
-      const ok = await sbInsert('rants',{id,content,mood,author:S.user,reactions:entry.reactions,created_at:new Date(ts).toISOString()});
+      const ok = await sbInsert('rants',{
+        id, content, mood, author:S.user,
+        created_at:new Date(ts).toISOString()
+      });
       if(ok){updEntry(id,{isSpilled:true});toast('✓ Tersimpan');}
       else{toast('⚠ Offline — tersimpan lokal');qSync('rant',entry);}
     } else {
@@ -560,19 +596,44 @@ async function submitRant(content, mood){
 async function toggleReaction(entryId, reactionType){
   let entry=S.entries.find(e=>e.id===entryId)||DE.find(e=>e.id===entryId);
   if(!entry)return;
+  
+  const previousReaction = entry.userReacted;
+  
   if(entry.userReacted===reactionType){
+    // Unreact
     entry.reactions[reactionType]=Math.max(0,(entry.reactions[reactionType]||0)-1);
     entry.userReacted=null;
   } else {
+    // Switch reaction
     if(entry.userReacted)entry.reactions[entry.userReacted]=Math.max(0,(entry.reactions[entry.userReacted]||0)-1);
     entry.reactions[reactionType]=(entry.reactions[reactionType]||0)+1;
     entry.userReacted=reactionType;
   }
+  
   if(!entry.isDummy){
     saveEntries();
-    if(S.online)await sbUpdate('rants',`id=eq.${entry.id}`,{reactions:entry.reactions});
+    renderEntries();
+    
+    if(S.online){
+      // Hapus reaction lama jika ada
+      if (previousReaction) {
+        await sbDelete('reactions', `rant_id=eq.${entryId}&user_id=eq.${encodeURIComponent(S.user)}&reaction_type=eq.${previousReaction}`);
+      }
+      
+      // Insert reaction baru jika bukan unreact
+      if (entry.userReacted) {
+        await sbInsert('reactions', {
+          id: crypto.randomUUID(),
+          rant_id: entryId,
+          user_id: S.user,
+          reaction_type: reactionType,
+          created_at: new Date().toISOString()
+        });
+      }
+    }
+  } else {
+    renderEntries();
   }
-  renderEntries();
 }
 
 // ─── SYNC QUEUE (offline) ─────────────────────────────────────────────────────
@@ -584,7 +645,14 @@ async function flushSyncQueue(){
   const failed=[];
   for(const item of q){
     if(item.type==='rant'){
-      const ok=await sbInsert('rants',{id:item.data.id,content:item.data.content,mood:item.data.mood,author:item.data.author||S.user,reactions:item.data.reactions||{skull:0,cry:0,fire:0,upside:0},created_at:new Date(item.data.timestamp).toISOString()});
+      // Insert rant tanpa reactions
+      const ok=await sbInsert('rants',{
+        id:item.data.id,
+        content:item.data.content,
+        mood:item.data.mood,
+        author:item.data.author||S.user,
+        created_at:new Date(item.data.timestamp).toISOString()
+      });
       if(!ok)failed.push(item);
       else updEntry(item.data.id,{isSpilled:true});
     }
