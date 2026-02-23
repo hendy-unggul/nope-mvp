@@ -180,7 +180,7 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 .entry-dummy{opacity:.6;border-style:dashed!important}
 .entry-dummy:hover{border-color:var(--bd)!important;opacity:.75}
 
-/* NEW: Gen Z Emoji Reaction Styles */
+/* Gen Z Emoji Reaction Styles */
 .reaction-bar{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--bd);background:var(--sfe);align-items:center;justify-content:flex-start}
 .reaction-btn{position:relative;display:flex;align-items:center;gap:4px;padding:6px 12px;background:var(--sf);border:2px solid var(--bd);cursor:pointer;transition:all .2s;font-size:14px;border-radius:4px}
 .reaction-btn:hover{border-color:var(--txs);transform:translateY(-2px);background:var(--sfe)}
@@ -191,6 +191,28 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 .reaction-btn[data-tooltip]:hover::after{content:attr(data-tooltip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:6px 10px;font-size:11px;font-weight:600;white-space:nowrap;border-radius:4px;z-index:100;pointer-events:none}
 .reaction-btn[data-tooltip]:hover::before{content:'';position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--tx);z-index:100;pointer-events:none}
 .reaction-btn:active{transform:scale(0.95)}
+
+/* NEW: Super Compact Connection Cards */
+.conn-mini{margin-top:24px}
+.conn-card-compact{background:var(--sf);border:2px solid var(--bd);margin-bottom:8px;position:relative;transition:all .2s;display:flex;align-items:center;padding:12px 16px;gap:12px}
+.conn-card-compact:hover{border-color:var(--ap)}
+.conn-card-compact.chaotic{border-left:4px solid var(--mc)}
+.conn-card-compact.caregiver{border-left:4px solid var(--mt)}
+.conn-avatar-mini{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--sfe);border:1px solid var(--bd);flex-shrink:0}
+.conn-card-compact.chaotic .conn-avatar-mini{border-color:var(--mc);color:var(--mc)}
+.conn-card-compact.caregiver .conn-avatar-mini{border-color:var(--mt);color:var(--mt)}
+.conn-info{flex:1;min-width:0}
+.conn-title-mini{font-size:12px;font-weight:600;line-height:1.4;color:var(--tx);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conn-meta{font-size:10px;color:var(--txs);display:flex;align-items:center;gap:6px}
+.conn-meta::before{content:'';width:6px;height:6px;background:var(--aq);border-radius:50%;display:inline-block;animation:blink 2s infinite}
+.conn-card-compact.chaotic .conn-meta::before{background:var(--mc)}
+.conn-card-compact.caregiver .conn-meta::before{background:var(--mt)}
+.conn-actions-mini{display:flex;gap:6px;flex-shrink:0}
+.conn-btn-mini{padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border:1px solid var(--bd);background:var(--sf);color:var(--tx);cursor:pointer;transition:all .2s}
+.conn-btn-mini:hover{border-color:var(--txs);background:var(--sfe)}
+.conn-btn-mini.pri{background:var(--tx);border-color:var(--tx);color:var(--bg)}
+.conn-btn-mini.pri:hover{background:var(--ap);border-color:var(--ap)}
+.conn-btn-mini:disabled{opacity:.5;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -248,6 +270,35 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
   <section style="margin-bottom:32px">
     <div class="shdr"><span class="stit">Memori</span><div class="sline"></div><span style="font-size:10px;color:var(--txm);margin-left:auto">FIFO • MAX 6 • AUTO-CENSOR</span></div>
     <div class="tgrid" id="tgrid"></div>
+    
+    <!-- NEW: Super Compact Connection Cards - Below Memori -->
+    <div class="conn-mini">
+      <!-- Card 1: Chaotic Good -->
+      <div class="conn-card-compact chaotic" id="card-chaotic">
+        <div class="conn-avatar-mini">🌀</div>
+        <div class="conn-info">
+          <div class="conn-title-mini">Seseorang dengan pola "chaotic good" sering muncul di timeline kamu.</div>
+          <div class="conn-meta">aktif jam aneh • react 😭 jarang post</div>
+        </div>
+        <div class="conn-actions-mini">
+          <button class="conn-btn-mini" onclick="skipConnection('chaotic')">Lewati</button>
+          <button class="conn-btn-mini pri" onclick="signalConnection('chaotic')">Isyarat</button>
+        </div>
+      </div>
+
+      <!-- Card 2: Caregiver -->
+      <div class="conn-card-compact caregiver" id="card-caregiver">
+        <div class="conn-avatar-mini">🫂</div>
+        <div class="conn-info">
+          <div class="conn-title-mini">Ada yang sering kasih hug ke curhatanmu, tapi jarang cerita balik.</div>
+          <div class="conn-meta">caregiver • burnout tapi diam</div>
+        </div>
+        <div class="conn-actions-mini">
+          <button class="conn-btn-mini" onclick="skipConnection('caregiver')">Lewati</button>
+          <button class="conn-btn-mini pri" onclick="signalConnection('caregiver')">Isyarat</button>
+        </div>
+      </div>
+    </div>
   </section>
 
   <footer><p class="ftxt">Nyambat • Aksi • Solusi</p></footer>
@@ -293,7 +344,6 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 <input type="file" id="finput" accept="image/*" multiple style="display:none">
 
 <script>
-// NEW: Gen Z Emoji Reactions Configuration
 const GENZ_REACTIONS = {
   skull: { emoji: '💀', tooltip: 'Dead from laughing', label: 'dead' },
   cry: { emoji: '😭', tooltip: 'Laughing so hard', label: 'cry' },
@@ -305,12 +355,8 @@ const CFG={supabaseUrl:'https://fuovfrdicdhnlymnacpz.supabase.co ',supabaseKey:'
 const MOODS={surviving:{emoji:'😮‍💨',color:'#FF9500',label:'surviving'},thriving:{emoji:'✨',color:'#39FF14',label:'thriving'},chaotic:{emoji:'🌀',color:'#00F0FF',label:'chaotic'},doom:{emoji:'🛌',color:'#8B5CF6',label:'doom'}};
 const THEMES=[{name:'MONOCHROME',filter:'fm'},{name:'NOIR',filter:'fn'},{name:'SEPIA',filter:'fsp'},{name:'WARM',filter:'fw'},{name:'GOLDEN',filter:'fg'},{name:'LOMO',filter:'fl'},{name:'DREAM',filter:'fd'},{name:'COLD',filter:'fco'},{name:'CYBER',filter:'fc'},{name:'VIGNETTE',filter:'fv'},{name:'CRISP',filter:'fcr'},{name:'MOODY',filter:'fmo'}];
 const CANVAS_FILTERS={'fm':'grayscale(100%) contrast(1.1)','fn':'grayscale(100%) contrast(1.4) brightness(.8)','fsp':'sepia(100%) contrast(1.1) saturate(.8)','fw':'sepia(60%) hue-rotate(-30deg) saturate(1.2)','fg':'sepia(40%) hue-rotate(-15deg) saturate(1.3) contrast(1.1)','fl':'contrast(1.2) saturate(1.3) brightness(.9)','fd':'blur(.5px) saturate(1.4) brightness(1.1) contrast(.9)','fco':'hue-rotate(180deg) saturate(.5) brightness(1.1)','fc':'hue-rotate(180deg) saturate(1.5) contrast(1.1)','fv':'grayscale(100%) contrast(1.2) brightness(.9)','fcr':'contrast(1.3) saturate(1.1)','fmo':'brightness(.8) contrast(1.2) saturate(.7)'};
-
-// NEW: Dummy entries with Gen Z reactions instead of old vibes
 const DE=[{id:'__d1',content:"gue udah bantuin dia tiap malem pas dia galau sampe gue lupa ngerjain tugas sendiri. pas gue butuh temen buat ngobrol, dia malah offline terus.",mood:'surviving',timestamp:Date.now()-172800000,reactions:{skull:5,cry:12,fire:3,upside:8},userReacted:null,isSpilled:true,isDummy:true},{id:'__d2',content:"deadline mepet, dosen gak jelas, dompet kering. rasanya pengen ijin cuti sehari buat jadi batu aja.",mood:'doom',timestamp:Date.now()-86400000,reactions:{skull:15,cry:7,fire:2,upside:20},userReacted:null,isSpilled:true,isDummy:true},{id:'__d3',content:"capek.",mood:'surviving',timestamp:Date.now()-43200000,reactions:{skull:25,cry:30,fire:5,upside:18},userReacted:null,isSpilled:true,isDummy:true}];
-
 const DA=[{id:'__a1',url:'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80 ',note:'jeda',faces:[],hasFace:false,isDummy:true},{id:'__a2',url:'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80 ',note:'hijau',faces:[],hasFace:false,isDummy:true},{id:'__a3',url:'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=80 ',note:'gabut',faces:[],hasFace:false,isDummy:true},{id:'__a4',url:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80 ',note:'sendiri',faces:[],hasFace:false,isDummy:true},{id:'__a5',url:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80 ',note:'capek',faces:[{box:{x:75,y:45,width:150,height:200},score:.92}],hasFace:true,isDummy:true},{id:'__a6',url:'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80 ',note:'love',faces:[],hasFace:false,isDummy:true}];
-
 const SESS=(()=>{const k={u:'jejak_username',id:'jejak_user_id',li:'jejak_logged_in'};const u=localStorage.getItem(k.u),id=localStorage.getItem(k.id),li=localStorage.getItem(k.li);return(!li||!u)?{username:'@anon',userId:null}:{username:u,userId:id}})();
 const PFX='jejak_'+(SESS.userId||SESS.username).replace(/[^a-z0-9]/g,'_')+'_';
 const S={user:SESS.username,uid:SESS.userId,mood:'surviving',entries:[],artefacts:[],selFiles:new Set(),theme:0,note:'',faceLoaded:false,sb:null,online:false,qStart:localStorage.getItem(PFX+'quota_start')||null,uploads:parseInt(localStorage.getItem(PFX+'uploads_count')||'0'),pendingFiles:[]};
@@ -367,31 +413,25 @@ function updEntry(id,u){const i=S.entries.findIndex(e=>e.id===id);if(i!==-1){S.e
 
 function qSync(type,data){const q=JSON.parse(localStorage.getItem(PFX+'sync_queue')||'[]');q.push({type,data,timestamp:Date.now()});localStorage.setItem(PFX+'sync_queue',JSON.stringify(q))}
 
-// NEW: Toggle reaction function for Gen Z emojis
 async function toggleReaction(entryId, reactionType) {
   const entry = S.entries.find(e => e.id === entryId) || DE.find(e => e.id === entryId);
   if (!entry) return;
   
-  // Toggle logic: if already reacted with this type, remove it
   if (entry.userReacted === reactionType) {
     entry.reactions[reactionType] = Math.max(0, (entry.reactions[reactionType] || 0) - 1);
     entry.userReacted = null;
   } else {
-    // If previously reacted with different type, decrement that
     if (entry.userReacted) {
       entry.reactions[entry.userReacted] = Math.max(0, (entry.reactions[entry.userReacted] || 0) - 1);
     }
-    // Add new reaction
     entry.reactions[reactionType] = (entry.reactions[reactionType] || 0) + 1;
     entry.userReacted = reactionType;
   }
   
-  // Save to local state
   if (!entry.isDummy) {
     saveEntries();
   }
   
-  // Sync with Supabase if online
   if (S.online && S.sb && !entry.isDummy) {
     try {
       await S.sb.from('rants').update({ reactions: entry.reactions }).eq('id', entryId);
@@ -403,7 +443,6 @@ async function toggleReaction(entryId, reactionType) {
   renderEntries();
 }
 
-// NEW: Render reaction bar HTML
 function renderReactionBar(entry) {
   const reactions = entry.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 };
   const userReacted = entry.userReacted;
@@ -458,6 +497,37 @@ const saveEntries=()=>localStorage.setItem(PFX+'entries',JSON.stringify(S.entrie
 const saveArtefacts=()=>localStorage.setItem(PFX+'artefacts',JSON.stringify(S.artefacts));
 
 function loadStorage(){try{const e=localStorage.getItem(PFX+'entries');if(e){const parsed=JSON.parse(e);S.entries=parsed.map(entry=>({...entry,reactions:entry.reactions||{skull:0,cry:0,fire:0,upside:0},userReacted:entry.userReacted||null}))}}catch{S.entries=[]}try{const a=localStorage.getItem(PFX+'artefacts');if(a)S.artefacts=JSON.parse(a)}catch{S.artefacts=[]}}
+
+// NEW: Super compact connection card functions
+function skipConnection(type) {
+  const card = document.getElementById(`card-${type}`);
+  if (card) {
+    card.style.opacity = '0.3';
+    card.style.transform = 'translateX(-10px)';
+    setTimeout(() => {
+      card.style.display = 'none';
+      toast(`${type === 'chaotic' ? 'Chaotic good' : 'Caregiver'} dilewati`);
+    }, 200);
+  }
+}
+
+function signalConnection(type) {
+  const card = document.getElementById(`card-${type}`);
+  if (card) {
+    const btn = card.querySelector('.conn-btn-mini.pri');
+    if (btn) {
+      btn.textContent = '✓';
+      btn.disabled = true;
+      btn.style.background = 'var(--aq)';
+      btn.style.borderColor = 'var(--aq)';
+    }
+    toast(`Isyarat ke ${type === 'chaotic' ? 'chaotic good' : 'caregiver'} terkirim!`);
+    
+    setTimeout(() => {
+      card.style.opacity = '0.5';
+    }, 1500);
+  }
+}
 
 document.addEventListener('DOMContentLoaded',()=>{const hu=$('huser');if(hu)hu.textContent=S.user;loadStorage();initSB();loadFaceApi();initUpload();renderEntries();renderTray();updQuota();if(S.online){loadRants();loadArtefacts()}const fr=S.artefacts.find(a=>!a.isDummy);if(fr)setHero(fr.url,fr.note,fr.faces,fr.theme?'f'+fr.theme.toLowerCase():'fm');else if(DA.length)setHero(DA[0].url,DA[0].note,DA[0].faces);const ri=$('ri'),cc=$('ccount'),sb=$('sbtn');if(ri&&cc){ri.oninput=()=>{const n=ri.value.length;cc.textContent=`${n}/500`;cc.style.color=n>=450?'var(--at)':'var(--txm)'}}if(sb&&ri){sb.onclick=()=>{const c=ri.value.trim();if(!c){toast('Tulis sesuatu...');return}submitRant(c,S.mood);ri.value='';if(cc)cc.textContent='0/500'}}setInterval(updQuota,60000)});
 </script>
