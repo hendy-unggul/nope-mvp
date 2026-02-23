@@ -16,7 +16,6 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .brand-icon{font-size:32px}
 .brand-text{font-size:28px;font-weight:800;letter-spacing:-.02em}
 .header-actions{display:flex;align-items:center;gap:12px}
-/* Removed online-dot styles - using connection-status instead */
 .menu-trigger{width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:transparent;border:none;cursor:pointer}
 .menu-trigger span{width:4px;height:4px;background:var(--txt);border-radius:50%}
 .tagline{font-style:italic;color:var(--ts);margin-bottom:8px}
@@ -57,6 +56,9 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .reaction-btn:hover .tooltip{opacity:1;visibility:visible}
 .reaction-btn:active{transform:scale(.95)}
 .reaction-btn.reacted{background:var(--a);border-color:var(--a);color:var(--bg)}
+.reaction-btn.reacted .rcount{color:var(--bg)}
+.reaction-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.reaction-btn:disabled:hover{border-color:var(--border);background:var(--se);color:var(--ts)}
 .reaction-emoji{font-size:14px}
 .reaction-count{font-weight:600;font-size:11px;min-width:14px;text-align:center}
 .tooltip{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--txt);color:var(--bg);padding:6px 10px;font-size:10px;font-weight:600;border-radius:6px;white-space:nowrap;opacity:0;visibility:hidden;transition:all .2s;margin-bottom:6px;z-index:100;pointer-events:none}
@@ -80,7 +82,6 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .nav-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
 .spill-counter{font-size:12px;color:var(--a);font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:.05em}
 
-/* CHATROOM STYLES - SEPARATED CARDS */
 .chatroom-section{margin-top:8px;padding-top:32px;border-top:1px solid var(--border)}
 .chatroom-header{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--tm);margin-bottom:16px;display:flex;align-items:center;gap:8px}
 .chatroom-container{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px}
@@ -142,8 +143,15 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .artefak-meta{padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
 .artefak-owner{font-size:11px;color:var(--tm);text-transform:uppercase;letter-spacing:.05em}
 .artefak-date{font-size:10px;color:var(--tm)}
+
+/* Peaking redirect overlay */
+.peaking-redirect-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:30000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+.peaking-redirect-overlay.active{display:flex}
+.peaking-redirect-timer{font-size:72px;font-weight:800;color:var(--a);margin-bottom:24px;font-family:'Plus Jakarta Sans',sans-serif}
+.peaking-redirect-text{font-size:16px;color:var(--ts);margin-bottom:8px;max-width:400px;line-height:1.6}
+.peaking-redirect-user{font-size:24px;font-weight:700;color:var(--txt);margin-bottom:32px}
+.peaking-redirect-hint{font-size:12px;color:var(--tm);font-style:italic}
 </style>
-<base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -154,7 +162,6 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
       <span class="brand-text">Spill the Tea</span>
     </div>
     <div class="header-actions">
-      <!-- Removed online-dot, using connection-status instead -->
       <button class="menu-trigger" onclick="toggleMenu()">
         <span></span><span></span><span></span>
       </button>
@@ -195,11 +202,9 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
     <span>🔄</span><span>Seduh Teh Baru</span>
   </button>
 
-  <!-- CHATROOM SECTION: 2 SEPARATED CARDS -->
   <div class="chatroom-section" id="chatroom-section">
     <div class="chatroom-header">Ruang Obrolan Langsung</div>
     
-    <!-- Card 1: Emosi Jiwa -->
     <div class="chatroom-container">
       <div class="chatroom-title emosi">🌊 Emosi Jiwa</div>
       <div class="chatroom-messages" id="chat-messages-emosi">
@@ -211,7 +216,6 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
       </div>
     </div>
     
-    <!-- Card 2: Agak Laen -->
     <div class="chatroom-container">
       <div class="chatroom-title agak">👽 Agak Laen</div>
       <div class="chatroom-messages" id="chat-messages-agak">
@@ -253,6 +257,14 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
   </div>
 </div>
 
+<!-- Peaking Redirect Overlay -->
+<div class="peaking-redirect-overlay" id="peaking-redirect-overlay">
+  <div class="peaking-redirect-timer" id="peaking-timer">20</div>
+  <div class="peaking-redirect-text">Mengintip jejak dari</div>
+  <div class="peaking-redirect-user" id="peaking-redirect-user">@user</div>
+  <div class="peaking-redirect-hint">Kembali ke Spill dalam...</div>
+</div>
+
 <nav class="bottom-nav">
   <div class="nav-container">
     <a href="jejak.html" class="nav-item"><span class="nav-icon">✦</span><span class="nav-label">Jejak</span></a>
@@ -289,7 +301,7 @@ const st = {
   loading: true,
   peakingId: null,
   artefacts: [],
-  userReacted: new Set(),
+  userReacted: new Set(), // Stores "rantId" strings (user can only react once per rant)
   offset: 0,
   seed: Math.random(),
   chatMessages: { emosi: [], agak: [] },
@@ -297,7 +309,6 @@ const st = {
 
 const unlocked = new Set();
 
-// 4 REACTIONS with tooltips
 const REACTIONS = [
   { id:'💀', type:'dead', label:'Dead', tooltip:'Aku dead baca ini / Relate banget sampai mati' },
   { id:'😭', type:'dramatic', label:'Dramatic', tooltip:'Kocak banget / Dramatic reaction' },
@@ -318,7 +329,6 @@ function toast(msg,isErr=false){
   t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000);
 }
 function setConn(online,msg){
-  // Removed online-dot toggle, only update connection-status text
   const el=document.getElementById('connection-status');
   el.textContent=online ? 'ONLINE' : msg; 
   el.className='connection-status '+(online?'online':'offline');
@@ -368,13 +378,11 @@ async function initSupabase(){
 }
 
 function setupRealtime(){
-  // Realtime for reactions
   st.sb.channel('rx-live')
     .on('postgres_changes',{ event:'INSERT', schema:'public', table:CFG.TBL_REACTIONS },
       p => { if(p.new?.rant_id) refreshCounts(p.new.rant_id); })
     .subscribe();
     
-  // Realtime for chat - both rooms
   st.sb.channel('chat-live')
     .on('postgres_changes',{ event:'INSERT', schema:'public', table:CFG.TBL_CHATS },
       p => { if(p.new) addChatToUI(p.new, false); })
@@ -386,7 +394,7 @@ function setupRealtime(){
 // ============================================
 async function loadSpills(isNew=false){
   setLoading(true);
-  if(isNew){ st.seed=Math.random(); st.offset+=6; } // Changed from 10 to 6
+  if(isNew){ st.seed=Math.random(); st.offset+=6; }
 
   if(!st.online || !st.sb){
     setLoading(false);
@@ -487,12 +495,17 @@ async function loadReactions(ids){
 
     if(error) throw error;
 
-    ids.forEach(id=>{ st.reactions[id]={}; REACTIONS.forEach(r=>{ st.reactions[id][r.id]=0; }); });
+    // Initialize reactions object for each rant
+    ids.forEach(id=>{ 
+      st.reactions[id] = {}; 
+      REACTIONS.forEach(r=>{ st.reactions[id][r.id] = 0; }); 
+    });
     
+    // Count reactions
     (data||[]).forEach(row=>{
       const reaction = REACTIONS.find(r => r.type === row.reaction_type || r.id === row.emoji);
       if(reaction && st.reactions[row.rant_id]){
-        st.reactions[row.rant_id][reaction.id] = (st.reactions[row.rant_id][reaction.id]||0)+1;
+        st.reactions[row.rant_id][reaction.id] = (st.reactions[row.rant_id][reaction.id] || 0) + 1;
       }
     });
   } catch(e){ console.error('❌ loadReactions:', e.message); }
@@ -503,15 +516,16 @@ async function loadMyReactions(ids){
   try {
     const { data, error } = await st.sb
       .from(CFG.TBL_REACTIONS)
-      .select('rant_id, reaction_type, emoji')
+      .select('rant_id')
       .eq('user_id', st.userId)
       .in('rant_id', ids);
 
     if(error) throw error;
+    
+    // Store only rant_id (user can only react once per rant)
     st.userReacted.clear();
     (data||[]).forEach(r=> {
-      const reaction = REACTIONS.find(rx => rx.type === r.reaction_type || rx.id === r.emoji);
-      if(reaction) st.userReacted.add(`${r.rant_id}-${reaction.id}`);
+      st.userReacted.add(r.rant_id);
     });
   } catch(e){ console.error('❌ loadMyReactions:', e.message); }
 }
@@ -529,22 +543,20 @@ async function loadArtefacts(){
 }
 
 // ============================================
-// CHATROOM FUNCTIONS - 2 SEPARATED ROOMS
+// CHATROOM FUNCTIONS
 // ============================================
 async function loadChats(){
   if(!st.sb) return;
   try {
-    // Load both rooms
     const { data, error } = await st.sb
       .from(CFG.TBL_CHATS)
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(60); // 30 per room max
+      .limit(60);
     
     if(error) throw error;
     
     if(data && data.length > 0){
-      // Separate by room
       st.chatMessages.emosi = data.filter(m => m.room === 'emosi').reverse().slice(-30);
       st.chatMessages.agak = data.filter(m => m.room === 'agak').reverse().slice(-30);
       renderChats();
@@ -591,11 +603,9 @@ function addChatToUI(msg, isNew = true){
   const container = document.getElementById(`chat-messages-${room}`);
   if(!container) return;
   
-  // Remove empty state if exists
   const emptyState = container.querySelector('.chat-empty');
   if(emptyState) emptyState.remove();
   
-  // Add to array (FIFO - keep max 30 per room)
   if(!st.chatMessages[room]) st.chatMessages[room] = [];
   st.chatMessages[room].push(msg);
   if(st.chatMessages[room].length > 30){
@@ -605,7 +615,6 @@ function addChatToUI(msg, isNew = true){
     }
   }
   
-  // Add to UI
   const chatHTML = createChatHTML(msg);
   container.insertAdjacentHTML('beforeend', chatHTML);
   container.scrollTop = container.scrollHeight;
@@ -617,12 +626,10 @@ async function sendChat(room){
   
   if(!content) return;
   
-  // Clear input immediately
   input.value = '';
   
   const username = st.currentUser || 'anonim';
   
-  // Optimistic UI
   const tempMsg = {
     id: 'temp_' + Date.now(),
     user_id: st.userId,
@@ -633,7 +640,6 @@ async function sendChat(room){
   };
   addChatToUI(tempMsg, true);
   
-  // Save to Supabase
   if(st.online && st.sb){
     try {
       const { data, error } = await st.sb
@@ -654,7 +660,6 @@ async function sendChat(room){
       toast('Gagal mengirim pesan', true);
     }
   } else {
-    // Offline - store locally
     const offline = JSON.parse(localStorage.getItem('offline_chats')||'[]');
     offline.push({
       user_id: st.userId,
@@ -669,13 +674,12 @@ async function sendChat(room){
 }
 
 // ============================================
-// REACTIONS
+// REACTIONS - FIXED: Only 1 reaction per rant
 // ============================================
 async function reactToSpill(rantId, emoji, author, btnEl){
-  const key = `${rantId}-${emoji}`;
-  
-  if(st.userReacted.has(key)){
-    toast('Sudah bereaksi!',true);
+  // Check if user already reacted to this rant (any emoji)
+  if(st.userReacted.has(rantId)){
+    toast('Kamu sudah bereaksi ke spill ini!', true);
     return;
   }
 
@@ -685,21 +689,38 @@ async function reactToSpill(rantId, emoji, author, btnEl){
     return;
   }
 
+  // Optimistic UI - mark this rant as reacted
+  st.userReacted.add(rantId);
+  
+  // Update UI - disable all reaction buttons for this rant
+  const allBtns = document.querySelectorAll(`[onclick*="'${rantId}'"]`);
+  allBtns.forEach(btn => {
+    btn.disabled = true;
+    btn.classList.add('reacted');
+  });
+  
+  // Update count for this specific emoji
   const countEl = document.getElementById(`count-${rantId}-${emoji}`);
-  const prev = parseInt(countEl?.textContent||'0');
-
-  // Optimistic UI
-  if(countEl) countEl.textContent = prev + 1;
-  if(btnEl) btnEl.classList.add('reacted');
+  if(countEl) {
+    const prev = parseInt(countEl.textContent || '0');
+    countEl.textContent = prev + 1;
+  }
+  
+  // Initialize reactions if needed
   if(!st.reactions[rantId]) st.reactions[rantId] = {};
-  st.reactions[rantId][emoji] = prev + 1;
-  st.userReacted.add(key);
+  st.reactions[rantId][emoji] = (st.reactions[rantId][emoji] || 0) + 1;
 
-  // Unlock peaking
-  if(author && author !== 'anonim' && !unlocked.has(author)){
+  // Unlock peaking and redirect after reaction
+  if(author && author !== 'anonim' && author !== 'null'){
     unlocked.add(author);
-    toast('🔓 Peaking unlocked!');
-    console.log('🔓 Unlocked peaking for:', author);
+    toast('🔓 Peaking unlocked! Mengarahkan ke jejak...');
+    
+    // Redirect to jejak.html with user parameter for 20 seconds
+    setTimeout(() => {
+      startPeakingRedirect(author);
+    }, 1000);
+  } else {
+    toast(emoji + ' Tersimpan!');
   }
 
   // Save to Supabase
@@ -735,22 +756,25 @@ async function reactToSpill(rantId, emoji, author, btnEl){
       if(error){
         if(error.code === '23505' || error.code === '23514'){
           console.log('⚠️ Constraint violation:', error.message);
-          toast(emoji+' Tersimpan!');
           return;
         }
         throw error;
       }
 
       console.log('✅ Reaction saved:', data);
-      toast(emoji+' Tersimpan!');
 
     } catch(e){
       console.error('❌ Gagal simpan reaction:', e);
       // Rollback
-      if(countEl) countEl.textContent = prev;
-      if(btnEl) btnEl.classList.remove('reacted');
-      st.reactions[rantId][emoji] = prev;
-      st.userReacted.delete(key);
+      st.userReacted.delete(rantId);
+      allBtns.forEach(btn => {
+        btn.disabled = false;
+        btn.classList.remove('reacted');
+      });
+      if(countEl) {
+        const prev = parseInt(countEl.textContent || '0');
+        countEl.textContent = Math.max(0, prev - 1);
+      }
       toast('Gagal: '+e.message, true);
     }
   } else {
@@ -768,6 +792,37 @@ async function reactToSpill(rantId, emoji, author, btnEl){
   }
 }
 
+// ============================================
+// PEAKING REDIRECT - NEW: 20 seconds to jejak
+// ============================================
+function startPeakingRedirect(author){
+  const overlay = document.getElementById('peaking-redirect-overlay');
+  const timerEl = document.getElementById('peaking-timer');
+  const userEl = document.getElementById('peaking-redirect-user');
+  
+  userEl.textContent = '@' + formatUsername(author);
+  overlay.classList.add('active');
+  
+  let seconds = 20;
+  timerEl.textContent = seconds;
+  
+  // Store current page to return to
+  sessionStorage.setItem('peaking_return_to', 'saynope.html');
+  sessionStorage.setItem('peaking_timer_end', Date.now() + (seconds * 1000));
+  
+  const countdown = setInterval(() => {
+    seconds--;
+    timerEl.textContent = seconds;
+    
+    if(seconds <= 0){
+      clearInterval(countdown);
+      overlay.classList.remove('active');
+      // Redirect to jejak.html with user parameter
+      window.location.href = `jejak.html?view_user=${encodeURIComponent(author)}&peaking=true`;
+    }
+  }, 1000);
+}
+
 async function refreshCounts(rantId){
   if(!st.sb||!rantId) return;
   try {
@@ -775,14 +830,17 @@ async function refreshCounts(rantId){
       .select('reaction_type, emoji')
       .eq('rant_id',rantId);
     
+    // Reset counts
     const c={};
     REACTIONS.forEach(r=>c[r.id]=0);
     
+    // Count all reactions
     (data||[]).forEach(r=>{
       const reaction = REACTIONS.find(rx => rx.type === r.reaction_type || rx.id === r.emoji);
       if(reaction) c[reaction.id]++;
     });
     
+    // Update UI
     REACTIONS.forEach(r=>{ 
       const el=document.getElementById(`count-${rantId}-${r.id}`); 
       if(el) el.textContent=c[r.id]; 
@@ -841,14 +899,12 @@ function renderSpills(){
   let rantCount = 0;
   let artefactInserted = false;
 
-  // CHANGED: max 6 rants per brew (was 10)
   const maxRants = 6;
   const displayList = list.slice(0, maxRants);
 
   for(let i=0; i<displayList.length; i++){
     const s=displayList[i];
     
-    // Insert artefak setelah rant ke-5 (before last one)
     if(rantCount === 5 && !artefactInserted){ 
       const a = getRandArtefact(); 
       if(a){
@@ -862,12 +918,16 @@ function renderSpills(){
     const pkey = s.is_anonymous ? null : s.author;
     const safe = (s.author||'').replace(/'/g,"\\'");
     const isUnlocked = pkey && unlocked.has(pkey);
+    
+    // Check if user already reacted to this rant
+    const hasReacted = st.userReacted.has(rid);
 
-    // 4 reactions with tooltips
+    // 4 reactions with tooltips - disabled if already reacted
     const rxHtml = REACTIONS.map(r=>{
       const count = (st.reactions[rid]||{})[r.id] ?? 0;
-      const reacted = st.userReacted.has(`${rid}-${r.id}`);
-      return `<button class="reaction-btn ${reacted?'reacted':''}" onclick="reactToSpill('${rid}','${r.id}','${safe}',this)">
+      return `<button class="reaction-btn ${hasReacted?'reacted':''}" 
+        onclick="reactToSpill('${rid}','${r.id}','${safe}',this)"
+        ${hasReacted?'disabled':''}>
         <span class="reaction-emoji">${r.id}</span>
         <span class="reaction-count" id="count-${rid}-${r.id}">${count}</span>
         <span class="tooltip">${r.tooltip}</span>
