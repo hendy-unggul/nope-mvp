@@ -1,5 +1,5 @@
 // ================================================
-// FREKUENSI HANGOUTS — Location recommendations
+// COCOMEO HANGOUTS — Location recommendations
 // ================================================
 
 async function loadHangouts() {
