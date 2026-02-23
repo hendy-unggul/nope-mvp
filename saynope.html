@@ -16,16 +16,15 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .brand-icon{font-size:32px}
 .brand-text{font-size:28px;font-weight:800;letter-spacing:-.02em}
 .header-actions{display:flex;align-items:center;gap:12px}
-.online-dot{width:8px;height:8px;background:var(--as);border-radius:50%;animation:blink 2s infinite}
-.online-dot.offline{background:var(--tm);animation:none}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+/* Removed online-dot styles - using connection-status instead */
 .menu-trigger{width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:transparent;border:none;cursor:pointer}
 .menu-trigger span{width:4px;height:4px;background:var(--txt);border-radius:50%}
 .tagline{font-style:italic;color:var(--ts);margin-bottom:8px}
 .status-text{color:var(--a);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:24px}
-.connection-status{font-size:10px;color:var(--tm);text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:.1em}
+.connection-status{font-size:10px;color:var(--tm);text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;justify-content:center;gap:6px}
 .connection-status.online{color:var(--aq)}
 .connection-status.offline{color:var(--at)}
+.connection-status::before{content:'';width:6px;height:6px;background:currentColor;border-radius:50%;display:inline-block}
 .filter-section{background:var(--surface);border:1px solid var(--border);padding:20px;margin-bottom:24px}
 .filter-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
 .filter-title{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:8px}
@@ -53,12 +52,15 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .spill-mood{font-size:10px;padding:4px 8px;border:1px solid currentColor;text-transform:uppercase}
 .spill-content{font-size:15px;line-height:1.6;margin-bottom:16px}
 .spill-reactions{display:flex;gap:6px;flex-wrap:nowrap;justify-content:space-between}
-.reaction-btn{display:flex;align-items:center;gap:4px;background:var(--se);border:1px solid var(--border);color:var(--ts);padding:6px 10px;font-size:12px;cursor:pointer;transition:all .2s;border-radius:16px;flex:1;justify-content:center;min-width:0}
+.reaction-btn{display:flex;align-items:center;gap:4px;background:var(--se);border:1px solid var(--border);color:var(--ts);padding:6px 10px;font-size:12px;cursor:pointer;transition:all .2s;border-radius:16px;flex:1;justify-content:center;min-width:0;position:relative}
 .reaction-btn:hover{border-color:var(--a);background:var(--a);color:var(--bg);transform:scale(1.05)}
+.reaction-btn:hover .tooltip{opacity:1;visibility:visible}
 .reaction-btn:active{transform:scale(.95)}
 .reaction-btn.reacted{background:var(--a);border-color:var(--a);color:var(--bg)}
 .reaction-emoji{font-size:14px}
 .reaction-count{font-weight:600;font-size:11px;min-width:14px;text-align:center}
+.tooltip{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--txt);color:var(--bg);padding:6px 10px;font-size:10px;font-weight:600;border-radius:6px;white-space:nowrap;opacity:0;visibility:hidden;transition:all .2s;margin-bottom:6px;z-index:100;pointer-events:none}
+.tooltip::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--txt)}
 .new-spill-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:16px;background:transparent;border:2px solid var(--a);color:var(--a);font-size:14px;font-weight:700;text-transform:uppercase;cursor:pointer;margin-top:24px;margin-bottom:32px;transition:all .2s}
 .new-spill-btn:hover{background:var(--a);color:var(--bg)}
 .empty-state{text-align:center;padding:40px}
@@ -76,35 +78,34 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .nav-item:hover{color:var(--txt)}
 .nav-icon{font-size:20px}
 .nav-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
-.vibe-match-section{margin-top:8px;padding-top:32px;border-top:1px solid var(--border)}
-.vibe-match-header{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--tm);margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.vibe-match-header::before{content:'〰️'}
-.vibe-match-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden;transition:border-color .3s}
-.vibe-match-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--a),var(--as));opacity:0;transition:opacity .3s}
-.vibe-match-card:hover::before{opacity:1}
-.vibe-match-icon{width:48px;height:48px;background:var(--se);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px;border:2px solid var(--border)}
-.vibe-match-icon.chaotic{border-color:var(--as);animation:spin-slow 8s linear infinite}
-.vibe-match-icon.caregiver{border-color:var(--aq);animation:pulse 2s ease-in-out infinite}
-@keyframes spin-slow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@keyframes pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(57,255,20,.4)}50%{transform:scale(1.05);box-shadow:0 0 20px 5px rgba(57,255,20,.2)}}
-.vibe-match-title{font-size:15px;font-weight:700;margin-bottom:12px;line-height:1.4}
-.vibe-match-traits{list-style:none;margin-bottom:16px}
-.vibe-match-traits li{font-size:13px;color:var(--ts);margin-bottom:6px;display:flex;align-items:center;gap:8px}
-.vibe-match-traits li::before{content:'✓';color:var(--aq);font-weight:700}
-.vibe-match-graph{display:flex;align-items:flex-end;gap:3px;height:24px;margin-bottom:16px;opacity:.6}
-.vibe-match-bar{width:4px;background:linear-gradient(to top,var(--a),var(--as));border-radius:2px;animation:equalizer 1.5s ease-in-out infinite}
-.vibe-match-bar:nth-child(1){height:40%;animation-delay:0s}
-.vibe-match-bar:nth-child(2){height:70%;animation-delay:.1s}
-.vibe-match-bar:nth-child(3){height:50%;animation-delay:.2s}
-.vibe-match-bar:nth-child(4){height:90%;animation-delay:.3s}
-.vibe-match-bar:nth-child(5){height:60%;animation-delay:.4s}
-@keyframes equalizer{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.6)}}
-.vibe-match-actions{display:flex;gap:12px}
-.vibe-match-btn{flex:1;padding:10px 16px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border-radius:20px;cursor:pointer;transition:all .2s;border:none}
-.vibe-match-btn.skip{background:transparent;color:var(--ts);border:1px solid var(--border)}
-.vibe-match-btn.skip:hover{border-color:var(--ts);color:var(--txt)}
-.vibe-match-btn.signal{background:var(--txt);color:var(--bg)}
-.vibe-match-btn.signal:hover{background:var(--a);color:var(--txt)}
+.spill-counter{font-size:12px;color:var(--a);font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:.05em}
+
+/* CHATROOM STYLES - SEPARATED CARDS */
+.chatroom-section{margin-top:8px;padding-top:32px;border-top:1px solid var(--border)}
+.chatroom-header{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--tm);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.chatroom-container{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px}
+.chatroom-messages{height:250px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--bg)}
+.chat-message{display:flex;flex-direction:column;gap:4px;animation:slideIn .3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.chat-message-own{align-items:flex-end}
+.chat-message-other{align-items:flex-start}
+.chat-bubble{max-width:85%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.5;word-wrap:break-word}
+.chat-message-own .chat-bubble{background:var(--a);color:var(--bg);border-bottom-right-radius:4px}
+.chat-message-other .chat-bubble{background:var(--se);color:var(--txt);border-bottom-left-radius:4px}
+.chat-meta{font-size:10px;color:var(--tm);display:flex;gap:8px;align-items:center}
+.chat-username{font-weight:600;color:var(--as)}
+.chat-input-container{display:flex;gap:8px;padding:12px;background:var(--se);border-top:1px solid var(--border)}
+.chat-input{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--txt);padding:10px 14px;font-size:13px;font-family:inherit;border-radius:20px;outline:none}
+.chat-input:focus{border-color:var(--a)}
+.chat-send-btn{background:var(--a);color:var(--bg);border:none;padding:10px 20px;font-size:12px;font-weight:700;text-transform:uppercase;border-radius:20px;cursor:pointer;transition:all .2s}
+.chat-send-btn:hover{background:var(--txt);color:var(--bg)}
+.chat-empty{text-align:center;padding:40px;color:var(--tm);font-size:12px;font-style:italic}
+.chat-badge{display:inline-flex;align-items:center;gap:4px;background:var(--at);color:var(--txt);padding:2px 8px;border-radius:10px;font-size:9px;font-weight:700;text-transform:uppercase}
+.chat-badge::before{content:'🔥'}
+.chatroom-title{padding:12px 16px;background:var(--se);border-bottom:1px solid var(--border);font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+.chatroom-title.emosi{color:var(--as)}
+.chatroom-title.agak{color:var(--at)}
+
 .peaking-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.95);backdrop-filter:blur(10px);z-index:20000;opacity:0;visibility:hidden;transition:all .3s ease;overflow-y:auto}
 .peaking-overlay.active{opacity:1;visibility:visible}
 .peaking-container{max-width:480px;margin:0 auto;padding:24px 16px 100px;min-height:100vh}
@@ -117,6 +118,9 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .peaking-avatar{width:80px;height:80px;background:var(--se);border:2px solid var(--a);border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:32px;position:relative}
 .peaking-username{font-size:18px;font-weight:700;margin-bottom:8px}
 .peaking-vibe{font-size:12px;color:var(--ts);text-transform:uppercase;letter-spacing:.1em}
+.reaction-unlock{display:inline-flex;align-items:center;gap:8px;background:var(--a);color:var(--bg);padding:8px 16px;font-size:11px;font-weight:700;text-transform:uppercase;margin-top:16px;letter-spacing:.05em}
+.peaking-hint{text-align:center;padding:24px;border:1px dashed var(--border);margin-bottom:24px;background:var(--surface)}
+.peaking-hint-text{font-size:12px;color:var(--ts);font-style:italic;line-height:1.6}
 .peaking-section{margin-bottom:24px}
 .peaking-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--tm);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
 .peaking-rants{display:flex;flex-direction:column;gap:16px}
@@ -129,9 +133,6 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .artefact-item{aspect-ratio:1;background:var(--se);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
 .artefact-item:hover{border-color:var(--a);transform:translateY(-4px);box-shadow:0 4px 20px rgba(255,77,0,.3)}
 .artefact-item.empty{border-style:dashed;opacity:.3}
-.peaking-hint{text-align:center;padding:24px;border:1px dashed var(--border);margin-bottom:24px;background:var(--surface)}
-.peaking-hint-text{font-size:12px;color:var(--ts);font-style:italic;line-height:1.6}
-.reaction-unlock{display:inline-flex;align-items:center;gap:8px;background:var(--a);color:var(--bg);padding:8px 16px;font-size:11px;font-weight:700;text-transform:uppercase;margin-top:16px;letter-spacing:.05em}
 .artefak-card{background:var(--surface);border:1px solid var(--border);animation:fadeIn .4s ease;position:relative;overflow:hidden}
 .artefak-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--a),var(--as))}
 .artefak-header{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--se)}
@@ -141,8 +142,8 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .artefak-meta{padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
 .artefak-owner{font-size:11px;color:var(--tm);text-transform:uppercase;letter-spacing:.05em}
 .artefak-date{font-size:10px;color:var(--tm)}
-.spill-counter{font-size:12px;color:var(--a);font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:.05em}
 </style>
+<base target="_blank">
 <base target="_blank">
 </head>
 <body>
@@ -153,7 +154,7 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
       <span class="brand-text">Spill the Tea</span>
     </div>
     <div class="header-actions">
-      <div class="online-dot" id="online-dot"></div>
+      <!-- Removed online-dot, using connection-status instead -->
       <button class="menu-trigger" onclick="toggleMenu()">
         <span></span><span></span><span></span>
       </button>
@@ -194,41 +195,31 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
     <span>🔄</span><span>Seduh Teh Baru</span>
   </button>
 
-  <div class="vibe-match-section" id="vibe-match-section">
-    <div class="vibe-match-header">Getaran yang Cocok</div>
-    <div class="vibe-match-card" id="chaotic-good-card">
-      <div class="vibe-match-icon chaotic">🌀</div>
-      <div class="vibe-match-title">Seseorang dengan pola "chaotic good" sering muncul di timeline kamu.</div>
-      <div class="vibe-match-graph">
-        <div class="vibe-match-bar"></div><div class="vibe-match-bar"></div>
-        <div class="vibe-match-bar"></div><div class="vibe-match-bar"></div>
-        <div class="vibe-match-bar"></div>
+  <!-- CHATROOM SECTION: 2 SEPARATED CARDS -->
+  <div class="chatroom-section" id="chatroom-section">
+    <div class="chatroom-header">Ruang Obrolan Langsung</div>
+    
+    <!-- Card 1: Emosi Jiwa -->
+    <div class="chatroom-container">
+      <div class="chatroom-title emosi">🌊 Emosi Jiwa</div>
+      <div class="chatroom-messages" id="chat-messages-emosi">
+        <div class="chat-empty">Belum ada yang ngobrol di sini...</div>
       </div>
-      <ul class="vibe-match-traits">
-        <li>Sama-sama aktif jam aneh</li>
-        <li>Sama-sama react 😂 tapi jarang post</li>
-        <li>Sama-sama "surviving" mode</li>
-      </ul>
-      <div class="vibe-match-actions">
-        <button class="vibe-match-btn skip" onclick="skipVibeMatch('chaotic')">Lewati</button>
-        <button class="vibe-match-btn signal" onclick="sendSignal('chaotic')">Beri Isyarat</button>
+      <div class="chat-input-container">
+        <input type="text" class="chat-input" id="chat-input-emosi" placeholder="Tulis pesan..." maxlength="200" onkeypress="if(event.key==='Enter')sendChat('emosi')">
+        <button class="chat-send-btn" onclick="sendChat('emosi')">Kirim</button>
       </div>
     </div>
-    <div class="vibe-match-card" id="caregiver-card">
-      <div class="vibe-match-icon caregiver">🫂</div>
-      <div class="vibe-match-title">Ada yang sering kasih hug ke curhatanmu, tapi jarang cerita balik.</div>
-      <div class="vibe-match-graph">
-        <div class="vibe-match-bar"></div><div class="vibe-match-bar"></div>
-        <div class="vibe-match-bar"></div><div class="vibe-match-bar"></div>
-        <div class="vibe-match-bar"></div>
+    
+    <!-- Card 2: Agak Laen -->
+    <div class="chatroom-container">
+      <div class="chatroom-title agak">👽 Agak Laen</div>
+      <div class="chatroom-messages" id="chat-messages-agak">
+        <div class="chat-empty">Belum ada yang ngobrol di sini...</div>
       </div>
-      <ul class="vibe-match-traits">
-        <li>Pola "caregiver" yang sama</li>
-        <li>Sama-sama burnout tapi diam</li>
-      </ul>
-      <div class="vibe-match-actions">
-        <button class="vibe-match-btn skip" onclick="skipVibeMatch('caregiver')">Lewati</button>
-        <button class="vibe-match-btn signal" onclick="sendSignal('caregiver')">Beri Isyarat</button>
+      <div class="chat-input-container">
+        <input type="text" class="chat-input" id="chat-input-agak" placeholder="Tulis pesan..." maxlength="200" onkeypress="if(event.key==='Enter')sendChat('agak')">
+        <button class="chat-send-btn" onclick="sendChat('agak')">Kirim</button>
       </div>
     </div>
   </div>
@@ -283,6 +274,7 @@ const CFG = {
   TBL_REACTIONS: 'reactions',
   TBL_ARTEFACTS: 'artefacts',
   TBL_USERS:     'users',
+  TBL_CHATS:     'chats',
 };
 
 const st = {
@@ -299,19 +291,18 @@ const st = {
   artefacts: [],
   userReacted: new Set(),
   offset: 0,
-  seed: Math.random()
+  seed: Math.random(),
+  chatMessages: { emosi: [], agak: [] },
 };
 
 const unlocked = new Set();
 
-// REACTIONS - Mapping emoji ke reaction_type untuk database
+// 4 REACTIONS with tooltips
 const REACTIONS = [
-  { id:'💯', type:'relatable', label:'Relatable' },
-  { id:'🤗', type:'hug',       label:'Hug'       },
-  { id:'✋',  type:'same',      label:'Same'      },
-  { id:'😮‍💨', type:'mood',      label:'Mood'      },
-  { id:'🍵', type:'tea',       label:'Tea'       },
-  { id:'🔥', type:'fire',      label:'Fire'      }
+  { id:'💀', type:'dead', label:'Dead', tooltip:'Aku dead baca ini / Relate banget sampai mati' },
+  { id:'😭', type:'dramatic', label:'Dramatic', tooltip:'Kocak banget / Dramatic reaction' },
+  { id:'🔥', type:'lit', label:'Lit', tooltip:'This is lit / Spill yang ngena' },
+  { id:'😶', type:'mess', label:'Mess', tooltip:'Life\'s a mess but I\'m fine' }
 ];
 
 const MOOD_COLORS = { surviving:'#FF9500', thriving:'#39FF14', chaotic:'#00F0FF', doom:'#8B5CF6' };
@@ -327,9 +318,10 @@ function toast(msg,isErr=false){
   t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000);
 }
 function setConn(online,msg){
-  document.getElementById('online-dot').classList.toggle('offline',!online);
+  // Removed online-dot toggle, only update connection-status text
   const el=document.getElementById('connection-status');
-  el.textContent=msg; el.className='connection-status '+(online?'online':'offline');
+  el.textContent=online ? 'ONLINE' : msg; 
+  el.className='connection-status '+(online?'online':'offline');
   st.online=online;
 }
 function shuffle(arr,seed){
@@ -376,9 +368,16 @@ async function initSupabase(){
 }
 
 function setupRealtime(){
+  // Realtime for reactions
   st.sb.channel('rx-live')
     .on('postgres_changes',{ event:'INSERT', schema:'public', table:CFG.TBL_REACTIONS },
       p => { if(p.new?.rant_id) refreshCounts(p.new.rant_id); })
+    .subscribe();
+    
+  // Realtime for chat - both rooms
+  st.sb.channel('chat-live')
+    .on('postgres_changes',{ event:'INSERT', schema:'public', table:CFG.TBL_CHATS },
+      p => { if(p.new) addChatToUI(p.new, false); })
     .subscribe();
 }
 
@@ -387,7 +386,7 @@ function setupRealtime(){
 // ============================================
 async function loadSpills(isNew=false){
   setLoading(true);
-  if(isNew){ st.seed=Math.random(); st.offset+=10; }
+  if(isNew){ st.seed=Math.random(); st.offset+=6; } // Changed from 10 to 6
 
   if(!st.online || !st.sb){
     setLoading(false);
@@ -481,7 +480,6 @@ async function loadSpills(isNew=false){
 async function loadReactions(ids){
   if(!st.sb||!ids.length) return;
   try {
-    // Coba load dengan reaction_type (untuk constraint yang pakai text)
     const { data, error } = await st.sb
       .from(CFG.TBL_REACTIONS)
       .select('rant_id, reaction_type, emoji')
@@ -492,7 +490,6 @@ async function loadReactions(ids){
     ids.forEach(id=>{ st.reactions[id]={}; REACTIONS.forEach(r=>{ st.reactions[id][r.id]=0; }); });
     
     (data||[]).forEach(row=>{
-      // Cari emoji yang match dengan reaction_type
       const reaction = REACTIONS.find(r => r.type === row.reaction_type || r.id === row.emoji);
       if(reaction && st.reactions[row.rant_id]){
         st.reactions[row.rant_id][reaction.id] = (st.reactions[row.rant_id][reaction.id]||0)+1;
@@ -532,7 +529,147 @@ async function loadArtefacts(){
 }
 
 // ============================================
-// REACTIONS - FIX: Gunakan reaction_type bukan emoji
+// CHATROOM FUNCTIONS - 2 SEPARATED ROOMS
+// ============================================
+async function loadChats(){
+  if(!st.sb) return;
+  try {
+    // Load both rooms
+    const { data, error } = await st.sb
+      .from(CFG.TBL_CHATS)
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(60); // 30 per room max
+    
+    if(error) throw error;
+    
+    if(data && data.length > 0){
+      // Separate by room
+      st.chatMessages.emosi = data.filter(m => m.room === 'emosi').reverse().slice(-30);
+      st.chatMessages.agak = data.filter(m => m.room === 'agak').reverse().slice(-30);
+      renderChats();
+    }
+  } catch(e){ console.error('❌ loadChats:', e.message); }
+}
+
+function renderChats(){
+  renderChatRoom('emosi');
+  renderChatRoom('agak');
+}
+
+function renderChatRoom(room){
+  const container = document.getElementById(`chat-messages-${room}`);
+  if(!container) return;
+  
+  const messages = st.chatMessages[room] || [];
+  
+  if(messages.length === 0){
+    container.innerHTML = '<div class="chat-empty">Belum ada yang ngobrol di sini...</div>';
+    return;
+  }
+  
+  container.innerHTML = messages.map(msg => createChatHTML(msg)).join('');
+  container.scrollTop = container.scrollHeight;
+}
+
+function createChatHTML(msg){
+  const isOwn = msg.user_id === st.userId;
+  const username = msg.username || 'anonim';
+  const time = new Date(msg.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+  
+  return `<div class="chat-message ${isOwn ? 'chat-message-own' : 'chat-message-other'}">
+    <div class="chat-meta">
+      ${isOwn ? '<span class="chat-badge">Kamu</span>' : `<span class="chat-username">@${formatUsername(username)}</span>`}
+      <span>${time}</span>
+    </div>
+    <div class="chat-bubble">${esc(msg.content)}</div>
+  </div>`;
+}
+
+function addChatToUI(msg, isNew = true){
+  const room = msg.room || 'emosi';
+  const container = document.getElementById(`chat-messages-${room}`);
+  if(!container) return;
+  
+  // Remove empty state if exists
+  const emptyState = container.querySelector('.chat-empty');
+  if(emptyState) emptyState.remove();
+  
+  // Add to array (FIFO - keep max 30 per room)
+  if(!st.chatMessages[room]) st.chatMessages[room] = [];
+  st.chatMessages[room].push(msg);
+  if(st.chatMessages[room].length > 30){
+    st.chatMessages[room].shift();
+    if(container.children.length > 0){
+      container.removeChild(container.firstChild);
+    }
+  }
+  
+  // Add to UI
+  const chatHTML = createChatHTML(msg);
+  container.insertAdjacentHTML('beforeend', chatHTML);
+  container.scrollTop = container.scrollHeight;
+}
+
+async function sendChat(room){
+  const input = document.getElementById(`chat-input-${room}`);
+  const content = input.value.trim();
+  
+  if(!content) return;
+  
+  // Clear input immediately
+  input.value = '';
+  
+  const username = st.currentUser || 'anonim';
+  
+  // Optimistic UI
+  const tempMsg = {
+    id: 'temp_' + Date.now(),
+    user_id: st.userId,
+    username: username,
+    content: content,
+    room: room,
+    created_at: new Date().toISOString()
+  };
+  addChatToUI(tempMsg, true);
+  
+  // Save to Supabase
+  if(st.online && st.sb){
+    try {
+      const { data, error } = await st.sb
+        .from(CFG.TBL_CHATS)
+        .insert({
+          user_id: st.userId,
+          username: username,
+          content: content,
+          room: room,
+          created_at: new Date().toISOString()
+        })
+        .select();
+      
+      if(error) throw error;
+      
+    } catch(e){
+      console.error('❌ sendChat error:', e);
+      toast('Gagal mengirim pesan', true);
+    }
+  } else {
+    // Offline - store locally
+    const offline = JSON.parse(localStorage.getItem('offline_chats')||'[]');
+    offline.push({
+      user_id: st.userId,
+      username: username,
+      content: content,
+      room: room,
+      created_at: new Date().toISOString()
+    });
+    localStorage.setItem('offline_chats', JSON.stringify(offline));
+    toast('Pesan tersimpan (offline)');
+  }
+}
+
+// ============================================
+// REACTIONS
 // ============================================
 async function reactToSpill(rantId, emoji, author, btnEl){
   const key = `${rantId}-${emoji}`;
@@ -542,7 +679,6 @@ async function reactToSpill(rantId, emoji, author, btnEl){
     return;
   }
 
-  // Cari reaction_type dari emoji
   const reactionDef = REACTIONS.find(r => r.id === emoji);
   if(!reactionDef){
     toast('Emoji tidak valid', true);
@@ -566,17 +702,16 @@ async function reactToSpill(rantId, emoji, author, btnEl){
     console.log('🔓 Unlocked peaking for:', author);
   }
 
-  // Simpan ke Supabase dengan reaction_type
+  // Save to Supabase
   if(st.online && st.sb){
     try {
       const payload = {
         rant_id: rantId,
-        reaction_type: reactionDef.type,  // Gunakan type (text) bukan emoji
+        reaction_type: reactionDef.type,
         user_id: st.userId,
         created_at: new Date().toISOString()
       };
 
-      // Coba insert dengan reaction_type dulu
       console.log('💾 Saving reaction:', payload);
       
       let { data, error } = await st.sb
@@ -584,7 +719,6 @@ async function reactToSpill(rantId, emoji, author, btnEl){
         .insert(payload)
         .select();
 
-      // Jika error karena kolom reaction_type tidak ada, coba dengan emoji
       if(error && error.message && error.message.includes('reaction_type')){
         console.log('⚠️ reaction_type not found, trying emoji column...');
         const payloadEmoji = {
@@ -707,14 +841,15 @@ function renderSpills(){
   let rantCount = 0;
   let artefactInserted = false;
 
-  const maxRants = 10;
+  // CHANGED: max 6 rants per brew (was 10)
+  const maxRants = 6;
   const displayList = list.slice(0, maxRants);
 
   for(let i=0; i<displayList.length; i++){
     const s=displayList[i];
     
-    // Insert artefak setelah rant ke-9
-    if(rantCount === 9 && !artefactInserted){ 
+    // Insert artefak setelah rant ke-5 (before last one)
+    if(rantCount === 5 && !artefactInserted){ 
       const a = getRandArtefact(); 
       if(a){
         html.push(artefactCard(a));
@@ -728,12 +863,14 @@ function renderSpills(){
     const safe = (s.author||'').replace(/'/g,"\\'");
     const isUnlocked = pkey && unlocked.has(pkey);
 
+    // 4 reactions with tooltips
     const rxHtml = REACTIONS.map(r=>{
       const count = (st.reactions[rid]||{})[r.id] ?? 0;
       const reacted = st.userReacted.has(`${rid}-${r.id}`);
       return `<button class="reaction-btn ${reacted?'reacted':''}" onclick="reactToSpill('${rid}','${r.id}','${safe}',this)">
         <span class="reaction-emoji">${r.id}</span>
         <span class="reaction-count" id="count-${rid}-${r.id}">${count}</span>
+        <span class="tooltip">${r.tooltip}</span>
       </button>`;
     }).join('');
 
@@ -839,8 +976,6 @@ function createNewSpill(){
 }
 
 function toggleMenu(){ toast('Menu coming soon'); }
-function skipVibeMatch(t){ document.getElementById(t==='chaotic'?'chaotic-good-card':'caregiver-card').style.display='none'; }
-function sendSignal(){ toast('Isyarat terkirim 🔥'); }
 
 // ============================================
 // INIT
@@ -856,7 +991,8 @@ document.addEventListener('DOMContentLoaded', async()=>{
 
   if(ok){ 
     await loadArtefacts(); 
-    await loadSpills(); 
+    await loadSpills();
+    await loadChats();
   } else { 
     setLoading(false);
     renderSpills(); 
