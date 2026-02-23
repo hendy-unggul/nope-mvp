@@ -144,7 +144,6 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 .artefak-owner{font-size:11px;color:var(--tm);text-transform:uppercase;letter-spacing:.05em}
 .artefak-date{font-size:10px;color:var(--tm)}
 
-/* Peaking redirect overlay */
 .peaking-redirect-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:var(--bg);z-index:30000;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
 .peaking-redirect-overlay.active{display:flex}
 .peaking-redirect-timer{font-size:72px;font-weight:800;color:var(--a);margin-bottom:24px;font-family:'Plus Jakarta Sans',sans-serif}
@@ -202,7 +201,8 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
     <span>🔄</span><span>Seduh Teh Baru</span>
   </button>
 
-  <div class="chatroom-section" id="chatroom-section">
+  <!-- CHATROOM SECTION - Hidden by default, shown if table exists -->
+  <div class="chatroom-section" id="chatroom-section" style="display:none;">
     <div class="chatroom-header">Ruang Obrolan Langsung</div>
     
     <div class="chatroom-container">
@@ -267,10 +267,10 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
 
 <nav class="bottom-nav">
   <div class="nav-container">
-    <a href="jejak.html" class="nav-item"><span class="nav-icon">✦</span><span class="nav-label">Jejak</span></a>
-    <a href="saynope.html" class="nav-item active"><span class="nav-icon">✕</span><span class="nav-label">Spill</span></a>
-    <a href="cocomeo.html" class="nav-item"><span class="nav-icon">〜</span><span class="nav-label">Cocomeo</span></a>
-    <a href="glitch.html" class="nav-item"><span class="nav-icon">⚡</span><span class="nav-label">Glitch</span></a>
+    <a href="jejak.html" class="nav-item"><span class="nav-icon">✦</span><span>Jejak</span></a>
+    <a href="saynope.html" class="nav-item active"><span class="nav-icon">✕</span><span>Spill</span></a>
+    <a href="cocomeo.html" class="nav-item"><span class="nav-icon">〜</span><span>Cocomeo</span></a>
+    <a href="glitch.html" class="nav-item"><span class="nav-icon">⚡</span><span>Glitch</span></a>
   </div>
 </nav>
 
@@ -295,25 +295,26 @@ const st = {
   userId: null,
   currentUser: null,
   spills: [],
-  reactions: {},
+  reactions: {}, // { rantId: { emoji: count } }
   filter: 'all',
   vibeMatch: 87,
   loading: true,
   peakingId: null,
   artefacts: [],
-  userReacted: new Set(), // Stores "rantId" strings (user can only react once per rant)
+  userReacted: new Set(), // Stores rantIds that user has reacted to (only 1 per rant)
   offset: 0,
   seed: Math.random(),
   chatMessages: { emosi: [], agak: [] },
+  hasChatsTable: false,
 };
 
 const unlocked = new Set();
 
 const REACTIONS = [
-  { id:'💀', type:'dead', label:'Dead', tooltip:'Aku dead baca ini / Relate banget sampai mati' },
-  { id:'😭', type:'dramatic', label:'Dramatic', tooltip:'Kocak banget / Dramatic reaction' },
-  { id:'🔥', type:'lit', label:'Lit', tooltip:'This is lit / Spill yang ngena' },
-  { id:'😶', type:'mess', label:'Mess', tooltip:'Life\'s a mess but I\'m fine' }
+  { id:'💀', label:'Dead', tooltip:'Aku dead baca ini / Relate banget sampai mati' },
+  { id:'😭', label:'Dramatic', tooltip:'Kocak banget / Dramatic reaction' },
+  { id:'🔥', label:'Lit', tooltip:'This is lit / Spill yang ngena' },
+  { id:'😶', label:'Mess', tooltip:'Life\'s a mess but I\'m fine' }
 ];
 
 const MOOD_COLORS = { surviving:'#FF9500', thriving:'#39FF14', chaotic:'#00F0FF', doom:'#8B5CF6' };
@@ -333,11 +334,6 @@ function setConn(online,msg){
   el.textContent=online ? 'ONLINE' : msg; 
   el.className='connection-status '+(online?'online':'offline');
   st.online=online;
-}
-function shuffle(arr,seed){
-  const a=[...arr]; let s=seed;
-  for(let i=a.length-1;i>0;i--){ s=(s*9301+49297)%233280; const j=Math.floor(s/233280*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
-  return a;
 }
 function fmtDate(ds){ return new Date(ds).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}); }
 function formatUsername(raw){ return raw?raw.trim().toLowerCase().replace(/[\s_\-]+/g,'.'):'anonim'; }
@@ -378,14 +374,10 @@ async function initSupabase(){
 }
 
 function setupRealtime(){
+  // Realtime for reactions
   st.sb.channel('rx-live')
     .on('postgres_changes',{ event:'INSERT', schema:'public', table:CFG.TBL_REACTIONS },
       p => { if(p.new?.rant_id) refreshCounts(p.new.rant_id); })
-    .subscribe();
-    
-  st.sb.channel('chat-live')
-    .on('postgres_changes',{ event:'INSERT', schema:'public', table:CFG.TBL_CHATS },
-      p => { if(p.new) addChatToUI(p.new, false); })
     .subscribe();
 }
 
@@ -458,6 +450,7 @@ async function loadSpills(isNew=false){
       }));
     }
 
+    // Filter out current user's own rants
     if(st.currentUser){
       mergedData = mergedData.filter(s => s.author !== st.currentUser);
     }
@@ -485,15 +478,26 @@ async function loadSpills(isNew=false){
   renderSpills();
 }
 
+// FIXED: Load reactions - match exact schema: rant_id, emoji, user_id, created_at, artefact_id
 async function loadReactions(ids){
   if(!st.sb||!ids.length) return;
   try {
+    // Select only existing columns: rant_id, emoji (NO reaction_type)
     const { data, error } = await st.sb
       .from(CFG.TBL_REACTIONS)
-      .select('rant_id, reaction_type, emoji')
-      .in('rant_id', ids);
+      .select('rant_id, emoji')
+      .in('rant_id', ids)
+      .is('artefact_id', null); // Only rants reactions, not artefact reactions
 
-    if(error) throw error;
+    if(error) {
+      console.warn('❌ loadReactions error:', error.message);
+      // Initialize empty reactions
+      ids.forEach(id=>{ 
+        st.reactions[id] = {}; 
+        REACTIONS.forEach(r=>{ st.reactions[id][r.id] = 0; }); 
+      });
+      return;
+    }
 
     // Initialize reactions object for each rant
     ids.forEach(id=>{ 
@@ -501,16 +505,23 @@ async function loadReactions(ids){
       REACTIONS.forEach(r=>{ st.reactions[id][r.id] = 0; }); 
     });
     
-    // Count reactions
+    // Count reactions by emoji
     (data||[]).forEach(row=>{
-      const reaction = REACTIONS.find(r => r.type === row.reaction_type || r.id === row.emoji);
-      if(reaction && st.reactions[row.rant_id]){
-        st.reactions[row.rant_id][reaction.id] = (st.reactions[row.rant_id][reaction.id] || 0) + 1;
+      if(row.emoji && st.reactions[row.rant_id]){
+        st.reactions[row.rant_id][row.emoji] = (st.reactions[row.rant_id][row.emoji] || 0) + 1;
       }
     });
-  } catch(e){ console.error('❌ loadReactions:', e.message); }
+  } catch(e){ 
+    console.error('❌ loadReactions exception:', e.message); 
+    // Initialize empty reactions on error
+    ids.forEach(id=>{ 
+      st.reactions[id] = {}; 
+      REACTIONS.forEach(r=>{ st.reactions[id][r.id] = 0; }); 
+    });
+  }
 }
 
+// FIXED: Load my reactions - check which rants user already reacted to
 async function loadMyReactions(ids){
   if(!st.sb||!ids.length||!st.userId) return;
   try {
@@ -518,16 +529,22 @@ async function loadMyReactions(ids){
       .from(CFG.TBL_REACTIONS)
       .select('rant_id')
       .eq('user_id', st.userId)
-      .in('rant_id', ids);
+      .in('rant_id', ids)
+      .is('artefact_id', null); // Only rants
 
-    if(error) throw error;
+    if(error) {
+      console.warn('❌ loadMyReactions error:', error.message);
+      return;
+    }
     
-    // Store only rant_id (user can only react once per rant)
+    // Store rantIds that user has reacted to (only 1 reaction per rant allowed)
     st.userReacted.clear();
     (data||[]).forEach(r=> {
       st.userReacted.add(r.rant_id);
     });
-  } catch(e){ console.error('❌ loadMyReactions:', e.message); }
+  } catch(e){ 
+    console.error('❌ loadMyReactions exception:', e.message); 
+  }
 }
 
 async function loadArtefacts(){
@@ -543,25 +560,46 @@ async function loadArtefacts(){
 }
 
 // ============================================
-// CHATROOM FUNCTIONS
+// CHATROOM - Graceful degradation
 // ============================================
 async function loadChats(){
   if(!st.sb) return;
+  
   try {
+    // Check if chats table exists
     const { data, error } = await st.sb
+      .from(CFG.TBL_CHATS)
+      .select('id')
+      .limit(1);
+    
+    if(error && error.message && error.message.includes('does not exist')) {
+      console.log('ℹ️ Chats table does not exist, hiding chat section');
+      document.getElementById('chatroom-section').style.display = 'none';
+      st.hasChatsTable = false;
+      return;
+    }
+    
+    st.hasChatsTable = true;
+    document.getElementById('chatroom-section').style.display = 'block';
+    
+    // Load actual messages
+    const { data: messages, error: msgError } = await st.sb
       .from(CFG.TBL_CHATS)
       .select('*')
       .order('created_at', { ascending: false })
       .limit(60);
     
-    if(error) throw error;
+    if(msgError) throw msgError;
     
-    if(data && data.length > 0){
-      st.chatMessages.emosi = data.filter(m => m.room === 'emosi').reverse().slice(-30);
-      st.chatMessages.agak = data.filter(m => m.room === 'agak').reverse().slice(-30);
+    if(messages && messages.length > 0){
+      st.chatMessages.emosi = messages.filter(m => m.room === 'emosi').reverse().slice(-30);
+      st.chatMessages.agak = messages.filter(m => m.room === 'agak').reverse().slice(-30);
       renderChats();
     }
-  } catch(e){ console.error('❌ loadChats:', e.message); }
+  } catch(e){ 
+    console.error('❌ loadChats:', e.message);
+    document.getElementById('chatroom-section').style.display = 'none';
+  }
 }
 
 function renderChats(){
@@ -621,6 +659,11 @@ function addChatToUI(msg, isNew = true){
 }
 
 async function sendChat(room){
+  if(!st.hasChatsTable) {
+    toast('Fitur chat belum tersedia', true);
+    return;
+  }
+  
   const input = document.getElementById(`chat-input-${room}`);
   const content = input.value.trim();
   
@@ -674,7 +717,7 @@ async function sendChat(room){
 }
 
 // ============================================
-// REACTIONS - FIXED: Only 1 reaction per rant
+// REACTIONS - FIXED: Only 1 per rant, use emoji column
 // ============================================
 async function reactToSpill(rantId, emoji, author, btnEl){
   // Check if user already reacted to this rant (any emoji)
@@ -683,8 +726,9 @@ async function reactToSpill(rantId, emoji, author, btnEl){
     return;
   }
 
-  const reactionDef = REACTIONS.find(r => r.id === emoji);
-  if(!reactionDef){
+  // Validate emoji
+  const validEmoji = REACTIONS.find(r => r.id === emoji);
+  if(!validEmoji){
     toast('Emoji tidak valid', true);
     return;
   }
@@ -710,12 +754,12 @@ async function reactToSpill(rantId, emoji, author, btnEl){
   if(!st.reactions[rantId]) st.reactions[rantId] = {};
   st.reactions[rantId][emoji] = (st.reactions[rantId][emoji] || 0) + 1;
 
-  // Unlock peaking and redirect after reaction
+  // Unlock peaking for this author
   if(author && author !== 'anonim' && author !== 'null'){
     unlocked.add(author);
     toast('🔓 Peaking unlocked! Mengarahkan ke jejak...');
     
-    // Redirect to jejak.html with user parameter for 20 seconds
+    // Redirect to jejak.html after short delay
     setTimeout(() => {
       startPeakingRedirect(author);
     }, 1000);
@@ -723,39 +767,29 @@ async function reactToSpill(rantId, emoji, author, btnEl){
     toast(emoji + ' Tersimpan!');
   }
 
-  // Save to Supabase
+  // Save to Supabase - match exact schema: rant_id, emoji, user_id, created_at
+  // artefact_id is null for rant reactions
   if(st.online && st.sb){
     try {
       const payload = {
         rant_id: rantId,
-        reaction_type: reactionDef.type,
+        emoji: emoji,  // Use emoji column (text)
         user_id: st.userId,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        artefact_id: null // Explicitly null for rant reactions
       };
 
       console.log('💾 Saving reaction:', payload);
       
-      let { data, error } = await st.sb
+      const { data, error } = await st.sb
         .from(CFG.TBL_REACTIONS)
         .insert(payload)
         .select();
 
-      if(error && error.message && error.message.includes('reaction_type')){
-        console.log('⚠️ reaction_type not found, trying emoji column...');
-        const payloadEmoji = {
-          rant_id: rantId,
-          emoji: emoji,
-          user_id: st.userId,
-          created_at: new Date().toISOString()
-        };
-        const result = await st.sb.from(CFG.TBL_REACTIONS).insert(payloadEmoji).select();
-        data = result.data;
-        error = result.error;
-      }
-
       if(error){
-        if(error.code === '23505' || error.code === '23514'){
-          console.log('⚠️ Constraint violation:', error.message);
+        // Handle unique constraint violation (user already reacted)
+        if(error.code === '23505'){
+          console.log('⚠️ Already reacted (constraint)');
           return;
         }
         throw error;
@@ -765,7 +799,7 @@ async function reactToSpill(rantId, emoji, author, btnEl){
 
     } catch(e){
       console.error('❌ Gagal simpan reaction:', e);
-      // Rollback
+      // Rollback UI
       st.userReacted.delete(rantId);
       allBtns.forEach(btn => {
         btn.disabled = false;
@@ -778,14 +812,14 @@ async function reactToSpill(rantId, emoji, author, btnEl){
       toast('Gagal: '+e.message, true);
     }
   } else {
-    // Offline
+    // Offline - queue for sync
     const offline = JSON.parse(localStorage.getItem('offline_reactions')||'[]');
     offline.push({ 
       rant_id: rantId, 
-      reaction_type: reactionDef.type,
       emoji: emoji,
       user_id: st.userId,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
+      artefact_id: null
     });
     localStorage.setItem('offline_reactions', JSON.stringify(offline));
     toast(emoji+' Tersimpan (offline)');
@@ -793,7 +827,7 @@ async function reactToSpill(rantId, emoji, author, btnEl){
 }
 
 // ============================================
-// PEAKING REDIRECT - NEW: 20 seconds to jejak
+// PEAKING REDIRECT
 // ============================================
 function startPeakingRedirect(author){
   const overlay = document.getElementById('peaking-redirect-overlay');
@@ -805,10 +839,6 @@ function startPeakingRedirect(author){
   
   let seconds = 20;
   timerEl.textContent = seconds;
-  
-  // Store current page to return to
-  sessionStorage.setItem('peaking_return_to', 'saynope.html');
-  sessionStorage.setItem('peaking_timer_end', Date.now() + (seconds * 1000));
   
   const countdown = setInterval(() => {
     seconds--;
@@ -823,21 +853,22 @@ function startPeakingRedirect(author){
   }, 1000);
 }
 
+// FIXED: Refresh counts using emoji column only
 async function refreshCounts(rantId){
   if(!st.sb||!rantId) return;
   try {
     const { data } = await st.sb.from(CFG.TBL_REACTIONS)
-      .select('reaction_type, emoji')
-      .eq('rant_id',rantId);
+      .select('emoji')
+      .eq('rant_id', rantId)
+      .is('artefact_id', null); // Only rant reactions
     
     // Reset counts
     const c={};
     REACTIONS.forEach(r=>c[r.id]=0);
     
-    // Count all reactions
+    // Count by emoji
     (data||[]).forEach(r=>{
-      const reaction = REACTIONS.find(rx => rx.type === r.reaction_type || rx.id === r.emoji);
-      if(reaction) c[reaction.id]++;
+      if(r.emoji) c[r.emoji] = (c[r.emoji] || 0) + 1;
     });
     
     // Update UI
@@ -845,7 +876,9 @@ async function refreshCounts(rantId){
       const el=document.getElementById(`count-${rantId}-${r.id}`); 
       if(el) el.textContent=c[r.id]; 
     });
-  } catch(e){}
+  } catch(e){
+    console.error('❌ refreshCounts:', e.message);
+  }
 }
 
 // ============================================
@@ -919,10 +952,10 @@ function renderSpills(){
     const safe = (s.author||'').replace(/'/g,"\\'");
     const isUnlocked = pkey && unlocked.has(pkey);
     
-    // Check if user already reacted to this rant
+    // Check if user already reacted to this rant (any emoji)
     const hasReacted = st.userReacted.has(rid);
 
-    // 4 reactions with tooltips - disabled if already reacted
+    // Render 4 reactions - disabled if already reacted
     const rxHtml = REACTIONS.map(r=>{
       const count = (st.reactions[rid]||{})[r.id] ?? 0;
       return `<button class="reaction-btn ${hasReacted?'reacted':''}" 
