@@ -3,96 +3,455 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Spill the Tea</title>
+<title>Spill - Spill the Tea</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/htmx.org@2.0.0"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-:root{--bg:#0A0A0A;--surface:#141414;--se:#1E1E1E;--border:#2A2A2A;--txt:#FFF;--ts:#888;--tm:#555;--a:#FF4D00;--as:#00F0FF;--at:#FF006E;--aq:#39FF14}
+:root{
+  --bg:#0A0A0A;
+  --surface:#141414;
+  --surface-light:#1E1E1E;
+  --border:#2A2A2A;
+  --text:#FFF;
+  --text-secondary:#888;
+  --text-muted:#555;
+  --primary:#FF4D00;
+  --emosi:#00F0FF;
+  --agak:#FF006E;
+  --surviving:#39FF14;
+  --chaotic:#00F0FF;
+  --doom:#8B5CF6;
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:var(--bg);color:var(--txt);font-family:'Plus Jakarta Sans',system-ui,sans-serif;min-height:100vh;padding-bottom:100px}
-.wrapper{max-width:480px;margin:0 auto;padding:24px 16px}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:32px;padding-bottom:16px;border-bottom:1px solid var(--border)}
-.brand{display:flex;align-items:center;gap:12px}
-.brand-icon{font-size:32px}
-.brand-text{font-size:28px;font-weight:800;letter-spacing:-.02em}
-.header-actions{display:flex;align-items:center;gap:12px}
-.menu-trigger{width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:transparent;border:none;cursor:pointer}
-.menu-trigger span{width:4px;height:4px;background:var(--txt);border-radius:50%}
-.tagline{font-style:italic;color:var(--ts);margin-bottom:8px}
-.connection-status{font-size:10px;color:var(--tm);text-align:center;margin-bottom:8px;text-transform:uppercase;letter-spacing:.1em;display:flex;align-items:center;justify-content:center;gap:6px}
-.connection-status.online{color:var(--aq)}
-.connection-status.offline{color:var(--at)}
-.connection-status::before{content:'';width:6px;height:6px;background:currentColor;border-radius:50%;display:inline-block}
-.filter-section{background:var(--surface);border:1px solid var(--border);padding:20px;margin-bottom:24px}
-.filter-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.filter-title{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:8px}
-.vibe-percentage{color:var(--a);font-weight:800}
-.reset-btn{background:transparent;border:1px solid var(--a);color:var(--a);padding:6px 12px;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer}
-.vibe-slider{width:100%;height:4px;background:var(--border);outline:none;-webkit-appearance:none;margin-bottom:8px;display:block}
-.vibe-slider::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;background:var(--a);border:2px solid var(--txt);cursor:pointer}
-.vibe-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--tm);text-transform:uppercase;margin-bottom:20px}
-.mood-filters{display:flex;flex-wrap:wrap;gap:8px}
-.mood-btn{padding:8px 16px;background:var(--se);border:1px solid var(--border);color:var(--txt);font-size:12px;font-weight:600;text-transform:uppercase;cursor:pointer;transition:all .2s}
-.mood-btn.active{background:var(--a);border-color:var(--a);color:var(--bg)}
-.mood-btn:hover:not(.active){border-color:var(--ts)}
-.content-area{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px dashed var(--border);padding:40px}
-.content-area.has-content{border-style:solid;border-color:var(--border);padding:0;align-items:stretch;justify-content:flex-start;gap:16px}
-.spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--a);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  min-height:100vh;
+  padding-bottom:80px;
+}
+.wrapper{
+  max-width:480px;
+  margin:0 auto;
+  padding:24px 16px;
+}
+
+/* HEADER */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:32px;
+  padding-bottom:16px;
+  border-bottom:1px solid var(--border);
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.brand-icon{
+  font-size:32px;
+}
+.brand-text{
+  font-size:28px;
+  font-weight:800;
+  letter-spacing:-.02em;
+  background:linear-gradient(135deg, var(--primary), #FF8A5C);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.chat-btn{
+  background:var(--primary);
+  color:var(--bg);
+  border:none;
+  padding:8px 16px;
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  cursor:pointer;
+  text-decoration:none;
+  border-radius:30px;
+  transition:all .2s;
+}
+.chat-btn:hover{
+  background:var(--text);
+  color:var(--bg);
+  transform:scale(1.05);
+}
+
+/* CONNECTION STATUS */
+.connection-status{
+  font-size:10px;
+  color:var(--text-muted);
+  text-align:center;
+  margin-bottom:24px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+.connection-status.online{color:var(--surviving);}
+.connection-status.offline{color:var(--agak);}
+.connection-status::before{
+  content:'';
+  width:6px;
+  height:6px;
+  background:currentColor;
+  border-radius:50%;
+  display:inline-block;
+}
+
+/* FILTER SECTION */
+.filter-section{
+  background:var(--surface);
+  border:1px solid var(--border);
+  padding:20px;
+  margin-bottom:24px;
+  border-radius:20px;
+}
+.filter-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+}
+.filter-title{
+  font-size:14px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.vibe-percentage{
+  color:var(--primary);
+  font-weight:800;
+}
+.reset-btn{
+  background:transparent;
+  border:1px solid var(--primary);
+  color:var(--primary);
+  padding:6px 12px;
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  cursor:pointer;
+  border-radius:30px;
+  transition:all .2s;
+}
+.reset-btn:hover{
+  background:var(--primary);
+  color:var(--bg);
+}
+.vibe-slider{
+  width:100%;
+  height:4px;
+  background:var(--border);
+  outline:none;
+  -webkit-appearance:none;
+  margin-bottom:8px;
+  display:block;
+}
+.vibe-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:24px;
+  height:24px;
+  background:var(--primary);
+  border:2px solid var(--text);
+  border-radius:50%;
+  cursor:pointer;
+}
+.vibe-labels{
+  display:flex;
+  justify-content:space-between;
+  font-size:11px;
+  color:var(--text-muted);
+  text-transform:uppercase;
+  margin-bottom:20px;
+}
+.mood-filters{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+.mood-btn{
+  padding:8px 16px;
+  background:var(--surface-light);
+  border:1px solid var(--border);
+  color:var(--text-secondary);
+  font-size:12px;
+  font-weight:600;
+  text-transform:uppercase;
+  cursor:pointer;
+  border-radius:30px;
+  transition:all .2s;
+}
+.mood-btn.active{
+  background:var(--primary);
+  border-color:var(--primary);
+  color:var(--bg);
+}
+.mood-btn:hover:not(.active){
+  border-color:var(--text);
+}
+
+/* CONTENT AREA */
+.content-area{
+  min-height:300px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  border:2px dashed var(--border);
+  padding:40px;
+  border-radius:20px;
+  margin-bottom:24px;
+}
+.content-area.has-content{
+  border-style:solid;
+  border-color:var(--border);
+  padding:0;
+  align-items:stretch;
+  justify-content:flex-start;
+  gap:16px;
+  background:transparent;
+  border:none;
+}
+.spinner{
+  width:48px;
+  height:48px;
+  border:3px solid var(--border);
+  border-top-color:var(--primary);
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+  margin-bottom:16px;
+}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{color:var(--ts);font-size:12px;text-transform:uppercase;letter-spacing:.1em}
-.spill-card{background:var(--surface);border:1px solid var(--border);padding:20px;animation:fadeIn .4s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.spill-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-.spill-author{font-size:12px;font-weight:700;color:var(--ts);cursor:pointer;transition:color .2s}
-.spill-author:hover{color:var(--a)}
-.spill-mood{font-size:10px;padding:4px 8px;border:1px solid currentColor;text-transform:uppercase}
-.spill-content{font-size:15px;line-height:1.6;margin-bottom:16px}
-.spill-reactions{display:flex;gap:6px;flex-wrap:nowrap;justify-content:space-between}
-.reaction-btn{display:flex;align-items:center;gap:4px;background:var(--se);border:1px solid var(--border);color:var(--ts);padding:6px 10px;font-size:12px;cursor:pointer;transition:all .2s;border-radius:16px;flex:1;justify-content:center;min-width:0;position:relative}
-.reaction-btn:hover{border-color:var(--a);background:var(--a);color:var(--bg);transform:scale(1.05)}
-.reaction-btn:active{transform:scale(.95)}
-.reaction-btn.reacted{background:var(--a);border-color:var(--a);color:var(--bg)}
-.reaction-emoji{font-size:14px}
-.reaction-count{font-weight:600;font-size:11px;min-width:14px;text-align:center}
-.new-spill-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:16px;background:transparent;border:2px solid var(--a);color:var(--a);font-size:14px;font-weight:700;text-transform:uppercase;cursor:pointer;margin-top:24px;margin-bottom:32px;transition:all .2s}
-.new-spill-btn:hover{background:var(--a);color:var(--bg)}
-.empty-state{text-align:center;padding:40px}
-.empty-icon{font-size:48px;margin-bottom:16px}
-.empty-text{color:var(--ts);font-style:italic;margin-bottom:8px}
-.empty-subtext{color:var(--tm);font-size:12px}
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--txt);color:var(--bg);padding:12px 24px;font-size:13px;font-weight:600;z-index:10000;opacity:0;transition:all .3s}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.error{background:var(--at);color:var(--txt)}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);z-index:1000}
-.nav-container{max-width:480px;margin:0 auto;display:flex;justify-content:space-around;align-items:center;height:60px}
-.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:transparent;border:none;color:var(--ts);cursor:pointer;padding:8px 24px;transition:all .2s;text-decoration:none;flex:1;position:relative}
-.nav-item.active{color:var(--a)}
-.nav-item.active::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--a)}
-.nav-item:hover{color:var(--txt)}
-.nav-icon{font-size:20px}
-.nav-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
-.chatroom-section{margin-top:8px;padding-top:32px;border-top:1px solid var(--border)}
-.chatroom-header{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--tm);margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.chatroom-container{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px}
-.chatroom-messages{height:250px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--bg)}
-.chat-message{display:flex;flex-direction:column;gap:4px;animation:slideIn .3s ease}
-@keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
-.chat-message-own{align-items:flex-end}
-.chat-message-other{align-items:flex-start}
-.chat-bubble{max-width:85%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.5;word-wrap:break-word}
-.chat-message-own .chat-bubble{background:var(--a);color:var(--bg);border-bottom-right-radius:4px}
-.chat-message-other .chat-bubble{background:var(--se);color:var(--txt);border-bottom-left-radius:4px}
-.chat-meta{font-size:10px;color:var(--tm);display:flex;gap:8px;align-items:center}
-.chat-username{font-weight:600;color:var(--as)}
-.chat-input-container{display:flex;gap:8px;padding:12px;background:var(--se);border-top:1px solid var(--border)}
-.chat-input{flex:1;background:var(--bg);border:1px solid var(--border);color:var(--txt);padding:10px 14px;font-size:13px;font-family:inherit;border-radius:20px;outline:none}
-.chat-input:focus{border-color:var(--a)}
-.chat-send-btn{background:var(--a);color:var(--bg);border:none;padding:10px 20px;font-size:12px;font-weight:700;text-transform:uppercase;border-radius:20px;cursor:pointer;transition:all .2s}
-.chat-send-btn:hover{background:var(--txt);color:var(--bg)}
-.chat-empty{text-align:center;padding:40px;color:var(--tm);font-size:12px;font-style:italic}
-.chatroom-title{padding:12px 16px;background:var(--se);border-bottom:1px solid var(--border);font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
-.chatroom-title.emosi{color:var(--as)}
-.chatroom-title.agak{color:var(--at)}
+.loading-text{
+  color:var(--text-secondary);
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+}
+
+/* SPILL CARD */
+.spill-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  padding:20px;
+  border-radius:20px;
+  animation:fadeIn .4s ease;
+  margin-bottom:16px;
+}
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.spill-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+}
+.spill-author{
+  font-size:12px;
+  font-weight:700;
+  color:var(--text-secondary);
+  cursor:pointer;
+  transition:color .2s;
+}
+.spill-author:hover{
+  color:var(--primary);
+}
+.spill-mood{
+  font-size:10px;
+  padding:4px 8px;
+  border:1px solid currentColor;
+  border-radius:30px;
+  text-transform:uppercase;
+}
+.spill-content{
+  font-size:15px;
+  line-height:1.6;
+  margin-bottom:16px;
+}
+
+/* REACTIONS */
+.spill-reactions{
+  display:flex;
+  gap:6px;
+  flex-wrap:nowrap;
+  justify-content:space-between;
+}
+.reaction-btn{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  background:var(--surface-light);
+  border:1px solid var(--border);
+  color:var(--text-secondary);
+  padding:6px 10px;
+  font-size:12px;
+  cursor:pointer;
+  transition:all .2s;
+  border-radius:30px;
+  flex:1;
+  justify-content:center;
+}
+.reaction-btn:hover{
+  border-color:var(--primary);
+  background:var(--primary);
+  color:var(--bg);
+  transform:scale(1.05);
+}
+.reaction-btn.reacted{
+  background:var(--primary);
+  border-color:var(--primary);
+  color:var(--bg);
+}
+.reaction-emoji{
+  font-size:14px;
+}
+.reaction-count{
+  font-weight:600;
+  font-size:11px;
+  min-width:14px;
+  text-align:center;
+}
+
+/* NEW SPILL BUTTON */
+.new-spill-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  width:100%;
+  padding:16px;
+  background:transparent;
+  border:2px solid var(--primary);
+  color:var(--primary);
+  font-size:14px;
+  font-weight:700;
+  text-transform:uppercase;
+  cursor:pointer;
+  margin-top:24px;
+  margin-bottom:32px;
+  border-radius:40px;
+  transition:all .2s;
+}
+.new-spill-btn:hover{
+  background:var(--primary);
+  color:var(--bg);
+}
+
+/* EMPTY STATE */
+.empty-state{
+  text-align:center;
+  padding:40px;
+}
+.empty-icon{
+  font-size:48px;
+  margin-bottom:16px;
+  opacity:0.5;
+}
+.empty-text{
+  color:var(--text-secondary);
+  font-style:italic;
+  margin-bottom:8px;
+}
+.empty-subtext{
+  color:var(--text-muted);
+  font-size:12px;
+}
+
+/* TOAST */
+.toast{
+  position:fixed;
+  bottom:100px;
+  left:50%;
+  transform:translateX(-50%) translateY(100px);
+  background:var(--text);
+  color:var(--bg);
+  padding:12px 24px;
+  font-size:13px;
+  font-weight:600;
+  border-radius:40px;
+  z-index:10000;
+  opacity:0;
+  transition:all .3s;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5);
+}
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+.toast.error{
+  background:var(--agak);
+  color:var(--text);
+}
+
+/* BOTTOM NAV */
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  z-index:1000;
+}
+.nav-container{
+  max-width:480px;
+  margin:0 auto;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  height:70px;
+}
+.nav-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  background:transparent;
+  border:none;
+  color:var(--text-muted);
+  cursor:pointer;
+  padding:8px 0;
+  transition:all .2s;
+  text-decoration:none;
+  flex:1;
+  font-size:12px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+.nav-item.active{
+  color:var(--primary);
+}
+.nav-item.active .nav-icon{
+  color:var(--primary);
+}
+.nav-item:hover{
+  color:var(--text);
+}
+.nav-icon{
+  font-size:20px;
+  margin-bottom:2px;
+}
 </style>
 </head>
 <body>
@@ -100,17 +459,14 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
   <header>
     <div class="brand">
       <span class="brand-icon">🍵</span>
-      <span class="brand-text">Spill the Tea</span>
+      <span class="brand-text">Spill</span>
     </div>
     <div class="header-actions">
-      <button class="menu-trigger" onclick="toggleMenu()">
-        <span></span><span></span><span></span>
-      </button>
+      <a href="chat.html" class="chat-btn">💬 Obrolan</a>
     </div>
   </header>
 
-  <p class="tagline">Curhatan dari komunitas yang selaras dengan vibrasimu</p>
-  <p class="connection-status" id="connection-status">Menghubungkan...</p>
+  <div class="connection-status" id="connection-status">Menghubungkan...</div>
 
   <div class="filter-section">
     <div class="filter-header">
@@ -139,45 +495,57 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
   <button class="new-spill-btn" onclick="refreshSpills()">
     <span>🔄</span><span>Seduh Teh Baru</span>
   </button>
-
-  <!-- CHATROOM SECTION -->
-  <div class="chatroom-section" id="chatroom-section">
-    <div class="chatroom-header">Ruang Obrolan Langsung</div>
-    
-    <!-- Card 1: Emosi Jiwa -->
-    <div class="chatroom-container">
-      <div class="chatroom-title emosi">🌊 Emosi Jiwa</div>
-      <div class="chatroom-messages" id="chat-messages-emosi">
-        <div class="chat-empty">Belum ada yang ngobrol di sini...</div>
-      </div>
-      <div class="chat-input-container">
-        <input type="text" class="chat-input" id="chat-input-emosi" placeholder="Tulis pesan..." maxlength="200">
-        <button class="chat-send-btn" onclick="sendChat('emosi')">Kirim</button>
-      </div>
-    </div>
-    
-    <!-- Card 2: Agak Laen -->
-    <div class="chatroom-container">
-      <div class="chatroom-title agak">👽 Agak Laen</div>
-      <div class="chatroom-messages" id="chat-messages-agak">
-        <div class="chat-empty">Belum ada yang ngobrol di sini...</div>
-      </div>
-      <div class="chat-input-container">
-        <input type="text" class="chat-input" id="chat-input-agak" placeholder="Tulis pesan..." maxlength="200">
-        <button class="chat-send-btn" onclick="sendChat('agak')">Kirim</button>
-      </div>
-    </div>
-  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
+<!-- BOTTOM NAV - 4 ITEM (TANPA OBROLAN) -->
 <nav class="bottom-nav">
   <div class="nav-container">
-    <a href="jejak.html" class="nav-item"><span class="nav-icon">✦</span><span class="nav-label">Jejak</span></a>
-    <a href="spill.html" class="nav-item active"><span class="nav-icon">✕</span><span class="nav-label">Spill</span></a>
-    <a href="cocomeo.html" class="nav-item"><span class="nav-icon">〜</span><span class="nav-label">Cocomeo</span></a>
-    <a href="glitch.html" class="nav-item"><span class="nav-icon">⚡</span><span class="nav-label">Glitch</span></a>
+    <a href="/jejak" 
+       class="nav-item"
+       hx-get="jejak.html"
+       hx-target=".wrapper"
+       hx-push-url="true"
+       hx-select=".wrapper"
+       hx-swap="outerHTML"
+       hx-trigger="click">
+      <span class="nav-icon">✦</span>
+      <span class="nav-label">Jejak</span>
+    </a>
+    <a href="/spill"
+       class="nav-item active"
+       hx-get="spill.html"
+       hx-target=".wrapper"
+       hx-push-url="true"
+       hx-select=".wrapper"
+       hx-swap="outerHTML"
+       hx-trigger="click">
+      <span class="nav-icon">✕</span>
+      <span class="nav-label">Spill</span>
+    </a>
+    <a href="/cocomeo"
+       class="nav-item"
+       hx-get="cocomeo.html"
+       hx-target=".wrapper"
+       hx-push-url="true"
+       hx-select=".wrapper"
+       hx-swap="outerHTML"
+       hx-trigger="click">
+      <span class="nav-icon">〜</span>
+      <span class="nav-label">Cocomeo</span>
+    </a>
+    <a href="/glitch"
+       class="nav-item"
+       hx-get="glitch.html"
+       hx-target=".wrapper"
+       hx-push-url="true"
+       hx-select=".wrapper"
+       hx-swap="outerHTML"
+       hx-trigger="click">
+      <span class="nav-icon">⚡</span>
+      <span class="nav-label">Glitch</span>
+    </a>
   </div>
 </nav>
 
@@ -191,32 +559,34 @@ const CFG = {
   TBL_RANTS: 'rants',
   TBL_REACTIONS: 'reactions',
   TBL_USERS: 'users',
-  TBL_CHATS: 'chats',
 };
 
 const st = {
   sb: null,
   online: false,
-  userId: null,        // UUID dari tabel users
-  sessionId: null,     // Session ID buat fallback
+  userId: null,
+  sessionId: null,
   username: null,
   rants: [],
   reactions: {},
   filter: 'all',
   vibeMatch: 87,
   loading: true,
-  chatMessages: { emosi: [], agak: [] },
 };
 
-// 4 REACTIONS
 const REACTIONS = [
-  { id:'💀', type:'💀', label:'Dead' },
-  { id:'😭', type:'😭', label:'Dramatic' },
-  { id:'🔥', type:'🔥', label:'Lit' },
-  { id:'😶', type:'😶', label:'Mess' }
+  { id:'💀', type:'💀' },
+  { id:'😭', type:'😭' },
+  { id:'🔥', type:'🔥' },
+  { id:'😶', type:'😶' }
 ];
 
-const MOOD_COLORS = { surviving:'#FF9500', thriving:'#39FF14', chaotic:'#00F0FF', doom:'#8B5CF6' };
+const MOOD_COLORS = {
+  surviving:'#39FF14',
+  thriving:'#FFD700',
+  chaotic:'#00F0FF',
+  doom:'#8B5CF6'
+};
 
 // ============================================
 // UTILS
@@ -233,13 +603,9 @@ function toast(msg, isErr=false){
 
 function setConn(online, msg){
   const el = document.getElementById('connection-status');
-  el.textContent = online ? 'ONLINE' : msg; 
+  el.textContent = online ? 'Terhubung' : msg; 
   el.className = 'connection-status ' + (online ? 'online' : 'offline');
   st.online = online;
-}
-
-function formatUsername(raw){ 
-  return raw ? raw.trim().toLowerCase().replace(/[\s_\-]+/g, '.') : 'anonim'; 
 }
 
 function getSessionId(){
@@ -252,47 +618,36 @@ function getSessionId(){
 }
 
 // ============================================
-// USER MANAGEMENT - FOCUS ON SPILL
+// USER MANAGEMENT
 // ============================================
 async function ensureUser() {
-  // Cek localStorage
   let username = localStorage.getItem('stt_username');
   let userId = localStorage.getItem('stt_user_id');
   
-  // Kalo belum ada username, minta input
   if (!username) {
-    username = prompt('🌸 Pilih username buat mulai:\n(Minimal 3 karakter, huruf/angka saja)', '');
+    username = prompt('Pilih username dulu yuk', '');
     if (!username || username.length < 3) {
       username = 'user_' + Math.random().toString(36).slice(2, 8);
     }
     username = username.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-    if (username.length < 3) username = 'user_' + Date.now().toString().slice(-6);
     localStorage.setItem('stt_username', username);
   }
   
   st.username = username;
   st.sessionId = getSessionId();
   
-  // Kalo userId udah ada di localStorage, pake itu
-  if (userId) {
-    st.userId = userId;
-  }
+  if (userId) st.userId = userId;
   
-  // Sync ke Supabase kalo online
   if (st.sb && st.online) {
     try {
-      // Cari user berdasarkan username
-      const { data: existing, error: selectError } = await st.sb
+      const { data: existing } = await st.sb
         .from(CFG.TBL_USERS)
-        .select('id, username')
+        .select('id')
         .eq('username', username)
         .maybeSingle();
       
-      if (selectError) throw selectError;
-      
       if (!existing) {
-        // User baru: insert
-        const { data: newUser, error: insertError } = await st.sb
+        const { data: newUser } = await st.sb
           .from(CFG.TBL_USERS)
           .insert({
             username: username,
@@ -303,39 +658,23 @@ async function ensureUser() {
           .select('id')
           .single();
         
-        if (insertError) throw insertError;
-        
         st.userId = newUser.id;
         localStorage.setItem('stt_user_id', st.userId);
-        console.log('✅ User baru dibuat:', st.userId);
-        
       } else {
-        // User lama: update last_seen dan pake id yang ada
         st.userId = existing.id;
         localStorage.setItem('stt_user_id', st.userId);
-        
         await st.sb
           .from(CFG.TBL_USERS)
-          .update({ 
-            last_seen: new Date().toISOString(),
-            session_id: st.sessionId 
-          })
+          .update({ last_seen: new Date().toISOString() })
           .eq('id', st.userId);
-        
-        console.log('✅ User ditemukan:', st.userId);
       }
     } catch (e) {
-      console.warn('⚠️ User sync error, pake session_id:', e);
-      // Fallback: pake session_id
+      console.warn('User sync error:', e);
       st.userId = st.sessionId;
     }
   } else {
-    // Offline: pake session_id
     st.userId = st.sessionId;
-    console.log('📴 Offline mode, pake session_id:', st.userId);
   }
-  
-  return username;
 }
 
 // ============================================
@@ -343,32 +682,29 @@ async function ensureUser() {
 // ============================================
 async function initSupabase(){
   if(typeof supabase === 'undefined'){ 
-    setConn(false, '❌ Library tidak ditemukan'); 
+    setConn(false, 'Gagal load'); 
     return false; 
   }
   
   try {
     st.sb = supabase.createClient(CFG.url, CFG.key);
-    
-    // Test koneksi
     const { error } = await st.sb.from(CFG.TBL_USERS).select('id').limit(1);
     if (error) throw error;
     
-    setConn(true, '🟢 Online');
-    await ensureUser();  // Pastikan user sync setelah konek
+    setConn(true, 'Terhubung');
+    await ensureUser();
     setupRealtime();
     return true;
     
   } catch(e){
-    console.error('❌ Init error:', e);
-    setConn(false, '❌ ' + e.message);
-    await ensureUser();  // Tetap jalanin user management walau offline
+    console.error('Init error:', e);
+    setConn(false, 'Error');
+    await ensureUser();
     return false;
   }
 }
 
 function setupRealtime(){
-  // Realtime untuk reactions
   st.sb.channel('rx-live')
     .on('postgres_changes', { 
       event: 'INSERT', 
@@ -378,21 +714,10 @@ function setupRealtime(){
       if(payload.new?.rant_id) refreshCounts(payload.new.rant_id); 
     })
     .subscribe();
-    
-  // Realtime untuk chat
-  st.sb.channel('chat-live')
-    .on('postgres_changes', { 
-      event: 'INSERT', 
-      schema: 'public', 
-      table: CFG.TBL_CHATS 
-    }, payload => { 
-      if(payload.new) addChatToUI(payload.new, false); 
-    })
-    .subscribe();
 }
 
 // ============================================
-// LOAD RANTS - EXCLUDE USER'S OWN RANTS
+// LOAD RANTS
 // ============================================
 async function loadRants(){
   setLoading(true);
@@ -404,7 +729,6 @@ async function loadRants(){
   }
 
   try {
-    // Query rants dengan JOIN ke users, EXCLUDE rant sendiri
     let query = st.sb
       .from(CFG.TBL_RANTS)
       .select(`
@@ -413,14 +737,11 @@ async function loadRants(){
         mood,
         is_anonymous,
         created_at,
-        users!inner (
-          username
-        )
+        users!inner (username)
       `)
       .order('created_at', { ascending: false })
       .limit(50);
     
-    // Filter: jangan tampilkan rant user sendiri (kalo userId adalah UUID)
     if (st.userId && st.userId !== st.sessionId) {
       query = query.not('user_id', 'eq', st.userId);
     }
@@ -430,19 +751,15 @@ async function loadRants(){
     if(rantsError) throw rantsError;
     
     st.rants = rantsData || [];
-    console.log('✅ Rants loaded (excluding own):', st.rants.length);
     
-    // Load reactions untuk rants ini
     if(st.rants.length > 0){
       const rantIds = st.rants.map(r => r.id);
       await loadReactions(rantIds);
-    } else {
-      st.reactions = {};
     }
 
   } catch(e){
-    console.error('❌ loadRants error:', e);
-    toast('Gagal memuat: ' + e.message, true);
+    console.error('loadRants error:', e);
+    toast('Gagal memuat', true);
   }
 
   setLoading(false);
@@ -460,14 +777,12 @@ async function loadReactions(ids){
 
     if(error) throw error;
 
-    // Reset reactions
     st.reactions = {};
     ids.forEach(id => { 
       st.reactions[id] = {}; 
-      REACTIONS.forEach(r => { st.reactions[id][r.id] = 0; });
+      REACTIONS.forEach(r => st.reactions[id][r.id] = 0);
     });
     
-    // Count reactions
     (data || []).forEach(row => {
       if(st.reactions[row.rant_id]) {
         st.reactions[row.rant_id][row.reaction_type] = 
@@ -475,52 +790,42 @@ async function loadReactions(ids){
       }
     });
     
-    console.log('✅ Reactions loaded');
-    
   } catch(e){ 
-    console.error('❌ loadReactions:', e.message); 
+    console.error('loadReactions error:', e); 
   }
 }
 
 // ============================================
-// REACTIONS - FIX UUID
+// REACTIONS
 // ============================================
 async function reactToRant(rantId, emoji, btnEl){
-  // Validasi user ID
   if (!st.userId) {
-    toast('User ID tidak ditemukan, coba refresh', true);
+    toast('User ID tidak ditemukan', true);
     return;
   }
   
   const countEl = document.getElementById(`count-${rantId}-${emoji}`);
   const prev = parseInt(countEl?.textContent || '0');
 
-  // Optimistic UI
   if(countEl) countEl.textContent = prev + 1;
   if(btnEl) btnEl.classList.add('reacted');
   if(!st.reactions[rantId]) st.reactions[rantId] = {};
   st.reactions[rantId][emoji] = prev + 1;
 
-  // Save ke Supabase
   if(st.online && st.sb){
     try {
-      const payload = {
-        rant_id: rantId,
-        reaction_type: emoji,
-        user_id: st.userId,  // Ini sekarang UUID (bukan session_id)
-        created_at: new Date().toISOString()
-      };
-
-      console.log('💾 Saving reaction:', payload);
-
       const { error } = await st.sb
         .from(CFG.TBL_REACTIONS)
-        .insert(payload);
+        .insert({
+          rant_id: rantId,
+          reaction_type: emoji,
+          user_id: st.userId,
+          created_at: new Date().toISOString()
+        });
 
       if(error){
-        if(error.code === '23505'){  // Unique violation
+        if(error.code === '23505'){
           toast('Sudah bereaksi!');
-          // Rollback
           if(countEl) countEl.textContent = prev;
           if(btnEl) btnEl.classList.remove('reacted');
           st.reactions[rantId][emoji] = prev;
@@ -528,26 +833,19 @@ async function reactToRant(rantId, emoji, btnEl){
         }
         throw error;
       }
-
       toast(emoji + ' Tersimpan!');
-
     } catch(e){
-      console.error('❌ Gagal simpan reaction:', e);
-      // Rollback
+      console.error('Reaction error:', e);
       if(countEl) countEl.textContent = prev;
       if(btnEl) btnEl.classList.remove('reacted');
       st.reactions[rantId][emoji] = prev;
-      toast('Gagal: ' + e.message, true);
+      toast('Gagal', true);
     }
-  } else {
-    // Offline - simpan ke localStorage
-    toast('Reaction disimpan offline', true);
   }
 }
 
 async function refreshCounts(rantId){
   if(!st.sb || !rantId) return;
-  
   try {
     const { data } = await st.sb
       .from(CFG.TBL_REACTIONS)
@@ -556,23 +854,17 @@ async function refreshCounts(rantId){
     
     const c = {};
     REACTIONS.forEach(r => c[r.id] = 0);
-    
-    (data || []).forEach(r => { 
-      if(c[r.reaction_type] !== undefined) c[r.reaction_type]++; 
-    });
+    (data || []).forEach(r => c[r.reaction_type]++);
     
     REACTIONS.forEach(r => { 
       const el = document.getElementById(`count-${rantId}-${r.id}`); 
       if(el) el.textContent = c[r.id]; 
     });
-    
-  } catch(e){ 
-    console.error('❌ refreshCounts error:', e);
-  }
+  } catch(e){}
 }
 
 // ============================================
-// RENDER RANTS
+// RENDER
 // ============================================
 function setLoading(v){
   st.loading = v;
@@ -589,12 +881,10 @@ function renderRants(){
 
   let list = [...st.rants];
   
-  // Filter berdasarkan mood
   if(st.filter !== 'all') {
     list = list.filter(s => s.mood === st.filter);
   }
   
-  // Filter berdasarkan vibe (simulasi)
   if(st.vibeMatch < 100) {
     list = list.filter(() => Math.random() < st.vibeMatch / 100);
   }
@@ -634,125 +924,7 @@ function renderRants(){
 }
 
 // ============================================
-// CHAT FUNCTIONS
-// ============================================
-async function loadChats(){
-  if(!st.sb) return;
-  
-  try {
-    const { data, error } = await st.sb
-      .from(CFG.TBL_CHATS)
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(60);
-    
-    if(error) throw error;
-    
-    if(data && data.length > 0){
-      st.chatMessages.emosi = data.filter(m => m.room === 'emosi').reverse().slice(-30);
-      st.chatMessages.agak = data.filter(m => m.room === 'agak').reverse().slice(-30);
-      renderChats();
-    }
-    
-  } catch(e){ 
-    console.error('❌ loadChats:', e.message); 
-  }
-}
-
-function renderChats(){
-  renderChatRoom('emosi');
-  renderChatRoom('agak');
-}
-
-function renderChatRoom(room){
-  const container = document.getElementById(`chat-messages-${room}`);
-  if(!container) return;
-  
-  const messages = st.chatMessages[room] || [];
-  
-  if(messages.length === 0){
-    container.innerHTML = '<div class="chat-empty">Belum ada yang ngobrol di sini...</div>';
-    return;
-  }
-  
-  container.innerHTML = messages.map(msg => {
-    const isOwn = msg.user_id === st.userId || msg.user_id === st.sessionId;
-    const username = msg.username || 'anonim';
-    const time = new Date(msg.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-    
-    return `<div class="chat-message ${isOwn ? 'chat-message-own' : 'chat-message-other'}">
-      <div class="chat-meta">
-        ${isOwn ? '<span>Kamu</span>' : `<span class="chat-username">@${formatUsername(username)}</span>`}
-        <span>${time}</span>
-      </div>
-      <div class="chat-bubble">${esc(msg.content)}</div>
-    </div>`;
-  }).join('');
-  
-  container.scrollTop = container.scrollHeight;
-}
-
-function addChatToUI(msg, isNew = true){
-  const room = msg.room || 'emosi';
-  const container = document.getElementById(`chat-messages-${room}`);
-  if(!container) return;
-  
-  const emptyState = container.querySelector('.chat-empty');
-  if(emptyState) emptyState.remove();
-  
-  if(!st.chatMessages[room]) st.chatMessages[room] = [];
-  st.chatMessages[room].push(msg);
-  if(st.chatMessages[room].length > 30){
-    st.chatMessages[room].shift();
-  }
-  
-  renderChatRoom(room);
-}
-
-async function sendChat(room){
-  const input = document.getElementById(`chat-input-${room}`);
-  const content = input.value.trim();
-  
-  if(!content) return;
-  
-  input.value = '';
-  
-  // Validasi user ID
-  const userId = st.userId || st.sessionId || 'anonymous';
-  
-  const tempMsg = {
-    id: 'temp_' + Date.now(),
-    user_id: userId,
-    username: st.username || 'anonim',
-    content: content,
-    room: room,
-    created_at: new Date().toISOString()
-  };
-  addChatToUI(tempMsg, true);
-  
-  if(st.online && st.sb){
-    try {
-      const { error } = await st.sb
-        .from(CFG.TBL_CHATS)
-        .insert({
-          user_id: userId,
-          username: st.username,
-          content: content,
-          room: room,
-          created_at: new Date().toISOString()
-        });
-      
-      if(error) throw error;
-      
-    } catch(e){
-      console.error('❌ sendChat error:', e);
-      toast('Gagal mengirim pesan', true);
-    }
-  }
-}
-
-// ============================================
-// FILTERS & EVENTS
+// FILTERS
 // ============================================
 function filterMood(mood){
   st.filter = mood;
@@ -777,19 +949,25 @@ function refreshSpills(){
   loadRants(); 
 }
 
-function toggleMenu(){ 
-  toast('Menu coming soon'); 
-}
+// ============================================
+// HTMX ACTIVE STATE
+// ============================================
+document.addEventListener('htmx:afterSwap', function() {
+  const path = window.location.pathname;
+  document.querySelectorAll('.nav-item').forEach(item => {
+    const href = item.getAttribute('href');
+    item.classList.toggle('active', href === path);
+  });
+});
 
 // ============================================
 // INIT
 // ============================================
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log('🚀 Spill the Tea starting...');
+  console.log('Spill the Tea starting...');
   
   const ok = await initSupabase();
   
-  // Vibe slider
   const slider = document.getElementById('vibe-slider');
   if (slider) {
     slider.addEventListener('input', e => {
@@ -799,16 +977,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Load data
-  if(ok){ 
-    await loadRants();
-    await loadChats();
-  } else { 
+  if(ok) await loadRants();
+  else {
     setLoading(false);
-    renderRants(); 
+    renderRants();
   }
-  
-  console.log('✅ App ready, user ID:', st.userId);
 });
 </script>
 </body>
