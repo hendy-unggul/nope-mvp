@@ -136,7 +136,7 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
     <p class="loading-text">Menyedu teh...</p>
   </div>
 
-  <button class="new-spill-btn" onclick="createNewSpill()">
+  <button class="new-spill-btn" onclick="refreshSpills()">
     <span>🔄</span><span>Seduh Teh Baru</span>
   </button>
 
@@ -153,7 +153,6 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
       <div class="chat-input-container">
         <input type="text" class="chat-input" id="chat-input-emosi" placeholder="Tulis pesan..." maxlength="200">
         <button class="chat-send-btn" onclick="sendChat('emosi')">Kirim</button>
-        <button class="chat-send-btn" style="background:var(--as);" onclick="askAI('emosi')">✨ AI</button>
       </div>
     </div>
     
@@ -166,7 +165,6 @@ header{display:flex;justify-content:space-between;align-items:center;margin-bott
       <div class="chat-input-container">
         <input type="text" class="chat-input" id="chat-input-agak" placeholder="Tulis pesan..." maxlength="200">
         <button class="chat-send-btn" onclick="sendChat('agak')">Kirim</button>
-        <button class="chat-send-btn" style="background:var(--as);" onclick="askAI('agak')">✨ AI</button>
       </div>
     </div>
   </div>
@@ -200,7 +198,7 @@ const st = {
   sb: null,
   online: false,
   userId: null,        // UUID dari tabel users
-  sessionId: null,      // Session ID buat fallback
+  sessionId: null,     // Session ID buat fallback
   username: null,
   rants: [],
   reactions: {},
@@ -254,7 +252,7 @@ function getSessionId(){
 }
 
 // ============================================
-// USER MANAGEMENT - FIX UUID
+// USER MANAGEMENT - FOCUS ON SPILL
 // ============================================
 async function ensureUser() {
   // Cek localStorage
@@ -394,7 +392,7 @@ function setupRealtime(){
 }
 
 // ============================================
-// LOAD RANTS
+// LOAD RANTS - EXCLUDE USER'S OWN RANTS
 // ============================================
 async function loadRants(){
   setLoading(true);
@@ -406,9 +404,8 @@ async function loadRants(){
   }
 
   try {
-    // Query rants dengan JOIN ke users
-    // TAPI exclude rant dari user sendiri
-    const { data: rantsData, error: rantsError } = await st.sb
+    // Query rants dengan JOIN ke users, EXCLUDE rant sendiri
+    let query = st.sb
       .from(CFG.TBL_RANTS)
       .select(`
         id,
@@ -420,9 +417,15 @@ async function loadRants(){
           username
         )
       `)
-      .not('user_id', 'eq', st.userId)  // ← FILTER: jangan tampilkan rant user sendiri
       .order('created_at', { ascending: false })
       .limit(50);
+    
+    // Filter: jangan tampilkan rant user sendiri (kalo userId adalah UUID)
+    if (st.userId && st.userId !== st.sessionId) {
+      query = query.not('user_id', 'eq', st.userId);
+    }
+    
+    const { data: rantsData, error: rantsError } = await query;
 
     if(rantsError) throw rantsError;
     
@@ -445,6 +448,40 @@ async function loadRants(){
   setLoading(false);
   renderRants();
 }
+
+async function loadReactions(ids){
+  if(!st.sb || !ids.length) return;
+  
+  try {
+    const { data, error } = await st.sb
+      .from(CFG.TBL_REACTIONS)
+      .select('rant_id, reaction_type')
+      .in('rant_id', ids);
+
+    if(error) throw error;
+
+    // Reset reactions
+    st.reactions = {};
+    ids.forEach(id => { 
+      st.reactions[id] = {}; 
+      REACTIONS.forEach(r => { st.reactions[id][r.id] = 0; });
+    });
+    
+    // Count reactions
+    (data || []).forEach(row => {
+      if(st.reactions[row.rant_id]) {
+        st.reactions[row.rant_id][row.reaction_type] = 
+          (st.reactions[row.rant_id][row.reaction_type] || 0) + 1;
+      }
+    });
+    
+    console.log('✅ Reactions loaded');
+    
+  } catch(e){ 
+    console.error('❌ loadReactions:', e.message); 
+  }
+}
+
 // ============================================
 // REACTIONS - FIX UUID
 // ============================================
@@ -715,88 +752,6 @@ async function sendChat(room){
 }
 
 // ============================================
-// AI FUNCTION
-// ============================================
-async function askAI(room) {
-  const input = document.getElementById(`chat-input-${room}`);
-  const question = input.value.trim();
-  
-  if (!question) {
-    toast('Tulis pertanyaan dulu!', true);
-    return;
-  }
-  
-  input.value = '';
-  
-  const userId = st.userId || st.sessionId || 'anonymous';
-  
-  const tempMsg = {
-    id: 'ai_typing_' + Date.now(),
-    user_id: 'ai',
-    username: 'SpillBot',
-    content: '✨ *Mikir...*',
-    room: room,
-    created_at: new Date().toISOString()
-  };
-  addChatToUI(tempMsg, true);
-  
-  try {
-    const response = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        message: question,
-        user_id: userId,
-        username: st.username 
-      })
-    });
-    
-    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
-    
-    const data = await response.json();
-    
-    // Hapus pesan typing
-    const container = document.getElementById(`chat-messages-${room}`);
-    const messages = container.querySelectorAll('.chat-message');
-    if (messages.length > 0 && messages[messages.length-1].textContent.includes('Mikir...')) {
-      container.removeChild(messages[messages.length-1]);
-    }
-    
-    const aiMsg = {
-      id: 'ai_' + Date.now(),
-      user_id: 'ai',
-      username: 'SpillBot',
-      content: data.reply || 'Maaf, aku gak bisa jawab sekarang.',
-      room: room,
-      created_at: new Date().toISOString()
-    };
-    addChatToUI(aiMsg, true);
-    
-  } catch (error) {
-    console.error('❌ AI error:', error);
-    
-    // Hapus pesan typing
-    const container = document.getElementById(`chat-messages-${room}`);
-    const messages = container.querySelectorAll('.chat-message');
-    if (messages.length > 0 && messages[messages.length-1].textContent.includes('Mikir...')) {
-      container.removeChild(messages[messages.length-1]);
-    }
-    
-    const errorMsg = {
-      id: 'ai_error_' + Date.now(),
-      user_id: 'ai',
-      username: 'SpillBot',
-      content: '❌ Gagal mikir... Coba lagi nanti.',
-      room: room,
-      created_at: new Date().toISOString()
-    };
-    addChatToUI(errorMsg, true);
-    
-    toast('Gagal panggil AI: ' + error.message, true);
-  }
-}
-
-// ============================================
 // FILTERS & EVENTS
 // ============================================
 function filterMood(mood){
@@ -818,7 +773,7 @@ function resetFilters(){
   loadRants();
 }
 
-function createNewSpill(){ 
+function refreshSpills(){ 
   loadRants(); 
 }
 
