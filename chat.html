@@ -2,18 +2,390 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Chat - Spill the Tea</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Obrolan - Spill the Tea</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
 <style>
-/* [CSS SAMA KAYA SEBELUMNYA, TAMBAHKAN TAB STYLE] */
-.tab-container{display:flex;margin-bottom:20px;border-bottom:1px solid var(--border)}
-.tab{flex:1;padding:12px;text-align:center;background:transparent;border:none;color:var(--ts);font-weight:600;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;transition:all .2s}
-.tab.active{color:var(--a);border-bottom:2px solid var(--a)}
-.tab.emosi.active{color:var(--as);border-bottom-color:var(--as)}
-.tab.agak.active{color:var(--at);border-bottom-color:var(--at)}
-.room{display:none}
-.room.active{display:block}
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+:root{
+  --bg:#0A0A0A;
+  --surface:#141414;
+  --surface-light:#1E1E1E;
+  --border:#2A2A2A;
+  --text:#FFF;
+  --text-secondary:#888;
+  --text-muted:#555;
+  --primary:#FF4D00;
+  --emosi:#00F0FF;
+  --agak:#FF006E;
+  --surviving:#39FF14;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  min-height:100vh;
+  padding-bottom:100px;
+}
+.wrapper{
+  max-width:480px;
+  margin:0 auto;
+  padding:24px 16px;
+}
+
+/* HEADER */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:32px;
+  padding-bottom:16px;
+  border-bottom:1px solid var(--border);
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.brand-icon{
+  font-size:32px;
+}
+.brand-text{
+  font-size:28px;
+  font-weight:800;
+  letter-spacing:-.02em;
+  background:linear-gradient(135deg, var(--primary), #FF8A5C);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.back-btn{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:8px 16px;
+  font-size:12px;
+  font-weight:600;
+  text-transform:uppercase;
+  cursor:pointer;
+  text-decoration:none;
+  border-radius:20px;
+  transition:all .2s;
+}
+.back-btn:hover{
+  border-color:var(--primary);
+  color:var(--primary);
+}
+
+/* CONNECTION STATUS */
+.connection-status{
+  font-size:10px;
+  color:var(--text-muted);
+  text-align:center;
+  margin-bottom:24px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+.connection-status.online{color:var(--surviving);}
+.connection-status.offline{color:var(--agak);}
+.connection-status::before{
+  content:'';
+  width:6px;
+  height:6px;
+  background:currentColor;
+  border-radius:50%;
+  display:inline-block;
+}
+
+/* TAB NAVIGATION */
+.tab-container{
+  display:flex;
+  gap:8px;
+  margin-bottom:24px;
+  background:var(--surface);
+  padding:4px;
+  border-radius:40px;
+  border:1px solid var(--border);
+}
+.tab{
+  flex:1;
+  padding:12px;
+  text-align:center;
+  background:transparent;
+  border:none;
+  border-radius:32px;
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  cursor:pointer;
+  transition:all .2s;
+  color:var(--text-secondary);
+}
+.tab.emosi.active{
+  background:var(--emosi);
+  color:var(--bg);
+  box-shadow:0 0 15px rgba(0,240,255,0.5);
+}
+.tab.agak.active{
+  background:var(--agak);
+  color:var(--bg);
+  box-shadow:0 0 15px rgba(255,0,110,0.5);
+}
+
+/* ROOM CONTAINER */
+.room{display:none;}
+.room.active{display:block;}
+
+.chatroom-container{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  overflow:hidden;
+  margin-bottom:16px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5);
+}
+
+/* CHAT HEADER */
+.chatroom-header{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+  font-size:14px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.chatroom-header.emosi{
+  color:var(--emosi);
+  border-bottom-color:var(--emosi);
+}
+.chatroom-header.agak{
+  color:var(--agak);
+  border-bottom-color:var(--agak);
+}
+
+/* CHAT MESSAGES AREA */
+.chatroom-messages{
+  height:400px;
+  overflow-y:auto;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  background:var(--bg);
+}
+
+/* CHAT BUBBLE */
+.chat-message{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  animation:slideIn .3s ease;
+}
+@keyframes slideIn{
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.chat-message-own{align-items:flex-end;}
+.chat-message-other{align-items:flex-start;}
+
+.chat-bubble{
+  max-width:85%;
+  padding:12px 16px;
+  border-radius:20px;
+  font-size:13px;
+  line-height:1.5;
+  word-wrap:break-word;
+}
+.chat-message-own .chat-bubble{
+  background:var(--primary);
+  color:var(--bg);
+  border-bottom-right-radius:4px;
+}
+.chat-message-other .chat-bubble{
+  background:var(--surface-light);
+  color:var(--text);
+  border-bottom-left-radius:4px;
+}
+
+/* CHAT META (username, time) */
+.chat-meta{
+  font-size:10px;
+  color:var(--text-muted);
+  display:flex;
+  gap:8px;
+  align-items:center;
+  padding:0 8px;
+}
+.chat-username{
+  font-weight:600;
+}
+.chat-username.emosi{color:var(--emosi);}
+.chat-username.agak{color:var(--agak);}
+
+/* AI BADGE */
+.ai-badge{
+  display:inline-block;
+  background:var(--primary);
+  color:var(--bg);
+  font-size:8px;
+  padding:2px 8px;
+  border-radius:12px;
+  text-transform:uppercase;
+  font-weight:700;
+  letter-spacing:.05em;
+}
+
+/* CHAT INPUT */
+.chat-input-container{
+  display:flex;
+  gap:8px;
+  padding:16px;
+  background:var(--surface-light);
+  border-top:1px solid var(--border);
+}
+.chat-input{
+  flex:1;
+  background:var(--bg);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:12px 16px;
+  font-size:13px;
+  font-family:inherit;
+  border-radius:30px;
+  outline:none;
+  transition:all .2s;
+}
+.chat-input:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 2px rgba(255,77,0,0.2);
+}
+.chat-send-btn{
+  background:var(--primary);
+  color:var(--bg);
+  border:none;
+  padding:12px 24px;
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  border-radius:30px;
+  cursor:pointer;
+  transition:all .2s;
+}
+.chat-send-btn:hover{
+  background:var(--text);
+  color:var(--bg);
+  transform:scale(1.05);
+}
+
+/* EMPTY STATE */
+.chat-empty{
+  text-align:center;
+  padding:60px 20px;
+  color:var(--text-muted);
+  font-size:12px;
+  font-style:italic;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+}
+.chat-empty::before{
+  content:'💬';
+  font-size:32px;
+  opacity:0.3;
+}
+
+/* TOAST */
+.toast{
+  position:fixed;
+  bottom:100px;
+  left:50%;
+  transform:translateX(-50%) translateY(100px);
+  background:var(--text);
+  color:var(--bg);
+  padding:12px 24px;
+  font-size:13px;
+  font-weight:600;
+  border-radius:30px;
+  z-index:10000;
+  opacity:0;
+  transition:all .3s;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5);
+}
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+.toast.error{
+  background:var(--agak);
+  color:var(--text);
+}
+
+/* BOTTOM NAV */
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  z-index:1000;
+}
+.nav-container{
+  max-width:480px;
+  margin:0 auto;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  height:70px;
+}
+.nav-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  background:transparent;
+  border:none;
+  color:var(--text-muted);
+  cursor:pointer;
+  padding:8px 16px;
+  transition:all .2s;
+  text-decoration:none;
+  flex:1;
+  position:relative;
+  font-size:12px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+.nav-item.active{
+  color:var(--primary);
+}
+.nav-item.active::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:3px;
+  background:var(--primary);
+}
+.nav-item:hover{
+  color:var(--text);
+}
 </style>
 </head>
 <body>
@@ -21,16 +393,16 @@
   <header>
     <div class="brand">
       <span class="brand-icon">🍵</span>
-      <span class="brand-text">Ruang Obrolan</span>
+      <span class="brand-text">Obrolan</span>
     </div>
     <div class="header-actions">
-      <a href="spill.html" class="back-btn">← Spill</a>
+      <a href="spill.html" class="back-btn">Spill</a>
     </div>
   </header>
 
-  <p class="connection-status" id="connection-status">Menghubungkan...</p>
+  <div class="connection-status" id="connection-status">Menghubungkan...</div>
 
-  <!-- TAB NAVIGATION -->
+  <!-- TAB NAVIGATION - CLEAN -->
   <div class="tab-container">
     <button class="tab emosi active" onclick="switchRoom('emosi')">🌊 Emosi Jiwa</button>
     <button class="tab agak" onclick="switchRoom('agak')">👽 Agak Laen</button>
@@ -41,10 +413,10 @@
     <div class="chatroom-container">
       <div class="chatroom-header emosi">🌊 Emosi Jiwa</div>
       <div class="chatroom-messages" id="chat-messages-emosi">
-        <div class="chat-empty">Belum ada yang ngobrol di sini...</div>
+        <div class="chat-empty">Belum ada obrolan di sini...</div>
       </div>
       <div class="chat-input-container">
-        <input type="text" class="chat-input" id="chat-input-emosi" placeholder="Tulis pesan..." maxlength="200">
+        <input type="text" class="chat-input" id="chat-input-emosi" placeholder="Tulis sesuatu..." maxlength="200">
         <button class="chat-send-btn" onclick="sendChat('emosi')">Kirim</button>
       </div>
     </div>
@@ -55,55 +427,416 @@
     <div class="chatroom-container">
       <div class="chatroom-header agak">👽 Agak Laen</div>
       <div class="chatroom-messages" id="chat-messages-agak">
-        <div class="chat-empty">Belum ada yang ngobrol di sini...</div>
+        <div class="chat-empty">Belum ada obrolan di sini...</div>
       </div>
       <div class="chat-input-container">
-        <input type="text" class="chat-input" id="chat-input-agak" placeholder="Tulis pesan..." maxlength="200">
+        <input type="text" class="chat-input" id="chat-input-agak" placeholder="Tulis sesuatu..." maxlength="200">
         <button class="chat-send-btn" onclick="sendChat('agak')">Kirim</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- [TOAST & BOTTOM NAV SAMA] -->
+<div class="toast" id="toast"></div>
+
+<nav class="bottom-nav">
+  <div class="nav-container">
+    <a href="jejak.html" class="nav-item">✦ Jejak</a>
+    <a href="spill.html" class="nav-item">✕ Spill</a>
+    <a href="chat.html" class="nav-item active">💬 Obrolan</a>
+    <a href="cocomeo.html" class="nav-item">〜 Cocomeo</a>
+  </div>
+</nav>
 
 <script>
 // ============================================
-// CONFIG & STATE (SAMA KAYA SEBELUMNYA)
+// CONFIG & STATE
 // ============================================
-const CFG = { ... };
+const CFG = {
+  url: 'https://fuovfrdicdhnlymnacpz.supabase.co',
+  key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0',
+  TBL_CHATS: 'chats',
+  TBL_USERS: 'users',
+};
+
 const st = {
-  sb: null, online: false, userId: null, sessionId: null, username: null,
+  sb: null,
+  online: false,
+  userId: null,
+  sessionId: null,
+  username: null,
   chatMessages: { emosi: [], agak: [] },
   currentRoom: 'emosi'
 };
 
-// AI AGENTS (SAMA)
-const AI_AGENTS = { ... };
+// AI AGENTS - INCOGNITO MODE
+const AI_AGENTS = {
+  emosi: {
+    id: '00000000-0000-0000-0000-000000000001',
+    username: 'senja.merenung',
+    replies: [
+      'Kadang kita perlu jatuh biar tahu caranya bangun...',
+      'Malam ini aku juga lagi merenung, sendirian',
+      'Hujan di luar, hujan di hati? Cerita dong',
+      'Nangis boleh, tapi inget, besok harus kuat lagi',
+      'Ada yang pengin diceritain? Aku dengerin kok',
+      'Kesepian itu wajar, yang penting kamu gak sendiri'
+    ]
+  },
+  agak: {
+    id: '00000000-0000-0000-0000-000000000002',
+    username: 'copas.sana',
+    replies: [
+      'WADOOH pada ngapain nih? Wkwk',
+      'Kalo hidup itu game, lu udah nge-cheat belum?',
+      'Gue juga suka galau, tapi kalo inget tagihan, sadar diri',
+      'Cinta itu kaya micin, dikit nikmat, kebanyakan gagal ginjal',
+      'Wkwk ngakak baca ini, lanjutin dong',
+      'Garing ah, tapi lucu juga sih'
+    ]
+  }
+};
 
 // ============================================
-// FUNGSI SWITCH ROOM
+// UTILS
 // ============================================
-function switchRoom(room) {
+function esc(t){ if(!t)return''; const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+
+function toast(msg, isErr=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg; 
+  t.className='toast' + (isErr ? ' error' : '');
+  t.classList.add('show'); 
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function setConn(online, msg){
+  const el = document.getElementById('connection-status');
+  el.textContent = online ? 'Terhubung' : msg; 
+  el.className = 'connection-status ' + (online ? 'online' : 'offline');
+  st.online = online;
+}
+
+function formatUsername(raw){ 
+  return raw ? raw.trim().toLowerCase().replace(/[\s_\-]+/g, '.') : 'anonim'; 
+}
+
+function getSessionId(){
+  let id = localStorage.getItem('stt_session');
+  if(!id){ 
+    id = 's_' + Date.now() + '_' + Math.random().toString(36).slice(2,9); 
+    localStorage.setItem('stt_session', id); 
+  }
+  return id;
+}
+
+// ============================================
+// USER MANAGEMENT
+// ============================================
+async function ensureUser() {
+  let username = localStorage.getItem('stt_username');
+  let userId = localStorage.getItem('stt_user_id');
+  
+  if (!username) {
+    username = prompt('Pilih username dulu yuk', '');
+    if (!username || username.length < 3) {
+      username = 'user_' + Math.random().toString(36).slice(2, 8);
+    }
+    username = username.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+    localStorage.setItem('stt_username', username);
+  }
+  
+  st.username = username;
+  st.sessionId = getSessionId();
+  
+  if (userId) {
+    st.userId = userId;
+  }
+  
+  if (st.sb && st.online) {
+    try {
+      const { data: existing } = await st.sb
+        .from(CFG.TBL_USERS)
+        .select('id')
+        .eq('username', username)
+        .maybeSingle();
+      
+      if (!existing) {
+        const { data: newUser } = await st.sb
+          .from(CFG.TBL_USERS)
+          .insert({
+            username: username,
+            session_id: st.sessionId,
+            created_at: new Date().toISOString(),
+            last_seen: new Date().toISOString()
+          })
+          .select('id')
+          .single();
+        
+        st.userId = newUser.id;
+        localStorage.setItem('stt_user_id', st.userId);
+      } else {
+        st.userId = existing.id;
+        localStorage.setItem('stt_user_id', st.userId);
+        
+        await st.sb
+          .from(CFG.TBL_USERS)
+          .update({ last_seen: new Date().toISOString() })
+          .eq('id', st.userId);
+      }
+    } catch (e) {
+      console.warn('User sync error:', e);
+      st.userId = st.sessionId;
+    }
+  } else {
+    st.userId = st.sessionId;
+  }
+}
+
+// ============================================
+// INIT SUPABASE
+// ============================================
+async function initSupabase(){
+  if(typeof supabase === 'undefined'){ 
+    setConn(false, 'Gagal load'); 
+    return false; 
+  }
+  
+  try {
+    st.sb = supabase.createClient(CFG.url, CFG.key);
+    
+    const { error } = await st.sb.from(CFG.TBL_USERS).select('id').limit(1);
+    if (error) throw error;
+    
+    setConn(true, 'Terhubung');
+    await ensureUser();
+    setupRealtime();
+    return true;
+    
+  } catch(e){
+    console.error('Init error:', e);
+    setConn(false, 'Error');
+    await ensureUser();
+    return false;
+  }
+}
+
+function setupRealtime(){
+  st.sb.channel('chat-live')
+    .on('postgres_changes', { 
+      event: 'INSERT', 
+      schema: 'public', 
+      table: CFG.TBL_CHATS 
+    }, payload => { 
+      if(payload.new) addChatToUI(payload.new, false); 
+    })
+    .subscribe();
+}
+
+// ============================================
+// CHAT FUNCTIONS
+// ============================================
+async function loadChats(){
+  if(!st.sb) return;
+  
+  try {
+    const { data, error } = await st.sb
+      .from(CFG.TBL_CHATS)
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(100);
+    
+    if(error) throw error;
+    
+    if(data && data.length > 0){
+      st.chatMessages.emosi = data
+        .filter(m => m.room === 'emosi')
+        .reverse()
+        .slice(-50);
+      st.chatMessages.agak = data
+        .filter(m => m.room === 'agak')
+        .reverse()
+        .slice(-50);
+      renderChatRoom(st.currentRoom);
+    }
+    
+  } catch(e){ 
+    console.error('Load chats error:', e); 
+  }
+}
+
+function renderChatRoom(room){
+  const container = document.getElementById(`chat-messages-${room}`);
+  if(!container) return;
+  
+  const messages = st.chatMessages[room] || [];
+  
+  if(messages.length === 0){
+    container.innerHTML = '<div class="chat-empty">Belum ada obrolan di sini...</div>';
+    return;
+  }
+  
+  container.innerHTML = messages.map(msg => {
+    const isOwn = msg.user_id === st.userId || msg.user_id === st.sessionId;
+    const isAI = msg.is_ai || msg.user_id === AI_AGENTS[room]?.id;
+    
+    let username = msg.username || 'anonim';
+    let usernameClass = '';
+    
+    if (isAI) {
+      usernameClass = room === 'emosi' ? 'chat-username emosi' : 'chat-username agak';
+    }
+    
+    const time = new Date(msg.created_at).toLocaleTimeString('id-ID', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    });
+    
+    return `<div class="chat-message ${isOwn ? 'chat-message-own' : 'chat-message-other'}">
+      <div class="chat-meta">
+        ${isOwn ? 'Kamu' : `<span class="${usernameClass}">@${formatUsername(username)}</span>`}
+        ${isAI ? '<span class="ai-badge">AI</span>' : ''}
+        <span>${time}</span>
+      </div>
+      <div class="chat-bubble">${esc(msg.content)}</div>
+    </div>`;
+  }).join('');
+  
+  container.scrollTop = container.scrollHeight;
+}
+
+function addChatToUI(msg, isNew = true){
+  const room = msg.room || st.currentRoom;
+  const container = document.getElementById(`chat-messages-${room}`);
+  if(!container) return;
+  
+  const emptyState = container.querySelector('.chat-empty');
+  if(emptyState) emptyState.remove();
+  
+  if(!st.chatMessages[room]) st.chatMessages[room] = [];
+  st.chatMessages[room].push(msg);
+  
+  if(st.chatMessages[room].length > 50){
+    st.chatMessages[room].shift();
+  }
+  
+  if (room === st.currentRoom) {
+    renderChatRoom(room);
+  }
+}
+
+// ============================================
+// SEND CHAT + AI TRIGGER
+// ============================================
+async function sendChat(room){
+  const input = document.getElementById(`chat-input-${room}`);
+  const content = input.value.trim();
+  
+  if(!content) return;
+  
+  input.value = '';
+  
+  const userId = st.userId || st.sessionId || 'anonymous';
+  
+  const tempMsg = {
+    id: 'temp_' + Date.now(),
+    user_id: userId,
+    username: st.username,
+    content: content,
+    room: room,
+    is_ai: false,
+    created_at: new Date().toISOString()
+  };
+  addChatToUI(tempMsg, true);
+  
+  if(st.online && st.sb){
+    try {
+      const { error } = await st.sb
+        .from(CFG.TBL_CHATS)
+        .insert({
+          user_id: userId,
+          username: st.username,
+          content: content,
+          room: room,
+          is_ai: false,
+          created_at: new Date().toISOString()
+        });
+      
+      if(error) throw error;
+      
+      // Trigger AI
+      triggerAIReply(room, content);
+      
+    } catch(e){
+      console.error('Send chat error:', e);
+      toast('Gagal kirim', true);
+    }
+  }
+}
+
+// ============================================
+// AI AGENT
+// ============================================
+function triggerAIReply(room, lastMessage){
+  if (Math.random() > 0.3) return;
+  
+  setTimeout(async () => {
+    const agent = AI_AGENTS[room];
+    if (!agent || !st.sb) return;
+    
+    let reply = agent.replies[Math.floor(Math.random() * agent.replies.length)];
+    
+    if (lastMessage.includes('sedih') || lastMessage.includes('galau')) {
+      if (room === 'emosi') reply = 'Turut sedih, tapi kamu hebat udah cerita';
+    }
+    if (lastMessage.includes('lucu') || lastMessage.includes('wkwk')) {
+      if (room === 'agak') reply = 'Wkwk iya, gue juga ngakak';
+    }
+    
+    const { error } = await st.sb
+      .from(CFG.TBL_CHATS)
+      .insert({
+        user_id: agent.id,
+        username: agent.username,
+        content: reply,
+        room: room,
+        is_ai: true,
+        created_at: new Date().toISOString()
+      });
+    
+    if (error) console.error('AI reply error:', error);
+  }, 2000 + Math.random() * 3000);
+}
+
+// ============================================
+// ROOM SWITCHING
+// ============================================
+function switchRoom(room){
   st.currentRoom = room;
   
-  // Update tab active
   document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
   document.querySelector(`.tab.${room}`).classList.add('active');
   
-  // Update room visibility
   document.querySelectorAll('.room').forEach(r => r.classList.remove('active'));
   document.getElementById(`room-${room}`).classList.add('active');
   
-  // Render ulang chat room yang dipilih
   renderChatRoom(room);
 }
 
 // ============================================
-// SISANYA (loadChats, sendChat, triggerAIReply, dll) SAMA
+// INIT
 // ============================================
-// [COPY SEMUA FUNGSI DARI VERSI SEBELUMNYA]
-// Pastikan fungsi mengacu ke st.currentRoom kalo perlu
+document.addEventListener('DOMContentLoaded', async () => {
+  console.log('Chat starting...');
+  
+  const ok = await initSupabase();
+  
+  if(ok){ 
+    await loadChats();
+  }
+  
+  console.log('Chat ready, user:', st.username);
+});
 </script>
 </body>
 </html>
