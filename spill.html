@@ -407,6 +407,7 @@ async function loadRants(){
 
   try {
     // Query rants dengan JOIN ke users
+    // TAPI exclude rant dari user sendiri
     const { data: rantsData, error: rantsError } = await st.sb
       .from(CFG.TBL_RANTS)
       .select(`
@@ -415,22 +416,25 @@ async function loadRants(){
         mood,
         is_anonymous,
         created_at,
-        users (
+        users!inner (
           username
         )
       `)
+      .not('user_id', 'eq', st.userId)  // ← FILTER: jangan tampilkan rant user sendiri
       .order('created_at', { ascending: false })
       .limit(50);
 
     if(rantsError) throw rantsError;
     
     st.rants = rantsData || [];
-    console.log('✅ Rants loaded:', st.rants.length);
+    console.log('✅ Rants loaded (excluding own):', st.rants.length);
     
     // Load reactions untuk rants ini
     if(st.rants.length > 0){
       const rantIds = st.rants.map(r => r.id);
       await loadReactions(rantIds);
+    } else {
+      st.reactions = {};
     }
 
   } catch(e){
@@ -441,40 +445,6 @@ async function loadRants(){
   setLoading(false);
   renderRants();
 }
-
-async function loadReactions(ids){
-  if(!st.sb || !ids.length) return;
-  
-  try {
-    const { data, error } = await st.sb
-      .from(CFG.TBL_REACTIONS)
-      .select('rant_id, reaction_type')
-      .in('rant_id', ids);
-
-    if(error) throw error;
-
-    // Reset reactions
-    st.reactions = {};
-    ids.forEach(id => { 
-      st.reactions[id] = {}; 
-      REACTIONS.forEach(r => { st.reactions[id][r.id] = 0; });
-    });
-    
-    // Count reactions
-    (data || []).forEach(row => {
-      if(st.reactions[row.rant_id]) {
-        st.reactions[row.rant_id][row.reaction_type] = 
-          (st.reactions[row.rant_id][row.reaction_type] || 0) + 1;
-      }
-    });
-    
-    console.log('✅ Reactions loaded');
-    
-  } catch(e){ 
-    console.error('❌ loadReactions:', e.message); 
-  }
-}
-
 // ============================================
 // REACTIONS - FIX UUID
 // ============================================
