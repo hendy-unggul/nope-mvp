@@ -726,18 +726,33 @@ function addChatToUI(msg, isNew){
 // ============================================
 // TRIGGER 30 KARAKTER
 // ============================================
+// ============================================
+// TRIGGER 30 KARAKTER - VERSI DEBUG
+// ============================================
 async function triggerDigitalFriend(room, lastMessage) {
-  if (Math.random() > 0.3) return;
+  console.log('🎯 triggerDigitalFriend dipanggil!', room, lastMessage);
+  
+  // 30% chance muncul
+  if (Math.random() > 0.3) {
+    console.log('⏭️ Gagal random, skip');
+    return;
+  }
+  
+  console.log('✅ Lolos random, akan muncul');
   
   var friends = DIGITAL_FRIENDS[room];
+  console.log('👥 Total friends:', friends.length);
+  
   var randomFriend = friends[Math.floor(Math.random() * friends.length)];
+  console.log('🎭 Friend terpilih:', randomFriend.username);
   
   var delay = 2000 + Math.random() * 3000;
+  console.log('⏱️ Delay:', delay, 'ms');
   
   setTimeout(async function() {
+    console.log('🤖 Mengeksekusi reply untuk', randomFriend.username);
+    
     try {
-      console.log('🤖 Triggering ' + randomFriend.username + ' for reply...');
-      
       var response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -750,9 +765,11 @@ async function triggerDigitalFriend(room, lastMessage) {
       });
       
       var data = await response.json();
-      console.log('API Response:', data);
+      console.log('📩 API Response:', data);
       
       if (data.reply && !data.fallback) {
+        console.log('💬 Reply dari DeepSeek:', data.reply);
+        
         if (st.sb) {
           await st.sb.from(CFG.TBL_CHATS).insert({
             user_id: randomFriend.id,
@@ -762,10 +779,13 @@ async function triggerDigitalFriend(room, lastMessage) {
             is_ai: true,
             created_at: new Date().toISOString()
           });
-          console.log('🎭 ' + randomFriend.username + ' muncul via DeepSeek');
+          console.log('✅ Sukses insert ke Supabase');
         }
       } else {
+        console.log('⚠️ API fallback, pake template');
         var fallbackReply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
+        console.log('💬 Reply template:', fallbackReply);
+        
         if (st.sb) {
           await st.sb.from(CFG.TBL_CHATS).insert({
             user_id: randomFriend.id,
@@ -775,27 +795,15 @@ async function triggerDigitalFriend(room, lastMessage) {
             is_ai: true,
             created_at: new Date().toISOString()
           });
-          console.log('🎭 ' + randomFriend.username + ' muncul via template');
+          console.log('✅ Sukses insert template ke Supabase');
         }
       }
       
     } catch (e) {
-      console.error('Digital friend error:', e);
-      var fallbackReply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
-      if (st.sb) {
-        await st.sb.from(CFG.TBL_CHATS).insert({
-          user_id: randomFriend.id,
-          username: randomFriend.username,
-          content: fallbackReply,
-          room: room,
-          is_ai: true,
-          created_at: new Date().toISOString()
-        });
-      }
+      console.error('❌ Error di triggerDigitalFriend:', e);
     }
   }, delay);
 }
-
 // ============================================
 // SEND CHAT
 // ============================================
