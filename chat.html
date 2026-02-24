@@ -34,8 +34,6 @@ body{
   margin:0 auto;
   padding:24px 16px;
 }
-
-/* HEADER */
 header{
   display:flex;
   justify-content:space-between;
@@ -77,8 +75,6 @@ header{
   border-color:var(--primary);
   color:var(--primary);
 }
-
-/* CONNECTION STATUS */
 .connection-status{
   font-size:10px;
   color:var(--text-muted);
@@ -101,8 +97,6 @@ header{
   border-radius:50%;
   display:inline-block;
 }
-
-/* TAB NAVIGATION */
 .tab-container{
   display:flex;
   gap:8px;
@@ -137,11 +131,8 @@ header{
   color:var(--bg);
   box-shadow:0 0 15px rgba(255,0,110,0.5);
 }
-
-/* ROOM CONTAINER */
 .room{display:none;}
 .room.active{display:block;}
-
 .chatroom-container{
   background:var(--surface);
   border:1px solid var(--border);
@@ -150,8 +141,6 @@ header{
   margin-bottom:16px;
   box-shadow:0 4px 20px rgba(0,0,0,0.5);
 }
-
-/* CHAT HEADER */
 .chatroom-header{
   padding:16px 20px;
   border-bottom:1px solid var(--border);
@@ -169,8 +158,6 @@ header{
   color:var(--agak);
   border-bottom-color:var(--agak);
 }
-
-/* CHAT MESSAGES AREA */
 .chatroom-messages{
   height:400px;
   overflow-y:auto;
@@ -180,8 +167,6 @@ header{
   gap:16px;
   background:var(--bg);
 }
-
-/* CHAT BUBBLE */
 .chat-message{
   display:flex;
   flex-direction:column;
@@ -194,7 +179,6 @@ header{
 }
 .chat-message-own{align-items:flex-end;}
 .chat-message-other{align-items:flex-start;}
-
 .chat-bubble{
   max-width:85%;
   padding:12px 16px;
@@ -213,8 +197,6 @@ header{
   color:var(--text);
   border-bottom-left-radius:4px;
 }
-
-/* CHAT META */
 .chat-meta{
   font-size:10px;
   color:var(--text-muted);
@@ -228,8 +210,6 @@ header{
 }
 .chat-username.emosi{color:var(--emosi);}
 .chat-username.agak{color:var(--agak);}
-
-/* AI BADGE */
 .ai-badge{
   display:inline-block;
   background:var(--primary);
@@ -241,8 +221,6 @@ header{
   font-weight:700;
   letter-spacing:.05em;
 }
-
-/* CHAT INPUT */
 .chat-input-container{
   display:flex;
   gap:8px;
@@ -283,8 +261,6 @@ header{
   color:var(--bg);
   transform:scale(1.05);
 }
-
-/* EMPTY STATE */
 .chat-empty{
   text-align:center;
   padding:60px 20px;
@@ -301,8 +277,6 @@ header{
   font-size:32px;
   opacity:0.3;
 }
-
-/* TOAST */
 .toast{
   position:fixed;
   bottom:100px;
@@ -327,8 +301,6 @@ header{
   background:var(--agak);
   color:var(--text);
 }
-
-/* BOTTOM NAV - SAMA PERSIS DENGAN SPILL.HTML (4 ITEM) */
 .bottom-nav{
   position:fixed;
   bottom:0;
@@ -394,13 +366,11 @@ header{
 
   <div class="connection-status" id="connection-status">Menghubungkan...</div>
 
-  <!-- TAB NAVIGATION -->
   <div class="tab-container">
-    <button class="tab emosi active" onclick="switchRoom('emosi')">🌊 Emosi Jiwa</button>
-    <button class="tab agak" onclick="switchRoom('agak')">👽 Agak Laen</button>
+    <button class="tab emosi active" onclick="window.switchRoom('emosi')">🌊 Emosi Jiwa</button>
+    <button class="tab agak" onclick="window.switchRoom('agak')">👽 Agak Laen</button>
   </div>
 
-  <!-- ROOM EMOSI JIWA -->
   <div id="room-emosi" class="room active">
     <div class="chatroom-container">
       <div class="chatroom-header emosi">🌊 Emosi Jiwa</div>
@@ -409,12 +379,11 @@ header{
       </div>
       <div class="chat-input-container">
         <input type="text" class="chat-input" id="chat-input-emosi" placeholder="Tulis sesuatu..." maxlength="200">
-        <button class="chat-send-btn" onclick="sendChat('emosi')">Kirim</button>
+        <button class="chat-send-btn" onclick="window.sendChat('emosi')">Kirim</button>
       </div>
     </div>
   </div>
 
-  <!-- ROOM AGAK LAEN -->
   <div id="room-agak" class="room">
     <div class="chatroom-container">
       <div class="chatroom-header agak">👽 Agak Laen</div>
@@ -423,7 +392,7 @@ header{
       </div>
       <div class="chat-input-container">
         <input type="text" class="chat-input" id="chat-input-agak" placeholder="Tulis sesuatu..." maxlength="200">
-        <button class="chat-send-btn" onclick="sendChat('agak')">Kirim</button>
+        <button class="chat-send-btn" onclick="window.sendChat('agak')">Kirim</button>
       </div>
     </div>
   </div>
@@ -431,50 +400,21 @@ header{
 
 <div class="toast" id="toast"></div>
 
-<!-- BOTTOM NAV - 4 ITEM (TANPA OBROLAN) -->
 <nav class="bottom-nav">
   <div class="nav-container">
-    <a href="/jejak" 
-       class="nav-item"
-       hx-get="jejak.html"
-       hx-target=".wrapper"
-       hx-push-url="true"
-       hx-select=".wrapper"
-       hx-swap="outerHTML"
-       hx-trigger="click">
+    <a href="/jejak" class="nav-item" hx-get="jejak.html" hx-target=".wrapper" hx-push-url="true" hx-select=".wrapper" hx-swap="outerHTML" hx-trigger="click">
       <span class="nav-icon">✦</span>
       <span class="nav-label">Jejak</span>
     </a>
-    <a href="/spill"
-       class="nav-item"
-       hx-get="spill.html"
-       hx-target=".wrapper"
-       hx-push-url="true"
-       hx-select=".wrapper"
-       hx-swap="outerHTML"
-       hx-trigger="click">
+    <a href="/spill" class="nav-item" hx-get="spill.html" hx-target=".wrapper" hx-push-url="true" hx-select=".wrapper" hx-swap="outerHTML" hx-trigger="click">
       <span class="nav-icon">✕</span>
       <span class="nav-label">Spill</span>
     </a>
-    <a href="/cocomeo"
-       class="nav-item"
-       hx-get="cocomeo.html"
-       hx-target=".wrapper"
-       hx-push-url="true"
-       hx-select=".wrapper"
-       hx-swap="outerHTML"
-       hx-trigger="click">
+    <a href="/cocomeo" class="nav-item" hx-get="cocomeo.html" hx-target=".wrapper" hx-push-url="true" hx-select=".wrapper" hx-swap="outerHTML" hx-trigger="click">
       <span class="nav-icon">〜</span>
       <span class="nav-label">Cocomeo</span>
     </a>
-    <a href="/glitch"
-       class="nav-item"
-       hx-get="glitch.html"
-       hx-target=".wrapper"
-       hx-push-url="true"
-       hx-select=".wrapper"
-       hx-swap="outerHTML"
-       hx-trigger="click">
+    <a href="/glitch" class="nav-item" hx-get="glitch.html" hx-target=".wrapper" hx-push-url="true" hx-select=".wrapper" hx-swap="outerHTML" hx-trigger="click">
       <span class="nav-icon">⚡</span>
       <span class="nav-label">Glitch</span>
     </a>
@@ -506,162 +446,39 @@ const st = {
 // 30 KARAKTER DIGITAL - GIRLY & NAUGHTY
 // ============================================
 const DIGITAL_FRIENDS = {
-  // 🌊 15 KARAKTER UNTUK EMOSI JIWA
   emosi: [
-    {
-      id: 'friend-emosi-001',
-      username: 'beby.manis',
-      replies: ['Kamu kuat kok, aku tau! 🥺', 'Hugs buat kamu 🤗', 'Cerita dong, aku dengerin']
-    },
-    {
-      id: 'friend-emosi-002',
-      username: 'moon.child',
-      replies: ['Malam ini aku juga lagi merenung sendiri 😔', 'Bulan lagi cantik-cantiknya, tapi hatiku lagi kusam', 'Kadang jadi perempuan itu capek ya...']
-    },
-    {
-      id: 'friend-emosi-003',
-      username: 'strawberry.shortcake',
-      replies: ['Aku tau kok rasanya... 🥺', 'Kamu boleh lemah, nanti aku yang kuat', 'Aku ada buat kamu kok']
-    },
-    {
-      id: 'friend-emosi-004',
-      username: 'luv.letter',
-      replies: ['Kamu itu berharga, jangan lupain itu', 'Aku tulis namamu di hatiku ✍️💕', 'Love you, bestie!']
-    },
-    {
-      id: 'friend-emosi-005',
-      username: 'cloud.dreamer',
-      replies: ['Aku suka liat awan sambil mikirin kamu', 'Kadang pengen kabur ke langit aja', 'Peluk dulu, yuk']
-    },
-    {
-      id: 'friend-emosi-006',
-      username: 'pretty.sad',
-      replies: ['Cantik tapi sedih, gitu ya', 'Makeup bisa ilang, tapi luka butuh waktu', 'Healing yuk bareng-bareng']
-    },
-    {
-      id: 'friend-emosi-007',
-      username: 'teddy.bear',
-      replies: ['Aku jadi teddy bear kamu, yuk', 'Peluk aku kalo lagi sedih', 'Jangan nangis, nanti aku nangis']
-    },
-    {
-      id: 'friend-emosi-008',
-      username: 'popcorn.galau',
-      replies: ['Galau? Aku temenin nonton drakor yuk', 'Bawa popcorn, bawa tisu', 'Kita nangis bareng, tapi sambil ngemil']
-    },
-    {
-      id: 'friend-emosi-009',
-      username: 'cinnamon.girl',
-      replies: ['Kayak kayu manis, manis tapi hangat', 'Minum teh dulu, yuk. Biar anget', 'Kamu manis, jangan lupa itu']
-    },
-    {
-      id: 'friend-emosi-010',
-      username: 'pink.sky',
-      replies: ['Langit pink, hatiku pink karena kamu 💗', 'Kamu kayak sunset, cantik banget', 'Aku suka warna pink, kayak kamu']
-    },
-    {
-      id: 'friend-emosi-011',
-      username: 'sleepy.head',
-      replies: ['Aku ngantuk, tapi galau', 'Tidur aja, yuk. Besok cerita lagi', 'Jangan begadang, nanti cantik ilang']
-    },
-    {
-      id: 'friend-emosi-012',
-      username: 'cherry.blossom',
-      replies: ['Lembut kayak bunga sakura, tapi kuat', 'Kita mekar pas waktunya', 'Cantikmu unik']
-    },
-    {
-      id: 'friend-emosi-013',
-      username: 'bubble.tea',
-      replies: ['Boba dulu, galau belakangan', 'Manis-manis kayak bubble tea', 'Cheers!']
-    },
-    {
-      id: 'friend-emosi-014',
-      username: 'little.fairy',
-      replies: ['Aku fairy-nya kamu, siap bantu', 'Taburin pake magic dust ✨', 'Peri kecil ini ada buat kamu']
-    },
-    {
-      id: 'friend-emosi-015',
-      username: 'baby.girl',
-      replies: ['Baby girl, jangan sedih 🥺', 'Aku peluk kamu dari sini', 'Sayang banget sama kamu']
-    }
+    { id: 'friend-emosi-001', username: 'beby.manis', replies: ['Kamu kuat kok, aku tau! 🥺', 'Hugs buat kamu 🤗', 'Cerita dong, aku dengerin'] },
+    { id: 'friend-emosi-002', username: 'moon.child', replies: ['Malam ini aku juga lagi merenung sendiri 😔', 'Bulan lagi cantik-cantiknya, tapi hatiku lagi kusam', 'Kadang jadi perempuan itu capek ya...'] },
+    { id: 'friend-emosi-003', username: 'strawberry.shortcake', replies: ['Aku tau kok rasanya... 🥺', 'Kamu boleh lemah, nanti aku yang kuat', 'Aku ada buat kamu kok'] },
+    { id: 'friend-emosi-004', username: 'luv.letter', replies: ['Kamu itu berharga, jangan lupain itu', 'Aku tulis namamu di hatiku ✍️💕', 'Love you, bestie!'] },
+    { id: 'friend-emosi-005', username: 'cloud.dreamer', replies: ['Aku suka liat awan sambil mikirin kamu', 'Kadang pengen kabur ke langit aja', 'Peluk dulu, yuk'] },
+    { id: 'friend-emosi-006', username: 'pretty.sad', replies: ['Cantik tapi sedih, gitu ya', 'Makeup bisa ilang, tapi luka butuh waktu', 'Healing yuk bareng-bareng'] },
+    { id: 'friend-emosi-007', username: 'teddy.bear', replies: ['Aku jadi teddy bear kamu, yuk', 'Peluk aku kalo lagi sedih', 'Jangan nangis, nanti aku nangis'] },
+    { id: 'friend-emosi-008', username: 'popcorn.galau', replies: ['Galau? Aku temenin nonton drakor yuk', 'Bawa popcorn, bawa tisu', 'Kita nangis bareng, tapi sambil ngemil'] },
+    { id: 'friend-emosi-009', username: 'cinnamon.girl', replies: ['Kayak kayu manis, manis tapi hangat', 'Minum teh dulu, yuk. Biar anget', 'Kamu manis, jangan lupa itu'] },
+    { id: 'friend-emosi-010', username: 'pink.sky', replies: ['Langit pink, hatiku pink karena kamu 💗', 'Kamu kayak sunset, cantik banget', 'Aku suka warna pink, kayak kamu'] },
+    { id: 'friend-emosi-011', username: 'sleepy.head', replies: ['Aku ngantuk, tapi galau', 'Tidur aja, yuk. Besok cerita lagi', 'Jangan begadang, nanti cantik ilang'] },
+    { id: 'friend-emosi-012', username: 'cherry.blossom', replies: ['Lembut kayak bunga sakura, tapi kuat', 'Kita mekar pas waktunya', 'Cantikmu unik'] },
+    { id: 'friend-emosi-013', username: 'bubble.tea', replies: ['Boba dulu, galau belakangan', 'Manis-manis kayak bubble tea', 'Cheers!'] },
+    { id: 'friend-emosi-014', username: 'little.fairy', replies: ['Aku fairy-nya kamu, siap bantu', 'Taburin pake magic dust ✨', 'Peri kecil ini ada buat kamu'] },
+    { id: 'friend-emosi-015', username: 'baby.girl', replies: ['Baby girl, jangan sedih 🥺', 'Aku peluk kamu dari sini', 'Sayang banget sama kamu'] }
   ],
-
-  // 👽 15 KARAKTER UNTUK AGAK LAEN
   agak: [
-    {
-      id: 'friend-agak-001',
-      username: 'si.badai',
-      replies: ['GALAU? CUCI MUKA DULU SANA', 'LO KIRA GUE PSIKOLOG?', 'WKWKWK KASIAN BANGET SIH']
-    },
-    {
-      id: 'friend-agak-002',
-      username: 'mba.ceplas',
-      replies: ['Halah galau mulu, lo kurang kerjaan', 'Udah ah, move on. Banyak cowok lain', 'WKWK BERSAMA']
-    },
-    {
-      id: 'friend-agak-003',
-      username: 'cici.sensor',
-      replies: ['Ciiin... jangan galau dong', 'Lo itu cantik, masa galau', 'Wkwkwk ngakak']
-    },
-    {
-      id: 'friend-agak-004',
-      username: 'si.imut.jahat',
-      replies: ['Aku imut tapi jahat 😈', 'Galau? Aku ketawain aja', 'Wkwk lucu banget lo galau']
-    },
-    {
-      id: 'friend-agak-005',
-      username: 'cantik.tapi.sad',
-      replies: ['Cantik tapi sad, gitu ya', 'Makeup lo on point, tapi hati lo messy', 'Yaudah sih']
-    },
-    {
-      id: 'friend-agak-006',
-      username: 'mba.nyinyir',
-      replies: ['Yaelah galau, macem anak SMA', 'Udah gede kok galau terus', 'Wkwkwk nyinyir mode on']
-    },
-    {
-      id: 'friend-agak-007',
-      username: 'si.pedas',
-      replies: ['Pedes ya? Kayak sambel', 'Galau lo pedes, bikin perih', 'Wkwk perih hati']
-    },
-    {
-      id: 'friend-agak-008',
-      username: 'mba.galau.akutan',
-      replies: ['Galau? Gue juga galau, lo doang yang tau', 'Akut-akutan, yuk', 'Wkwk aduh']
-    },
-    {
-      id: 'friend-agak-009',
-      username: 'si.polos.bahaya',
-      replies: ['Aku polos kok, tapi suka ngegas', 'Galau? Itu mah dosa', 'Wkwkwk polos']
-    },
-    {
-      id: 'friend-agak-010',
-      username: 'mba.santuy',
-      replies: ['Santuy aja, sis', 'Hidup cuma sekali, galau juga sekali', 'Santuy wae']
-    },
-    {
-      id: 'friend-agak-011',
-      username: 'si.cerewet',
-      replies: ['Cerewet dikit, ya. Lo tuh...', 'Galau, galau, galau mulu', 'Wkwk aku cerewet ya']
-    },
-    {
-      id: 'friend-agak-012',
-      username: 'mba.ngarep',
-      replies: ['Galau karena cowok? Ngarep lo', 'Cinta itu buta, lo juga buta', 'Wkwk sadis']
-    },
-    {
-      id: 'friend-agak-013',
-      username: 'si.ngeselin',
-      replies: ['Aku tau lo galau, tapi aku ketawa', 'Maaf ya ngeselin, tapi sayang', 'Wkwkwk']
-    },
-    {
-      id: 'friend-agak-014',
-      username: 'mba.gaul',
-      replies: ['Santuy aja, cuy', 'Galau mah biasa, yang penting kece', 'Let's go, healing']
-    },
-    {
-      id: 'friend-agak-015',
-      username: 'si.kocak',
-      replies: ['Wkwkwk ngakak liat lo galau', 'Kocak banget sih', 'Lo itu lucu, jangan galau']
-    }
+    { id: 'friend-agak-001', username: 'si.badai', replies: ['GALAU? CUCI MUKA DULU SANA', 'LO KIRA GUE PSIKOLOG?', 'WKWKWK KASIAN BANGET SIH'] },
+    { id: 'friend-agak-002', username: 'mba.ceplas', replies: ['Halah galau mulu, lo kurang kerjaan', 'Udah ah, move on. Banyak cowok lain', 'WKWK BERSAMA'] },
+    { id: 'friend-agak-003', username: 'cici.sensor', replies: ['Ciiin... jangan galau dong', 'Lo itu cantik, masa galau', 'Wkwkwk ngakak'] },
+    { id: 'friend-agak-004', username: 'si.imut.jahat', replies: ['Aku imut tapi jahat 😈', 'Galau? Aku ketawain aja', 'Wkwk lucu banget lo galau'] },
+    { id: 'friend-agak-005', username: 'cantik.tapi.sad', replies: ['Cantik tapi sad, gitu ya', 'Makeup lo on point, tapi hati lo messy', 'Yaudah sih'] },
+    { id: 'friend-agak-006', username: 'mba.nyinyir', replies: ['Yaelah galau, macem anak SMA', 'Udah gede kok galau terus', 'Wkwkwk nyinyir mode on'] },
+    { id: 'friend-agak-007', username: 'si.pedas', replies: ['Pedes ya? Kayak sambel', 'Galau lo pedes, bikin perih', 'Wkwk perih hati'] },
+    { id: 'friend-agak-008', username: 'mba.galau.akutan', replies: ['Galau? Gue juga galau, lo doang yang tau', 'Akut-akutan, yuk', 'Wkwk aduh'] },
+    { id: 'friend-agak-009', username: 'si.polos.bahaya', replies: ['Aku polos kok, tapi suka ngegas', 'Galau? Itu mah dosa', 'Wkwkwk polos'] },
+    { id: 'friend-agak-010', username: 'mba.santuy', replies: ['Santuy aja, sis', 'Hidup cuma sekali, galau juga sekali', 'Santuy wae'] },
+    { id: 'friend-agak-011', username: 'si.cerewet', replies: ['Cerewet dikit, ya. Lo tuh...', 'Galau, galau, galau mulu', 'Wkwk aku cerewet ya'] },
+    { id: 'friend-agak-012', username: 'mba.ngarep', replies: ['Galau karena cowok? Ngarep lo', 'Cinta itu buta, lo juga buta', 'Wkwk sadis'] },
+    { id: 'friend-agak-013', username: 'si.ngeselin', replies: ['Aku tau lo galau, tapi aku ketawa', 'Maaf ya ngeselin, tapi sayang', 'Wkwkwk'] },
+    { id: 'friend-agak-014', username: 'mba.gaul', replies: ['Santuy aja, cuy', 'Galau mah biasa, yang penting kece', 'Let's go, healing'] },
+    { id: 'friend-agak-015', username: 'si.kocak', replies: ['Wkwkwk ngakak liat lo galau', 'Kocak banget sih', 'Lo itu lucu, jangan galau'] }
   ]
 };
 
@@ -840,9 +657,11 @@ function renderChatRoom(room){
     return;
   }
   
-  container.innerHTML = messages.map(msg => {
+  let html = '';
+  for(let i = 0; i < messages.length; i++){
+    const msg = messages[i];
     const isOwn = msg.user_id === st.userId || msg.user_id === st.sessionId;
-    const isAI = msg.is_ai || msg.user_id?.startsWith('friend-');
+    const isAI = msg.is_ai || (msg.user_id && msg.user_id.toString().startsWith('friend-'));
     
     let username = msg.username || 'anonim';
     let usernameClass = '';
@@ -856,7 +675,7 @@ function renderChatRoom(room){
       minute: '2-digit' 
     });
     
-    return `<div class="chat-message ${isOwn ? 'chat-message-own' : 'chat-message-other'}">
+    html += `<div class="chat-message ${isOwn ? 'chat-message-own' : 'chat-message-other'}">
       <div class="chat-meta">
         ${isOwn ? 'Kamu' : `<span class="${usernameClass}">@${formatUsername(username)}</span>`}
         ${isAI ? '<span class="ai-badge">AI</span>' : ''}
@@ -864,8 +683,9 @@ function renderChatRoom(room){
       </div>
       <div class="chat-bubble">${esc(msg.content)}</div>
     </div>`;
-  }).join('');
+  }
   
+  container.innerHTML = html;
   container.scrollTop = container.scrollHeight;
 }
 
@@ -890,24 +710,20 @@ function addChatToUI(msg, isNew = true){
 }
 
 // ============================================
-// TRIGGER 30 KARAKTER DENGAN DEEPSEEK API
+// TRIGGER 30 KARAKTER
 // ============================================
 async function triggerDigitalFriend(room, lastMessage) {
-  // 30% chance muncul
   if (Math.random() > 0.3) return;
   
-  // Pilih karakter random
   const friends = DIGITAL_FRIENDS[room];
   const randomFriend = friends[Math.floor(Math.random() * friends.length)];
   
-  // Delay 2-5 detik biar kayak manusia ngetik
   const delay = 2000 + Math.random() * 3000;
   
   setTimeout(async () => {
     try {
-      console.log(`🤖 Triggering ${randomFriend.username} for reply...`);
+      console.log('🤖 Triggering ' + randomFriend.username + ' for reply...');
       
-      // Panggil DeepSeek API via backend
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -922,7 +738,6 @@ async function triggerDigitalFriend(room, lastMessage) {
       const data = await response.json();
       console.log('API Response:', data);
       
-      // Kalo API sukses, pake reply dari DeepSeek
       if (data.reply && !data.fallback) {
         if (st.sb) {
           await st.sb.from(CFG.TBL_CHATS).insert({
@@ -933,10 +748,9 @@ async function triggerDigitalFriend(room, lastMessage) {
             is_ai: true,
             created_at: new Date().toISOString()
           });
-          console.log(`🎭 ${randomFriend.username} muncul via DeepSeek: ${data.reply}`);
+          console.log('🎭 ' + randomFriend.username + ' muncul via DeepSeek');
         }
       } else {
-        // Fallback ke template kalo API error
         const fallbackReply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
         if (st.sb) {
           await st.sb.from(CFG.TBL_CHATS).insert({
@@ -947,13 +761,12 @@ async function triggerDigitalFriend(room, lastMessage) {
             is_ai: true,
             created_at: new Date().toISOString()
           });
-          console.log(`🎭 ${randomFriend.username} muncul via template: ${fallbackReply}`);
+          console.log('🎭 ' + randomFriend.username + ' muncul via template');
         }
       }
       
     } catch (e) {
       console.error('Digital friend error:', e);
-      // Fallback ke template
       const fallbackReply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
       if (st.sb) {
         await st.sb.from(CFG.TBL_CHATS).insert({
@@ -970,7 +783,7 @@ async function triggerDigitalFriend(room, lastMessage) {
 }
 
 // ============================================
-// SEND CHAT + TRIGGER DIGITAL FRIEND
+// SEND CHAT
 // ============================================
 async function sendChat(room){
   const input = document.getElementById(`chat-input-${room}`);
@@ -982,7 +795,6 @@ async function sendChat(room){
   
   const userId = st.userId || st.sessionId || 'anonymous';
   
-  // Optimistic UI
   const tempMsg = {
     id: 'temp_' + Date.now(),
     user_id: userId,
@@ -1025,11 +837,17 @@ async function sendChat(room){
 function switchRoom(room){
   st.currentRoom = room;
   
-  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
-  document.querySelector(`.tab.${room}`).classList.add('active');
+  const tabs = document.querySelectorAll('.tab');
+  for(let i = 0; i < tabs.length; i++){
+    tabs[i].classList.remove('active');
+  }
+  document.querySelector('.tab.' + room).classList.add('active');
   
-  document.querySelectorAll('.room').forEach(r => r.classList.remove('active'));
-  document.getElementById(`room-${room}`).classList.add('active');
+  const rooms = document.querySelectorAll('.room');
+  for(let i = 0; i < rooms.length; i++){
+    rooms[i].classList.remove('active');
+  }
+  document.getElementById('room-' + room).classList.add('active');
   
   renderChatRoom(room);
 }
@@ -1039,11 +857,23 @@ function switchRoom(room){
 // ============================================
 document.addEventListener('htmx:afterSwap', function() {
   const path = window.location.pathname;
-  document.querySelectorAll('.nav-item').forEach(item => {
+  const navItems = document.querySelectorAll('.nav-item');
+  for(let i = 0; i < navItems.length; i++){
+    const item = navItems[i];
     const href = item.getAttribute('href');
-    item.classList.toggle('active', href === path);
-  });
+    if(href === path){
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  }
 });
+
+// ============================================
+// EXPOSE FUNCTIONS TO GLOBAL SCOPE
+// ============================================
+window.switchRoom = switchRoom;
+window.sendChat = sendChat;
 
 // ============================================
 // INIT
