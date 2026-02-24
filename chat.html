@@ -7,6 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/htmx.org@2.0.0"></script>
 <style>
+/* ===== CSS SAMA PERSIS DENGAN SEBELUMNYA ===== */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 :root{
   --bg:#0A0A0A;
@@ -367,8 +368,8 @@ header{
   <div class="connection-status" id="connection-status">Menghubungkan...</div>
 
   <div class="tab-container">
-    <button class="tab emosi active" onclick="window.switchRoom('emosi')">🌊 Emosi Jiwa</button>
-    <button class="tab agak" onclick="window.switchRoom('agak')">👽 Agak Laen</button>
+    <button class="tab emosi active" onclick="switchRoom('emosi')">🌊 Emosi Jiwa</button>
+    <button class="tab agak" onclick="switchRoom('agak')">👽 Agak Laen</button>
   </div>
 
   <div id="room-emosi" class="room active">
@@ -379,7 +380,7 @@ header{
       </div>
       <div class="chat-input-container">
         <input type="text" class="chat-input" id="chat-input-emosi" placeholder="Tulis sesuatu..." maxlength="200">
-        <button class="chat-send-btn" onclick="window.sendChat('emosi')">Kirim</button>
+        <button class="chat-send-btn" onclick="sendChat('emosi')">Kirim</button>
       </div>
     </div>
   </div>
@@ -392,7 +393,7 @@ header{
       </div>
       <div class="chat-input-container">
         <input type="text" class="chat-input" id="chat-input-agak" placeholder="Tulis sesuatu..." maxlength="200">
-        <button class="chat-send-btn" onclick="window.sendChat('agak')">Kirim</button>
+        <button class="chat-send-btn" onclick="sendChat('agak')">Kirim</button>
       </div>
     </div>
   </div>
@@ -443,7 +444,7 @@ const st = {
 };
 
 // ============================================
-// 30 KARAKTER DIGITAL - GIRLY & NAUGHTY
+// 30 KARAKTER DIGITAL - PASTI AMAN
 // ============================================
 const DIGITAL_FRIENDS = {
   emosi: [
@@ -477,7 +478,7 @@ const DIGITAL_FRIENDS = {
     { id: 'friend-agak-011', username: 'si.cerewet', replies: ['Cerewet dikit, ya. Lo tuh...', 'Galau, galau, galau mulu', 'Wkwk aku cerewet ya'] },
     { id: 'friend-agak-012', username: 'mba.ngarep', replies: ['Galau karena cowok? Ngarep lo', 'Cinta itu buta, lo juga buta', 'Wkwk sadis'] },
     { id: 'friend-agak-013', username: 'si.ngeselin', replies: ['Aku tau lo galau, tapi aku ketawa', 'Maaf ya ngeselin, tapi sayang', 'Wkwkwk'] },
-    { id: 'friend-agak-014', username: 'mba.gaul', replies: ['Santuy aja, cuy', 'Galau mah biasa, yang penting kece', 'Let's go, healing'] },
+    { id: 'friend-agak-014', username: 'mba.gaul', replies: ['Santuy aja, cuy', 'Galau mah biasa, yang penting kece', 'Lets go, healing'] },
     { id: 'friend-agak-015', username: 'si.kocak', replies: ['Wkwkwk ngakak liat lo galau', 'Kocak banget sih', 'Lo itu lucu, jangan galau'] }
   ]
 };
@@ -485,29 +486,31 @@ const DIGITAL_FRIENDS = {
 // ============================================
 // UTILS
 // ============================================
-function esc(t){ if(!t)return''; const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+function esc(t){ if(!t)return''; var d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
 
-function toast(msg, isErr=false){
-  const t=document.getElementById('toast');
+function toast(msg, isErr){
+  if(isErr === undefined) isErr = false;
+  var t=document.getElementById('toast');
   t.textContent=msg; 
   t.className='toast' + (isErr ? ' error' : '');
   t.classList.add('show'); 
-  setTimeout(() => t.classList.remove('show'), 3000);
+  setTimeout(function(){ t.classList.remove('show'); }, 3000);
 }
 
 function setConn(online, msg){
-  const el = document.getElementById('connection-status');
+  var el = document.getElementById('connection-status');
   el.textContent = online ? 'Terhubung' : msg; 
   el.className = 'connection-status ' + (online ? 'online' : 'offline');
   st.online = online;
 }
 
 function formatUsername(raw){ 
-  return raw ? raw.trim().toLowerCase().replace(/[\s_\-]+/g, '.') : 'anonim'; 
+  if(!raw) return 'anonim';
+  return raw.trim().toLowerCase().replace(/[\s_\-]+/g, '.');
 }
 
 function getSessionId(){
-  let id = localStorage.getItem('stt_session');
+  var id = localStorage.getItem('stt_session');
   if(!id){ 
     id = 's_' + Date.now() + '_' + Math.random().toString(36).slice(2,9); 
     localStorage.setItem('stt_session', id); 
@@ -519,8 +522,8 @@ function getSessionId(){
 // USER MANAGEMENT
 // ============================================
 async function ensureUser() {
-  let username = localStorage.getItem('stt_username');
-  let userId = localStorage.getItem('stt_user_id');
+  var username = localStorage.getItem('stt_username');
+  var userId = localStorage.getItem('stt_user_id');
   
   if (!username) {
     username = prompt('Pilih username dulu yuk', '');
@@ -538,14 +541,14 @@ async function ensureUser() {
   
   if (st.sb && st.online) {
     try {
-      const { data: existing } = await st.sb
+      var { data: existing } = await st.sb
         .from(CFG.TBL_USERS)
         .select('id')
         .eq('username', username)
         .maybeSingle();
       
       if (!existing) {
-        const { data: newUser } = await st.sb
+        var { data: newUser } = await st.sb
           .from(CFG.TBL_USERS)
           .insert({
             username: username,
@@ -586,7 +589,7 @@ async function initSupabase(){
   
   try {
     st.sb = supabase.createClient(CFG.url, CFG.key);
-    const { error } = await st.sb.from(CFG.TBL_USERS).select('id').limit(1);
+    var { error } = await st.sb.from(CFG.TBL_USERS).select('id').limit(1);
     if (error) throw error;
     
     setConn(true, 'Terhubung');
@@ -608,7 +611,7 @@ function setupRealtime(){
       event: 'INSERT', 
       schema: 'public', 
       table: CFG.TBL_CHATS 
-    }, payload => { 
+    }, function(payload){ 
       if(payload.new) addChatToUI(payload.new, false); 
     })
     .subscribe();
@@ -621,7 +624,7 @@ async function loadChats(){
   if(!st.sb) return;
   
   try {
-    const { data, error } = await st.sb
+    var { data, error } = await st.sb
       .from(CFG.TBL_CHATS)
       .select('*')
       .order('created_at', { ascending: false })
@@ -630,14 +633,21 @@ async function loadChats(){
     if(error) throw error;
     
     if(data && data.length > 0){
-      st.chatMessages.emosi = data
-        .filter(m => m.room === 'emosi')
-        .reverse()
-        .slice(-50);
-      st.chatMessages.agak = data
-        .filter(m => m.room === 'agak')
-        .reverse()
-        .slice(-50);
+      st.chatMessages.emosi = [];
+      st.chatMessages.agak = [];
+      
+      for(var i = 0; i < data.length; i++){
+        var msg = data[i];
+        if(msg.room === 'emosi'){
+          st.chatMessages.emosi.unshift(msg);
+        } else if(msg.room === 'agak'){
+          st.chatMessages.agak.unshift(msg);
+        }
+      }
+      
+      if(st.chatMessages.emosi.length > 50) st.chatMessages.emosi = st.chatMessages.emosi.slice(-50);
+      if(st.chatMessages.agak.length > 50) st.chatMessages.agak = st.chatMessages.agak.slice(-50);
+      
       renderChatRoom(st.currentRoom);
     }
     
@@ -647,54 +657,58 @@ async function loadChats(){
 }
 
 function renderChatRoom(room){
-  const container = document.getElementById(`chat-messages-${room}`);
+  var container = document.getElementById('chat-messages-' + room);
   if(!container) return;
   
-  const messages = st.chatMessages[room] || [];
+  var messages = st.chatMessages[room] || [];
   
   if(messages.length === 0){
     container.innerHTML = '<div class="chat-empty">Belum ada obrolan di sini...</div>';
     return;
   }
   
-  let html = '';
-  for(let i = 0; i < messages.length; i++){
-    const msg = messages[i];
-    const isOwn = msg.user_id === st.userId || msg.user_id === st.sessionId;
-    const isAI = msg.is_ai || (msg.user_id && msg.user_id.toString().startsWith('friend-'));
+  var html = '';
+  for(var i = 0; i < messages.length; i++){
+    var msg = messages[i];
+    var isOwn = (msg.user_id === st.userId) || (msg.user_id === st.sessionId);
+    var isAI = msg.is_ai || (msg.user_id && msg.user_id.toString().indexOf('friend-') === 0);
     
-    let username = msg.username || 'anonim';
-    let usernameClass = '';
+    var username = msg.username || 'anonim';
+    var usernameClass = '';
     
     if (isAI) {
       usernameClass = room === 'emosi' ? 'chat-username emosi' : 'chat-username agak';
     }
     
-    const time = new Date(msg.created_at).toLocaleTimeString('id-ID', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    });
+    var d = new Date(msg.created_at);
+    var hours = d.getHours().toString().padStart(2, '0');
+    var minutes = d.getMinutes().toString().padStart(2, '0');
+    var time = hours + ':' + minutes;
     
-    html += `<div class="chat-message ${isOwn ? 'chat-message-own' : 'chat-message-other'}">
-      <div class="chat-meta">
-        ${isOwn ? 'Kamu' : `<span class="${usernameClass}">@${formatUsername(username)}</span>`}
-        ${isAI ? '<span class="ai-badge">AI</span>' : ''}
-        <span>${time}</span>
-      </div>
-      <div class="chat-bubble">${esc(msg.content)}</div>
-    </div>`;
+    var metaHtml = '';
+    if(isOwn){
+      metaHtml = '<div class="chat-meta">Kamu <span>' + time + '</span></div>';
+    } else {
+      var badgeHtml = isAI ? '<span class="ai-badge">AI</span>' : '';
+      metaHtml = '<div class="chat-meta"><span class="' + usernameClass + '">@' + formatUsername(username) + '</span>' + badgeHtml + ' <span>' + time + '</span></div>';
+    }
+    
+    html += '<div class="chat-message ' + (isOwn ? 'chat-message-own' : 'chat-message-other') + '">' +
+      metaHtml +
+      '<div class="chat-bubble">' + esc(msg.content) + '</div>' +
+    '</div>';
   }
   
   container.innerHTML = html;
   container.scrollTop = container.scrollHeight;
 }
 
-function addChatToUI(msg, isNew = true){
-  const room = msg.room || st.currentRoom;
-  const container = document.getElementById(`chat-messages-${room}`);
+function addChatToUI(msg, isNew){
+  var room = msg.room || st.currentRoom;
+  var container = document.getElementById('chat-messages-' + room);
   if(!container) return;
   
-  const emptyState = container.querySelector('.chat-empty');
+  var emptyState = container.querySelector('.chat-empty');
   if(emptyState) emptyState.remove();
   
   if(!st.chatMessages[room]) st.chatMessages[room] = [];
@@ -715,16 +729,16 @@ function addChatToUI(msg, isNew = true){
 async function triggerDigitalFriend(room, lastMessage) {
   if (Math.random() > 0.3) return;
   
-  const friends = DIGITAL_FRIENDS[room];
-  const randomFriend = friends[Math.floor(Math.random() * friends.length)];
+  var friends = DIGITAL_FRIENDS[room];
+  var randomFriend = friends[Math.floor(Math.random() * friends.length)];
   
-  const delay = 2000 + Math.random() * 3000;
+  var delay = 2000 + Math.random() * 3000;
   
-  setTimeout(async () => {
+  setTimeout(async function() {
     try {
       console.log('🤖 Triggering ' + randomFriend.username + ' for reply...');
       
-      const response = await fetch('/api/chat', {
+      var response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -735,7 +749,7 @@ async function triggerDigitalFriend(room, lastMessage) {
         })
       });
       
-      const data = await response.json();
+      var data = await response.json();
       console.log('API Response:', data);
       
       if (data.reply && !data.fallback) {
@@ -751,7 +765,7 @@ async function triggerDigitalFriend(room, lastMessage) {
           console.log('🎭 ' + randomFriend.username + ' muncul via DeepSeek');
         }
       } else {
-        const fallbackReply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
+        var fallbackReply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
         if (st.sb) {
           await st.sb.from(CFG.TBL_CHATS).insert({
             user_id: randomFriend.id,
@@ -767,7 +781,7 @@ async function triggerDigitalFriend(room, lastMessage) {
       
     } catch (e) {
       console.error('Digital friend error:', e);
-      const fallbackReply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
+      var fallbackReply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
       if (st.sb) {
         await st.sb.from(CFG.TBL_CHATS).insert({
           user_id: randomFriend.id,
@@ -786,16 +800,16 @@ async function triggerDigitalFriend(room, lastMessage) {
 // SEND CHAT
 // ============================================
 async function sendChat(room){
-  const input = document.getElementById(`chat-input-${room}`);
-  const content = input.value.trim();
+  var input = document.getElementById('chat-input-' + room);
+  var content = input.value.trim();
   
   if(!content) return;
   
   input.value = '';
   
-  const userId = st.userId || st.sessionId || 'anonymous';
+  var userId = st.userId || st.sessionId || 'anonymous';
   
-  const tempMsg = {
+  var tempMsg = {
     id: 'temp_' + Date.now(),
     user_id: userId,
     username: st.username,
@@ -808,7 +822,7 @@ async function sendChat(room){
   
   if(st.online && st.sb){
     try {
-      const { error } = await st.sb
+      var { error } = await st.sb
         .from(CFG.TBL_CHATS)
         .insert({
           user_id: userId,
@@ -837,14 +851,14 @@ async function sendChat(room){
 function switchRoom(room){
   st.currentRoom = room;
   
-  const tabs = document.querySelectorAll('.tab');
-  for(let i = 0; i < tabs.length; i++){
+  var tabs = document.querySelectorAll('.tab');
+  for(var i = 0; i < tabs.length; i++){
     tabs[i].classList.remove('active');
   }
   document.querySelector('.tab.' + room).classList.add('active');
   
-  const rooms = document.querySelectorAll('.room');
-  for(let i = 0; i < rooms.length; i++){
+  var rooms = document.querySelectorAll('.room');
+  for(var i = 0; i < rooms.length; i++){
     rooms[i].classList.remove('active');
   }
   document.getElementById('room-' + room).classList.add('active');
@@ -856,11 +870,11 @@ function switchRoom(room){
 // HTMX ACTIVE STATE
 // ============================================
 document.addEventListener('htmx:afterSwap', function() {
-  const path = window.location.pathname;
-  const navItems = document.querySelectorAll('.nav-item');
-  for(let i = 0; i < navItems.length; i++){
-    const item = navItems[i];
-    const href = item.getAttribute('href');
+  var path = window.location.pathname;
+  var navItems = document.querySelectorAll('.nav-item');
+  for(var i = 0; i < navItems.length; i++){
+    var item = navItems[i];
+    var href = item.getAttribute('href');
     if(href === path){
       item.classList.add('active');
     } else {
@@ -870,18 +884,12 @@ document.addEventListener('htmx:afterSwap', function() {
 });
 
 // ============================================
-// EXPOSE FUNCTIONS TO GLOBAL SCOPE
-// ============================================
-window.switchRoom = switchRoom;
-window.sendChat = sendChat;
-
-// ============================================
 // INIT
 // ============================================
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', async function() {
   console.log('Chat starting...');
   
-  const ok = await initSupabase();
+  var ok = await initSupabase();
   
   if(ok) await loadChats();
   
