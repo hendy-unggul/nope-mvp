@@ -729,18 +729,29 @@ function addChatToUI(msg, isNew){
 // ============================================
 // TRIGGER 30 KARAKTER - VERSI DEBUG
 // ============================================
-async function triggerDigitalFriend(room, lastMessage) {
+// ============================================
+// TRIGGER 30 KARAKTER - VERSI FORCE TEST
+// ============================================
+async function triggerDigitalFriend(room, lastMessage, forceTest) {
   console.log('🎯 triggerDigitalFriend dipanggil!', room, lastMessage);
   
-  // 30% chance muncul
-  if (Math.random() > 0.3) {
-    console.log('⏭️ Gagal random, skip');
+  // Kalo forceTest = true, selalu muncul
+  if (!forceTest) {
+    // 30% chance muncul buat production
+    if (Math.random() > 0.3) {
+      console.log('⏭️ Gagal random, skip');
+      return;
+    }
+  } else {
+    console.log('🔥 FORCE TEST MODE: selalu muncul');
+  }
+  
+  var friends = DIGITAL_FRIENDS[room];
+  if (!friends || friends.length === 0) {
+    console.log('❌ Gak ada temen di room', room);
     return;
   }
   
-  console.log('✅ Lolos random, akan muncul');
-  
-  var friends = DIGITAL_FRIENDS[room];
   console.log('👥 Total friends:', friends.length);
   
   var randomFriend = friends[Math.floor(Math.random() * friends.length)];
@@ -767,40 +778,45 @@ async function triggerDigitalFriend(room, lastMessage) {
       var data = await response.json();
       console.log('📩 API Response:', data);
       
+      var reply = '';
+      
       if (data.reply && !data.fallback) {
         console.log('💬 Reply dari DeepSeek:', data.reply);
-        
-        if (st.sb) {
-          await st.sb.from(CFG.TBL_CHATS).insert({
-            user_id: randomFriend.id,
-            username: randomFriend.username,
-            content: data.reply,
-            room: room,
-            is_ai: true,
-            created_at: new Date().toISOString()
-          });
-          console.log('✅ Sukses insert ke Supabase');
-        }
+        reply = data.reply;
       } else {
         console.log('⚠️ API fallback, pake template');
-        var fallbackReply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
-        console.log('💬 Reply template:', fallbackReply);
-        
-        if (st.sb) {
-          await st.sb.from(CFG.TBL_CHATS).insert({
-            user_id: randomFriend.id,
-            username: randomFriend.username,
-            content: fallbackReply,
-            room: room,
-            is_ai: true,
-            created_at: new Date().toISOString()
-          });
-          console.log('✅ Sukses insert template ke Supabase');
-        }
+        reply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
+        console.log('💬 Reply template:', reply);
+      }
+      
+      if (st.sb) {
+        await st.sb.from(CFG.TBL_CHATS).insert({
+          user_id: randomFriend.id,
+          username: randomFriend.username,
+          content: reply,
+          room: room,
+          is_ai: true,
+          created_at: new Date().toISOString()
+        });
+        console.log('✅ Sukses insert ke Supabase');
       }
       
     } catch (e) {
       console.error('❌ Error di triggerDigitalFriend:', e);
+      
+      // Fallback kalo error
+      if (st.sb) {
+        var fallbackReply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
+        await st.sb.from(CFG.TBL_CHATS).insert({
+          user_id: randomFriend.id,
+          username: randomFriend.username,
+          content: fallbackReply,
+          room: room,
+          is_ai: true,
+          created_at: new Date().toISOString()
+        });
+        console.log('✅ Fallback insert ke Supabase');
+      }
     }
   }, delay);
 }
