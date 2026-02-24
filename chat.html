@@ -2,9 +2,10 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Obrolan - Spill the Tea</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/htmx.org@2.0.0"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 :root{
@@ -20,14 +21,13 @@
   --agak:#FF006E;
   --surviving:#39FF14;
 }
-
 *{margin:0;padding:0;box-sizing:border-box}
 body{
   background:var(--bg);
   color:var(--text);
   font-family:'Plus Jakarta Sans',system-ui,sans-serif;
   min-height:100vh;
-  padding-bottom:100px;
+  padding-bottom:80px;
 }
 .wrapper{
   max-width:480px;
@@ -60,11 +60,6 @@ header{
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
 }
-.header-actions{
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
 .back-btn{
   background:transparent;
   border:1px solid var(--border);
@@ -75,7 +70,7 @@ header{
   text-transform:uppercase;
   cursor:pointer;
   text-decoration:none;
-  border-radius:20px;
+  border-radius:30px;
   transition:all .2s;
 }
 .back-btn:hover{
@@ -219,7 +214,7 @@ header{
   border-bottom-left-radius:4px;
 }
 
-/* CHAT META (username, time) */
+/* CHAT META */
 .chat-meta{
   font-size:10px;
   color:var(--text-muted);
@@ -361,11 +356,10 @@ header{
   border:none;
   color:var(--text-muted);
   cursor:pointer;
-  padding:8px 16px;
+  padding:8px 0;
   transition:all .2s;
   text-decoration:none;
   flex:1;
-  position:relative;
   font-size:12px;
   font-weight:600;
   text-transform:uppercase;
@@ -374,17 +368,15 @@ header{
 .nav-item.active{
   color:var(--primary);
 }
-.nav-item.active::before{
-  content:'';
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  height:3px;
-  background:var(--primary);
+.nav-item.active .nav-icon{
+  color:var(--primary);
 }
 .nav-item:hover{
   color:var(--text);
+}
+.nav-icon{
+  font-size:20px;
+  margin-bottom:2px;
 }
 </style>
 </head>
@@ -402,7 +394,7 @@ header{
 
   <div class="connection-status" id="connection-status">Menghubungkan...</div>
 
-  <!-- TAB NAVIGATION - CLEAN -->
+  <!-- TAB NAVIGATION -->
   <div class="tab-container">
     <button class="tab emosi active" onclick="switchRoom('emosi')">🌊 Emosi Jiwa</button>
     <button class="tab agak" onclick="switchRoom('agak')">👽 Agak Laen</button>
@@ -439,12 +431,64 @@ header{
 
 <div class="toast" id="toast"></div>
 
+<!-- BOTTOM NAV - SAMA UNTUK SEMUA HALAMAN -->
 <nav class="bottom-nav">
   <div class="nav-container">
-    <a href="jejak.html" class="nav-item">✦ Jejak</a>
-    <a href="spill.html" class="nav-item">✕ Spill</a>
-    <a href="cocomeo.html" class="nav-item">〜 Cocomeo</a>
-    <a href="glitch.html" class="nav-item">⚡ Glitch</a>
+    <a href="/jejak" 
+       class="nav-item"
+       hx-get="jejak.html"
+       hx-target=".wrapper"
+       hx-push-url="true"
+       hx-select=".wrapper"
+       hx-swap="outerHTML"
+       hx-trigger="click">
+      <span class="nav-icon">✦</span>
+      <span class="nav-label">Jejak</span>
+    </a>
+    <a href="/spill"
+       class="nav-item"
+       hx-get="spill.html"
+       hx-target=".wrapper"
+       hx-push-url="true"
+       hx-select=".wrapper"
+       hx-swap="outerHTML"
+       hx-trigger="click">
+      <span class="nav-icon">✕</span>
+      <span class="nav-label">Spill</span>
+    </a>
+    <a href="/chat"
+       class="nav-item active"
+       hx-get="chat.html"
+       hx-target=".wrapper"
+       hx-push-url="true"
+       hx-select=".wrapper"
+       hx-swap="outerHTML"
+       hx-trigger="click">
+      <span class="nav-icon">💬</span>
+      <span class="nav-label">Obrolan</span>
+    </a>
+    <a href="/cocomeo"
+       class="nav-item"
+       hx-get="cocomeo.html"
+       hx-target=".wrapper"
+       hx-push-url="true"
+       hx-select=".wrapper"
+       hx-swap="outerHTML"
+       hx-trigger="click">
+      <span class="nav-icon">〜</span>
+      <span class="nav-label">Cocomeo</span>
+    </a>
+    <a href="/glitch"
+       class="nav-item"
+       hx-get="glitch.html"
+       hx-target=".wrapper"
+       hx-push-url="true"
+       hx-select=".wrapper"
+       hx-swap="outerHTML"
+       hx-trigger="click">
+      <span class="nav-icon">⚡</span>
+      <span class="nav-label">Glitch</span>
+    </a>
   </div>
 </nav>
 
@@ -469,7 +513,7 @@ const st = {
   currentRoom: 'emosi'
 };
 
-// AI AGENTS - INCOGNITO MODE
+// AI AGENTS
 const AI_AGENTS = {
   emosi: {
     id: '00000000-0000-0000-0000-000000000001',
@@ -549,9 +593,7 @@ async function ensureUser() {
   st.username = username;
   st.sessionId = getSessionId();
   
-  if (userId) {
-    st.userId = userId;
-  }
+  if (userId) st.userId = userId;
   
   if (st.sb && st.online) {
     try {
@@ -578,7 +620,6 @@ async function ensureUser() {
       } else {
         st.userId = existing.id;
         localStorage.setItem('stt_user_id', st.userId);
-        
         await st.sb
           .from(CFG.TBL_USERS)
           .update({ last_seen: new Date().toISOString() })
@@ -604,7 +645,6 @@ async function initSupabase(){
   
   try {
     st.sb = supabase.createClient(CFG.url, CFG.key);
-    
     const { error } = await st.sb.from(CFG.TBL_USERS).select('id').limit(1);
     if (error) throw error;
     
@@ -764,7 +804,6 @@ async function sendChat(room){
       
       if(error) throw error;
       
-      // Trigger AI
       triggerAIReply(room, content);
       
     } catch(e){
@@ -824,6 +863,17 @@ function switchRoom(room){
 }
 
 // ============================================
+// HTMX ACTIVE STATE
+// ============================================
+document.addEventListener('htmx:afterSwap', function() {
+  const path = window.location.pathname;
+  document.querySelectorAll('.nav-item').forEach(item => {
+    const href = item.getAttribute('href');
+    item.classList.toggle('active', href === path);
+  });
+});
+
+// ============================================
 // INIT
 // ============================================
 document.addEventListener('DOMContentLoaded', async () => {
@@ -831,9 +881,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   const ok = await initSupabase();
   
-  if(ok){ 
-    await loadChats();
-  }
+  if(ok) await loadChats();
   
   console.log('Chat ready, user:', st.username);
 });
