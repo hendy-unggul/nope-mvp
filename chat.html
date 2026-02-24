@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Chat - Spill the Tea</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+<style>
+/* [CSS SAMA KAYA SEBELUMNYA, TAMBAHKAN TAB STYLE] */
+.tab-container{display:flex;margin-bottom:20px;border-bottom:1px solid var(--border)}
+.tab{flex:1;padding:12px;text-align:center;background:transparent;border:none;color:var(--ts);font-weight:600;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;transition:all .2s}
+.tab.active{color:var(--a);border-bottom:2px solid var(--a)}
+.tab.emosi.active{color:var(--as);border-bottom-color:var(--as)}
+.tab.agak.active{color:var(--at);border-bottom-color:var(--at)}
+.room{display:none}
+.room.active{display:block}
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <header>
+    <div class="brand">
+      <span class="brand-icon">🍵</span>
+      <span class="brand-text">Ruang Obrolan</span>
+    </div>
+    <div class="header-actions">
+      <a href="spill.html" class="back-btn">← Spill</a>
+    </div>
+  </header>
+
+  <p class="connection-status" id="connection-status">Menghubungkan...</p>
+
+  <!-- TAB NAVIGATION -->
+  <div class="tab-container">
+    <button class="tab emosi active" onclick="switchRoom('emosi')">🌊 Emosi Jiwa</button>
+    <button class="tab agak" onclick="switchRoom('agak')">👽 Agak Laen</button>
+  </div>
+
+  <!-- ROOM EMOSI JIWA -->
+  <div id="room-emosi" class="room active">
+    <div class="chatroom-container">
+      <div class="chatroom-header emosi">🌊 Emosi Jiwa</div>
+      <div class="chatroom-messages" id="chat-messages-emosi">
+        <div class="chat-empty">Belum ada yang ngobrol di sini...</div>
+      </div>
+      <div class="chat-input-container">
+        <input type="text" class="chat-input" id="chat-input-emosi" placeholder="Tulis pesan..." maxlength="200">
+        <button class="chat-send-btn" onclick="sendChat('emosi')">Kirim</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROOM AGAK LAEN -->
+  <div id="room-agak" class="room">
+    <div class="chatroom-container">
+      <div class="chatroom-header agak">👽 Agak Laen</div>
+      <div class="chatroom-messages" id="chat-messages-agak">
+        <div class="chat-empty">Belum ada yang ngobrol di sini...</div>
+      </div>
+      <div class="chat-input-container">
+        <input type="text" class="chat-input" id="chat-input-agak" placeholder="Tulis pesan..." maxlength="200">
+        <button class="chat-send-btn" onclick="sendChat('agak')">Kirim</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- [TOAST & BOTTOM NAV SAMA] -->
+
+<script>
+// ============================================
+// CONFIG & STATE (SAMA KAYA SEBELUMNYA)
+// ============================================
+const CFG = { ... };
+const st = {
+  sb: null, online: false, userId: null, sessionId: null, username: null,
+  chatMessages: { emosi: [], agak: [] },
+  currentRoom: 'emosi'
+};
+
+// AI AGENTS (SAMA)
+const AI_AGENTS = { ... };
+
+// ============================================
+// FUNGSI SWITCH ROOM
+// ============================================
+function switchRoom(room) {
+  st.currentRoom = room;
+  
+  // Update tab active
+  document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+  document.querySelector(`.tab.${room}`).classList.add('active');
+  
+  // Update room visibility
+  document.querySelectorAll('.room').forEach(r => r.classList.remove('active'));
+  document.getElementById(`room-${room}`).classList.add('active');
+  
+  // Render ulang chat room yang dipilih
+  renderChatRoom(room);
+}
+
+// ============================================
+// SISANYA (loadChats, sendChat, triggerAIReply, dll) SAMA
+// ============================================
+// [COPY SEMUA FUNGSI DARI VERSI SEBELUMNYA]
+// Pastikan fungsi mengacu ke st.currentRoom kalo perlu
+</script>
+</body>
+</html>
