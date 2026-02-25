@@ -7,6 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/htmx.org@2.0.0"></script>
 <style>
+/* ===== CSS SAMA PERSIS DENGAN SEBELUMNYA ===== */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 :root{
   --bg:#0A0A0A;
@@ -666,6 +667,9 @@ async function loadChats(){
   }
 }
 
+// ============================================
+// RENDER CHAT ROOM - FIX NAN:NAN
+// ============================================
 function renderChatRoom(room){
   var container = document.getElementById('chat-messages-' + room);
   if(!container) return;
@@ -690,30 +694,31 @@ function renderChatRoom(room){
       usernameClass = room === 'emosi' ? 'chat-username emosi' : 'chat-username agak';
     }
     
+    // FIX FORMAT WAKTU - TIDAK NAN:NAN
     var time = '';
-if (msg.created_at) {
-  try {
-    var d = new Date(msg.created_at);
-    if (!isNaN(d.getTime())) {
-      var hours = d.getHours().toString().padStart(2, '0');
-      var minutes = d.getMinutes().toString().padStart(2, '0');
-      time = hours + ':' + minutes;
+    if (msg.created_at) {
+      try {
+        var d = new Date(msg.created_at);
+        if (!isNaN(d.getTime())) {
+          var hours = d.getHours().toString().padStart(2, '0');
+          var minutes = d.getMinutes().toString().padStart(2, '0');
+          time = hours + ':' + minutes;
+        } else {
+          time = '';
+        }
+      } catch (e) {
+        time = '';
+      }
     } else {
-      time = 'now';
+      time = '';
     }
-  } catch (e) {
-    time = 'now';
-  }
-} else {
-  time = 'now';
-}
     
     var metaHtml = '';
     if(isOwn){
-      metaHtml = '<div class="chat-meta">Kamu <span>' + time + '</span></div>';
+      metaHtml = '<div class="chat-meta">Kamu' + (time ? ' <span>' + time + '</span>' : '') + '</div>';
     } else {
       var badgeHtml = isAI ? '<span class="ai-badge">AI</span>' : '';
-      metaHtml = '<div class="chat-meta"><span class="' + usernameClass + '">@' + formatUsername(username) + '</span>' + badgeHtml + ' <span>' + time + '</span></div>';
+      metaHtml = '<div class="chat-meta"><span class="' + usernameClass + '">@' + formatUsername(username) + '</span>' + badgeHtml + (time ? ' <span>' + time + '</span>' : '') + '</div>';
     }
     
     html += '<div class="chat-message ' + (isOwn ? 'chat-message-own' : 'chat-message-other') + '">' +
@@ -752,7 +757,7 @@ function addChatToUI(msg, isNew){
 }
 
 // ============================================
-// TRIGGER 30 KARAKTER - VERSI FIX (TABEL LAMA)
+// TRIGGER 30 KARAKTER
 // ============================================
 async function triggerDigitalFriend(room, lastMessage, forceTest) {
   console.log('🎯 triggerDigitalFriend dipanggil!', room, lastMessage);
@@ -809,7 +814,6 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
         console.log('💬 Reply template:', reply);
       }
       
-      // INSERT KE SUPABASE - TANPA is_ai DAN created_at
       if (st.sb) {
         try {
           const { error } = await st.sb
@@ -819,12 +823,10 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
               username: randomFriend.username,
               content: reply,
               room: room
-              // TIDAK PAKE is_ai dan created_at
             });
           
           if (error) {
             console.error('❌ Supabase insert error:', error);
-            console.error('❌ Error details:', error.message, error.details, error.hint);
           } else {
             console.log('✅ Sukses insert ke Supabase');
           }
@@ -840,7 +842,7 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
 }
 
 // ============================================
-// SEND CHAT - VERSI FIX (TABEL LAMA)
+// SEND CHAT - MATIKAN FORCE TEST
 // ============================================
 async function sendChat(room){
   var input = document.getElementById('chat-input-' + room);
@@ -857,9 +859,7 @@ async function sendChat(room){
     user_id: userId,
     username: st.username,
     content: content,
-    room: room,
-    is_ai: false,
-    created_at: new Date().toISOString()
+    room: room
   };
   addChatToUI(tempMsg, true);
   
@@ -872,7 +872,6 @@ async function sendChat(room){
           username: st.username,
           content: content,
           room: room
-          // TIDAK PAKE is_ai dan created_at
         });
       
       if(error) throw error;
