@@ -690,17 +690,125 @@ function showProc(v) {
 }
 
 // ═══════════════════════════════════════════════════
-// CHAOS GENERATOR (30 KARAKTER)
+// CHAOS GENERATOR - HUMAN PATTERN
 // ═══════════════════════════════════════════════════
+const CHAOS_SCHEDULE = {
+  // [jam] = { min: minimal rant, max: maksimal rant, karakter: [list username] }
+  5:  { min: 2, max: 3, karakter: ['sleepy.head', 'moon.child'] },
+  6:  { min: 3, max: 4, karakter: ['mba.santuy', 'si.badai', 'sleepy.head'] },
+  7:  { min: 3, max: 4, karakter: ['beby.manis', 'strawberry.shortcake', 'mba.ceplas'] },
+  8:  { min: 2, max: 3, karakter: ['popcorn.galau', 'si.pedas', 'cinnamon.girl'] },
+  9:  { min: 2, max: 3, karakter: ['popcorn.galau', 'si.pedas', 'cloud.dreamer'] },
+  10: { min: 4, max: 5, karakter: ['cinnamon.girl', 'bubble.tea', 'little.fairy'] },
+  11: { min: 3, max: 4, karakter: ['si.lapar', 'mba.ceplas', 'popcorn.galau'] },
+  12: { min: 5, max: 6, karakter: 'all' }, // Peak hour, semua karakter
+  13: { min: 2, max: 3, karakter: ['teddy.bear', 'pretty.sad', 'cherry.blossom'] },
+  14: { min: 2, max: 3, karakter: ['cloud.dreamer', 'little.fairy', 'sleepy.head'] },
+  15: { min: 3, max: 4, karakter: ['si.kocak', 'mba.ngarep', 'si.imut.jahat'] },
+  16: { min: 4, max: 5, karakter: ['si.badai', 'mba.nyinyir', 'cantik.tapi.sad'] },
+  17: { min: 3, max: 4, karakter: ['cherry.blossom', 'pink.sky', 'mba.santuy'] },
+  18: { min: 4, max: 5, karakter: ['cinnamon.girl', 'popcorn.galau', 'bubble.tea'] },
+  19: { min: 3, max: 4, karakter: ['si.kocak', 'mba.gaul', 'beby.manis'] },
+  20: { min: 4, max: 5, karakter: ['sleepy.head', 'si.pedas', 'si.cerewet'] },
+  21: { min: 5, max: 6, karakter: 'all_emosi' }, // Peak galau, semua karakter emosi
+  22: { min: 4, max: 5, karakter: ['baby.girl', 'teddy.bear', 'moon.child'] },
+  23: { min: 3, max: 4, karakter: ['si.imut.jahat', 'mba.galau.akutan', 'sleepy.head'] },
+  0:  { min: 2, max: 3, karakter: ['moon.child', 'sleepy.head', 'si.ngeselin'] },
+  1:  { min: 2, max: 3, karakter: ['moon.child', 'si.polos.bahaya'] },
+  2:  { min: 1, max: 2, karakter: ['moon.child'] },
+  3:  { min: 1, max: 2, karakter: ['moon.child'] },
+  4:  { min: 1, max: 2, karakter: ['moon.child', 'sleepy.head'] }
+};
+
+// Total minimal per hari: 55
+// Total maksimal per hari: 85
+
+function getRandomMood() {
+  const moods = ['surviving', 'thriving', 'chaotic', 'doom'];
+  // Weighted: surviving lebih sering (40%), doom jarang (10%)
+  const weights = [0.4, 0.3, 0.2, 0.1];
+  const rand = Math.random();
+  let sum = 0;
+  for (let i = 0; i < moods.length; i++) {
+    sum += weights[i];
+    if (rand < sum) return moods[i];
+  }
+  return 'surviving';
+}
+
+function getCharactersForHour(hour) {
+  const schedule = CHAOS_SCHEDULE[hour] || CHAOS_SCHEDULE[12]; // Default ke peak hour
+  if (schedule.karakter === 'all') {
+    // Semua karakter (30)
+    return [...CHAOS_FRIENDS.emosi, ...CHAOS_FRIENDS.agak];
+  } else if (schedule.karakter === 'all_emosi') {
+    return CHAOS_FRIENDS.emosi;
+  } else if (schedule.karakter === 'all_agak') {
+    return CHAOS_FRIENDS.agak;
+  } else {
+    // Filter karakter berdasarkan username
+    const allChars = [...CHAOS_FRIENDS.emosi, ...CHAOS_FRIENDS.agak];
+    return allChars.filter(c => schedule.karakter.includes(c.username));
+  }
+}
+
+function getDailyTarget() {
+  const hour = new Date().getHours();
+  const schedule = CHAOS_SCHEDULE[hour] || CHAOS_SCHEDULE[12];
+  return Math.floor(Math.random() * (schedule.max - schedule.min + 1)) + schedule.min;
+}
+
+function startChaosGenerator() {
+  if (S.chaosInterval) clearInterval(S.chaosInterval);
+  
+  // Hitung target rant untuk jam ini
+  let targetForThisHour = getDailyTarget();
+  let rantCountThisHour = 0;
+  
+  console.log(`🌪️ Chaos generator started. Target jam ini: ${targetForThisHour} rant`);
+  
+  // Generate pertama setelah 5-15 menit (biar gak langsung rame)
+  setTimeout(() => {
+    generateChaosBatch();
+  }, 300000 + Math.random() * 600000); // 5-15 menit
+  
+  // Interval 30-60 menit (cek progress)
+  S.chaosInterval = setInterval(() => {
+    if (!S.online) return;
+    
+    const currentHour = new Date().getHours();
+    
+    // Reset counter kalo sudah berganti jam
+    if (currentHour !== lastHour) {
+      lastHour = currentHour;
+      targetForThisHour = getDailyTarget();
+      rantCountThisHour = 0;
+      console.log(`🕐 Ganti jam ${currentHour}. Target: ${targetForThisHour} rant`);
+    }
+    
+    // Kalo masih kurang dari target, generate 1-2 rant
+    if (rantCountThisHour < targetForThisHour) {
+      const batchSize = Math.min(2, targetForThisHour - rantCountThisHour);
+      for (let i = 0; i < batchSize; i++) {
+        setTimeout(() => generateChaosRant(), i * 5000); // Jarak 5 detik antar rant
+      }
+      rantCountThisHour += batchSize;
+      console.log(`📊 Rant jam ini: ${rantCountThisHour}/${targetForThisHour}`);
+    }
+  }, 1800000 + Math.random() * 1800000); // 30-60 menit
+}
+
+let lastHour = new Date().getHours();
+
 function generateChaosRant() {
-  // Pilih room random
-  const room = Math.random() > 0.5 ? 'emosi' : 'agak';
-  const characters = CHAOS_FRIENDS[room];
+  const hour = new Date().getHours();
+  const characters = getCharactersForHour(hour);
+  
+  // Pilih karakter random dari yang available di jam ini
   const randomChar = characters[Math.floor(Math.random() * characters.length)];
   
-  // Pilih mood random
-  const moods = ['surviving', 'thriving', 'chaotic', 'doom'];
-  const mood = moods[Math.floor(Math.random() * moods.length)];
+  // Pilih mood dengan weighted random
+  const mood = getRandomMood();
   
   // Pilih rant random
   const rants = CHAOS_RANTS[mood];
@@ -709,15 +817,21 @@ function generateChaosRant() {
   // Ganti placeholder @{user} dengan username karakter (tanpa @)
   rant = rant.replace('@{user}', randomChar.username);
   
-  // Sesekali mention user real (20% chance)
-  if (Math.random() < 0.2 && S.user !== '@anon') {
-    rant += ' ' + (Math.random() > 0.5 ? `kaka @${S.user.replace('@', '')}` : `sis @${S.user.replace('@', '')}`);
+  // Sesekali mention user real (30% chance)
+  if (Math.random() < 0.3 && S.user !== '@anon') {
+    const mention = Math.random() > 0.5 ? `kaka @${S.user.replace('@', '')}` : `sis @${S.user.replace('@', '')}`;
+    // Tambah di awal atau akhir
+    if (Math.random() > 0.5) {
+      rant = mention + ' ' + rant;
+    } else {
+      rant = rant + ' ' + mention;
+    }
   }
   
   // Generate ID unik
   const id = 'chaos_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
   
-  return {
+  const rantObj = {
     id,
     content: rant,
     mood,
@@ -728,38 +842,33 @@ function generateChaosRant() {
     isChaos: true,
     author: randomChar.username
   };
+  
+  S.entries.unshift(rantObj);
+  if (S.entries.length > CFG.maxEntries) {
+    S.entries.pop();
+  }
+  renderEntries();
+  
+  // Notifikasi kalau lagi sepi (20% chance)
+  if (Math.random() < 0.2) {
+    toast(`🌀 ${randomChar.username} nge-spill`);
+  }
+  
+  return rantObj;
 }
 
-function startChaosGenerator() {
-  if (S.chaosInterval) clearInterval(S.chaosInterval);
+function generateChaosBatch() {
+  const hour = new Date().getHours();
+  const characters = getCharactersForHour(hour);
   
-  // Generate pertama setelah 5 detik
-  setTimeout(() => {
-    const rant = generateChaosRant();
-    S.entries.unshift(rant);
-    if (S.entries.length > CFG.maxEntries) {
-      S.entries.pop();
-    }
-    renderEntries();
-    toast(`🌀 ${rant.author} nge-spill sesuatu`);
-  }, 5000);
+  // Generate 2-4 rant sekaligus dengan jeda
+  const batchSize = 2 + Math.floor(Math.random() * 3);
   
-  // Interval setiap 3-5 menit
-  S.chaosInterval = setInterval(() => {
-    if (!S.online) return; // Hanya online mode
-    
-    const rant = generateChaosRant();
-    S.entries.unshift(rant);
-    if (S.entries.length > CFG.maxEntries) {
-      S.entries.pop();
-    }
-    renderEntries();
-    
-    // Kadang-kadang muncul notifikasi
-    if (Math.random() < 0.3) {
-      toast(`🌀 ${rant.author} nge-spill: ${rant.content.substring(0, 30)}...`);
-    }
-  }, 180000 + Math.random() * 120000); // 3-5 menit
+  for (let i = 0; i < batchSize; i++) {
+    setTimeout(() => {
+      generateChaosRant();
+    }, i * 8000 + Math.random() * 4000); // Jeda 8-12 detik
+  }
 }
 
 // ═══════════════════════════════════════════════════
