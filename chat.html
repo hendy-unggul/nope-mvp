@@ -7,7 +7,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/htmx.org@2.0.0"></script>
 <style>
-/* ===== CSS SAMA PERSIS DENGAN SEBELUMNYA ===== */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 :root{
   --bg:#0A0A0A;
@@ -444,8 +443,50 @@ const st = {
 };
 
 // ============================================
-// 30 KARAKTER DIGITAL
+// STATE MANAJEMEN PERCAKAPAN - DINAMIS
 // ============================================
+const convoState = {
+  phase: 'idle',        // idle, init, active, chain, cooldown
+  messageCount: 0,
+  lastMessageTime: null,
+  lastAITime: null,
+  activeCharacters: [],
+  roomStats: {
+    emosi: { lastAITime: null, messageCount: 0, lastUserMessage: null },
+    agak: { lastAITime: null, messageCount: 0, lastUserMessage: null }
+  }
+};
+
+// Fungsi update fase percakapan
+function updateConvoPhase(room) {
+  var now = Date.now();
+  var roomStat = convoState.roomStats[room];
+  
+  if (!roomStat || !roomStat.lastUserMessage) {
+    convoState.phase = 'idle';
+    return 'idle';
+  }
+  
+  var timeSinceLast = now - roomStat.lastUserMessage;
+  var msgCount = roomStat.messageCount || 0;
+  
+  // Fase berdasarkan waktu dan jumlah pesan
+  if (timeSinceLast > 300000) { // >5 menit gak ada chat
+    convoState.phase = 'idle';
+  } else if (msgCount < 3) {
+    convoState.phase = 'init';
+  } else if (msgCount < 7) {
+    convoState.phase = 'active';
+  } else if (msgCount < 15) {
+    convoState.phase = 'chain';
+  } else {
+    convoState.phase = 'cooldown';
+  }
+  
+  console.log(`🔄 [${room}] Phase: ${convoState.phase} (${msgCount} pesan, jeda ${Math.round(timeSinceLast/1000)}s)`);
+  return convoState.phase;
+}
+
 // ============================================
 // 30 KARAKTER DIGITAL - DENGAN UUID VALID
 // ============================================
@@ -468,23 +509,24 @@ const DIGITAL_FRIENDS = {
     { id: 'ffffffff-ffff-ffff-ffff-ffffffffffff', username: 'baby.girl', replies: ['Baby girl, jangan sedih 🥺', 'Aku peluk kamu dari sini', 'Sayang banget sama kamu'] }
   ],
   agak: [
-    { id: '11111111-1111-1111-1111-111111111111', username: 'si.badai', replies: ['GALAU? CUCI MUKA DULU SANA', 'LO KIRA GUE PSIKOLOG?', 'WKWKWK KASIAN BANGET SIH'] },
-    { id: '22222222-2222-2222-2222-222222222222', username: 'mba.ceplas', replies: ['Halah galau mulu, lo kurang kerjaan', 'Udah ah, move on. Banyak cowok lain', 'WKWK BERSAMA'] },
-    { id: '33333333-3333-3333-3333-333333333333', username: 'cici.sensor', replies: ['Ciiin... jangan galau dong', 'Lo itu cantik, masa galau', 'Wkwkwk ngakak'] },
-    { id: '44444444-4444-4444-4444-444444444444', username: 'si.imut.jahat', replies: ['Aku imut tapi jahat 😈', 'Galau? Aku ketawain aja', 'Wkwk lucu banget lo galau'] },
-    { id: '55555555-5555-5555-5555-555555555555', username: 'cantik.tapi.sad', replies: ['Cantik tapi sad, gitu ya', 'Makeup lo on point, tapi hati lo messy', 'Yaudah sih'] },
-    { id: '66666666-6666-6666-6666-666666666666', username: 'mba.nyinyir', replies: ['Yaelah galau, macem anak SMA', 'Udah gede kok galau terus', 'Wkwkwk nyinyir mode on'] },
-    { id: '77777777-7777-7777-7777-777777777777', username: 'si.pedas', replies: ['Pedes ya? Kayak sambel', 'Galau lo pedes, bikin perih', 'Wkwk perih hati'] },
-    { id: '88888888-8888-8888-8888-888888888888', username: 'mba.galau.akutan', replies: ['Galau? Gue juga galau, lo doang yang tau', 'Akut-akutan, yuk', 'Wkwk aduh'] },
-    { id: '99999999-9999-9999-9999-999999999999', username: 'si.polos.bahaya', replies: ['Aku polos kok, tapi suka ngegas', 'Galau? Itu mah dosa', 'Wkwkwk polos'] },
-    { id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', username: 'mba.santuy', replies: ['Santuy aja, sis', 'Hidup cuma sekali, galau juga sekali', 'Santuy wae'] },
-    { id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', username: 'si.cerewet', replies: ['Cerewet dikit, ya. Lo tuh...', 'Galau, galau, galau mulu', 'Wkwk aku cerewet ya'] },
-    { id: 'cccccccc-cccc-cccc-cccc-cccccccccccc', username: 'mba.ngarep', replies: ['Galau karena cowok? Ngarep lo', 'Cinta itu buta, lo juga buta', 'Wkwk sadis'] },
-    { id: 'dddddddd-dddd-dddd-dddd-dddddddddddd', username: 'si.ngeselin', replies: ['Aku tau lo galau, tapi aku ketawa', 'Maaf ya ngeselin, tapi sayang', 'Wkwkwk'] },
-    { id: 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', username: 'mba.gaul', replies: ['Santuy aja, cuy', 'Galau mah biasa, yang penting kece', 'Lets go, healing'] },
-    { id: 'ffffffff-ffff-ffff-ffff-ffffffffffff', username: 'si.kocak', replies: ['Wkwkwk ngakak liat lo galau', 'Kocak banget sih', 'Lo itu lucu, jangan galau'] }
+    { id: '11111111-1111-1111-1111-111111111112', username: 'si.badai', replies: ['GALAU? CUCI MUKA DULU SANA', 'LO KIRA GUE PSIKOLOG?', 'WKWKWK KASIAN BANGET SIH'] },
+    { id: '22222222-2222-2222-2222-222222222223', username: 'mba.ceplas', replies: ['Halah galau mulu, lo kurang kerjaan', 'Udah ah, move on. Banyak cowok lain', 'WKWK BERSAMA'] },
+    { id: '33333333-3333-3333-3333-333333333334', username: 'cici.sensor', replies: ['Ciiin... jangan galau dong', 'Lo itu cantik, masa galau', 'Wkwkwk ngakak'] },
+    { id: '44444444-4444-4444-4444-444444444445', username: 'si.imut.jahat', replies: ['Aku imut tapi jahat 😈', 'Galau? Aku ketawain aja', 'Wkwk lucu banget lo galau'] },
+    { id: '55555555-5555-5555-5555-555555555556', username: 'cantik.tapi.sad', replies: ['Cantik tapi sad, gitu ya', 'Makeup lo on point, tapi hati lo messy', 'Yaudah sih'] },
+    { id: '66666666-6666-6666-6666-666666666667', username: 'mba.nyinyir', replies: ['Yaelah galau, macem anak SMA', 'Udah gede kok galau terus', 'Wkwkwk nyinyir mode on'] },
+    { id: '77777777-7777-7777-7777-777777777778', username: 'si.pedas', replies: ['Pedes ya? Kayak sambel', 'Galau lo pedes, bikin perih', 'Wkwk perih hati'] },
+    { id: '88888888-8888-8888-8888-888888888889', username: 'mba.galau.akutan', replies: ['Galau? Gue juga galau, lo doang yang tau', 'Akut-akutan, yuk', 'Wkwk aduh'] },
+    { id: '99999999-9999-9999-9999-999999999990', username: 'si.polos.bahaya', replies: ['Aku polos kok, tapi suka ngegas', 'Galau? Itu mah dosa', 'Wkwkwk polos'] },
+    { id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab', username: 'mba.santuy', replies: ['Santuy aja, sis', 'Hidup cuma sekali, galau juga sekali', 'Santuy wae'] },
+    { id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbcc', username: 'si.cerewet', replies: ['Cerewet dikit, ya. Lo tuh...', 'Galau, galau, galau mulu', 'Wkwk aku cerewet ya'] },
+    { id: 'cccccccc-cccc-cccc-cccc-ccccccccccdd', username: 'mba.ngarep', replies: ['Galau karena cowok? Ngarep lo', 'Cinta itu buta, lo juga buta', 'Wkwk sadis'] },
+    { id: 'dddddddd-dddd-dddd-dddd-ddddddddddee', username: 'si.ngeselin', replies: ['Aku tau lo galau, tapi aku ketawa', 'Maaf ya ngeselin, tapi sayang', 'Wkwkwk'] },
+    { id: 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeff', username: 'mba.gaul', replies: ['Santuy aja, cuy', 'Galau mah biasa, yang penting kece', 'Lets go, healing'] },
+    { id: 'ffffffff-ffff-ffff-ffff-ffffffffff00', username: 'si.kocak', replies: ['Wkwkwk ngakak liat lo galau', 'Kocak banget sih', 'Lo itu lucu, jangan galau'] }
   ]
 };
+
 // ============================================
 // UTILS
 // ============================================
@@ -563,6 +605,9 @@ async function ensureUser() {
         
         st.userId = newUser.id;
         localStorage.setItem('stt_user_id', st.userId);
+        
+        // Simpan timestamp buat deteksi new user
+        localStorage.setItem('stt_created_at', Date.now().toString());
       } else {
         st.userId = existing.id;
         localStorage.setItem('stt_user_id', st.userId);
@@ -696,7 +741,7 @@ function renderChatRoom(room){
       usernameClass = room === 'emosi' ? 'chat-username emosi' : 'chat-username agak';
     }
     
-    // FIX FORMAT WAKTU - TIDAK NAN:NAN
+    // FIX FORMAT WAKTU
     var time = '';
     if (msg.created_at) {
       try {
@@ -705,14 +750,8 @@ function renderChatRoom(room){
           var hours = d.getHours().toString().padStart(2, '0');
           var minutes = d.getMinutes().toString().padStart(2, '0');
           time = hours + ':' + minutes;
-        } else {
-          time = '';
         }
-      } catch (e) {
-        time = '';
-      }
-    } else {
-      time = '';
+      } catch (e) {}
     }
     
     var metaHtml = '';
@@ -733,8 +772,35 @@ function renderChatRoom(room){
   container.scrollTop = container.scrollHeight;
 }
 
+// ============================================
+// ADD CHAT TO UI - DENGAN STATE UPDATE
+// ============================================
 function addChatToUI(msg, isNew){
   console.log('📝 addChatToUI dipanggil:', msg);
+  
+  // Update state percakapan
+  if (!msg.is_ai && msg.user_id === st.userId) {
+    // Ini pesan dari user
+    var room = msg.room || st.currentRoom;
+    if (!convoState.roomStats[room]) {
+      convoState.roomStats[room] = { lastAITime: null, messageCount: 0, lastUserMessage: null };
+    }
+    convoState.roomStats[room].lastUserMessage = Date.now();
+    convoState.roomStats[room].messageCount = (convoState.roomStats[room].messageCount || 0) + 1;
+    convoState.lastMessageTime = Date.now();
+    
+    // Update fase
+    updateConvoPhase(room);
+  }
+  
+  if (msg.is_ai) {
+    var room = msg.room || st.currentRoom;
+    if (!convoState.roomStats[room]) {
+      convoState.roomStats[room] = { lastAITime: null, messageCount: 0, lastUserMessage: null };
+    }
+    convoState.roomStats[room].lastAITime = Date.now();
+    convoState.lastAITime = Date.now();
+  }
   
   var room = msg.room || st.currentRoom;
   var container = document.getElementById('chat-messages-' + room);
@@ -759,104 +825,192 @@ function addChatToUI(msg, isNew){
 }
 
 // ============================================
-// TRIGGER 30 KARAKTER - PROBABILITAS DINAMIS
+// TRIGGER 30 KARAKTER - DENGAN PROBABILITAS DINAMIS
 // ============================================
 async function triggerDigitalFriend(room, lastMessage, forceTest) {
   console.log('🎯 triggerDigitalFriend dipanggil!', room, lastMessage);
   
-  // HITUNG PROBABILITAS DINAMIS
-  var baseChance = 0.4; // 40% dasar
+  // Update fase percakapan
+  var currentPhase = updateConvoPhase(room);
   
-  // 1. FAKTOR JUMLAH USER ONLINE
+  // Hitung online users
   var onlineUsers = 0;
   if (st.chatMessages[room]) {
-    // Hitung user unik dalam 10 menit terakhir
     var uniqueUsers = new Set();
-    var tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    var tenMinutesAgo = Date.now() - 10 * 60 * 1000;
     
     for (var i = 0; i < st.chatMessages[room].length; i++) {
       var msg = st.chatMessages[room][i];
-      var msgTime = new Date(msg.created_at);
-      if (msgTime > tenMinutesAgo) {
+      var msgTime = new Date(msg.created_at).getTime();
+      if (msgTime > tenMinutesAgo && !msg.is_ai) {
         uniqueUsers.add(msg.user_id);
       }
     }
     onlineUsers = uniqueUsers.size;
   }
   
-  // Makin sedikit user online, makin sering AI muncul
-  var userFactor = Math.max(0, (10 - onlineUsers) / 10); // 0-1
-  userFactor = Math.min(userFactor, 0.4); // Max +40%
-  
-  // 2. FAKTOR WAKTU (jam sepi)
-  var currentHour = new Date().getHours();
-  var isQuietHour = (currentHour >= 1 && currentHour <= 5) || // 1-5 pagi
-                    (currentHour >= 14 && currentHour <= 16);  // 2-4 sore
-  var timeFactor = isQuietHour ? 0.3 : 0; // +30% kalo jam sepi
-  
-  // 3. FAKTOR USER BARU (7 hari pertama)
+  // Cek user baru dari localStorage
   var isNewUser = false;
-  if (st.userId) {
-    try {
-      var { data: userData } = await st.sb
-        .from(CFG.TBL_USERS)
-        .select('created_at')
-        .eq('id', st.userId)
-        .single();
-      
-      if (userData) {
-        var daysOld = (Date.now() - new Date(userData.created_at)) / (1000 * 3600 * 24);
-        isNewUser = daysOld < 7; // Kurang dari 7 hari
-      }
-    } catch (e) {}
-  }
-  var newUserFactor = isNewUser ? 0.2 : 0; // +20% untuk new user
-  
-  // 4. FAKTOR PANJANG PESAN (makin panjang, makin butuh respons)
-  var messageLength = lastMessage.length;
-  var lengthFactor = Math.min(messageLength / 200, 0.2); // Max +20%
-  
-  // 5. PENALTY KALO BARU AJA ADA AI (biar gak spam)
-  var recentAIPenalty = 0;
-  var oneMinuteAgo = new Date(Date.now() - 60 * 1000);
-  for (var i = 0; i < st.chatMessages[room].length; i++) {
-    var msg = st.chatMessages[room][i];
-    if (msg.is_ai && new Date(msg.created_at) > oneMinuteAgo) {
-      recentAIPenalty = 0.5; // -50% chance kalo ada AI dalam 1 menit terakhir
-      break;
-    }
+  var userCreated = localStorage.getItem('stt_created_at');
+  if (userCreated) {
+    var daysOld = (Date.now() - parseInt(userCreated)) / (1000 * 3600 * 24);
+    isNewUser = daysOld < 7;
   }
   
-  // HITUNG TOTAL CHANCE
-  var totalChance = baseChance + userFactor + timeFactor + newUserFactor + lengthFactor;
-  totalChance = totalChance * (1 - recentAIPenalty); // Apply penalty
-  totalChance = Math.min(totalChance, 0.9); // Max 90%
+  // Hitung probabilitas berdasarkan fase
+  var baseChance = 0;
+  
+  // FASE 0: IDLE (inisiatif AI)
+  if (currentPhase === 'idle') {
+    baseChance = 0.6; // 60% chance mulai obrolan
+    if (onlineUsers < 3) baseChance += 0.2; // +20% kalo sepi
+  }
+  
+  // FASE 1: INITIATION
+  if (currentPhase === 'init') {
+    baseChance = 0.8; // 80% sambut user baru
+  }
+  
+  // FASE 2: ACTIVE
+  if (currentPhase === 'active') {
+    baseChance = 0.3; // 30% biar gak dominan
+  }
+  
+  // FASE 3: CHAIN
+  if (currentPhase === 'chain') {
+    baseChance = 0.5; // 50% untuk multi-karakter
+  }
+  
+  // FASE 4: COOLDOWN
+  if (currentPhase === 'cooldown') {
+    baseChance = 0.2; // 20% untuk closing
+  }
+  
+  // BOOST untuk user baru
+  if (isNewUser) baseChance += 0.2;
+  
+  // PENALTY kalo baru ada AI
+  var timeSinceLastAI = Date.now() - (convoState.roomStats[room]?.lastAITime || 0);
+  if (timeSinceLastAI < 60000) { // 1 menit
+    baseChance *= 0.5;
+  }
+  
+  // FAKTOR JUMLAH USER ONLINE
+  var userFactor = Math.max(0, (5 - onlineUsers) / 5) * 0.3; // Max +30%
+  baseChance += userFactor;
+  
+  // BATASI MAKSIMAL 90%
+  baseChance = Math.min(baseChance, 0.9);
   
   console.log('📊 PROBABILITAS:', {
-    base: baseChance,
-    userFactor: userFactor.toFixed(2) + ' (' + onlineUsers + ' online)',
-    timeFactor: timeFactor,
-    newUserFactor: newUserFactor,
-    lengthFactor: lengthFactor.toFixed(2),
-    recentAIPenalty: recentAIPenalty,
-    total: totalChance.toFixed(2)
+    phase: currentPhase,
+    onlineUsers: onlineUsers,
+    isNewUser: isNewUser,
+    timeSinceLastAI: Math.round(timeSinceLastAI/1000) + 's',
+    baseChance: baseChance.toFixed(2)
   });
   
-  // RANDOM BERDASARKAN TOTAL CHANCE
   if (!forceTest) {
-    if (Math.random() > totalChance) {
-      console.log('⏭️ Gagal random (chance ' + (totalChance*100).toFixed(0) + '%)');
+    if (Math.random() > baseChance) {
+      console.log('⏭️ Gagal random (chance ' + (baseChance*100).toFixed(0) + '%)');
       return;
     }
   } else {
     console.log('🔥 FORCE TEST MODE: selalu muncul');
   }
   
-  // ... SISANYA SAMA (pilih karakter, delay, dll)
-  // [lanjutan kode yang sama]
+  var friends = DIGITAL_FRIENDS[room];
+  if (!friends || friends.length === 0) {
+    console.log('❌ Gak ada temen di room', room);
+    return;
+  }
+  
+  console.log('👥 Total friends:', friends.length);
+  
+  var randomFriend = friends[Math.floor(Math.random() * friends.length)];
+  console.log('🎭 Friend terpilih:', randomFriend.username);
+  
+  // Hitung delay alami berdasarkan panjang pesan
+  var messageLength = lastMessage.length;
+  var baseDelay = 1000;
+  var lengthFactor = Math.min(messageLength / 50, 3) * 1000;
+  var randomFactor = 0.7 + Math.random() * 0.6;
+  var thinkingFactor = Math.random() > 0.7 ? 2000 : 0;
+  
+  var delay = (baseDelay + lengthFactor + thinkingFactor) * randomFactor;
+  delay = Math.min(delay, 8000);
+  
+  console.log(`⏳ Delay: ${delay.toFixed(0)}ms (panjang: ${messageLength})`);
+  
+  setTimeout(async function() {
+    console.log('🤖 Mengeksekusi reply untuk', randomFriend.username);
+    
+    try {
+      var response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: lastMessage,
+          characterName: randomFriend.username,
+          room: room,
+          lastMessages: []
+        })
+      });
+      
+      var data = await response.json();
+      console.log('📩 API Response:', data);
+      
+      var reply = '';
+      
+      if (data.reply && !data.fallback) {
+        console.log('💬 Reply dari DeepSeek:', data.reply);
+        reply = data.reply;
+      } else {
+        console.log('⚠️ API fallback, pake template');
+        reply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
+        console.log('💬 Reply template:', reply);
+      }
+      
+      if (st.sb) {
+        try {
+          const { error } = await st.sb
+            .from(CFG.TBL_CHATS)
+            .insert({
+              user_id: randomFriend.id,
+              username: randomFriend.username,
+              content: reply,
+              room: room
+            });
+          
+          if (error) {
+            console.error('❌ Supabase insert error:', error);
+          } else {
+            console.log('✅ Sukses insert ke Supabase');
+          }
+        } catch (insertError) {
+          console.error('❌ Exception saat insert:', insertError);
+        }
+      }
+      
+    } catch (e) {
+      console.error('❌ Error di triggerDigitalFriend:', e);
+      
+      // Fallback insert pake template
+      if (st.sb) {
+        var fallbackReply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
+        await st.sb.from(CFG.TBL_CHATS).insert({
+          user_id: randomFriend.id,
+          username: randomFriend.username,
+          content: fallbackReply,
+          room: room
+        });
+      }
+    }
+  }, delay);
 }
-  // ============================================
-// SEND CHAT - MATIKAN FORCE TEST
+
+// ============================================
+// SEND CHAT - DENGAN TRIGGER DINAMIS
 // ============================================
 async function sendChat(room){
   var input = document.getElementById('chat-input-' + room);
@@ -867,6 +1021,11 @@ async function sendChat(room){
   input.value = '';
   
   var userId = st.userId || st.sessionId || 'anonymous';
+  
+  // Simpan timestamp user di localStorage untuk deteksi new user
+  if (!localStorage.getItem('stt_created_at')) {
+    localStorage.setItem('stt_created_at', Date.now().toString());
+  }
   
   var tempMsg = {
     id: 'temp_' + Date.now(),
