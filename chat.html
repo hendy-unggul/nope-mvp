@@ -606,15 +606,23 @@ async function initSupabase(){
 }
 
 function setupRealtime(){
+  console.log('📡 Setting up realtime...');
+  
   st.sb.channel('chat-live')
     .on('postgres_changes', { 
       event: 'INSERT', 
       schema: 'public', 
       table: CFG.TBL_CHATS 
     }, function(payload){ 
+      console.log('🔄 Realtime insert detected:', payload.new);
       if(payload.new) addChatToUI(payload.new, false); 
     })
-    .subscribe();
+    .subscribe(function(status) {
+      console.log('📡 Realtime subscription status:', status);
+      if(status === 'SUBSCRIBED') {
+        console.log('✅ Realtime connected!');
+      }
+    });
 }
 
 // ============================================
