@@ -1286,9 +1286,9 @@ footer{
 
 <section class="hero-s">
   <div class="hero" id="hero">
-    <img id="himg" src="" alt="artefak" class="fm">
+    <img id="himg" src="https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80" alt="artefak" class="fm">
     <div id="hfaces" style="position:absolute;inset:0;pointer-events:none"></div>
-    <div class="hnote" id="hnote">"memori tersimpan"</div>
+    <div class="hnote" id="hnote">"jeda"</div>
     <div class="upctrls">
       <div class="qtimer" id="qtimer">Window aktif • Sisa 2 hari</div>
       <button class="upbtn" id="upbtn">+<span class="upcnt" id="ucnt" style="display:none"></span></button>
@@ -1414,16 +1414,134 @@ footer{
 <input type="file" id="finput" accept="image/*" multiple style="display:none">
 
 <script>
-// ═══════════════════════════════════════════════════
-// SUPABASE CONFIG
-// ═══════════════════════════════════════════════════
-const SB_URL='https://fuovfrdicdhnlymnacpz.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
-const SB_HDR={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'};
+// ============================================
+// DUMMY DATA
+// ============================================
+const DUMMY_ENTRIES = [
+  {
+    id: 'dummy1',
+    content: 'Hari ini gue nangis di angkot gegara liat kucing dipukul orang. Mental gue udah kayak kerupuk kena hujan.',
+    mood: 'surviving',
+    timestamp: Date.now() - 3600000,
+    reactions: { skull: 42, cry: 89, fire: 12, upside: 7 },
+    userReacted: null,
+    isDummy: true,
+    author: 'anon.kucing'
+  },
+  {
+    id: 'dummy2',
+    content: 'akhirnya bisa tidur nyenyak semalaman setelah 3 minggu insomnia. thanks buat chat tadi malam, lu tau lah siapa.',
+    mood: 'thriving',
+    timestamp: Date.now() - 7200000,
+    reactions: { skull: 23, cry: 15, fire: 67, upside: 31 },
+    userReacted: null,
+    isDummy: true,
+    author: 'sleepy.head'
+  },
+  {
+    id: 'dummy3',
+    content: 'hari ini chaos abis! dari bangun tidur udah salah ambil kaki, sampe kantor lupa bawa laptop.',
+    mood: 'chaotic',
+    timestamp: Date.now() - 10800000,
+    reactions: { skull: 89, cry: 23, fire: 45, upside: 78 },
+    userReacted: null,
+    isDummy: true,
+    author: 'chaos.queen'
+  }
+];
 
-// ═══════════════════════════════════════════════════
+const DUMMY_ARTEFACTS = [
+  {
+    id: 'art1',
+    url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80',
+    note: 'jeda',
+    faces: [],
+    hasFace: false,
+    isDummy: true,
+    theme: 'fm'
+  },
+  {
+    id: 'art2',
+    url: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80',
+    note: 'hijau',
+    faces: [],
+    hasFace: false,
+    isDummy: true,
+    theme: 'fg'
+  },
+  {
+    id: 'art3',
+    url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=80',
+    note: 'gabut',
+    faces: [],
+    hasFace: false,
+    isDummy: true,
+    theme: 'fl'
+  },
+  {
+    id: 'art4',
+    url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',
+    note: 'sendiri',
+    faces: [],
+    hasFace: false,
+    isDummy: true,
+    theme: 'fv'
+  },
+  {
+    id: 'art5',
+    url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
+    note: 'capek',
+    faces: [{ box: { x: 75, y: 45, width: 150, height: 200 }, score: 0.92 }],
+    hasFace: true,
+    isDummy: true,
+    theme: 'fn'
+  },
+  {
+    id: 'art6',
+    url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80',
+    note: 'love',
+    faces: [],
+    hasFace: false,
+    isDummy: true,
+    theme: 'fc'
+  }
+];
+
+// ============================================
+// STATE
+// ============================================
+const S = {
+  user: '@anon',
+  entries: [],
+  artefacts: []
+};
+
+// Load dari localStorage atau pakai dummy
+try {
+  const saved = localStorage.getItem('jejak_entries');
+  if (saved) {
+    S.entries = JSON.parse(saved);
+  } else {
+    S.entries = [...DUMMY_ENTRIES];
+  }
+} catch {
+  S.entries = [...DUMMY_ENTRIES];
+}
+
+try {
+  const saved = localStorage.getItem('jejak_artefacts');
+  if (saved) {
+    S.artefacts = JSON.parse(saved);
+  } else {
+    S.artefacts = [...DUMMY_ARTEFACTS];
+  }
+} catch {
+  S.artefacts = [...DUMMY_ARTEFACTS];
+}
+
+// ============================================
 // HELPER FUNCTIONS
-// ═══════════════════════════════════════════════════
+// ============================================
 const $ = id => document.getElementById(id);
 
 function toast(msg) {
@@ -1439,22 +1557,17 @@ function esc(t) {
   return d.innerHTML;
 }
 
-function showProc(v) {
-  $('proc').classList[v ? 'add' : 'remove']('on');
-}
-
 function toggleMenu() {
   $('mdd').classList.toggle('on');
 }
 
 function logoutUser() {
   if (!confirm('Yakin logout?')) return;
-  ['jejak_username', 'jejak_user_id', 'jejak_logged_in'].forEach(k => localStorage.removeItem(k));
+  localStorage.clear();
   location.href = 'index.html';
 }
 
 function selMood(mood) {
-  S.mood = mood;
   document.querySelectorAll('.mc').forEach(c => c.classList.toggle('act', c.dataset.mood === mood));
 }
 
@@ -1465,7 +1578,7 @@ function skipConnection(type) {
     card.style.transform = 'translateX(-10px)';
     setTimeout(() => {
       card.style.display = 'none';
-      toast(`${type === 'chaotic' ? 'Chaotic good' : type === 'caregiver' ? 'Caregiver' : 'Red alert'} dilewati`);
+      toast('Dilewati');
     }, 200);
   }
 }
@@ -1478,372 +1591,113 @@ function signalConnection(type) {
       btn.textContent = '✓';
       btn.disabled = true;
       btn.style.background = 'var(--aq)';
-      btn.style.borderColor = 'var(--aq)';
     }
-    toast(`Isyarat ke ${type === 'chaotic' ? 'chaotic good' : type === 'caregiver' ? 'caregiver' : 'red alert'} terkirim!`);
+    toast('Isyarat terkirim!');
     setTimeout(() => {
       card.style.opacity = '.5';
     }, 1500);
   }
 }
 
-// ═══════════════════════════════════════════════════
-// SESSION & STATE
-// ═══════════════════════════════════════════════════
-const SESS = (() => {
-  const u = localStorage.getItem('jejak_username');
-  const id = localStorage.getItem('jejak_user_id');
-  const li = localStorage.getItem('jejak_logged_in');
-  return (!li || !u) ? { username: '@anon', userId: null } : { username: u, userId: id };
-})();
-
-const PFX = 'jejak_' + (SESS.userId || SESS.username).replace(/[^a-z0-9]/g, '_') + '_';
-
-const S = {
-  user: SESS.username,
-  uid: SESS.userId,
-  mood: 'surviving',
-  entries: [],
-  artefacts: [],
-  selFiles: new Set(),
-  theme: 0,
-  note: '',
-  faceLoaded: false,
-  online: false,
-  qStart: localStorage.getItem(PFX + 'quota_start') || null,
-  uploads: parseInt(localStorage.getItem(PFX + 'uploads_count') || '0'),
-  pendingFiles: []
-};
-
-// ═══════════════════════════════════════════════════
-// FACE API
-// ═══════════════════════════════════════════════════
-async function loadFaceApi() {
-  try {
-    const U = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/model/';
-    await faceapi.nets.tinyFaceDetector.loadFromUri(U);
-    await faceapi.nets.faceLandmark68Net.loadFromUri(U);
-    S.faceLoaded = true;
-  } catch (e) {
-    S.faceLoaded = false;
-    console.error('Face-API fail', e);
-  }
-}
-
-async function detectFaces(file) {
-  if (!S.faceLoaded) return [];
-  showProc(true);
-  try {
-    const img = await faceapi.bufferToImage(file);
-    const d = await faceapi.detectAllFaces(img, new faceapi.TinyFaceDetectorOptions({
-      inputSize: 416,
-      scoreThreshold: 0.6
-    }));
-    return d.map(x => ({
-      box: { x: x.box.x, y: x.box.y, width: x.box.width, height: x.box.height },
-      score: x.score
-    }));
-  } catch (e) {
-    return [];
-  } finally {
-    showProc(false);
-  }
-}
-
-// ═══════════════════════════════════════════════════
-// UPLOAD & GALLERY
-// ═══════════════════════════════════════════════════
-function initUpload() {
-  const btn = $('upbtn');
-  const fi = $('finput');
-  if (!btn || !fi) return;
-  btn.onclick = () => {
-    if (!checkQuota()) {
-      toast('⏳ Quota habis');
-      return;
-    }
-    fi.click();
-  };
-  fi.onchange = handleFiles;
-}
-
-function checkQuota() {
-  if (!S.qStart) {
-    S.qStart = Date.now();
-    localStorage.setItem(PFX + 'quota_start', S.qStart);
-    S.uploads = 0;
-    localStorage.setItem(PFX + 'uploads_count', '0');
-    return true;
-  }
-  const e = Date.now() - parseInt(S.qStart);
-  const w = 3 * 86400000;
-  if (e > w) {
-    S.qStart = Date.now();
-    S.uploads = 0;
-    localStorage.setItem(PFX + 'quota_start', S.qStart);
-    localStorage.setItem(PFX + 'uploads_count', '0');
-    return true;
-  }
-  return S.uploads < 6;
-}
-
-function updQuota() {
-  const t = $('qtimer');
-  const c = $('ucnt');
-  if (!t) return;
-  if (!S.qStart) {
-    t.textContent = 'Window aktif • Sisa 6 slot';
-    t.classList.remove('urg');
-    if (c) c.style.display = 'none';
-    return;
-  }
-  const e = Date.now() - parseInt(S.qStart);
-  const w = 3 * 86400000;
-  const rem = Math.max(0, w - e);
-  const days = Math.ceil(rem / 86400000);
-  const slots = 6 - S.uploads;
-  if (rem <= 0) t.textContent = 'Window reset • Sisa 6 slot';
-  else {
-    t.textContent = `Window aktif • ${days} hari • ${slots} slot`;
-    if (slots <= 2) t.classList.add('urg');
-  }
-  if (c) {
-    c.textContent = S.uploads;
-    c.style.display = S.uploads > 0 ? 'block' : 'none';
-  }
-}
-
-async function handleFiles(e) {
-  const files = Array.from(e.target.files);
-  if (!files.length) return;
-  if (files.reduce((s, f) => s + f.size, 0) > 10 * 1024 * 1024) {
-    toast('⚠ File terlalu besar');
-    return;
-  }
-  const pf = [];
-  for (const f of files.slice(0, 6)) {
-    const faces = await detectFaces(f);
-    pf.push({
-      file: f,
-      faces,
-      hasFace: faces.length > 0,
-      preview: URL.createObjectURL(f)
-    });
-  }
-  openGallery(pf);
-}
-
-function openGallery(files) {
-  S.selFiles = new Set(files.map((_, i) => i));
-  S.theme = 0;
-  S.note = '';
-  const grid = $('ggrid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  files.forEach((item, i) => {
-    const d = document.createElement('div');
-    d.className = 'gi sel';
-    d.innerHTML = `<img src="${item.preview}" class="fm" id="pv${i}">`;
-    d.onclick = () => toggleSel(i, d);
-    if (item.hasFace) {
-      const b = document.createElement('div');
-      b.className = 'dbadge';
-      b.textContent = 'WAJAH TERDETEKSI';
-      d.appendChild(b);
-    }
-    grid.appendChild(d);
-  });
-
-  ['tmsl', 'tmnm', 'noti', 'notcnt'].forEach(id => {
-    const el = $(id);
-    if (el) {
-      if (id === 'tmsl') el.value = 0;
-      else if (id === 'tmnm') el.textContent = 'MONOCHROME';
-      else if (id === 'noti') el.value = '';
-      else el.textContent = '0/4';
-    }
-  });
-
-  updSelCnt();
-  $('gmodal').classList.add('on');
-  S.pendingFiles = files;
-}
-
-function toggleSel(i, el) {
-  S.selFiles[S.selFiles.has(i) ? 'delete' : 'add'](i);
-  el.classList.toggle('sel');
-  updSelCnt();
-}
-
-function updSelCnt() {
-  const el = $('selcnt');
-  if (el) el.textContent = S.selFiles.size;
-}
-
-function updTheme(v) {
-  S.theme = +v;
-  const themes = ['MONOCHROME', 'NOIR', 'SEPIA', 'WARM', 'GOLDEN', 'LOMO', 'DREAM', 'COLD', 'CYBER', 'VIGNETTE', 'CRISP', 'MOODY'];
-  const nm = $('tmnm');
-  if (nm) nm.textContent = themes[S.theme];
-  S.pendingFiles.forEach((_, i) => {
-    const img = $('pv' + i);
-    if (img) {
-      img.className = '';
-      img.classList.add('f' + themes[S.theme].toLowerCase().slice(0,2));
-    }
-  });
-}
-
-function valNote(inp) {
-  const w = inp.value.trim().split(/\s+/).filter(x => x.length);
-  const nc = $('notcnt');
-  if (nc) nc.textContent = `${Math.min(w.length, 4)}/4`;
-  if (w.length > 4) inp.value = w.slice(0, 4).join(' ');
-  S.note = inp.value.trim();
-}
-
-function closeGallery() {
-  $('gmodal').classList.remove('on');
-  S.pendingFiles = [];
-  S.selFiles = new Set();
-}
-
-async function confirmUpload() {
-  if (!S.selFiles.size) {
-    toast('Pilih minimal 1');
-    return;
-  }
-  const themes = ['fm', 'fn', 'fsp', 'fw', 'fg', 'fl', 'fd', 'fco', 'fc', 'fv', 'fcr', 'fmo'];
-  const theme = { filter: themes[S.theme] };
-  const note = S.note || 'memory';
-  for (const i of S.selFiles) await procUpload(S.pendingFiles[i], theme, note);
-  S.uploads += S.selFiles.size;
-  localStorage.setItem(PFX + 'uploads_count', S.uploads);
-  updQuota();
-  closeGallery();
-  toast(`✓ ${S.selFiles.size} foto`);
-}
-
-async function procUpload(item, theme, note) {
-  const id = crypto.randomUUID();
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  const img = new Image();
-  await new Promise(res => {
-    img.onload = res;
-    img.src = item.preview;
-  });
-  canvas.width = img.width;
-  canvas.height = img.height;
-  ctx.drawImage(img, 0, 0);
-  const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.85));
-  let url = item.preview;
-  url = URL.createObjectURL(blob);
+// ============================================
+// RENDER FUNCTIONS
+// ============================================
+function renderEntries() {
+  const container = $('econ');
+  if (!container) return;
   
-  addArtefactFIFO({
-    id,
-    url,
-    note,
-    faces: item.faces,
-    hasFace: item.hasFace,
-    theme: theme.filter,
-    timestamp: Date.now(),
-    isDummy: false
-  });
-}
-
-// ═══════════════════════════════════════════════════
-// ARTEFACTS MANAGEMENT
-// ═══════════════════════════════════════════════════
-function getVisArtefacts() {
-  const r = S.artefacts.filter(a => !a.isDummy);
-  if (r.length >= 6) return r.slice(0, 6);
-  return r;
-}
-
-function addArtefactFIFO(a) {
-  const r = S.artefacts.filter(x => !x.isDummy);
-  r.unshift(a);
-  if (r.length > 6) {
-    r.pop();
-    toast('Foto lama terhapus (FIFO)');
+  const entries = S.entries;
+  
+  if (entries.length === 0) {
+    container.innerHTML = '<div class="es"><span class="ee">🍃</span><div class="et">Belum ada jejak</div><div class="est">Jadilah yang pertama spill your truth</div></div>';
+    return;
   }
-  S.artefacts = r;
-  saveArtefacts();
-  renderTray();
-  setHero(a.url, a.note, a.faces, a.theme);
-}
-
-function saveArtefacts() {
-  localStorage.setItem(PFX + 'artefacts', JSON.stringify(S.artefacts));
+  
+  container.innerHTML = entries.map(e => {
+    const isDummy = e.isDummy;
+    const timeAgo = isDummy ? 'contoh' : 'baru saja';
+    
+    return `<article class="entry${isDummy ? ' entry-dummy' : ''}">
+      <div class="ehdr">
+        <div class="emeta">
+          <span class="etime">${timeAgo}</span>
+          <span class="emood ${e.mood}">${e.mood === 'surviving' ? '😮‍💨' : e.mood === 'thriving' ? '✨' : e.mood === 'chaotic' ? '🌀' : '🛌'} ${e.mood}</span>
+        </div>
+        ${isDummy ? '<span class="fifo-i">Contoh</span>' : ''}
+      </div>
+      <div class="econt">${esc(e.content)}</div>
+      <div class="reaction-bar">
+        ${Object.entries({ skull: '💀', cry: '😭', fire: '🔥', upside: '🙃' }).map(([k, emoji]) => `
+          <button class="reaction-btn" disabled>
+            <span class="remoji">${emoji}</span>
+            <span class="rcount">${e.reactions[k]}</span>
+          </button>
+        `).join('')}
+      </div>
+    </article>`;
+  }).join('');
 }
 
 function renderTray() {
-  const g = $('tgrid');
-  if (!g) return;
+  const container = $('tgrid');
+  if (!container) return;
   
-  const artefacts = getVisArtefacts();
+  const artefacts = S.artefacts;
+  
   if (artefacts.length === 0) {
-    g.innerHTML = '<div class="ti empty" onclick="$(\'upbtn\').click()">+</div>'.repeat(6);
+    container.innerHTML = '<div class="ti empty" onclick="$(\'upbtn\').click()">+</div>'.repeat(6);
     return;
   }
   
-  g.innerHTML = artefacts.map(a => {
+  let html = '';
+  artefacts.forEach(a => {
     if (a.hasFace) {
-      return `<div class="ti" onclick="setHeroFromTray('${a.id}')" style="position:relative">
+      html += `<div class="ti" onclick="setHero('${a.id}')" style="position:relative">
         <img src="${a.url}" alt="${a.note}" class="${a.theme}">
         <div class="sensored-overlay"><span class="sensored-text">SENSORED</span></div>
       </div>`;
+    } else {
+      html += `<div class="ti" onclick="setHero('${a.id}')">
+        <img src="${a.url}" alt="${a.note}" class="${a.theme}">
+      </div>`;
     }
-    return `<div class="ti" onclick="setHeroFromTray('${a.id}')">
-      <img src="${a.url}" alt="${a.note}" class="${a.theme}">
-    </div>`;
-  }).join('');
+  });
   
   // Tambah placeholder jika kurang dari 6
-  const count = artefacts.length;
-  for (let i = count; i < 6; i++) {
-    g.innerHTML += '<div class="ti empty" onclick="$(\'upbtn\').click()">+</div>';
+  for (let i = artefacts.length; i < 6; i++) {
+    html += '<div class="ti empty" onclick="$(\'upbtn\').click()">+</div>';
+  }
+  
+  container.innerHTML = html;
+}
+
+function setHero(id) {
+  const artefact = S.artefacts.find(a => a.id === id);
+  if (!artefact) return;
+  
+  const img = $('himg');
+  const note = $('hnote');
+  if (img && note) {
+    img.src = artefact.url;
+    img.className = artefact.theme;
+    note.textContent = `"${artefact.note}"`;
   }
 }
 
-function setHero(url, note, faces, fc) {
-  const hi = $('himg');
-  const hn = $('hnote');
-  if (!hi || !hn) return;
-  hi.src = url;
-  hi.className = fc || 'fm';
-  hn.textContent = `"${note || 'memori'}"`;
-}
-
-function setHeroFromTray(id) {
-  const a = S.artefacts.find(x => x.id === id);
-  if (a) setHero(a.url, a.note, a.faces, a.theme);
-}
-
-// ═══════════════════════════════════════════════════
+// ============================================
 // INIT
-// ═══════════════════════════════════════════════════
+// ============================================
 document.addEventListener('DOMContentLoaded', () => {
-  const hu = $('huser');
-  if (hu) hu.textContent = S.user;
-
-  // Load saved artefacts
-  try {
-    const a = localStorage.getItem(PFX + 'artefacts');
-    if (a) S.artefacts = JSON.parse(a);
-  } catch {
-    S.artefacts = [];
-  }
-
-  loadFaceApi();
-  initUpload();
+  renderEntries();
   renderTray();
-  updQuota();
-
+  
+  // Set hero ke artefak pertama
+  if (S.artefacts.length > 0) {
+    setHero(S.artefacts[0].id);
+  }
+  
   const ri = $('ri');
   const cc = $('ccount');
-
   if (ri && cc) {
     ri.oninput = () => {
       const n = ri.value.length;
@@ -1851,8 +1705,38 @@ document.addEventListener('DOMContentLoaded', () => {
       cc.style.color = n >= 450 ? 'var(--at)' : 'var(--txm)';
     };
   }
-
-  setInterval(updQuota, 60000);
+  
+  const sb = $('sbtn');
+  if (sb && ri) {
+    sb.onclick = () => {
+      const c = ri.value.trim();
+      if (!c) {
+        toast('Tulis sesuatu...');
+        return;
+      }
+      
+      // Simulate submit
+      const newEntry = {
+        id: 'user_' + Date.now(),
+        content: c,
+        mood: document.querySelector('.mc.act')?.dataset.mood || 'surviving',
+        timestamp: Date.now(),
+        reactions: { skull: 0, cry: 0, fire: 0, upside: 0 },
+        userReacted: null,
+        isDummy: false,
+        author: S.user
+      };
+      
+      S.entries.unshift(newEntry);
+      if (S.entries.length > 6) S.entries.pop();
+      localStorage.setItem('jejak_entries', JSON.stringify(S.entries));
+      renderEntries();
+      
+      ri.value = '';
+      if (cc) cc.textContent = '0/500';
+      toast('✓ Tersimpan');
+    };
+  }
 });
 </script>
 </body>
