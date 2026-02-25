@@ -22,6 +22,11 @@
   --surviving:#39FF14;
   --chaotic:#00F0FF;
   --doom:#8B5CF6;
+  --radar-bg:#0A2A0A;
+  --radar-grid:#2A5A2A;
+  --radar-line:#3A8A3A;
+  --radar-dot-purple:#B026FF;
+  --radar-dot-red:#FF3333;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{
@@ -90,7 +95,7 @@ header{
   background:var(--primary);
 }
 
-/* CONNECTION STATUS - HANYA HIJAU BLINKING */
+/* CONNECTION DOT */
 .connection-dot{
   width:8px;
   height:8px;
@@ -105,11 +110,11 @@ header{
 }
 
 /* ============================================ */
-/* LET'S TALK HERO - INSOMNIA AQUARIUM */
+/* RADAR CHAT HERO */
 /* ============================================ */
-.insomnia-hero {
+.radar-hero {
   width: 100%;
-  aspect-ratio: 1/1; /* Tinggi = Lebar (kotak) */
+  aspect-ratio: 1/1;
   margin-bottom: 24px;
   border-radius: 20px;
   overflow: hidden;
@@ -118,109 +123,112 @@ header{
   background: #000;
 }
 
-.aquarium-container {
+.radar-container {
   position: relative;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: radial-gradient(ellipse at 30% 40%, #0a1a2a, #030614);
+  background: radial-gradient(circle at 30% 30%, #1A3A1A, #0A1A0A);
 }
 
-.aquarium-bg {
+/* Grid radar */
+.radar-grid {
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 240, 255, 0.02) 0px,
-    rgba(0, 0, 0, 0.5) 2px,
-    transparent 3px,
-    transparent 8px
-  );
-  animation: wave 15s infinite linear;
-  opacity: 0.4;
+  background-image: 
+    repeating-linear-gradient(0deg, var(--radar-grid) 0px, transparent 1px, transparent 20px),
+    repeating-linear-gradient(90deg, var(--radar-grid) 0px, transparent 1px, transparent 20px);
+  opacity: 0.3;
+  animation: radar-scan 8s infinite linear;
 }
 
-@keyframes wave {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-20px); }
+@keyframes radar-scan {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.fishes {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  z-index: 10;
-}
-
-.fish {
+/* Lingkaran radar */
+.radar-circles {
   position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px var(--radar-line);
+}
+
+.radar-circles::before,
+.radar-circles::after {
+  content: '';
+  position: absolute;
+  inset: 25%;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 2px var(--radar-line);
+  opacity: 0.5;
+}
+
+.radar-circles::after {
+  inset: 50%;
+}
+
+/* Garis radar berputar */
+.radar-line {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--surviving), transparent);
+  transform-origin: left;
+  animation: radar-spin 4s infinite linear;
+  opacity: 0.8;
+}
+
+@keyframes radar-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Dots (user) */
+.radar-dot {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: radar-blink 1.5s infinite ease-in-out;
+  z-index: 20;
   cursor: pointer;
   transition: all 0.2s;
-  filter: drop-shadow(0 0 8px currentColor);
-  animation: blink 2s infinite, swim 25s infinite ease-in-out;
-  z-index: 10;
-  font-size: 28px;
 }
 
-.fish:hover {
-  transform: scale(1.3) !important;
-  filter: drop-shadow(0 0 20px currentColor);
-  z-index: 100;
+.radar-dot:hover {
+  transform: translate(-50%, -50%) scale(2);
+  box-shadow: 0 0 20px currentColor;
+  z-index: 30;
 }
 
-.fish-char {
-  font-family: 'Courier New', monospace;
-  font-size: 32px;
-  font-weight: bold;
-  display: inline-block;
-  transform: rotate(var(--rot, 0deg));
-  text-shadow: 0 0 15px currentColor;
+.radar-dot.purple {
+  background: var(--radar-dot-purple);
+  box-shadow: 0 0 15px var(--radar-dot-purple);
 }
 
-.fish[data-color="pink"] { color: #FF006E; }
-.fish[data-color="purple"] { color: #8B5CF6; }
-.fish[data-color="green"] { color: #39FF14; }
-.fish[data-color="cyan"] { color: #00F0FF; }
-.fish[data-color="orange"] { color: #FF4D00; }
-.fish[data-color="blue"] { color: #3B82F6; }
-.fish[data-color="brown"] { color: #FF9500; }
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+.radar-dot.red {
+  background: var(--radar-dot-red);
+  box-shadow: 0 0 15px var(--radar-dot-red);
 }
 
-@keyframes swim {
-  0% { transform: translate(0, 0) rotate(0deg); }
-  25% { transform: translate(20px, -15px) rotate(5deg); }
-  50% { transform: translate(-15px, 20px) rotate(-5deg); }
-  75% { transform: translate(15px, -10px) rotate(3deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
+.radar-dot.ai {
+  background: var(--surviving);
+  box-shadow: 0 0 15px var(--surviving);
+  animation: radar-blink 2.5s infinite;
 }
 
-.bubbles {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 5;
+@keyframes radar-blink {
+  0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.8); }
 }
 
-.bubble {
-  position: absolute;
-  bottom: -20px;
-  width: 15px;
-  height: 15px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 50%;
-  animation: bubble 8s infinite ease-in;
-}
-
-@keyframes bubble {
-  0% { transform: translateY(0) scale(1); opacity: 0.3; }
-  100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
-}
-
-.aquarium-overlay {
+/* Radar overlay */
+.radar-overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -231,14 +239,14 @@ header{
   justify-content: center;
   align-items: center;
   text-align: center;
-  z-index: 20;
+  z-index: 10;
   pointer-events: none;
-  background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.4) 100%);
+  background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.6) 100%);
 }
 
-.aquarium-overlay h2,
-.aquarium-overlay p,
-.aquarium-overlay .quota-display {
+.radar-overlay h2,
+.radar-overlay p,
+.radar-overlay .quota-display {
   pointer-events: auto;
 }
 
@@ -248,9 +256,9 @@ header{
   text-transform: uppercase;
   color: #fff;
   text-shadow: 
-    3px 0 0 #FF006E,
-    -3px 0 0 #00F0FF,
-    0 0 30px #39FF14;
+    3px 0 0 var(--radar-dot-red),
+    -3px 0 0 var(--radar-dot-purple),
+    0 0 30px var(--surviving);
   animation: glitch 3s infinite;
   letter-spacing: 8px;
   margin-bottom: 8px;
@@ -269,13 +277,13 @@ header{
 
 .glitch-text::before {
   animation: glitch-top 0.3s infinite;
-  color: #FF006E;
+  color: var(--radar-dot-red);
   z-index: -1;
 }
 
 .glitch-text::after {
   animation: glitch-bottom 0.3s infinite;
-  color: #00F0FF;
+  color: var(--radar-dot-purple);
   z-index: -2;
 }
 
@@ -343,7 +351,7 @@ header{
   text-decoration: underline;
 }
 
-/* VIBE CHECK BUTTON - DI DALAM HERO */
+/* VIBE CHECK BUTTON */
 .vibe-check-btn {
   position: absolute;
   bottom: 16px;
@@ -351,17 +359,20 @@ header{
   background: var(--primary);
   color: var(--bg);
   border: none;
-  padding: 8px 16px;
-  font-size: 12px;
+  padding: 12px 24px;
+  font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
   cursor: pointer;
-  text-decoration: none;
-  border-radius: 30px;
+  border-radius: 40px;
   transition: all 0.2s;
   z-index: 30;
   pointer-events: auto;
   box-shadow: 0 0 20px rgba(255,77,0,0.5);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .vibe-check-btn:hover {
@@ -860,35 +871,31 @@ header{
   </header>
 
   <!-- ============================================ -->
-  <!-- LET'S TALK HERO - INSOMNIA AQUARIUM -->
+  <!-- RADAR CHAT HERO -->
   <!-- ============================================ -->
-  <section class="insomnia-hero" id="insomniaHero">
-    <div class="aquarium-container">
-      <div class="aquarium-bg"></div>
+  <section class="radar-hero" id="radarHero">
+    <div class="radar-container">
+      <div class="radar-grid"></div>
+      <div class="radar-circles"></div>
+      <div class="radar-line"></div>
       
-      <div class="fishes" id="aquariumFishes">
-        <!-- Ikan akan di-generate via JS -->
-      </div>
+      <!-- Dots (akan diisi JS) -->
+      <div class="radar-dots" id="radarDots"></div>
       
-      <div class="bubbles">
-        <div class="bubble" style="left: 10%; width: 15px; height: 15px; animation-delay: 0s;"></div>
-        <div class="bubble" style="left: 30%; width: 25px; height: 25px; animation-delay: 2s;"></div>
-        <div class="bubble" style="left: 60%; width: 10px; height: 10px; animation-delay: 4s;"></div>
-        <div class="bubble" style="left: 80%; width: 20px; height: 20px; animation-delay: 1s;"></div>
-        <div class="bubble" style="left: 50%; width: 18px; height: 18px; animation-delay: 3s;"></div>
-      </div>
-      
-      <div class="aquarium-overlay">
+      <!-- Radar overlay -->
+      <div class="radar-overlay">
         <h2 class="glitch-text" data-text="LET'S TALK">LET'S TALK</h2>
-        <p class="sub-text">tap ikan untuk bertemu teman baru</p>
+        <p class="sub-text">tap titik untuk mengobrol</p>
         <div class="quota-display">
-          <span class="quota-badge" id="quotaBadge">0/3 hari ini</span>
+          <span class="quota-badge" id="quotaBadge">1/1 hari ini</span>
           <span class="upgrade-link" onclick="showUpgradeModal()">Upgrade</span>
         </div>
       </div>
       
-      <!-- VIBE CHECK BUTTON - DI DALAM HERO (KANAN BAWAH) -->
-      <a href="chat.html" class="vibe-check-btn">✨ Vibe Check</a>
+      <!-- VIBE CHECK BUTTON -->
+      <a href="chat.html" class="vibe-check-btn">
+        <span>✨</span> Vibe Check
+      </a>
     </div>
   </section>
 
@@ -896,7 +903,7 @@ header{
   <div class="modal" id="upgradeModal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>✨ Insomnia Premium</h3>
+        <h3>✨ Radar Premium</h3>
         <button class="modal-close" onclick="closeUpgradeModal()">×</button>
       </div>
       <div class="modal-body">
@@ -907,9 +914,9 @@ header{
           </div>
           <ul class="benefits">
             <li>✓ Chat 5 jam/hari (unlimited)</li>
-            <li>✓ Pilih karakter favorit</li>
-            <li>✓ Prioritas antrian</li>
-            <li>✓ Memory percakapan lebih panjang</li>
+            <li>✓ Lihat semua titik radar</li>
+            <li>✓ Prioritas koneksi</li>
+            <li>✓ Bebas pilih lawan bicara</li>
           </ul>
           <button class="upgrade-btn" onclick="upgrade('monthly')">Upgrade Sekarang</button>
         </div>
@@ -921,8 +928,8 @@ header{
           <ul class="benefits">
             <li>✓ Semua benefit bulanan</li>
             <li>✓ Hemat Rp 140.000</li>
-            <li>✓ Akses early fitur baru</li>
-            <li>✓ Badge eksklusif</li>
+            <li>✓ Badge eksklusif di radar</li>
+            <li>✓ Akses ke semua karakter AI</li>
           </ul>
           <button class="upgrade-btn" onclick="upgrade('yearly')">Upgrade Sekarang</button>
         </div>
@@ -961,7 +968,7 @@ header{
 
 <div class="toast" id="toast"></div>
 
-<!-- BOTTOM NAV - 4 ITEM -->
+<!-- BOTTOM NAV -->
 <nav class="bottom-nav">
   <div class="nav-container">
     <a href="/jejak" 
@@ -1029,6 +1036,7 @@ const st = {
   userId: null,
   sessionId: null,
   username: null,
+  userGender: localStorage.getItem('user_gender') || 'unknown', // 'male' atau 'female'
   rants: [],
   reactions: {},
   filter: 'all',
@@ -1051,132 +1059,201 @@ const MOOD_COLORS = {
 };
 
 // ============================================
-// INSOMNIA AQUARIUM - 30 KARAKTER
+// AI CHARACTERS (Standby)
 // ============================================
-const AQUARIUM_FISH = [
-  // Karakter perempuan (pink, purple, cyan)
-  { username: 'beby.manis', glyph: '🥺', color: 'pink' },
-  { username: 'moon.child', glyph: '🌙', color: 'purple' },
-  { username: 'strawberry.shortcake', glyph: '🍓', color: 'pink' },
-  { username: 'luv.letter', glyph: '💌', color: 'purple' },
-  { username: 'cloud.dreamer', glyph: '☁️', color: 'cyan' },
-  { username: 'pretty.sad', glyph: '😔', color: 'purple' },
-  { username: 'teddy.bear', glyph: '🧸', color: 'brown' },
-  { username: 'popcorn.galau', glyph: '🍿', color: 'orange' },
-  { username: 'cinnamon.girl', glyph: '🥨', color: 'orange' },
-  { username: 'pink.sky', glyph: '🌸', color: 'pink' },
-  { username: 'sleepy.head', glyph: '😴', color: 'blue' },
-  { username: 'cherry.blossom', glyph: '🌸', color: 'pink' },
-  { username: 'bubble.tea', glyph: '🧋', color: 'purple' },
-  { username: 'little.fairy', glyph: '🧚', color: 'cyan' },
-  { username: 'baby.girl', glyph: '👶', color: 'pink' },
-  
-  // Karakter laki-laki (green, blue, cyan)
-  { username: 'si.badai', glyph: '🌪️', color: 'green' },
-  { username: 'mba.ceplas', glyph: '🗣️', color: 'green' },
-  { username: 'cici.sensor', glyph: '🔍', color: 'cyan' },
-  { username: 'si.imut.jahat', glyph: '😈', color: 'purple' },
-  { username: 'cantik.tapi.sad', glyph: '💅', color: 'purple' },
-  { username: 'mba.nyinyir', glyph: '👀', color: 'green' },
-  { username: 'si.pedas', glyph: '🌶️', color: 'orange' },
-  { username: 'mba.galau.akutan', glyph: '😫', color: 'purple' },
-  { username: 'si.polos.bahaya', glyph: '😇', color: 'cyan' },
-  { username: 'mba.santuy', glyph: '😎', color: 'green' },
-  { username: 'si.cerewet', glyph: '📢', color: 'orange' },
-  { username: 'mba.ngarep', glyph: '🤞', color: 'pink' },
-  { username: 'si.ngeselin', glyph: '😏', color: 'green' },
-  { username: 'mba.gaul', glyph: '🔥', color: 'orange' },
-  { username: 'si.kocak', glyph: '😂', color: 'green' }
-];
+const AI_CHARACTERS = {
+  male: [
+    { username: 'si.badai', glyph: '🌪️', personality: 'sarkas' },
+    { username: 'moon.child', glyph: '🌙', personality: 'melankolis' },
+    { username: 'si.kocak', glyph: '😂', personality: 'humoris' },
+    { username: 'si.pedas', glyph: '🌶️', personality: 'pedas' },
+    { username: 'mba.gaul', glyph: '🔥', personality: 'gaul' }
+  ],
+  female: [
+    { username: 'beby.manis', glyph: '🥺', personality: 'manja' },
+    { username: 'strawberry.shortcake', glyph: '🍓', personality: 'manis' },
+    { username: 'pretty.sad', glyph: '😔', personality: 'galau' },
+    { username: 'little.fairy', glyph: '🧚', personality: 'magical' },
+    { username: 'cinnamon.girl', glyph: '🥨', personality: 'hangat' }
+  ]
+};
 
-// Quota management
-let dailyQuota = 3;
-const quotaKey = 'insomnia_quota_' + new Date().toDateString();
+// ============================================
+// RADAR CHAT MANAGER
+// ============================================
+let radarInterval = null;
+let onlineUsers = [];
+
+// Quota management (1x per hari)
+let dailyQuota = 1;
+const quotaKey = 'radar_quota_' + new Date().toDateString();
 
 // Load quota dari localStorage
 const savedQuota = localStorage.getItem(quotaKey);
 if (savedQuota !== null) {
   dailyQuota = parseInt(savedQuota);
 } else {
-  localStorage.setItem(quotaKey, '3');
+  localStorage.setItem(quotaKey, '1');
 }
 
-// Generate ikan
-function initAquarium() {
-  const container = document.getElementById('aquariumFishes');
-  if (!container) return;
+function initRadar() {
+  // Generate initial dots
+  generateRadarDots();
   
-  // Shuffle array
-  const shuffled = [...AQUARIUM_FISH].sort(() => 0.5 - Math.random());
-  
-  // Ambil 12 ikan random
-  const selected = shuffled.slice(0, 12);
-  
-  // Buat ikan
-  container.innerHTML = '';
-  selected.forEach((fish, index) => {
-    const fishEl = document.createElement('div');
-    fishEl.className = 'fish';
-    fishEl.setAttribute('data-color', fish.color);
-    fishEl.setAttribute('data-username', fish.username);
-    
-    // Posisi random
-    const left = 5 + Math.random() * 90;
-    const top = 10 + Math.random() * 80;
-    fishEl.style.left = left + '%';
-    fishEl.style.top = top + '%';
-    fishEl.style.animationDelay = (index * 0.3) + 's';
-    
-    // Random rotasi
-    const rot = (Math.random() * 30) - 15;
-    
-    fishEl.innerHTML = `<span class="fish-char" style="--rot: ${rot}deg">${fish.glyph}</span>`;
-    
-    fishEl.addEventListener('click', () => onFishClick(fish, fishEl));
-    
-    container.appendChild(fishEl);
-  });
+  // Update radar setiap 5 detik (simulasi user online)
+  radarInterval = setInterval(() => {
+    updateRadarDots();
+  }, 5000);
   
   updateQuotaDisplay();
+}
+
+function generateRadarDots() {
+  const container = document.getElementById('radarDots');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  // Generate 5-10 dots random
+  const dotCount = 5 + Math.floor(Math.random() * 6);
+  
+  for (let i = 0; i < dotCount; i++) {
+    // Random gender
+    const gender = Math.random() > 0.5 ? 'purple' : 'red';
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 20 + Math.random() * 60; // 20-80% dari radius
+    
+    // Konversi ke koordinat polar
+    const x = 50 + Math.cos(angle) * distance / 2;
+    const y = 50 + Math.sin(angle) * distance / 2;
+    
+    const dot = document.createElement('div');
+    dot.className = `radar-dot ${gender}`;
+    dot.style.left = x + '%';
+    dot.style.top = y + '%';
+    
+    // Simpan data user
+    const userData = {
+      id: 'user_' + i,
+      username: `user_${Math.random().toString(36).substring(2, 6)}`,
+      gender: gender === 'purple' ? 'female' : 'male',
+      isAI: false
+    };
+    
+    dot.setAttribute('data-user', JSON.stringify(userData));
+    dot.addEventListener('click', () => onDotClick(userData, dot));
+    
+    container.appendChild(dot);
+  }
+  
+  // Tambah AI dots (standby)
+  addAIDots(container);
+}
+
+function addAIDots(container) {
+  // Tambah 3 AI karakter
+  for (let i = 0; i < 3; i++) {
+    const gender = Math.random() > 0.5 ? 'purple' : 'red';
+    const aiPool = gender === 'purple' ? AI_CHARACTERS.female : AI_CHARACTERS.male;
+    const aiChar = aiPool[Math.floor(Math.random() * aiPool.length)];
+    
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 10 + Math.random() * 70;
+    
+    const x = 50 + Math.cos(angle) * distance / 2;
+    const y = 50 + Math.sin(angle) * distance / 2;
+    
+    const dot = document.createElement('div');
+    dot.className = `radar-dot ${gender} ai`;
+    dot.style.left = x + '%';
+    dot.style.top = y + '%';
+    
+    const userData = {
+      id: 'ai_' + aiChar.username,
+      username: aiChar.username,
+      gender: gender === 'purple' ? 'female' : 'male',
+      isAI: true,
+      personality: aiChar.personality,
+      glyph: aiChar.glyph
+    };
+    
+    dot.setAttribute('data-user', JSON.stringify(userData));
+    dot.addEventListener('click', () => onDotClick(userData, dot));
+    
+    container.appendChild(dot);
+  }
+}
+
+function updateRadarDots() {
+  // Simulasi user bergerak/berubah
+  const container = document.getElementById('radarDots');
+  if (!container) return;
+  
+  const dots = container.querySelectorAll('.radar-dot');
+  
+  dots.forEach(dot => {
+    // Update posisi sedikit
+    const currentLeft = parseFloat(dot.style.left);
+    const currentTop = parseFloat(dot.style.top);
+    
+    if (!isNaN(currentLeft) && !isNaN(currentTop)) {
+      let newLeft = currentLeft + (Math.random() - 0.5) * 5;
+      let newTop = currentTop + (Math.random() - 0.5) * 5;
+      
+      // Batasi dalam radar
+      newLeft = Math.max(5, Math.min(95, newLeft));
+      newTop = Math.max(5, Math.min(95, newTop));
+      
+      dot.style.left = newLeft + '%';
+      dot.style.top = newTop + '%';
+    }
+  });
+}
+
+function onDotClick(userData, dotElement) {
+  if (dailyQuota <= 0 && !userData.isAI) {
+    // Kalo quota habis dan bukan AI, show upgrade
+    showUpgradeModal();
+    return;
+  }
+  
+  // Efek klik
+  dotElement.style.transform = 'translate(-50%, -50%) scale(2)';
+  dotElement.style.boxShadow = '0 0 30px currentColor';
+  setTimeout(() => {
+    dotElement.style.transform = '';
+    dotElement.style.boxShadow = '';
+  }, 500);
+  
+  if (userData.isAI) {
+    // Chat dengan AI (gratis, tanpa quota)
+    toast(`💬 Bertemu dengan @${userData.username} (AI)`);
+    setTimeout(() => {
+      window.location.href = `chat.html?private=true&with=${userData.username}`;
+    }, 800);
+  } else {
+    // Chat dengan real user (kurangi quota)
+    dailyQuota--;
+    localStorage.setItem(quotaKey, dailyQuota.toString());
+    updateQuotaDisplay();
+    
+    toast(`💬 Bertemu dengan @${userData.username}`);
+    setTimeout(() => {
+      window.location.href = `chat.html?private=true&with=${userData.username}`;
+    }, 800);
+  }
 }
 
 function updateQuotaDisplay() {
   const badge = document.getElementById('quotaBadge');
   if (badge) {
-    badge.textContent = `${dailyQuota}/3 hari ini`;
+    badge.textContent = `${dailyQuota}/1 hari ini`;
     if (dailyQuota <= 0) {
       badge.classList.add('empty');
     } else {
       badge.classList.remove('empty');
     }
   }
-}
-
-function onFishClick(fish, fishEl) {
-  if (dailyQuota <= 0) {
-    showUpgradeModal();
-    return;
-  }
-  
-  // Kurangi quota
-  dailyQuota--;
-  localStorage.setItem(quotaKey, dailyQuota.toString());
-  updateQuotaDisplay();
-  
-  // Efek ikan menghilang sebentar
-  fishEl.style.transform = 'scale(0)';
-  fishEl.style.opacity = '0';
-  setTimeout(() => {
-    fishEl.style.transform = '';
-    fishEl.style.opacity = '1';
-  }, 1000);
-  
-  toast(`💬 Bertemu dengan @${fish.username}`);
-  
-  // Redirect ke private chat (setelah delay)
-  setTimeout(() => {
-    window.location.href = `chat.html?private=true&with=${fish.username}`;
-  }, 800);
 }
 
 // ============================================
@@ -1210,8 +1287,7 @@ function toast(msg, isErr=false){
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-function setConn(online, msg){
-  // Just update dot color based on online status
+function setConn(online){
   const dot = document.getElementById('connectionDot');
   if (dot) {
     dot.style.background = online ? 'var(--surviving)' : 'var(--agak)';
@@ -1238,6 +1314,7 @@ function toggleMenu() {
 async function ensureUser() {
   let username = localStorage.getItem('stt_username');
   let userId = localStorage.getItem('stt_user_id');
+  let gender = localStorage.getItem('user_gender');
   
   if (!username) {
     username = prompt('Pilih username dulu yuk', '');
@@ -1246,6 +1323,15 @@ async function ensureUser() {
     }
     username = username.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
     localStorage.setItem('stt_username', username);
+  }
+  
+  if (!gender) {
+    gender = prompt('Pilih gender kamu (male/female)', 'male').toLowerCase();
+    if (gender !== 'male' && gender !== 'female') {
+      gender = 'male';
+    }
+    localStorage.setItem('user_gender', gender);
+    st.userGender = gender;
   }
   
   st.username = username;
@@ -1267,6 +1353,7 @@ async function ensureUser() {
           .insert({
             username: username,
             session_id: st.sessionId,
+            gender: gender,
             created_at: new Date().toISOString(),
             last_seen: new Date().toISOString()
           })
@@ -1332,7 +1419,7 @@ function setupRealtime(){
 }
 
 // ============================================
-// LOAD RANTS
+// LOAD RANTS (EXISTING)
 // ============================================
 async function loadRants(){
   setLoading(true);
@@ -1411,7 +1498,7 @@ async function loadReactions(ids){
 }
 
 // ============================================
-// REACTIONS
+// REACTIONS (EXISTING)
 // ============================================
 async function reactToRant(rantId, emoji, btnEl){
   if (!st.userId) {
@@ -1479,7 +1566,7 @@ async function refreshCounts(rantId){
 }
 
 // ============================================
-// RENDER
+// RENDER RANTS (EXISTING)
 // ============================================
 function setLoading(v){
   st.loading = v;
@@ -1581,8 +1668,8 @@ document.addEventListener('htmx:afterSwap', function() {
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('Spill the Tea starting...');
   
-  // Init aquarium
-  initAquarium();
+  // Init radar
+  initRadar();
   
   const ok = await initSupabase();
   
@@ -1599,6 +1686,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   else {
     setLoading(false);
     renderRants();
+  }
+});
+
+// Cleanup interval saat page unload
+window.addEventListener('beforeunload', () => {
+  if (radarInterval) {
+    clearInterval(radarInterval);
   }
 });
 </script>
