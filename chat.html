@@ -7,7 +7,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/htmx.org@2.0.0"></script>
 <style>
-/* ===== CSS SAMA PERSIS DENGAN SEBELUMNYA ===== */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 :root{
   --bg:#0A0A0A;
@@ -444,7 +443,7 @@ const st = {
 };
 
 // ============================================
-// STATE MANAJEMEN PERCAKAPAN
+// STATE MANAJEMEN MULTI-KARAKTER
 // ============================================
 const convoState = {
   phase: 'idle',
@@ -455,8 +454,189 @@ const convoState = {
   roomStats: {
     emosi: { lastAITime: null, messageCount: 0, lastUserMessage: null },
     agak: { lastAITime: null, messageCount: 0, lastUserMessage: null }
-  }
+  },
+  
+  // Multi-character tracking
+  activeConversations: {
+    emosi: {
+      topic: null,
+      topicKeywords: [],
+      lastTopicTime: null,
+      participants: [],
+      messageCount: 0,
+      lastMessages: [],
+      characterLastSeen: {}
+    },
+    agak: {
+      topic: null,
+      topicKeywords: [],
+      lastTopicTime: null,
+      participants: [],
+      messageCount: 0,
+      lastMessages: [],
+      characterLastSeen: {}
+    }
+  },
+  
+  maxParticipantsPerConvo: 7,
+  cooldownPerCharacter: 120000, // 2 menit
+  newCharacterChance: 0.4, // 40% chance karakter baru nimbrung
+  participantReturnChance: 0.7 // 70% chance pake participant lama
 };
+
+// ============================================
+// DETEKSI TOPIK SEDERHANA
+// ============================================
+function extractKeywords(text) {
+  text = text.toLowerCase();
+  var words = text.split(' ');
+  var keywords = [];
+  
+  // Stop words yang diabaikan
+  var stopWords = ['yang', 'dan', 'di', 'ke', 'dari', 'ini', 'itu', 'aku', 'kamu', 'gue', 'lo', 'ga', 'gak', 'nggak', 'ya', 'yah', 'dong', 'sih', 'deh', 'kok', 'loh', 'tau', 'tahu'];
+  
+  for (var i = 0; i < words.length; i++) {
+    var word = words[i].replace(/[^a-z0-9]/g, '');
+    if (word.length > 2 && !stopWords.includes(word)) {
+      keywords.push(word);
+    }
+  }
+  
+  return keywords.slice(0, 5); // Max 5 keywords
+}
+
+function isSameTopic(newMessage, lastMessages) {
+  if (!lastMessages || lastMessages.length === 0) return true;
+  
+  var lastMsg = lastMessages[lastMessages.length - 1];
+  var timeDiff = Date.now() - (lastMsg?.timestamp || 0);
+  
+  // Kalo udah lebih dari 10 menit, anggap topik baru
+  if (timeDiff > 600000) return false;
+  
+  // Extract keywords
+  var newKeywords = extractKeywords(newMessage);
+  var lastKeywords = extractKeywords(lastMsg?.content || '');
+  
+  // Cek overlap keywords
+  for (var i = 0; i < newKeywords.length; i++) {
+    for (var j = 0; j < lastKeywords.length; j++) {
+      if (newKeywords[i] === lastKeywords[j]) {
+        return true;
+      }
+    }
+  }
+  
+  // Kalo ada kata tanya, mungkin masih topik yang sama
+  if (newMessage.includes('?') && timeDiff < 300000) return true;
+  
+  return false;
+}
+
+// ============================================
+// PILIH KARAKTER UNTUK MULTI-KARAKTER
+// ============================================
+function selectCharacterForReply(room, lastMessage, lastMessages) {
+  var friends = DIGITAL_FRIENDS[room];
+  var convo = convoState.activeConversations[room];
+  var now = Date.now();
+  
+  // Update last messages
+  if (lastMessages && lastMessages.length > 0) {
+    convo.lastMessages = lastMessages.slice(-5);
+  }
+  
+  // Cek apakah masih topik yang sama
+  var sameTopic = isSameTopic(lastMessage, convo.lastMessages);
+  
+  if (!sameTopic) {
+    // Topik baru, reset participants
+    convo.participants = [];
+    convo.messageCount = 0;
+    convo.topic = lastMessage.substring(0, 50);
+    convo.topicKeywords = extractKeywords(lastMessage);
+    convo.lastTopicTime = now;
+    console.log('🆕 Topik baru:', convo.topic);
+    console.log('🔑 Keywords:', convo.topicKeywords);
+  } else {
+    // Update keywords topik
+    var newKeywords = extractKeywords(lastMessage);
+    convo.topicKeywords = [...new Set([...convo.topicKeywords, ...newKeywords])].slice(0, 10);
+  }
+  
+  // Filter karakter yang available (belum ngomong dalam cooldown)
+  var availableFriends = friends.filter(f => {
+    var lastSeen = convo.characterLastSeen[f.username] || 0;
+    return (now - lastSeen) > convoState.cooldownPerCharacter;
+  });
+  
+  // Kalo available kosong, ambil yang paling lama ngomong
+  if (availableFriends.length === 0) {
+    console.log('⚠️ Semua karakter dalam cooldown');
+    
+    // Urutkan berdasarkan lastSeen (yang paling lama duluan)
+    var sortedFriends = [...friends].sort((a, b) => {
+      var lastA = convo.characterLastSeen[a.username] || 0;
+      var lastB = convo.characterLastSeen[b.username] || 0;
+      return lastA - lastB;
+    });
+    
+    availableFriends = [sortedFriends[0]];
+  }
+  
+  // Participants yang masih available
+  var participants = convo.participants || [];
+  var activeParticipants = participants.filter(p => 
+    availableFriends.some(f => f.username === p)
+  );
+  
+  var selectedFriend;
+  
+  // Logika pemilihan
+  if (activeParticipants.length > 0 && Math.random() < convoState.participantReturnChance) {
+    // Pilih dari participant yang udah ada
+    var randomParticipant = activeParticipants[Math.floor(Math.random() * activeParticipants.length)];
+    selectedFriend = friends.find(f => f.username === randomParticipant);
+    console.log('🔄 Pakai participant lama:', randomParticipant);
+    
+  } else if (Math.random() < convoState.newCharacterChance) {
+    // Coba pilih karakter baru
+    var newFriends = availableFriends.filter(f => !participants.includes(f.username));
+    
+    if (newFriends.length > 0) {
+      selectedFriend = newFriends[Math.floor(Math.random() * newFriends.length)];
+      
+      // Tambah ke participants
+      if (!participants.includes(selectedFriend.username)) {
+        participants.push(selectedFriend.username);
+        if (participants.length > convoState.maxParticipantsPerConvo) {
+          var removed = participants.shift();
+          console.log('🗑️ Participant lama dihapus:', removed);
+        }
+      }
+      console.log('🎉 Karakter baru nimbrung:', selectedFriend.username);
+    } else {
+      // Kalo semua udah pernah, pake random dari available
+      selectedFriend = availableFriends[Math.floor(Math.random() * availableFriends.length)];
+    }
+  } else {
+    // Default: pake random dari available
+    selectedFriend = availableFriends[Math.floor(Math.random() * availableFriends.length)];
+  }
+  
+  // Fallback kalo masih undefined
+  if (!selectedFriend) {
+    selectedFriend = friends[Math.floor(Math.random() * friends.length)];
+    console.log('⚠️ Fallback random:', selectedFriend.username);
+  }
+  
+  // Update last seen
+  convo.characterLastSeen[selectedFriend.username] = now;
+  convo.participants = participants;
+  convo.messageCount++;
+  
+  return selectedFriend;
+}
 
 function updateConvoPhase(room) {
   var now = Date.now();
@@ -668,6 +848,14 @@ function setupRealtime(){
       console.log('📡 Realtime subscription status:', status);
       if(status === 'SUBSCRIBED') {
         console.log('✅ Realtime connected!');
+      } else {
+        console.log('⚠️ Realtime error, fallback ke polling 3 detik');
+        // Fallback polling
+        if (!window.pollingInterval) {
+          window.pollingInterval = setInterval(function() {
+            loadChats();
+          }, 3000);
+        }
       }
     });
 }
@@ -817,7 +1005,7 @@ function addChatToUI(msg, isNew){
 }
 
 // ============================================
-// TRIGGER DIGITAL FRIEND
+// TRIGGER DIGITAL FRIEND - DENGAN MULTI-KARAKTER
 // ============================================
 async function triggerDigitalFriend(room, lastMessage, forceTest) {
   console.log('🎯 triggerDigitalFriend dipanggil!', room, lastMessage);
@@ -893,17 +1081,23 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
   console.log('🔍 DEBUG - panjang:', DIGITAL_FRIENDS[room]?.length);
   console.log('🔍 DEBUG - tipe:', typeof DIGITAL_FRIENDS[room]);
   
-  var friends = DIGITAL_FRIENDS[room];
-  if (!friends || friends.length === 0) {
-    console.log('❌ Gak ada temen di room', room);
-    console.log('🔍 DIGITAL_FRIENDS full:', DIGITAL_FRIENDS);
+  // Ambil last messages buat konteks
+  var lastMessages = (st.chatMessages[room] || []).slice(-5).map(m => ({
+    content: m.content,
+    timestamp: new Date(m.created_at).getTime(),
+    username: m.username,
+    is_ai: m.is_ai
+  }));
+  
+  // Pilih karakter dengan multi-character logic
+  var selectedFriend = selectCharacterForReply(room, lastMessage, lastMessages);
+  
+  if (!selectedFriend) {
+    console.log('❌ Gagal pilih karakter');
     return;
   }
   
-  console.log('👥 Total friends:', friends.length);
-  
-  var randomFriend = friends[Math.floor(Math.random() * friends.length)];
-  console.log('🎭 Friend terpilih:', randomFriend.username);
+  console.log('🎭 Friend terpilih:', selectedFriend.username);
   
   var messageLength = lastMessage.length;
   var baseDelay = 1000;
@@ -917,7 +1111,7 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
   console.log(`⏳ Delay: ${delay.toFixed(0)}ms (panjang: ${messageLength})`);
   
   setTimeout(async function() {
-    console.log('🤖 Mengeksekusi reply untuk', randomFriend.username);
+    console.log('🤖 Mengeksekusi reply untuk', selectedFriend.username);
     
     try {
       var response = await fetch('/api/chat', {
@@ -925,9 +1119,9 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: lastMessage,
-          characterName: randomFriend.username,
+          characterName: selectedFriend.username,
           room: room,
-          lastMessages: []
+          lastMessages: lastMessages.slice(-3)
         })
       });
       
@@ -941,7 +1135,7 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
         reply = data.reply;
       } else {
         console.log('⚠️ API fallback, pake template');
-        reply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
+        reply = selectedFriend.replies[Math.floor(Math.random() * selectedFriend.replies.length)];
         console.log('💬 Reply template:', reply);
       }
       
@@ -950,10 +1144,12 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
           const { error } = await st.sb
             .from(CFG.TBL_CHATS)
             .insert({
-              user_id: randomFriend.id,
-              username: randomFriend.username,
+              user_id: selectedFriend.id,
+              username: selectedFriend.username,
               content: reply,
-              room: room
+              room: room,
+              is_ai: true,
+              created_at: new Date().toISOString()
             });
           
           if (error) {
@@ -970,12 +1166,14 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
       console.error('❌ Error di triggerDigitalFriend:', e);
       
       if (st.sb) {
-        var fallbackReply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
+        var fallbackReply = selectedFriend.replies[Math.floor(Math.random() * selectedFriend.replies.length)];
         await st.sb.from(CFG.TBL_CHATS).insert({
-          user_id: randomFriend.id,
-          username: randomFriend.username,
+          user_id: selectedFriend.id,
+          username: selectedFriend.username,
           content: fallbackReply,
-          room: room
+          room: room,
+          is_ai: true,
+          created_at: new Date().toISOString()
         });
       }
     }
@@ -1004,7 +1202,9 @@ async function sendChat(room){
     user_id: userId,
     username: st.username,
     content: content,
-    room: room
+    room: room,
+    is_ai: false,
+    created_at: new Date().toISOString()
   };
   addChatToUI(tempMsg, true);
   
@@ -1016,7 +1216,9 @@ async function sendChat(room){
           user_id: userId,
           username: st.username,
           content: content,
-          room: room
+          room: room,
+          is_ai: false,
+          created_at: new Date().toISOString()
         });
       
       if(error) throw error;
