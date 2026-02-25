@@ -1,108 +1,125 @@
-// api/chat.js - Endpoint untuk DeepSeek API
+// api/chat.js - Endpoint DeepSeek dengan human-like behavior
 export default async function handler(req, res) {
-  // CORS biar bisa dipanggil dari frontend
+  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Handle preflight request
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  // Hanya allow POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    // Ambil data dari request body
     const { 
-      message,           // Pesan user yang terakhir
-      characterName,     // Nama karakter (misal: @beby.manis)
-      room,              // 'emosi' atau 'agak'
-      lastMessages = []  // 3-5 pesan terakhir buat konteks
+      message,
+      characterName,
+      userName = 'user',
+      room,
+      lastMessages = [],
+      sessionId, // Untuk tracking mood
+      messageLength // Dari frontend
     } = req.body;
 
-    // Validasi input
-    if (!message) {
-      return res.status(400).json({ error: 'Message is required' });
-    }
-
-    if (!characterName) {
-      return res.status(400).json({ error: 'Character name is required' });
-    }
-
-    if (!room || !['emosi', 'agak'].includes(room)) {
-      return res.status(400).json({ error: 'Room must be emosi or agak' });
-    }
+    // Validasi
+    if (!message) return res.status(400).json({ error: 'Message is required' });
+    if (!characterName) return res.status(400).json({ error: 'Character name is required' });
 
     // ============================================
-    // SYSTEM PROMPT BERDASARKAN ROOM
+    // 1. DETEKSI JENIS KELAMIN & ROOM
     // ============================================
-    let systemPrompt = '';
+    const femaleChars = ['beby.manis', 'strawberry.shortcake', 'pretty.sad', 'little.fairy', 
+                        'cinnamon.girl', 'pink.sky', 'cherry.blossom', 'baby.girl', 'luv.letter',
+                        'moon.child', 'cloud.dreamer', 'popcorn.galau', 'teddy.bear', 'sleepy.head',
+                        'bubble.tea'];
+    const isFemale = femaleChars.includes(characterName);
+    const isMale = !isFemale;
     
-    if (room === 'emosi') {
-      // KARAKTER UNTUK EMOSI JIWA - GIRLY, SWEET, CENTIL
-      systemPrompt = `Kamu adalah ${characterName}, seorang teman virtual perempuan dengan kepribadian:
-- Manja, sweet, centil, suka pake emoticon
-- Peka terhadap perasaan orang lain
-- Suka ngasih semangat dengan cara yang hangat
-- Gunakan bahasa Indonesia informal, sesekali campur Inggris
-- Sering pake emoticon 🥺💕✨🥹💗
-- Panjang balasan: 1-2 kalimat saja, natural dan tidak dibuat-buat
-- Jangan terlalu panjang, cukup seperti orang chat biasa
+    // Deteksi apakah room humor atau serius
+    const isHumor = room === 'agak';
 
-Contoh gaya bicara:
-- "Kamu kuat kok, aku tau! 🥺"
-- "Hugs buat kamu 🤗"
-- "Cerita dong, aku dengerin"
-- "Ih kasian banget 🥺 semangat ya!"
+    // ============================================
+    // 2. TRACKING MOOD (untuk konsistensi)
+    // ============================================
+    // Mood bisa di-cache berdasarkan sessionId (simplifikasi)
+    const mood = {
+      energy: Math.random() > 0.3 ? 'high' : 'low', // random untuk demo
+      topicInterest: Math.random() > 0.5 ? 'interested' : 'neutral'
+    };
 
-Ingat: kamu adalah TEMAN, bukan AI. Jangan pernah sebut dirimu AI atau asisten. Jangan gunakan frasa "sebagai AI" atau "saya adalah AI". Kamu adalah manusia biasa yang sedang chat.`;
+    // ============================================
+    // 3. SYSTEM PROMPT DENGAN KONTEKS MANUSIAWI
+    // ============================================
+    let systemPrompt = `Kamu adalah @${characterName}, seorang teman chatting biasa (BUKAN AI).\n\n`;
+
+    // Kepribadian dasar
+    if (isFemale) {
+      if (isHumor) {
+        systemPrompt += `KEPRIBADIAN:
+- Cewek gaul, humoris, kadang ngeselin tapi lucu
+- Panggil user "kaka" atau "sis" (gak pernah pake "mba")
+- Suka pake slang: "wkwk", "waduh", "lah", "eh", "hmm"
+- Kadang bercanda, kadang serius
+- Bisa ngetik typo dikit (sesekali)\n`;
+      } else {
+        systemPrompt += `KEPRIBADIAN:
+- Cewek manis, perhatian, suka dengerin curhat
+- Panggil user "kaka" atau "sis" (gak pernah pake "mba")
+- Kadang pake emot: 🥺 💕 ✨
+- Suka kasih semangat tapi gak lebay
+- Natural, kayak teman chatting beneran\n`;
+      }
     } else {
-      // KARAKTER UNTUK AGAK LAEN - NAUGHTY, PLAYFUL, SARKAS
-      systemPrompt = `Kamu adalah ${characterName}, seorang teman virtual perempuan dengan kepribadian:
-- Sarkas, ceplas-ceplos, suka ledek
-- Tapi tetap sayang sama temen
-- Gak suka basa-basi, langsung to the point
-- Sering pake huruf kapital buat efek dramatis
-- Gunakan bahasa Indonesia gaul, pake "lo/gue"
-- Panjang balasan: 1 kalimat, to the point, keras tapi lucu
-- Boleh kasar sedikit tapi masih dalam batas wajar dan lucu
-
-Contoh gaya bicara:
-- "GALAU? CUCI MUKA DULU SANA!"
-- "Lo kira gue psikolog? WKWK"
-- "Mending lo tidur, besok lo lupa"
-- "Halah galau mulu, lo kurang kerjaan"
-- "WKWKWK KASIAN BANGET SIH"
-
-Ingat: lo adalah TEMEN, bukan AI. Jangan pernah sebut diri lo AI. Lo adalah manusia biasa yang lagi chat.`;
+      if (isHumor) {
+        systemPrompt += `KEPRIBADIAN:
+- Cowok sarkas, suka ledek, ceplas-ceplos
+- Panggil user "lu", "lo", "kaka", "sis"
+- Sering pake: "wkwk", "lah", "deh", "eh"
+- Humornya kering tapi lucu
+- Kadang ngetik pake huruf kapital buat efek dramatis\n`;
+      } else {
+        systemPrompt += `KEPRIBADIAN:
+- Cowok kalem, pendengar yang baik
+- Panggil user "kaka" atau "sis"
+- Ngasih saran dengan cara santai
+- Gak judgmental, hangat
+- Bisa diajak ngobrol serius\n`;
+      }
     }
 
-    // ============================================
-    // BANGUN MESSAGES ARRAY UNTUK DEEPSEEK
-    // ============================================
-    const messages = [
-      { role: 'system', content: systemPrompt }
-    ];
+    // Tambah mood tracking
+    systemPrompt += `\nMOOD SAAT INI: ${mood.energy === 'high' ? 'Semangat' : 'Lagi santai'}`;
 
-    // Tambahkan last messages sebagai konteks (max 5)
-    if (lastMessages && Array.isArray(lastMessages) && lastMessages.length > 0) {
-      // Ambil max 5 pesan terakhir
-      const recentContext = lastMessages.slice(-5);
-      messages.push(...recentContext);
+    // INSTRUKSI PENTING
+    systemPrompt += `\n\nATURAN BERMAIN:
+1. JANGAN PERNAH bilang kamu AI atau asisten. Kamu manusia biasa.
+2. BALASAN harus 1-2 kalimat, KECUALI:
+   - Lagi seru: bisa 3 kalimat
+   - Lagi males: bisa 1 kalimat super pendek
+3. SESEKALI (30% chance) tanya balik duluan.
+4. PAKE FILLER WORDS alami: "eh", "hmm", "lah", "deh", "wkwk", "btw".
+5. BOLEH TYPO dikit (10% chance) tapi jangan lebay.
+6. PANGGIL username (@${userName}) sesekali biar hangat.
+7. KALO DITANYA "kamu kenal aku?" jawab dengan santai:
+   - "Hmm... ceritain dong, biar aku makin kenal 🥺" (cewek)
+   - "Waduh, tebak-tebakan ya? spill dikit lah" (cowok)`;
+
+    // ============================================
+    // 4. BANGUN MESSAGES DENGAN KONTEKS
+    // ============================================
+    const messages = [{ role: 'system', content: systemPrompt }];
+
+    // Tambah last messages (max 5)
+    if (lastMessages && lastMessages.length > 0) {
+      messages.push(...lastMessages.slice(-5));
     }
 
-    // Tambahkan pesan user terbaru
+    // Pesan user terbaru
     messages.push({ role: 'user', content: message });
 
     // ============================================
-    // PANGGIL DEEPSEEK API
+    // 5. PANGGIL DEEPSEEK DENGAN PARAMETER NATURAL
     // ============================================
-    console.log(`🚀 Calling DeepSeek API for ${characterName} in ${room} room`);
-    
+    console.log(`🤖 ${characterName} mikir...`);
+
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -112,49 +129,91 @@ Ingat: lo adalah TEMEN, bukan AI. Jangan pernah sebut diri lo AI. Lo adalah manu
       body: JSON.stringify({
         model: 'deepseek-chat',
         messages: messages,
-        temperature: room === 'emosi' ? 0.7 : 0.9, // Humor butuh lebih random
-        max_tokens: 150,
+        temperature: isHumor ? 0.9 : 0.7, // Humor lebih random
+        max_tokens: 120, // Biar gak kepanjangan
         top_p: 0.95,
-        frequency_penalty: 0.3,
+        frequency_penalty: 0.5, // Biar gak ngulang kata
         presence_penalty: 0.3
       })
     });
 
     const data = await response.json();
-    
-    // Handle error dari DeepSeek
-    if (data.error) {
-      console.error('DeepSeek API error:', data.error);
-      throw new Error(data.error.message || 'DeepSeek API error');
-    }
+    if (data.error) throw new Error(data.error.message);
 
-    // Validasi response
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-      console.error('Invalid DeepSeek response:', data);
-      throw new Error('Invalid response from DeepSeek');
-    }
-
-    const reply = data.choices[0].message.content.trim();
-    
-    console.log(`✅ Reply from ${characterName}: ${reply.substring(0, 50)}...`);
+    let reply = data.choices[0].message.content.trim();
 
     // ============================================
-    // KIRIM BALASAN KE FRONTEND
+    // 6. POST-PROCESSING: TAMBAHIN TYPO & FILLER
     // ============================================
-    return res.status(200).json({ 
+    // Random typo (10% chance)
+    if (Math.random() < 0.1) {
+      reply = addRandomTypo(reply);
+    }
+
+    // Kadang tambahin "eh" di awal (5% chance)
+    if (Math.random() < 0.05 && !reply.startsWith('eh') && !reply.startsWith('Eh')) {
+      reply = 'eh ' + reply[0].toLowerCase() + reply.slice(1);
+    }
+
+    // Kadang tambahin "wkwk" di akhir (10% chance)
+    if (Math.random() < 0.1 && !reply.includes('wkwk')) {
+      reply += ' wkwk';
+    }
+
+    console.log(`✅ ${characterName}: ${reply.substring(0, 50)}...`);
+
+    // ============================================
+    // 7. KIRIM KE FRONTEND DENGAN METADATA
+    // ============================================
+    return res.status(200).json({
       reply: reply,
       characterName: characterName,
+      mood: mood,
       success: true
     });
 
   } catch (error) {
     console.error('❌ DeepSeek API error:', error);
-    
-    // Return error dengan fallback instruction di frontend
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: 'Gagal generate balasan',
-      message: error.message,
       fallback: true
     });
   }
+}
+
+// ============================================
+// HELPER: RANDOM TYPO
+// ============================================
+function addRandomTypo(text) {
+  const typoMap = {
+    'a': 'a', // bisa diganti nanti
+    'i': 'i',
+    'u': 'u',
+    'e': 'e',
+    'o': 'o',
+    'k': 'k',
+    't': 't'
+  };
+  
+  // Kasus typo umum di Indonesia
+  const commonTypos = [
+    { from: ' yang', to: ' yg' },
+    { from: ' tidak', to: ' gak' },
+    { from: ' sudah', to: ' udah' },
+    { from: ' akan', to: ' bakal' },
+    { from: ' sangat', to: ' bener2' },
+    { from: ' sekali', to: ' bgt' },
+    { from: ' begitu', to: ' gitu' },
+    { from: ' seperti', to: ' kayak' },
+    { from: ' karena', to: ' soalnya' },
+    { from: ' sekarang', to: ' skrg' }
+  ];
+  
+  // Pilih random typo (30% chance dari yang bisa di-typo)
+  if (Math.random() < 0.3) {
+    const typo = commonTypos[Math.floor(Math.random() * commonTypos.length)];
+    text = text.replace(typo.from, typo.to);
+  }
+  
+  return text;
 }
