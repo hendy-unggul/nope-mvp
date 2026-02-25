@@ -820,6 +820,63 @@ header{
   font-size:20px;
   margin-bottom:2px;
 }
+  /* Efek panning - cahaya blur yang menyapu */
+.radar-pan {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 0% 50%, 
+    rgba(57, 255, 20, 0.4) 0%, 
+    rgba(57, 255, 20, 0.1) 30%, 
+    transparent 70%);
+  filter: blur(20px);
+  transform-origin: left;
+  animation: radar-pan 4s infinite linear;
+  z-index: 22;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+@keyframes radar-pan {
+  0% { transform: rotate(0deg); opacity: 0.8; }
+  25% { opacity: 1; }
+  50% { opacity: 0.8; }
+  75% { opacity: 1; }
+  100% { transform: rotate(360deg); opacity: 0.8; }
+}
+
+/* Trail effect (bekas sapuan) */
+.radar-trail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 0% 50%, 
+    rgba(57, 255, 20, 0.15) 0%, 
+    transparent 60%);
+  filter: blur(30px);
+  transform-origin: left;
+  animation: radar-trail 4s infinite linear;
+  z-index: 21;
+  pointer-events: none;
+}
+
+@keyframes radar-trail {
+  0% { transform: rotate(-10deg); opacity: 0.5; }
+  50% { transform: rotate(180deg); opacity: 0.3; }
+  100% { transform: rotate(370deg); opacity: 0.5; }
+}
+
+/* Dot highlight saat terkena panning */
+.radar-dot.highlighted {
+  filter: brightness(2) drop-shadow(0 0 15px currentColor);
+  transform: translate(-50%, -50%) scale(1.5);
+  transition: all 0.2s ease-out;
+  z-index: 45;
+}
 </style>
 </head>
 <body>
