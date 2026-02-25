@@ -27,6 +27,7 @@
   --radar-line:#3A8A3A;
   --radar-dot-purple:#B026FF;
   --radar-dot-red:#FF3333;
+  --radar-dot-ai:#39FF14;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{
@@ -180,6 +181,8 @@ header{
   transform-origin: left;
   animation: radar-spin 4s infinite linear;
   opacity: 0.8;
+  z-index: 25;
+  pointer-events: none;
 }
 
 @keyframes radar-spin {
@@ -187,23 +190,51 @@ header{
   100% { transform: rotate(360deg); }
 }
 
+/* Radar sweep effect (garis lebar untuk panning) */
+.radar-sweep {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 70%;
+  height: 70%;
+  background: radial-gradient(circle at 0% 50%, rgba(57, 255, 20, 0.3), transparent 70%);
+  transform-origin: left;
+  animation: radar-sweep 4s infinite linear;
+  z-index: 20;
+  pointer-events: none;
+  filter: blur(10px);
+}
+
+@keyframes radar-sweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* Dots (user) */
 .radar-dot {
   position: absolute;
-  width: 12px;
-  height: 12px;
   border-radius: 50%;
   transform: translate(-50%, -50%);
   animation: radar-blink 1.5s infinite ease-in-out;
-  z-index: 20;
+  z-index: 30;
   cursor: pointer;
   transition: all 0.2s;
+  box-shadow: 0 0 10px currentColor;
+}
+
+/* Efek saat terkena sweep radar */
+.radar-dot.highlighted {
+  filter: brightness(1.5);
+  box-shadow: 0 0 30px currentColor;
+  transform: translate(-50%, -50%) scale(1.3);
+  z-index: 40;
+  transition: all 0.1s;
 }
 
 .radar-dot:hover {
   transform: translate(-50%, -50%) scale(2);
-  box-shadow: 0 0 20px currentColor;
-  z-index: 30;
+  box-shadow: 0 0 30px currentColor;
+  z-index: 50;
 }
 
 .radar-dot.purple {
@@ -217,14 +248,14 @@ header{
 }
 
 .radar-dot.ai {
-  background: var(--surviving);
-  box-shadow: 0 0 15px var(--surviving);
+  background: var(--radar-dot-ai);
+  box-shadow: 0 0 15px var(--radar-dot-ai);
   animation: radar-blink 2.5s infinite;
 }
 
 @keyframes radar-blink {
   0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  50% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.8); }
+  50% { opacity: 0.7; transform: translate(-50%, -50%) scale(0.9); }
 }
 
 /* Radar overlay */
@@ -236,80 +267,27 @@ header{
   bottom: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-align: left;
   z-index: 10;
   pointer-events: none;
-  background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.6) 100%);
+  padding: 16px;
 }
 
-.radar-overlay h2,
-.radar-overlay p,
-.radar-overlay .quota-display {
-  pointer-events: auto;
-}
-
-.glitch-text {
-  font-size: 48px;
+.radar-title {
+  font-size: 24px;
   font-weight: 800;
   text-transform: uppercase;
   color: #fff;
   text-shadow: 
-    3px 0 0 var(--radar-dot-red),
-    -3px 0 0 var(--radar-dot-purple),
-    0 0 30px var(--surviving);
-  animation: glitch 3s infinite;
-  letter-spacing: 8px;
+    2px 0 0 var(--radar-dot-red),
+    -2px 0 0 var(--radar-dot-purple),
+    0 0 20px var(--surviving);
+  letter-spacing: 4px;
   margin-bottom: 8px;
   position: relative;
-}
-
-.glitch-text::before,
-.glitch-text::after {
-  content: attr(data-text);
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.glitch-text::before {
-  animation: glitch-top 0.3s infinite;
-  color: var(--radar-dot-red);
-  z-index: -1;
-}
-
-.glitch-text::after {
-  animation: glitch-bottom 0.3s infinite;
-  color: var(--radar-dot-purple);
-  z-index: -2;
-}
-
-@keyframes glitch {
-  0%, 100% { transform: skew(0deg, 0deg); opacity: 1; }
-  95% { transform: skew(2deg, 1deg); opacity: 0.9; }
-  96% { transform: skew(-2deg, -1deg); opacity: 0.9; }
-}
-
-@keyframes glitch-top {
-  0%, 100% { transform: translate(0); }
-  50% { transform: translate(-2px, -1px); }
-}
-
-@keyframes glitch-bottom {
-  0%, 100% { transform: translate(0); }
-  50% { transform: translate(2px, 1px); }
-}
-
-.sub-text {
-  color: rgba(255,255,255,0.8);
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: 2px;
-  margin-bottom: 16px;
-  text-transform: uppercase;
+  pointer-events: auto;
   background: rgba(0,0,0,0.5);
   padding: 4px 12px;
   border-radius: 30px;
@@ -322,12 +300,13 @@ header{
   align-items: center;
   gap: 12px;
   background: rgba(0,0,0,0.7);
-  padding: 6px 16px;
-  border-radius: 40px;
+  padding: 4px 12px;
+  border-radius: 30px;
   backdrop-filter: blur(5px);
   border: 1px solid var(--border);
   font-size: 12px;
-  margin-bottom: 16px;
+  pointer-events: auto;
+  margin-top: 8px;
 }
 
 .quota-badge {
@@ -337,18 +316,6 @@ header{
 
 .quota-badge.empty {
   color: var(--agak);
-}
-
-.upgrade-link {
-  color: var(--primary);
-  text-decoration: none;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.upgrade-link:hover {
-  text-decoration: underline;
 }
 
 /* VIBE CHECK BUTTON */
@@ -878,17 +845,16 @@ header{
       <div class="radar-grid"></div>
       <div class="radar-circles"></div>
       <div class="radar-line"></div>
+      <div class="radar-sweep"></div>
       
       <!-- Dots (akan diisi JS) -->
       <div class="radar-dots" id="radarDots"></div>
       
       <!-- Radar overlay -->
       <div class="radar-overlay">
-        <h2 class="glitch-text" data-text="LET'S TALK">LET'S TALK</h2>
-        <p class="sub-text">tap titik untuk mengobrol</p>
+        <div class="radar-title">LET'S TALK</div>
         <div class="quota-display">
           <span class="quota-badge" id="quotaBadge">1/1 hari ini</span>
-          <span class="upgrade-link" onclick="showUpgradeModal()">Upgrade</span>
         </div>
       </div>
       
@@ -1036,7 +1002,7 @@ const st = {
   userId: null,
   sessionId: null,
   username: null,
-  userGender: localStorage.getItem('user_gender') || 'unknown', // 'male' atau 'female'
+  userGender: localStorage.getItem('user_gender') || 'unknown',
   rants: [],
   reactions: {},
   filter: 'all',
@@ -1082,7 +1048,8 @@ const AI_CHARACTERS = {
 // RADAR CHAT MANAGER
 // ============================================
 let radarInterval = null;
-let onlineUsers = [];
+let sweepInterval = null;
+let lastSweepAngle = 0;
 
 // Quota management (1x per hari)
 let dailyQuota = 1;
@@ -1105,6 +1072,9 @@ function initRadar() {
     updateRadarDots();
   }, 5000);
   
+  // Sweep effect untuk highlight dots
+  startSweepEffect();
+  
   updateQuotaDisplay();
 }
 
@@ -1114,30 +1084,36 @@ function generateRadarDots() {
   
   container.innerHTML = '';
   
-  // Generate 5-10 dots random
-  const dotCount = 5 + Math.floor(Math.random() * 6);
+  // Generate 8-15 dots random dengan ukuran variatif
+  const dotCount = 8 + Math.floor(Math.random() * 8);
   
   for (let i = 0; i < dotCount; i++) {
     // Random gender
     const gender = Math.random() > 0.5 ? 'purple' : 'red';
     const angle = Math.random() * Math.PI * 2;
-    const distance = 20 + Math.random() * 60; // 20-80% dari radius
+    const distance = 10 + Math.random() * 80; // 10-90% dari radius
     
     // Konversi ke koordinat polar
     const x = 50 + Math.cos(angle) * distance / 2;
     const y = 50 + Math.sin(angle) * distance / 2;
     
+    // Ukuran variatif (8px - 16px)
+    const size = 8 + Math.floor(Math.random() * 8);
+    
     const dot = document.createElement('div');
     dot.className = `radar-dot ${gender}`;
     dot.style.left = x + '%';
     dot.style.top = y + '%';
+    dot.style.width = size + 'px';
+    dot.style.height = size + 'px';
     
     // Simpan data user
     const userData = {
       id: 'user_' + i,
       username: `user_${Math.random().toString(36).substring(2, 6)}`,
       gender: gender === 'purple' ? 'female' : 'male',
-      isAI: false
+      isAI: false,
+      size: size
     };
     
     dot.setAttribute('data-user', JSON.stringify(userData));
@@ -1146,13 +1122,15 @@ function generateRadarDots() {
     container.appendChild(dot);
   }
   
-  // Tambah AI dots (standby)
+  // Tambah AI dots (standby) dengan ukuran variatif
   addAIDots(container);
 }
 
 function addAIDots(container) {
-  // Tambah 3 AI karakter
-  for (let i = 0; i < 3; i++) {
+  // Tambah 3-5 AI karakter
+  const aiCount = 3 + Math.floor(Math.random() * 3);
+  
+  for (let i = 0; i < aiCount; i++) {
     const gender = Math.random() > 0.5 ? 'purple' : 'red';
     const aiPool = gender === 'purple' ? AI_CHARACTERS.female : AI_CHARACTERS.male;
     const aiChar = aiPool[Math.floor(Math.random() * aiPool.length)];
@@ -1163,10 +1141,15 @@ function addAIDots(container) {
     const x = 50 + Math.cos(angle) * distance / 2;
     const y = 50 + Math.sin(angle) * distance / 2;
     
+    // Ukuran variatif untuk AI (10px - 18px)
+    const size = 10 + Math.floor(Math.random() * 8);
+    
     const dot = document.createElement('div');
     dot.className = `radar-dot ${gender} ai`;
     dot.style.left = x + '%';
     dot.style.top = y + '%';
+    dot.style.width = size + 'px';
+    dot.style.height = size + 'px';
     
     const userData = {
       id: 'ai_' + aiChar.username,
@@ -1174,7 +1157,8 @@ function addAIDots(container) {
       gender: gender === 'purple' ? 'female' : 'male',
       isAI: true,
       personality: aiChar.personality,
-      glyph: aiChar.glyph
+      glyph: aiChar.glyph,
+      size: size
     };
     
     dot.setAttribute('data-user', JSON.stringify(userData));
@@ -1185,20 +1169,19 @@ function addAIDots(container) {
 }
 
 function updateRadarDots() {
-  // Simulasi user bergerak/berubah
   const container = document.getElementById('radarDots');
   if (!container) return;
   
   const dots = container.querySelectorAll('.radar-dot');
   
   dots.forEach(dot => {
-    // Update posisi sedikit
+    // Update posisi sedikit (gerakan lambat)
     const currentLeft = parseFloat(dot.style.left);
     const currentTop = parseFloat(dot.style.top);
     
     if (!isNaN(currentLeft) && !isNaN(currentTop)) {
-      let newLeft = currentLeft + (Math.random() - 0.5) * 5;
-      let newTop = currentTop + (Math.random() - 0.5) * 5;
+      let newLeft = currentLeft + (Math.random() - 0.5) * 3;
+      let newTop = currentTop + (Math.random() - 0.5) * 3;
       
       // Batasi dalam radar
       newLeft = Math.max(5, Math.min(95, newLeft));
@@ -1210,6 +1193,44 @@ function updateRadarDots() {
   });
 }
 
+function startSweepEffect() {
+  // Simulasi efek sweep setiap 100ms
+  sweepInterval = setInterval(() => {
+    const dots = document.querySelectorAll('.radar-dot');
+    const sweepAngle = (Date.now() / 100) % 360; // Angle sweep berubah terus
+    
+    dots.forEach(dot => {
+      // Hitung angle dot relatif ke center
+      const left = parseFloat(dot.style.left);
+      const top = parseFloat(dot.style.top);
+      
+      if (!isNaN(left) && !isNaN(top)) {
+        // Konversi ke koordinat relatif center
+        const relX = left - 50;
+        const relY = top - 50;
+        const dotAngle = (Math.atan2(relY, relX) * 180 / Math.PI + 360) % 360;
+        
+        // Hitung selisih angle dengan sweep
+        let angleDiff = Math.abs(dotAngle - sweepAngle);
+        angleDiff = Math.min(angleDiff, 360 - angleDiff);
+        
+        // Jika angle diff < 30 derajat, highlight dot
+        if (angleDiff < 30) {
+          // Intensitas highlight berdasarkan kedekatan angle
+          const intensity = 1 - (angleDiff / 30);
+          dot.classList.add('highlighted');
+          dot.style.filter = `brightness(${1 + intensity})`;
+          dot.style.transform = `translate(-50%, -50%) scale(${1 + intensity * 0.3})`;
+        } else {
+          dot.classList.remove('highlighted');
+          dot.style.filter = '';
+          dot.style.transform = '';
+        }
+      }
+    });
+  }, 100);
+}
+
 function onDotClick(userData, dotElement) {
   if (dailyQuota <= 0 && !userData.isAI) {
     // Kalo quota habis dan bukan AI, show upgrade
@@ -1218,11 +1239,13 @@ function onDotClick(userData, dotElement) {
   }
   
   // Efek klik
-  dotElement.style.transform = 'translate(-50%, -50%) scale(2)';
-  dotElement.style.boxShadow = '0 0 30px currentColor';
+  dotElement.style.transform = 'translate(-50%, -50%) scale(2.5)';
+  dotElement.style.boxShadow = '0 0 40px currentColor';
+  dotElement.style.zIndex = '100';
   setTimeout(() => {
     dotElement.style.transform = '';
     dotElement.style.boxShadow = '';
+    dotElement.style.zIndex = '';
   }, 500);
   
   if (userData.isAI) {
@@ -1693,6 +1716,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 window.addEventListener('beforeunload', () => {
   if (radarInterval) {
     clearInterval(radarInterval);
+  }
+  if (sweepInterval) {
+    clearInterval(sweepInterval);
   }
 });
 </script>
