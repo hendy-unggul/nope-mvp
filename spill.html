@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Spill - Spill the Tea</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1,user-scalable=no">
+<title>Spill — JEJAK</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/htmx.org@2.0.0"></script>
 <style>
@@ -22,12 +22,6 @@
   --surviving:#39FF14;
   --chaotic:#00F0FF;
   --doom:#8B5CF6;
-  --radar-bg:#0A2A0A;
-  --radar-grid:#2A5A2A;
-  --radar-line:#3A8A3A;
-  --radar-dot-purple:#B026FF;
-  --radar-dot-red:#FF3333;
-  --radar-dot-ai:#39FF14;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{
@@ -73,6 +67,18 @@ header{
   align-items:center;
   gap:12px;
 }
+.connection-dot{
+  width:8px;
+  height:8px;
+  background:var(--surviving);
+  border-radius:50%;
+  animation:blink 2s infinite;
+  margin-right:8px;
+}
+@keyframes blink{
+  0%,100%{opacity:1}
+  50%{opacity:.3}
+}
 .menu-trigger{
   width:32px;
   height:32px;
@@ -93,26 +99,10 @@ header{
   transition:all .2s;
 }
 .menu-trigger:hover span{
-  background:var(--primary);
+  background:var(--primary)
 }
 
-/* CONNECTION DOT */
-.connection-dot{
-  width:8px;
-  height:8px;
-  background:var(--surviving);
-  border-radius:50%;
-  animation:blink 2s infinite;
-  margin-right:8px;
-}
-@keyframes blink{
-  0%,100%{opacity:1}
-  50%{opacity:.3}
-}
-
-/* ============================================ */
-/* RADAR CHAT HERO */
-/* ============================================ */
+/* RADAR HERO */
 .radar-hero {
   width: 100%;
   aspect-ratio: 1/1;
@@ -132,13 +122,12 @@ header{
   background: radial-gradient(circle at 30% 30%, #1A3A1A, #0A1A0A);
 }
 
-/* Grid radar */
 .radar-grid {
   position: absolute;
   inset: 0;
   background-image: 
-    repeating-linear-gradient(0deg, var(--radar-grid) 0px, transparent 1px, transparent 20px),
-    repeating-linear-gradient(90deg, var(--radar-grid) 0px, transparent 1px, transparent 20px);
+    repeating-linear-gradient(0deg, var(--border) 0px, transparent 1px, transparent 20px),
+    repeating-linear-gradient(90deg, var(--border) 0px, transparent 1px, transparent 20px);
   opacity: 0.3;
   animation: radar-scan 8s infinite linear;
 }
@@ -148,12 +137,11 @@ header{
   100% { transform: rotate(360deg); }
 }
 
-/* Lingkaran radar */
 .radar-circles {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 2px var(--radar-line);
+  box-shadow: inset 0 0 0 2px var(--surviving);
 }
 
 .radar-circles::before,
@@ -162,7 +150,7 @@ header{
   position: absolute;
   inset: 25%;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 2px var(--radar-line);
+  box-shadow: inset 0 0 0 2px var(--surviving);
   opacity: 0.5;
 }
 
@@ -170,7 +158,6 @@ header{
   inset: 50%;
 }
 
-/* Garis radar berputar */
 .radar-line {
   position: absolute;
   top: 50%;
@@ -190,7 +177,6 @@ header{
   100% { transform: rotate(360deg); }
 }
 
-/* Radar sweep effect (garis lebar untuk panning) */
 .radar-sweep {
   position: absolute;
   top: 50%;
@@ -210,7 +196,6 @@ header{
   100% { transform: rotate(360deg); }
 }
 
-/* Dots (user) */
 .radar-dot {
   position: absolute;
   border-radius: 50%;
@@ -222,15 +207,6 @@ header{
   box-shadow: 0 0 10px currentColor;
 }
 
-/* Efek saat terkena sweep radar */
-.radar-dot.highlighted {
-  filter: brightness(1.5);
-  box-shadow: 0 0 30px currentColor;
-  transform: translate(-50%, -50%) scale(1.3);
-  z-index: 40;
-  transition: all 0.1s;
-}
-
 .radar-dot:hover {
   transform: translate(-50%, -50%) scale(2);
   box-shadow: 0 0 30px currentColor;
@@ -238,18 +214,18 @@ header{
 }
 
 .radar-dot.purple {
-  background: var(--radar-dot-purple);
-  box-shadow: 0 0 15px var(--radar-dot-purple);
+  background: #B026FF;
+  box-shadow: 0 0 15px #B026FF;
 }
 
 .radar-dot.red {
-  background: var(--radar-dot-red);
-  box-shadow: 0 0 15px var(--radar-dot-red);
+  background: #FF3333;
+  box-shadow: 0 0 15px #FF3333;
 }
 
 .radar-dot.ai {
-  background: var(--radar-dot-ai);
-  box-shadow: 0 0 15px var(--radar-dot-ai);
+  background: var(--surviving);
+  box-shadow: 0 0 15px var(--surviving);
   animation: radar-blink 2.5s infinite;
 }
 
@@ -258,7 +234,14 @@ header{
   50% { opacity: 0.7; transform: translate(-50%, -50%) scale(0.9); }
 }
 
-/* Radar overlay */
+.radar-dot.highlighted {
+  filter: brightness(1.5);
+  box-shadow: 0 0 30px currentColor;
+  transform: translate(-50%, -50%) scale(1.3);
+  z-index: 40;
+  transition: all 0.1s;
+}
+
 .radar-overlay {
   position: absolute;
   top: 0;
@@ -281,8 +264,8 @@ header{
   text-transform: uppercase;
   color: #fff;
   text-shadow: 
-    2px 0 0 var(--radar-dot-red),
-    -2px 0 0 var(--radar-dot-purple),
+    2px 0 0 #FF3333,
+    -2px 0 0 #B026FF,
     0 0 20px var(--surviving);
   letter-spacing: 4px;
   margin-bottom: 8px;
@@ -315,7 +298,7 @@ header{
 }
 
 .quota-badge.empty {
-  color: var(--agak);
+  color: #FF3333;
 }
 
 /* VIBE CHECK BUTTON */
@@ -637,80 +620,256 @@ header{
   transform:translateX(-50%) translateY(0);
 }
 .toast.error{
-  background:var(--agak);
+  background:#FF3333;
   color:var(--text);
 }
 
-/* MODAL UPGRADE */
-.modal {
+/* MODAL GENDER */
+.gender-modal {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.95);
-  z-index: 10001;
+  background: rgba(0,0,0,0.98);
+  z-index: 20000;
   padding: 20px;
   overflow-y: auto;
+  backdrop-filter: blur(10px);
 }
 
-.modal.on { display: flex; align-items: center; justify-content: center; }
+.gender-modal.on { display: flex; align-items: center; justify-content: center; }
 
-.modal-content {
+.gender-container {
   max-width: 480px;
   width: 100%;
   background: var(--surface);
-  border: 2px solid var(--border);
-  border-radius: 20px;
-  overflow: hidden;
+  border: 3px solid var(--primary);
+  padding: 32px 24px;
+  position: relative;
+  box-shadow: 10px 10px 0 var(--primary);
 }
 
-.modal-header {
-  padding: 20px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-header h3 {
-  font-size: 20px;
+.gender-container::before {
+  content: 'VIBE CHECK';
+  position: absolute;
+  top: -12px;
+  left: 20px;
+  background: var(--surface);
+  padding: 0 10px;
+  font-size: 12px;
   font-weight: 800;
+  color: var(--primary);
+  letter-spacing: 2px;
+}
+
+.gender-title {
+  font-size: 32px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 8px;
   background: linear-gradient(135deg, var(--primary), #FF8A5C);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-align: center;
 }
 
-.modal-close {
-  background: transparent;
-  border: none;
-  color: var(--text);
-  font-size: 24px;
-  cursor: pointer;
-  width: 40px;
-  height: 40px;
+.gender-sub {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 32px;
+  text-align: center;
+  font-style: italic;
+}
+
+.gender-options {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.gender-option {
+  flex: 1;
+  background: var(--surface-light);
+  border: 3px solid var(--border);
+  padding: 24px 16px;
+  text-align: center;
+  cursor: pointer;
   transition: all 0.2s;
+  position: relative;
 }
 
-.modal-close:hover {
-  background: var(--border);
+.gender-option:hover {
+  border-color: var(--primary);
+  transform: translateY(-4px);
 }
 
-.modal-body {
+.gender-option.selected {
+  border-color: var(--primary);
+  background: linear-gradient(145deg, var(--surface-light), #2A2A2A);
+}
+
+.gender-option.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.gender-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.gender-label {
+  font-size: 18px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+
+.gender-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.gender-note {
+  background: rgba(255,77,0,0.1);
+  border-left: 4px solid var(--primary);
+  padding: 16px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.gender-note strong {
+  color: var(--primary);
+}
+
+.gender-confirm {
+  width: 100%;
+  padding: 16px;
+  background: var(--primary);
+  color: var(--bg);
+  border: none;
+  font-size: 16px;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 6px 6px 0 var(--bg), 6px 6px 0 2px var(--primary);
+}
+
+.gender-confirm:hover {
+  transform: translate(3px, 3px);
+  box-shadow: 3px 3px 0 var(--bg), 3px 3px 0 2px var(--primary);
+}
+
+.gender-confirm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* MODAL UPGRADE */
+.upgrade-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.98);
+  z-index: 20001;
   padding: 20px;
+  overflow-y: auto;
+  backdrop-filter: blur(10px);
+}
+
+.upgrade-modal.on { display: flex; align-items: center; justify-content: center; }
+
+.upgrade-container {
+  max-width: 480px;
+  width: 100%;
+  background: var(--surface);
+  border: 3px solid var(--primary);
+  padding: 32px 24px;
+  position: relative;
+  box-shadow: 10px 10px 0 var(--primary);
+}
+
+.upgrade-container::before {
+  content: 'WAKTU HABIS';
+  position: absolute;
+  top: -12px;
+  left: 20px;
+  background: var(--surface);
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #FF3333;
+  letter-spacing: 2px;
+}
+
+.upgrade-title {
+  font-size: 32px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #FF3333, #FF8A5C);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+}
+
+.upgrade-sub {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 24px;
+  text-align: center;
+  font-style: italic;
+}
+
+.timer-warning {
+  background: rgba(255,51,51,0.1);
+  border: 2px solid #FF3333;
+  padding: 20px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.timer-warning .big {
+  font-size: 48px;
+  font-weight: 800;
+  color: #FF3333;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.timer-warning .small {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.pricing-grid {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .pricing-card {
   background: var(--surface-light);
-  border: 2px solid var(--border);
-  border-radius: 16px;
+  border: 3px solid var(--border);
   padding: 20px;
+  cursor: pointer;
   transition: all 0.2s;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .pricing-card:hover {
@@ -718,56 +877,256 @@ header{
   transform: translateY(-2px);
 }
 
-.price-tag {
-  text-align: center;
-  margin-bottom: 20px;
+.pricing-card.selected {
+  border-color: var(--primary);
+  background: linear-gradient(145deg, var(--surface-light), #2A2A2A);
 }
 
-.price {
-  font-size: 36px;
+.pricing-card.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.pricing-left {
+  flex: 1;
+}
+
+.pricing-price {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.pricing-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.pricing-right {
+  text-align: right;
+}
+
+.pricing-duration {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.pricing-limit {
+  font-size: 11px;
+  color: var(--surviving);
+  background: rgba(57,255,20,0.1);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.pricing-total {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.upgrade-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.upgrade-btn {
+  flex: 1;
+  padding: 16px;
+  background: var(--primary);
+  color: var(--bg);
+  border: none;
+  font-size: 14px;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 4px 4px 0 var(--bg), 4px 4px 0 2px var(--primary);
+}
+
+.upgrade-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--bg), 2px 2px 0 2px var(--primary);
+}
+
+.upgrade-btn.secondary {
+  background: transparent;
+  color: var(--text);
+  border: 2px solid var(--border);
+  box-shadow: none;
+}
+
+.upgrade-btn.secondary:hover {
+  background: var(--surface-light);
+}
+
+/* CHAT ROOM */
+.chat-room {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 15000;
+  flex-direction: column;
+}
+
+.chat-room.on { display: flex; }
+
+.chat-header {
+  padding: 16px 20px;
+  border-bottom: 3px solid var(--primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--surface);
+}
+
+.chat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-with {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.chat-name {
+  font-size: 18px;
   font-weight: 800;
   color: var(--primary);
 }
 
-.period {
-  font-size: 14px;
-  color: var(--text-secondary);
-}
-
-.benefits {
-  list-style: none;
-  margin-bottom: 20px;
-}
-
-.benefits li {
-  padding: 8px 0;
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-.benefits li:before {
-  content: '✓';
+.chat-timer {
+  background: var(--surface-light);
+  border: 2px solid var(--border);
+  padding: 8px 16px;
+  font-size: 20px;
+  font-weight: 800;
+  font-family: monospace;
   color: var(--surviving);
-  margin-right: 10px;
 }
 
-.upgrade-btn {
-  width: 100%;
-  padding: 14px;
+.chat-timer.warning {
+  color: #FF3333;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--bg);
+}
+
+.chat-message {
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+}
+
+.chat-message.own {
+  align-self: flex-end;
+}
+
+.chat-message.other {
+  align-self: flex-start;
+}
+
+.chat-bubble {
+  padding: 12px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  line-height: 1.5;
+  word-wrap: break-word;
+  border: 2px solid var(--border);
+}
+
+.own .chat-bubble {
+  background: var(--primary);
+  color: var(--bg);
+  border-color: var(--primary);
+  border-bottom-right-radius: 4px;
+}
+
+.other .chat-bubble {
+  background: var(--surface);
+  color: var(--text);
+  border-bottom-left-radius: 4px;
+}
+
+.chat-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin: 4px 8px 0;
+}
+
+.chat-input-area {
+  padding: 16px;
+  border-top: 3px solid var(--border);
+  display: flex;
+  gap: 12px;
+  background: var(--surface);
+}
+
+.chat-input {
+  flex: 1;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  color: var(--text);
+  padding: 12px 16px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.chat-send {
   background: var(--primary);
   color: var(--bg);
   border: none;
-  border-radius: 40px;
+  padding: 0 24px;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.upgrade-btn:hover {
+.chat-send:hover {
   background: var(--text);
   color: var(--bg);
+}
+
+.chat-fifo-note {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 4px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
 }
 
 /* BOTTOM NAV */
@@ -777,7 +1136,7 @@ header{
   left:0;
   right:0;
   background:var(--surface);
-  border-top:1px solid var(--border);
+  border-top:2px solid var(--border);
   z-index:1000;
 }
 .nav-container{
@@ -820,63 +1179,6 @@ header{
   font-size:20px;
   margin-bottom:2px;
 }
-  /* Efek panning - cahaya blur yang menyapu */
-.radar-pan {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at 0% 50%, 
-    rgba(57, 255, 20, 0.4) 0%, 
-    rgba(57, 255, 20, 0.1) 30%, 
-    transparent 70%);
-  filter: blur(20px);
-  transform-origin: left;
-  animation: radar-pan 4s infinite linear;
-  z-index: 22;
-  pointer-events: none;
-  mix-blend-mode: screen;
-}
-
-@keyframes radar-pan {
-  0% { transform: rotate(0deg); opacity: 0.8; }
-  25% { opacity: 1; }
-  50% { opacity: 0.8; }
-  75% { opacity: 1; }
-  100% { transform: rotate(360deg); opacity: 0.8; }
-}
-
-/* Trail effect (bekas sapuan) */
-.radar-trail {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at 0% 50%, 
-    rgba(57, 255, 20, 0.15) 0%, 
-    transparent 60%);
-  filter: blur(30px);
-  transform-origin: left;
-  animation: radar-trail 4s infinite linear;
-  z-index: 21;
-  pointer-events: none;
-}
-
-@keyframes radar-trail {
-  0% { transform: rotate(-10deg); opacity: 0.5; }
-  50% { transform: rotate(180deg); opacity: 0.3; }
-  100% { transform: rotate(370deg); opacity: 0.5; }
-}
-
-/* Dot highlight saat terkena panning */
-.radar-dot.highlighted {
-  filter: brightness(2) drop-shadow(0 0 15px currentColor);
-  transform: translate(-50%, -50%) scale(1.5);
-  transition: all 0.2s ease-out;
-  z-index: 45;
-}
 </style>
 </head>
 <body>
@@ -894,9 +1196,7 @@ header{
     </div>
   </header>
 
-  <!-- ============================================ -->
-  <!-- RADAR CHAT HERO -->
-  <!-- ============================================ -->
+  <!-- RADAR HERO -->
   <section class="radar-hero" id="radarHero">
     <div class="radar-container">
       <div class="radar-grid"></div>
@@ -904,59 +1204,21 @@ header{
       <div class="radar-line"></div>
       <div class="radar-sweep"></div>
       
-      <!-- Dots (akan diisi JS) -->
       <div class="radar-dots" id="radarDots"></div>
       
-      <!-- Radar overlay -->
       <div class="radar-overlay">
-        <div class="radar-title">TEMAN RAHASIA</div>
+        <div class="radar-title">VIBE RADAR</div>
         <div class="quota-display">
+          <span class="quota-badge" id="quotaBadge">30:00 tersisa</span>
         </div>
+      </div>
       
       <!-- VIBE CHECK BUTTON -->
-      <a href="chat.html" class="vibe-check-btn">
+      <button class="vibe-check-btn" onclick="startVibeCheck()">
         <span>✨</span> Vibe Check
-      </a>
+      </button>
     </div>
   </section>
-
-  <!-- UPGRADE MODAL -->
-  <div class="modal" id="upgradeModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>✨ Radar Premium</h3>
-        <button class="modal-close" onclick="closeUpgradeModal()">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="pricing-card">
-          <div class="price-tag">
-            <span class="price">Rp 20.000</span>
-            <span class="period">/bulan</span>
-          </div>
-          <ul class="benefits">
-            <li>✓ Chat 5 jam/hari (unlimited)</li>
-            <li>✓ Lihat semua titik radar</li>
-            <li>✓ Prioritas koneksi</li>
-            <li>✓ Bebas pilih lawan bicara</li>
-          </ul>
-          <button class="upgrade-btn" onclick="upgrade('monthly')">Upgrade Sekarang</button>
-        </div>
-        <div class="pricing-card">
-          <div class="price-tag">
-            <span class="price">Rp 100.000</span>
-            <span class="period">/tahun</span>
-          </div>
-          <ul class="benefits">
-            <li>✓ Semua benefit bulanan</li>
-            <li>✓ Hemat Rp 140.000</li>
-            <li>✓ Badge eksklusif di radar</li>
-            <li>✓ Akses ke semua karakter AI</li>
-          </ul>
-          <button class="upgrade-btn" onclick="upgrade('yearly')">Upgrade Sekarang</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <div class="filter-section">
     <div class="filter-header">
@@ -987,52 +1249,115 @@ header{
   </button>
 </div>
 
+<!-- GENDER MODAL -->
+<div class="gender-modal" id="genderModal">
+  <div class="gender-container">
+    <div class="gender-title">VIBE CHECK</div>
+    <div class="gender-sub">pilih identitasmu untuk bertemu lawan jenis</div>
+    
+    <div class="gender-options">
+      <div class="gender-option" data-gender="male" onclick="selectGender('male')">
+        <span class="gender-icon">♂️</span>
+        <div class="gender-label">PRIA</div>
+        <div class="gender-desc">akan bertemu cewek</div>
+      </div>
+      <div class="gender-option" data-gender="female" onclick="selectGender('female')">
+        <span class="gender-icon">♀️</span>
+        <div class="gender-label">WANITA</div>
+        <div class="gender-desc">akan bertemu cowok</div>
+      </div>
+    </div>
+    
+    <div class="gender-note">
+      <strong>🔒 GRATIS 30 MENIT</strong><br>
+      Sesi akan berakhir otomatis. Chat hanya disimpan selama sesi berlangsung (FIFO 20 pesan).
+    </div>
+    
+    <button class="gender-confirm" id="genderConfirm" onclick="confirmGender()" disabled>Mulai Vibe Check</button>
+  </div>
+</div>
+
+<!-- UPGRADE MODAL -->
+<div class="upgrade-modal" id="upgradeModal">
+  <div class="upgrade-container">
+    <div class="upgrade-title">WAKTU HABIS</div>
+    <div class="upgrade-sub">lanjutkan obrolan dengan upgrade</div>
+    
+    <div class="timer-warning">
+      <div class="big">30:00</div>
+      <div class="small">sesi gratis selesai</div>
+    </div>
+    
+    <div class="pricing-grid">
+      <div class="pricing-card" data-plan="weekly" onclick="selectPlan('weekly')">
+        <div class="pricing-left">
+          <div class="pricing-price">Rp 10k</div>
+          <div class="pricing-desc">7 hari</div>
+        </div>
+        <div class="pricing-right">
+          <div class="pricing-duration">@ 2jam/hari</div>
+          <div class="pricing-limit">14 jam total</div>
+          <div class="pricing-total">Rp 1.428/jam</div>
+        </div>
+      </div>
+      
+      <div class="pricing-card" data-plan="monthly" onclick="selectPlan('monthly')">
+        <div class="pricing-left">
+          <div class="pricing-price">Rp 50k</div>
+          <div class="pricing-desc">30 hari</div>
+        </div>
+        <div class="pricing-right">
+          <div class="pricing-duration">@ 3jam/hari</div>
+          <div class="pricing-limit">90 jam total</div>
+          <div class="pricing-total">Rp 555/jam</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="upgrade-actions">
+      <button class="upgrade-btn" id="upgradeNow" onclick="upgradeNow()" disabled>Upgrade</button>
+      <button class="upgrade-btn secondary" onclick="closeUpgradeModal()">Nanti aja</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHAT ROOM -->
+<div class="chat-room" id="chatRoom">
+  <div class="chat-header">
+    <div class="chat-info">
+      <span class="chat-with">ngobrol dengan</span>
+      <span class="chat-name" id="chatPartnerName">@beby.manis</span>
+    </div>
+    <div class="chat-timer" id="chatTimer">30:00</div>
+  </div>
+  
+  <div class="chat-messages" id="chatMessages"></div>
+  
+  <div class="chat-input-area">
+    <input type="text" class="chat-input" id="chatInput" placeholder="Tulis pesan..." maxlength="200">
+    <button class="chat-send" onclick="sendChatMessage()">Kirim</button>
+  </div>
+  <div class="chat-fifo-note">FIFO • maks 20 pesan • chat dihapus setelah sesi</div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
   <div class="nav-container">
-    <a href="/jejak" 
-       class="nav-item"
-       hx-get="jejak.html"
-       hx-target=".wrapper"
-       hx-push-url="true"
-       hx-select=".wrapper"
-       hx-swap="outerHTML"
-       hx-trigger="click">
+    <a href="/jejak" class="nav-item" hx-get="jejak.html" hx-target=".wrapper" hx-push-url="true" hx-select=".wrapper" hx-swap="outerHTML">
       <span class="nav-icon">✦</span>
       <span class="nav-label">Jejak</span>
     </a>
-    <a href="/spill"
-       class="nav-item active"
-       hx-get="spill.html"
-       hx-target=".wrapper"
-       hx-push-url="true"
-       hx-select=".wrapper"
-       hx-swap="outerHTML"
-       hx-trigger="click">
+    <a href="/spill" class="nav-item active" hx-get="spill.html" hx-target=".wrapper" hx-push-url="true" hx-select=".wrapper" hx-swap="outerHTML">
       <span class="nav-icon">✕</span>
       <span class="nav-label">Spill</span>
     </a>
-    <a href="/cocomeo"
-       class="nav-item"
-       hx-get="cocomeo.html"
-       hx-target=".wrapper"
-       hx-push-url="true"
-       hx-select=".wrapper"
-       hx-swap="outerHTML"
-       hx-trigger="click">
+    <a href="/cocomeo" class="nav-item" hx-get="cocomeo.html" hx-target=".wrapper" hx-push-url="true" hx-select=".wrapper" hx-swap="outerHTML">
       <span class="nav-icon">〜</span>
       <span class="nav-label">Cocomeo</span>
     </a>
-    <a href="/glitch"
-       class="nav-item"
-       hx-get="glitch.html"
-       hx-target=".wrapper"
-       hx-push-url="true"
-       hx-select=".wrapper"
-       hx-swap="outerHTML"
-       hx-trigger="click">
+    <a href="/glitch" class="nav-item" hx-get="glitch.html" hx-target=".wrapper" hx-push-url="true" hx-select=".wrapper" hx-swap="outerHTML">
       <span class="nav-icon">⚡</span>
       <span class="nav-label">Glitch</span>
     </a>
@@ -1041,96 +1366,47 @@ header{
 
 <script>
 // ============================================
-// CONFIG & STATE
+// VIBE CHECK STATE
 // ============================================
-const CFG = {
-  url: 'https://fuovfrdicdhnlymnacpz.supabase.co',
-  key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0',
-  TBL_RANTS: 'rants',
-  TBL_REACTIONS: 'reactions',
-  TBL_USERS: 'users',
-};
+let currentGender = null;
+let chatPartner = null;
+let chatMessages = [];
+let chatTimerInterval = null;
+let chatTimeLeft = 30 * 60; // 30 menit dalam detik
+let selectedPlan = null;
 
-const st = {
-  sb: null,
-  online: false,
-  userId: null,
-  sessionId: null,
-  username: null,
-  userGender: localStorage.getItem('user_gender') || 'unknown',
-  rants: [],
-  reactions: {},
-  filter: 'all',
-  vibeMatch: 87,
-  loading: true,
-};
-
-const REACTIONS = [
-  { id:'💀', type:'💀' },
-  { id:'😭', type:'😭' },
-  { id:'🔥', type:'🔥' },
-  { id:'😶', type:'😶' }
-];
-
-const MOOD_COLORS = {
-  surviving:'#39FF14',
-  thriving:'#FFD700',
-  chaotic:'#00F0FF',
-  doom:'#8B5CF6'
-};
-
-// ============================================
-// AI CHARACTERS (Standby)
-// ============================================
+// AI Characters pool
 const AI_CHARACTERS = {
   male: [
-    { username: 'si.badai', glyph: '🌪️', personality: 'sarkas' },
-    { username: 'moon.child', glyph: '🌙', personality: 'melankolis' },
-    { username: 'si.kocak', glyph: '😂', personality: 'humoris' },
-    { username: 'si.pedas', glyph: '🌶️', personality: 'pedas' },
-    { username: 'mba.gaul', glyph: '🔥', personality: 'gaul' }
+    { name: 'si.badai', avatar: '🌪️' },
+    { name: 'moon.child', avatar: '🌙' },
+    { name: 'si.kocak', avatar: '😂' },
+    { name: 'si.pedas', avatar: '🌶️' },
+    { name: 'mba.gaul', avatar: '🔥' }
   ],
   female: [
-    { username: 'beby.manis', glyph: '🥺', personality: 'manja' },
-    { username: 'strawberry.shortcake', glyph: '🍓', personality: 'manis' },
-    { username: 'pretty.sad', glyph: '😔', personality: 'galau' },
-    { username: 'little.fairy', glyph: '🧚', personality: 'magical' },
-    { username: 'cinnamon.girl', glyph: '🥨', personality: 'hangat' }
+    { name: 'beby.manis', avatar: '🥺' },
+    { name: 'strawberry.shortcake', avatar: '🍓' },
+    { name: 'pretty.sad', avatar: '😔' },
+    { name: 'little.fairy', avatar: '🧚' },
+    { name: 'cinnamon.girl', avatar: '🥨' }
   ]
 };
 
 // ============================================
-// RADAR CHAT MANAGER
+// RADAR EFFECTS
 // ============================================
 let radarInterval = null;
 let sweepInterval = null;
-let lastSweepAngle = 0;
-
-// Quota management (1x per hari)
-let dailyQuota = 1;
-const quotaKey = 'radar_quota_' + new Date().toDateString();
-
-// Load quota dari localStorage
-const savedQuota = localStorage.getItem(quotaKey);
-if (savedQuota !== null) {
-  dailyQuota = parseInt(savedQuota);
-} else {
-  localStorage.setItem(quotaKey, '1');
-}
 
 function initRadar() {
-  // Generate initial dots
   generateRadarDots();
   
-  // Update radar setiap 5 detik (simulasi user online)
   radarInterval = setInterval(() => {
     updateRadarDots();
   }, 5000);
   
-  // Sweep effect untuk highlight dots
   startSweepEffect();
-  
-  updateQuotaDisplay();
 }
 
 function generateRadarDots() {
@@ -1139,20 +1415,17 @@ function generateRadarDots() {
   
   container.innerHTML = '';
   
-  // Generate 8-15 dots random dengan ukuran variatif
+  // Generate 8-15 dots random
   const dotCount = 8 + Math.floor(Math.random() * 8);
   
   for (let i = 0; i < dotCount; i++) {
-    // Random gender
     const gender = Math.random() > 0.5 ? 'purple' : 'red';
     const angle = Math.random() * Math.PI * 2;
-    const distance = 10 + Math.random() * 80; // 10-90% dari radius
+    const distance = 10 + Math.random() * 80;
     
-    // Konversi ke koordinat polar
     const x = 50 + Math.cos(angle) * distance / 2;
     const y = 50 + Math.sin(angle) * distance / 2;
     
-    // Ukuran variatif (8px - 16px)
     const size = 8 + Math.floor(Math.random() * 8);
     
     const dot = document.createElement('div');
@@ -1162,41 +1435,18 @@ function generateRadarDots() {
     dot.style.width = size + 'px';
     dot.style.height = size + 'px';
     
-    // Simpan data user
-    const userData = {
-      id: 'user_' + i,
-      username: `user_${Math.random().toString(36).substring(2, 6)}`,
-      gender: gender === 'purple' ? 'female' : 'male',
-      isAI: false,
-      size: size
-    };
-    
-    dot.setAttribute('data-user', JSON.stringify(userData));
-    dot.addEventListener('click', () => onDotClick(userData, dot));
-    
     container.appendChild(dot);
   }
   
-  // Tambah AI dots (standby) dengan ukuran variatif
-  addAIDots(container);
-}
-
-function addAIDots(container) {
-  // Tambah 3-5 AI karakter
-  const aiCount = 3 + Math.floor(Math.random() * 3);
-  
-  for (let i = 0; i < aiCount; i++) {
+  // Add AI dots
+  for (let i = 0; i < 3; i++) {
     const gender = Math.random() > 0.5 ? 'purple' : 'red';
-    const aiPool = gender === 'purple' ? AI_CHARACTERS.female : AI_CHARACTERS.male;
-    const aiChar = aiPool[Math.floor(Math.random() * aiPool.length)];
-    
     const angle = Math.random() * Math.PI * 2;
     const distance = 10 + Math.random() * 70;
     
     const x = 50 + Math.cos(angle) * distance / 2;
     const y = 50 + Math.sin(angle) * distance / 2;
     
-    // Ukuran variatif untuk AI (10px - 18px)
     const size = 10 + Math.floor(Math.random() * 8);
     
     const dot = document.createElement('div');
@@ -1205,19 +1455,6 @@ function addAIDots(container) {
     dot.style.top = y + '%';
     dot.style.width = size + 'px';
     dot.style.height = size + 'px';
-    
-    const userData = {
-      id: 'ai_' + aiChar.username,
-      username: aiChar.username,
-      gender: gender === 'purple' ? 'female' : 'male',
-      isAI: true,
-      personality: aiChar.personality,
-      glyph: aiChar.glyph,
-      size: size
-    };
-    
-    dot.setAttribute('data-user', JSON.stringify(userData));
-    dot.addEventListener('click', () => onDotClick(userData, dot));
     
     container.appendChild(dot);
   }
@@ -1230,7 +1467,6 @@ function updateRadarDots() {
   const dots = container.querySelectorAll('.radar-dot');
   
   dots.forEach(dot => {
-    // Update posisi sedikit (gerakan lambat)
     const currentLeft = parseFloat(dot.style.left);
     const currentTop = parseFloat(dot.style.top);
     
@@ -1238,7 +1474,6 @@ function updateRadarDots() {
       let newLeft = currentLeft + (Math.random() - 0.5) * 3;
       let newTop = currentTop + (Math.random() - 0.5) * 3;
       
-      // Batasi dalam radar
       newLeft = Math.max(5, Math.min(95, newLeft));
       newTop = Math.max(5, Math.min(95, newTop));
       
@@ -1249,532 +1484,330 @@ function updateRadarDots() {
 }
 
 function startSweepEffect() {
-  // Simulasi efek sweep setiap 100ms
   sweepInterval = setInterval(() => {
     const dots = document.querySelectorAll('.radar-dot');
-    const sweepAngle = (Date.now() / 100) % 360; // Angle sweep berubah terus
+    const sweepAngle = (Date.now() / 150) % 360;
     
     dots.forEach(dot => {
-      // Hitung angle dot relatif ke center
+      dot.classList.remove('highlighted');
+      
       const left = parseFloat(dot.style.left);
       const top = parseFloat(dot.style.top);
       
       if (!isNaN(left) && !isNaN(top)) {
-        // Konversi ke koordinat relatif center
         const relX = left - 50;
         const relY = top - 50;
         const dotAngle = (Math.atan2(relY, relX) * 180 / Math.PI + 360) % 360;
         
-        // Hitung selisih angle dengan sweep
         let angleDiff = Math.abs(dotAngle - sweepAngle);
         angleDiff = Math.min(angleDiff, 360 - angleDiff);
         
-        // Jika angle diff < 30 derajat, highlight dot
-        if (angleDiff < 30) {
-          // Intensitas highlight berdasarkan kedekatan angle
-          const intensity = 1 - (angleDiff / 30);
+        if (angleDiff < 35) {
           dot.classList.add('highlighted');
-          dot.style.filter = `brightness(${1 + intensity})`;
-          dot.style.transform = `translate(-50%, -50%) scale(${1 + intensity * 0.3})`;
+          const intensity = 1 - (angleDiff / 35);
+          dot.style.filter = `brightness(${1 + intensity}) drop-shadow(0 0 ${10 + intensity * 20}px currentColor)`;
+          dot.style.transform = `translate(-50%, -50%) scale(${1.2 + intensity * 0.5})`;
         } else {
-          dot.classList.remove('highlighted');
           dot.style.filter = '';
           dot.style.transform = '';
         }
       }
     });
-  }, 100);
+  }, 50);
 }
 
-function onDotClick(userData, dotElement) {
-  if (dailyQuota <= 0 && !userData.isAI) {
-    // Kalo quota habis dan bukan AI, show upgrade
-    showUpgradeModal();
-    return;
-  }
+// ============================================
+// VIBE CHECK FLOW
+// ============================================
+function startVibeCheck() {
+  document.getElementById('genderModal').classList.add('on');
+}
+
+function selectGender(gender) {
+  // Remove selected class from all options
+  document.querySelectorAll('.gender-option').forEach(opt => {
+    opt.classList.remove('selected');
+  });
   
-  // Efek klik
-  dotElement.style.transform = 'translate(-50%, -50%) scale(2.5)';
-  dotElement.style.boxShadow = '0 0 40px currentColor';
-  dotElement.style.zIndex = '100';
-  setTimeout(() => {
-    dotElement.style.transform = '';
-    dotElement.style.boxShadow = '';
-    dotElement.style.zIndex = '';
-  }, 500);
+  // Add selected class to clicked option
+  document.querySelector(`.gender-option[data-gender="${gender}"]`).classList.add('selected');
   
-  if (userData.isAI) {
-    // Chat dengan AI (gratis, tanpa quota)
-    toast(`💬 Bertemu dengan @${userData.username} (AI)`);
-    setTimeout(() => {
-      window.location.href = `chat.html?private=true&with=${userData.username}`;
-    }, 800);
-  } else {
-    // Chat dengan real user (kurangi quota)
-    dailyQuota--;
-    localStorage.setItem(quotaKey, dailyQuota.toString());
-    updateQuotaDisplay();
+  currentGender = gender;
+  document.getElementById('genderConfirm').disabled = false;
+}
+
+function confirmGender() {
+  if (!currentGender) return;
+  
+  // Close gender modal
+  document.getElementById('genderModal').classList.remove('on');
+  
+  // Find chat partner (real user first, then AI)
+  findChatPartner();
+}
+
+function findChatPartner() {
+  // Simulate finding real user (70% chance)
+  const foundRealUser = Math.random() < 0.7;
+  
+  if (foundRealUser) {
+    // Fake real user
+    const oppositeGender = currentGender === 'male' ? 'female' : 'male';
+    const names = oppositeGender === 'female' 
+      ? ['jessica', 'amanda', 'sarah', 'diana', 'melanie']
+      : ['kevin', 'brian', 'alex', 'steven', 'jordan'];
     
-    toast(`💬 Bertemu dengan @${userData.username}`);
-    setTimeout(() => {
-      window.location.href = `chat.html?private=true&with=${userData.username}`;
-    }, 800);
+    chatPartner = {
+      name: names[Math.floor(Math.random() * names.length)],
+      isAI: false,
+      gender: oppositeGender
+    };
+    
+    toast(`✨ Bertemu dengan @${chatPartner.name}`);
+  } else {
+    // AI partner
+    const oppositePool = currentGender === 'male' ? AI_CHARACTERS.female : AI_CHARACTERS.male;
+    const aiChar = oppositePool[Math.floor(Math.random() * oppositePool.length)];
+    
+    chatPartner = {
+      name: aiChar.name,
+      avatar: aiChar.avatar,
+      isAI: true,
+      gender: currentGender === 'male' ? 'female' : 'male'
+    };
+    
+    toast(`💬 Bertemu dengan @${chatPartner.name} (AI)`);
   }
+  
+  // Open chat room
+  openChatRoom();
 }
 
-function updateQuotaDisplay() {
-  const badge = document.getElementById('quotaBadge');
-  if (badge) {
-    badge.textContent = `${dailyQuota}/1 hari ini`;
-    if (dailyQuota <= 0) {
-      badge.classList.add('empty');
-    } else {
-      badge.classList.remove('empty');
+function openChatRoom() {
+  // Reset chat
+  chatMessages = [];
+  chatTimeLeft = 30 * 60;
+  
+  // Set partner name
+  document.getElementById('chatPartnerName').textContent = '@' + chatPartner.name;
+  
+  // Clear messages
+  document.getElementById('chatMessages').innerHTML = '';
+  
+  // Show chat room
+  document.getElementById('chatRoom').classList.add('on');
+  
+  // Start timer
+  startChatTimer();
+  
+  // Add welcome message
+  setTimeout(() => {
+    addMessage(`Halo! Aku @${chatPartner.name}. Senang ngobrol sama kamu.`, false);
+  }, 500);
+}
+
+function startChatTimer() {
+  updateTimerDisplay();
+  
+  chatTimerInterval = setInterval(() => {
+    chatTimeLeft--;
+    updateTimerDisplay();
+    
+    // Warning at 5 minutes
+    if (chatTimeLeft === 300) {
+      toast('⚠️ Sisa 5 menit! Upgrade untuk lanjut.');
     }
+    
+    // Time's up
+    if (chatTimeLeft <= 0) {
+      endChatSession();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const mins = Math.floor(chatTimeLeft / 60);
+  const secs = chatTimeLeft % 60;
+  const timerEl = document.getElementById('chatTimer');
+  
+  timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  
+  if (chatTimeLeft <= 300) {
+    timerEl.classList.add('warning');
+  } else {
+    timerEl.classList.remove('warning');
   }
 }
 
+function endChatSession() {
+  // Stop timer
+  if (chatTimerInterval) {
+    clearInterval(chatTimerInterval);
+    chatTimerInterval = null;
+  }
+  
+  // Hide chat room
+  document.getElementById('chatRoom').classList.remove('on');
+  
+  // Show upgrade modal
+  document.getElementById('upgradeModal').classList.add('on');
+  
+  toast('⏰ Sesi chat selesai');
+}
+
+function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  
+  if (!text) return;
+  
+  // Add user message
+  addMessage(text, true);
+  input.value = '';
+  
+  // Simulate reply (only if partner is AI or simulate real user typing)
+  setTimeout(() => {
+    if (chatPartner.isAI) {
+      // AI reply
+      const replies = [
+        'iya, aku setuju banget!',
+        'wkwk ngakak bacanya',
+        'ceritain lebih lanjut dong',
+        'aku juga ngerasain kok',
+        'seriusan? gila sih'
+      ];
+      const reply = replies[Math.floor(Math.random() * replies.length)];
+      addMessage(reply, false);
+    } else {
+      // Random reply (simulate real user)
+      if (Math.random() < 0.7) {
+        const replies = [
+          'haha iya nih',
+          'sama wkwk',
+          'eh gue juga lagi',
+          'nggak nyangka lo jg',
+          'ya ampun relate banget'
+        ];
+        const reply = replies[Math.floor(Math.random() * replies.length)];
+        addMessage(reply, false);
+      }
+    }
+  }, 1000 + Math.random() * 2000);
+}
+
+function addMessage(text, isOwn) {
+  const messagesEl = document.getElementById('chatMessages');
+  
+  const messageDiv = document.createElement('div');
+  messageDiv.className = `chat-message ${isOwn ? 'own' : 'other'}`;
+  
+  const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  
+  messageDiv.innerHTML = `
+    <div class="chat-bubble">${esc(text)}</div>
+    <div class="chat-meta">${time}</div>
+  `;
+  
+  messagesEl.appendChild(messageDiv);
+  
+  // FIFO: keep only last 20 messages
+  while (messagesEl.children.length > 20) {
+    messagesEl.removeChild(messagesEl.firstChild);
+  }
+  
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
 // ============================================
-// UPGRADE MODAL FUNCTIONS
+// UPGRADE FLOW
 // ============================================
-function showUpgradeModal() {
-  const modal = document.getElementById('upgradeModal');
-  if (modal) modal.classList.add('on');
+function selectPlan(plan) {
+  // Remove selected class from all cards
+  document.querySelectorAll('.pricing-card').forEach(card => {
+    card.classList.remove('selected');
+  });
+  
+  // Add selected class to clicked card
+  document.querySelector(`.pricing-card[data-plan="${plan}"]`).classList.add('selected');
+  
+  selectedPlan = plan;
+  document.getElementById('upgradeNow').disabled = false;
+}
+
+function upgradeNow() {
+  if (!selectedPlan) return;
+  
+  const planDetails = selectedPlan === 'weekly' 
+    ? { price: 10000, days: 7, hoursPerDay: 2 }
+    : { price: 50000, days: 30, hoursPerDay: 3 };
+  
+  toast(`🔄 Proses upgrade ${selectedPlan}... (integrasi payment nanti)`);
+  
+  // Simulate success
+  setTimeout(() => {
+    toast(`✅ Upgrade berhasil! ${planDetails.days} hari @ ${planDetails.hoursPerDay}jam/hari`);
+    closeUpgradeModal();
+    
+    // Reopen chat with extended time (simulate)
+    if (chatPartner) {
+      chatTimeLeft = planDetails.hoursPerDay * 3600;
+      document.getElementById('chatRoom').classList.add('on');
+      startChatTimer();
+      addMessage('Obrolan dilanjut!', false);
+    }
+  }, 1500);
 }
 
 function closeUpgradeModal() {
-  const modal = document.getElementById('upgradeModal');
-  if (modal) modal.classList.remove('on');
-}
-
-function upgrade(type) {
-  toast(`Proses upgrade ${type}... (integrasi payment nanti)`);
-  closeUpgradeModal();
+  document.getElementById('upgradeModal').classList.remove('on');
 }
 
 // ============================================
 // UTILS
 // ============================================
-function esc(t){ if(!t)return''; const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
-
-function toast(msg, isErr=false){
-  const t=document.getElementById('toast');
-  t.textContent=msg; 
-  t.className='toast' + (isErr ? ' error' : '');
-  t.classList.add('show'); 
+function toast(msg, isErr = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isErr ? ' error' : '');
+  t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-function setConn(online){
-  const dot = document.getElementById('connectionDot');
-  if (dot) {
-    dot.style.background = online ? 'var(--surviving)' : 'var(--agak)';
-  }
-  st.online = online;
-}
-
-function getSessionId(){
-  let id = localStorage.getItem('stt_session');
-  if(!id){ 
-    id = 's_' + Date.now() + '_' + Math.random().toString(36).slice(2,9); 
-    localStorage.setItem('stt_session', id); 
-  }
-  return id;
+function esc(t) {
+  if (!t) return '';
+  const d = document.createElement('div');
+  d.textContent = t;
+  return d.innerHTML;
 }
 
 function toggleMenu() {
   toast('Menu coming soon');
 }
 
-// ============================================
-// USER MANAGEMENT
-// ============================================
-async function ensureUser() {
-  let username = localStorage.getItem('stt_username');
-  let userId = localStorage.getItem('stt_user_id');
-  let gender = localStorage.getItem('user_gender');
-  
-  if (!username) {
-    username = prompt('Pilih username dulu yuk', '');
-    if (!username || username.length < 3) {
-      username = 'user_' + Math.random().toString(36).slice(2, 8);
-    }
-    username = username.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-    localStorage.setItem('stt_username', username);
-  }
-  
-  if (!gender) {
-    gender = prompt('Pilih gender kamu (male/female)', 'male').toLowerCase();
-    if (gender !== 'male' && gender !== 'female') {
-      gender = 'male';
-    }
-    localStorage.setItem('user_gender', gender);
-    st.userGender = gender;
-  }
-  
-  st.username = username;
-  st.sessionId = getSessionId();
-  
-  if (userId) st.userId = userId;
-  
-  if (st.sb && st.online) {
-    try {
-      const { data: existing } = await st.sb
-        .from(CFG.TBL_USERS)
-        .select('id')
-        .eq('username', username)
-        .maybeSingle();
-      
-      if (!existing) {
-        const { data: newUser } = await st.sb
-          .from(CFG.TBL_USERS)
-          .insert({
-            username: username,
-            session_id: st.sessionId,
-            gender: gender,
-            created_at: new Date().toISOString(),
-            last_seen: new Date().toISOString()
-          })
-          .select('id')
-          .single();
-        
-        st.userId = newUser.id;
-        localStorage.setItem('stt_user_id', st.userId);
-      } else {
-        st.userId = existing.id;
-        localStorage.setItem('stt_user_id', st.userId);
-        await st.sb
-          .from(CFG.TBL_USERS)
-          .update({ last_seen: new Date().toISOString() })
-          .eq('id', st.userId);
-      }
-    } catch (e) {
-      console.warn('User sync error:', e);
-      st.userId = st.sessionId;
-    }
-  } else {
-    st.userId = st.sessionId;
-  }
+function filterMood(mood) {
+  console.log('Filter mood:', mood);
 }
 
-// ============================================
-// INIT SUPABASE
-// ============================================
-async function initSupabase(){
-  if(typeof supabase === 'undefined'){ 
-    setConn(false); 
-    return false; 
-  }
-  
-  try {
-    st.sb = supabase.createClient(CFG.url, CFG.key);
-    const { error } = await st.sb.from(CFG.TBL_USERS).select('id').limit(1);
-    if (error) throw error;
-    
-    setConn(true);
-    await ensureUser();
-    setupRealtime();
-    return true;
-    
-  } catch(e){
-    console.error('Init error:', e);
-    setConn(false);
-    await ensureUser();
-    return false;
-  }
+function resetFilters() {
+  console.log('Reset filters');
 }
 
-function setupRealtime(){
-  st.sb.channel('rx-live')
-    .on('postgres_changes', { 
-      event: 'INSERT', 
-      schema: 'public', 
-      table: CFG.TBL_REACTIONS 
-    }, payload => { 
-      if(payload.new?.rant_id) refreshCounts(payload.new.rant_id); 
-    })
-    .subscribe();
+function refreshSpills() {
+  console.log('Refresh spills');
 }
-
-// ============================================
-// LOAD RANTS (EXISTING)
-// ============================================
-async function loadRants(){
-  setLoading(true);
-  
-  if(!st.online || !st.sb){
-    setLoading(false);
-    renderRants();
-    return;
-  }
-
-  try {
-    let query = st.sb
-      .from(CFG.TBL_RANTS)
-      .select(`
-        id,
-        content,
-        mood,
-        is_anonymous,
-        created_at,
-        users!inner (username)
-      `)
-      .order('created_at', { ascending: false })
-      .limit(50);
-    
-    if (st.userId && st.userId !== st.sessionId) {
-      query = query.not('user_id', 'eq', st.userId);
-    }
-    
-    const { data: rantsData, error: rantsError } = await query;
-
-    if(rantsError) throw rantsError;
-    
-    st.rants = rantsData || [];
-    
-    if(st.rants.length > 0){
-      const rantIds = st.rants.map(r => r.id);
-      await loadReactions(rantIds);
-    }
-
-  } catch(e){
-    console.error('loadRants error:', e);
-    toast('Gagal memuat', true);
-  }
-
-  setLoading(false);
-  renderRants();
-}
-
-async function loadReactions(ids){
-  if(!st.sb || !ids.length) return;
-  
-  try {
-    const { data, error } = await st.sb
-      .from(CFG.TBL_REACTIONS)
-      .select('rant_id, reaction_type')
-      .in('rant_id', ids);
-
-    if(error) throw error;
-
-    st.reactions = {};
-    ids.forEach(id => { 
-      st.reactions[id] = {}; 
-      REACTIONS.forEach(r => st.reactions[id][r.id] = 0);
-    });
-    
-    (data || []).forEach(row => {
-      if(st.reactions[row.rant_id]) {
-        st.reactions[row.rant_id][row.reaction_type] = 
-          (st.reactions[row.rant_id][row.reaction_type] || 0) + 1;
-      }
-    });
-    
-  } catch(e){ 
-    console.error('loadReactions error:', e); 
-  }
-}
-
-// ============================================
-// REACTIONS (EXISTING)
-// ============================================
-async function reactToRant(rantId, emoji, btnEl){
-  if (!st.userId) {
-    toast('User ID tidak ditemukan', true);
-    return;
-  }
-  
-  const countEl = document.getElementById(`count-${rantId}-${emoji}`);
-  const prev = parseInt(countEl?.textContent || '0');
-
-  if(countEl) countEl.textContent = prev + 1;
-  if(btnEl) btnEl.classList.add('reacted');
-  if(!st.reactions[rantId]) st.reactions[rantId] = {};
-  st.reactions[rantId][emoji] = prev + 1;
-
-  if(st.online && st.sb){
-    try {
-      const { error } = await st.sb
-        .from(CFG.TBL_REACTIONS)
-        .insert({
-          rant_id: rantId,
-          reaction_type: emoji,
-          user_id: st.userId,
-          created_at: new Date().toISOString()
-        });
-
-      if(error){
-        if(error.code === '23505'){
-          toast('Sudah bereaksi!');
-          if(countEl) countEl.textContent = prev;
-          if(btnEl) btnEl.classList.remove('reacted');
-          st.reactions[rantId][emoji] = prev;
-          return;
-        }
-        throw error;
-      }
-      toast(emoji + ' Tersimpan!');
-    } catch(e){
-      console.error('Reaction error:', e);
-      if(countEl) countEl.textContent = prev;
-      if(btnEl) btnEl.classList.remove('reacted');
-      st.reactions[rantId][emoji] = prev;
-      toast('Gagal', true);
-    }
-  }
-}
-
-async function refreshCounts(rantId){
-  if(!st.sb || !rantId) return;
-  try {
-    const { data } = await st.sb
-      .from(CFG.TBL_REACTIONS)
-      .select('reaction_type')
-      .eq('rant_id', rantId);
-    
-    const c = {};
-    REACTIONS.forEach(r => c[r.id] = 0);
-    (data || []).forEach(r => c[r.reaction_type]++);
-    
-    REACTIONS.forEach(r => { 
-      const el = document.getElementById(`count-${rantId}-${r.id}`); 
-      if(el) el.textContent = c[r.id]; 
-    });
-  } catch(e){}
-}
-
-// ============================================
-// RENDER RANTS (EXISTING)
-// ============================================
-function setLoading(v){
-  st.loading = v;
-  const ca = document.getElementById('content-area');
-  if(v){ 
-    ca.className = 'content-area loading'; 
-    ca.innerHTML = '<div class="spinner"></div><p class="loading-text">Menyedu teh...</p>'; 
-  }
-}
-
-function renderRants(){
-  const ca = document.getElementById('content-area');
-  if(!ca || st.loading) return;
-
-  let list = [...st.rants];
-  
-  if(st.filter !== 'all') {
-    list = list.filter(s => s.mood === st.filter);
-  }
-  
-  if(st.vibeMatch < 100) {
-    list = list.filter(() => Math.random() < st.vibeMatch / 100);
-  }
-
-  if(!list.length){
-    ca.className = 'content-area';
-    ca.innerHTML = '<div class="empty-state"><div class="empty-icon">🍃</div><div class="empty-text">Belum ada teh yang tumpah...</div><div class="empty-subtext">Jadilah yang pertama!</div></div>';
-    return;
-  }
-
-  ca.className = 'content-area has-content';
-  const html = [];
-
-  for(let i = 0; i < list.length; i++){
-    const s = list[i];
-    const username = s.users?.username || 'anonim';
-    
-    const rxHtml = REACTIONS.map(r => {
-      const count = (st.reactions[s.id] || {})[r.id] ?? 0;
-      return `<button class="reaction-btn" onclick="reactToRant('${s.id}','${r.id}',this)">
-        <span class="reaction-emoji">${r.id}</span>
-        <span class="reaction-count" id="count-${s.id}-${r.id}">${count}</span>
-      </button>`;
-    }).join('');
-
-    html.push(`<div class="spill-card">
-      <div class="spill-header">
-        <span class="spill-author">@${esc(username)}</span>
-        <span class="spill-mood" style="color:${MOOD_COLORS[s.mood] || '#FFF'}">${s.mood || ''}</span>
-      </div>
-      <div class="spill-content">${esc(s.content)}</div>
-      <div class="spill-reactions">${rxHtml}</div>
-    </div>`);
-  }
-
-  ca.innerHTML = html.join('');
-}
-
-// ============================================
-// FILTERS
-// ============================================
-function filterMood(mood){
-  st.filter = mood;
-  document.querySelectorAll('.mood-btn').forEach(b => 
-    b.classList.toggle('active', b.dataset.mood === mood)
-  );
-  renderRants();
-}
-
-function resetFilters(){
-  st.filter = 'all'; 
-  st.vibeMatch = 87;
-  document.getElementById('vibe-slider').value = 87;
-  document.getElementById('vibe-percentage').textContent = '87%';
-  document.querySelectorAll('.mood-btn').forEach(b => 
-    b.classList.toggle('active', b.dataset.mood === 'all')
-  );
-  loadRants();
-}
-
-function refreshSpills(){ 
-  loadRants(); 
-}
-
-// ============================================
-// HTMX ACTIVE STATE
-// ============================================
-document.addEventListener('htmx:afterSwap', function() {
-  const path = window.location.pathname;
-  document.querySelectorAll('.nav-item').forEach(item => {
-    const href = item.getAttribute('href');
-    item.classList.toggle('active', href === path);
-  });
-});
 
 // ============================================
 // INIT
 // ============================================
-document.addEventListener('DOMContentLoaded', async () => {
-  console.log('Spill the Tea starting...');
-  
-  // Init radar
+document.addEventListener('DOMContentLoaded', () => {
   initRadar();
   
-  const ok = await initSupabase();
-  
-  const slider = document.getElementById('vibe-slider');
-  if (slider) {
-    slider.addEventListener('input', e => {
-      st.vibeMatch = +e.target.value;
-      document.getElementById('vibe-percentage').textContent = st.vibeMatch + '%';
-      renderRants();
-    });
-  }
-
-  if(ok) await loadRants();
-  else {
-    setLoading(false);
-    renderRants();
-  }
-});
-
-// Cleanup interval saat page unload
-window.addEventListener('beforeunload', () => {
-  if (radarInterval) {
-    clearInterval(radarInterval);
-  }
-  if (sweepInterval) {
-    clearInterval(sweepInterval);
-  }
+  // Cleanup intervals on page unload
+  window.addEventListener('beforeunload', () => {
+    if (radarInterval) clearInterval(radarInterval);
+    if (sweepInterval) clearInterval(sweepInterval);
+    if (chatTimerInterval) clearInterval(chatTimerInterval);
+  });
 });
 </script>
 </body>
