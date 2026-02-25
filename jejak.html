@@ -1094,18 +1094,21 @@ async function submitRant(content, mood) {
   }
 }
 
-// ═══════════════════════════════════════════════════
-// TOGGLE REACTION
-// ═══════════════════════════════════════════════════
+// ============================================
+// TOGGLE REACTION - FIX SELF-REACT & COUNTER
+// ============================================
 async function toggleReaction(entryId, emoji) {
+  // Cari entry di state
   const entry = S.entries.find(e => e.id === entryId);
   if (!entry) return;
 
+  // ── CEK SELF-REACT (WAJIB!) ────────────────────
   if (!entry.isDummy && entry.author === S.user) {
     toast('😶 Gak bisa react ke rant sendiri');
     return;
   }
 
+  // Simpan state sebelum perubahan
   const previousState = {
     reactions: { ...entry.reactions },
     userReacted: entry.userReacted
@@ -1113,10 +1116,13 @@ async function toggleReaction(entryId, emoji) {
 
   const prevEmoji = entry.userReacted;
 
+  // Update state lokal (optimistic UI)
   if (prevEmoji === emoji) {
+    // Unreact
     entry.reactions[emoji] = Math.max(0, (entry.reactions[emoji] || 0) - 1);
     entry.userReacted = null;
   } else {
+    // Switch atau react baru
     if (prevEmoji) {
       entry.reactions[prevEmoji] = Math.max(0, (entry.reactions[prevEmoji] || 0) - 1);
     }
@@ -1124,45 +1130,55 @@ async function toggleReaction(entryId, emoji) {
     entry.userReacted = emoji;
   }
 
+  // Render ulang dengan state baru
   if (!entry.isDummy) {
     saveEntries();
   }
   renderEntries();
 
+  // Sync ke Supabase (jika online dan bukan dummy)
   if (S.online && !entry.isDummy) {
     try {
+      // Hapus reaction lama jika ada dan berbeda
       if (prevEmoji && prevEmoji !== emoji) {
         await sbDelete('reactions',
           `rant_id=eq.${entryId}&user_id=eq.${encodeURIComponent(S.user)}`);
       }
 
+      // Insert/update reaction baru
       if (entry.userReacted) {
+        // Cek apakah user sudah pernah react
         const existing = await sbSelect('reactions',
           `rant_id=eq.${entryId}&user_id=eq.${encodeURIComponent(S.user)}&select=id`);
 
         if (existing && existing.length > 0) {
-          const ok = await sbUpdate('reactions', `id=eq.${existing[0].id}`, { emoji });
+          // Update emoji yang ada
+          const ok = await sbUpdate('reactions', `id=eq.${existing[0].id}`, { emoji: entry.userReacted });
           if (!ok) throw new Error('Update failed');
         } else {
+          // Insert baru
           const newId = crypto.randomUUID();
           const ok = await sbInsert('reactions', {
             id: newId,
             rant_id: entryId,
             user_id: S.user,
-            emoji: emoji,
+            emoji: entry.userReacted,
             created_at: new Date().toISOString()
           });
           if (!ok) throw new Error('Insert failed');
         }
       } else {
+        // Unreact total (hapus semua reaction user untuk rant ini)
         await sbDelete('reactions', `rant_id=eq.${entryId}&user_id=eq.${encodeURIComponent(S.user)}`);
       }
 
+      // Refresh data untuk memastikan counter akurat
       await loadRants();
 
     } catch (error) {
       console.error('[rxSync error]', error);
 
+      // Rollback jika error
       entry.reactions = previousState.reactions;
       entry.userReacted = previousState.userReacted;
       saveEntries();
@@ -1171,6 +1187,7 @@ async function toggleReaction(entryId, emoji) {
       toast('⚠ Gagal sync reaksi');
     }
   } else if (!entry.isDummy) {
+    // Simpan ke queue jika offline
     qSync('reaction', {
       id: crypto.randomUUID(),
       rant_id: entryId,
@@ -1181,6 +1198,169 @@ async function toggleReaction(entryId, emoji) {
   }
 }
 
+// ============================================
+// RENDER REACTION BAR - FIX SELF-REACT BUTTON
+// ============================================
+function renderReactionBar(entry) {
+  const r = entry.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 };
+  const ur = entry.userReacted;
+  const isOwn = !entry.isDummy && (entry.author === S.user);
+  const isDummy = entry.isDummy;
+
+  const btns = Object.entries(RX).map(([k, v]) => {
+    const active = ur === k;
+    const count = r[k] || 0;
+    
+    // Jika rant milik sendiri, button disabled
+    if (isOwn) {
+      return `<button class="reaction-btn" disabled title="Gak bisa react ke rant sendiri">
+        <span class="remoji">${v.e}</span>
+        <span class="rcount">${count}</span>
+      </button>`;
+    }
+    
+    // Untuk rant orang lain atau dummy, button aktif
+    return `<button class="reaction-btn${active ? ' act' : ''}"
+      onclick="toggleReaction('${entry.id}','${k}')"
+      data-tooltip="${v.tip}">
+      <span class="remoji">${v.e}</span>
+      <span class="rcount">${count}</span>
+    </button>`;
+  }).join('');
+
+  let lockLabel = '';
+  if (isOwn) {
+    lockLabel = `<span class="own-lock">⛔ rant sendiri</span>`;
+  }
+  
+  return `<div class="reaction-bar">${btns}${lockLabel}</div>`;
+}
+
+// ============================================
+// REFRESH COUNTS - DIPANGGIL VIA REALTIME
+// ============================================
+async function refreshCounts(rantId) {
+  if (!rantId) return;
+  
+  try {
+    // Ambil semua reactions untuk rant ini
+    const data = await sbSelect('reactions', `rant_id=eq.${rantId}&select=emoji`);
+    
+    if (data && data.length > 0) {
+      // Hitung ulang counter
+      const counts = { skull: 0, cry: 0, fire: 0, upside: 0 };
+      
+      data.forEach(r => {
+        if (r.emoji === 'skull') counts.skull++;
+        else if (r.emoji === 'cry') counts.cry++;
+        else if (r.emoji === 'fire') counts.fire++;
+        else if (r.emoji === 'upside') counts.upside++;
+      });
+      
+      // Update state
+      const entry = S.entries.find(e => e.id === rantId);
+      if (entry) {
+        entry.reactions = counts;
+        
+        // Update juga userReacted untuk current user
+        const userReact = data.find(r => r.user_id === S.user);
+        entry.userReacted = userReact ? userReact.emoji : null;
+        
+        renderEntries();
+      }
+    }
+  } catch (e) {
+    console.error('[refreshCounts error]', e);
+  }
+}
+
+// ============================================
+// LOAD RANTS - PASTIKAN COUNTER TERUPDATE
+// ============================================
+async function loadRants() {
+  try {
+    // Ambil rants milik user
+    const rants = await sbSelect('rants',
+      `author=eq.${encodeURIComponent(S.user)}&order=created_at.desc&limit=${CFG.maxEntries}`);
+
+    if (!rants || !rants.length) return;
+
+    const rantIds = rants.map(r => r.id);
+    const reactMap = {};
+    rantIds.forEach(id => {
+      reactMap[id] = { skull: 0, cry: 0, fire: 0, upside: 0, myEmoji: null };
+    });
+
+    // Ambil semua reactions untuk rant-rant ini
+    for (const rantId of rantIds) {
+      const rxRaw = await sbSelect('reactions', `rant_id=eq.${rantId}&select=user_id,emoji`);
+
+      if (rxRaw && rxRaw.length) {
+        rxRaw.forEach(rx => {
+          // Hitung counter
+          if (rx.emoji === 'skull') reactMap[rantId].skull++;
+          else if (rx.emoji === 'cry') reactMap[rantId].cry++;
+          else if (rx.emoji === 'fire') reactMap[rantId].fire++;
+          else if (rx.emoji === 'upside') reactMap[rantId].upside++;
+
+          // Tandai jika milik current user
+          if (rx.user_id === S.user) {
+            reactMap[rantId].myEmoji = rx.emoji;
+          }
+        });
+      }
+    }
+
+    // Update entry yang sudah ada
+    S.entries = S.entries.map(entry => {
+      if (reactMap[entry.id]) {
+        return {
+          ...entry,
+          reactions: {
+            skull: reactMap[entry.id].skull,
+            cry: reactMap[entry.id].cry,
+            fire: reactMap[entry.id].fire,
+            upside: reactMap[entry.id].upside
+          },
+          userReacted: reactMap[entry.id].myEmoji
+        };
+      }
+      return entry;
+    });
+
+    // Tambahkan rants baru
+    const existingIds = new Set(S.entries.map(e => e.id));
+    const newEntries = rants
+      .filter(r => !existingIds.has(r.id))
+      .map(r => ({
+        id: r.id,
+        content: r.content,
+        mood: r.mood,
+        timestamp: new Date(r.created_at).getTime(),
+        reactions: {
+          skull: reactMap[r.id]?.skull || 0,
+          cry: reactMap[r.id]?.cry || 0,
+          fire: reactMap[r.id]?.fire || 0,
+          upside: reactMap[r.id]?.upside || 0
+        },
+        userReacted: reactMap[r.id]?.myEmoji || null,
+        isSpilled: true,
+        author: r.author
+      }));
+
+    if (newEntries.length) {
+      S.entries = [...newEntries, ...S.entries]
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .slice(0, CFG.maxEntries);
+    }
+
+    saveEntries();
+    renderEntries();
+
+  } catch (error) {
+    console.error('[loadRants error]', error);
+  }
+}
 // ═══════════════════════════════════════════════════
 // SYNC QUEUE
 // ═══════════════════════════════════════════════════
