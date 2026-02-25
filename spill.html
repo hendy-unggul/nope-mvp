@@ -1392,7 +1392,99 @@ const AI_CHARACTERS = {
     { name: 'cinnamon.girl', avatar: '🥨' }
   ]
 };
+// ============================================
+// TYPING INDICATOR REALISTIS
+// ============================================
+function simulateTyping(characterName, messageLength) {
+  const typingEl = document.createElement('div');
+  typingEl.className = 'chat-message other';
+  typingEl.innerHTML = `
+    <div class="chat-bubble typing">
+      <span class="dot-typing"></span>
+      <span class="dot-typing"></span>
+      <span class="dot-typing"></span>
+    </div>
+  `;
+  
+  document.getElementById('chatMessages').appendChild(typingEl);
+  
+  // Hitung delay berdasarkan panjang pesan (realistis)
+  // Rata-rata orang ngetik 40 kata/menit = 0.67 kata/detik
+  // Asumsi 1 kata = 5 karakter
+  const wordCount = messageLength / 5;
+  const baseDelay = 1000; // 1 detik minimal
+  const typingDelay = baseDelay + (wordCount * 150); // 150ms per kata
+  
+  // Tambah variasi random (±30%)
+  const finalDelay = typingDelay * (0.7 + Math.random() * 0.6);
+  
+  // Hapus typing indicator setelah delay
+  setTimeout(() => {
+    typingEl.remove();
+  }, finalDelay);
+  
+  return finalDelay;
+}
 
+// Update fungsi sendChatMessage
+async function sendChatMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  
+  // Add user message
+  addMessage(text, true);
+  input.value = '';
+  
+  // Show typing indicator
+  const typingDelay = simulateTyping(chatPartner.name, text.length);
+  
+  // Kirim ke API setelah typing selesai
+  setTimeout(async () => {
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          characterName: chatPartner.name,
+          userName: currentUser,
+          room: 'private',
+          lastMessages: getLastMessages(5)
+        })
+      });
+      
+      const data = await response.json();
+      if (data.reply) {
+        addMessage(data.reply, false);
+      }
+    } catch (e) {
+      console.error('Chat error:', e);
+      addMessage('*error koneksi*', false);
+    }
+  }, typingDelay);
+}
+
+// Ambil last messages untuk konteks
+function getLastMessages(count) {
+  const messages = [];
+  const msgElements = document.querySelectorAll('#chatMessages .chat-message');
+  
+  for (let i = Math.max(0, msgElements.length - count); i < msgElements.length; i++) {
+    const el = msgElements[i];
+    const isOwn = el.classList.contains('own');
+    const bubble = el.querySelector('.chat-bubble');
+    
+    if (bubble && !bubble.classList.contains('typing')) {
+      messages.push({
+        role: isOwn ? 'user' : 'assistant',
+        content: bubble.textContent
+      });
+    }
+  }
+  
+  return messages;
+}
 // ============================================
 // RADAR EFFECTS
 // ============================================
