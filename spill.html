@@ -67,54 +67,49 @@ header{
   align-items:center;
   gap:12px;
 }
-.chat-btn{
-  background:var(--primary);
-  color:var(--bg);
-  border:none;
-  padding:8px 16px;
-  font-size:12px;
-  font-weight:700;
-  text-transform:uppercase;
-  cursor:pointer;
-  text-decoration:none;
-  border-radius:30px;
-  transition:all .2s;
-}
-.chat-btn:hover{
-  background:var(--text);
-  color:var(--bg);
-  transform:scale(1.05);
-}
-
-/* CONNECTION STATUS */
-.connection-status{
-  font-size:10px;
-  color:var(--text-muted);
-  text-align:center;
-  margin-bottom:24px;
-  text-transform:uppercase;
-  letter-spacing:.1em;
+.menu-trigger{
+  width:32px;
+  height:32px;
   display:flex;
+  flex-direction:column;
   align-items:center;
   justify-content:center;
-  gap:6px;
+  gap:3px;
+  background:transparent;
+  border:none;
+  cursor:pointer;
 }
-.connection-status.online{color:var(--surviving);}
-.connection-status.offline{color:var(--agak);}
-.connection-status::before{
-  content:'';
-  width:6px;
-  height:6px;
-  background:currentColor;
+.menu-trigger span{
+  width:4px;
+  height:4px;
+  background:var(--text);
   border-radius:50%;
-  display:inline-block;
+  transition:all .2s;
+}
+.menu-trigger:hover span{
+  background:var(--primary);
+}
+
+/* CONNECTION STATUS - HANYA HIJAU BLINKING */
+.connection-dot{
+  width:8px;
+  height:8px;
+  background:var(--surviving);
+  border-radius:50%;
+  animation:blink 2s infinite;
+  margin-right:8px;
+}
+@keyframes blink{
+  0%,100%{opacity:1}
+  50%{opacity:.3}
 }
 
 /* ============================================ */
-/* LET'S TALK HERO - INSOMNIA AQUARIUM STYLES */
+/* LET'S TALK HERO - INSOMNIA AQUARIUM */
 /* ============================================ */
 .insomnia-hero {
   width: 100%;
+  aspect-ratio: 1/1; /* Tinggi = Lebar (kotak) */
   margin-bottom: 24px;
   border-radius: 20px;
   overflow: hidden;
@@ -126,7 +121,7 @@ header{
 .aquarium-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 16/9;
+  height: 100%;
   overflow: hidden;
   background: radial-gradient(ellipse at 30% 40%, #0a1a2a, #030614);
 }
@@ -324,6 +319,7 @@ header{
   backdrop-filter: blur(5px);
   border: 1px solid var(--border);
   font-size: 12px;
+  margin-bottom: 16px;
 }
 
 .quota-badge {
@@ -345,6 +341,34 @@ header{
 
 .upgrade-link:hover {
   text-decoration: underline;
+}
+
+/* VIBE CHECK BUTTON - DI DALAM HERO */
+.vibe-check-btn {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  background: var(--primary);
+  color: var(--bg);
+  border: none;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 30px;
+  transition: all 0.2s;
+  z-index: 30;
+  pointer-events: auto;
+  box-shadow: 0 0 20px rgba(255,77,0,0.5);
+}
+
+.vibe-check-btn:hover {
+  background: var(--text);
+  color: var(--bg);
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(255,255,255,0.5);
 }
 
 /* FILTER SECTION */
@@ -828,11 +852,12 @@ header{
       <span class="brand-text">Spill</span>
     </div>
     <div class="header-actions">
-      <a href="chat.html" class="chat-btn">💬 Obrolan</a>
+      <div class="connection-dot" id="connectionDot"></div>
+      <button class="menu-trigger" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </header>
-
-  <div class="connection-status" id="connection-status">Menghubungkan...</div>
 
   <!-- ============================================ -->
   <!-- LET'S TALK HERO - INSOMNIA AQUARIUM -->
@@ -857,10 +882,13 @@ header{
         <h2 class="glitch-text" data-text="LET'S TALK">LET'S TALK</h2>
         <p class="sub-text">tap ikan untuk bertemu teman baru</p>
         <div class="quota-display">
-          <span class="quota-badge" id="quotaBadge">3/3 hari ini</span>
+          <span class="quota-badge" id="quotaBadge">0/3 hari ini</span>
           <span class="upgrade-link" onclick="showUpgradeModal()">Upgrade</span>
         </div>
       </div>
+      
+      <!-- VIBE CHECK BUTTON - DI DALAM HERO (KANAN BAWAH) -->
+      <a href="chat.html" class="vibe-check-btn">✨ Vibe Check</a>
     </div>
   </section>
 
@@ -1183,9 +1211,11 @@ function toast(msg, isErr=false){
 }
 
 function setConn(online, msg){
-  const el = document.getElementById('connection-status');
-  el.textContent = online ? 'Terhubung' : msg; 
-  el.className = 'connection-status ' + (online ? 'online' : 'offline');
+  // Just update dot color based on online status
+  const dot = document.getElementById('connectionDot');
+  if (dot) {
+    dot.style.background = online ? 'var(--surviving)' : 'var(--agak)';
+  }
   st.online = online;
 }
 
@@ -1196,6 +1226,10 @@ function getSessionId(){
     localStorage.setItem('stt_session', id); 
   }
   return id;
+}
+
+function toggleMenu() {
+  toast('Menu coming soon');
 }
 
 // ============================================
@@ -1263,7 +1297,7 @@ async function ensureUser() {
 // ============================================
 async function initSupabase(){
   if(typeof supabase === 'undefined'){ 
-    setConn(false, 'Gagal load'); 
+    setConn(false); 
     return false; 
   }
   
@@ -1272,14 +1306,14 @@ async function initSupabase(){
     const { error } = await st.sb.from(CFG.TBL_USERS).select('id').limit(1);
     if (error) throw error;
     
-    setConn(true, 'Terhubung');
+    setConn(true);
     await ensureUser();
     setupRealtime();
     return true;
     
   } catch(e){
     console.error('Init error:', e);
-    setConn(false, 'Error');
+    setConn(false);
     await ensureUser();
     return false;
   }
