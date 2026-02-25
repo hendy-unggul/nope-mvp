@@ -7,6 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/htmx.org@2.0.0"></script>
 <style>
+/* ===== CSS SAMA PERSIS DENGAN SEBELUMNYA ===== */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 :root{
   --bg:#0A0A0A;
@@ -443,10 +444,10 @@ const st = {
 };
 
 // ============================================
-// STATE MANAJEMEN PERCAKAPAN - DINAMIS
+// STATE MANAJEMEN PERCAKAPAN
 // ============================================
 const convoState = {
-  phase: 'idle',        // idle, init, active, chain, cooldown
+  phase: 'idle',
   messageCount: 0,
   lastMessageTime: null,
   lastAITime: null,
@@ -457,7 +458,6 @@ const convoState = {
   }
 };
 
-// Fungsi update fase percakapan
 function updateConvoPhase(room) {
   var now = Date.now();
   var roomStat = convoState.roomStats[room];
@@ -470,8 +470,7 @@ function updateConvoPhase(room) {
   var timeSinceLast = now - roomStat.lastUserMessage;
   var msgCount = roomStat.messageCount || 0;
   
-  // Fase berdasarkan waktu dan jumlah pesan
-  if (timeSinceLast > 300000) { // >5 menit gak ada chat
+  if (timeSinceLast > 300000) {
     convoState.phase = 'idle';
   } else if (msgCount < 3) {
     convoState.phase = 'init';
@@ -488,7 +487,7 @@ function updateConvoPhase(room) {
 }
 
 // ============================================
-// 30 KARAKTER DIGITAL - DENGAN UUID VALID
+// 30 KARAKTER DIGITAL
 // ============================================
 const DIGITAL_FRIENDS = {
   emosi: [
@@ -605,8 +604,6 @@ async function ensureUser() {
         
         st.userId = newUser.id;
         localStorage.setItem('stt_user_id', st.userId);
-        
-        // Simpan timestamp buat deteksi new user
         localStorage.setItem('stt_created_at', Date.now().toString());
       } else {
         st.userId = existing.id;
@@ -676,7 +673,7 @@ function setupRealtime(){
 }
 
 // ============================================
-// CHAT FUNCTIONS
+// LOAD CHATS
 // ============================================
 async function loadChats(){
   if(!st.sb) return;
@@ -715,7 +712,7 @@ async function loadChats(){
 }
 
 // ============================================
-// RENDER CHAT ROOM - FIX NAN:NAN
+// RENDER CHAT ROOM
 // ============================================
 function renderChatRoom(room){
   var container = document.getElementById('chat-messages-' + room);
@@ -741,7 +738,6 @@ function renderChatRoom(room){
       usernameClass = room === 'emosi' ? 'chat-username emosi' : 'chat-username agak';
     }
     
-    // FIX FORMAT WAKTU
     var time = '';
     if (msg.created_at) {
       try {
@@ -773,19 +769,12 @@ function renderChatRoom(room){
 }
 
 // ============================================
-// ADD CHAT TO UI - DENGAN STATE UPDATE
+// ADD CHAT TO UI
 // ============================================
 function addChatToUI(msg, isNew){
   console.log('📝 addChatToUI dipanggil:', msg);
-  console.log('🔍 Room:', msg.room, 'Current room:', st.currentRoom);
-  console.log('🔍 Container ada?', document.getElementById('chat-messages-' + (msg.room || st.currentRoom)));
   
-  // ... sisanya
-}
-  
-  // Update state percakapan
   if (!msg.is_ai && msg.user_id === st.userId) {
-    // Ini pesan dari user
     var room = msg.room || st.currentRoom;
     if (!convoState.roomStats[room]) {
       convoState.roomStats[room] = { lastAITime: null, messageCount: 0, lastUserMessage: null };
@@ -793,8 +782,6 @@ function addChatToUI(msg, isNew){
     convoState.roomStats[room].lastUserMessage = Date.now();
     convoState.roomStats[room].messageCount = (convoState.roomStats[room].messageCount || 0) + 1;
     convoState.lastMessageTime = Date.now();
-    
-    // Update fase
     updateConvoPhase(room);
   }
   
@@ -830,15 +817,13 @@ function addChatToUI(msg, isNew){
 }
 
 // ============================================
-// TRIGGER 30 KARAKTER - VERSI FIX
+// TRIGGER DIGITAL FRIEND
 // ============================================
 async function triggerDigitalFriend(room, lastMessage, forceTest) {
   console.log('🎯 triggerDigitalFriend dipanggil!', room, lastMessage);
   
-  // Update fase percakapan
   var currentPhase = updateConvoPhase(room);
   
-  // Hitung online users
   var onlineUsers = 0;
   if (st.chatMessages[room]) {
     var uniqueUsers = new Set();
@@ -854,7 +839,6 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
     onlineUsers = uniqueUsers.size;
   }
   
-  // Cek user baru dari localStorage
   var isNewUser = false;
   var userCreated = localStorage.getItem('stt_created_at');
   if (userCreated) {
@@ -862,7 +846,6 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
     isNewUser = daysOld < 7;
   }
   
-  // Hitung probabilitas berdasarkan fase
   var baseChance = 0;
   
   if (currentPhase === 'idle') {
@@ -997,9 +980,10 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
       }
     }
   }, delay);
-} // ← PASTIKAN ADA KURUNG TUTUP INI
+}
+
 // ============================================
-// SEND CHAT - DENGAN TRIGGER DINAMIS
+// SEND CHAT
 // ============================================
 async function sendChat(room){
   var input = document.getElementById('chat-input-' + room);
@@ -1011,7 +995,6 @@ async function sendChat(room){
   
   var userId = st.userId || st.sessionId || 'anonymous';
   
-  // Simpan timestamp user di localStorage untuk deteksi new user
   if (!localStorage.getItem('stt_created_at')) {
     localStorage.setItem('stt_created_at', Date.now().toString());
   }
