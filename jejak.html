@@ -505,11 +505,11 @@ const CFG = {
   maxFileSize: 5 * 1024 * 1024,
   maxSelection: 6,
   maxArtefacts: 6,
-  maxEntries: 12, // Naikkan jadi 12 biar keliatan rame
+  maxEntries: 12,
   faceThreshold: 0.6,
   inputSize: 416,
   storageBucket: 'artefacts',
-  chaosInterval: 180000 // 3 menit
+  chaosInterval: 180000
 };
 
 const MOODS = {
@@ -690,10 +690,10 @@ function showProc(v) {
 }
 
 // ═══════════════════════════════════════════════════
-// CHAOS GENERATOR - HUMAN PATTERN
+// CHAOS GENERATOR - HUMAN PATTERN (LANGSUNG KE SPILL)
 // ═══════════════════════════════════════════════════
 const CHAOS_SCHEDULE = {
-  // [jam] = { min: minimal rant, max: maksimal rant, karakter: [list username] }
+  // [jam] = { min: minimal rant, maks: maksimal rant, karakter: [list username] }
   5:  { min: 2, max: 3, karakter: ['sleepy.head', 'moon.child'] },
   6:  { min: 3, max: 4, karakter: ['mba.santuy', 'si.badai', 'sleepy.head'] },
   7:  { min: 3, max: 4, karakter: ['beby.manis', 'strawberry.shortcake', 'mba.ceplas'] },
@@ -720,12 +720,8 @@ const CHAOS_SCHEDULE = {
   4:  { min: 1, max: 2, karakter: ['moon.child', 'sleepy.head'] }
 };
 
-// Total minimal per hari: 55
-// Total maksimal per hari: 85
-
 function getRandomMood() {
   const moods = ['surviving', 'thriving', 'chaotic', 'doom'];
-  // Weighted: surviving lebih sering (40%), doom jarang (10%)
   const weights = [0.4, 0.3, 0.2, 0.1];
   const rand = Math.random();
   let sum = 0;
@@ -737,16 +733,14 @@ function getRandomMood() {
 }
 
 function getCharactersForHour(hour) {
-  const schedule = CHAOS_SCHEDULE[hour] || CHAOS_SCHEDULE[12]; // Default ke peak hour
+  const schedule = CHAOS_SCHEDULE[hour] || CHAOS_SCHEDULE[12];
   if (schedule.karakter === 'all') {
-    // Semua karakter (30)
     return [...CHAOS_FRIENDS.emosi, ...CHAOS_FRIENDS.agak];
   } else if (schedule.karakter === 'all_emosi') {
     return CHAOS_FRIENDS.emosi;
   } else if (schedule.karakter === 'all_agak') {
     return CHAOS_FRIENDS.agak;
   } else {
-    // Filter karakter berdasarkan username
     const allChars = [...CHAOS_FRIENDS.emosi, ...CHAOS_FRIENDS.agak];
     return allChars.filter(c => schedule.karakter.includes(c.username));
   }
@@ -761,113 +755,95 @@ function getDailyTarget() {
 function startChaosGenerator() {
   if (S.chaosInterval) clearInterval(S.chaosInterval);
   
-  // Hitung target rant untuk jam ini
   let targetForThisHour = getDailyTarget();
   let rantCountThisHour = 0;
   
-  console.log(`🌪️ Chaos generator started. Target jam ini: ${targetForThisHour} rant`);
+  console.log(`🌪️ Chaos generator started. Target jam ini: ${targetForThisHour} rant (akan dikirim ke spill)`);
   
-  // Generate pertama setelah 5-15 menit (biar gak langsung rame)
   setTimeout(() => {
     generateChaosBatch();
-  }, 300000 + Math.random() * 600000); // 5-15 menit
+  }, 300000 + Math.random() * 600000);
   
-  // Interval 30-60 menit (cek progress)
   S.chaosInterval = setInterval(() => {
     if (!S.online) return;
     
     const currentHour = new Date().getHours();
     
-    // Reset counter kalo sudah berganti jam
     if (currentHour !== lastHour) {
       lastHour = currentHour;
       targetForThisHour = getDailyTarget();
       rantCountThisHour = 0;
-      console.log(`🕐 Ganti jam ${currentHour}. Target: ${targetForThisHour} rant`);
+      console.log(`🕐 Ganti jam ${currentHour}. Target spill: ${targetForThisHour} rant`);
     }
     
-    // Kalo masih kurang dari target, generate 1-2 rant
     if (rantCountThisHour < targetForThisHour) {
       const batchSize = Math.min(2, targetForThisHour - rantCountThisHour);
       for (let i = 0; i < batchSize; i++) {
-        setTimeout(() => generateChaosRant(), i * 5000); // Jarak 5 detik antar rant
+        setTimeout(() => generateChaosRantAndSendToSpill(), i * 5000);
       }
       rantCountThisHour += batchSize;
-      console.log(`📊 Rant jam ini: ${rantCountThisHour}/${targetForThisHour}`);
+      console.log(`📊 Rant spill jam ini: ${rantCountThisHour}/${targetForThisHour}`);
     }
-  }, 1800000 + Math.random() * 1800000); // 30-60 menit
+  }, 1800000 + Math.random() * 1800000);
 }
 
 let lastHour = new Date().getHours();
 
-function generateChaosRant() {
+async function generateChaosRantAndSendToSpill() {
   const hour = new Date().getHours();
   const characters = getCharactersForHour(hour);
   
-  // Pilih karakter random dari yang available di jam ini
+  if (!characters || characters.length === 0) return;
+  
   const randomChar = characters[Math.floor(Math.random() * characters.length)];
-  
-  // Pilih mood dengan weighted random
   const mood = getRandomMood();
-  
-  // Pilih rant random
   const rants = CHAOS_RANTS[mood];
   let rant = rants[Math.floor(Math.random() * rants.length)];
   
-  // Ganti placeholder @{user} dengan username karakter (tanpa @)
   rant = rant.replace('@{user}', randomChar.username);
   
-  // Sesekali mention user real (30% chance)
-  if (Math.random() < 0.3 && S.user !== '@anon') {
-    const mention = Math.random() > 0.5 ? `kaka @${S.user.replace('@', '')}` : `sis @${S.user.replace('@', '')}`;
-    // Tambah di awal atau akhir
-    if (Math.random() > 0.5) {
-      rant = mention + ' ' + rant;
-    } else {
-      rant = rant + ' ' + mention;
-    }
-  }
-  
-  // Generate ID unik
   const id = 'chaos_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
   
+  // KIRIM KE SPILL VIA SUPABASE
   const rantObj = {
-    id,
+    id: id,
     content: rant,
-    mood,
-    timestamp: Date.now(),
-    reactions: { skull: 0, cry: 0, fire: 0, upside: 0 },
-    userReacted: null,
-    isDummy: false,
-    isChaos: true,
-    author: randomChar.username
+    mood: mood,
+    author: randomChar.username,
+    is_ai: true,
+    created_at: new Date().toISOString()
   };
   
-  S.entries.unshift(rantObj);
-  if (S.entries.length > CFG.maxEntries) {
-    S.entries.pop();
+  try {
+    // Simpan ke tabel spill_ai atau kirim ke endpoint khusus
+    const response = await fetch('https://jejak.space/api/chaos-to-spill', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(rantObj)
+    });
+    
+    if (response.ok) {
+      console.log(`✅ Rant ${randomChar.username} terkirim ke spill`);
+    }
+  } catch (e) {
+    console.error('❌ Gagal kirim rant ke spill', e);
   }
-  renderEntries();
   
-  // Notifikasi kalau lagi sepi (20% chance)
   if (Math.random() < 0.2) {
-    toast(`🌀 ${randomChar.username} nge-spill`);
+    toast(`🌀 ${randomChar.username} nge-spill di halaman lain`);
   }
-  
-  return rantObj;
 }
 
 function generateChaosBatch() {
   const hour = new Date().getHours();
   const characters = getCharactersForHour(hour);
   
-  // Generate 2-4 rant sekaligus dengan jeda
   const batchSize = 2 + Math.floor(Math.random() * 3);
   
   for (let i = 0; i < batchSize; i++) {
     setTimeout(() => {
-      generateChaosRant();
-    }, i * 8000 + Math.random() * 4000); // Jeda 8-12 detik
+      generateChaosRantAndSendToSpill();
+    }, i * 8000 + Math.random() * 4000);
   }
 }
 
@@ -875,15 +851,10 @@ function generateChaosBatch() {
 // LOCAL STATE HELPERS
 // ═══════════════════════════════════════════════════
 function getVisEntries() {
-  const r = S.entries.filter(e => !e.isChaos); // Ambil real entries dulu
-  const chaos = S.entries.filter(e => e.isChaos); // Ambil chaos entries
-  
-  // Campur real dan chaos
-  const mixed = [...r, ...chaos].sort((a, b) => b.timestamp - a.timestamp);
-  
-  if (!mixed.length) return DE;
-  if (mixed.length < 3) return [...mixed, ...DE.slice(0, 3 - mixed.length)];
-  return mixed.slice(0, CFG.maxEntries);
+  const r = S.entries; // HANYA ENTRI USER (tidak ada chaos)
+  if (!r.length) return DE;
+  if (r.length < 3) return [...r, ...DE.slice(0, 3 - r.length)];
+  return r.slice(0, CFG.maxEntries);
 }
 
 function addEntryFIFO(e) {
@@ -960,9 +931,10 @@ async function initOnline() {
     await loadRants();
     await loadArtefacts();
     await flushSyncQueue();
-    startChaosGenerator(); // Mulai chaos generator
+    
+    // Mulai chaos generator (rant karakter dikirim ke spill)
+    startChaosGenerator();
 
-    // Refresh reactions setiap 30 detik
     setInterval(async () => {
       if (S.online) {
         await loadRants();
@@ -972,40 +944,31 @@ async function initOnline() {
 }
 
 // ═══════════════════════════════════════════════════
-// LOAD RANTS + REACTIONS (PERBAIKAN)
-// Tabel: public.reactions { id, rant_id, user_id, emoji }
-// Satu user = satu row per rant (1 reaction per rant)
-// Counter = hitung row per emoji per rant
+// LOAD RANTS + REACTIONS
 // ═══════════════════════════════════════════════════
 async function loadRants() {
   try {
-    // 1. Ambil rants milik user
     const rants = await sbSelect('rants',
       `author=eq.${encodeURIComponent(S.user)}&order=created_at.desc&limit=${CFG.maxEntries}`);
 
     if (!rants || !rants.length) return;
 
     const rantIds = rants.map(r => r.id);
-
-    // 2. Buat map untuk menyimpan reaksi
     const reactMap = {};
     rantIds.forEach(id => {
       reactMap[id] = { skull: 0, cry: 0, fire: 0, upside: 0, myEmoji: null };
     });
 
-    // 3. Ambil SEMUA reactions untuk setiap rant SATU PER SATU (karena IN() bermasalah)
     for (const rantId of rantIds) {
       const rxRaw = await sbSelect('reactions', `rant_id=eq.${rantId}&select=rant_id,user_id,emoji`);
 
       if (rxRaw && rxRaw.length) {
         rxRaw.forEach(rx => {
-          // Increment counter berdasarkan emoji
           if (rx.emoji === 'skull') reactMap[rantId].skull++;
           else if (rx.emoji === 'cry') reactMap[rantId].cry++;
           else if (rx.emoji === 'fire') reactMap[rantId].fire++;
           else if (rx.emoji === 'upside') reactMap[rantId].upside++;
 
-          // Tandai jika ini milik current user
           if (rx.user_id === S.user) {
             reactMap[rantId].myEmoji = rx.emoji;
           }
@@ -1013,7 +976,6 @@ async function loadRants() {
       }
     }
 
-    // 4. Update existing entries di state (refresh counter)
     S.entries = S.entries.map(entry => {
       if (reactMap[entry.id]) {
         return {
@@ -1030,7 +992,6 @@ async function loadRants() {
       return entry;
     });
 
-    // 5. Tambahkan rants baru yang belum ada di state
     const existingIds = new Set(S.entries.map(e => e.id));
     const newEntries = rants
       .filter(r => !existingIds.has(r.id))
@@ -1134,20 +1095,17 @@ async function submitRant(content, mood) {
 }
 
 // ═══════════════════════════════════════════════════
-// TOGGLE REACTION (PERBAIKAN)
+// TOGGLE REACTION
 // ═══════════════════════════════════════════════════
 async function toggleReaction(entryId, emoji) {
-  // Cari entry di state atau dummy
   const entry = S.entries.find(e => e.id === entryId);
   if (!entry) return;
 
-  // ── Guard: block self-react ────────────────────
   if (!entry.isDummy && entry.author === S.user) {
     toast('😶 Gak bisa react ke rant sendiri');
     return;
   }
 
-  // Simpan state sebelum perubahan untuk rollback jika error
   const previousState = {
     reactions: { ...entry.reactions },
     userReacted: entry.userReacted
@@ -1155,48 +1113,37 @@ async function toggleReaction(entryId, emoji) {
 
   const prevEmoji = entry.userReacted;
 
-  // Update state lokal OPTIMISTICALLY
   if (prevEmoji === emoji) {
-    // Unreact: kurangi counter reaksi yang sama
     entry.reactions[emoji] = Math.max(0, (entry.reactions[emoji] || 0) - 1);
     entry.userReacted = null;
   } else {
-    // Switch atau react baru
     if (prevEmoji) {
-      // Kurangi reaksi sebelumnya
       entry.reactions[prevEmoji] = Math.max(0, (entry.reactions[prevEmoji] || 0) - 1);
     }
-    // Tambah reaksi baru
     entry.reactions[emoji] = (entry.reactions[emoji] || 0) + 1;
     entry.userReacted = emoji;
   }
 
-  // Render ulang dengan state yang sudah diupdate
   if (!entry.isDummy) {
     saveEntries();
   }
   renderEntries();
 
-  // Sync ke Supabase (hanya jika online dan bukan dummy)
   if (S.online && !entry.isDummy) {
     try {
       if (prevEmoji && prevEmoji !== emoji) {
-        // Hapus reaction lama
         await sbDelete('reactions',
           `rant_id=eq.${entryId}&user_id=eq.${encodeURIComponent(S.user)}`);
       }
 
       if (entry.userReacted) {
-        // Cek apakah user sudah pernah react ke rant ini
         const existing = await sbSelect('reactions',
           `rant_id=eq.${entryId}&user_id=eq.${encodeURIComponent(S.user)}&select=id`);
 
         if (existing && existing.length > 0) {
-          // Update emoji di row yang ada
           const ok = await sbUpdate('reactions', `id=eq.${existing[0].id}`, { emoji });
           if (!ok) throw new Error('Update failed');
         } else {
-          // Insert row baru
           const newId = crypto.randomUUID();
           const ok = await sbInsert('reactions', {
             id: newId,
@@ -1208,17 +1155,14 @@ async function toggleReaction(entryId, emoji) {
           if (!ok) throw new Error('Insert failed');
         }
       } else {
-        // Unreact total — hapus semua row user untuk rant ini
         await sbDelete('reactions', `rant_id=eq.${entryId}&user_id=eq.${encodeURIComponent(S.user)}`);
       }
 
-      // Refresh data untuk memastikan counter akurat
       await loadRants();
 
     } catch (error) {
       console.error('[rxSync error]', error);
 
-      // Rollback ke state sebelumnya jika error
       entry.reactions = previousState.reactions;
       entry.userReacted = previousState.userReacted;
       saveEntries();
@@ -1227,7 +1171,6 @@ async function toggleReaction(entryId, emoji) {
       toast('⚠ Gagal sync reaksi');
     }
   } else if (!entry.isDummy) {
-    // Simpan ke queue jika offline
     qSync('reaction', {
       id: crypto.randomUUID(),
       rant_id: entryId,
@@ -1239,12 +1182,11 @@ async function toggleReaction(entryId, emoji) {
 }
 
 // ═══════════════════════════════════════════════════
-// SYNC QUEUE (PERBAIKAN - Tambah dukungan reaction)
+// SYNC QUEUE
 // ═══════════════════════════════════════════════════
 function qSync(type, data) {
   const q = JSON.parse(localStorage.getItem(PFX + 'sync_queue') || '[]');
 
-  // Untuk reaction, hapus queue lama untuk rant yang sama (hanya simpan yang terbaru)
   if (type === 'reaction') {
     const filtered = q.filter(item =>
       !(item.type === 'reaction' && item.data.rant_id === data.rant_id)
@@ -1282,7 +1224,6 @@ async function flushSyncQueue() {
         }
       } else if (item.type === 'reaction') {
         if (item.data.emoji) {
-          // Insert/update reaction
           const existing = await sbSelect('reactions',
             `rant_id=eq.${item.data.rant_id}&user_id=eq.${encodeURIComponent(item.data.user_id)}&select=id`);
 
@@ -1298,7 +1239,6 @@ async function flushSyncQueue() {
             });
           }
         } else {
-          // Delete reaction
           await sbDelete('reactions',
             `rant_id=eq.${item.data.rant_id}&user_id=eq.${encodeURIComponent(item.data.user_id)}`);
         }
@@ -1314,7 +1254,6 @@ async function flushSyncQueue() {
 
   if (syncedCount > 0) {
     toast(`✓ ${syncedCount} item tersinkronisasi`);
-    // Refresh data setelah sync
     await loadRants();
   }
 }
@@ -1590,13 +1529,11 @@ function renderReactionBar(entry) {
   const r = entry.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 };
   const ur = entry.userReacted;
   const isOwn = !entry.isDummy && (entry.author === S.user);
-  const isChaos = entry.isChaos;
 
   const btns = Object.entries(RX).map(([k, v]) => {
     const active = ur === k;
     const count = r[k] || 0;
     if (isOwn) {
-      // Disabled — no self-react
       return `<button class="reaction-btn" disabled title="Gak bisa react ke rant sendiri">
         <span class="remoji">${v.e}</span><span class="rcount">${count}</span>
       </button>`;
@@ -1611,8 +1548,6 @@ function renderReactionBar(entry) {
   let lockLabel = '';
   if (isOwn) {
     lockLabel = `<span class="own-lock">rant lo sendiri</span>`;
-  } else if (isChaos) {
-    lockLabel = `<span class="own-lock" style="color:var(--as)">karakter</span>`;
   }
   return `<div class="reaction-bar">${btns}${lockLabel}</div>`;
 }
@@ -1629,7 +1564,6 @@ function renderEntries() {
     const m = MOODS[e.mood] || MOODS.surviving;
     const isDum = e.isDummy || e.id?.startsWith('__d');
     const isOwn = !isDum && e.author === S.user;
-    const isChaos = e.isChaos;
     let ts = 'baru saja';
     if (!isDum && e.timestamp) {
       const d = Date.now() - e.timestamp;
@@ -1642,7 +1576,6 @@ function renderEntries() {
     let badge = '';
     if (isDum) badge = '<span class="fifo-i">Contoh</span>';
     else if (isOwn) badge = '<span class="own-badge">Milik lo</span>';
-    else if (isChaos) badge = `<span class="fifo-i" style="color:var(--as)">✨ karakter</span>`;
     
     return `<article class="entry${isDum ? ' entry-dummy' : ''}${isOwn ? ' own-rant' : ''}" data-id="${e.id}">
       <div class="ehdr">
@@ -1651,7 +1584,6 @@ function renderEntries() {
           <span class="emood ${e.mood}">${m.emoji} ${m.label}</span>
         </div>
         ${badge}
-        ${isChaos ? `<span style="font-size:10px;color:var(--as);margin-left:4px">@${e.author}</span>` : ''}
       </div>
       <div class="econt">${esc(e.content)}</div>
       ${renderReactionBar(e)}
