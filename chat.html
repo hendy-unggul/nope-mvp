@@ -7,8 +7,349 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/htmx.org@2.0.0"></script>
 <style>
-/* ===== CSS SAMA PERSIS DENGAN SEBELUMNYA ===== */
-/* ... (copy dari kode sebelumnya) ... */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+:root{
+  --bg:#0A0A0A;
+  --surface:#141414;
+  --surface-light:#1E1E1E;
+  --border:#2A2A2A;
+  --text:#FFF;
+  --text-secondary:#888;
+  --text-muted:#555;
+  --primary:#FF4D00;
+  --emosi:#00F0FF;
+  --agak:#FF006E;
+  --surviving:#39FF14;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  min-height:100vh;
+  padding-bottom:80px;
+}
+.wrapper{
+  max-width:480px;
+  margin:0 auto;
+  padding:24px 16px;
+}
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:32px;
+  padding-bottom:16px;
+  border-bottom:1px solid var(--border);
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.brand-icon{
+  font-size:32px;
+}
+.brand-text{
+  font-size:28px;
+  font-weight:800;
+  letter-spacing:-.02em;
+  background:linear-gradient(135deg, var(--primary), #FF8A5C);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.back-btn{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:8px 16px;
+  font-size:12px;
+  font-weight:600;
+  text-transform:uppercase;
+  cursor:pointer;
+  text-decoration:none;
+  border-radius:30px;
+  transition:all .2s;
+}
+.back-btn:hover{
+  border-color:var(--primary);
+  color:var(--primary);
+}
+.connection-status{
+  font-size:10px;
+  color:var(--text-muted);
+  text-align:center;
+  margin-bottom:24px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+.connection-status.online{color:var(--surviving);}
+.connection-status.offline{color:var(--agak);}
+.connection-status::before{
+  content:'';
+  width:6px;
+  height:6px;
+  background:currentColor;
+  border-radius:50%;
+  display:inline-block;
+}
+.tab-container{
+  display:flex;
+  gap:8px;
+  margin-bottom:24px;
+  background:var(--surface);
+  padding:4px;
+  border-radius:40px;
+  border:1px solid var(--border);
+}
+.tab{
+  flex:1;
+  padding:12px;
+  text-align:center;
+  background:transparent;
+  border:none;
+  border-radius:32px;
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  cursor:pointer;
+  transition:all .2s;
+  color:var(--text-secondary);
+}
+.tab.emosi.active{
+  background:var(--emosi);
+  color:var(--bg);
+  box-shadow:0 0 15px rgba(0,240,255,0.5);
+}
+.tab.agak.active{
+  background:var(--agak);
+  color:var(--bg);
+  box-shadow:0 0 15px rgba(255,0,110,0.5);
+}
+.room{display:none;}
+.room.active{display:block;}
+.chatroom-container{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:20px;
+  overflow:hidden;
+  margin-bottom:16px;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5);
+}
+.chatroom-header{
+  padding:16px 20px;
+  border-bottom:1px solid var(--border);
+  font-size:14px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.chatroom-header.emosi{
+  color:var(--emosi);
+  border-bottom-color:var(--emosi);
+}
+.chatroom-header.agak{
+  color:var(--agak);
+  border-bottom-color:var(--agak);
+}
+.chatroom-messages{
+  height:400px;
+  overflow-y:auto;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  background:var(--bg);
+}
+.chat-message{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  animation:slideIn .3s ease;
+}
+@keyframes slideIn{
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.chat-message-own{align-items:flex-end;}
+.chat-message-other{align-items:flex-start;}
+.chat-bubble{
+  max-width:85%;
+  padding:12px 16px;
+  border-radius:20px;
+  font-size:13px;
+  line-height:1.5;
+  word-wrap:break-word;
+}
+.chat-message-own .chat-bubble{
+  background:var(--primary);
+  color:var(--bg);
+  border-bottom-right-radius:4px;
+}
+.chat-message-other .chat-bubble{
+  background:var(--surface-light);
+  color:var(--text);
+  border-bottom-left-radius:4px;
+}
+.chat-meta{
+  font-size:10px;
+  color:var(--text-muted);
+  display:flex;
+  gap:8px;
+  align-items:center;
+  padding:0 8px;
+}
+.chat-username{
+  font-weight:600;
+}
+.chat-username.emosi{color:var(--emosi);}
+.chat-username.agak{color:var(--agak);}
+.ai-badge{
+  display:inline-block;
+  background:var(--primary);
+  color:var(--bg);
+  font-size:8px;
+  padding:2px 8px;
+  border-radius:12px;
+  text-transform:uppercase;
+  font-weight:700;
+  letter-spacing:.05em;
+}
+.chat-input-container{
+  display:flex;
+  gap:8px;
+  padding:16px;
+  background:var(--surface-light);
+  border-top:1px solid var(--border);
+}
+.chat-input{
+  flex:1;
+  background:var(--bg);
+  border:1px solid var(--border);
+  color:var(--text);
+  padding:12px 16px;
+  font-size:13px;
+  font-family:inherit;
+  border-radius:30px;
+  outline:none;
+  transition:all .2s;
+}
+.chat-input:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 2px rgba(255,77,0,0.2);
+}
+.chat-send-btn{
+  background:var(--primary);
+  color:var(--bg);
+  border:none;
+  padding:12px 24px;
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  border-radius:30px;
+  cursor:pointer;
+  transition:all .2s;
+}
+.chat-send-btn:hover{
+  background:var(--text);
+  color:var(--bg);
+  transform:scale(1.05);
+}
+.chat-empty{
+  text-align:center;
+  padding:60px 20px;
+  color:var(--text-muted);
+  font-size:12px;
+  font-style:italic;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:12px;
+}
+.chat-empty::before{
+  content:'💬';
+  font-size:32px;
+  opacity:0.3;
+}
+.toast{
+  position:fixed;
+  bottom:100px;
+  left:50%;
+  transform:translateX(-50%) translateY(100px);
+  background:var(--text);
+  color:var(--bg);
+  padding:12px 24px;
+  font-size:13px;
+  font-weight:600;
+  border-radius:30px;
+  z-index:10000;
+  opacity:0;
+  transition:all .3s;
+  box-shadow:0 4px 20px rgba(0,0,0,0.5);
+}
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+.toast.error{
+  background:var(--agak);
+  color:var(--text);
+}
+.bottom-nav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  z-index:1000;
+}
+.nav-container{
+  max-width:480px;
+  margin:0 auto;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  height:70px;
+}
+.nav-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  background:transparent;
+  border:none;
+  color:var(--text-muted);
+  cursor:pointer;
+  padding:8px 0;
+  transition:all .2s;
+  text-decoration:none;
+  flex:1;
+  font-size:12px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+.nav-item.active{
+  color:var(--primary);
+}
+.nav-item.active .nav-icon{
+  color:var(--primary);
+}
+.nav-item:hover{
+  color:var(--text);
+}
+.nav-icon{
+  font-size:20px;
+  margin-bottom:2px;
+}
 </style>
 </head>
 <body>
@@ -99,7 +440,7 @@ const st = {
   username: null,
   chatMessages: { emosi: [], agak: [] },
   currentRoom: 'emosi',
-  processedIds: new Set() // Untuk cek duplikat
+  processedIds: new Set()
 };
 
 // ============================================
@@ -115,7 +456,6 @@ const convoState = {
     emosi: { lastAITime: null, messageCount: 0, lastUserMessage: null },
     agak: { lastAITime: null, messageCount: 0, lastUserMessage: null }
   },
-  
   activeConversations: {
     emosi: {
       topic: null,
@@ -136,7 +476,6 @@ const convoState = {
       characterLastSeen: {}
     }
   },
-  
   maxParticipantsPerConvo: 7,
   cooldownPerCharacter: 120000,
   newCharacterChance: 0.4,
@@ -585,18 +924,15 @@ function renderChatRoom(room){
 function addChatToUI(msg, isNew){
   console.log('📝 addChatToUI dipanggil:', msg);
   
-  // CEK DUPLIKAT BERDASARKAN ID
   if (msg.id && st.processedIds.has(msg.id)) {
     console.log('⚠️ Pesan dengan ID', msg.id, 'sudah diproses, diabaikan');
     return;
   }
   
-  // Tandai sebagai sudah diproses
   if (msg.id) {
     st.processedIds.add(msg.id);
   }
   
-  // CEK DUPLIKAT TEMP ID
   if (msg.id && msg.id.toString().startsWith('temp_')) {
     var room = msg.room || st.currentRoom;
     var existingMessages = st.chatMessages[room] || [];
@@ -650,7 +986,7 @@ function addChatToUI(msg, isNew){
 }
 
 // ============================================
-// TRIGGER DIGITAL FRIEND - DENGAN USERNAME
+// TRIGGER DIGITAL FRIEND
 // ============================================
 async function triggerDigitalFriend(room, lastMessage, forceTest) {
   console.log('🎯 triggerDigitalFriend dipanggil!', room, lastMessage);
@@ -753,14 +1089,13 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
     console.log('🤖 Mengeksekusi reply untuk', selectedFriend.username);
     
     try {
-      // TAMBAHKAN USERNAME KE API CALL
       var response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: lastMessage,
           characterName: selectedFriend.username,
-          userName: st.username,  // INI PENTING!
+          userName: st.username,
           room: room,
           lastMessages: lastMessages.slice(-3)
         })
@@ -838,7 +1173,6 @@ async function sendChat(room){
     localStorage.setItem('stt_created_at', Date.now().toString());
   }
   
-  // PASTIKAN ID UNIK
   var tempId = 'temp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
   
   var tempMsg = {
@@ -854,7 +1188,6 @@ async function sendChat(room){
   
   if(st.online && st.sb){
     try {
-      // INSERT KE SUPABASE, DAPATKAN ID ASLI
       var { data, error } = await st.sb
         .from(CFG.TBL_CHATS)
         .insert({
@@ -869,7 +1202,6 @@ async function sendChat(room){
       
       if(error) throw error;
       
-      // Kalo berhasil, ganti temp message dengan yang asli (panggil lagi via realtime)
       console.log('Triggering digital friend for:', room);
       triggerDigitalFriend(room, content, false);
       
