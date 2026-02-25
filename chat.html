@@ -7,7 +7,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/htmx.org@2.0.0"></script>
 <style>
-/* ===== CSS SAMA PERSIS DENGAN SEBELUMNYA ===== */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 :root{
   --bg:#0A0A0A;
@@ -444,7 +443,7 @@ const st = {
 };
 
 // ============================================
-// 30 KARAKTER DIGITAL - PASTI AMAN
+// 30 KARAKTER DIGITAL
 // ============================================
 const DIGITAL_FRIENDS = {
   emosi: [
@@ -605,6 +604,9 @@ async function initSupabase(){
   }
 }
 
+// ============================================
+// REALTIME SETUP
+// ============================================
 function setupRealtime(){
   console.log('📡 Setting up realtime...');
   
@@ -679,7 +681,7 @@ function renderChatRoom(room){
   for(var i = 0; i < messages.length; i++){
     var msg = messages[i];
     var isOwn = (msg.user_id === st.userId) || (msg.user_id === st.sessionId);
-    var isAI = msg.is_ai || (msg.user_id && msg.user_id.toString().indexOf('friend-') === 0);
+    var isAI = msg.user_id && msg.user_id.toString().indexOf('friend-') === 0;
     
     var username = msg.username || 'anonim';
     var usernameClass = '';
@@ -712,9 +714,14 @@ function renderChatRoom(room){
 }
 
 function addChatToUI(msg, isNew){
+  console.log('📝 addChatToUI dipanggil:', msg);
+  
   var room = msg.room || st.currentRoom;
   var container = document.getElementById('chat-messages-' + room);
-  if(!container) return;
+  if(!container) {
+    console.error('❌ Container tidak ditemukan untuk room', room);
+    return;
+  }
   
   var emptyState = container.querySelector('.chat-empty');
   if(emptyState) emptyState.remove();
@@ -732,20 +739,12 @@ function addChatToUI(msg, isNew){
 }
 
 // ============================================
-// TRIGGER 30 KARAKTER
-// ============================================
-// ============================================
-// TRIGGER 30 KARAKTER - VERSI DEBUG
-// ============================================
-// ============================================
-// TRIGGER 30 KARAKTER - VERSI FORCE TEST
+// TRIGGER 30 KARAKTER - VERSI FIX (TABEL LAMA)
 // ============================================
 async function triggerDigitalFriend(room, lastMessage, forceTest) {
   console.log('🎯 triggerDigitalFriend dipanggil!', room, lastMessage);
   
-  // Kalo forceTest = true, selalu muncul
   if (!forceTest) {
-    // 30% chance muncul buat production
     if (Math.random() > 0.3) {
       console.log('⏭️ Gagal random, skip');
       return;
@@ -766,7 +765,7 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
   console.log('🎭 Friend terpilih:', randomFriend.username);
   
   var delay = 2000 + Math.random() * 3000;
-  console.log('⏱️ Delay:', delay, 'ms');
+  console.log('⏳ Delay:', delay, 'ms');
   
   setTimeout(async function() {
     console.log('🤖 Mengeksekusi reply untuk', randomFriend.username);
@@ -797,42 +796,38 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
         console.log('💬 Reply template:', reply);
       }
       
+      // INSERT KE SUPABASE - TANPA is_ai DAN created_at
       if (st.sb) {
-        await st.sb.from(CFG.TBL_CHATS).insert({
-          user_id: randomFriend.id,
-          username: randomFriend.username,
-          content: reply,
-          room: room,
-          is_ai: true,
-          created_at: new Date().toISOString()
-        });
-        console.log('✅ Sukses insert ke Supabase');
+        try {
+          const { error } = await st.sb
+            .from(CFG.TBL_CHATS)
+            .insert({
+              user_id: randomFriend.id,
+              username: randomFriend.username,
+              content: reply,
+              room: room
+              // TIDAK PAKE is_ai dan created_at
+            });
+          
+          if (error) {
+            console.error('❌ Supabase insert error:', error);
+            console.error('❌ Error details:', error.message, error.details, error.hint);
+          } else {
+            console.log('✅ Sukses insert ke Supabase');
+          }
+        } catch (insertError) {
+          console.error('❌ Exception saat insert:', insertError);
+        }
       }
       
     } catch (e) {
       console.error('❌ Error di triggerDigitalFriend:', e);
-      
-      // Fallback kalo error
-      if (st.sb) {
-        var fallbackReply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
-        await st.sb.from(CFG.TBL_CHATS).insert({
-          user_id: randomFriend.id,
-          username: randomFriend.username,
-          content: fallbackReply,
-          room: room,
-          is_ai: true,
-          created_at: new Date().toISOString()
-        });
-        console.log('✅ Fallback insert ke Supabase');
-      }
     }
   }, delay);
 }
+
 // ============================================
-// SEND CHAT
-// ============================================
-// ============================================
-// SEND CHAT
+// SEND CHAT - VERSI FIX (TABEL LAMA)
 // ============================================
 async function sendChat(room){
   var input = document.getElementById('chat-input-' + room);
@@ -863,15 +858,14 @@ async function sendChat(room){
           user_id: userId,
           username: st.username,
           content: content,
-          room: room,
-          is_ai: false,
-          created_at: new Date().toISOString()
+          room: room
+          // TIDAK PAKE is_ai dan created_at
         });
       
       if(error) throw error;
       
       console.log('Triggering digital friend for:', room);
-      triggerDigitalFriend(room, content, true);  // ← FORCE TEST!
+      triggerDigitalFriend(room, content, true);
       
     } catch(e){
       console.error('Send chat error:', e);
@@ -879,6 +873,7 @@ async function sendChat(room){
     }
   }
 }
+
 // ============================================
 // ROOM SWITCHING
 // ============================================
