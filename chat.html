@@ -830,7 +830,7 @@ function addChatToUI(msg, isNew){
 }
 
 // ============================================
-// TRIGGER 30 KARAKTER - DENGAN PROBABILITAS DINAMIS
+// TRIGGER 30 KARAKTER - VERSI FIX
 // ============================================
 async function triggerDigitalFriend(room, lastMessage, forceTest) {
   console.log('🎯 triggerDigitalFriend dipanggil!', room, lastMessage);
@@ -865,46 +865,28 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
   // Hitung probabilitas berdasarkan fase
   var baseChance = 0;
   
-  // FASE 0: IDLE (inisiatif AI)
   if (currentPhase === 'idle') {
-    baseChance = 0.6; // 60% chance mulai obrolan
-    if (onlineUsers < 3) baseChance += 0.2; // +20% kalo sepi
+    baseChance = 0.6;
+    if (onlineUsers < 3) baseChance += 0.2;
+  } else if (currentPhase === 'init') {
+    baseChance = 0.8;
+  } else if (currentPhase === 'active') {
+    baseChance = 0.3;
+  } else if (currentPhase === 'chain') {
+    baseChance = 0.5;
+  } else if (currentPhase === 'cooldown') {
+    baseChance = 0.2;
   }
   
-  // FASE 1: INITIATION
-  if (currentPhase === 'init') {
-    baseChance = 0.8; // 80% sambut user baru
-  }
-  
-  // FASE 2: ACTIVE
-  if (currentPhase === 'active') {
-    baseChance = 0.3; // 30% biar gak dominan
-  }
-  
-  // FASE 3: CHAIN
-  if (currentPhase === 'chain') {
-    baseChance = 0.5; // 50% untuk multi-karakter
-  }
-  
-  // FASE 4: COOLDOWN
-  if (currentPhase === 'cooldown') {
-    baseChance = 0.2; // 20% untuk closing
-  }
-  
-  // BOOST untuk user baru
   if (isNewUser) baseChance += 0.2;
   
-  // PENALTY kalo baru ada AI
   var timeSinceLastAI = Date.now() - (convoState.roomStats[room]?.lastAITime || 0);
-  if (timeSinceLastAI < 60000) { // 1 menit
+  if (timeSinceLastAI < 60000) {
     baseChance *= 0.5;
   }
   
-  // FAKTOR JUMLAH USER ONLINE
-  var userFactor = Math.max(0, (5 - onlineUsers) / 5) * 0.3; // Max +30%
+  var userFactor = Math.max(0, (5 - onlineUsers) / 5) * 0.3;
   baseChance += userFactor;
-  
-  // BATASI MAKSIMAL 90%
   baseChance = Math.min(baseChance, 0.9);
   
   console.log('📊 PROBABILITAS:', {
@@ -923,22 +905,23 @@ async function triggerDigitalFriend(room, lastMessage, forceTest) {
   } else {
     console.log('🔥 FORCE TEST MODE: selalu muncul');
   }
+  
   console.log('🔍 DEBUG - DIGITAL_FRIENDS[room]:', DIGITAL_FRIENDS[room]);
-console.log('🔍 DEBUG - panjang:', DIGITAL_FRIENDS[room]?.length);
-console.log('🔍 DEBUG - tipe:', typeof DIGITAL_FRIENDS[room]);
+  console.log('🔍 DEBUG - panjang:', DIGITAL_FRIENDS[room]?.length);
+  console.log('🔍 DEBUG - tipe:', typeof DIGITAL_FRIENDS[room]);
+  
   var friends = DIGITAL_FRIENDS[room];
   if (!friends || friends.length === 0) {
-  console.log('❌ Gak ada temen di room', room);
-  console.log('🔍 DIGITAL_FRIENDS full:', DIGITAL_FRIENDS);
-  return;
-}
+    console.log('❌ Gak ada temen di room', room);
+    console.log('🔍 DIGITAL_FRIENDS full:', DIGITAL_FRIENDS);
+    return;
+  }
   
   console.log('👥 Total friends:', friends.length);
   
   var randomFriend = friends[Math.floor(Math.random() * friends.length)];
   console.log('🎭 Friend terpilih:', randomFriend.username);
   
-  // Hitung delay alami berdasarkan panjang pesan
   var messageLength = lastMessage.length;
   var baseDelay = 1000;
   var lengthFactor = Math.min(messageLength / 50, 3) * 1000;
@@ -1003,7 +986,6 @@ console.log('🔍 DEBUG - tipe:', typeof DIGITAL_FRIENDS[room]);
     } catch (e) {
       console.error('❌ Error di triggerDigitalFriend:', e);
       
-      // Fallback insert pake template
       if (st.sb) {
         var fallbackReply = randomFriend.replies[Math.floor(Math.random() * randomFriend.replies.length)];
         await st.sb.from(CFG.TBL_CHATS).insert({
@@ -1015,8 +997,7 @@ console.log('🔍 DEBUG - tipe:', typeof DIGITAL_FRIENDS[room]);
       }
     }
   }, delay);
-}
-
+} // ← PASTIKAN ADA KURUNG TUTUP INI
 // ============================================
 // SEND CHAT - DENGAN TRIGGER DINAMIS
 // ============================================
