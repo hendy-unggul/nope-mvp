@@ -690,10 +690,23 @@ function renderChatRoom(room){
       usernameClass = room === 'emosi' ? 'chat-username emosi' : 'chat-username agak';
     }
     
+    var time = '';
+if (msg.created_at) {
+  try {
     var d = new Date(msg.created_at);
-    var hours = d.getHours().toString().padStart(2, '0');
-    var minutes = d.getMinutes().toString().padStart(2, '0');
-    var time = hours + ':' + minutes;
+    if (!isNaN(d.getTime())) {
+      var hours = d.getHours().toString().padStart(2, '0');
+      var minutes = d.getMinutes().toString().padStart(2, '0');
+      time = hours + ':' + minutes;
+    } else {
+      time = 'now';
+    }
+  } catch (e) {
+    time = 'now';
+  }
+} else {
+  time = 'now';
+}
     
     var metaHtml = '';
     if(isOwn){
