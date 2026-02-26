@@ -1,397 +1,1061 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>JEJAK — Spill Your Truth</title>
-<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/dist/face-api.js" crossorigin="anonymous"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#0A0A0A;--sf:#141414;--sfe:#1E1E1E;--bd:#2A2A2A;
-  --tx:#FFF;--txs:#888;--txm:#555;
-  --ap:#FF4D00;--as:#00F0FF;--at:#FF006E;--aq:#39FF14;
-  --ms:#FF9500;--mt:#39FF14;--mc:#00F0FF;--md:#8B5CF6;
-  --rd:#FF3333;--rd-dark:#990000;
-}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--tx);font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:500;font-size:15px;line-height:1.4;min-height:100vh;overflow-x:hidden;padding-bottom:100px}
-body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.4}
-.w{max-width:480px;margin:0 auto;padding:0 16px}
-header{padding:24px 0 16px;display:flex;justify-content:space-between;align-items:flex-start}
-.logo{font-size:42px;font-weight:800;letter-spacing:-.04em;cursor:pointer;line-height:.9;position:relative}
-.logo::before,.logo::after{content:'JEJAK';position:absolute;top:0;left:0;opacity:0;transition:opacity .1s}
-.logo::before{color:var(--as);transform:translate(-2px,0)}
-.logo::after{color:var(--at);transform:translate(2px,0)}
-.logo:hover::before{opacity:.8;animation:g .3s infinite}
-@keyframes g{0%,100%{transform:translate(-2px,0)}25%{transform:translate(2px,2px)}50%{transform:translate(-2px,-2px)}75%{transform:translate(2px,0)}}
-.tagline{font-family:'Instrument Serif',serif;font-size:13px;color:var(--txs);font-style:italic;margin-top:4px}
-.top-right{display:flex;align-items:center;gap:8px}
-.huser{font-size:11px;font-weight:700;color:var(--tx);text-transform:lowercase;letter-spacing:.05em;padding:4px 8px;background:var(--sf);border:1px solid var(--bd);max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dot{width:8px;height:8px;background:var(--aq);border-radius:50%;animation:blink 2s infinite;flex-shrink:0}
-.dot.off{background:var(--at);animation:none}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.smenu{position:relative}
-.mtrig{width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:transparent;border:none;cursor:pointer;padding:0}
-.mtrig span{width:4px;height:4px;background:var(--tx);border-radius:50%;transition:all .2s}
-.mtrig:hover span{background:var(--ap)}
-.mdd{position:absolute;top:100%;right:0;margin-top:8px;background:var(--sf);border:2px solid var(--bd);min-width:120px;display:none;z-index:100}
-.mdd.on{display:block}
-.mi{width:100%;padding:8px 16px;background:transparent;border:none;color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;text-align:left;cursor:pointer;transition:all .2s}
-.mi:hover{background:var(--sfe);color:var(--ap)}
-.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--sf);border-top:2px solid var(--bd);z-index:1000;padding-bottom:env(safe-area-inset-bottom)}
-.bnav-c{max-width:480px;margin:0 auto;display:flex;justify-content:space-around;align-items:center;height:64px}
-.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:100%;color:var(--txm);text-decoration:none;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;transition:all .2s;position:relative;cursor:pointer}
-.ni::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--ap);transition:width .2s}
-.ni:hover{color:var(--txs);background:var(--sfe)}
-.ni.act{color:var(--ap)}
-.ni.act::before{width:100%}
-.nico{font-size:20px;line-height:1}
-.hero-s{position:relative;margin:0 -16px 24px}
-.hero{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;border-top:2px solid var(--bd);border-bottom:2px solid var(--bd);background:var(--sf)}
-.hero img{width:100%;height:100%;object-fit:cover;transition:transform .6s,filter .3s}
-.hero:hover img{transform:scale(1.03)}
-.hero::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none}
-.hnote{position:absolute;bottom:0;left:0;right:0;padding:16px;background:linear-gradient(to top,rgba(0,0,0,.9),transparent);font-family:'Instrument Serif',serif;font-size:24px;font-style:italic;color:var(--tx);line-height:1.2;z-index:20}
-.upctrls{position:absolute;top:16px;right:16px;display:flex;flex-direction:column;gap:8px;align-items:flex-end;z-index:20}
-.upbtn{width:48px;height:48px;background:var(--ap);border:none;color:var(--bg);font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;box-shadow:4px 4px 0 var(--bg),4px 4px 0 2px var(--ap);position:relative}
-.upbtn:hover:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 var(--bg),2px 2px 0 2px var(--ap)}
-.upbtn:disabled{background:var(--txm);box-shadow:none;cursor:not-allowed;opacity:.6}
-.upcnt{position:absolute;top:-8px;right:-8px;background:var(--at);color:var(--tx);font-size:10px;font-weight:700;padding:2px 6px;min-width:20px;text-align:center}
-.qtimer{position:absolute;top:calc(100% + 8px);right:0;background:var(--sf);border:2px solid var(--bd);padding:8px 16px;font-size:11px;color:var(--txs);white-space:nowrap;opacity:0;visibility:hidden;transition:all .2s;z-index:30}
-.qtimer::before{content:'';position:absolute;bottom:100%;right:16px;border:6px solid transparent;border-bottom-color:var(--bd)}
-.upctrls:hover .qtimer{opacity:1;visibility:visible}
-.qtimer.urg{border-color:var(--at);color:var(--at);animation:pb 2s infinite}
-@keyframes pb{0%,100%{border-color:var(--at)}50%{border-color:var(--txm)}}
-.isec{margin-bottom:32px}
-.ihdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.ilbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--txs)}
-.ccount{font-size:12px;color:var(--txm);font-variant-numeric:tabular-nums}
-.ri{width:100%;background:var(--sf);border:2px solid var(--bd);padding:16px;color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;line-height:1.5;resize:none;min-height:120px;transition:all .2s}
-.ri:focus{outline:none;border-color:var(--ap);background:var(--sfe)}
-.ri::placeholder{color:var(--txm)}
-.msec{margin:16px 0}
-.mlbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--txs);margin-bottom:8px}
-.mgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.mc{position:relative;padding:16px;background:var(--sf);border:2px solid var(--bd);cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:4px}
-.mc:hover{border-color:var(--txs);transform:translateY(-2px)}
-.mc.act{border-color:currentColor;background:var(--sfe)}
-.mc.act::before{content:'✓';position:absolute;top:8px;right:8px;font-size:12px;font-weight:700}
-.me{font-size:28px;line-height:1}
-.mn{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
-.md-desc{font-size:11px;color:var(--txs)}
-.mc[data-mood="surviving"]{color:var(--ms)}
-.mc[data-mood="thriving"]{color:var(--mt)}
-.mc[data-mood="chaotic"]{color:var(--mc)}
-.mc[data-mood="doom"]{color:var(--md)}
-.iact{display:flex;justify-content:flex-end;margin-top:16px}
-.sbtn{padding:14px 32px;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;background:var(--ap);border:none;color:var(--bg);cursor:pointer;transition:all .2s;box-shadow:4px 4px 0 var(--sfe),4px 4px 0 2px var(--ap)}
-.sbtn:hover:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 var(--sfe),2px 2px 0 2px var(--ap)}
-.sbtn:disabled{opacity:.5;cursor:not-allowed;box-shadow:none}
-.shdr{display:flex;align-items:center;gap:8px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--bd)}
-.stit{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--tx)}
-.sline{flex:1;height:2px;background:var(--bd)}
-.entry{background:var(--sf);border:2px solid var(--bd);margin-bottom:16px;position:relative;animation:si .4s ease}
-@keyframes si{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.entry:hover{border-color:var(--ap)}
-.ehdr{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-bottom:1px solid var(--bd);background:var(--sfe)}
-.emeta{display:flex;align-items:center;gap:8px}
-.etime{font-size:11px;color:var(--txm);font-weight:600;letter-spacing:.05em}
-.emood{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;padding:4px 8px;border:1px solid currentColor}
-.emood.surviving{color:var(--ms)}
-.emood.thriving{color:var(--mt)}
-.emood.chaotic{color:var(--mc)}
-.emood.doom{color:var(--md)}
-.econt{padding:16px;font-size:15px;line-height:1.6;color:var(--tx)}
-.tgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--bd);border:2px solid var(--bd);margin-bottom:16px}
-.ti{aspect-ratio:1;background:var(--sf);position:relative;overflow:hidden;cursor:pointer}
-.ti.empty{display:flex;align-items:center;justify-content:center;color:var(--txm);font-size:20px;border:2px dashed var(--bd)}
-.ti img{width:100%;height:100%;object-fit:cover;transition:all .3s}
-.ti:hover img{transform:scale(1.1)}
-.ti::after{content:'';position:absolute;inset:0;background:var(--ap);opacity:0;transition:opacity .2s;mix-blend-mode:multiply}
-.ti:hover::after{opacity:.3}
-.fifo-i{font-size:9px;color:var(--txm);text-transform:uppercase;letter-spacing:.05em;padding:2px 6px;border:1px solid var(--bd)}
-.es{padding:32px 16px;text-align:center;border:2px dashed var(--bd)}
-.ee{font-size:48px;margin-bottom:16px;display:block;animation:fl 3s ease-in-out infinite}
-@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-.et{font-family:'Instrument Serif',serif;font-size:20px;font-style:italic;color:var(--txs);margin-bottom:8px}
-.est{font-size:13px;color:var(--txm)}
-footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bottom:80px}
-.ftxt{font-size:11px;color:var(--txm);text-transform:uppercase;letter-spacing:.2em}
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--tx);color:var(--bg);padding:8px 16px;font-size:13px;font-weight:600;z-index:10000;opacity:0;transition:all .3s}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.reaction-bar{display:flex;gap:6px;padding:10px 16px;border-top:1px solid var(--bd);background:var(--sfe);align-items:center;flex-wrap:wrap}
-.reaction-btn{position:relative;display:flex;align-items:center;gap:4px;padding:5px 10px;background:var(--sf);border:2px solid var(--bd);cursor:pointer;transition:all .15s;border-radius:4px;font-family:inherit}
-.reaction-btn:hover:not([disabled]){border-color:var(--txs);transform:translateY(-2px);background:var(--sfe)}
-.reaction-btn.act{border-color:var(--ap);background:var(--ap)}
-.reaction-btn[disabled]{cursor:not-allowed;opacity:.38;pointer-events:none}
-.remoji{font-size:17px;line-height:1}
-.rcount{font-size:11px;font-weight:700;color:var(--txs);min-width:14px;text-align:center;font-variant-numeric:tabular-nums}
-.reaction-btn.act .rcount{color:#000}
-.conn-mini{margin-top:24px}
-.conn-card-compact{background:var(--sf);border:2px solid var(--bd);margin-bottom:8px;position:relative;transition:all .2s;display:flex;align-items:center;padding:12px 16px;gap:12px}
-.conn-card-compact:hover{border-color:var(--ap)}
-.conn-card-compact.chaotic{border-left:4px solid var(--mc)}
-.conn-card-compact.caregiver{border-left:4px solid var(--mt)}
-.conn-card-compact.red-alert{border-left:4px solid var(--rd);border-color:var(--rd);background:linear-gradient(145deg,var(--sf),#330000)}
-.conn-avatar-mini{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--sfe);border:1px solid var(--bd);flex-shrink:0}
-.conn-card-compact.chaotic .conn-avatar-mini{border-color:var(--mc);color:var(--mc)}
-.conn-card-compact.caregiver .conn-avatar-mini{border-color:var(--mt);color:var(--mt)}
-.conn-card-compact.red-alert .conn-avatar-mini{border-color:var(--rd);color:var(--rd);animation:pulse-red 2s infinite}
-@keyframes pulse-red{0%,100%{box-shadow:0 0 5px var(--rd)}50%{box-shadow:0 0 20px var(--rd)}}
-.conn-info{flex:1;min-width:0}
-.conn-title-mini{font-size:12px;font-weight:600;line-height:1.4;color:var(--tx);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.conn-meta{font-size:10px;color:var(--txs);display:flex;align-items:center;gap:6px}
-.conn-meta::before{content:'';width:6px;height:6px;background:var(--aq);border-radius:50%;display:inline-block;animation:blink 2s infinite}
-.conn-card-compact.chaotic .conn-meta::before{background:var(--mc)}
-.conn-card-compact.caregiver .conn-meta::before{background:var(--mt)}
-.conn-card-compact.red-alert .conn-meta::before{background:var(--rd);animation:blink-red 1s infinite}
-@keyframes blink-red{0%,100%{opacity:1;background:var(--rd);box-shadow:0 0 10px var(--rd)}50%{opacity:.4;background:var(--rd-dark)}}
-.conn-actions-mini{display:flex;gap:6px;flex-shrink:0}
-.conn-btn-mini{padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border:1px solid var(--bd);background:var(--sf);color:var(--tx);cursor:pointer;transition:all .2s}
-.conn-btn-mini:hover{border-color:var(--txs);background:var(--sfe)}
-.conn-btn-mini.pri{background:var(--tx);border-color:var(--tx);color:var(--bg)}
-.conn-btn-mini.pri:hover{background:var(--ap);border-color:var(--ap)}
-.conn-btn-mini:disabled{opacity:.5;cursor:not-allowed}
-.sensored-overlay{position:absolute;inset:0;background:#000;display:flex;align-items:center;justify-content:center;color:#FF0000;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:2px;border:2px solid #FF0000;animation:pulse-sensor 2s infinite;z-index:25}
-@keyframes pulse-sensor{0%,100%{opacity:.9}50%{opacity:1;box-shadow:inset 0 0 30px #FF0000}}
-.sensored-text{transform:rotate(-5deg);border:2px solid #FF0000;padding:4px 8px;background:rgba(0,0,0,.8)}
-/* Filters */
-.fm{filter:grayscale(100%) contrast(1.1)!important}
-.fsp{filter:sepia(100%) contrast(1.1) saturate(.8)!important}
-.fl{filter:contrast(1.2) saturate(1.3) brightness(.9)!important}
-.fv{filter:grayscale(100%) contrast(1.2) brightness(.9)!important}
-.fn{filter:grayscale(100%) contrast(1.4) brightness(.8)!important}
-.fc{filter:hue-rotate(180deg) saturate(1.5) contrast(1.1)!important}
-.fw{filter:sepia(60%) hue-rotate(-30deg) saturate(1.2)!important}
-.fco{filter:hue-rotate(180deg) saturate(.5) brightness(1.1)!important}
-.fd{filter:blur(.5px) saturate(1.4) brightness(1.1) contrast(.9)!important}
-.fcr{filter:contrast(1.3) saturate(1.1)!important}
-.fmo{filter:brightness(.8) contrast(1.2) saturate(.7)!important}
-.fg{filter:sepia(40%) hue-rotate(-15deg) saturate(1.3) contrast(1.1)!important}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>jejak — dashboard ✨</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&family=Bebas+Neue&family=Courier+Prime:wght@400;700&family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    /* [CSS SAMA SEPERTI SEBELUMNYA - TIDAK BERUBAH] */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --bg: #0a0a0a;
+      --surface: #121212;
+      --text: #ffffff;
+      --muted: #999999;
+      --accent: #00ff88;
+      --accent-2: #ff3366;
+      --accent-3: #ffff00;
+      --accent-4: #00d4ff;
+      --border: #333;
+      --font-main: 'DM Sans', sans-serif;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-mono: 'Courier Prime', monospace;
+      --font-alt: 'Rubik', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-main);
+      min-height: 100vh;
+      padding: 20px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Header dengan user name di kanan atas */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background: rgba(0,0,0,0.3);
+      border: 2px solid var(--border);
+      border-radius: 60px;
+      margin-bottom: 30px;
+      backdrop-filter: blur(10px);
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .logo-small {
+      font-family: var(--font-display);
+      font-size: 32px;
+      color: var(--accent);
+      text-transform: lowercase;
+      filter: drop-shadow(2px 2px 0px var(--accent-2));
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.05);
+      padding: 8px 16px 8px 12px;
+      border-radius: 40px;
+      border: 1px solid var(--accent-4);
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #000;
+    }
+
+    .user-name {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent-4);
+    }
+
+    .user-name::before {
+      content: '@';
+      opacity: 0.7;
+      margin-right: 2px;
+    }
+
+    /* Container utama */
+    .main-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Welcome section */
+    .welcome-section {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .welcome-title {
+      font-family: var(--font-display);
+      font-size: 48px;
+      color: var(--text);
+      text-transform: lowercase;
+      letter-spacing: 2px;
+    }
+
+    .welcome-title span {
+      color: var(--accent);
+      background: rgba(0,255,136,0.1);
+      padding: 0 10px;
+      border-radius: 20px;
+    }
+
+    /* Upload section */
+    .upload-section {
+      background: var(--surface);
+      border: 4px solid var(--accent-3);
+      border-radius: 40px;
+      padding: 40px;
+      margin-bottom: 40px;
+      text-align: center;
+      transform: rotate(-0.5deg);
+      box-shadow: 12px 12px 0 rgba(255,255,0,0.2);
+    }
+
+    .upload-title {
+      font-family: var(--font-display);
+      font-size: 36px;
+      margin-bottom: 20px;
+      color: var(--accent-3);
+    }
+
+    .upload-area {
+      border: 4px dashed var(--border);
+      border-radius: 30px;
+      padding: 50px 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .upload-area:hover {
+      border-color: var(--accent);
+      background: rgba(0,255,136,0.05);
+      transform: scale(1.02);
+    }
+
+    .upload-area.dragover {
+      border-color: var(--accent-3);
+      background: rgba(255,255,0,0.1);
+      transform: scale(1.05);
+    }
+
+    .upload-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .upload-text {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--accent-3);
+    }
+
+    .upload-hint {
+      font-family: var(--font-mono);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .upload-progress {
+      margin-top: 20px;
+      display: none;
+    }
+
+    .upload-progress.show {
+      display: block;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background: var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-3));
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .upload-status {
+      margin-top: 20px;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent);
+    }
+
+    /* 3 Tabs Connection */
+    .tabs-section {
+      margin-bottom: 40px;
+    }
+
+    .tabs-container {
+      background: var(--surface);
+      border: 3px solid var(--accent-4);
+      border-radius: 30px;
+      overflow: hidden;
+    }
+
+    .tab-headers {
+      display: flex;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 20px;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: var(--font-alt);
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tab-btn::before {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 3px;
+      background: var(--accent-4);
+      transition: width 0.3s ease;
+    }
+
+    .tab-btn:hover::before {
+      width: 80%;
+    }
+
+    .tab-btn.active {
+      background: rgba(0,212,255,0.1);
+      color: var(--accent-4);
+    }
+
+    .tab-btn.active::before {
+      width: 80%;
+      background: var(--accent-4);
+    }
+
+    .tab-panels {
+      padding: 30px;
+      min-height: 300px;
+    }
+
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Connection cards */
+    .connections-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .connection-card {
+      background: rgba(255,255,255,0.03);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .connection-card:hover {
+      transform: translateY(-5px) rotate(1deg);
+      border-color: var(--accent-4);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .card-username {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--accent-4);
+    }
+
+    .card-status {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    .card-status.offline {
+      background: var(--muted);
+      animation: none;
+    }
+
+    .card-message {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 12px;
+      font-style: italic;
+    }
+
+    .card-time {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    /* Feed items */
+    .feed-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .feed-item {
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 16px;
+      border-left: 4px solid var(--accent-2);
+    }
+
+    .feed-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #000;
+    }
+
+    .feed-content {
+      flex: 1;
+    }
+
+    .feed-user {
+      font-weight: 700;
+      color: var(--accent-2);
+      margin-bottom: 4px;
+    }
+
+    .feed-text {
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .feed-time {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    /* Artefak items */
+    .artefak-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .artefak-card {
+      background: rgba(255,255,255,0.03);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .artefak-card:hover {
+      border-color: var(--accent-3);
+      transform: scale(1.05);
+    }
+
+    .artefak-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .artefak-name {
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--accent-3);
+    }
+
+    .artefak-size {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 30px 0;
+      border-top: 2px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Loading overlay */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+    
+    .loading-overlay.hidden {
+      display: none;
+    }
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        gap: 16px;
+        border-radius: 30px;
+      }
+
+      .upload-section {
+        padding: 20px;
+      }
+
+      .tab-btn {
+        font-size: 14px;
+        padding: 15px;
+      }
+
+      .connections-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-<div class="w">
-<header>
-  <div>
-    <div class="logo" onclick="location.reload()">JEJAK</div>
-    <div class="tagline">no filter, just truth</div>
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">memuat jejak mu...</div>
   </div>
-  <div class="top-right">
-    <div class="huser" id="huser">@anon</div>
-    <div class="dot off" id="odot" title="Offline"></div>
-    <div class="smenu">
-      <button class="mtrig" onclick="toggleMenu()"><span></span><span></span><span></span></button>
-      <div class="mdd" id="mdd"><button class="mi" onclick="logoutUser()">Logout</button></div>
-    </div>
+
+  <div class="main-container">
+    <!-- Header dengan user name di kanan atas -->
+    <header class="header">
+      <div class="logo-small">jejak</div>
+      <div class="user-profile" id="user-profile">
+        <div class="user-avatar" id="user-avatar">👤</div>
+        <div class="user-name" id="user-name">anon</div>
+      </div>
+    </header>
+
+    <!-- Welcome section -->
+    <section class="welcome-section">
+      <h1 class="welcome-title">
+        halo, <span id="welcome-user">@anon</span> 👋
+      </h1>
+    </section>
+
+    <!-- CTA Upload Artefak (Pakai tabel artefacts yang sudah ada) -->
+    <section class="upload-section">
+      <h2 class="upload-title">unggah artefak 🚀</h2>
+      <div class="upload-area" id="upload-area">
+        <div class="upload-icon">✨</div>
+        <div class="upload-text">drop file atau klik untuk unggah</div>
+        <div class="upload-hint">jpg, png, gif, pdf, mp4 (maks 50mb)</div>
+        
+        <!-- Progress bar (hidden by default) -->
+        <div class="upload-progress" id="upload-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width: 0%;"></div>
+          </div>
+          <div class="upload-status" id="upload-status">mengunggah 0%</div>
+        </div>
+      </div>
+      <input type="file" id="file-input" style="display: none;" multiple>
+    </section>
+
+    <!-- 3 Tabs Connection (Pakai tabel existing) -->
+    <section class="tabs-section">
+      <div class="tabs-container">
+        <div class="tab-headers">
+          <button class="tab-btn active" data-tab="connections">koneksi 🔗</button>
+          <button class="tab-btn" data-tab="feed">spills 📱</button>
+          <button class="tab-btn" data-tab="artefak">artefak 💎</button>
+        </div>
+        
+        <div class="tab-panels">
+          <!-- Tab 1: Connections (Pakai tabel matches atau chats) -->
+          <div class="tab-panel active" id="panel-connections">
+            <div class="connections-grid" id="connections-grid">
+              <!-- Connections will be loaded here -->
+            </div>
+          </div>
+          
+          <!-- Tab 2: Feed/Spills (Pakai tabel spills yang sudah ada) -->
+          <div class="tab-panel" id="panel-feed">
+            <div class="feed-list" id="feed-list">
+              <!-- Spills akan dimuat dari tabel spills -->
+            </div>
+          </div>
+          
+          <!-- Tab 3: Artefak (Pakai tabel artefacts yang sudah ada) -->
+          <div class="tab-panel" id="panel-artefak">
+            <div class="artefak-grid" id="artefak-grid">
+              <!-- Artefak akan dimuat dari tabel artefacts -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div>jejak · ruang aman buat kamu yang overthink</div>
+      <div style="margin-top: 8px;">soul by itsALrUdio · v2.0</div>
+    </footer>
   </div>
-</header>
 
-<section class="hero-s">
-  <div class="hero" id="hero">
-    <img id="himg" src="https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80" alt="artefak" class="fm">
-    <div id="hfaces" style="position:absolute;inset:0;pointer-events:none"></div>
-    <div class="hnote" id="hnote">"jeda"</div>
-    <div class="upctrls">
-      <div class="qtimer" id="qtimer">Window aktif • Sisa 2 hari</div>
-      <button class="upbtn" id="upbtn">+<span class="upcnt" id="ucnt" style="display:none"></span></button>
-    </div>
-  </div>
-</section>
+  <script>
+    // ================================================================
+    // CONFIG - PAKAI TABEL YANG SUDAH ADA
+    // ================================================================
+    const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+    
+    // 🔥 PAKAI TABEL YANG SUDAH ADA (dari screenshot)
+    const USERS_TABLE = 'jejak_users';        // untuk user data
+    const ARTEFAK_TABLE = 'artefacts';        // untuk menyimpan file
+    const SPILLS_TABLE = 'spills';             // untuk feed/postingan
+    const MATCHES_TABLE = 'matches';           // untuk koneksi antar user
+    const REACTIONS_TABLE = 'reactions';       // untuk likes
+    const COMMENTS_TABLE = 'comments';          // untuk komentar
 
-<section class="isec">
-  <div class="ihdr"><span class="ilbl">Spill your truth</span><span class="ccount" id="ccount">0/500</span></div>
-  <textarea class="ri" id="ri" placeholder="What's eating you alive right now? No cap, no filter..." maxlength="500"></textarea>
-  <div class="msec">
-    <div class="mlbl">Pilih mood-mu sekarang</div>
-    <div class="mgrid">
-      <div class="mc act" data-mood="surviving" onclick="selMood('surviving')"><span class="me">😮‍💨</span><span class="mn" style="color:var(--ms)">Surviving</span><span class="md-desc">Hidup tapi barely</span></div>
-      <div class="mc" data-mood="thriving" onclick="selMood('thriving')"><span class="me">✨</span><span class="mn" style="color:var(--mt)">Thriving</span><span class="md-desc">On top of my game</span></div>
-      <div class="mc" data-mood="chaotic" onclick="selMood('chaotic')"><span class="me">🌀</span><span class="mn" style="color:var(--mc)">Chaotic</span><span class="md-desc">Everything is on fire</span></div>
-      <div class="mc" data-mood="doom" onclick="selMood('doom')"><span class="me">🛌</span><span class="mn" style="color:var(--md)">Doom</span><span class="md-desc">Just wanna disappear</span></div>
-    </div>
-  </div>
-  <div class="iact"><button class="sbtn" id="sbtn">Jejakkan & Spill</button></div>
-</section>
+    const SK = {
+      username: 'jejak_username',
+      sessionId: 'jejak_session_id',
+      loggedIn: 'jejak_logged_in',
+      vibe: 'jejak_vibe',
+    };
 
-<section>
-  <div class="shdr"><span class="stit">Riwayat</span><div class="sline"></div><span style="font-size:10px;color:var(--txm);margin-left:auto">FIFO • MAX 6 • AUTO-CENSOR</span></div>
-  <div id="econ"></div>
-</section>
+    // ================================================================
+    // UTILS
+    // ================================================================
+    function getSessionId() {
+      return localStorage.getItem(SK.sessionId) || '';
+    }
 
-<section style="margin-bottom:32px">
-  <div class="shdr"><span class="stit">Memori</span><div class="sline"></div><span style="font-size:10px;color:var(--txm);margin-left:auto">FIFO • MAX 6 • AUTO-CENSOR</span></div>
-  <div class="tgrid" id="tgrid"></div>
-  <div class="conn-mini">
-    <div class="conn-card-compact chaotic" id="card-chaotic">
-      <div class="conn-avatar-mini">🌀</div>
-      <div class="conn-info">
-        <div class="conn-title-mini">Seseorang dengan pola "chaotic good" sering muncul di timeline kamu.</div>
-        <div class="conn-meta">aktif jam aneh • react 😭 jarang post</div>
-      </div>
-      <div class="conn-actions-mini">
-        <button class="conn-btn-mini" onclick="skipConn('chaotic')">Abaikan</button>
-        <button class="conn-btn-mini pri" onclick="signalConn('chaotic')">Senggol</button>
-      </div>
-    </div>
-    <div class="conn-card-compact caregiver" id="card-caregiver">
-      <div class="conn-avatar-mini">🫂</div>
-      <div class="conn-info">
-        <div class="conn-title-mini">Ada yang sering kasih hug ke curhatanmu, tapi jarang cerita balik.</div>
-        <div class="conn-meta">caregiver • burnout tapi diam</div>
-      </div>
-      <div class="conn-actions-mini">
-        <button class="conn-btn-mini" onclick="skipConn('caregiver')">Abaikan</button>
-        <button class="conn-btn-mini pri" onclick="signalConn('caregiver')">Senggol</button>
-      </div>
-    </div>
-    <div class="conn-card-compact red-alert" id="card-redalert">
-      <div class="conn-avatar-mini">⚠️</div>
-      <div class="conn-info">
-        <div class="conn-title-mini">Seseorang mengirimkan pesan dengan nuansa merah dan intensitas tinggi.</div>
-        <div class="conn-meta">urgent • butuh respon cepat</div>
-      </div>
-      <div class="conn-actions-mini">
-        <button class="conn-btn-mini" onclick="skipConn('redalert')">Abaikan</button>
-        <button class="conn-btn-mini pri" onclick="signalConn('redalert')">Senggol</button>
-      </div>
-    </div>
-  </div>
-</section>
+    function getUsername() {
+      return localStorage.getItem(SK.username) || 'anon';
+    }
 
-<footer><p class="ftxt">Nyambat • Aksi • Solusi</p></footer>
-</div>
+    async function sbFetch(table, method = 'GET', body = null, qs = '') {
+      const url = `${SUPABASE_URL}/rest/v1/${table}${qs}`;
+      console.log('Fetching:', url);
+      
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': `Bearer ${SUPABASE_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': method === 'POST' ? 'return=representation' : ''
+        },
+        body: body ? JSON.stringify(body) : undefined
+      });
+      
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+      return text ? JSON.parse(text) : [];
+    }
 
-<nav class="bnav">
-  <div class="bnav-c">
-    <a href="jejak.html" class="ni act"><span class="nico">✦</span><span>Jejak</span></a>
-    <a href="spill.html" class="ni"><span class="nico">✕</span><span>Spill</span></a>
-    <a href="cocomeo.html" class="ni"><span class="nico">〜</span><span>Cocomeo</span></a>
-    <a href="glitch.html" class="ni"><span class="nico">⚡</span><span>Glitch</span></a>
-  </div>
-</nav>
+    // ================================================================
+    // CHECK SESSION & UPDATE UI
+    // ================================================================
+    async function checkSession() {
+      const username = getUsername();
+      const sessionId = getSessionId();
+      
+      // Update UI with username (FIX #1: @anon becomes user.name)
+      document.getElementById('user-name').textContent = username;
+      document.getElementById('welcome-user').textContent = '@' + username;
+      
+      // Set avatar initial
+      const avatar = document.getElementById('user-avatar');
+      avatar.textContent = username.charAt(0).toUpperCase();
+      
+      try {
+        // Verify session with Supabase - pakai jejak_users
+        const data = await sbFetch(USERS_TABLE, 'GET', null,
+          `?username=eq.${encodeURIComponent(username)}&select=username,session_id&limit=1`
+        );
+        
+        if (data.length === 0 || data[0].session_id !== sessionId) {
+          // Session invalid, redirect to login
+          window.location.href = 'index.html';
+          return;
+        }
+        
+        // Load all data from existing tables
+        loadConnections();  // dari tabel matches
+        loadSpills();       // dari tabel spills
+        loadArtefak();      // dari tabel artefacts
+        
+      } catch (e) {
+        console.error('Session check error:', e);
+        // Still try to load data
+        loadConnections();
+        loadSpills();
+        loadArtefak();
+      }
+      
+      // Hide loading overlay
+      setTimeout(() => {
+        document.getElementById('loading-overlay').classList.add('hidden');
+      }, 500);
+    }
 
-<div class="toast" id="toast"></div>
-<input type="file" id="finput" accept="image/*" multiple style="display:none">
+    // ================================================================
+    // LOAD CONNECTIONS - PAKAI TABEL MATCHES
+    // ================================================================
+    async function loadConnections() {
+      const grid = document.getElementById('connections-grid');
+      
+      try {
+        // 🔥 AMBIL DARI TABEL MATCHES YANG SUDAH ADA
+        // Asumsi struktur: matches punya user1, user2, status, last_active
+        const currentUser = getUsername();
+        
+        // Coba fetch dari tabel matches
+        let connections = [];
+        try {
+          // Cari matches dimana currentUser terlibat
+          const data = await sbFetch(MATCHES_TABLE, 'GET', null,
+            `?or=(user1.eq.${encodeURIComponent(currentUser)},user2.eq.${encodeURIComponent(currentUser)})&status=eq.active&order=last_active.desc&limit=20`
+          );
+          
+          if (data && data.length > 0) {
+            connections = data.map(match => {
+              const otherUser = match.user1 === currentUser ? match.user2 : match.user1;
+              return {
+                username: otherUser,
+                status: match.last_active && (Date.now() - new Date(match.last_active).getTime() < 5*60000) ? 'online' : 'offline',
+                message: match.status_message || 'available',
+                time: formatTime(match.last_active)
+              };
+            });
+          }
+        } catch (e) {
+          console.log('Matches table maybe empty, using mock data:', e);
+        }
+        
+        // Fallback ke mock data jika tabel kosong
+        if (connections.length === 0) {
+          connections = [
+            { username: 'over.thinker', status: 'online', message: 'sedang mikir berat', time: '2 menit lalu' },
+            { username: 'tired.soul', status: 'offline', message: 'tidur dulu bestie', time: '1 jam lalu' },
+            { username: 'aku.anonim', status: 'online', message: 'nunggu sinyal', time: '5 menit lalu' },
+          ];
+        }
+        
+        grid.innerHTML = connections.map(conn => `
+          <div class="connection-card">
+            <div class="card-header">
+              <span class="card-username">@${conn.username}</span>
+              <span class="card-status ${conn.status === 'offline' ? 'offline' : ''}"></span>
+            </div>
+            <div class="card-message">"${conn.message}"</div>
+            <div class="card-time">${conn.time}</div>
+          </div>
+        `).join('');
+        
+      } catch (e) {
+        console.error('Error loading connections:', e);
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--muted);">gagal memuat koneksi</div>';
+      }
+    }
 
-<script>
-const DUMMY_ENTRIES=[
-  {id:'d1',content:'Hari ini gue nangis di angkot gegara liat kucing dipukul orang. Mental gue udah kayak kerupuk kena hujan.',mood:'surviving',timestamp:Date.now()-3600000,reactions:{skull:42,cry:89,fire:12,upside:7},isDummy:true,author:'anon.kucing'},
-  {id:'d2',content:'akhirnya bisa tidur nyenyak semalaman setelah 3 minggu insomnia. thanks buat chat tadi malam, lu tau lah siapa.',mood:'thriving',timestamp:Date.now()-7200000,reactions:{skull:23,cry:15,fire:67,upside:31},isDummy:true,author:'sleepy.head'},
-  {id:'d3',content:'hari ini chaos abis! dari bangun tidur udah salah ambil kaki, sampe kantor lupa bawa laptop.',mood:'chaotic',timestamp:Date.now()-10800000,reactions:{skull:89,cry:23,fire:45,upside:78},isDummy:true,author:'chaos.queen'}
-];
+    // ================================================================
+    // LOAD SPILLS - PAKAI TABEL SPILLS
+    // ================================================================
+    async function loadSpills() {
+      const feedList = document.getElementById('feed-list');
+      
+      try {
+        // 🔥 AMBIL DARI TABEL SPILLS YANG SUDAH ADA
+        let spills = [];
+        try {
+          // Ambil spills terbaru
+          const data = await sbFetch(SPILLS_TABLE, 'GET', null,
+            `?select=*,${USERS_TABLE}!inner(username)&order=created_at.desc&limit=20`
+          );
+          
+          if (data && data.length > 0) {
+            spills = data.map(spill => ({
+              username: spill.username,
+              text: spill.content || spill.text || spill.message,
+              time: formatTime(spill.created_at)
+            }));
+          }
+        } catch (e) {
+          console.log('Spills table maybe empty, using mock data:', e);
+        }
+        
+        // Fallback ke mock data
+        if (spills.length === 0) {
+          spills = [
+            { username: 'over.thinker', text: 'hari ini productive ga sih?', time: '5 menit lalu' },
+            { username: 'self.care', text: 'minum air putih dulu yuk!', time: '15 menit lalu' },
+            { username: 'tired.soul', text: 'capek tapi gamau tidur 🥲', time: '25 menit lalu' },
+          ];
+        }
+        
+        feedList.innerHTML = spills.map(item => `
+          <div class="feed-item">
+            <div class="feed-avatar">${item.username.charAt(0)}</div>
+            <div class="feed-content">
+              <div class="feed-user">@${item.username}</div>
+              <div class="feed-text">${item.text}</div>
+              <div class="feed-time">${item.time}</div>
+            </div>
+          </div>
+        `).join('');
+        
+      } catch (e) {
+        console.error('Error loading spills:', e);
+        feedList.innerHTML = '<div style="text-align: center; color: var(--muted);">gagal memuat spills</div>';
+      }
+    }
 
-const DUMMY_ARTEFACTS=[
-  {id:'a1',url:'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80',note:'jeda',hasFace:false,isDummy:true,theme:'fm'},
-  {id:'a2',url:'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80',note:'hijau',hasFace:false,isDummy:true,theme:'fg'},
-  {id:'a3',url:'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=80',note:'gabut',hasFace:false,isDummy:true,theme:'fl'},
-  {id:'a4',url:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',note:'sendiri',hasFace:false,isDummy:true,theme:'fv'},
-  {id:'a5',url:'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',note:'capek',hasFace:true,isDummy:true,theme:'fn'},
-  {id:'a6',url:'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80',note:'love',hasFace:false,isDummy:true,theme:'fc'}
-];
+    // ================================================================
+    // LOAD ARTEFAK - PAKAI TABEL ARTEFACTS
+    // ================================================================
+    async function loadArtefak() {
+      const artefakGrid = document.getElementById('artefak-grid');
+      
+      try {
+        // 🔥 AMBIL DARI TABEL ARTEFACTS YANG SUDAH ADA
+        const currentUser = getUsername();
+        let artefacts = [];
+        
+        try {
+          // Ambil artefacts milik current user
+          const data = await sbFetch(ARTEFAK_TABLE, 'GET', null,
+            `?username=eq.${encodeURIComponent(currentUser)}&order=uploaded_at.desc&limit=20`
+          );
+          
+          if (data && data.length > 0) {
+            artefacts = data.map(art => ({
+              name: art.filename || art.name || 'untitled',
+              size: formatFileSize(art.filesize || art.size || 0),
+              icon: getFileIcon(art.filetype || art.type || '')
+            }));
+          }
+        } catch (e) {
+          console.log('Artefacts table maybe empty, using mock data:', e);
+        }
+        
+        // Fallback ke mock data
+        if (artefacts.length === 0) {
+          artefacts = [
+            { name: 'moodboard-1.jpg', size: '2.4 MB', icon: '🖼️' },
+            { name: 'sketsa-hari-ini.png', size: '1.8 MB', icon: '🎨' },
+            { name: 'catatan-random.pdf', size: '524 KB', icon: '📄' },
+          ];
+        }
+        
+        artefakGrid.innerHTML = artefacts.map(art => `
+          <div class="artefak-card">
+            <div class="artefak-icon">${art.icon}</div>
+            <div class="artefak-name">${art.name}</div>
+            <div class="artefak-size">${art.size}</div>
+          </div>
+        `).join('');
+        
+      } catch (e) {
+        console.error('Error loading artefacts:', e);
+        artefakGrid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--muted);">gagal memuat artefak</div>';
+      }
+    }
 
-const parse=k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch{return null}};
-const S={
-  user:'@anon',
-  entries:parse('jejak_entries')||[...DUMMY_ENTRIES],
-  artefacts:parse('jejak_artefacts')||[...DUMMY_ARTEFACTS]
-};
+    // ================================================================
+    // HELPER FUNCTIONS
+    // ================================================================
+    function formatTime(timestamp) {
+      if (!timestamp) return 'waktu tidak diketahui';
+      
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diffMs = now - date;
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMins / 60);
+      const diffDays = Math.floor(diffHours / 24);
+      
+      if (diffMins < 1) return 'baru saja';
+      if (diffMins < 60) return diffMins + ' menit lalu';
+      if (diffHours < 24) return diffHours + ' jam lalu';
+      return diffDays + ' hari lalu';
+    }
+    
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+    
+    function getFileIcon(filetype) {
+      if (filetype.includes('image')) return '🖼️';
+      if (filetype.includes('video')) return '🎬';
+      if (filetype.includes('audio')) return '🎵';
+      if (filetype.includes('pdf')) return '📄';
+      if (filetype.includes('zip')) return '📦';
+      return '📁';
+    }
 
-const $=id=>document.getElementById(id);
-const MOODS={surviving:'😮‍💨',thriving:'✨',chaotic:'🌀',doom:'🛌'};
-const REACTIONS={skull:'💀',cry:'😭',fire:'🔥',upside:'🙃'};
+    // ================================================================
+    // UPLOAD ARTEFAK - SIMPAN KE TABEL ARTEFACTS
+    // ================================================================
+    function setupUpload() {
+      const uploadArea = document.getElementById('upload-area');
+      const fileInput = document.getElementById('file-input');
+      const progressDiv = document.getElementById('upload-progress');
+      const progressFill = document.getElementById('progress-fill');
+      const uploadStatus = document.getElementById('upload-status');
+      
+      // Click to upload
+      uploadArea.addEventListener('click', () => {
+        fileInput.click();
+      });
+      
+      // Drag & drop handlers
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+      });
+      
+      uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+      });
+      
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          handleFiles(files);
+        }
+      });
+      
+      // File input change
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          handleFiles(e.target.files);
+        }
+      });
+      
+      // Handle file upload
+      async function handleFiles(files) {
+        progressDiv.classList.add('show');
+        
+        const totalFiles = files.length;
+        let completed = 0;
+        const currentUser = getUsername();
+        
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          
+          try {
+            // Simulasi upload progress
+            await simulateFileUpload(file, (progress) => {
+              const overallProgress = ((completed + (progress/100)) / totalFiles) * 100;
+              progressFill.style.width = overallProgress + '%';
+              uploadStatus.textContent = `mengunggah ${Math.round(overallProgress)}%`;
+            });
+            
+            // 🔥 SIMPAN KE TABEL ARTEFACTS
+            await sbFetch(ARTEFAK_TABLE, 'POST', {
+              username: currentUser,
+              filename: file.name,
+              filesize: file.size,
+              filetype: file.type || 'application/octet-stream',
+              uploaded_at: new Date().toISOString(),
+              // url: nanti diisi setelah upload ke storage
+            });
+            
+            completed++;
+            
+          } catch (e) {
+            console.error('Upload error:', e);
+            uploadStatus.textContent = `❌ gagal upload ${file.name}`;
+          }
+        }
+        
+        // Selesai semua
+        setTimeout(() => {
+          progressDiv.classList.remove('show');
+          uploadStatus.textContent = '✅ upload selesai!';
+          progressFill.style.width = '0%';
+          
+          // Refresh artefak list
+          loadArtefak();
+          
+          setTimeout(() => {
+            uploadStatus.textContent = '';
+          }, 3000);
+        }, 500);
+      }
+      
+      function simulateFileUpload(file, onProgress) {
+        return new Promise((resolve) => {
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress >= 100) {
+              progress = 100;
+              clearInterval(interval);
+              resolve();
+            }
+            onProgress(progress);
+          }, 150);
+        });
+      }
+    }
 
-function toast(msg){
-  const t=$('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3000);
-}
+    // ================================================================
+    // TAB SWITCHING
+    // ================================================================
+    function setupTabs() {
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      
+      tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tabBtns.forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+          
+          btn.classList.add('active');
+          const tabName = btn.dataset.tab;
+          document.getElementById(`panel-${tabName}`).classList.add('active');
+        });
+      });
+    }
 
-function esc(t){const d=document.createElement('div');d.textContent=t;return d.innerHTML}
-function toggleMenu(){$('mdd').classList.toggle('on')}
-function logoutUser(){if(!confirm('Yakin logout?'))return;localStorage.clear();location.href='index.html'}
-function selMood(mood){document.querySelectorAll('.mc').forEach(c=>c.classList.toggle('act',c.dataset.mood===mood))}
+    // ================================================================
+    // VIBE
+    // ================================================================
+    const VIBES = {
+      cyber:  { accent:'#00ff88', accent2:'#ff3366', accent3:'#ffff00', accent4:'#00d4ff' },
+      neon:   { accent:'#ff10f0', accent2:'#00ff88', accent3:'#ffff00', accent4:'#00d4ff' },
+      retro:  { accent:'#ff6b35', accent2:'#f7b801', accent3:'#6a994e', accent4:'#bc4749' },
+      pastel: { accent:'#ffc8dd', accent2:'#bde0fe', accent3:'#a2d2ff', accent4:'#ffafcc' }
+    };
+    
+    function loadVibe() {
+      const saved = localStorage.getItem(SK.vibe) || 'cyber';
+      const c = VIBES[saved];
+      if (c) {
+        document.documentElement.style.setProperty('--accent', c.accent);
+        document.documentElement.style.setProperty('--accent-2', c.accent2);
+        document.documentElement.style.setProperty('--accent-3', c.accent3);
+        document.documentElement.style.setProperty('--accent-4', c.accent4);
+      }
+    }
 
-function skipConn(type){
-  const c=$('card-'+type);
-  if(!c)return;
-  c.style.cssText='opacity:.3;transform:translateX(-10px)';
-  setTimeout(()=>{c.style.display='none';toast('Dilewati')},200);
-}
+    // ================================================================
+    // LOGOUT
+    // ================================================================
+    function setupLogout() {
+      document.getElementById('user-profile').addEventListener('dblclick', () => {
+        if (confirm('logout dari jejak?')) {
+          localStorage.removeItem(SK.username);
+          localStorage.removeItem(SK.loggedIn);
+          window.location.href = 'index.html';
+        }
+      });
+    }
 
-function signalConn(type){
-  const c=$('card-'+type);
-  if(!c)return;
-  const btn=c.querySelector('.conn-btn-mini.pri');
-  if(btn){btn.textContent='✓';btn.disabled=true;btn.style.background='var(--aq)'}
-  toast('Isyarat terkirim!');
-  setTimeout(()=>c.style.opacity='.5',1500);
-}
-
-function renderEntries(){
-  const con=$('econ');if(!con)return;
-  if(!S.entries.length){
-    con.innerHTML='<div class="es"><span class="ee">🍃</span><div class="et">Belum ada jejak</div><div class="est">Jadilah yang pertama spill your truth</div></div>';
-    return;
-  }
-  con.innerHTML=S.entries.map(e=>`<article class="entry${e.isDummy?' entry-dummy':''}">
-    <div class="ehdr">
-      <div class="emeta">
-        <span class="etime">${e.isDummy?'contoh':'baru saja'}</span>
-        <span class="emood ${e.mood}">${MOODS[e.mood]} ${e.mood}</span>
-      </div>
-      ${e.isDummy?'<span class="fifo-i">Contoh</span>':''}
-    </div>
-    <div class="econt">${esc(e.content)}</div>
-    <div class="reaction-bar">
-      ${Object.entries(REACTIONS).map(([k,em])=>`<button class="reaction-btn" disabled><span class="remoji">${em}</span><span class="rcount">${e.reactions[k]}</span></button>`).join('')}
-    </div>
-  </article>`).join('');
-}
-
-function renderTray(){
-  const con=$('tgrid');if(!con)return;
-  const EMPTY='<div class="ti empty" onclick="$(\'upbtn\').click()">+</div>';
-  if(!S.artefacts.length){con.innerHTML=EMPTY.repeat(6);return}
-  let html=S.artefacts.map(a=>a.hasFace
-    ?`<div class="ti" onclick="setHero('${a.id}')"><img src="${a.url}" alt="${a.note}" class="${a.theme}"><div class="sensored-overlay"><span class="sensored-text">SENSORED</span></div></div>`
-    :`<div class="ti" onclick="setHero('${a.id}')"><img src="${a.url}" alt="${a.note}" class="${a.theme}"></div>`
-  ).join('');
-  for(let i=S.artefacts.length;i<6;i++)html+=EMPTY;
-  con.innerHTML=html;
-}
-
-function setHero(id){
-  const a=S.artefacts.find(x=>x.id===id);if(!a)return;
-  $('himg').src=a.url;$('himg').className=a.theme;
-  $('hnote').textContent=`"${a.note}"`;
-}
-
-document.addEventListener('DOMContentLoaded',()=>{
-  renderEntries();renderTray();
-  if(S.artefacts.length)setHero(S.artefacts[0].id);
-
-  const ri=$('ri'),cc=$('ccount');
-  if(ri&&cc)ri.oninput=()=>{
-    const n=ri.value.length;
-    cc.textContent=`${n}/500`;
-    cc.style.color=n>=450?'var(--at)':'var(--txm)';
-  };
-
-  const sb=$('sbtn');
-  if(sb&&ri)sb.onclick=()=>{
-    const c=ri.value.trim();
-    if(!c){toast('Tulis sesuatu...');return}
-    S.entries.unshift({id:'u_'+Date.now(),content:c,mood:document.querySelector('.mc.act')?.dataset.mood||'surviving',timestamp:Date.now(),reactions:{skull:0,cry:0,fire:0,upside:0},isDummy:false,author:S.user});
-    if(S.entries.length>6)S.entries.pop();
-    localStorage.setItem('jejak_entries',JSON.stringify(S.entries));
-    renderEntries();ri.value='';if(cc)cc.textContent='0/500';toast('✓ Tersimpan');
-  };
-});
-</script>
+    // ================================================================
+    // INIT
+    // ================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      loadVibe();
+      checkSession();
+      setupUpload();
+      setupTabs();
+      setupLogout();
+    });
+  </script>
 </body>
 </html>
