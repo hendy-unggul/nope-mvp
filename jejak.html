@@ -191,6 +191,7 @@ header{
   color:var(--bg);
   cursor:pointer;
   box-shadow:4px 4px 0 var(--sfe);
+  width:100%;
 }
 .sbtn:disabled{
   opacity:.5;
@@ -287,6 +288,7 @@ header{
   padding:8px;
   color:var(--tx);
   font-size:14px;
+  margin:16px 0;
 }
 .toast{
   position:fixed;
@@ -388,7 +390,7 @@ header{
     <div class="mc" data-mood="doom" onclick="selMood('doom')">🛌 Doom</div>
   </div>
   
-  <button class="sbtn" id="sbtn" style="width:100%">JEJAKKAN & SPILL</button>
+  <button class="sbtn" id="sbtn">JEJAKKAN & SPILL</button>
 </section>
 
 <!-- MEMORI -->
@@ -418,7 +420,7 @@ header{
   <div class="mc2">
     <h3 style="margin-bottom:16px;">Upload Artefak</h3>
     <div class="ggrid" id="ggrid"></div>
-    <input type="text" class="noti" id="noti" placeholder="Notasi (opsional)" style="margin:16px 0;">
+    <input type="text" class="noti" id="noti" placeholder="Notasi (opsional)">
     <div style="display:flex; gap:8px; justify-content:flex-end;">
       <button class="sbtn" onclick="closeGallery()" style="background:var(--sf); color:var(--tx);">Batal</button>
       <button class="sbtn" onclick="confirmUpload()">Konfirmasi</button>
@@ -440,12 +442,13 @@ header{
 
 <script>
 // ============================================
-// SUPABASE
+// SUPABASE - SATU KALI DEKLARASI
 // ============================================
 const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// PAKAI NAMA BERBEDA dari yang di window.supabase
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const BUCKET = 'artefacts';
 
 // ============================================
@@ -485,7 +488,7 @@ function toast(msg, isError = false) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-function showProc(msg) {
+function showProc() {
   $('proc').classList.add('on');
 }
 
@@ -493,11 +496,11 @@ function hideProc() {
   $('proc').classList.remove('on');
 }
 
-function selMood(mood) {
+window.selMood = function(mood) {
   document.querySelectorAll('.mc').forEach(c => 
     c.classList.toggle('act', c.dataset.mood === mood)
   );
-}
+};
 
 // ============================================
 // QUOTA
@@ -526,7 +529,7 @@ function updateQuota() {
 // LOAD DATA
 // ============================================
 async function loadRants() {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from('rants')
     .select('*')
     .order('created_at', { ascending: false })
@@ -537,7 +540,7 @@ async function loadRants() {
 }
 
 async function loadArtefacts() {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from('artefacts')
     .select('*')
     .eq('user_id', S.userId)
@@ -590,13 +593,13 @@ function renderTray() {
   container.innerHTML = html;
 }
 
-function setHero(id) {
+window.setHero = function(id) {
   const a = S.artefacts.find(a => a.id === id);
   if (a) {
     $('himg').src = a.url;
     $('hnote').innerHTML = `"${a.note || 'memory'}"`;
   }
-}
+};
 
 // ============================================
 // UPLOAD
@@ -645,13 +648,13 @@ function openGallery() {
   $('gmodal').classList.add('on');
 }
 
-function closeGallery() {
+window.closeGallery = function() {
   $('gmodal').classList.remove('on');
   pendingFiles = [];
   selectedIndexes.clear();
-}
+};
 
-async function confirmUpload() {
+window.confirmUpload = async function() {
   if (!selectedIndexes.size) {
     toast('Pilih minimal 1 foto');
     return;
@@ -671,19 +674,19 @@ async function confirmUpload() {
     
     try {
       // Upload ke storage
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabaseClient.storage
         .from(BUCKET)
         .upload(fileName, file);
       
       if (uploadError) throw uploadError;
       
       // Get URL
-      const { data: { publicUrl } } = supabase.storage
+      const { data: { publicUrl } } = supabaseClient.storage
         .from(BUCKET)
         .getPublicUrl(fileName);
       
       // Insert database
-      const { error: insertError } = await supabase
+      const { error: insertError } = await supabaseClient
         .from('artefacts')
         .insert({
           user_id: S.userId,
@@ -699,6 +702,7 @@ async function confirmUpload() {
       
     } catch (err) {
       console.error(err);
+      toast(err.message, true);
     }
   }
   
@@ -710,12 +714,10 @@ async function confirmUpload() {
     await loadArtefacts();
     if (S.artefacts.length) setHero(S.artefacts[0].id);
     toast(`✓ ${success} foto berhasil diupload!`);
-  } else {
-    toast('✗ Gagal upload', true);
   }
   
   updateQuota();
-}
+};
 
 // ============================================
 // INIT
@@ -747,7 +749,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.disabled = true;
     btn.textContent = 'Menyimpan...';
     
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('rants')
       .insert({
         user_id: S.userId,
