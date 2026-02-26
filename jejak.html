@@ -357,16 +357,58 @@ const BUCKET  = 'artefacts';
 const db = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 // ============================================================
-// AUTH STATE — baca dari localStorage, coba semua kemungkinan key
+// AUTH STATE — username dari localStorage, userId SELALU diverifikasi dari DB
 // ============================================================
 const S = {
-  user    : (()=>{ for(const k of ['jejak_username','username','user_handle']){const v=localStorage.getItem(k);if(v&&v!=='null'&&v!=='@anon')return v.startsWith('@')?v:'@'+v;} return '@anon'; })(),
-  userId  : (()=>{ for(const k of ['user_id','jejak_user_id','userId','uid']){const v=localStorage.getItem(k);if(v&&v!=='null')return v;} return null; })(),
-  entries : [],
-  artefacts: []
+  user      : (()=>{ for(const k of ['jejak_username','username','user_handle']){const v=localStorage.getItem(k);if(v&&v!=='null'&&v!=='@anon')return v.startsWith('@')?v:'@'+v;} return '@anon'; })(),
+  userId    : null,   // akan diisi setelah verifikasi DB
+  _cachedUid: (()=>{ for(const k of ['user_id','jejak_user_id','userId','uid']){const v=localStorage.getItem(k);if(v&&v!=='null')return v;} return null; })(),
+  entries   : [],
+  artefacts : []
 };
 
-console.log('[JEJAK] user=', S.user, 'userId=', S.userId);
+console.log('[JEJAK] user=', S.user, '| cached uid=', S._cachedUid);
+
+/**
+ * WAJIB dipanggil sebelum insert apapun.
+ * Query public.users WHERE username = S.user
+ * Jika user_id dari DB cocok dengan cached → pakai
+ * Jika tidak cocok → update localStorage dengan yang benar dari DB
+ * Jika tidak ada internet → pakai cached (akan gagal 409, tapi itu masalah koneksi)
+ */
+async function resolveAndVerifyUserId() {
+  const uname = S.user.replace('@','').trim();
+  if (!uname || uname === 'anon') return null;
+
+  try {
+    const { data, error } = await db
+      .from('users')
+      .select('id, username')
+      .eq('username', uname)
+      .single();
+
+    if (error || !data) {
+      console.warn('[JEJAK] users lookup failed:', error?.message);
+      // Fallback ke cached jika ada
+      return S._cachedUid || null;
+    }
+
+    const dbUid = data.id;
+    if (dbUid !== S._cachedUid) {
+      console.warn('[JEJAK] userId mismatch! cached:', S._cachedUid, '→ correct:', dbUid);
+      // Update semua key yang mungkin tersimpan
+      localStorage.setItem('user_id', dbUid);
+      localStorage.setItem('jejak_user_id', dbUid);
+    }
+    S.userId = dbUid;
+    console.log('[JEJAK] userId verified from DB:', dbUid);
+    return dbUid;
+
+  } catch(e) {
+    console.error('[JEJAK] resolveAndVerifyUserId error:', e);
+    return S._cachedUid || null;
+  }
+}
 
 // ============================================================
 // DUMMY DATA  
@@ -405,7 +447,7 @@ function showProc(m='Memproses...'){$('proctxt').innerHTML=m;$('proc').classList
 function hideProc(){$('proc').classList.remove('on');}
 function skipConn(t){const c=$('card-'+t);if(c){c.style.opacity='.3';c.style.transform='translateX(-10px)';setTimeout(()=>c.style.display='none',200);}}
 function signalConn(t){const c=$('card-'+t);if(c){const b=c.querySelector('.conn-btn-mini.pri');if(b){b.textContent='✓';b.disabled=true;b.style.background='var(--aq)';}toast('Isyarat terkirim!');setTimeout(()=>c.style.opacity='.5',1500);}}
-function toggleDebug(){const d=$('dbg');d.classList.toggle('on');if(d.classList.contains('on'))d.textContent=`user: ${S.user} | uid: ${S.userId||'NONE'} | ls_keys: ${Object.keys(localStorage).join(', ')}`;}
+function toggleDebug(){const d=$('dbg');d.classList.toggle('on');if(d.classList.contains('on'))d.innerHTML=`<b>user:</b> ${S.user}<br><b>userId (aktif):</b> ${S.userId||'NONE'}<br><b>cached uid:</b> ${S._cachedUid||'NONE'}<br><b>ls keys:</b> ${Object.keys(localStorage).join(', ')}`;}
 
 // ============================================================
 // KOLOM YANG ADA DI TIAP TABEL (dari screenshot):
@@ -574,9 +616,14 @@ function closeGallery(){$('gmodal').classList.remove('on');pendingFiles=[];selFi
 
 async function confirmUpload(){
   if(selFiles.size===0){toast('Pilih minimal 1 foto');return;}
-  if(!S.userId){toast('Login diperlukan untuk upload',true);closeGallery();return;}
+  if(!S.userId && S.user === '@anon'){toast('Login diperlukan untuk upload',true);closeGallery();return;}
   const kb=$('konfirmbtn');if(kb)kb.disabled=true;
   closeGallery();
+  showProc('Memverifikasi sesi...<br><small>Sebentar</small>');
+  // Selalu verifikasi userId sebelum upload
+  const verifiedId = await resolveAndVerifyUserId();
+  if(!verifiedId){hideProc();toast('User tidak ditemukan di DB — coba logout & login ulang',true);if(kb)kb.disabled=false;return;}
+  S.userId = verifiedId;
   showProc('Mengupload foto...<br><small>Mohon tunggu</small>');
   const theme=THEMES[curTheme];
   const note=curNote||'memory';
@@ -638,19 +685,35 @@ async function confirmUpload(){
 // POST RANT
 // ============================================================
 async function postRant(content, mood){
-  // Tabel rants kolom pasti ada: user_id, content, mood, is_anonymous
-  // created_at biasanya auto (default now())
-  // JANGAN kirim: reaction_count, username, vibes, ai_metadata (tidak ada di tabel)
+  // Pastikan userId selalu fresh dari DB (hindari foreign key mismatch)
+  if(!S.userId) {
+    const uid = await resolveAndVerifyUserId();
+    if(!uid) return {ok:false, msg:'User tidak ditemukan di database'};
+    S.userId = uid;
+  }
+  // Kolom yang ADA di tabel rants: id(auto), user_id, content, mood, is_anonymous, created_at(auto)
   const payload = {
-    user_id    : S.userId,
-    content    : content,
-    mood       : mood,
+    user_id     : S.userId,
+    content     : content,
+    mood        : mood,
     is_anonymous: false
   };
-  console.log('[JEJAK] postRant payload:', payload);
-  const {data,error}=await db.from('rants').insert(payload).select('id');
+  console.log('[JEJAK] postRant payload:', JSON.stringify(payload));
+  const {data,error} = await db.from('rants').insert(payload).select('id');
   if(error){
-    console.error('[JEJAK] postRant error:', error);
+    console.error('[JEJAK] postRant error code:', error.code, '| msg:', error.message, '| details:', error.details);
+    // Jika foreign key error, coba refresh userId dari DB lalu retry sekali
+    if(error.code === '23503') {
+      console.warn('[JEJAK] Foreign key violation — refreshing userId from DB...');
+      S.userId = null; // force re-query
+      const freshId = await resolveAndVerifyUserId();
+      if(freshId && freshId !== payload.user_id){
+        payload.user_id = freshId;
+        const {data:d2, error:e2} = await db.from('rants').insert(payload).select('id');
+        if(!e2){ console.log('[JEJAK] Retry success with fresh userId:', freshId); return {ok:true}; }
+        return {ok:false, msg: e2.message};
+      }
+    }
     return {ok:false, msg: error.message};
   }
   console.log('[JEJAK] postRant success, id:', data?.[0]?.id);
@@ -668,11 +731,22 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   // Update header
   const hu=$('huser');if(hu)hu.textContent=S.user;
 
-  // Dot status
+  // === LANGKAH 1: Verifikasi userId dari DB (fix foreign key mismatch) ===
   const dot=$('odot');
-  if(dot){
-    if(S.userId){dot.classList.remove('off');dot.style.background='var(--aq)';dot.title=`Login: ${S.user}`;}
-    else{dot.title='Tidak ada userId — upload/post mungkin gagal';}
+  if(S.user !== '@anon'){
+    showProc('Memverifikasi sesi...<br><small>Sebentar ya</small>');
+    const verifiedId = await resolveAndVerifyUserId();
+    hideProc();
+    if(verifiedId){
+      S.userId = verifiedId;
+      if(dot){ dot.classList.remove('off'); dot.style.background='var(--aq)'; dot.title=`Login: ${S.user} ✓`; }
+      console.log('[JEJAK] Session OK — userId:', S.userId);
+    } else {
+      if(dot){ dot.style.background='var(--at)'; dot.title='User tidak ditemukan di DB'; }
+      toast('⚠ Session bermasalah — coba logout & login ulang', true);
+    }
+  } else {
+    if(dot) dot.title='Tidak login';
   }
 
   // Load data
