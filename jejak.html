@@ -1,185 +1,125 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>JEJAK - Upload Test</title>
+    <title>JEJAK - UPLOAD TEST MINIMAL</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body style="font-family: system-ui; padding: 20px; max-width: 500px; margin: 0 auto; background: #0A0A0A; color: white;">
+<body style="font-family: monospace; padding: 20px; background: #000; color: #0f0;">
 
-<h1 style="color: #FF4D00;">JEJAK - UPLOAD TEST</h1>
+<h2>🚀 JEJAK - UPLOAD TEST MINIMAL</h2>
 
-<div style="margin: 20px 0; padding: 20px; background: #141414; border: 2px solid #2A2A2A;">
-    <h3>Status:</h3>
-    <div id="status" style="color: #888; margin: 10px 0;">Menunggu...</div>
-    <div id="quota" style="color: #39FF14; font-size: 14px;"></div>
-</div>
+<button id="btnTest" style="padding: 10px 20px; background: #FF4D00; border: none; font-weight: bold; cursor: pointer;">TEST KONEKSI</button>
+<button id="btnUpload" style="padding: 10px 20px; background: #39FF14; border: none; font-weight: bold; cursor: pointer;">PILIH FOTO</button>
+<button id="btnCek" style="padding: 10px 20px; background: #00F0FF; border: none; font-weight: bold; cursor: pointer;">CEK DATABASE</button>
 
-<div style="margin: 20px 0;">
-    <button id="btnUpload" style="background: #FF4D00; color: black; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer;">PILIH FOTO</button>
-    <span id="selectedCount" style="margin-left: 10px; color: #888;">0 dipilih</span>
-</div>
-
-<div id="preview" style="display: grid; grid-template-columns: repeat(3,1fr); gap: 5px; margin: 20px 0;"></div>
-
-<button id="btnConfirm" disabled style="background: #555; color: white; border: none; padding: 15px 30px; font-weight: bold; cursor: not-allowed; width: 100%;">KONFIRMASI UPLOAD</button>
-
-<div id="result" style="margin: 20px 0; padding: 10px; background: #1E1E1E; border: 2px solid #2A2A2A; min-height: 50px;"></div>
+<div style="margin: 20px 0; padding: 10px; background: #111; border: 1px solid #333; min-height: 200px; font-size: 12px;" id="log"></div>
 
 <input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
 
 <script>
 // ============================================
-// SUPABASE (HANYA SATU KALI DEKLARASI)
+// SUPABASE CONFIG
 // ============================================
 const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-// BUAT CLIENT
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// ============================================
-// STATE
-// ============================================
 const BUCKET = 'artefacts';
-const USER_ID = 'user-test-' + Date.now(); // ID unik setiap session
-const USERNAME = 'test.user';
-
-let uploads = parseInt(localStorage.getItem('test_uploads') || '0');
-let quotaStart = localStorage.getItem('test_quota_start') || Date.now();
-let selectedFiles = [];
 
 // ============================================
-// DOM ELEMENTS
+// DOM
 // ============================================
-const statusEl = document.getElementById('status');
-const quotaEl = document.getElementById('quota');
+const logEl = document.getElementById('log');
+const btnTest = document.getElementById('btnTest');
 const btnUpload = document.getElementById('btnUpload');
-const btnConfirm = document.getElementById('btnConfirm');
+const btnCek = document.getElementById('btnCek');
 const fileInput = document.getElementById('fileInput');
-const previewEl = document.getElementById('preview');
-const selectedCountEl = document.getElementById('selectedCount');
-const resultEl = document.getElementById('result');
 
-// ============================================
-// FUNCTIONS
-// ============================================
-function updateQuota() {
-    const now = Date.now();
-    const windowDays = 3 * 86400000; // 3 hari
-    
-    if (now - parseInt(quotaStart) > windowDays) {
-        uploads = 0;
-        quotaStart = now;
-        localStorage.setItem('test_uploads', '0');
-        localStorage.setItem('test_quota_start', now.toString());
-    }
-    
-    const rem = Math.max(0, windowDays - (now - parseInt(quotaStart)));
-    const days = Math.ceil(rem / 86400000);
-    const slots = 6 - uploads;
-    
-    quotaEl.innerHTML = `📊 QUOTA: ${slots} slot tersisa (dari 6 foto per 3 hari)<br>⏰ Reset dalam ${days} hari`;
-    quotaEl.style.color = slots <= 2 ? '#FF006E' : '#39FF14';
-}
-
-function log(msg, isError = false) {
+function addLog(msg, type = 'info') {
+    const color = type === 'error' ? '#f00' : type === 'success' ? '#0f0' : '#0ff';
+    logEl.innerHTML += `<div style="color: ${color}; margin: 5px 0;">> ${msg}</div>`;
     console.log(msg);
-    resultEl.innerHTML += `<div style="color: ${isError ? '#FF3333' : '#888'}; padding: 5px; border-bottom: 1px solid #2A2A2A;">${msg}</div>`;
-    resultEl.scrollTop = resultEl.scrollHeight;
-}
-
-function clearLog() {
-    resultEl.innerHTML = '';
 }
 
 // ============================================
-// UPLOAD FLOW
+// TEST 1: KONEKSI
+// ============================================
+btnTest.onclick = async () => {
+    addLog('🔍 TEST KONEKSI...');
+    
+    try {
+        // Test 1: Cek bucket
+        addLog('→ Cek bucket...');
+        const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+        
+        if (bucketError) {
+            addLog(`❌ Bucket error: ${bucketError.message}`, 'error');
+        } else {
+            const bucketExists = buckets.find(b => b.name === BUCKET);
+            addLog(`✓ Bucket ditemukan: ${bucketExists ? 'YES' : 'NO'}`, bucketExists ? 'success' : 'error');
+        }
+        
+        // Test 2: Cek tabel
+        addLog('→ Cek tabel artefacts...');
+        const { error: tableError } = await supabase.from('artefacts').select('count', { count: 'exact', head: true });
+        
+        if (tableError) {
+            addLog(`❌ Tabel error: ${tableError.message}`, 'error');
+        } else {
+            addLog('✓ Tabel artefacts OK', 'success');
+        }
+        
+    } catch (e) {
+        addLog(`❌ Exception: ${e.message}`, 'error');
+    }
+};
+
+// ============================================
+// TEST 2: UPLOAD
 // ============================================
 btnUpload.onclick = () => {
-    if (uploads >= 6) {
-        log('❌ QUOTA HABIS! Tunggu reset quota', true);
-        return;
-    }
+    addLog('📂 Pilih file...');
     fileInput.click();
 };
 
-fileInput.onchange = (e) => {
+fileInput.onchange = async (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
     
-    // Batasi 6 foto
-    selectedFiles = files.slice(0, 6);
+    addLog(`📸 ${files.length} file dipilih`);
     
-    // Update counter
-    selectedCountEl.textContent = `${selectedFiles.length} dipilih`;
-    
-    // Tampilkan preview
-    previewEl.innerHTML = '';
-    selectedFiles.forEach((file, i) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const div = document.createElement('div');
-            div.style.aspectRatio = '1/1';
-            div.style.background = '#1E1E1E';
-            div.style.border = '2px solid #2A2A2A';
-            div.style.overflow = 'hidden';
-            div.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;">`;
-            previewEl.appendChild(div);
-        };
-        reader.readAsDataURL(file);
-    });
-    
-    // Enable confirm button
-    btnConfirm.disabled = false;
-    btnConfirm.style.background = '#FF4D00';
-    btnConfirm.style.cursor = 'pointer';
-    
-    log(`📸 ${selectedFiles.length} file siap diupload`);
-};
-
-btnConfirm.onclick = async () => {
-    if (!selectedFiles.length) return;
-    
-    // Disable button
-    btnConfirm.disabled = true;
-    btnConfirm.textContent = 'UPLOADING...';
-    clearLog();
-    log('🚀 MULAI UPLOAD...');
-    
-    let success = 0;
-    let failed = 0;
-    
-    for (let i = 0; i < selectedFiles.length; i++) {
-        const file = selectedFiles[i];
-        const fileName = `${USERNAME}/${Date.now()}_${i}.${file.name.split('.').pop() || 'jpg'}`;
-        
-        log(`📤 Uploading file ${i+1}/${selectedFiles.length}: ${file.name}`);
+    for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        addLog(`\n📤 Upload file ${i+1}: ${file.name} (${(file.size/1024).toFixed(1)}KB)`);
         
         try {
-            // STEP 1: UPLOAD KE STORAGE
-            log(`   → Storage: ${BUCKET}/${fileName}`);
+            // Step 1: Upload ke storage
+            const fileName = `test-${Date.now()}-${i}.${file.name.split('.').pop() || 'jpg'}`;
+            addLog(`→ Upload ke: ${BUCKET}/${fileName}`);
+            
             const { error: uploadError } = await supabase.storage
                 .from(BUCKET)
                 .upload(fileName, file);
             
             if (uploadError) {
-                throw new Error(`Storage error: ${uploadError.message}`);
+                addLog(`❌ Upload gagal: ${uploadError.message}`, 'error');
+                continue;
             }
-            log(`   ✅ Storage OK`);
+            addLog(`✓ Upload sukses`, 'success');
             
-            // STEP 2: GET PUBLIC URL
+            // Step 2: Get URL
             const { data: { publicUrl } } = supabase.storage
                 .from(BUCKET)
                 .getPublicUrl(fileName);
-            log(`   → URL: ${publicUrl.substring(0, 50)}...`);
+            addLog(`→ URL: ${publicUrl.substring(0, 50)}...`);
             
-            // STEP 3: INSERT KE TABEL artefacts
-            log(`   → Insert ke database...`);
+            // Step 3: Insert database
+            addLog(`→ Insert ke database...`);
             const { error: insertError } = await supabase
                 .from('artefacts')
                 .insert({
-                    user_id: USER_ID,
-                    username: USERNAME,
+                    user_id: 'test-user',
+                    username: 'tester',
                     url: publicUrl,
                     note: 'test upload',
                     has_face: false,
@@ -187,86 +127,45 @@ btnConfirm.onclick = async () => {
                 });
             
             if (insertError) {
-                throw new Error(`Database error: ${insertError.message}`);
+                addLog(`❌ Insert gagal: ${insertError.message}`, 'error');
+            } else {
+                addLog(`✓ Insert sukses`, 'success');
             }
             
-            log(`   ✅ Database OK`);
-            success++;
-            
         } catch (err) {
-            log(`   ❌ GAGAL: ${err.message}`, true);
-            failed++;
-            console.error(err);
+            addLog(`❌ Error: ${err.message}`, 'error');
         }
     }
     
-    // Update quota
-    if (success > 0) {
-        uploads += success;
-        localStorage.setItem('test_uploads', uploads.toString());
-    }
+    addLog('\n✅ Selesai');
+};
+
+// ============================================
+// TEST 3: CEK DATABASE
+// ============================================
+btnCek.onclick = async () => {
+    addLog('🔍 CEK DATABASE...');
     
-    // Update UI
-    updateQuota();
-    
-    log('=================================');
-    log(`✅ SUKSES: ${success} foto`);
-    log(`❌ GAGAL: ${failed} foto`);
-    log('=================================');
-    
-    // Reset form
-    if (success === selectedFiles.length) {
-        selectedFiles = [];
-        previewEl.innerHTML = '';
-        selectedCountEl.textContent = '0 dipilih';
-    }
-    
-    btnConfirm.textContent = 'KONFIRMASI UPLOAD';
-    btnConfirm.disabled = success === 0;
-    btnConfirm.style.background = success === 0 ? '#555' : '#FF4D00';
-    btnConfirm.style.cursor = success === 0 ? 'not-allowed' : 'pointer';
-    
-    // Cek hasil di database
-    if (success > 0) {
-        setTimeout(async () => {
-            log('\n🔍 CEK DATA DI DATABASE:');
-            const { data, error } = await supabase
-                .from('artefacts')
-                .select('*')
-                .eq('user_id', USER_ID)
-                .order('created_at', { ascending: false })
-                .limit(5);
-            
-            if (error) {
-                log(`❌ Gagal cek database: ${error.message}`, true);
-            } else {
-                log(`📊 Total data user: ${data.length} foto`);
-                data.forEach((d, i) => {
-                    log(`   ${i+1}. ${d.note} - ${new Date(d.created_at).toLocaleTimeString()}`);
-                });
-            }
-        }, 1000);
+    try {
+        const { data, error } = await supabase
+            .from('artefacts')
+            .select('*')
+            .limit(5);
+        
+        if (error) {
+            addLog(`❌ Error: ${error.message}`, 'error');
+        } else {
+            addLog(`✓ Total data: ${data.length}`);
+            data.forEach((item, i) => {
+                addLog(`  ${i+1}. ${item.note || 'no note'} - ${item.url?.substring(0, 30)}...`);
+            });
+        }
+    } catch (e) {
+        addLog(`❌ Exception: ${e.message}`, 'error');
     }
 };
 
-// Initial update
-updateQuota();
-log('✅ READY - Pilih foto untuk mulai upload');
-log(`👤 User ID: ${USER_ID}`);
-
-// Test koneksi
-(async () => {
-    try {
-        const { error } = await supabase.from('artefacts').select('count', { count: 'exact', head: true });
-        if (error) {
-            log(`❌ Koneksi database error: ${error.message}`, true);
-        } else {
-            log(`✅ Koneksi database OK`);
-        }
-    } catch (e) {
-        log(`❌ Koneksi error: ${e.message}`, true);
-    }
-})();
+addLog('✅ READY - Klik tombol TEST KONEKSI dulu');
 </script>
 </body>
 </html>
