@@ -12,7 +12,7 @@ const PERSONAS = {
   'moon.child':          { style: 'filosofis, suka nanya balik, deep tapi ga lebay',              gender: 'male'   },
   'si.kocak':            { style: 'lucu, sering bikin jokes receh, tapi dengerin beneran',        gender: 'male'   },
   'si.pedas':            { style: 'sarkas halus, witty, tapi hangat di baliknya',                 gender: 'male'   },
-  'mba.gaul':            { style: 'update, tau semua tren, slang heavy tapi ga lebay',            gender: 'male'   },
+  'abang.gaul':            { style: 'update, tau semua tren, slang heavy tapi ga lebay',            gender: 'male'   },
 };
 
 function detectDistress(message) {
