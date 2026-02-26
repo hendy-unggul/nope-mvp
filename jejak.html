@@ -1385,7 +1385,7 @@ footer{
 
 <div class="proc" id="proc">
   <div class="pspin"></div>
-  <div class="ptxt">Scanning untuk wajah...<br><small>AI Privacy Shield Active</small></div>
+  <div class="ptxt" id="proctxt">Scanning untuk wajah...<br><small>AI Privacy Shield Active</small></div>
 </div>
 
 <!-- REVIEW ARTEFAK MODAL -->
@@ -1556,9 +1556,11 @@ try {
 // ============================================
 const $ = id => document.getElementById(id);
 
-function toast(msg) {
+function toast(msg, isError = false) {
   const t = $('toast');
   t.textContent = msg;
+  t.style.background = isError ? 'var(--rd)' : 'var(--tx)';
+  t.style.color = isError ? 'var(--tx)' : 'var(--bg)';
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
@@ -1652,9 +1654,11 @@ async function loadRantsFromDB() {
       .order('created_at', { ascending: false })
       .limit(6);
     
-    if (error) throw error;
-    
-    if (data && data.length > 0) {
+    if (error) {
+      console.error('Error loading rants:', error);
+      toast('Gagal load rants: ' + error.message, true);
+      S.entries = [...DUMMY_ENTRIES];
+    } else if (data && data.length > 0) {
       S.entries = data.map(r => ({
         id: r.id,
         content: r.content,
@@ -1662,7 +1666,7 @@ async function loadRantsFromDB() {
         timestamp: new Date(r.created_at).getTime(),
         reactions: r.reaction_count || { skull: 0, cry: 0, fire: 0, upside: 0 },
         isDummy: false,
-        author: 'user'
+        author: r.username || 'user'
       }));
     } else {
       S.entries = [...DUMMY_ENTRIES];
@@ -1685,16 +1689,18 @@ async function loadArtefactsFromDB() {
       .order('created_at', { ascending: false })
       .limit(6);
     
-    if (error) throw error;
-    
-    if (data && data.length > 0) {
+    if (error) {
+      console.error('Error loading artefacts:', error);
+      toast('Gagal load artefacts: ' + error.message, true);
+      S.artefacts = [...DUMMY_ARTEFACTS];
+    } else if (data && data.length > 0) {
       S.artefacts = data.map(a => ({
         id: a.id,
         url: a.url,
         note: a.note || 'memory',
         faces: a.faces || [],
         hasFace: a.has_face || false,
-        theme: 'fm',
+        theme: a.theme || 'fm',
         isDummy: false
       }));
     } else {
@@ -1962,6 +1968,7 @@ async function confirmUpload() {
   const note = currentNote || 'memory';
   const username = S.user.replace('@', '');
   let uploadedCount = 0;
+  let errors = [];
   
   for (const i of selFiles) {
     const item = pendingFiles[i];
@@ -1977,6 +1984,7 @@ async function confirmUpload() {
       
       if (uploadError) {
         console.error('Upload error:', uploadError);
+        errors.push(`Upload ${i+1}: ${uploadError.message}`);
         continue;
       }
       
@@ -1985,7 +1993,7 @@ async function confirmUpload() {
         .from(BUCKET)
         .getPublicUrl(fileName);
       
-      // Insert ke tabel artefacts
+      // Insert ke tabel artefacts - JANGAN kirim id, biarkan database generate UUID
       const { error: insertError } = await supabaseClient
         .from('artefacts')
         .insert({
@@ -1999,6 +2007,7 @@ async function confirmUpload() {
       
       if (insertError) {
         console.error('Insert error:', insertError);
+        errors.push(`Insert ${i+1}: ${insertError.message}`);
         continue;
       }
       
@@ -2006,6 +2015,7 @@ async function confirmUpload() {
       
     } catch (err) {
       console.error('Upload process error:', err);
+      errors.push(`Error ${i+1}: ${err.message}`);
     }
   }
   
@@ -2018,8 +2028,11 @@ async function confirmUpload() {
     updQuota();
     if (S.artefacts.length > 0) setHero(S.artefacts[0].id);
     toast(`✓ ${uploadedCount} foto berhasil diupload!`);
+    if (errors.length > 0) {
+      console.error('Upload errors:', errors);
+    }
   } else {
-    toast('⚠ Gagal upload');
+    toast('⚠ Gagal upload: ' + errors.join(', '), true);
   }
 }
 
@@ -2030,6 +2043,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Update username di header
   const huser = $('huser');
   if (huser) huser.textContent = S.user;
+  
+  // Cek koneksi Supabase
+  try {
+    const { error } = await supabaseClient.from('rants').select('count', { count: 'exact', head: true });
+    if (error) {
+      console.error('Supabase connection error:', error);
+      toast('Koneksi database bermasalah', true);
+    } else {
+      console.log('Supabase connected successfully');
+    }
+  } catch (e) {
+    console.error('Supabase connection error:', e);
+  }
   
   // Load data dari Supabase
   if (S.userId) {
@@ -2077,17 +2103,26 @@ document.addEventListener('DOMContentLoaded', async () => {
       sb.textContent = 'Menyimpan...';
       
       try {
-        // Insert ke Supabase
-        const { error } = await supabaseClient
+        // Insert ke Supabase - JANGAN kirim id, biarkan database generate UUID
+        console.log('Inserting rant:', { user_id: S.userId, content: c, mood: mood, username: S.user.replace('@', '') });
+        
+        const { data, error } = await supabaseClient
           .from('rants')
           .insert({
             user_id: S.userId,
             content: c,
             mood: mood,
+            username: S.user.replace('@', ''),
             reaction_count: { skull: 0, cry: 0, fire: 0, upside: 0 }
           });
         
-        if (error) throw error;
+        if (error) {
+          console.error('Insert error details:', error);
+          toast('⚠ Gagal: ' + error.message, true);
+          return;
+        }
+        
+        console.log('Insert success:', data);
         
         // Refresh rants
         await loadRantsFromDB();
@@ -2097,8 +2132,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         toast('✓ Tersimpan di database');
         
       } catch (err) {
-        console.error('Post error:', err);
-        toast('⚠ Gagal menyimpan');
+        console.error('Exception:', err);
+        toast('⚠ Error: ' + err.message, true);
       } finally {
         sb.disabled = false;
         sb.textContent = 'Jejakkan & Spill';
