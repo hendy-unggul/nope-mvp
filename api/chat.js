@@ -26,6 +26,33 @@ const FORBIDDEN_PHRASES = [
   'iya wkwk'
 ];
 
+// Variasi sapaan untuk memanggil user
+const NAME_PREFIXES = {
+  female: ['say', 'kak', 'sis', 'dek', 'cuy'],
+  male: ['bro', 'bro', 'cuy', 'bang', 'deck']
+};
+
+// Ambil 1 kata dari username (ambil kata pertama atau random chunk)
+function getShortName(username) {
+  if (!username || username === 'user') return '';
+  
+  // Buang @ kalo ada
+  const clean = username.replace('@', '');
+  
+  // Split berdasarkan titik, underscore, atau spasi
+  const parts = clean.split(/[._\-\s]+/);
+  
+  if (parts.length >= 2) {
+    // Ambil kata pertama atau kedua secara random
+    return parts[Math.floor(Math.random() * Math.min(2, parts.length))];
+  } else if (clean.length > 8) {
+    // Kalo panjang banget, ambil 5 karakter pertama
+    return clean.substring(0, 5);
+  } else {
+    return clean;
+  }
+}
+
 function detectDistress(message) {
   const msg = message.toLowerCase();
   const highSignals = ['mau mati', 'bunuh diri', 'nyakitin diri', 'pengen mati'];
@@ -45,7 +72,7 @@ function containsForbiddenPhrase(text) {
   return FORBIDDEN_PHRASES.some(phrase => lower.includes(phrase));
 }
 
-const SYSTEM = (name, style, lastMessages) => {
+const SYSTEM = (name, style, lastMessages, userName, shortName) => {
   // Analisis lastMessages buat deteksi repetisi
   const lastReplies = lastMessages
     .filter(m => m.role === 'assistant')
@@ -74,6 +101,11 @@ CARA NGOBROL:
 - Sesekali typo kecil yang natural (bkn, yg, gk, napa, gmn) — jangan tiap pesan, cukup 1 dari 5 pesan
 - Kadang mulai dengan "eh", "lah", "wah", "hm" — terasa natural
 - Kalau nggak tau mau bilang apa, cukup "hmm" atau "..." dulu sebelum lanjut
+
+PANGGILAN KE USER:
+- User ini bernama lengkap: @${userName}
+- Panggil dia dengan nama pendek: "${shortName}" (sekali-sekali, jangan tiap pesan)
+- Bisa juga pake panggilan seperti: ${userGender === 'male' ? 'bro, bang, deck, cuy' : 'sis, kak, say, dek'} — variasikan!
 
 PENTING BANGET:
 - JANGAN PERNAH PAKAI FRASA YANG SAMA PERSIS DENGAN RESPONS SEBELUMNYA
@@ -105,7 +137,7 @@ KALAU DITANYA "KAMU AI BUKAN?":
 - JANGAN pernah jawab ya atau tidak secara eksplisit
 
 JANGAN PERNAH:
-- Mulai pesan dengan nama user
+- Mulai pesan dengan nama user (kecuali sekali-sekali)
 - Pakai emoji berlebihan (max 1 per pesan, sering tanpa emoji)
 - Bilang "tentu", "tentunya", "pastinya", "sebagai teman"
 - Kasih list atau bullet point
@@ -121,7 +153,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { message, characterName, lastMessages = [] } = req.body || {};
+  const { message, characterName, userName = 'user', lastMessages = [] } = req.body || {};
   if (!message?.trim()) return res.status(400).json({ error: 'Message required' });
   if (!process.env.DEEPSEEK_API_KEY) return res.status(500).json({ error: 'API key missing' });
 
@@ -129,6 +161,12 @@ export default async function handler(req, res) {
   if (!persona) return res.status(400).json({ error: 'Unknown character' });
 
   const { isHigh, isLow } = detectDistress(message);
+  
+  // Ambil nama pendek dari username
+  const shortName = getShortName(userName);
+  
+  // Deteksi gender karakter untuk variasi sapaan
+  const charGender = persona.gender;
 
   // Siapkan history
   const history = lastMessages.slice(-10).map(m => ({ 
@@ -138,8 +176,8 @@ export default async function handler(req, res) {
   history.push({ role: 'user', content: message.trim() });
 
   const systemPrompt = isHigh
-    ? SYSTEM(characterName, persona.style, lastMessages) + '\n\n[SEKARANG: user mungkin lagi di titik sangat berat. Tanya pelan, kasih ruang, tetap hangat dan casual — jangan panik, jangan tiba-tiba formal.]'
-    : SYSTEM(characterName, persona.style, lastMessages);
+    ? SYSTEM(characterName, persona.style, lastMessages, userName, shortName) + '\n\n[SEKARANG: user mungkin lagi di titik sangat berat. Tanya pelan, kasih ruang, tetap hangat dan casual — jangan panik, jangan tiba-tiba formal.]'
+    : SYSTEM(characterName, persona.style, lastMessages, userName, shortName);
 
   // Tambah instruksi anti-repetisi langsung di user prompt terakhir
   const antiRepetitionNote = '\n\nPENTING: Respons harus UNIK dan BERBEDA dari respons sebelumnya. Jangan ulangi frasa yang sama. Variasikan antara nanya, komen, atau reaksi.';
@@ -155,10 +193,10 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'deepseek-chat',
         max_tokens: 150,
-        temperature: 0.65, // Turunin dari 0.9 biar lebih fokus tapi tetap kreatif
+        temperature: 0.65,
         top_p: 0.9,
-        frequency_penalty: 0.7, // Tambah penalty biar gak ngulang kata
-        presence_penalty: 0.5,  // Tambah penalty biar gak stuck di topik
+        frequency_penalty: 0.7,
+        presence_penalty: 0.5,
         messages: [
           { role: 'system', content: systemPrompt },
           ...history.slice(0, -1), // History tanpa pesan terakhir
@@ -180,7 +218,6 @@ export default async function handler(req, res) {
 
     // Cek apakah reply mengandung frasa terlarang
     if (containsForbiddenPhrase(reply)) {
-      // Paksa regenerate dengan instruksi lebih keras
       console.warn('Forbidden phrase detected, regenerating...');
       
       const retryResponse = await fetch('https://api.deepseek.com/chat/completions', {
@@ -193,7 +230,7 @@ export default async function handler(req, res) {
           model: 'deepseek-chat',
           max_tokens: 150,
           temperature: 0.7,
-          frequency_penalty: 1.0, // Naikin penalty
+          frequency_penalty: 1.0,
           presence_penalty: 0.8,
           messages: [
             { role: 'system', content: systemPrompt + '\n\n⚠️ RESPONS SEBELUMNYA MENGANDUNG FRASA TERLARANG. JANGAN ULANGI FRASA ITU. BUAT RESPONS YANG SAMA SEKALI BERBEDA.' },
