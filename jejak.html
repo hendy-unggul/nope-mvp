@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <title>JEJAK — Spill Your Truth</title>
 <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/dist/face-api.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
@@ -1428,6 +1429,10 @@ footer{
 const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
+// Inisialisasi Supabase client
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const BUCKET = 'artefacts';
+
 // ============================================
 // STATE
 // ============================================
@@ -1529,7 +1534,7 @@ const DUMMY_ARTEFACTS = [
   }
 ];
 
-// Load dari localStorage
+// Load dari localStorage (sementara)
 try {
   const saved = localStorage.getItem('jejak_entries');
   if (saved) S.entries = JSON.parse(saved);
@@ -1606,6 +1611,16 @@ function signalConnection(type) {
   }
 }
 
+function showProc(msg) {
+  const ptxt = $('proctxt');
+  if (ptxt) ptxt.innerHTML = msg || 'Processing...';
+  $('proc').classList.add('on');
+}
+
+function hideProc() {
+  $('proc').classList.remove('on');
+}
+
 // ============================================
 // THEME FILTERS
 // ============================================
@@ -1623,6 +1638,74 @@ const THEMES = [
   { name: 'CRISP', filter: 'fcr' },
   { name: 'MOODY', filter: 'fmo' }
 ];
+
+// ============================================
+// LOAD DATA FROM SUPABASE
+// ============================================
+async function loadRantsFromDB() {
+  if (!S.userId) return;
+  
+  try {
+    const { data, error } = await supabaseClient
+      .from('rants')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(6);
+    
+    if (error) throw error;
+    
+    if (data && data.length > 0) {
+      S.entries = data.map(r => ({
+        id: r.id,
+        content: r.content,
+        mood: r.mood,
+        timestamp: new Date(r.created_at).getTime(),
+        reactions: r.reaction_count || { skull: 0, cry: 0, fire: 0, upside: 0 },
+        isDummy: false,
+        author: 'user'
+      }));
+    } else {
+      S.entries = [...DUMMY_ENTRIES];
+    }
+  } catch (e) {
+    console.error('Load rants error:', e);
+    S.entries = [...DUMMY_ENTRIES];
+  }
+  renderEntries();
+}
+
+async function loadArtefactsFromDB() {
+  if (!S.userId) return;
+  
+  try {
+    const { data, error } = await supabaseClient
+      .from('artefacts')
+      .select('*')
+      .eq('user_id', S.userId)
+      .order('created_at', { ascending: false })
+      .limit(6);
+    
+    if (error) throw error;
+    
+    if (data && data.length > 0) {
+      S.artefacts = data.map(a => ({
+        id: a.id,
+        url: a.url,
+        note: a.note || 'memory',
+        faces: a.faces || [],
+        hasFace: a.has_face || false,
+        theme: 'fm',
+        isDummy: false
+      }));
+    } else {
+      S.artefacts = [...DUMMY_ARTEFACTS];
+    }
+  } catch (e) {
+    console.error('Load artefacts error:', e);
+    S.artefacts = [...DUMMY_ARTEFACTS];
+  }
+  renderTray();
+}
 
 // ============================================
 // RENDER FUNCTIONS
@@ -1655,7 +1738,7 @@ function renderEntries() {
         ${Object.entries({ skull: '💀', cry: '😭', fire: '🔥', upside: '🙃' }).map(([k, emoji]) => `
           <button class="reaction-btn" disabled>
             <span class="remoji">${emoji}</span>
-            <span class="rcount">${e.reactions[k]}</span>
+            <span class="rcount">${e.reactions?.[k] || 0}</span>
           </button>
         `).join('')}
       </div>
@@ -1866,20 +1949,97 @@ async function confirmUpload() {
     return;
   }
   
-  toast('Upload akan segera diimplementasikan');
+  if (!S.userId) {
+    toast('Session tidak valid, login ulang');
+    closeGallery();
+    return;
+  }
+  
   closeGallery();
+  showProc('Mengupload foto...<br><small>Mohon tunggu</small>');
+  
+  const theme = THEMES[currentTheme];
+  const note = currentNote || 'memory';
+  const username = S.user.replace('@', '');
+  let uploadedCount = 0;
+  
+  for (const i of selFiles) {
+    const item = pendingFiles[i];
+    const file = item.file;
+    const ext = file.name.split('.').pop() || 'jpg';
+    const fileName = `${username}/${Date.now()}_${i}.${ext}`;
+    
+    try {
+      // Upload ke Storage
+      const { error: uploadError } = await supabaseClient.storage
+        .from(BUCKET)
+        .upload(fileName, file);
+      
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        continue;
+      }
+      
+      // Get public URL
+      const { data: { publicUrl } } = supabaseClient.storage
+        .from(BUCKET)
+        .getPublicUrl(fileName);
+      
+      // Insert ke tabel artefacts
+      const { error: insertError } = await supabaseClient
+        .from('artefacts')
+        .insert({
+          user_id: S.userId,
+          username: username,
+          url: publicUrl,
+          note: note,
+          has_face: false,
+          faces: []
+        });
+      
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        continue;
+      }
+      
+      uploadedCount++;
+      
+    } catch (err) {
+      console.error('Upload process error:', err);
+    }
+  }
+  
+  hideProc();
+  
+  if (uploadedCount > 0) {
+    uploads += uploadedCount;
+    localStorage.setItem('jejak_uploads', uploads.toString());
+    await loadArtefactsFromDB();
+    updQuota();
+    if (S.artefacts.length > 0) setHero(S.artefacts[0].id);
+    toast(`✓ ${uploadedCount} foto berhasil diupload!`);
+  } else {
+    toast('⚠ Gagal upload');
+  }
 }
 
 // ============================================
 // INIT
 // ============================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // Update username di header
   const huser = $('huser');
   if (huser) huser.textContent = S.user;
   
-  renderEntries();
-  renderTray();
+  // Load data dari Supabase
+  if (S.userId) {
+    await loadRantsFromDB();
+    await loadArtefactsFromDB();
+  } else {
+    renderEntries();
+    renderTray();
+  }
+  
   initUpload();
   updQuota();
   
@@ -1907,28 +2067,42 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       
+      if (!S.userId) {
+        toast('Session tidak valid, login ulang');
+        return;
+      }
+      
       const mood = document.querySelector('.mc.act')?.dataset.mood || 'surviving';
+      sb.disabled = true;
+      sb.textContent = 'Menyimpan...';
       
-      const newEntry = {
-        id: 'user_' + Date.now(),
-        content: c,
-        mood: mood,
-        timestamp: Date.now(),
-        reactions: { skull: 0, cry: 0, fire: 0, upside: 0 },
-        userReacted: null,
-        isDummy: false,
-        author: S.user
-      };
-      
-      S.entries.unshift(newEntry);
-      if (S.entries.length > 6) S.entries.pop();
-      localStorage.setItem('jejak_entries', JSON.stringify(S.entries));
-      renderEntries();
-      
-      ri.value = '';
-      if (cc) cc.textContent = '0/500';
-      
-      toast('✓ Tersimpan (offline mode)');
+      try {
+        // Insert ke Supabase
+        const { error } = await supabaseClient
+          .from('rants')
+          .insert({
+            user_id: S.userId,
+            content: c,
+            mood: mood,
+            reaction_count: { skull: 0, cry: 0, fire: 0, upside: 0 }
+          });
+        
+        if (error) throw error;
+        
+        // Refresh rants
+        await loadRantsFromDB();
+        
+        ri.value = '';
+        if (cc) cc.textContent = '0/500';
+        toast('✓ Tersimpan di database');
+        
+      } catch (err) {
+        console.error('Post error:', err);
+        toast('⚠ Gagal menyimpan');
+      } finally {
+        sb.disabled = false;
+        sb.textContent = 'Jejakkan & Spill';
+      }
     };
   }
   
