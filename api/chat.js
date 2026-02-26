@@ -48,7 +48,7 @@ function getShortName(username) {
   return clean;
 }
 
-const SYSTEM = (name, style, lastMessages, userName, shortName, charGender) => {
+const SYSTEM = (name, style, lastMessages, userName, shortName, charGender, currentTime) => {
   const lastReplies = lastMessages.filter(m => m.role === 'assistant').slice(-5).map(m => m.content);
   let repetitionWarning = '';
   const uniqueReplies = new Set(lastReplies);
@@ -58,6 +58,7 @@ const SYSTEM = (name, style, lastMessages, userName, shortName, charGender) => {
   }
 
   return `Kamu adalah ${name}. Kamu lagi ngobrol santai di sebuah app.
+SEKARANG JAM ${currentTime || '??:??'} - INGET JANGAN SAMPAI SALAH KONTEKS WAKTU!
 
 SIAPA KAMU:
 Kamu manusia biasa. Style ngobrolmu: ${style}.
@@ -113,6 +114,11 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { message, characterName, userName = 'user', lastMessages = [] } = req.body || {};
+  
+  // AMBIL JAM SEKARANG
+  const now = new Date();
+  const currentTime = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+  
   if (!message?.trim()) return res.status(400).json({ error: 'Message required' });
   if (!process.env.DEEPSEEK_API_KEY) return res.status(500).json({ error: 'API key missing' });
 
@@ -123,7 +129,7 @@ export default async function handler(req, res) {
   
   const shortName = getShortName(userName);
   const charGender = persona.gender;
-  const shortCharName = characterName.split('.')[0]; // "little.fairy" → "little"
+  const shortCharName = characterName.split('.')[0];
 
   // Siapkan history
   const history = lastMessages.slice(-8).map(m => ({ role: m.role, content: m.content }));
@@ -131,26 +137,13 @@ export default async function handler(req, res) {
   // Deteksi pertanyaan nama
   const isNameQuestion = /nama (kamu|lu|lo|kmu|luu)|kamu siapa|kenalan|nama lu|siapa nama/i.test(message);
   
-  // Cek repetisi
-  const lastReplies = history.filter(m => m.role === 'assistant').slice(-3);
-  let antiRepeatInstruction = '';
-  if (lastReplies.length >= 2) {
-    const unique = new Set(lastReplies.map(r => r.content));
-    if (unique.size === 1) {
-      antiRepeatInstruction = '\n\n⚠️ 3 RESPONS TERAKHIR IDENTIK! WAJIB BIKIN RESPONS BARU YANG SAMA SEKALI BERBEDA.';
-    }
-  }
-
-  // System prompt dasar
-  let systemPrompt = SYSTEM(characterName, persona.style, lastMessages, userName, shortName, charGender);
+  // System prompt dasar (dengan currentTime)
+  let systemPrompt = SYSTEM(characterName, persona.style, lastMessages, userName, shortName, charGender, currentTime);
 
   // Tambah instruksi khusus untuk pertanyaan nama
   if (isNameQuestion) {
     systemPrompt += `\n\n🔥 INSTRUKSI WAJIB: User nanya nama lo. JAWAB HARUS: "aku ${shortCharName}" atau "gue ${shortCharName}" atau "${shortCharName}". JANGAN PAKAI NAMA LENGKAP "${characterName}"!`;
   }
-
-  // Gabung semua instruksi
-  const finalPrompt = systemPrompt + antiRepeatInstruction;
 
   try {
     const response = await fetch('https://api.deepseek.com/chat/completions', {
@@ -167,7 +160,7 @@ export default async function handler(req, res) {
         frequency_penalty: 1.0,
         presence_penalty: 0.8,
         messages: [
-          { role: 'system', content: finalPrompt },
+          { role: 'system', content: systemPrompt },
           ...history,
           { role: 'user', content: message.trim() }
         ]
