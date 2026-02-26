@@ -1700,7 +1700,7 @@ async function loadArtefactsFromDB() {
         note: a.note || 'memory',
         faces: a.faces || [],
         hasFace: a.has_face || false,
-        theme: a.theme || 'fm',
+        theme: 'fm',
         isDummy: false
       }));
     } else {
@@ -1964,7 +1964,6 @@ async function confirmUpload() {
   closeGallery();
   showProc('Mengupload foto...<br><small>Mohon tunggu</small>');
   
-  const theme = THEMES[currentTheme];
   const note = currentNote || 'memory';
   const username = S.user.replace('@', '');
   let uploadedCount = 0;
@@ -1993,7 +1992,7 @@ async function confirmUpload() {
         .from(BUCKET)
         .getPublicUrl(fileName);
       
-      // Insert ke tabel artefacts - JANGAN kirim id, biarkan database generate UUID
+      // Insert ke tabel artefacts - Sesuai dengan struktur tabel
       const { error: insertError } = await supabaseClient
         .from('artefacts')
         .insert({
@@ -2103,8 +2102,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       sb.textContent = 'Menyimpan...';
       
       try {
-        // Insert ke Supabase - JANGAN kirim id, biarkan database generate UUID
-        console.log('Inserting rant:', { user_id: S.userId, content: c, mood: mood, username: S.user.replace('@', '') });
+        // Insert ke Supabase - Sesuai dengan struktur tabel rants
+        console.log('Inserting rant:', { 
+          user_id: S.userId, 
+          content: c, 
+          mood: mood, 
+          username: S.user.replace('@', '')
+        });
         
         const { data, error } = await supabaseClient
           .from('rants')
