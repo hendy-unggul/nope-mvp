@@ -142,7 +142,6 @@
     .input-label::after { content: '⭐'; margin-left: 8px; font-size: 16px; animation: pulse 2s ease-in-out infinite; }
     @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } }
 
-    /* FORMAT HINT — jelas sejak awal */
     .format-hint {
       text-align: center; font-family: var(--font-mono); font-size: 11px;
       color: var(--muted); margin-bottom: 16px; letter-spacing: 0.05em;
@@ -318,12 +317,12 @@
   const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-  // FIX: nama tabel yang benar adalah 'users', bukan 'jejak_users'
+  // FIX: tabel yang benar adalah 'users'
   const TABLE = 'users';
 
   const SK = {
     username: 'jejak_username',
-    deviceId: 'jejak_device_id',
+    sessionId: 'jejak_session_id', // GANTI dari deviceId ke sessionId
     loggedIn: 'jejak_logged_in',
     vibe:     'jejak_vibe',
   };
@@ -376,7 +375,10 @@
   // SUPABASE REST
   // ================================================================
   async function sbFetch(table, method = 'GET', body = null, qs = '') {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${qs}`, {
+    const url = `${SUPABASE_URL}/rest/v1/${table}${qs}`;
+    console.log('Fetching:', url);
+    
+    const res = await fetch(url, {
       method,
       headers: {
         'apikey': SUPABASE_KEY,
@@ -386,22 +388,21 @@
       },
       body: body ? JSON.stringify(body) : undefined
     });
+    
     const text = await res.text();
     if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
     return text ? JSON.parse(text) : [];
   }
 
   // ================================================================
-  // DEVICE ID
+  // SESSION ID (GANTI DEVICE_ID)
   // ================================================================
-  async function getDeviceId() {
-    let id = localStorage.getItem(SK.deviceId);
+  function getSessionId() {
+    let id = localStorage.getItem(SK.sessionId);
     if (!id) {
-      const raw = [navigator.userAgent, navigator.language, screen.width,
-        screen.height, new Date().getTimezoneOffset()].join('|');
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
-      id = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-      localStorage.setItem(SK.deviceId, id);
+      // Generate session ID random
+      id = 's_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+      localStorage.setItem(SK.sessionId, id);
     }
     return id;
   }
@@ -565,7 +566,7 @@
     retro:  { accent:'#ff6b35', accent2:'#f7b801', accent3:'#6a994e', accent4:'#bc4749' },
     pastel: { accent:'#ffc8dd', accent2:'#bde0fe', accent3:'#a2d2ff', accent4:'#ffafcc' }
   };
-  function setVibe(v) {
+  window.setVibe = function(v) {
     const c = VIBES[v]; if (!c) return;
     document.documentElement.style.setProperty('--accent',   c.accent);
     document.documentElement.style.setProperty('--accent-2', c.accent2);
@@ -575,7 +576,7 @@
       b.classList.toggle('active', b.textContent.includes(v))
     );
     localStorage.setItem(SK.vibe, v);
-  }
+  };
 
   // ================================================================
   // FORM SUBMIT
@@ -593,36 +594,40 @@
     btn.textContent = 'checking vibes...';
 
     try {
-      const deviceId = await getDeviceId();
+      const sessionId = getSessionId(); // GANTI dari deviceId ke sessionId
 
-      // FIX: tabel 'users', kolom 'username' dan 'device_id'
+      // FIX: tabel 'users', cek berdasarkan username
       const existing = await sbFetch(TABLE, 'GET', null,
-        `?username=eq.${encodeURIComponent(username)}&select=username,device_id&limit=1`
+        `?username=eq.${encodeURIComponent(username)}&select=username,session_id&limit=1`
       );
 
       if (existing.length === 0) {
         // ── REGISTER BARU ────────────────────────────────────────
-        await sbFetch(TABLE, 'POST', { username, device_id: deviceId });
+        await sbFetch(TABLE, 'POST', { 
+          username, 
+          session_id: sessionId,  // GANTI dari device_id ke session_id
+          created_at: new Date().toISOString(),
+          last_seen: new Date().toISOString()
+        });
         setFeedback('success', '🎉 account created! welcome bestie');
 
       } else {
         // ── LOGIN ────────────────────────────────────────────────
         const user = existing[0];
 
-        if (user.device_id && user.device_id !== deviceId) {
+        // Cek apakah session_id cocok
+        if (user.session_id && user.session_id !== sessionId) {
           setFeedback('error', '⚠️ username ini terdaftar di device lain');
           btn.disabled = false;
           btn.textContent = "let's goooo";
           return;
         }
 
-        // Patch device_id jika belum ada
-        if (!user.device_id) {
-          await sbFetch(TABLE, 'PATCH',
-            { device_id: deviceId },
-            `?username=eq.${encodeURIComponent(username)}`
-          );
-        }
+        // Update last_seen
+        await sbFetch(TABLE, 'PATCH',
+          { last_seen: new Date().toISOString() },
+          `?username=eq.${encodeURIComponent(username)}`
+        );
 
         setFeedback('success', '✅ welcome back, @' + username + '!');
       }
@@ -660,13 +665,13 @@
     }
 
     try {
-      const deviceId = await getDeviceId();
+      const sessionId = getSessionId();
       // FIX: tabel 'users'
       const data = await sbFetch(TABLE, 'GET', null,
-        `?username=eq.${encodeURIComponent(session.username)}&select=username,device_id&limit=1`
+        `?username=eq.${encodeURIComponent(session.username)}&select=username,session_id&limit=1`
       );
 
-      if (data.length > 0 && data[0].device_id === deviceId) {
+      if (data.length > 0 && data[0].session_id === sessionId) {
         window.location.href = 'jejak.html';
         return;
       }
