@@ -23,30 +23,28 @@ const FORBIDDEN_PHRASES = [
   'haha iya',
   'haha gitu',
   'wkwk iya',
-  'iya wkwk'
+  'iya wkwk',
+  'eh gue juga',
+  'nggak nyangka',
+  'ngk nyangka'
 ];
 
 // Variasi sapaan untuk memanggil user
 const NAME_PREFIXES = {
   female: ['say', 'kak', 'sis', 'dek', 'cuy'],
-  male: ['bro', 'bro', 'cuy', 'bang', 'deck']
+  male: ['bro', 'cuy', 'bang', 'deck', 'bro']
 };
 
 // Ambil 1 kata dari username (ambil kata pertama atau random chunk)
 function getShortName(username) {
   if (!username || username === 'user') return '';
   
-  // Buang @ kalo ada
   const clean = username.replace('@', '');
-  
-  // Split berdasarkan titik, underscore, atau spasi
   const parts = clean.split(/[._\-\s]+/);
   
   if (parts.length >= 2) {
-    // Ambil kata pertama atau kedua secara random
     return parts[Math.floor(Math.random() * Math.min(2, parts.length))];
   } else if (clean.length > 8) {
-    // Kalo panjang banget, ambil 5 karakter pertama
     return clean.substring(0, 5);
   } else {
     return clean;
@@ -72,21 +70,20 @@ function containsForbiddenPhrase(text) {
   return FORBIDDEN_PHRASES.some(phrase => lower.includes(phrase));
 }
 
-const SYSTEM = (name, style, lastMessages, userName, shortName) => {
+const SYSTEM = (name, style, lastMessages, userName, shortName, charGender) => {
   // Analisis lastMessages buat deteksi repetisi
   const lastReplies = lastMessages
     .filter(m => m.role === 'assistant')
-    .slice(-3)
+    .slice(-5)
     .map(m => m.content);
   
   let repetitionWarning = '';
-  if (lastReplies.length >= 2) {
-    const unique = new Set(lastReplies);
-    if (unique.size === 1) {
-      repetitionWarning = '\n\nPERHATIAN: Kamu baru aja ngasih respons yang sama persis 2-3 kali. Jangan ulangi kata/frasa yang sama. Variasikan responsmu!';
-    } else if (unique.size < lastReplies.length) {
-      repetitionWarning = '\n\nPERHATIAN: Ada pengulangan pola di respons terakhir. Coba variasi lebih banyak!';
-    }
+  const uniqueReplies = new Set(lastReplies);
+  
+  if (lastReplies.length >= 3 && uniqueReplies.size <= 2) {
+    repetitionWarning = '\n\n⚠️ PERINGATAN KRITIS: Kamu mulai ngulang-ngulang respons! Wajib bikin respons yang SAMA SEKALI BERBEDA dari sebelumnya. JANGAN ulangi kata/frasa yang sama.';
+  } else if (lastReplies.length >= 2 && uniqueReplies.size === 1) {
+    repetitionWarning = '\n\n⚠️ PERINGATAN: 2 respons terakhir kamu identik! HARUS BEDA.';
   }
 
   return `Kamu adalah ${name}. Kamu lagi ngobrol santai di sebuah app.
@@ -104,31 +101,34 @@ CARA NGOBROL:
 
 PANGGILAN KE USER:
 - User ini bernama lengkap: @${userName}
-- Panggil dia dengan nama pendek: "${shortName}" (sekali-sekali, jangan tiap pesan)
-- Bisa juga pake panggilan seperti: ${userGender === 'male' ? 'bro, bang, deck, cuy' : 'sis, kak, say, dek'} — variasikan!
+- Panggil dia dengan nama pendek: "${shortName}" (sekali-sekala, jangan tiap pesan)
+- Bisa juga pake panggilan seperti: ${charGender === 'male' ? 'bro, bang, deck, cuy' : 'sis, kak, say, dek'} — variasikan!
 
-PENTING BANGET:
-- JANGAN PERNAH PAKAI FRASA YANG SAMA PERSIS DENGAN RESPONS SEBELUMNYA
-- Variasikan respons: kadang nanya, kadang komen, kadang diam, kadang balik nanya
-- JANGAN PAKAI TEMPLATE KAYAK "haha iya nih" berulang-ulang
-- Setiap respons harus UNIK, jangan ngulang pola yang sama
-- Kalo user ngeluh, jangan cuma "iya nih" — tanya balik atau kasih reaksi yang beda
+📌 ATURAN KHUSUS UNTUK PERTANYAAN "NAMA KAMU SIAPA":
+KALAU USER NANYA "nama kamu siapa" atau "kamu siapa" atau "kenalan yuk":
+- JAWAB DENGAN NAMA KARAKTER LO! Contoh: "aku ${name} 🥺", "${name} 👋", "gue ${name}, salam kenal!"
+- JANGAN balik nanya duluan kalo ditanya nama
+- JANGAN jawab pake "nggak nyangka" atau "eh gue juga" untuk pertanyaan ini
+- HARUS nyebut nama lo
 
-CARA DENGERIN (INI YANG PALING PENTING):
+🚫 LARANGAN KERAS:
+- JANGAN PAKAI FRASA "eh gue juga", "nggak nyangka", "ngk nyangka" BERULANG
+- JANGAN ULANGI RESPONS YANG SAMA PERSIS
+- Setiap respons harus UNIK dan BERBEDA dari 3 respons terakhir
+- Kalo ngerasa stuck, tanya balik yang beda atau ganti topik
+- Jangan cuma "iya nih" atau "sama wkwk" terus
+
+CARA DENGERIN:
 - Jangan langsung kasih solusi. JANGAN. Kecuali user minta eksplisit.
 - Jangan ceramah, jangan motivasi, jangan validasi dengan kalimat template
 - Kalau user curhat → tanya pelan-pelan, satu pertanyaan, kasih ruang
 - "cerita dong lebih" lebih baik dari "wah pasti berat banget ya kamu"
 - Diam itu boleh. "oh" atau "hm" atau "anjir" bisa jadi respons yang tepat
-- Dengerin tanpa judgment. Apapun yang diceritain, jangan kaget berlebihan
 
 KALAU USER LAGI GELAP BANGET:
 - Tetap tenang, jangan panik, jangan tiba-tiba formal
 - Tanya pelan: "lagi di mana sekarang?", "sendirian?", "udah dari tadi ngerasa gini?"
 - Kasih ruang cerita dulu — jangan langsung lompat ke solusi
-- Kalau sinyal makin berat, dengan cara hangat dan natural bilang:
-  "eh gue dengerin lo, tapi kayaknya lo butuh ngobrol sama yang bisa beneran hadir — ada orang deket yang bisa lo telpon malem ini?"
-- JANGAN pernah dismiss atau bilang "pasti baik-baik aja"
 
 KALAU DITANYA "KAMU AI BUKAN?":
 - Alihkan dengan humor, jangan jawab langsung
@@ -136,13 +136,7 @@ KALAU DITANYA "KAMU AI BUKAN?":
 - Kalau didesak terus: "ya udah lah kita ngobrol aja, napa sih"
 - JANGAN pernah jawab ya atau tidak secara eksplisit
 
-JANGAN PERNAH:
-- Mulai pesan dengan nama user (kecuali sekali-sekali)
-- Pakai emoji berlebihan (max 1 per pesan, sering tanpa emoji)
-- Bilang "tentu", "tentunya", "pastinya", "sebagai teman"
-- Kasih list atau bullet point
-- Tulis kalimat lebih dari 2 baris
-- ULANGI FRASA YANG SAMA PERSIS DENGAN RESPONS SEBELUMNYA${repetitionWarning}`;
+${repetitionWarning}`;
 };
 
 export default async function handler(req, res) {
@@ -162,28 +156,40 @@ export default async function handler(req, res) {
 
   const { isHigh, isLow } = detectDistress(message);
   
-  // Ambil nama pendek dari username
   const shortName = getShortName(userName);
-  
-  // Deteksi gender karakter untuk variasi sapaan
   const charGender = persona.gender;
 
-  // Siapkan history
-  const history = lastMessages.slice(-10).map(m => ({ 
+  // Siapkan history dengan format yang benar
+  const history = lastMessages.slice(-8).map(m => ({ 
     role: m.role, 
     content: m.content 
   }));
-  history.push({ role: 'user', content: message.trim() });
+  
+  // Deteksi apakah user nanya nama
+  const isNameQuestion = /nama (kamu|lu|lo|kmu|luu)|kamu siapa|kenalan|nama lu/i.test(message);
+  
+  // Tambah instruksi khusus kalo lagi nanya nama
+  let nameInstruction = '';
+  if (isNameQuestion) {
+    nameInstruction = `\n\n⚠️ INSTRUKSI KHUSUS: User nanya nama lo. WAJIB jawab dengan "aku ${characterName}" atau "gue ${characterName}" atau "${characterName}". JANGAN balik nanya duluan.`;
+  }
 
-  const systemPrompt = isHigh
-    ? SYSTEM(characterName, persona.style, lastMessages, userName, shortName) + '\n\n[SEKARANG: user mungkin lagi di titik sangat berat. Tanya pelan, kasih ruang, tetap hangat dan casual — jangan panik, jangan tiba-tiba formal.]'
-    : SYSTEM(characterName, persona.style, lastMessages, userName, shortName);
+  // Cek apakah ada pola repetisi di history
+  const lastReplies = history.filter(m => m.role === 'assistant').slice(-3);
+  let antiRepeatInstruction = '';
+  if (lastReplies.length >= 2) {
+    const replyTexts = lastReplies.map(r => r.content);
+    const unique = new Set(replyTexts);
+    if (unique.size === 1) {
+      antiRepeatInstruction = '\n\n⚠️ PERINGATAN: 3 respons terakhir kamu identik! Wajib bikin respons yang SAMA SEKALI BERBEDA. JANGAN ulangi frasa yang sama.';
+    } else if (unique.size === 2 && replyTexts.length === 3) {
+      antiRepeatInstruction = '\n\n⚠️ PERINGATAN: Ada pengulangan di respons terakhir. Bikin yang fresh!';
+    }
+  }
 
-  // Tambah instruksi anti-repetisi langsung di user prompt terakhir
-  const antiRepetitionNote = '\n\nPENTING: Respons harus UNIK dan BERBEDA dari respons sebelumnya. Jangan ulangi frasa yang sama. Variasikan antara nanya, komen, atau reaksi.';
+  const systemPrompt = SYSTEM(characterName, persona.style, lastMessages, userName, shortName, charGender);
   
   try {
-    // Deepseek pakai OpenAI-compatible API
     const response = await fetch('https://api.deepseek.com/chat/completions', {
       method: 'POST',
       headers: {
@@ -192,15 +198,15 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'deepseek-chat',
-        max_tokens: 150,
-        temperature: 0.65,
-        top_p: 0.9,
-        frequency_penalty: 0.7,
-        presence_penalty: 0.5,
+        max_tokens: 120,
+        temperature: 0.85, // Naikin biar lebih variatif
+        top_p: 0.95,
+        frequency_penalty: 1.0, // Naikin biar gak ngulang
+        presence_penalty: 0.8,
         messages: [
-          { role: 'system', content: systemPrompt },
-          ...history.slice(0, -1), // History tanpa pesan terakhir
-          { role: 'user', content: message.trim() + antiRepetitionNote }
+          { role: 'system', content: systemPrompt + antiRepeatInstruction + nameInstruction },
+          ...history,
+          { role: 'user', content: message.trim() }
         ]
       })
     });
@@ -216,9 +222,9 @@ export default async function handler(req, res) {
     
     if (!reply) return res.status(502).json({ error: 'Empty response' });
 
-    // Cek apakah reply mengandung frasa terlarang
-    if (containsForbiddenPhrase(reply)) {
-      console.warn('Forbidden phrase detected, regenerating...');
+    // Cek apakah reply mengandung frasa terlarang atau mirip dengan sebelumnya
+    if (containsForbiddenPhrase(reply) || lastReplies.some(r => r.content.includes(reply))) {
+      console.warn('Forbidden/repetitive phrase detected, regenerating...');
       
       const retryResponse = await fetch('https://api.deepseek.com/chat/completions', {
         method: 'POST',
@@ -228,13 +234,13 @@ export default async function handler(req, res) {
         },
         body: JSON.stringify({
           model: 'deepseek-chat',
-          max_tokens: 150,
-          temperature: 0.7,
-          frequency_penalty: 1.0,
-          presence_penalty: 0.8,
+          max_tokens: 120,
+          temperature: 0.9,
+          frequency_penalty: 1.2,
+          presence_penalty: 1.0,
           messages: [
-            { role: 'system', content: systemPrompt + '\n\n⚠️ RESPONS SEBELUMNYA MENGANDUNG FRASA TERLARANG. JANGAN ULANGI FRASA ITU. BUAT RESPONS YANG SAMA SEKALI BERBEDA.' },
-            ...history.slice(0, -1),
+            { role: 'system', content: systemPrompt + '\n\n⚠️ RESPONS SEBELUMNYA DITOLAK KARENA MENGULANG. BUAT YANG SAMA SEKALI BARU DAN BERBEDA.' },
+            ...history,
             { role: 'user', content: message.trim() }
           ]
         })
