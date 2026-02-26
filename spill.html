@@ -1680,9 +1680,6 @@ function openChatRoom() {
   chatMessages = [];
   chatTimeLeft = 30 * 60;
   
-  // Set partner name
-  document.getElementById('chatPartnerName').textContent = '@' + chatPartner.name;
-  
   // Clear messages
   document.getElementById('chatMessages').innerHTML = '';
   
@@ -1692,12 +1689,63 @@ function openChatRoom() {
   // Start timer
   startChatTimer();
   
-  // Add welcome message
+  // Add casual greeting based on partner type and time
   setTimeout(() => {
-    addMessage(`Halo! Aku @${chatPartner.name}. Senang ngobrol sama kamu.`, false);
-  }, 500);
+    const greeting = getCasualGreeting(chatPartner);
+    addMessage(greeting, false);
+  }, 800);
 }
 
+function getCasualGreeting(partner) {
+  const hour = new Date().getHours();
+  const greetings = [];
+  
+  if (partner.isAI) {
+    // AI greetings
+    if (partner.gender === 'female') {
+      greetings.push(
+        "pa kabar cuy?",
+        "haloo, lg ngapain?",
+        "eh ada temen baru, pa kabar?",
+        "wih ada yang nyapa, gimana kabarnya?",
+        "halo halo, santuy aja ya?"
+      );
+    } else {
+      greetings.push(
+        "pa kabar bro?",
+        "waduh ada yang chat, lg apa?",
+        "eh lo, pa kabar?",
+        "gas ngobrol yuk, lg apa?",
+        "halo, lg sibuk ga?"
+      );
+    }
+  } else {
+    // Real user greetings (simulasi)
+    greetings.push(
+      "halo juga, pa kabar?",
+      "eh ada yang chat, lg apa?",
+      "hai hai, gimana kabarnya?",
+      "wkwk halo, pa kabar cuy?"
+    );
+  }
+  
+  // Add time-based greeting
+  if (hour < 5) {
+    greetings.push("eh masih begadang? sama wkwk");
+  } else if (hour < 10) {
+    greetings.push("pagi, udah ngopi belom?");
+  } else if (hour < 15) {
+    greetings.push("siang, udah makan?");
+  } else if (hour < 18) {
+    greetings.push("sore, capek ga?");
+  } else if (hour < 22) {
+    greetings.push("malem, lagi santuy?");
+  } else {
+    greetings.push("udah malem, belum tidur?");
+  }
+  
+  return greetings[Math.floor(Math.random() * greetings.length)];
+}
 function startChatTimer() {
   updateTimerDisplay();
   
