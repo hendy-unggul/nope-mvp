@@ -1362,12 +1362,12 @@ footer{
     <div class="conn-card-compact red-alert" id="card-redalert">
       <div class="conn-avatar-mini">⚠️</div>
       <div class="conn-info">
-        <div class="conn-title-mini">Seseorang mencoba mengirimkan pesan dan menghubungi kamu.</div>
+        <div class="conn-title-mini">Seseorang mengirimkan pesan dengan nuansa merah dan intensitas tinggi.</div>
         <div class="conn-meta">urgent • butuh respon cepat</div>
       </div>
       <div class="conn-actions-mini">
         <button class="conn-btn-mini" onclick="skipConnection('redalert')">Abaikan</button>
-        <button class="conn-btn-mini pri" onclick="signalConnection('redalert')">Lihat</button>
+        <button class="conn-btn-mini pri" onclick="signalConnection('redalert')">Senggol</button>
       </div>
     </div>
   </div>
@@ -1414,6 +1414,37 @@ footer{
 <input type="file" id="finput" accept="image/*" multiple style="display:none">
 
 <script>
+// ============================================
+// CONFIG SUPABASE
+// ============================================
+const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+
+async function sbInsert(table, data) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(data)
+    });
+    
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('Supabase error:', err);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Fetch error:', e);
+    return false;
+  }
+}
+
 // ============================================
 // DUMMY DATA
 // ============================================
@@ -1508,10 +1539,10 @@ const DUMMY_ARTEFACTS = [
 ];
 
 // ============================================
-// STATE - FIX: TAMBAHKAN GENDER
+// STATE
 // ============================================
 const S = {
-  user: localStorage.getItem('jejak_username') || '@anon', // ← FIX: ambil dari localStorage
+  user: localStorage.getItem('jejak_username') || '@anon',
   gender: localStorage.getItem('user_gender') || null,
   entries: [],
   artefacts: []
@@ -1655,7 +1686,7 @@ function renderTray() {
     if (a.hasFace) {
       html += `<div class="ti" onclick="setHero('${a.id}')" style="position:relative">
         <img src="${a.url}" alt="${a.note}" class="${a.theme}">
-        <div class="sensored-overlay"><span class="sensored-text">NO FACE</span></div>
+        <div class="sensored-overlay"><span class="sensored-text">SENSORED</span></div>
       </div>`;
     } else {
       html += `<div class="ti" onclick="setHero('${a.id}')">
@@ -1686,7 +1717,7 @@ function setHero(id) {
 }
 
 // ============================================
-// UPLOAD FUNCTIONS - FIX: INIT UPLOAD
+// UPLOAD FUNCTIONS
 // ============================================
 let uploads = parseInt(localStorage.getItem('jejak_uploads') || '0');
 let quotaStart = localStorage.getItem('jejak_quota_start') || Date.now();
@@ -1788,7 +1819,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   renderEntries();
   renderTray();
-  initUpload(); // ← FIX: panggil initUpload
+  initUpload();
   updQuota();
   
   // Set hero ke artefak pertama
@@ -1808,33 +1839,58 @@ document.addEventListener('DOMContentLoaded', () => {
   
   const sb = $('sbtn');
   if (sb && ri) {
-    sb.onclick = () => {
+    sb.onclick = async () => {
       const c = ri.value.trim();
       if (!c) {
         toast('Tulis sesuatu...');
         return;
       }
       
-      // Simulate submit
-      const newEntry = {
-        id: 'user_' + Date.now(),
+      const mood = document.querySelector('.mc.act')?.dataset.mood || 'surviving';
+      const username = S.user.replace('@', '');
+      
+      // Tampilkan loading
+      sb.disabled = true;
+      sb.textContent = 'Menyimpan...';
+      
+      // Simpan ke Supabase
+      const rantData = {
         content: c,
-        mood: document.querySelector('.mc.act')?.dataset.mood || 'surviving',
-        timestamp: Date.now(),
-        reactions: { skull: 0, cry: 0, fire: 0, upside: 0 },
-        userReacted: null,
-        isDummy: false,
-        author: S.user
+        mood: mood,
+        author: username,
+        created_at: new Date().toISOString()
       };
       
-      S.entries.unshift(newEntry);
-      if (S.entries.length > 6) S.entries.pop();
-      localStorage.setItem('jejak_entries', JSON.stringify(S.entries));
-      renderEntries();
+      const success = await sbInsert('rants', rantData);
       
-      ri.value = '';
-      if (cc) cc.textContent = '0/500';
-      toast('✓ Tersimpan');
+      if (success) {
+        // Simpan ke localStorage untuk tampilan cepat
+        const newEntry = {
+          id: 'user_' + Date.now(),
+          content: c,
+          mood: mood,
+          timestamp: Date.now(),
+          reactions: { skull: 0, cry: 0, fire: 0, upside: 0 },
+          userReacted: null,
+          isDummy: false,
+          author: S.user
+        };
+        
+        S.entries.unshift(newEntry);
+        if (S.entries.length > 6) S.entries.pop();
+        localStorage.setItem('jejak_entries', JSON.stringify(S.entries));
+        renderEntries();
+        
+        ri.value = '';
+        if (cc) cc.textContent = '0/500';
+        toast('✓ Tersimpan di database');
+      } else {
+        // Fallback ke lokal
+        toast('⚠ Gagal simpan ke server, tersimpan lokal');
+      }
+      
+      sb.disabled = false;
+      sb.textContent = 'Jejakkan & Spill';
     };
   }
   
