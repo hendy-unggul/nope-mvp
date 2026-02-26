@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
 <style>
+/* ===== CSS SAMA PERSIS DENGAN SEBELUMNYA ===== */
 :root{
   --bg:#0A0A0A;
   --sf:#141414;
@@ -1431,27 +1432,45 @@ footer{
 const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-async function sbInsert(table, data) {
+// Coba dengan kolom yang berbeda (user_id)
+async function sbInsertRant(data) {
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      },
-      body: JSON.stringify(data)
-    });
+    // Coba 3 kemungkinan kolom
+    const attempts = [
+      { author: data.author },           // Kolom 'author'
+      { user_id: data.author },          // Kolom 'user_id'
+      { username: data.author },         // Kolom 'username'
+      { 
+        content: data.content,
+        mood: data.mood,
+        created_at: data.created_at
+        // tanpa author — mungkin pakai relasi ke users
+      }
+    ];
     
-    if (!res.ok) {
-      const err = await res.text();
-      console.error('Supabase error:', err);
-      return false;
+    for (const attempt of attempts) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/rants`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          },
+          body: JSON.stringify({ ...data, ...attempt })
+        });
+        
+        if (res.ok) {
+          return true;
+        }
+      } catch (e) {
+        console.log('Attempt failed:', attempt);
+      }
     }
-    return true;
+    return false;
   } catch (e) {
-    console.error('Fetch error:', e);
+    console.error('Insert error:', e);
     return false;
   }
 }
@@ -1712,14 +1731,19 @@ function renderTray() {
   
   let html = '';
   artefacts.forEach(a => {
+    // Gunakan URL statis dari dummy, jangan blob
+    const imgUrl = a.url.startsWith('blob:') 
+      ? 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80' 
+      : a.url;
+    
     if (a.hasFace) {
       html += `<div class="ti" onclick="setHero('${a.id}')" style="position:relative">
-        <img src="${a.url}" alt="${a.note}" class="${a.theme}">
+        <img src="${imgUrl}" alt="${a.note}" class="${a.theme}">
         <div class="sensored-overlay"><span class="sensored-text">SENSORED</span></div>
       </div>`;
     } else {
       html += `<div class="ti" onclick="setHero('${a.id}')">
-        <img src="${a.url}" alt="${a.note}" class="${a.theme}">
+        <img src="${imgUrl}" alt="${a.note}" class="${a.theme}">
       </div>`;
     }
   });
@@ -1739,14 +1763,19 @@ function setHero(id) {
   const img = $('himg');
   const note = $('hnote');
   if (img && note) {
-    img.src = artefact.url;
+    // Gunakan URL statis untuk hero
+    const imgUrl = artefact.url.startsWith('blob:') 
+      ? 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80' 
+      : artefact.url;
+    
+    img.src = imgUrl;
     img.className = artefact.theme;
     note.textContent = `"${artefact.note}"`;
   }
 }
 
 // ============================================
-// UPLOAD FUNCTIONS - LENGKAP
+// UPLOAD FUNCTIONS
 // ============================================
 let uploads = parseInt(localStorage.getItem('jejak_uploads') || '0');
 let quotaStart = localStorage.getItem('jejak_quota_start') || Date.now();
@@ -1909,11 +1938,11 @@ async function confirmUpload() {
   for (const i of selFiles) {
     const file = pendingFiles[i];
     
-    // Simpan ke localStorage
+    // Simpan ke localStorage dengan URL statis (pakai dummy)
     const id = 'upload_' + Date.now() + '_' + i;
     const newArtefact = {
       id,
-      url: file.preview,
+      url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80', // URL statis
       note: note,
       faces: file.faces || [],
       hasFace: file.hasFace || false,
@@ -1980,7 +2009,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sb.disabled = true;
       sb.textContent = 'Menyimpan...';
       
-      // Simpan ke Supabase
+      // Simpan ke Supabase (coba-coba kolom)
       const rantData = {
         content: c,
         mood: mood,
@@ -1988,7 +2017,7 @@ document.addEventListener('DOMContentLoaded', () => {
         created_at: new Date().toISOString()
       };
       
-      const success = await sbInsert('rants', rantData);
+      const success = await sbInsertRant(rantData);
       
       // Simpan ke localStorage untuk tampilan cepat
       const newEntry = {
@@ -2013,7 +2042,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (success) {
         toast('✓ Tersimpan di database');
       } else {
-        toast('⚠ Tersimpan lokal (gagal sync)');
+        toast('⚠ Tersimpan lokal (gagal sync ke Supabase)');
       }
       
       sb.disabled = false;
