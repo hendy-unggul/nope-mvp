@@ -98,12 +98,13 @@ header{padding:24px 0 16px;display:flex;justify-content:space-between}
 
 <script>
 // ============================================
-// [1] CEK SESSION DULU - PALING ATAS
+// CEK SESSION - SESUAI DENGAN KEY DI LOCALSTORAGE
 // ============================================
 (function checkSession() {
+  // Baca dari localStorage dengan key yang benar
   const username = localStorage.getItem('jejak_username');
-  const userId = localStorage.getItem('jejak_user_id');
-  const loggedIn = localStorage.getItem('jejak_logged_in');
+  const userId = localStorage.getItem('user_id');      // ← PAKAI 'user_id', BUKAN 'jejak_user_id'
+  const loggedIn = localStorage.getItem('jejak_logged_in') === 'true';
   
   console.log('Session check:', { username, userId, loggedIn });
   
@@ -115,7 +116,7 @@ header{padding:24px 0 16px;display:flex;justify-content:space-between}
   if (!loggedIn || !username || !userId) {
     statusEl.textContent = '❌ SESSION TIDAK VALID';
     statusEl.style.color = '#ff3366';
-    usernameEl.textContent = 'Redirect ke login...';
+    usernameEl.innerHTML = 'Redirect ke login...';
     
     setTimeout(() => {
       window.location.href = 'index.html';
@@ -132,19 +133,13 @@ header{padding:24px 0 16px;display:flex;justify-content:space-between}
   // Update header
   document.getElementById('huser').textContent = '@' + username;
   
+  // Simpan ke state
+  window.S = window.S || {};
+  window.S.user = username;
+  window.S.userId = userId;
+  
   return { username, userId };
 })();
-
-// ============================================
-// [2] SETELAH SESSION VALID, BARU DEKLARASI STATE
-// ============================================
-const S = {
-  user: localStorage.getItem('jejak_username'),
-  userId: localStorage.getItem('jejak_user_id'),
-  entries: [],
-  artefacts: []
-};
-
 // DUMMY DATA
 const DUMMY_ENTRIES = [
   {id:'d1', content:'Hari ini gue nangis di angkot gegara liat kucing dipukul orang.', mood:'surviving'},
