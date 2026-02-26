@@ -206,21 +206,25 @@ function validate(raw) {
 }
 
 // ============================================
-// DEVICE SIGNATURE
+// DEVICE SIGNATURE (FIXED)
 // ============================================
 function getDeviceSignature() {
   let sig = localStorage.getItem(SK.s);
   if (!sig) {
+    // Ambil screen size dengan aman
+    const width = window.screen?.width || 'unknown';
+    const height = window.screen?.height || 'unknown';
     const ua = navigator.userAgent;
-    const screen = `${screen.width}x${screen.height}`;
     const time = Date.now();
     const random = Math.random().toString(36).substring(2, 15);
-    sig = btoa(ua + screen + time + random).substring(0, 32);
+    
+    // Gunakan kombinasi yang aman
+    const rawString = ua + width + 'x' + height + time + random;
+    sig = btoa(rawString).substring(0, 32).replace(/[^a-zA-Z0-9]/g, '');
     localStorage.setItem(SK.s, sig);
   }
   return sig;
 }
-
 // ============================================
 // FETCH WRAPPER
 // ============================================
