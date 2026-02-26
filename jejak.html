@@ -2038,6 +2038,46 @@ async function confirmUpload() {
 // ============================================
 // INIT
 // ============================================
+  // Di bagian init, tambahkan fungsi ini:
+async function ensureUserInDatabase() {
+  if (!S.userId) return false;
+  
+  try {
+    // Cek apakah user ada di tabel users/public.users
+    const { data: userExists, error: checkError } = await supabaseClient
+      .from('users') // atau nama tabel users Anda
+      .select('id')
+      .eq('id', S.userId)
+      .single();
+    
+    if (checkError || !userExists) {
+      // User tidak ada, insert dulu
+      const { error: insertError } = await supabaseClient
+        .from('users')
+        .insert({
+          id: S.userId,
+          username: S.user.replace('@', ''),
+          created_at: new Date()
+        });
+      
+      if (insertError) {
+        console.error('Error creating user:', insertError);
+        return false;
+      }
+    }
+    return true;
+  } catch (e) {
+    console.error('Error ensuring user:', e);
+    return false;
+  }
+}
+
+// Panggil sebelum insert
+const userReady = await ensureUserInDatabase();
+if (!userReady) {
+  toast('User tidak valid', true);
+  return;
+}
 document.addEventListener('DOMContentLoaded', async () => {
   // Update username di header
   const huser = $('huser');
