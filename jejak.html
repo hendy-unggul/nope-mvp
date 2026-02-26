@@ -1,701 +1,1743 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>jejak — vibe check ✨ [v2]</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;900&family=Bebas+Neue&family=Courier+Prime:wght@400;700&family=Rubik:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    :root {
-      --bg: #0a0a0a;
-      --surface: #121212;
-      --text: #ffffff;
-      --muted: #999999;
-      --accent: #00ff88;
-      --accent-2: #ff3366;
-      --accent-3: #ffff00;
-      --accent-4: #00d4ff;
-      --border: #333;
-      --font-main: 'DM Sans', sans-serif;
-      --font-display: 'Bebas Neue', sans-serif;
-      --font-mono: 'Courier Prime', monospace;
-      --font-alt: 'Rubik', sans-serif;
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font-main);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      position: relative;
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      top: -50%; left: -50%;
-      width: 200%; height: 200%;
-      background: 
-        radial-gradient(circle at 20% 80%, rgba(0,255,136,0.03) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255,51,102,0.03) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(0,212,255,0.02) 0%, transparent 50%);
-      animation: slowRotate 60s linear infinite;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    @keyframes slowRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-    .sticker {
-      position: fixed; font-size: 48px; opacity: 0.15;
-      pointer-events: none; animation: float 8s ease-in-out infinite; z-index: 0; filter: blur(0.5px);
-    }
-    .sticker:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
-    .sticker:nth-child(2) { top: 20%; right: 10%; animation-delay: 2s; font-size: 64px; }
-    .sticker:nth-child(3) { bottom: 15%; left: 15%; animation-delay: 4s; }
-    .sticker:nth-child(4) { bottom: 25%; right: 5%; animation-delay: 6s; font-size: 56px; }
-    .sticker:nth-child(5) { top: 60%; left: 8%; animation-delay: 1s; }
-    .sticker:nth-child(6) { top: 40%; right: 12%; animation-delay: 3s; font-size: 40px; }
-    
-    @keyframes float {
-      0%, 100% { transform: translate(0,0) rotate(0deg); }
-      25% { transform: translate(10px,-15px) rotate(5deg); }
-      50% { transform: translate(-10px,-25px) rotate(-5deg); }
-      75% { transform: translate(15px,-10px) rotate(3deg); }
-    }
-
-    .container { max-width: 480px; width: 100%; position: relative; z-index: 1; }
-    .logo-zone { text-align: center; margin-bottom: 16px; position: relative; }
-
-    .logo-big {
-      font-family: var(--font-display);
-      font-size: 88px; font-weight: 400; line-height: 0.9;
-      letter-spacing: -0.02em; color: var(--accent); text-transform: lowercase;
-      position: relative; display: inline-block;
-      filter: drop-shadow(3px 3px 0px var(--accent-2)) drop-shadow(-2px -2px 0px var(--accent-4));
-      transform: rotate(-2deg);
-      animation: subtleGlitch 5s ease-in-out infinite;
-    }
-
-    @keyframes subtleGlitch {
-      0%, 100% { transform: rotate(-2deg); }
-      20% { transform: rotate(-2deg) translate(1px,0); }
-      40% { transform: rotate(-2deg) translate(0,1px); }
-      60% { transform: rotate(-2deg) translate(-1px,0); }
-      80% { transform: rotate(-2deg) translate(0,-1px); }
-    }
-
-    .doodle-circle {
-      position: absolute; top: -10px; right: -15px; width: 120px; height: 120px;
-      border: 3px solid var(--accent-3); border-radius: 50%;
-      transform: rotate(15deg); opacity: 0.3; animation: wobble 3s ease-in-out infinite;
-    }
-    @keyframes wobble { 0%, 100% { transform: rotate(15deg) scale(1); } 50% { transform: rotate(12deg) scale(1.05); } }
-
-    .tagline {
-      text-align: center; font-family: var(--font-mono); font-size: 13px;
-      color: var(--muted); margin-bottom: 24px; padding: 8px 16px;
-      background: rgba(255,255,255,0.03); border: 1px dashed var(--border);
-      border-radius: 20px; display: inline-block; width: 100%;
-      transform: rotate(-1deg);
-    }
-
-    .vibe-picker { display: flex; gap: 10px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap; }
-
-    .vibe-btn {
-      padding: 10px 20px; background: transparent; border: 2px solid var(--border);
-      color: var(--text); border-radius: 30px; font-family: var(--font-alt);
-      font-size: 13px; font-weight: 700; text-transform: lowercase; cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.68,-0.55,0.27,1.55);
-    }
-    .vibe-btn:hover { transform: translateY(-3px) rotate(-2deg); border-color: var(--accent); color: var(--accent); }
-    .vibe-btn.active { background: var(--accent); color: #000; border-color: var(--accent); transform: scale(1.05) rotate(-2deg); }
-
-    .auth-box {
-      background: var(--surface); border: 4px solid var(--accent); border-radius: 24px;
-      padding: 40px 32px; position: relative;
-      box-shadow: 8px 8px 0px rgba(0,255,136,0.2), 12px 12px 0px rgba(255,51,102,0.1);
-      transform: rotate(-1deg); transition: all 0.3s ease;
-    }
-    .auth-box:hover { transform: rotate(0deg); }
-
-    .corner-sticker { position: absolute; font-size: 32px; z-index: 10; animation: spin 8s linear infinite; }
-    .corner-sticker.top-left { top: -15px; left: -15px; }
-    .corner-sticker.top-right { top: -15px; right: -15px; animation-direction: reverse; }
-    .corner-sticker.bottom-left { bottom: -15px; left: -15px; animation-delay: 2s; }
-    .corner-sticker.bottom-right { bottom: -15px; right: -15px; animation-direction: reverse; animation-delay: 2s; }
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-    .input-label {
-      text-align: center; font-family: var(--font-display); font-size: 24px;
-      color: var(--text); margin-bottom: 4px; text-transform: lowercase; letter-spacing: 1px;
-    }
-    .input-label::after { content: '⭐'; margin-left: 8px; font-size: 16px; animation: pulse 2s ease-in-out infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } }
-
-    .format-hint {
-      text-align: center; font-family: var(--font-mono); font-size: 11px;
-      color: var(--muted); margin-bottom: 16px; letter-spacing: 0.05em;
-    }
-    .format-hint b { color: var(--accent); }
-
-    .form-group { margin-bottom: 20px; position: relative; }
-
-    .form-group input {
-      width: 100%; background: rgba(255,255,255,0.05); border: 3px solid var(--border);
-      border-radius: 16px; padding: 20px; color: var(--text);
-      font-family: var(--font-mono); /* mono supaya titik kelihatan jelas */
-      font-size: 18px; font-weight: 500; text-align: center; text-transform: lowercase;
-      transition: all 0.3s cubic-bezier(0.68,-0.55,0.27,1.55); letter-spacing: 0.08em;
-    }
-    .form-group input:focus {
-      outline: none; border-color: var(--accent); background: rgba(0,255,136,0.1);
-      transform: translateY(-4px) rotate(1deg);
-      box-shadow: 0 0 0 4px rgba(0,255,136,0.2), 6px 6px 0px rgba(0,255,136,0.3);
-    }
-    .form-group input::placeholder { color: var(--muted); font-weight: 400; letter-spacing: 0.05em; }
-    .form-group input.is-valid   { border-color: var(--accent); }
-    .form-group input.is-invalid { border-color: var(--accent-2); }
-    .form-group input.is-checking{ border-color: var(--accent-3); }
-
-    /* SINGLE FEEDBACK ELEMENT — gantikan error-msg + success-msg */
-    .field-feedback {
-      margin-top: 10px; padding: 10px 16px; border-radius: 12px;
-      font-size: 12px; font-family: var(--font-mono); text-align: center;
-      border: 2px solid; display: none; line-height: 1.5;
-      animation: slideIn 0.4s cubic-bezier(0.68,-0.55,0.27,1.55);
-    }
-    .field-feedback.show { display: block; }
-    .field-feedback.error    { background: rgba(255,51,102,0.1);  border-color: var(--accent-2); color: var(--accent-2); }
-    .field-feedback.success  { background: rgba(0,255,136,0.1);   border-color: var(--accent);   color: var(--accent);   }
-    .field-feedback.checking { background: rgba(255,255,0,0.08);  border-color: var(--accent-3); color: var(--accent-3); }
-    @keyframes slideIn { from { opacity:0; transform: translateY(-10px); } to { opacity:1; transform:translateY(0); } }
-
-    /* SUGGESTION CHIP — klik untuk apply */
-    .suggestion-chip {
-      display: none; margin-top: 8px; padding: 6px 16px;
-      background: rgba(0,212,255,0.1); border: 1px solid var(--accent-4);
-      border-radius: 20px; font-family: var(--font-mono); font-size: 12px;
-      color: var(--accent-4); cursor: pointer; transition: all 0.2s;
-      text-align: center;
-    }
-    .suggestion-chip.show { display: block; }
-    .suggestion-chip:hover { background: rgba(0,212,255,0.2); }
-
-    .btn {
-      width: 100%; background: var(--accent); color: #000; border: none;
-      border-radius: 16px; padding: 20px; font-family: var(--font-display);
-      font-size: 28px; text-transform: lowercase; cursor: pointer; margin-top: 16px;
-      position: relative; overflow: hidden; transform: rotate(-1deg);
-      transition: all 0.3s cubic-bezier(0.68,-0.55,0.27,1.55);
-      box-shadow: 4px 4px 0px rgba(0,0,0,0.3), 6px 6px 0px var(--accent-2);
-      letter-spacing: 2px;
-    }
-    .btn::before { content: '🚀'; position: absolute; left: 20px; font-size: 24px; animation: rocket 2s ease-in-out infinite; }
-    @keyframes rocket { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-5px) rotate(15deg); } }
-    .btn:hover { transform: translateY(-6px) rotate(1deg) scale(1.02); }
-    .btn:active { transform: translateY(-2px) rotate(0deg); }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-
-    .notif-box {
-      margin-top: 24px; padding: 20px;
-      background: linear-gradient(135deg, rgba(255,255,0,0.05), rgba(0,212,255,0.05));
-      border: 2px dashed var(--border); border-radius: 16px; font-size: 13px;
-      line-height: 1.6; position: relative; opacity: 0;
-      transform: translateY(20px) rotate(-2deg); transition: all 0.6s cubic-bezier(0.68,-0.55,0.27,1.55);
-    }
-    .notif-box.show { opacity: 1; transform: translateY(0) rotate(0deg); }
-    .notif-box::before { content: '📌'; position: absolute; top: -12px; left: 20px; font-size: 24px; background: var(--surface); padding: 0 8px; }
-    .notif-box h4 { color: var(--accent-3); font-family: var(--font-alt); font-weight: 800; margin-bottom: 12px; font-size: 15px; text-transform: lowercase; }
-    .notif-box p { margin-bottom: 8px; font-family: var(--font-mono); color: var(--muted); }
-    .notif-box .highlight { color: var(--accent); font-weight: 700; text-decoration: underline; text-decoration-style: wavy; text-decoration-color: var(--accent-2); }
-
-    .soul-footer { margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border); text-align: center; }
-    .soul-brand { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-bottom: 8px; opacity: 0.6; }
-
-    .loading-overlay {
-      position: fixed; inset: 0; background: var(--bg); z-index: 9999;
-      display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px;
-    }
-    .loading-overlay.hidden { display: none; }
-    .loading-text { font-family: var(--font-mono); font-size: 14px; color: var(--muted); }
-    .loading-spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
-
-    @media (max-width: 480px) {
-      .logo-big { font-size: 64px; }
-      .btn { font-size: 24px; padding: 18px; }
-      .auth-box { padding: 32px 24px; }
-    }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>JEJAK — Spill Your Truth</title>
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/dist/face-api.js" crossorigin="anonymous"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0A0A;
+  --sf:#141414;
+  --sfe:#1E1E1E;
+  --bd:#2A2A2A;
+  --tx:#FFF;
+  --txs:#888;
+  --txm:#555;
+  --ap:#FF4D00;
+  --as:#00F0FF;
+  --at:#FF006E;
+  --aq:#39FF14;
+  --aw:#FFD700;
+  --ms:#FF9500;
+  --mt:#39FF14;
+  --mc:#00F0FF;
+  --md:#8B5CF6;
+  --rd:#FF3333;
+  --rd-dark:#990000;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--tx);
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  font-weight:500;
+  font-size:15px;
+  line-height:1.4;
+  min-height:100vh;
+  overflow-x:hidden;
+  padding-bottom:100px
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:9999;
+  opacity:.4
+}
+.w{
+  max-width:480px;
+  margin:0 auto;
+  padding:0 16px
+}
+header{
+  padding:24px 0 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start
+}
+.logo{
+  font-size:42px;
+  font-weight:800;
+  letter-spacing:-.04em;
+  cursor:pointer;
+  line-height:.9;
+  position:relative
+}
+.logo::before,.logo::after{
+  content:'JEJAK';
+  position:absolute;
+  top:0;
+  left:0;
+  opacity:0;
+  transition:opacity .1s
+}
+.logo::before{
+  color:var(--as);
+  transform:translate(-2px,0)
+}
+.logo::after{
+  color:var(--at);
+  transform:translate(2px,0)
+}
+.logo:hover::before{
+  opacity:.8;
+  animation:g .3s infinite
+}
+@keyframes g{
+  0%,100%{transform:translate(-2px,0)}
+  25%{transform:translate(2px,2px)}
+  50%{transform:translate(-2px,-2px)}
+  75%{transform:translate(2px,0)}
+}
+.tagline{
+  font-family:'Instrument Serif',serif;
+  font-size:13px;
+  color:var(--txs);
+  font-style:italic;
+  margin-top:4px
+}
+.top-right{
+  display:flex;
+  align-items:center;
+  gap:8px
+}
+.huser{
+  font-size:11px;
+  font-weight:700;
+  color:var(--tx);
+  text-transform:lowercase;
+  letter-spacing:.05em;
+  padding:4px 8px;
+  background:var(--sf);
+  border:1px solid var(--bd);
+  max-width:100px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap
+}
+.dot{
+  width:8px;
+  height:8px;
+  background:var(--aq);
+  border-radius:50%;
+  animation:blink 2s infinite;
+  flex-shrink:0
+}
+@keyframes blink{
+  0%,100%{opacity:1}
+  50%{opacity:.3}
+}
+.dot.off{
+  background:var(--at);
+  animation:none
+}
+.smenu{
+  position:relative
+}
+.mtrig{
+  width:32px;
+  height:32px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  background:transparent;
+  border:none;
+  cursor:pointer;
+  padding:0
+}
+.mtrig span{
+  width:4px;
+  height:4px;
+  background:var(--tx);
+  border-radius:50%;
+  transition:all .2s
+}
+.mtrig:hover span{
+  background:var(--ap)
+}
+.mdd{
+  position:absolute;
+  top:100%;
+  right:0;
+  margin-top:8px;
+  background:var(--sf);
+  border:2px solid var(--bd);
+  min-width:120px;
+  display:none;
+  z-index:100
+}
+.mdd.on{
+  display:block
+}
+.mi{
+  width:100%;
+  padding:8px 16px;
+  background:transparent;
+  border:none;
+  color:var(--tx);
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:12px;
+  font-weight:600;
+  text-align:left;
+  cursor:pointer;
+  transition:all .2s
+}
+.mi:hover{
+  background:var(--sfe);
+  color:var(--ap)
+}
+.bnav{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:var(--sf);
+  border-top:2px solid var(--bd);
+  z-index:1000;
+  padding-bottom:env(safe-area-inset-bottom)
+}
+.bnav-c{
+  max-width:480px;
+  margin:0 auto;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  height:64px
+}
+.ni{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  height:100%;
+  color:var(--txm);
+  text-decoration:none;
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  transition:all .2s;
+  position:relative;
+  cursor:pointer
+}
+.ni::before{
+  content:'';
+  position:absolute;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:0;
+  height:2px;
+  background:var(--ap);
+  transition:width .2s
+}
+.ni:hover{
+  color:var(--txs);
+  background:var(--sfe)
+}
+.ni.act{
+  color:var(--ap)
+}
+.ni.act::before{
+  width:100%
+}
+.nico{
+  font-size:20px;
+  line-height:1
+}
+.hero-s{
+  position:relative;
+  margin:0 -16px 24px
+}
+.hero{
+  position:relative;
+  width:100%;
+  aspect-ratio:1/1;
+  overflow:hidden;
+  border-top:2px solid var(--bd);
+  border-bottom:2px solid var(--bd);
+  background:var(--sf)
+}
+.hero img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:transform .6s,filter .3s
+}
+.hero:hover img{
+  transform:scale(1.03)
+}
+.hero::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);
+  pointer-events:none
+}
+.hnote{
+  position:absolute;
+  bottom:0;
+  left:0;
+  right:0;
+  padding:16px;
+  background:linear-gradient(to top,rgba(0,0,0,.9),transparent);
+  font-family:'Instrument Serif',serif;
+  font-size:24px;
+  font-style:italic;
+  color:var(--tx);
+  line-height:1.2;
+  z-index:20
+}
+.fscrib{
+  position:absolute;
+  background:rgba(0,0,0,.95);
+  pointer-events:none;
+  z-index:15;
+  overflow:hidden
+}
+.fscrib::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background-image:repeating-linear-gradient(90deg,transparent,transparent 2px,rgba(255,255,255,.1) 2px,rgba(255,255,255,.1) 4px),repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.05) 2px,rgba(255,255,255,.05) 4px)
+}
+.mlines{
+  position:absolute;
+  inset:0;
+  background-image:repeating-linear-gradient(-45deg,transparent,transparent 3px,rgba(0,0,0,.8) 3px,rgba(0,0,0,.8) 6px)
+}
+.upctrls{
+  position:absolute;
+  top:16px;
+  right:16px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  align-items:flex-end;
+  z-index:20
+}
+.upbtn{
+  width:48px;
+  height:48px;
+  background:var(--ap);
+  border:none;
+  color:var(--bg);
+  font-size:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:all .2s;
+  box-shadow:4px 4px 0 var(--bg),4px 4px 0 2px var(--ap);
+  position:relative
+}
+.upbtn:hover:not(:disabled){
+  transform:translate(2px,2px);
+  box-shadow:2px 2px 0 var(--bg),2px 2px 0 2px var(--ap)
+}
+.upbtn:disabled{
+  background:var(--txm);
+  box-shadow:none;
+  cursor:not-allowed;
+  opacity:.6
+}
+.upcnt{
+  position:absolute;
+  top:-8px;
+  right:-8px;
+  background:var(--at);
+  color:var(--tx);
+  font-size:10px;
+  font-weight:700;
+  padding:2px 6px;
+  min-width:20px;
+  text-align:center
+}
+.qtimer{
+  position:absolute;
+  top:calc(100% + 8px);
+  right:0;
+  background:var(--sf);
+  border:2px solid var(--bd);
+  padding:8px 16px;
+  font-size:11px;
+  color:var(--txs);
+  white-space:nowrap;
+  opacity:0;
+  visibility:hidden;
+  transition:all .2s;
+  z-index:30
+}
+.qtimer::before{
+  content:'';
+  position:absolute;
+  bottom:100%;
+  right:16px;
+  border:6px solid transparent;
+  border-bottom-color:var(--bd)
+}
+.upctrls:hover .qtimer{
+  opacity:1;
+  visibility:visible
+}
+.qtimer.urg{
+  border-color:var(--at);
+  color:var(--at);
+  animation:pb 2s infinite
+}
+@keyframes pb{
+  0%,100%{border-color:var(--at)}
+  50%{border-color:var(--txm)}
+}
+.isec{
+  margin-bottom:32px
+}
+.ihdr{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px
+}
+.ilbl{
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  color:var(--txs)
+}
+.ccount{
+  font-size:12px;
+  color:var(--txm);
+  font-variant-numeric:tabular-nums
+}
+.ri{
+  width:100%;
+  background:var(--sf);
+  border:2px solid var(--bd);
+  padding:16px;
+  color:var(--tx);
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:16px;
+  line-height:1.5;
+  resize:none;
+  min-height:120px;
+  transition:all .2s
+}
+.ri:focus{
+  outline:none;
+  border-color:var(--ap);
+  background:var(--sfe)
+}
+.ri::placeholder{
+  color:var(--txm)
+}
+.msec{
+  margin:16px 0
+}
+.mlbl{
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  color:var(--txs);
+  margin-bottom:8px
+}
+.mgrid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px
+}
+.mc{
+  position:relative;
+  padding:16px;
+  background:var(--sf);
+  border:2px solid var(--bd);
+  cursor:pointer;
+  transition:all .2s;
+  display:flex;
+  flex-direction:column;
+  gap:4px
+}
+.mc:hover{
+  border-color:var(--txs);
+  transform:translateY(-2px)
+}
+.mc.act{
+  border-color:currentColor;
+  background:var(--sfe)
+}
+.mc.act::before{
+  content:'✓';
+  position:absolute;
+  top:8px;
+  right:8px;
+  font-size:12px;
+  font-weight:700
+}
+.me{
+  font-size:28px;
+  line-height:1
+}
+.mn{
+  font-size:13px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.05em
+}
+.md-desc{
+  font-size:11px;
+  color:var(--txs)
+}
+.mc[data-mood="surviving"]{
+  color:var(--ms)
+}
+.mc[data-mood="thriving"]{
+  color:var(--mt)
+}
+.mc[data-mood="chaotic"]{
+  color:var(--mc)
+}
+.mc[data-mood="doom"]{
+  color:var(--md)
+}
+.iact{
+  display:flex;
+  justify-content:flex-end;
+  margin-top:16px
+}
+.sbtn{
+  padding:14px 32px;
+  font-size:14px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  background:var(--ap);
+  border:none;
+  color:var(--bg);
+  cursor:pointer;
+  transition:all .2s;
+  box-shadow:4px 4px 0 var(--sfe),4px 4px 0 2px var(--ap)
+}
+.sbtn:hover:not(:disabled){
+  transform:translate(2px,2px);
+  box-shadow:2px 2px 0 var(--sfe),2px 2px 0 2px var(--ap)
+}
+.sbtn:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+  box-shadow:none
+}
+.shdr{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:16px;
+  padding-bottom:8px;
+  border-bottom:2px solid var(--bd)
+}
+.stit{
+  font-size:12px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.15em;
+  color:var(--tx)
+}
+.sline{
+  flex:1;
+  height:2px;
+  background:var(--bd)
+}
+.entry{
+  background:var(--sf);
+  border:2px solid var(--bd);
+  margin-bottom:16px;
+  position:relative;
+  animation:si .4s ease
+}
+@keyframes si{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.entry:hover{
+  border-color:var(--ap)
+}
+.entry.own-rant{
+  border-left:3px solid var(--txm)
+}
+.ehdr{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 16px;
+  border-bottom:1px solid var(--bd);
+  background:var(--sfe)
+}
+.emeta{
+  display:flex;
+  align-items:center;
+  gap:8px
+}
+.etime{
+  font-size:11px;
+  color:var(--txm);
+  font-weight:600;
+  letter-spacing:.05em
+}
+.emood{
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  padding:4px 8px;
+  border:1px solid currentColor
+}
+.emood.surviving{
+  color:var(--ms)
+}
+.emood.thriving{
+  color:var(--mt)
+}
+.emood.chaotic{
+  color:var(--mc)
+}
+.emood.doom{
+  color:var(--md)
+}
+.econt{
+  padding:16px;
+  font-size:15px;
+  line-height:1.6;
+  color:var(--tx)
+}
+.tgrid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2px;
+  background:var(--bd);
+  border:2px solid var(--bd);
+  margin-bottom:16px
+}
+.ti{
+  aspect-ratio:1;
+  background:var(--sf);
+  position:relative;
+  overflow:hidden;
+  cursor:pointer
+}
+.ti.empty{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--txm);
+  font-size:20px;
+  border:2px dashed var(--bd)
+}
+.ti img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:all .3s
+}
+.ti:hover img{
+  transform:scale(1.1)
+}
+.ti::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:var(--ap);
+  opacity:0;
+  transition:opacity .2s;
+  mix-blend-mode:multiply
+}
+.ti:hover::after{
+  opacity:.3
+}
+.ti-dum{
+  opacity:.5
+}
+.ti-dum:hover{
+  opacity:.7
+}
+.dbadge{
+  position:absolute;
+  top:4px;
+  left:4px;
+  background:var(--at);
+  color:var(--tx);
+  font-size:9px;
+  font-weight:700;
+  padding:2px 6px;
+  text-transform:uppercase;
+  z-index:20
+}
+.fifo-i{
+  font-size:9px;
+  color:var(--txm);
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  padding:2px 6px;
+  border:1px solid var(--bd)
+}
+.own-badge{
+  font-size:9px;
+  font-weight:700;
+  color:var(--txm);
+  letter-spacing:.08em;
+  padding:2px 6px;
+  border:1px solid var(--bd);
+  text-transform:uppercase
+}
+.es{
+  padding:32px 16px;
+  text-align:center;
+  border:2px dashed var(--bd)
+}
+.ee{
+  font-size:48px;
+  margin-bottom:16px;
+  display:block;
+  animation:fl 3s ease-in-out infinite
+}
+@keyframes fl{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-10px)}
+}
+.et{
+  font-family:'Instrument Serif',serif;
+  font-size:20px;
+  font-style:italic;
+  color:var(--txs);
+  margin-bottom:8px
+}
+.est{
+  font-size:13px;
+  color:var(--txm)
+}
+footer{
+  padding:32px 0;
+  text-align:center;
+  border-top:2px solid var(--bd);
+  margin-bottom:80px
+}
+.ftxt{
+  font-size:11px;
+  color:var(--txm);
+  text-transform:uppercase;
+  letter-spacing:.2em
+}
+.toast{
+  position:fixed;
+  bottom:80px;
+  left:50%;
+  transform:translateX(-50%) translateY(100px);
+  background:var(--tx);
+  color:var(--bg);
+  padding:8px 16px;
+  font-size:13px;
+  font-weight:600;
+  z-index:10000;
+  opacity:0;
+  transition:all .3s
+}
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0)
+}
+.proc{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.95);
+  z-index:10002;
+  display:none;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:16px
+}
+.proc.on{
+  display:flex
+}
+.pspin{
+  width:48px;
+  height:48px;
+  border:3px solid var(--bd);
+  border-top-color:var(--ap);
+  border-radius:50%;
+  animation:sp 1s linear infinite
+}
+@keyframes sp{
+  to{transform:rotate(360deg)}
+}
+.ptxt{
+  font-size:14px;
+  color:var(--txs);
+  text-align:center
+}
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.95);
+  z-index:10001;
+  padding:16px;
+  overflow-y:auto
+}
+.modal.on{
+  display:block
+}
+.mc2{
+  max-width:480px;
+  margin:0 auto;
+  background:var(--sf);
+  border:2px solid var(--bd);
+  padding:24px
+}
+.mhdr{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+  padding-bottom:16px;
+  border-bottom:2px solid var(--bd)
+}
+.mtit{
+  font-size:18px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.05em
+}
+.mcls{
+  background:none;
+  border:none;
+  color:var(--tx);
+  font-size:24px;
+  cursor:pointer
+}
+.ggrid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:8px;
+  margin-bottom:16px
+}
+.gi{
+  aspect-ratio:1;
+  background:var(--sfe);
+  border:2px solid var(--bd);
+  cursor:pointer;
+  overflow:hidden;
+  position:relative
+}
+.gi img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:all .2s
+}
+.gi:hover img{
+  transform:scale(1.05)
+}
+.gi.sel{
+  border-color:var(--ap);
+  box-shadow:0 0 0 2px var(--ap)
+}
+.gi.sel::after{
+  content:'✓';
+  position:absolute;
+  top:4px;
+  right:4px;
+  background:var(--ap);
+  color:var(--bg);
+  width:20px;
+  height:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  font-weight:700
+}
+.tmsec{
+  margin:16px 0;
+  padding:16px;
+  background:var(--sfe);
+  border:2px solid var(--bd)
+}
+.tmhdr{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px
+}
+.tmlbl{
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  color:var(--txs)
+}
+.tmnm{
+  font-size:11px;
+  font-weight:700;
+  color:var(--ap)
+}
+.tmsl{
+  width:100%;
+  height:4px;
+  background:var(--bd);
+  outline:none;
+  -webkit-appearance:none;
+  margin:8px 0
+}
+.tmsl::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:20px;
+  height:20px;
+  background:var(--ap);
+  cursor:pointer;
+  border:2px solid var(--tx);
+  box-shadow:2px 2px 0 var(--bg)
+}
+.tmlabs{
+  display:flex;
+  justify-content:space-between;
+  font-size:9px;
+  color:var(--txm);
+  font-weight:600;
+  text-transform:uppercase
+}
+.notsec{
+  margin:16px 0;
+  padding:16px;
+  background:var(--sfe);
+  border:2px solid var(--bd)
+}
+.notlbl{
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  color:var(--txs);
+  margin-bottom:8px;
+  display:flex;
+  justify-content:space-between
+}
+.notcnt{
+  font-size:10px;
+  color:var(--txm)
+}
+.noti{
+  width:100%;
+  background:var(--sf);
+  border:2px solid var(--bd);
+  padding:8px;
+  color:var(--tx);
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:14px;
+  transition:all .2s
+}
+.noti:focus{
+  outline:none;
+  border-color:var(--ap);
+  background:var(--sfe)
+}
+.noti::placeholder{
+  color:var(--txm);
+  font-size:12px
+}
+.gwarn{
+  background:var(--at);
+  color:var(--tx);
+  padding:16px;
+  margin-bottom:16px;
+  font-size:13px;
+  font-weight:700;
+  text-align:center;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  border:2px solid var(--at);
+  animation:pw 2s infinite
+}
+@keyframes pw{
+  0%,100%{opacity:1}
+  50%{opacity:.8}
+}
+.gwarn::before{
+  content:'🚫 '
+}
+.macts{
+  margin-top:16px;
+  display:flex;
+  justify-content:flex-end;
+  gap:8px
+}
+.mbtn{
+  padding:12px 24px;
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  border:2px solid var(--bd);
+  background:var(--sf);
+  color:var(--tx);
+  cursor:pointer;
+  transition:all .2s
+}
+.mbtn.pri{
+  background:var(--ap);
+  border-color:var(--ap);
+  color:var(--bg)
+}
+.mbtn:hover{
+  transform:translateY(-2px)
+}
+.fm{filter:grayscale(100%) contrast(1.1)!important}
+.fsp{filter:sepia(100%) contrast(1.1) saturate(.8)!important}
+.fl{filter:contrast(1.2) saturate(1.3) brightness(.9)!important}
+.fv{filter:grayscale(100%) contrast(1.2) brightness(.9)!important}
+.fn{filter:grayscale(100%) contrast(1.4) brightness(.8)!important}
+.fc{filter:hue-rotate(180deg) saturate(1.5) contrast(1.1)!important}
+.fw{filter:sepia(60%) hue-rotate(-30deg) saturate(1.2)!important}
+.fco{filter:hue-rotate(180deg) saturate(.5) brightness(1.1)!important}
+.fd{filter:blur(.5px) saturate(1.4) brightness(1.1) contrast(.9)!important}
+.fcr{filter:contrast(1.3) saturate(1.1)!important}
+.fmo{filter:brightness(.8) contrast(1.2) saturate(.7)!important}
+.fg{filter:sepia(40%) hue-rotate(-15deg) saturate(1.3) contrast(1.1)!important}
+.entry-dummy{opacity:.6;border-style:dashed!important}
+.entry-dummy:hover{border-color:var(--bd)!important;opacity:.75}
+.reaction-bar{
+  display:flex;
+  gap:6px;
+  padding:10px 16px;
+  border-top:1px solid var(--bd);
+  background:var(--sfe);
+  align-items:center;
+  flex-wrap:wrap
+}
+.reaction-btn{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:4px;
+  padding:5px 10px;
+  background:var(--sf);
+  border:2px solid var(--bd);
+  cursor:pointer;
+  transition:all .15s;
+  border-radius:4px;
+  font-family:inherit
+}
+.reaction-btn:hover:not([disabled]){
+  border-color:var(--txs);
+  transform:translateY(-2px);
+  background:var(--sfe)
+}
+.reaction-btn.act{
+  border-color:var(--ap);
+  background:var(--ap)
+}
+.reaction-btn.act .rcount{
+  color:#000
+}
+.reaction-btn[disabled]{
+  cursor:not-allowed;
+  opacity:.38;
+  pointer-events:none
+}
+.remoji{
+  font-size:17px;
+  line-height:1
+}
+.rcount{
+  font-size:11px;
+  font-weight:700;
+  color:var(--txs);
+  min-width:14px;
+  text-align:center;
+  font-variant-numeric:tabular-nums
+}
+.reaction-btn.act .rcount{
+  color:#000
+}
+.reaction-btn[data-tooltip]:not([disabled]):hover::after{
+  content:attr(data-tooltip);
+  position:absolute;
+  bottom:calc(100% + 8px);
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--tx);
+  color:var(--bg);
+  padding:5px 10px;
+  font-size:11px;
+  font-weight:600;
+  white-space:nowrap;
+  border-radius:4px;
+  z-index:100;
+  pointer-events:none
+}
+.reaction-btn[data-tooltip]:not([disabled]):hover::before{
+  content:'';
+  position:absolute;
+  bottom:calc(100% + 4px);
+  left:50%;
+  transform:translateX(-50%);
+  border:4px solid transparent;
+  border-top-color:var(--tx);
+  z-index:100;
+  pointer-events:none
+}
+.own-lock{
+  font-size:10px;
+  font-weight:600;
+  color:var(--txm);
+  font-style:italic;
+  margin-left:auto;
+  padding:0 2px
+}
+.conn-mini{
+  margin-top:24px
+}
+.conn-card-compact{
+  background:var(--sf);
+  border:2px solid var(--bd);
+  margin-bottom:8px;
+  position:relative;
+  transition:all .2s;
+  display:flex;
+  align-items:center;
+  padding:12px 16px;
+  gap:12px
+}
+.conn-card-compact:hover{
+  border-color:var(--ap)
+}
+.conn-card-compact.chaotic{
+  border-left:4px solid var(--mc)
+}
+.conn-card-compact.caregiver{
+  border-left:4px solid var(--mt)
+}
+.conn-card-compact.red-alert{
+  border-left:4px solid var(--rd);
+  border-color:var(--rd);
+  background:linear-gradient(145deg, var(--sf), #330000)
+}
+.conn-avatar-mini{
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  background:var(--sfe);
+  border:1px solid var(--bd);
+  flex-shrink:0
+}
+.conn-card-compact.chaotic .conn-avatar-mini{
+  border-color:var(--mc);
+  color:var(--mc)
+}
+.conn-card-compact.caregiver .conn-avatar-mini{
+  border-color:var(--mt);
+  color:var(--mt)
+}
+.conn-card-compact.red-alert .conn-avatar-mini{
+  border-color:var(--rd);
+  color:var(--rd);
+  animation:pulse-red 2s infinite
+}
+@keyframes pulse-red{
+  0%,100%{box-shadow:0 0 5px var(--rd)}
+  50%{box-shadow:0 0 20px var(--rd)}
+}
+.conn-info{
+  flex:1;
+  min-width:0
+}
+.conn-title-mini{
+  font-size:12px;
+  font-weight:600;
+  line-height:1.4;
+  color:var(--tx);
+  margin-bottom:2px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis
+}
+.conn-meta{
+  font-size:10px;
+  color:var(--txs);
+  display:flex;
+  align-items:center;
+  gap:6px
+}
+.conn-meta::before{
+  content:'';
+  width:6px;
+  height:6px;
+  background:var(--aq);
+  border-radius:50%;
+  display:inline-block;
+  animation:blink 2s infinite
+}
+.conn-card-compact.chaotic .conn-meta::before{
+  background:var(--mc)
+}
+.conn-card-compact.caregiver .conn-meta::before{
+  background:var(--mt)
+}
+.conn-card-compact.red-alert .conn-meta::before{
+  background:var(--rd);
+  animation:blink-red 1s infinite
+}
+@keyframes blink-red{
+  0%,100%{opacity:1;background:var(--rd);box-shadow:0 0 10px var(--rd)}
+  50%{opacity:0.4;background:var(--rd-dark)}
+}
+.conn-actions-mini{
+  display:flex;
+  gap:6px;
+  flex-shrink:0
+}
+.conn-btn-mini{
+  padding:6px 12px;
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.05em;
+  border:1px solid var(--bd);
+  background:var(--sf);
+  color:var(--tx);
+  cursor:pointer;
+  transition:all .2s
+}
+.conn-btn-mini:hover{
+  border-color:var(--txs);
+  background:var(--sfe)
+}
+.conn-btn-mini.pri{
+  background:var(--tx);
+  border-color:var(--tx);
+  color:var(--bg)
+}
+.conn-btn-mini.pri:hover{
+  background:var(--ap);
+  border-color:var(--ap)
+}
+.conn-btn-mini:disabled{
+  opacity:.5;
+  cursor:not-allowed
+}
+.sensored-overlay{
+  position:absolute;
+  inset:0;
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#FF0000;
+  font-size:14px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  border:2px solid #FF0000;
+  animation:pulse-sensor 2s infinite;
+  z-index:25
+}
+@keyframes pulse-sensor{
+  0%,100%{opacity:0.9}
+  50%{opacity:1;box-shadow:inset 0 0 30px #FF0000}
+}
+.sensored-text{
+  transform:rotate(-5deg);
+  border:2px solid #FF0000;
+  padding:4px 8px;
+  background:rgba(0,0,0,0.8)
+}
+</style>
 </head>
 <body>
-  <div class="loading-overlay" id="loading-overlay">
-    <div class="loading-spinner"></div>
-    <div class="loading-text">checking session...</div>
+<div class="w">
+<header>
+  <div>
+    <div class="logo" onclick="location.reload()">JEJAK</div>
+    <div class="tagline">no filter, just truth</div>
   </div>
-
-  <div class="sticker">✨</div>
-  <div class="sticker">🌈</div>
-  <div class="sticker">⚡</div>
-  <div class="sticker">💫</div>
-  <div class="sticker">🔥</div>
-  <div class="sticker">💜</div>
-
-  <div class="container">
-    <div class="logo-zone">
-      <div class="doodle-circle"></div>
-      <div class="logo-big">jejak</div>
-    </div>
-
-    <div class="tagline">nyambat · aksi · solusi</div>
-
-    <div class="vibe-picker">
-      <button class="vibe-btn active" onclick="setVibe('cyber')">cyber 💻</button>
-      <button class="vibe-btn" onclick="setVibe('neon')">neon ✨</button>
-      <button class="vibe-btn" onclick="setVibe('retro')">retro 🎮</button>
-      <button class="vibe-btn" onclick="setVibe('pastel')">soft 🌸</button>
-    </div>
-
-    <div class="auth-box">
-      <span class="corner-sticker top-left">🌟</span>
-      <span class="corner-sticker top-right">💥</span>
-      <span class="corner-sticker bottom-left">✨</span>
-      <span class="corner-sticker bottom-right">🎯</span>
-
-      <form id="login-form">
-        <div class="input-label">ur username vibes</div>
-
-        <!-- Format hint yang jelas -->
-        <div class="format-hint">format: <b>kata.kata</b> &nbsp;·&nbsp; contoh: <b>over.thinker</b></div>
-
-        <div class="form-group">
-          <input
-            type="text"
-            id="username"
-            placeholder="over.thinker"
-            autocomplete="off"
-            autofocus
-            maxlength="30"
-            spellcheck="false"
-          >
-          <!-- Single feedback element -->
-          <div class="field-feedback" id="field-feedback"></div>
-          <!-- Suggestion chip: klik untuk apply -->
-          <div class="suggestion-chip" id="suggestion-chip"></div>
-        </div>
-
-        <button type="submit" class="btn" id="login-btn" disabled>let's goooo</button>
-
-        <div class="notif-box" id="notif-box">
-          <h4>real talk: stay safe bestie 🔒</h4>
-          <p>no <span class="highlight">real names</span> fr fr</p>
-          <p>no face pics, keep it <span class="highlight">mysterious</span> ✨</p>
-          <p>obey the law, <span class="highlight">zero hoax</span> energy 🚫</p>
-          <p>have fun but stay <span class="highlight">accountable</span> 💯</p>
-        </div>
-
-        <div class="soul-footer">
-          <div class="soul-brand">soul by itsALrUdio • v2.0</div>
-        </div>
-      </form>
+  <div class="top-right">
+    <div class="huser" id="huser">@anon</div>
+    <div class="dot off" id="odot" title="Offline"></div>
+    <div class="smenu">
+      <button class="mtrig" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+      <div class="mdd" id="mdd"><button class="mi" onclick="logoutUser()">Logout</button></div>
     </div>
   </div>
+</header>
 
-  <script>
-  // ================================================================
-  // CONFIG
-  // ================================================================
-  const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+<section class="hero-s">
+  <div class="hero" id="hero">
+    <img id="himg" src="https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80" alt="artefak" class="fm">
+    <div id="hfaces" style="position:absolute;inset:0;pointer-events:none"></div>
+    <div class="hnote" id="hnote">"jeda"</div>
+    <div class="upctrls">
+      <div class="qtimer" id="qtimer">Window aktif • Sisa 2 hari</div>
+      <button class="upbtn" id="upbtn">+<span class="upcnt" id="ucnt" style="display:none"></span></button>
+    </div>
+  </div>
+</section>
 
-  // FIX: tabel yang benar adalah 'users'
-  const TABLE = 'users';
+<section class="isec">
+  <div class="ihdr"><span class="ilbl">Spill your truth</span><span class="ccount" id="ccount">0/500</span></div>
+  <textarea class="ri" id="ri" placeholder="What's eating you alive right now? No cap, no filter..." maxlength="500"></textarea>
+  <div class="msec">
+    <div class="mlbl">Pilih mood-mu sekarang</div>
+    <div class="mgrid">
+      <div class="mc act" data-mood="surviving" onclick="selMood('surviving')"><span class="me">😮‍💨</span><span class="mn" style="color:var(--ms)">Surviving</span><span class="md-desc">Hidup tapi barely</span></div>
+      <div class="mc" data-mood="thriving" onclick="selMood('thriving')"><span class="me">✨</span><span class="mn" style="color:var(--mt)">Thriving</span><span class="md-desc">On top of my game</span></div>
+      <div class="mc" data-mood="chaotic" onclick="selMood('chaotic')"><span class="me">🌀</span><span class="mn" style="color:var(--mc)">Chaotic</span><span class="md-desc">Everything is on fire</span></div>
+      <div class="mc" data-mood="doom" onclick="selMood('doom')"><span class="me">🛌</span><span class="mn" style="color:var(--md)">Doom</span><span class="md-desc">Just wanna disappear</span></div>
+    </div>
+  </div>
+  <div class="iact"><button class="sbtn" id="sbtn">Jejakkan & Spill</button></div>
+</section>
 
-  const SK = {
-    username: 'jejak_username',
-    sessionId: 'jejak_session_id', // GANTI dari deviceId ke sessionId
-    loggedIn: 'jejak_logged_in',
-    vibe:     'jejak_vibe',
-  };
+<!-- ===== RIWAYAT SECTION ===== -->
+<section>
+  <div class="shdr">
+    <span class="stit">Riwayat</span>
+    <div class="sline"></div>
+    <span style="font-size:10px;color:var(--txm);margin-left:auto">FIFO • MAX 6 • AUTO-CENSOR</span>
+  </div>
+  <div id="econ"></div>
+</section>
 
-  // ================================================================
-  // USERNAME VALIDATION
-  // Format wajib: kata.kata
-  //   ✓ over.thinker  ✓ tired.soul  ✓ aku.anonim  ✓ self.care99
-  //   ✗ "aku anonim"  ✗ akunonim    ✗ .aku        ✗ aku.        ✗ 1.abc
-  // ================================================================
-  const UN_PATTERN = /^[a-z][a-z0-9]*\.[a-z][a-z0-9]*$/;
-
-  function validateUsername(raw) {
-    if (!raw || !raw.trim()) {
-      return { ok: false, msg: 'username tidak boleh kosong', suggestion: null };
-    }
-    const val = raw.trim().toLowerCase();
-
-    if (val.length > 30) {
-      return { ok: false, msg: 'maksimal 30 karakter', suggestion: null };
-    }
-
-    // Jika user ketik pakai spasi → sarankan konversi ke titik
-    if (val.includes(' ')) {
-      const sug = val.trim().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '');
-      return { ok: false, msg: 'gunakan titik bukan spasi — format: kata.kata', suggestion: sug };
-    }
-
-    if (!val.includes('.')) {
-      return { ok: false, msg: 'harus dua kata dipisah titik · contoh: over.thinker', suggestion: null };
-    }
-    if ((val.match(/\./g) || []).length > 1) {
-      return { ok: false, msg: 'hanya boleh satu titik pemisah', suggestion: null };
-    }
-    if (!UN_PATTERN.test(val)) {
-      if (/^\d/.test(val) || /\.\d/.test(val)) {
-        return { ok: false, msg: 'tidak boleh diawali angka', suggestion: null };
-      }
-      return { ok: false, msg: 'hanya huruf kecil a-z, angka, dan satu titik', suggestion: null };
-    }
-    const [p1, p2] = val.split('.');
-    if (p1.length < 2 || p2.length < 2) {
-      return { ok: false, msg: 'masing-masing kata minimal 2 huruf', suggestion: null };
-    }
-
-    return { ok: true, msg: null, suggestion: null, value: val };
-  }
-
-  // ================================================================
-  // SUPABASE REST
-  // ================================================================
-  async function sbFetch(table, method = 'GET', body = null, qs = '') {
-    const url = `${SUPABASE_URL}/rest/v1/${table}${qs}`;
-    console.log('Fetching:', url);
+<!-- ===== MEMORI SECTION ===== -->
+<section style="margin-bottom:32px">
+  <div class="shdr">
+    <span class="stit">Memori</span>
+    <div class="sline"></div>
+    <span style="font-size:10px;color:var(--txm);margin-left:auto">FIFO • MAX 6 • AUTO-CENSOR</span>
+  </div>
+  <div class="tgrid" id="tgrid"></div>
+  
+  <!-- CONNECTION CARDS -->
+  <div class="conn-mini">
+    <!-- Card 1: Chaotic -->
+    <div class="conn-card-compact chaotic" id="card-chaotic">
+      <div class="conn-avatar-mini">🌀</div>
+      <div class="conn-info">
+        <div class="conn-title-mini">Seseorang dengan pola "chaotic good" sering muncul di timeline kamu.</div>
+        <div class="conn-meta">aktif jam aneh • react 😭 jarang post</div>
+      </div>
+      <div class="conn-actions-mini">
+        <button class="conn-btn-mini" onclick="skipConnection('chaotic')">Abaikan</button>
+        <button class="conn-btn-mini pri" onclick="signalConnection('chaotic')">Senggol</button>
+      </div>
+    </div>
     
-    const res = await fetch(url, {
-      method,
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': method === 'POST' ? 'return=representation' : ''
-      },
-      body: body ? JSON.stringify(body) : undefined
-    });
+    <!-- Card 2: Caregiver -->
+    <div class="conn-card-compact caregiver" id="card-caregiver">
+      <div class="conn-avatar-mini">🫂</div>
+      <div class="conn-info">
+        <div class="conn-title-mini">Ada yang sering kasih hug ke curhatanmu, tapi jarang cerita balik.</div>
+        <div class="conn-meta">caregiver • burnout tapi diam</div>
+      </div>
+      <div class="conn-actions-mini">
+        <button class="conn-btn-mini" onclick="skipConnection('caregiver')">Abaikan</button>
+        <button class="conn-btn-mini pri" onclick="signalConnection('caregiver')">Senggol</button>
+      </div>
+    </div>
     
-    const text = await res.text();
-    if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
-    return text ? JSON.parse(text) : [];
-  }
+    <!-- Card 3: Red Alert -->
+    <div class="conn-card-compact red-alert" id="card-redalert">
+      <div class="conn-avatar-mini">⚠️</div>
+      <div class="conn-info">
+        <div class="conn-title-mini">Seseorang mengirimkan pesan dengan nuansa merah dan intensitas tinggi.</div>
+        <div class="conn-meta">urgent • butuh respon cepat</div>
+      </div>
+      <div class="conn-actions-mini">
+        <button class="conn-btn-mini" onclick="skipConnection('redalert')">Abaikan</button>
+        <button class="conn-btn-mini pri" onclick="signalConnection('redalert')">Senggol</button>
+      </div>
+    </div>
+  </div>
+</section>
 
-  // ================================================================
-  // SESSION ID (GANTI DEVICE_ID)
-  // ================================================================
-  function getSessionId() {
-    let id = localStorage.getItem(SK.sessionId);
-    if (!id) {
-      // Generate session ID random
-      id = 's_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
-      localStorage.setItem(SK.sessionId, id);
+<footer><p class="ftxt">Nyambat • Aksi • Solusi</p></footer>
+</div>
+
+<nav class="bnav">
+  <div class="bnav-c">
+    <a href="jejak.html" class="ni act"><span class="nico">✦</span><span>Jejak</span></a>
+    <a href="spill.html" class="ni"><span class="nico">✕</span><span>Spill</span></a>
+    <a href="cocomeo.html" class="ni"><span class="nico">〜</span><span>Cocomeo</span></a>
+    <a href="glitch.html" class="ni"><span class="nico">⚡</span><span>Glitch</span></a>
+  </div>
+</nav>
+
+<div class="proc" id="proc">
+  <div class="pspin"></div>
+  <div class="ptxt">Scanning untuk wajah...<br><small>AI Privacy Shield Active</small></div>
+</div>
+<div class="modal" id="gmodal">
+  <div class="mc2">
+    <div class="mhdr"><h3 class="mtit">Review Artefak</h3><button class="mcls" onclick="closeGallery()">×</button></div>
+    <div class="gwarn">DILARANG UPLOAD FOTO WAJAH!</div>
+    <div style="font-size:11px;color:var(--txs);margin-bottom:16px;text-align:center">Wajah terdeteksi akan otomatis disensor • Sistem FIFO (6 foto max) • Tidak dapat dihapus</div>
+    <div class="ggrid" id="ggrid"></div>
+    <div class="tmsec">
+      <div class="tmhdr"><span class="tmlbl">🎨 Tema Foto</span><span class="tmnm" id="tmnm">MONOCHROME</span></div>
+      <input type="range" class="tmsl" id="tmsl" min="0" max="11" value="0" step="1" oninput="updTheme(this.value)">
+      <div class="tmlabs"><span>B&W</span><span>Warm</span><span>Cool</span><span>Art</span></div>
+    </div>
+    <div class="notsec">
+      <div class="notlbl"><span>📝 Notasi (Max 4 kata)</span><span class="notcnt" id="notcnt">0/4</span></div>
+      <input type="text" class="noti" id="noti" placeholder="Contoh: senja di kamar" maxlength="30" oninput="valNote(this)">
+    </div>
+    <div class="macts">
+      <button class="mbtn" onclick="closeGallery()">Batal</button>
+      <button class="mbtn pri" onclick="confirmUpload()">Konfirmasi (<span id="selcnt">0</span>)</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<input type="file" id="finput" accept="image/*" multiple style="display:none">
+
+<script>
+// ============================================
+// DUMMY DATA
+// ============================================
+const DUMMY_ENTRIES = [
+  {
+    id: 'dummy1',
+    content: 'Hari ini gue nangis di angkot gegara liat kucing dipukul orang. Mental gue udah kayak kerupuk kena hujan.',
+    mood: 'surviving',
+    timestamp: Date.now() - 3600000,
+    reactions: { skull: 42, cry: 89, fire: 12, upside: 7 },
+    userReacted: null,
+    isDummy: true,
+    author: 'anon.kucing'
+  },
+  {
+    id: 'dummy2',
+    content: 'akhirnya bisa tidur nyenyak semalaman setelah 3 minggu insomnia. thanks buat chat tadi malam, lu tau lah siapa.',
+    mood: 'thriving',
+    timestamp: Date.now() - 7200000,
+    reactions: { skull: 23, cry: 15, fire: 67, upside: 31 },
+    userReacted: null,
+    isDummy: true,
+    author: 'sleepy.head'
+  },
+  {
+    id: 'dummy3',
+    content: 'hari ini chaos abis! dari bangun tidur udah salah ambil kaki, sampe kantor lupa bawa laptop.',
+    mood: 'chaotic',
+    timestamp: Date.now() - 10800000,
+    reactions: { skull: 89, cry: 23, fire: 45, upside: 78 },
+    userReacted: null,
+    isDummy: true,
+    author: 'chaos.queen'
+  }
+];
+
+const DUMMY_ARTEFACTS = [
+  {
+    id: 'art1',
+    url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80',
+    note: 'jeda',
+    faces: [],
+    hasFace: false,
+    isDummy: true,
+    theme: 'fm'
+  },
+  {
+    id: 'art2',
+    url: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80',
+    note: 'hijau',
+    faces: [],
+    hasFace: false,
+    isDummy: true,
+    theme: 'fg'
+  },
+  {
+    id: 'art3',
+    url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=80',
+    note: 'gabut',
+    faces: [],
+    hasFace: false,
+    isDummy: true,
+    theme: 'fl'
+  },
+  {
+    id: 'art4',
+    url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80',
+    note: 'sendiri',
+    faces: [],
+    hasFace: false,
+    isDummy: true,
+    theme: 'fv'
+  },
+  {
+    id: 'art5',
+    url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
+    note: 'capek',
+    faces: [{ box: { x: 75, y: 45, width: 150, height: 200 }, score: 0.92 }],
+    hasFace: true,
+    isDummy: true,
+    theme: 'fn'
+  },
+  {
+    id: 'art6',
+    url: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80',
+    note: 'love',
+    faces: [],
+    hasFace: false,
+    isDummy: true,
+    theme: 'fc'
+  }
+];
+
+// ============================================
+// STATE
+// ============================================
+const S = {
+  user: '@anon',
+  entries: [],
+  artefacts: []
+};
+
+// Load dari localStorage atau pakai dummy
+try {
+  const saved = localStorage.getItem('jejak_entries');
+  if (saved) {
+    S.entries = JSON.parse(saved);
+  } else {
+    S.entries = [...DUMMY_ENTRIES];
+  }
+} catch {
+  S.entries = [...DUMMY_ENTRIES];
+}
+
+try {
+  const saved = localStorage.getItem('jejak_artefacts');
+  if (saved) {
+    S.artefacts = JSON.parse(saved);
+  } else {
+    S.artefacts = [...DUMMY_ARTEFACTS];
+  }
+} catch {
+  S.artefacts = [...DUMMY_ARTEFACTS];
+}
+
+// ============================================
+// HELPER FUNCTIONS
+// ============================================
+const $ = id => document.getElementById(id);
+
+function toast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function esc(t) {
+  const d = document.createElement('div');
+  d.textContent = t;
+  return d.innerHTML;
+}
+
+function toggleMenu() {
+  $('mdd').classList.toggle('on');
+}
+
+function logoutUser() {
+  if (!confirm('Yakin logout?')) return;
+  localStorage.clear();
+  location.href = 'index.html';
+}
+
+function selMood(mood) {
+  document.querySelectorAll('.mc').forEach(c => c.classList.toggle('act', c.dataset.mood === mood));
+}
+
+function skipConnection(type) {
+  const card = document.getElementById(`card-${type}`);
+  if (card) {
+    card.style.opacity = '0.3';
+    card.style.transform = 'translateX(-10px)';
+    setTimeout(() => {
+      card.style.display = 'none';
+      toast('Dilewati');
+    }, 200);
+  }
+}
+
+function signalConnection(type) {
+  const card = document.getElementById(`card-${type}`);
+  if (card) {
+    const btn = card.querySelector('.conn-btn-mini.pri');
+    if (btn) {
+      btn.textContent = '✓';
+      btn.disabled = true;
+      btn.style.background = 'var(--aq)';
     }
-    return id;
+    toast('Isyarat terkirim!');
+    setTimeout(() => {
+      card.style.opacity = '.5';
+    }, 1500);
   }
+}
 
-  // ================================================================
-  // SESSION
-  // ================================================================
-  function setSession(username) {
-    localStorage.setItem(SK.username, username);
-    localStorage.setItem(SK.loggedIn, 'true');
+// ============================================
+// RENDER FUNCTIONS
+// ============================================
+function renderEntries() {
+  const container = $('econ');
+  if (!container) return;
+  
+  const entries = S.entries;
+  
+  if (entries.length === 0) {
+    container.innerHTML = '<div class="es"><span class="ee">🍃</span><div class="et">Belum ada jejak</div><div class="est">Jadilah yang pertama spill your truth</div></div>';
+    return;
   }
-  function clearSession() {
-    localStorage.removeItem(SK.username);
-    localStorage.removeItem(SK.loggedIn);
+  
+  container.innerHTML = entries.map(e => {
+    const isDummy = e.isDummy;
+    const timeAgo = isDummy ? 'contoh' : 'baru saja';
+    
+    return `<article class="entry${isDummy ? ' entry-dummy' : ''}">
+      <div class="ehdr">
+        <div class="emeta">
+          <span class="etime">${timeAgo}</span>
+          <span class="emood ${e.mood}">${e.mood === 'surviving' ? '😮‍💨' : e.mood === 'thriving' ? '✨' : e.mood === 'chaotic' ? '🌀' : '🛌'} ${e.mood}</span>
+        </div>
+        ${isDummy ? '<span class="fifo-i">Contoh</span>' : ''}
+      </div>
+      <div class="econt">${esc(e.content)}</div>
+      <div class="reaction-bar">
+        ${Object.entries({ skull: '💀', cry: '😭', fire: '🔥', upside: '🙃' }).map(([k, emoji]) => `
+          <button class="reaction-btn" disabled>
+            <span class="remoji">${emoji}</span>
+            <span class="rcount">${e.reactions[k]}</span>
+          </button>
+        `).join('')}
+      </div>
+    </article>`;
+  }).join('');
+}
+
+function renderTray() {
+  const container = $('tgrid');
+  if (!container) return;
+  
+  const artefacts = S.artefacts;
+  
+  if (artefacts.length === 0) {
+    container.innerHTML = '<div class="ti empty" onclick="$(\'upbtn\').click()">+</div>'.repeat(6);
+    return;
   }
-  function getSession() {
-    return {
-      username: localStorage.getItem(SK.username),
-      loggedIn: localStorage.getItem(SK.loggedIn) === 'true'
+  
+  let html = '';
+  artefacts.forEach(a => {
+    if (a.hasFace) {
+      html += `<div class="ti" onclick="setHero('${a.id}')" style="position:relative">
+        <img src="${a.url}" alt="${a.note}" class="${a.theme}">
+        <div class="sensored-overlay"><span class="sensored-text">SENSORED</span></div>
+      </div>`;
+    } else {
+      html += `<div class="ti" onclick="setHero('${a.id}')">
+        <img src="${a.url}" alt="${a.note}" class="${a.theme}">
+      </div>`;
+    }
+  });
+  
+  // Tambah placeholder jika kurang dari 6
+  for (let i = artefacts.length; i < 6; i++) {
+    html += '<div class="ti empty" onclick="$(\'upbtn\').click()">+</div>';
+  }
+  
+  container.innerHTML = html;
+}
+
+function setHero(id) {
+  const artefact = S.artefacts.find(a => a.id === id);
+  if (!artefact) return;
+  
+  const img = $('himg');
+  const note = $('hnote');
+  if (img && note) {
+    img.src = artefact.url;
+    img.className = artefact.theme;
+    note.textContent = `"${artefact.note}"`;
+  }
+}
+
+// ============================================
+// INIT
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+  renderEntries();
+  renderTray();
+  
+  // Set hero ke artefak pertama
+  if (S.artefacts.length > 0) {
+    setHero(S.artefacts[0].id);
+  }
+  
+  const ri = $('ri');
+  const cc = $('ccount');
+  if (ri && cc) {
+    ri.oninput = () => {
+      const n = ri.value.length;
+      cc.textContent = `${n}/500`;
+      cc.style.color = n >= 450 ? 'var(--at)' : 'var(--txm)';
     };
   }
-
-  // ================================================================
-  // UI HELPERS
-  // ================================================================
-  const $input    = () => document.getElementById('username');
-  const $feedback = () => document.getElementById('field-feedback');
-  const $suggest  = () => document.getElementById('suggestion-chip');
-  const $btn      = () => document.getElementById('login-btn');
-
-  function setFeedback(type, msg) {
-    // type: 'error' | 'success' | 'checking' | ''
-    const el = $feedback();
-    if (!type || !msg) { el.className = 'field-feedback'; el.textContent = ''; return; }
-    el.className = 'field-feedback show ' + type;
-    el.textContent = msg;
-    // Border warna input
-    $input().className = type === 'success' ? 'is-valid' : type === 'checking' ? 'is-checking' : 'is-invalid';
-  }
-
-  function setSuggestion(text) {
-    const el = $suggest();
-    if (!text) { el.className = 'suggestion-chip'; return; }
-    el.className = 'suggestion-chip show';
-    el.textContent = '👉 maksud kamu: ' + text + '? (klik untuk apply)';
-    el.onclick = () => {
-      $input().value = text;
-      el.className = 'suggestion-chip';
-      $input().dispatchEvent(new Event('input'));
-    };
-  }
-
-  // ================================================================
-  // AVAILABILITY CHECK (debounced 600ms)
-  // Query ke tabel 'users' dengan kolom 'username'
-  // ================================================================
-  let _debounce = null;
-  let _lastChecked = null;
-
-  async function checkAvailability(username) {
-    if (username === _lastChecked) return;
-    _lastChecked = username;
-    $btn().disabled = true;
-    setFeedback('checking', '⏳ mengecek ketersediaan...');
-
-    try {
-      // FIX: tabel 'users', bukan 'jejak_users'
-      const data = await sbFetch(TABLE, 'GET', null,
-        `?username=eq.${encodeURIComponent(username)}&select=username&limit=1`
-      );
-
-      if (data.length === 0) {
-        setFeedback('success', '✓ ' + username + ' tersedia — siap daftar!');
-      } else {
-        setFeedback('success', '✓ ' + username + ' ditemukan — welcome back!');
-      }
-      $btn().disabled = false;
-
-    } catch (e) {
-      console.error('Check error:', e.message);
-      // Jika cek gagal, tetap izinkan submit
-      setFeedback('checking', '⚠️ koneksi lambat, coba submit langsung');
-      $btn().disabled = false;
-    }
-  }
-
-  // ================================================================
-  // INPUT LISTENER — format paksa + validasi realtime
-  // ================================================================
-  $input().addEventListener('input', (e) => {
-    let val = e.target.value;
-
-    // FORMAT PAKSA saat mengetik:
-    // 1. Lowercase
-    // 2. Spasi → titik (auto-convert)
-    // 3. Hapus karakter selain a-z, 0-9, titik
-    // 4. Titik ganda → satu titik
-    const formatted = val
-      .toLowerCase()
-      .replace(/\s+/g, '.')
-      .replace(/[^a-z0-9.]/g, '')
-      .replace(/\.{2,}/g, '.');
-
-    if (formatted !== val) {
-      const pos = e.target.selectionStart;
-      e.target.value = formatted;
-      try { e.target.setSelectionRange(pos, pos); } catch(_) {}
-    }
-
-    val = formatted;
-
-    // Kosong → reset
-    if (!val) {
-      setFeedback('', '');
-      setSuggestion(null);
-      $btn().disabled = true;
-      $input().className = '';
-      _lastChecked = null;
-      return;
-    }
-
-    // Tampilkan notif box
-    document.getElementById('notif-box').classList.add('show');
-
-    // Validasi format
-    const result = validateUsername(val);
-    if (!result.ok) {
-      setFeedback('error', result.msg);
-      setSuggestion(result.suggestion);
-      $btn().disabled = true;
-      clearTimeout(_debounce);
-      _lastChecked = null;
-      return;
-    }
-
-    // Format valid — cek ketersediaan (debounced)
-    setSuggestion(null);
-    clearTimeout(_debounce);
-    _debounce = setTimeout(() => checkAvailability(result.value), 600);
-  });
-
-  // Cegah paste karakter invalid
-  $input().addEventListener('paste', (e) => {
-    e.preventDefault();
-    const pasted = (e.clipboardData || window.clipboardData).getData('text');
-    const clean = pasted.trim().toLowerCase()
-      .replace(/[\s_\-]+/g, '.')
-      .replace(/[^a-z0-9.]/g, '')
-      .replace(/\.{2,}/g, '.')
-      .slice(0, 30);
-    e.target.value = clean;
-    e.target.dispatchEvent(new Event('input'));
-  });
-
-  // ================================================================
-  // VIBE
-  // ================================================================
-  const VIBES = {
-    cyber:  { accent:'#00ff88', accent2:'#ff3366', accent3:'#ffff00', accent4:'#00d4ff' },
-    neon:   { accent:'#ff10f0', accent2:'#00ff88', accent3:'#ffff00', accent4:'#00d4ff' },
-    retro:  { accent:'#ff6b35', accent2:'#f7b801', accent3:'#6a994e', accent4:'#bc4749' },
-    pastel: { accent:'#ffc8dd', accent2:'#bde0fe', accent3:'#a2d2ff', accent4:'#ffafcc' }
-  };
-  window.setVibe = function(v) {
-    const c = VIBES[v]; if (!c) return;
-    document.documentElement.style.setProperty('--accent',   c.accent);
-    document.documentElement.style.setProperty('--accent-2', c.accent2);
-    document.documentElement.style.setProperty('--accent-3', c.accent3);
-    document.documentElement.style.setProperty('--accent-4', c.accent4);
-    document.querySelectorAll('.vibe-btn').forEach(b =>
-      b.classList.toggle('active', b.textContent.includes(v))
-    );
-    localStorage.setItem(SK.vibe, v);
-  };
-
-  // ================================================================
-  // FORM SUBMIT
-  // ================================================================
-  document.getElementById('login-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const raw    = $input().value;
-    const result = validateUsername(raw);
-    if (!result.ok) { setFeedback('error', result.msg); return; }
-
-    const username = result.value;
-    const btn = $btn();
-    btn.disabled = true;
-    btn.textContent = 'checking vibes...';
-
-    try {
-      const sessionId = getSessionId(); // GANTI dari deviceId ke sessionId
-
-      // FIX: tabel 'users', cek berdasarkan username
-      const existing = await sbFetch(TABLE, 'GET', null,
-        `?username=eq.${encodeURIComponent(username)}&select=username,session_id&limit=1`
-      );
-
-      if (existing.length === 0) {
-        // ── REGISTER BARU ────────────────────────────────────────
-        await sbFetch(TABLE, 'POST', { 
-          username, 
-          session_id: sessionId,  // GANTI dari device_id ke session_id
-          created_at: new Date().toISOString(),
-          last_seen: new Date().toISOString()
-        });
-        setFeedback('success', '🎉 account created! welcome bestie');
-
-      } else {
-        // ── LOGIN ────────────────────────────────────────────────
-        const user = existing[0];
-
-        // Cek apakah session_id cocok
-        if (user.session_id && user.session_id !== sessionId) {
-          setFeedback('error', '⚠️ username ini terdaftar di device lain');
-          btn.disabled = false;
-          btn.textContent = "let's goooo";
-          return;
-        }
-
-        // Update last_seen
-        await sbFetch(TABLE, 'PATCH',
-          { last_seen: new Date().toISOString() },
-          `?username=eq.${encodeURIComponent(username)}`
-        );
-
-        setFeedback('success', '✅ welcome back, @' + username + '!');
-      }
-
-      setSession(username);
-      setTimeout(() => { window.location.href = 'jejak.html'; }, 700);
-
-    } catch (err) {
-      console.error('Submit error:', err);
-      if (err.message.includes('duplicate key')) {
-        setFeedback('error', 'username sudah dipakai di device lain');
-      } else {
-        setFeedback('error', 'error: ' + err.message);
-      }
-    } finally {
-      btn.disabled = false;
-      btn.textContent = "let's goooo";
-    }
-  });
-
-  // ================================================================
-  // AUTO-LOGIN CHECK
-  // ================================================================
-  async function checkAutoLogin() {
-    const session = getSession();
-
-    if (!session.loggedIn || !session.username) {
-      document.getElementById('loading-overlay').classList.add('hidden');
-      const saved = localStorage.getItem(SK.username);
-      if (saved) {
-        $input().value = saved;
-        $input().dispatchEvent(new Event('input'));
-      }
-      return;
-    }
-
-    try {
-      const sessionId = getSessionId();
-      // FIX: tabel 'users'
-      const data = await sbFetch(TABLE, 'GET', null,
-        `?username=eq.${encodeURIComponent(session.username)}&select=username,session_id&limit=1`
-      );
-
-      if (data.length > 0 && data[0].session_id === sessionId) {
-        window.location.href = 'jejak.html';
+  
+  const sb = $('sbtn');
+  if (sb && ri) {
+    sb.onclick = () => {
+      const c = ri.value.trim();
+      if (!c) {
+        toast('Tulis sesuatu...');
         return;
       }
-
-      clearSession();
-    } catch (e) {
-      console.error('Auto-login error:', e.message);
-    }
-
-    document.getElementById('loading-overlay').classList.add('hidden');
-    const saved = localStorage.getItem(SK.username);
-    if (saved) {
-      $input().value = saved;
-      $input().dispatchEvent(new Event('input'));
-    }
+      
+      // Simulate submit
+      const newEntry = {
+        id: 'user_' + Date.now(),
+        content: c,
+        mood: document.querySelector('.mc.act')?.dataset.mood || 'surviving',
+        timestamp: Date.now(),
+        reactions: { skull: 0, cry: 0, fire: 0, upside: 0 },
+        userReacted: null,
+        isDummy: false,
+        author: S.user
+      };
+      
+      S.entries.unshift(newEntry);
+      if (S.entries.length > 6) S.entries.pop();
+      localStorage.setItem('jejak_entries', JSON.stringify(S.entries));
+      renderEntries();
+      
+      ri.value = '';
+      if (cc) cc.textContent = '0/500';
+      toast('✓ Tersimpan');
+    };
   }
-
-  // ================================================================
-  // INIT
-  // ================================================================
-  window.addEventListener('DOMContentLoaded', () => {
-    setVibe(localStorage.getItem(SK.vibe) || 'cyber');
-    checkAutoLogin();
-  });
-  </script>
+});
+</script>
 </body>
 </html>
