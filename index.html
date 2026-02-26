@@ -124,174 +124,396 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 </div>
 
 <script>
-const SB_URL='https://fuovfrdicdhnlymnacpz.supabase.co';
-const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
-const TABLE='users';
-const SK={u:'jejak_username',s:'jejak_session_id',l:'jejak_logged_in',v:'jejak_vibe'};
-const UN_PAT=/^[a-z][a-z0-9]*\.[a-z][a-z0-9]*$/;
+// ============================================
+// CONFIG SUPABASE
+// ============================================
+const SB_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+const TABLE = 'users';
 
-const VIBES={
-  cyber:{ac:'#00ff88',a2:'#ff3366',a3:'#ffff00',a4:'#00d4ff'},
-  neon: {ac:'#ff10f0',a2:'#00ff88',a3:'#ffff00',a4:'#00d4ff'},
-  retro:{ac:'#ff6b35',a2:'#f7b801',a3:'#6a994e',a4:'#bc4749'},
-  pastel:{ac:'#ffc8dd',a2:'#bde0fe',a3:'#a2d2ff',a4:'#ffafcc'}
+// ============================================
+// LOCALSTORAGE KEYS
+// ============================================
+const SK = {
+  u: 'jejak_username',        // username
+  s: 'jejak_session_id',       // session id
+  l: 'jejak_logged_in',        // login status
+  v: 'jejak_vibe',             // vibe preference
+  uid: 'user_id',              // user uuid
+  isAi: 'is_ai',               // is AI flag
+  aiToken: 'ai_token'          // AI 30-char token
 };
 
-// ── DOM ───────────────────────────────────────────
-const $u  = ()=>document.getElementById('uname');
-const $fb = ()=>document.getElementById('fb');
-const $sg = ()=>document.getElementById('sg');
-const $btn= ()=>document.getElementById('btn');
+// ============================================
+// VALIDATION PATTERNS
+// ============================================
+const UN_PAT = /^[a-z][a-z0-9]*\.[a-z][a-z0-9]*$/;
 
-// ── UTILS ─────────────────────────────────────────
+// ============================================
+// VIBE THEMES
+// ============================================
+const VIBES = {
+  cyber: { ac: '#00ff88', a2: '#ff3366', a3: '#ffff00', a4: '#00d4ff' },
+  neon:  { ac: '#ff10f0', a2: '#00ff88', a3: '#ffff00', a4: '#00d4ff' },
+  retro: { ac: '#ff6b35', a2: '#f7b801', a3: '#6a994e', a4: '#bc4749' },
+  pastel:{ ac: '#ffc8dd', a2: '#bde0fe', a3: '#a2d2ff', a4: '#ffafcc' }
+};
+
+// ============================================
+// DOM HELPERS
+// ============================================
+const $u = () => document.getElementById('uname');
+const $fb = () => document.getElementById('fb');
+const $sg = () => document.getElementById('sg');
+const $btn = () => document.getElementById('btn');
+
+// ============================================
+// UI FUNCTIONS
+// ============================================
 function setFb(type, msg) {
-  const el=$fb(), inp=$u();
-  if(!type||!msg){el.className='feedback';el.textContent='';inp.className='';return}
-  el.className='feedback show '+type; el.textContent=msg;
-  inp.className=type==='success'?'is-valid':type==='checking'?'is-checking':'is-invalid';
+  const el = $fb(), inp = $u();
+  if (!type || !msg) {
+    el.className = 'feedback';
+    el.textContent = '';
+    inp.className = '';
+    return;
+  }
+  el.className = 'feedback show ' + type;
+  el.textContent = msg;
+  inp.className = type === 'success' ? 'is-valid' : type === 'checking' ? 'is-checking' : 'is-invalid';
 }
 
 function setSg(text) {
-  const el=$sg();
-  if(!text){el.className='suggest';return}
-  el.className='suggest show';
-  el.textContent='👉 maksud kamu: '+text+'? (klik untuk apply)';
-  el.onclick=()=>{ $u().value=text; el.className='suggest'; $u().dispatchEvent(new Event('input')); };
+  const el = $sg();
+  if (!text) {
+    el.className = 'suggest';
+    return;
+  }
+  el.className = 'suggest show';
+  el.textContent = '👉 maksud kamu: ' + text + '? (klik untuk apply)';
+  el.onclick = () => {
+    $u().value = text;
+    el.className = 'suggest';
+    $u().dispatchEvent(new Event('input'));
+  };
 }
 
 function validate(raw) {
-  if(!raw?.trim()) return {ok:false,msg:'username tidak boleh kosong'};
-  const v=raw.trim().toLowerCase();
-  if(v.length>30) return {ok:false,msg:'maksimal 30 karakter'};
-  if(v.includes(' ')){
-    const s=v.trim().replace(/\s+/g,'.').replace(/[^a-z0-9.]/g,'');
-    return {ok:false,msg:'gunakan titik bukan spasi — format: kata.kata',suggest:s};
+  if (!raw?.trim()) return { ok: false, msg: 'username tidak boleh kosong' };
+  const v = raw.trim().toLowerCase();
+  if (v.length > 30) return { ok: false, msg: 'maksimal 30 karakter' };
+  if (v.includes(' ')) {
+    const s = v.trim().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '');
+    return { ok: false, msg: 'gunakan titik bukan spasi — format: kata.kata', suggest: s };
   }
-  if(!v.includes('.')) return {ok:false,msg:'harus dua kata dipisah titik · contoh: over.thinker'};
-  if((v.match(/\./g)||[]).length>1) return {ok:false,msg:'hanya boleh satu titik pemisah'};
-  if(!UN_PAT.test(v)) return {ok:false,msg:/^\d|^\.\d/.test(v)?'tidak boleh diawali angka':'hanya huruf kecil a-z, angka, dan satu titik'};
-  const [p1,p2]=v.split('.');
-  if(p1.length<2||p2.length<2) return {ok:false,msg:'masing-masing kata minimal 2 huruf'};
-  return {ok:true,value:v};
+  if (!v.includes('.')) return { ok: false, msg: 'harus dua kata dipisah titik · contoh: over.thinker' };
+  if ((v.match(/\./g) || []).length > 1) return { ok: false, msg: 'hanya boleh satu titik pemisah' };
+  if (!UN_PAT.test(v)) return { ok: false, msg: /^\d|^\.\d/.test(v) ? 'tidak boleh diawali angka' : 'hanya huruf kecil a-z, angka, dan satu titik' };
+  const [p1, p2] = v.split('.');
+  if (p1.length < 2 || p2.length < 2) return { ok: false, msg: 'masing-masing kata minimal 2 huruf' };
+  return { ok: true, value: v };
 }
 
-async function sbFetch(path,method='GET',body=null) {
-  const r=await fetch(SB_URL+'/rest/v1/'+path,{
+// ============================================
+// SUPABASE FETCH WRAPPER
+// ============================================
+async function sbFetch(path, method = 'GET', body = null) {
+  const r = await fetch(SB_URL + '/rest/v1/' + path, {
     method,
-    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':method==='POST'?'return=representation':''},
-    body:body?JSON.stringify(body):undefined
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method === 'POST' ? 'return=representation' : ''
+    },
+    body: body ? JSON.stringify(body) : undefined
   });
-  const t=await r.text();
-  if(!r.ok) throw new Error(t||'HTTP '+r.status);
-  return t?JSON.parse(t):[];
+  const t = await r.text();
+  if (!r.ok) throw new Error(t || 'HTTP ' + r.status);
+  return t ? JSON.parse(t) : [];
 }
 
+// ============================================
+// SESSION MANAGEMENT
+// ============================================
 function getSessionId() {
-  let id=localStorage.getItem(SK.s);
-  if(!id){ id='s_'+Date.now()+'_'+Math.random().toString(36).slice(2,9); localStorage.setItem(SK.s,id); }
+  let id = localStorage.getItem(SK.s);
+  if (!id) {
+    id = 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2, 15);
+    localStorage.setItem(SK.s, id);
+  }
   return id;
 }
 
-function setSession(u){localStorage.setItem(SK.u,u);localStorage.setItem(SK.l,'true')}
-function clearSession(){localStorage.removeItem(SK.u);localStorage.removeItem(SK.l)}
-function getSession(){return{username:localStorage.getItem(SK.u),loggedIn:localStorage.getItem(SK.l)==='true'}}
-
-// ── VIBE ──────────────────────────────────────────
-window.setVibe=function(v){
-  const c=VIBES[v]; if(!c) return;
-  const r=document.documentElement.style;
-  r.setProperty('--ac',c.ac); r.setProperty('--a2',c.a2);
-  r.setProperty('--a3',c.a3); r.setProperty('--a4',c.a4);
-  document.querySelectorAll('.vibe-btn').forEach(b=>b.classList.toggle('active',b.textContent.includes(v)));
-  localStorage.setItem(SK.v,v);
-};
-
-// ── AVAILABILITY CHECK ────────────────────────────
-let _deb=null, _last=null;
-async function checkAvail(username) {
-  if(username===_last) return;
-  _last=username; $btn().disabled=true;
-  setFb('checking','⏳ mengecek ketersediaan...');
-  try {
-    const d=await sbFetch(`${TABLE}?username=eq.${encodeURIComponent(username)}&select=username&limit=1`);
-    setFb('success', d.length===0 ? '✓ '+username+' tersedia — siap daftar!' : '✓ '+username+' ditemukan — welcome back!');
-    $btn().disabled=false;
-  } catch(e) {
-    console.error('Check:',e.message);
-    setFb('checking','⚠️ koneksi lambat, coba submit langsung');
-    $btn().disabled=false;
+function setSession(username, userId, isAi = false, aiToken = null) {
+  localStorage.setItem(SK.u, username);
+  localStorage.setItem(SK.uid, userId);
+  localStorage.setItem(SK.isAi, isAi ? 'true' : 'false');
+  localStorage.setItem(SK.l, 'true');
+  
+  if (aiToken) {
+    localStorage.setItem(SK.aiToken, aiToken);
   }
 }
 
-// ── INPUT ─────────────────────────────────────────
-$u().addEventListener('input',e=>{
-  let v=e.target.value;
-  const fmt=v.toLowerCase().replace(/\s+/g,'.').replace(/[^a-z0-9.]/g,'').replace(/\.{2,}/g,'.');
-  if(fmt!==v){ const p=e.target.selectionStart; e.target.value=fmt; try{e.target.setSelectionRange(p,p)}catch(_){} v=fmt; }
-  if(!v){ setFb('',''); setSg(null); $btn().disabled=true; $u().className=''; _last=null; return; }
+function clearSession() {
+  localStorage.removeItem(SK.u);
+  localStorage.removeItem(SK.uid);
+  localStorage.removeItem(SK.isAi);
+  localStorage.removeItem(SK.aiToken);
+  localStorage.removeItem(SK.l);
+}
+
+function getSession() {
+  return {
+    username: localStorage.getItem(SK.u),
+    userId: localStorage.getItem(SK.uid),
+    loggedIn: localStorage.getItem(SK.l) === 'true',
+    isAi: localStorage.getItem(SK.isAi) === 'true'
+  };
+}
+
+// ============================================
+// VIBE MANAGEMENT
+// ============================================
+window.setVibe = function(v) {
+  const c = VIBES[v];
+  if (!c) return;
+  const r = document.documentElement.style;
+  r.setProperty('--ac', c.ac);
+  r.setProperty('--a2', c.a2);
+  r.setProperty('--a3', c.a3);
+  r.setProperty('--a4', c.a4);
+  document.querySelectorAll('.vibe-btn').forEach(b => 
+    b.classList.toggle('active', b.textContent.includes(v))
+  );
+  localStorage.setItem(SK.v, v);
+};
+
+// ============================================
+// USERNAME AVAILABILITY CHECK
+// ============================================
+let _deb = null, _last = null;
+
+async function checkAvail(username) {
+  if (username === _last) return;
+  _last = username;
+  $btn().disabled = true;
+  setFb('checking', '⏳ mengecek ketersediaan...');
+  
+  try {
+    const d = await sbFetch(
+      `${TABLE}?username=eq.${encodeURIComponent(username)}&select=username&limit=1`
+    );
+    
+    setFb('success', d.length === 0 
+      ? '✓ ' + username + ' tersedia — siap daftar!' 
+      : '✓ ' + username + ' ditemukan — welcome back!'
+    );
+    $btn().disabled = false;
+  } catch (e) {
+    console.error('Check:', e.message);
+    setFb('checking', '⚠️ koneksi lambat, coba submit langsung');
+    $btn().disabled = false;
+  }
+}
+
+// ============================================
+// INPUT HANDLER
+// ============================================
+$u().addEventListener('input', e => {
+  let v = e.target.value;
+  const fmt = v.toLowerCase()
+    .replace(/\s+/g, '.')
+    .replace(/[^a-z0-9.]/g, '')
+    .replace(/\.{2,}/g, '.');
+  
+  if (fmt !== v) {
+    const p = e.target.selectionStart;
+    e.target.value = fmt;
+    try { e.target.setSelectionRange(p, p); } catch (_) { }
+    v = fmt;
+  }
+  
+  if (!v) {
+    setFb('', '');
+    setSg(null);
+    $btn().disabled = true;
+    $u().className = '';
+    _last = null;
+    return;
+  }
+  
   document.getElementById('notif').classList.add('show');
-  const r=validate(v);
-  if(!r.ok){ setFb('error',r.msg); setSg(r.suggest||null); $btn().disabled=true; clearTimeout(_deb); _last=null; return; }
-  setSg(null); clearTimeout(_deb); _deb=setTimeout(()=>checkAvail(r.value),600);
+  const r = validate(v);
+  
+  if (!r.ok) {
+    setFb('error', r.msg);
+    setSg(r.suggest || null);
+    $btn().disabled = true;
+    clearTimeout(_deb);
+    _last = null;
+    return;
+  }
+  
+  setSg(null);
+  clearTimeout(_deb);
+  _deb = setTimeout(() => checkAvail(r.value), 600);
 });
 
-$u().addEventListener('paste',e=>{
+$u().addEventListener('paste', e => {
   e.preventDefault();
-  const p=(e.clipboardData||window.clipboardData).getData('text');
-  e.target.value=p.trim().toLowerCase().replace(/[\s_\-]+/g,'.').replace(/[^a-z0-9.]/g,'').replace(/\.{2,}/g,'.').slice(0,30);
+  const p = (e.clipboardData || window.clipboardData).getData('text');
+  e.target.value = p.trim()
+    .toLowerCase()
+    .replace(/[\s_\-]+/g, '.')
+    .replace(/[^a-z0-9.]/g, '')
+    .replace(/\.{2,}/g, '.')
+    .slice(0, 30);
   e.target.dispatchEvent(new Event('input'));
 });
 
-// ── SUBMIT ────────────────────────────────────────
-document.getElementById('frm').addEventListener('submit',async e=>{
+// ============================================
+// FORM SUBMIT
+// ============================================
+document.getElementById('frm').addEventListener('submit', async e => {
   e.preventDefault();
-  const r=validate($u().value);
-  if(!r.ok){ setFb('error',r.msg); return; }
-  const username=r.value, btn=$btn();
-  btn.disabled=true; btn.textContent='checking vibes...';
+  
+  const r = validate($u().value);
+  if (!r.ok) {
+    setFb('error', r.msg);
+    return;
+  }
+  
+  const username = r.value;
+  const btn = $btn();
+  btn.disabled = true;
+  btn.textContent = 'checking vibes...';
+  
   try {
-    const sid=getSessionId();
-    const ex=await sbFetch(`${TABLE}?username=eq.${encodeURIComponent(username)}&select=username,session_id&limit=1`);
-    if(ex.length===0) {
-      await sbFetch(TABLE,'POST',{username,session_id:sid,created_at:new Date().toISOString(),last_seen:new Date().toISOString()});
-      setFb('success','🎉 account created! welcome bestie');
+    const sid = getSessionId();
+    
+    // Cek user existing
+    const existing = await sbFetch(
+      `${TABLE}?username=eq.${encodeURIComponent(username)}&select=id,username,session_id,is_ai,ai_token&limit=1`
+    );
+    
+    if (existing.length === 0) {
+      // INSERT user baru
+      const newUsers = await sbFetch(TABLE, 'POST', {
+        username: username,
+        session_id: sid,
+        created_at: new Date().toISOString(),
+        last_seen: new Date().toISOString(),
+        vibe_preference: 50,
+        total_rants: 0,
+        is_ai: false,
+        ai_token: null,
+        parent_user_id: null,
+        metadata: {
+          vibe: localStorage.getItem(SK.v) || 'cyber',
+          login_method: 'web',
+          created_from: 'index.html'
+        }
+      });
+      
+      if (newUsers && newUsers.length > 0) {
+        setSession(username, newUsers[0].id, false, null);
+        setFb('success', '🎉 account created! welcome bestie');
+      }
+      
     } else {
-      if(ex[0].session_id && ex[0].session_id!==sid){ setFb('error','⚠️ username ini terdaftar di device lain'); return; }
-      await sbFetch(`${TABLE}?username=eq.${encodeURIComponent(username)}`,'PATCH',{last_seen:new Date().toISOString()});
-      setFb('success','✅ welcome back, @'+username+'!');
+      // UPDATE user existing
+      const user = existing[0];
+      
+      // Cek session conflict
+      if (user.session_id && user.session_id !== sid) {
+        setFb('error', '⚠️ username ini terdaftar di device lain');
+        btn.disabled = false;
+        btn.textContent = "let's goooo";
+        return;
+      }
+      
+      await sbFetch(
+        `${TABLE}?username=eq.${encodeURIComponent(username)}`,
+        'PATCH',
+        {
+          session_id: sid,
+          last_seen: new Date().toISOString(),
+          metadata: {
+            ...user.metadata,
+            last_vibe: localStorage.getItem(SK.v) || 'cyber',
+            last_login: new Date().toISOString()
+          }
+        }
+      );
+      
+      setSession(username, user.id, user.is_ai || false, user.ai_token || null);
+      setFb('success', '✅ welcome back, @' + username + '!');
     }
-    setSession(username);
-    setTimeout(()=>window.location.href='jejak.html',700);
-  } catch(err) {
-    console.error('Submit:',err);
-    setFb('error', err.message.includes('duplicate key')?'username sudah dipakai di device lain':'error: '+err.message);
-  } finally {
-    btn.disabled=false; btn.textContent="let's goooo";
+    
+    // Redirect ke jejak.html
+    setTimeout(() => window.location.href = 'jejak.html', 700);
+    
+  } catch (err) {
+    console.error('Submit:', err);
+    setFb('error', err.message.includes('duplicate key') 
+      ? 'username sudah dipakai di device lain' 
+      : 'error: ' + err.message
+    );
+    btn.disabled = false;
+    btn.textContent = "let's goooo";
   }
 });
 
-// ── AUTO-LOGIN ────────────────────────────────────
+// ============================================
+// AUTO LOGIN CHECK
+// ============================================
 async function checkAutoLogin() {
-  const {username,loggedIn}=getSession();
-  if(!loggedIn||!username){ done(); return; }
+  const { username, userId, loggedIn, isAi } = getSession();
+  
+  if (!loggedIn || !username || !userId) {
+    done();
+    return;
+  }
+  
   try {
-    const sid=getSessionId();
-    const d=await sbFetch(`${TABLE}?username=eq.${encodeURIComponent(username)}&select=username,session_id&limit=1`);
-    if(d.length>0&&d[0].session_id===sid){ window.location.href='jejak.html'; return; }
+    const sid = getSessionId();
+    
+    const users = await sbFetch(
+      `${TABLE}?id=eq.${userId}&select=id,username,session_id,is_ai,ai_token&limit=1`
+    );
+    
+    if (users.length > 0 && users[0].session_id === sid) {
+      // Session valid, langsung redirect
+      window.location.href = 'jejak.html';
+      return;
+    }
+    
+    // Session invalid, clear
     clearSession();
-  } catch(e){ console.error('AutoLogin:',e.message); }
+    
+  } catch (e) {
+    console.error('AutoLogin:', e.message);
+  }
+  
   done();
 }
 
 function done() {
   document.getElementById('loading').classList.add('hidden');
-  const s=localStorage.getItem(SK.u);
-  if(s){ $u().value=s; $u().dispatchEvent(new Event('input')); }
+  const savedUsername = localStorage.getItem(SK.u);
+  if (savedUsername) {
+    $u().value = savedUsername;
+    $u().dispatchEvent(new Event('input'));
+  }
 }
 
-// ── INIT ──────────────────────────────────────────
-window.addEventListener('DOMContentLoaded',()=>{
-  setVibe(localStorage.getItem(SK.v)||'cyber');
+// ============================================
+// INIT
+// ============================================
+window.addEventListener('DOMContentLoaded', () => {
+  setVibe(localStorage.getItem(SK.v) || 'cyber');
   checkAutoLogin();
 });
 </script>
