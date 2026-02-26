@@ -1511,8 +1511,8 @@ const DUMMY_ARTEFACTS = [
 // STATE - FIX: TAMBAHKAN GENDER
 // ============================================
 const S = {
-  user: '@anon',
-  gender: localStorage.getItem('user_gender') || null, // ← TAMBAHKAN INI
+  user: localStorage.getItem('jejak_username') || '@anon', // ← FIX: ambil dari localStorage
+  gender: localStorage.getItem('user_gender') || null,
   entries: [],
   artefacts: []
 };
@@ -1686,11 +1686,110 @@ function setHero(id) {
 }
 
 // ============================================
+// UPLOAD FUNCTIONS - FIX: INIT UPLOAD
+// ============================================
+let uploads = parseInt(localStorage.getItem('jejak_uploads') || '0');
+let quotaStart = localStorage.getItem('jejak_quota_start') || Date.now();
+
+function initUpload() {
+  const btn = $('upbtn');
+  const fi = $('finput');
+  if (!btn || !fi) return;
+  
+  btn.onclick = () => {
+    if (!checkQuota()) {
+      toast('⏳ Quota habis');
+      return;
+    }
+    fi.click();
+  };
+  
+  fi.onchange = handleFiles;
+}
+
+function checkQuota() {
+  const now = Date.now();
+  const windowDays = 3 * 86400000; // 3 hari
+  
+  if (now - parseInt(quotaStart) > windowDays) {
+    // Reset quota
+    uploads = 0;
+    quotaStart = now;
+    localStorage.setItem('jejak_uploads', '0');
+    localStorage.setItem('jejak_quota_start', now.toString());
+    return true;
+  }
+  
+  return uploads < 6;
+}
+
+function updQuota() {
+  const t = $('qtimer');
+  const c = $('ucnt');
+  if (!t) return;
+  
+  const now = Date.now();
+  const windowDays = 3 * 86400000;
+  const rem = Math.max(0, windowDays - (now - parseInt(quotaStart)));
+  const days = Math.ceil(rem / 86400000);
+  const slots = 6 - uploads;
+  
+  t.textContent = `Window aktif • ${days} hari • ${slots} slot`;
+  t.classList.toggle('urg', slots <= 2);
+  
+  if (c) {
+    c.textContent = uploads;
+    c.style.display = uploads > 0 ? 'block' : 'none';
+  }
+}
+
+async function handleFiles(e) {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+  
+  if (files.reduce((s, f) => s + f.size, 0) > 10 * 1024 * 1024) {
+    toast('⚠ File terlalu besar');
+    return;
+  }
+  
+  // Simulasi upload berhasil
+  uploads += files.length;
+  localStorage.setItem('jejak_uploads', uploads.toString());
+  
+  // Tambah artefak dummy
+  files.forEach((file, i) => {
+    const id = 'upload_' + Date.now() + '_' + i;
+    const newArtefact = {
+      id,
+      url: URL.createObjectURL(file),
+      note: 'upload baru',
+      faces: [],
+      hasFace: false,
+      isDummy: false,
+      theme: 'fm'
+    };
+    S.artefacts.unshift(newArtefact);
+    if (S.artefacts.length > 6) S.artefacts.pop();
+  });
+  
+  localStorage.setItem('jejak_artefacts', JSON.stringify(S.artefacts));
+  renderTray();
+  updQuota();
+  toast(`✓ ${files.length} foto diupload`);
+}
+
+// ============================================
 // INIT
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
+  // Update username di header
+  const huser = $('huser');
+  if (huser) huser.textContent = S.user;
+  
   renderEntries();
   renderTray();
+  initUpload(); // ← FIX: panggil initUpload
+  updQuota();
   
   // Set hero ke artefak pertama
   if (S.artefacts.length > 0) {
@@ -1738,6 +1837,8 @@ document.addEventListener('DOMContentLoaded', () => {
       toast('✓ Tersimpan');
     };
   }
+  
+  setInterval(updQuota, 60000);
 });
 </script>
 </body>
