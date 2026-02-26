@@ -227,7 +227,7 @@ header{
 .quota-display{
   display:flex;
   align-items:center;
-  gap:12px;
+  gap:8px;
   background:rgba(0,0,0,.7);
   padding:4px 12px;
   border-radius:30px;
@@ -238,7 +238,33 @@ header{
 }
 .quota-badge{
   color:var(--gn);
-  font-weight:700
+  font-weight:700;
+  font-size:18px
+}
+.quota-text{
+  color:var(--txs);
+  font-size:12px
+}
+.radar-guide{
+  margin-top:12px;
+  background:rgba(57,255,20,0.1);
+  border-left:4px solid var(--gn);
+  padding:8px 12px;
+  border-radius:8px;
+  pointer-events:auto;
+  max-width:220px;
+  animation:pulse-guide 2s infinite
+}
+@keyframes pulse-guide{
+  0%,100%{opacity:0.8}
+  50%{opacity:1;background:rgba(57,255,20,0.15)}
+}
+.guide-text{
+  color:var(--gn);
+  font-size:11px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.5px
 }
 .vibe-check-btn{
   position:absolute;
@@ -999,20 +1025,6 @@ header{
   border-top:1px solid var(--bd)
 }
 
-/* DISTRESS BANNER */
-.distress-banner{
-  display:none;
-  padding:10px 16px;
-  background:rgba(255,51,51,.15);
-  border-top:1px solid #FF3333;
-  font-size:12px;
-  color:#FF6666;
-  text-align:center
-}
-.distress-banner.show{
-  display:block
-}
-
 /* TYPING CURSOR */
 .typing-cursor{
   display:inline-block;
@@ -1058,6 +1070,20 @@ header{
 @keyframes typing-wave{
   0%,60%,100%{transform:translateY(0);opacity:.6}
   30%{transform:translateY(-6px);opacity:1}
+}
+
+/* DISTRESS BANNER */
+.distress-banner{
+  display:none;
+  padding:10px 16px;
+  background:rgba(255,51,51,.15);
+  border-top:1px solid #FF3333;
+  font-size:12px;
+  color:#FF6666;
+  text-align:center
+}
+.distress-banner.show{
+  display:block
 }
 
 /* NAV */
@@ -1122,6 +1148,7 @@ header{
     </div>
   </header>
 
+  <!-- RADAR HERO -->
   <section class="radar-hero">
     <div class="radar-container">
       <div class="radar-grid"></div>
@@ -1129,13 +1156,21 @@ header{
       <div class="radar-line"></div>
       <div class="radar-sweep"></div>
       <div id="radarDots"></div>
+      
       <div class="radar-overlay">
         <div class="radar-title">VIBE RADAR</div>
         <div class="quota-display">
-          <span class="quota-badge" id="quotaBadge">30:00 tersisa</span>
+          <span class="quota-badge" id="quotaBadge">24</span>
+          <span class="quota-text">couple online siap diajak ngobrol</span>
+        </div>
+        <div class="radar-guide">
+          <span class="guide-text">✨ 15 menit cukup buat tahu kalian cocok</span>
         </div>
       </div>
-      <button class="vibe-check-btn" onclick="startVibeCheck()"><span>✨</span> Vibe Check</button>
+      
+      <button class="vibe-check-btn" onclick="startVibeCheck()">
+        <span>✨</span> Vibe Check
+      </button>
     </div>
   </section>
 
@@ -1181,7 +1216,7 @@ header{
         <div class="gender-desc">akan bertemu cowok</div>
       </div>
     </div>
-    <div class="modal-note"><strong>🔒 GRATIS 30 MENIT</strong><br>Sesi berakhir otomatis. Chat hanya disimpan selama sesi (FIFO 20 pesan).</div>
+    <div class="modal-note"><strong>🔒 GRATIS 15 MENIT</strong><br>Sesi berakhir otomatis. Chat hanya disimpan selama sesi (FIFO 20 pesan).</div>
     <button class="modal-confirm" id="genderConfirm" onclick="confirmGender()" disabled>Mulai Vibe Check</button>
   </div>
 </div>
@@ -1193,7 +1228,7 @@ header{
     <div class="modal-title upgrade-title">WAKTU HABIS</div>
     <div class="modal-sub">lanjutkan obrolan dengan upgrade</div>
     <div class="timer-warn">
-      <div class="big">30:00</div>
+      <div class="big">15:00</div>
       <div class="small">sesi gratis selesai</div>
     </div>
     <div class="pricing-grid">
@@ -1231,7 +1266,7 @@ header{
 <div class="chat-room" id="chatRoom">
   <div class="chat-header">
     <div class="chat-eyes"><span class="eye-l">👀</span><span class="eye-r">👀</span></div>
-    <div class="chat-timer" id="chatTimer">30:00</div>
+    <div class="chat-timer" id="chatTimer">15:00</div>
     <button class="chat-close" onclick="closeChat()">✕</button>
   </div>
   <div class="chat-messages" id="chatMessages"></div>
@@ -1259,7 +1294,7 @@ header{
 <script>
 // ── STATE ──────────────────────────────────────────
 let currentGender = null, chatPartner = null;
-let timerInterval = null, chatTimeLeft = 1800;
+let timerInterval = null, chatTimeLeft = 900; // 15 menit = 900 detik
 let selectedPlan = null, activeMood = 'all', radarInterval, sweepInterval;
 
 const AI_CHARS = {
@@ -1376,6 +1411,9 @@ function initRadar() {
   genDots();
   radarInterval = setInterval(moveDots, 5000);
   sweepInterval = setInterval(sweepEffect, 50);
+  
+  // Set random couple online (20-30)
+  document.getElementById('quotaBadge').textContent = Math.floor(20 + Math.random() * 10);
 }
 
 function genDots() {
@@ -1568,7 +1606,7 @@ const typingEngine = new TypingEngine();
 
 // ── CHAT ──────────────────────────────────────────
 function openChat() {
-  chatTimeLeft = 1800;
+  chatTimeLeft = 900; // 15 menit
   $('chatMessages').innerHTML = '';
   $('distressBanner').classList.remove('show');
   $('chatRoom').classList.add('on');
@@ -1607,7 +1645,6 @@ function updateTimer() {
   const m=Math.floor(chatTimeLeft/60), s=chatTimeLeft%60;
   $('chatTimer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   $('chatTimer').classList.toggle('warn', chatTimeLeft<=300);
-  $('quotaBadge').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} tersisa`;
 }
 
 function endChat() {
@@ -1642,6 +1679,7 @@ async function sendMsg() {
         body: JSON.stringify({
           message: text,
           characterName: chatPartner.name,
+          userName: 'user',
           lastMessages: getHistory(8)
         })
       });
