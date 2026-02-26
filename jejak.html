@@ -284,6 +284,9 @@ header{
 .entry:hover{
   border-color:var(--ap);
 }
+.entry.own-rant{
+  border-left:4px solid var(--ap);
+}
 .ehdr{
   display:flex;
   justify-content:space-between;
@@ -329,6 +332,7 @@ header{
   cursor:pointer;
   overflow:hidden;
   border-radius:4px;
+  position:relative;
 }
 .gi img{
   width:100%;
@@ -576,15 +580,25 @@ const sb = supabase.createClient(SB_URL, SB_KEY);
 const BUCKET = 'artefacts';
 
 // ============================================
-// STATE
+// STATE - PASTI ADA
 // ============================================
-const USER_ID = 'user-' + Date.now();
-const USERNAME = '@anon';
+// AMBIL USERNAME DARI LOCALSTORAGE ATAU BUAT BARU
+let USERNAME = localStorage.getItem('jejak_username');
+let USER_ID = localStorage.getItem('user_id');
 
-// Simpan ke localStorage
-if (!localStorage.getItem('jejak_username')) {
+// KALO BELUM ADA, BUAT BARU
+if (!USERNAME) {
+    // GENERATE USERNAME UNIK
+    const names = ['dog.dog', 'lalu.lintas', 'anon.kucing', 'sleepy.head', 'chaos.queen'];
+    const randomName = names[Math.floor(Math.random() * names.length)];
+    USERNAME = randomName;
+    USER_ID = 'user-' + Date.now() + '-' + Math.random().toString(36).substring(7);
+    
     localStorage.setItem('jejak_username', USERNAME);
+    localStorage.setItem('user_id', USER_ID);
 }
+
+console.log('Login sebagai:', USERNAME, 'ID:', USER_ID);
 
 // Upload quota
 let uploads = parseInt(localStorage.getItem('jejak_uploads') || '0');
@@ -669,9 +683,11 @@ window.selMood = function(mood) {
 // ============================================
 async function loadRants() {
     try {
+        // AMBIL HANYA RANT DENGAN USERNAME YANG SAMA
         const { data, error } = await sb
             .from('rants')
             .select('*')
+            .eq('username', USERNAME)  // FILTER PAKAI USERNAME
             .order('created_at', { ascending: false })
             .limit(10);
         
@@ -681,6 +697,7 @@ async function loadRants() {
         }
         
         myEntries = data || [];
+        console.log('Rants loaded:', myEntries.length, 'untuk user', USERNAME);
         renderEntries();
     } catch (e) {
         console.error('Load rants exception:', e);
@@ -720,7 +737,7 @@ function renderEntries() {
     }
     
     container.innerHTML = myEntries.map(e => `
-        <div class="entry">
+        <div class="entry own-rant">
             <div class="ehdr">
                 <span>@${e.username || 'anon'}</span>
                 <span style="color:var(--txs);">${new Date(e.created_at).toLocaleDateString('id-ID', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}</span>
@@ -836,13 +853,12 @@ window.confirmUpload = async function() {
     showLoading('Uploading...');
     
     const note = $('noti').value.trim() || 'memory';
-    const username = 'anon';
     let success = 0;
     
     for (const i of selectedIndexes) {
         const file = pendingFiles[i].file;
         const ext = file.name.split('.').pop() || 'jpg';
-        const fileName = `${username}/${Date.now()}_${i}.${ext}`;
+        const fileName = `${USERNAME}/${Date.now()}_${i}.${ext}`;
         
         try {
             // Upload ke storage
@@ -862,7 +878,7 @@ window.confirmUpload = async function() {
                 .from('artefacts')
                 .insert({
                     user_id: USER_ID,
-                    username: username,
+                    username: USERNAME,
                     url: publicUrl,
                     note: note,
                     has_face: false,
@@ -914,7 +930,7 @@ $('sbtn').onclick = async () => {
             .from('rants')
             .insert({
                 user_id: USER_ID,
-                username: 'anon',
+                username: USERNAME,
                 content: content,
                 mood: mood,
                 reaction_count: { skull: 0, cry: 0, fire: 0, upside: 0 }
@@ -957,8 +973,8 @@ async function testConnection() {
 // INITIALIZATION
 // ============================================
 document.addEventListener('DOMContentLoaded', async () => {
-    // Set username
-    $('huser').textContent = USERNAME;
+    // Set username di kanan atas
+    $('huser').textContent = '@' + USERNAME;
     
     // Test koneksi
     await testConnection();
@@ -976,13 +992,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateQuota();
     setInterval(updateQuota, 60000);
     
-    // Character counter
-    const ri = $('ri');
-    ri.addEventListener('input', () => {
-        // Bisa ditambah counter jika mau
-    });
-    
-    console.log('JEJAK READY!');
+    console.log('JEJAK READY! User:', USERNAME);
 });
 </script>
 </body>
