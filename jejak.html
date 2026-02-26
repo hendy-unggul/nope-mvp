@@ -1,72 +1,76 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>JEJAK - UPLOAD TEST MINIMAL</title>
+    <title>JEJAK - TEST</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body style="font-family: monospace; padding: 20px; background: #000; color: #0f0;">
+<body style="font-family: system-ui; padding: 20px; background: #0A0A0A; color: white;">
 
-<h2>🚀 JEJAK - UPLOAD TEST MINIMAL</h2>
+<h2 style="color: #FF4D00;">🚀 JEJAK - TEST CONNECTION</h2>
 
-<button id="btnTest" style="padding: 10px 20px; background: #FF4D00; border: none; font-weight: bold; cursor: pointer;">TEST KONEKSI</button>
-<button id="btnUpload" style="padding: 10px 20px; background: #39FF14; border: none; font-weight: bold; cursor: pointer;">PILIH FOTO</button>
-<button id="btnCek" style="padding: 10px 20px; background: #00F0FF; border: none; font-weight: bold; cursor: pointer;">CEK DATABASE</button>
+<div style="margin: 20px 0; display: flex; gap: 10px;">
+    <button id="btnTest" style="padding: 10px 20px; background: #FF4D00; border: none; font-weight: bold; cursor: pointer;">1. TEST KONEKSI</button>
+    <button id="btnUpload" style="padding: 10px 20px; background: #39FF14; border: none; font-weight: bold; cursor: pointer;">2. PILIH FOTO</button>
+</div>
 
-<div style="margin: 20px 0; padding: 10px; background: #111; border: 1px solid #333; min-height: 200px; font-size: 12px;" id="log"></div>
+<div id="log" style="background: #111; border: 2px solid #333; padding: 20px; margin-top: 20px; font-family: monospace; min-height: 200px;"></div>
 
-<input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
+<input type="file" id="fileInput" accept="image/*" style="display: none;">
 
 <script>
 // ============================================
-// SUPABASE CONFIG
+// PASTIIN HANYA SATU KALI DEKLARASI
 // ============================================
 const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// PAKAI NAMA BERBEDA biar ga bentrok
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const BUCKET = 'artefacts';
 
 // ============================================
-// DOM
+// LOGGING
 // ============================================
 const logEl = document.getElementById('log');
-const btnTest = document.getElementById('btnTest');
-const btnUpload = document.getElementById('btnUpload');
-const btnCek = document.getElementById('btnCek');
-const fileInput = document.getElementById('fileInput');
 
 function addLog(msg, type = 'info') {
-    const color = type === 'error' ? '#f00' : type === 'success' ? '#0f0' : '#0ff';
-    logEl.innerHTML += `<div style="color: ${color}; margin: 5px 0;">> ${msg}</div>`;
+    const color = type === 'error' ? '#FF006E' : type === 'success' ? '#39FF14' : '#00F0FF';
+    logEl.innerHTML += `<div style="color: ${color}; margin: 5px 0; border-bottom: 1px solid #333; padding: 5px;">> ${msg}</div>`;
     console.log(msg);
 }
 
 // ============================================
 // TEST 1: KONEKSI
 // ============================================
-btnTest.onclick = async () => {
-    addLog('🔍 TEST KONEKSI...');
+document.getElementById('btnTest').onclick = async () => {
+    addLog('🔍 TEST KONEKSI KE SUPABASE...');
     
     try {
-        // Test 1: Cek bucket
-        addLog('→ Cek bucket...');
-        const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+        // Test tabel
+        addLog('→ Cek tabel artefacts...');
+        const { data, error } = await supabaseClient
+            .from('artefacts')
+            .select('count')
+            .limit(1);
+        
+        if (error) {
+            addLog(`❌ Error: ${error.message}`, 'error');
+            addLog(`📋 Detail: ${JSON.stringify(error)}`, 'error');
+        } else {
+            addLog('✓ Koneksi database OK', 'success');
+        }
+        
+        // Test bucket
+        addLog('→ Cek storage bucket...');
+        const { data: buckets, error: bucketError } = await supabaseClient
+            .storage
+            .listBuckets();
         
         if (bucketError) {
-            addLog(`❌ Bucket error: ${bucketError.message}`, 'error');
+            addLog(`❌ Storage error: ${bucketError.message}`, 'error');
         } else {
             const bucketExists = buckets.find(b => b.name === BUCKET);
             addLog(`✓ Bucket ditemukan: ${bucketExists ? 'YES' : 'NO'}`, bucketExists ? 'success' : 'error');
-        }
-        
-        // Test 2: Cek tabel
-        addLog('→ Cek tabel artefacts...');
-        const { error: tableError } = await supabase.from('artefacts').select('count', { count: 'exact', head: true });
-        
-        if (tableError) {
-            addLog(`❌ Tabel error: ${tableError.message}`, 'error');
-        } else {
-            addLog('✓ Tabel artefacts OK', 'success');
         }
         
     } catch (e) {
@@ -77,95 +81,71 @@ btnTest.onclick = async () => {
 // ============================================
 // TEST 2: UPLOAD
 // ============================================
+const fileInput = document.getElementById('fileInput');
+const btnUpload = document.getElementById('btnUpload');
+
 btnUpload.onclick = () => {
-    addLog('📂 Pilih file...');
+    addLog('📂 Pilih file foto...');
     fileInput.click();
 };
 
 fileInput.onchange = async (e) => {
-    const files = Array.from(e.target.files);
-    if (!files.length) return;
+    const file = e.target.files[0];
+    if (!file) return;
     
-    addLog(`📸 ${files.length} file dipilih`);
+    addLog(`📸 File: ${file.name} (${(file.size/1024).toFixed(1)}KB)`);
     
-    for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        addLog(`\n📤 Upload file ${i+1}: ${file.name} (${(file.size/1024).toFixed(1)}KB)`);
-        
-        try {
-            // Step 1: Upload ke storage
-            const fileName = `test-${Date.now()}-${i}.${file.name.split('.').pop() || 'jpg'}`;
-            addLog(`→ Upload ke: ${BUCKET}/${fileName}`);
-            
-            const { error: uploadError } = await supabase.storage
-                .from(BUCKET)
-                .upload(fileName, file);
-            
-            if (uploadError) {
-                addLog(`❌ Upload gagal: ${uploadError.message}`, 'error');
-                continue;
-            }
-            addLog(`✓ Upload sukses`, 'success');
-            
-            // Step 2: Get URL
-            const { data: { publicUrl } } = supabase.storage
-                .from(BUCKET)
-                .getPublicUrl(fileName);
-            addLog(`→ URL: ${publicUrl.substring(0, 50)}...`);
-            
-            // Step 3: Insert database
-            addLog(`→ Insert ke database...`);
-            const { error: insertError } = await supabase
-                .from('artefacts')
-                .insert({
-                    user_id: 'test-user',
-                    username: 'tester',
-                    url: publicUrl,
-                    note: 'test upload',
-                    has_face: false,
-                    faces: []
-                });
-            
-            if (insertError) {
-                addLog(`❌ Insert gagal: ${insertError.message}`, 'error');
-            } else {
-                addLog(`✓ Insert sukses`, 'success');
-            }
-            
-        } catch (err) {
-            addLog(`❌ Error: ${err.message}`, 'error');
-        }
-    }
-    
-    addLog('\n✅ Selesai');
-};
-
-// ============================================
-// TEST 3: CEK DATABASE
-// ============================================
-btnCek.onclick = async () => {
-    addLog('🔍 CEK DATABASE...');
+    // Generate nama file unik
+    const fileName = `test-${Date.now()}.${file.name.split('.').pop() || 'jpg'}`;
     
     try {
-        const { data, error } = await supabase
-            .from('artefacts')
-            .select('*')
-            .limit(5);
+        // STEP 1: UPLOAD
+        addLog('→ Upload ke storage...');
+        const { error: uploadError } = await supabaseClient.storage
+            .from(BUCKET)
+            .upload(fileName, file);
         
-        if (error) {
-            addLog(`❌ Error: ${error.message}`, 'error');
-        } else {
-            addLog(`✓ Total data: ${data.length}`);
-            data.forEach((item, i) => {
-                addLog(`  ${i+1}. ${item.note || 'no note'} - ${item.url?.substring(0, 30)}...`);
-            });
+        if (uploadError) {
+            addLog(`❌ Upload gagal: ${uploadError.message}`, 'error');
+            return;
         }
-    } catch (e) {
-        addLog(`❌ Exception: ${e.message}`, 'error');
+        addLog('✓ Upload sukses', 'success');
+        
+        // STEP 2: GET URL
+        const { data: { publicUrl } } = supabaseClient.storage
+            .from(BUCKET)
+            .getPublicUrl(fileName);
+        addLog(`→ URL: ${publicUrl}`);
+        
+        // STEP 3: INSERT DATABASE
+        addLog('→ Insert ke database...');
+        const { error: insertError } = await supabaseClient
+            .from('artefacts')
+            .insert({
+                user_id: 'test-user',
+                username: 'tester',
+                url: publicUrl,
+                note: 'test upload',
+                has_face: false,
+                faces: []
+            });
+        
+        if (insertError) {
+            addLog(`❌ Insert gagal: ${insertError.message}`, 'error');
+            addLog(`📋 Detail: ${JSON.stringify(insertError)}`, 'error');
+        } else {
+            addLog('✓ Insert sukses', 'success');
+        }
+        
+    } catch (err) {
+        addLog(`❌ Error: ${err.message}`, 'error');
     }
+    
+    // Reset input
+    fileInput.value = '';
 };
 
-addLog('✅ READY - Klik tombol TEST KONEKSI dulu');
+addLog('✅ READY - Klik tombol "TEST KONEKSI" dulu');
 </script>
 </body>
 </html>
