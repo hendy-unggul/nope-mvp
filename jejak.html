@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* ===== CSS SAMA PERSIS DENGAN SEBELUMNYA ===== */
 :root{
   --bg:#0A0A0A;
   --sf:#141414;
@@ -1432,67 +1431,6 @@ footer{
 const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-// Coba dengan kolom yang berbeda (user_id)
-async function sbInsertRant(data) {
-  try {
-    // Coba 3 kemungkinan kolom
-    const attempts = [
-      { author: data.author },           // Kolom 'author'
-      { user_id: data.author },          // Kolom 'user_id'
-      { username: data.author },         // Kolom 'username'
-      { 
-        content: data.content,
-        mood: data.mood,
-        created_at: data.created_at
-        // tanpa author — mungkin pakai relasi ke users
-      }
-    ];
-    
-    for (const attempt of attempts) {
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/rants`, {
-          method: 'POST',
-          headers: {
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation'
-          },
-          body: JSON.stringify({ ...data, ...attempt })
-        });
-        
-        if (res.ok) {
-          return true;
-        }
-      } catch (e) {
-        console.log('Attempt failed:', attempt);
-      }
-    }
-    return false;
-  } catch (e) {
-    console.error('Insert error:', e);
-    return false;
-  }
-}
-
-// ============================================
-// THEME FILTERS
-// ============================================
-const THEMES = [
-  { name: 'MONOCHROME', filter: 'fm' },
-  { name: 'NOIR', filter: 'fn' },
-  { name: 'SEPIA', filter: 'fsp' },
-  { name: 'WARM', filter: 'fw' },
-  { name: 'GOLDEN', filter: 'fg' },
-  { name: 'LOMO', filter: 'fl' },
-  { name: 'DREAM', filter: 'fd' },
-  { name: 'COLD', filter: 'fco' },
-  { name: 'CYBER', filter: 'fc' },
-  { name: 'VIGNETTE', filter: 'fv' },
-  { name: 'CRISP', filter: 'fcr' },
-  { name: 'MOODY', filter: 'fmo' }
-];
-
 // ============================================
 // DUMMY DATA
 // ============================================
@@ -1587,10 +1525,11 @@ const DUMMY_ARTEFACTS = [
 ];
 
 // ============================================
-// STATE
+// STATE - SESUAI DENGAN STRUKTUR DATABASE
 // ============================================
 const S = {
   user: localStorage.getItem('jejak_username') || '@anon',
+  userId: localStorage.getItem('jejak_user_id') || null,
   gender: localStorage.getItem('user_gender') || null,
   entries: [],
   artefacts: []
@@ -1680,6 +1619,52 @@ function signalConnection(type) {
 }
 
 // ============================================
+// SUPABASE FUNCTIONS
+// ============================================
+async function sbInsert(table, data) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      },
+      body: JSON.stringify(data)
+    });
+    
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('Supabase error:', err);
+      return false;
+    }
+    return true;
+  } catch (e) {
+    console.error('Fetch error:', e);
+    return false;
+  }
+}
+
+// ============================================
+// THEME FILTERS
+// ============================================
+const THEMES = [
+  { name: 'MONOCHROME', filter: 'fm' },
+  { name: 'NOIR', filter: 'fn' },
+  { name: 'SEPIA', filter: 'fsp' },
+  { name: 'WARM', filter: 'fw' },
+  { name: 'GOLDEN', filter: 'fg' },
+  { name: 'LOMO', filter: 'fl' },
+  { name: 'DREAM', filter: 'fd' },
+  { name: 'COLD', filter: 'fco' },
+  { name: 'CYBER', filter: 'fc' },
+  { name: 'VIGNETTE', filter: 'fv' },
+  { name: 'CRISP', filter: 'fcr' },
+  { name: 'MOODY', filter: 'fmo' }
+];
+
+// ============================================
 // RENDER FUNCTIONS
 // ============================================
 function renderEntries() {
@@ -1731,19 +1716,14 @@ function renderTray() {
   
   let html = '';
   artefacts.forEach(a => {
-    // Gunakan URL statis dari dummy, jangan blob
-    const imgUrl = a.url.startsWith('blob:') 
-      ? 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80' 
-      : a.url;
-    
     if (a.hasFace) {
       html += `<div class="ti" onclick="setHero('${a.id}')" style="position:relative">
-        <img src="${imgUrl}" alt="${a.note}" class="${a.theme}">
+        <img src="${a.url}" alt="${a.note}" class="${a.theme}">
         <div class="sensored-overlay"><span class="sensored-text">SENSORED</span></div>
       </div>`;
     } else {
       html += `<div class="ti" onclick="setHero('${a.id}')">
-        <img src="${imgUrl}" alt="${a.note}" class="${a.theme}">
+        <img src="${a.url}" alt="${a.note}" class="${a.theme}">
       </div>`;
     }
   });
@@ -1763,12 +1743,7 @@ function setHero(id) {
   const img = $('himg');
   const note = $('hnote');
   if (img && note) {
-    // Gunakan URL statis untuk hero
-    const imgUrl = artefact.url.startsWith('blob:') 
-      ? 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80' 
-      : artefact.url;
-    
-    img.src = imgUrl;
+    img.src = artefact.url;
     img.className = artefact.theme;
     note.textContent = `"${artefact.note}"`;
   }
@@ -1938,11 +1913,11 @@ async function confirmUpload() {
   for (const i of selFiles) {
     const file = pendingFiles[i];
     
-    // Simpan ke localStorage dengan URL statis (pakai dummy)
+    // Simpan ke localStorage
     const id = 'upload_' + Date.now() + '_' + i;
     const newArtefact = {
       id,
-      url: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80', // URL statis
+      url: file.preview,
       note: note,
       faces: file.faces || [],
       hasFace: file.hasFace || false,
@@ -1963,6 +1938,8 @@ async function confirmUpload() {
   updQuota();
   closeGallery();
   toast(`✓ ${selFiles.size} foto ditambahkan`);
+  
+  // TODO: Upload ke Supabase Storage
 }
 
 // ============================================
@@ -2003,21 +1980,31 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       const mood = document.querySelector('.mc.act')?.dataset.mood || 'surviving';
+      const userId = S.userId;
       const username = S.user.replace('@', '');
       
-      // Tampilkan loading
+      if (!userId) {
+        toast('User ID tidak ditemukan, login dulu');
+        return;
+      }
+      
       sb.disabled = true;
       sb.textContent = 'Menyimpan...';
       
-      // Simpan ke Supabase (coba-coba kolom)
+      // Simpan ke Supabase (tabel rants)
       const rantData = {
+        user_id: userId,
         content: c,
         mood: mood,
-        author: username,
-        created_at: new Date().toISOString()
+        is_anonymous: false,
+        created_at: new Date().toISOString(),
+        response_count: 0,
+        vibes: {},
+        reaction_count: { skull: 0, cry: 0, fire: 0, upside: 0 },
+        ai_metadata: {}
       };
       
-      const success = await sbInsertRant(rantData);
+      const success = await sbInsert('rants', rantData);
       
       // Simpan ke localStorage untuk tampilan cepat
       const newEntry = {
@@ -2039,11 +2026,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ri.value = '';
       if (cc) cc.textContent = '0/500';
       
-      if (success) {
-        toast('✓ Tersimpan di database');
-      } else {
-        toast('⚠ Tersimpan lokal (gagal sync ke Supabase)');
-      }
+      toast(success ? '✓ Tersimpan di database' : '⚠ Tersimpan lokal');
       
       sb.disabled = false;
       sb.textContent = 'Jejakkan & Spill';
