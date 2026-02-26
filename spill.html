@@ -1025,6 +1025,25 @@ header{
   border-top:1px solid var(--bd)
 }
 
+/* SEARCHING INDICATOR */
+.searching-message{
+  align-self:center!important;
+  max-width:90%!important;
+  margin:20px 0
+}
+.searching-message .chat-bubble{
+  background:var(--sfl)!important;
+  color:var(--txs)!important;
+  border:1px dashed var(--gn)!important;
+  font-style:italic;
+  text-align:center;
+  animation:pulse-search 2s infinite
+}
+@keyframes pulse-search{
+  0%,100%{opacity:0.8}
+  50%{opacity:1;border-color:var(--gn)}
+}
+
 /* TYPING CURSOR */
 .typing-cursor{
   display:inline-block;
@@ -1161,7 +1180,7 @@ header{
         <div class="radar-title">VIBE RADAR</div>
         <div class="quota-display">
           <span class="quota-badge" id="quotaBadge">24</span>
-          <span class="quota-text">online siap diajak ngobrol</span>
+          <span class="quota-text">couple online siap diajak ngobrol</span>
         </div>
         <div class="radar-guide">
           <span class="guide-text">✨ 15 menit cukup buat tahu kalian cocok</span>
@@ -1473,28 +1492,137 @@ function selectGender(g) {
 function confirmGender() {
   if(!currentGender) return;
   closeModal('genderModal');
-  findPartner();
+  findRealUserFirst();
 }
 
-function findPartner() {
-  // 30% chance AI fallback, 70% simulasi real user
-  const isAI = Math.random() < 0.3;
-  const oppGender = currentGender==='male' ? 'female' : 'male';
-
-  if (isAI) {
-    const pool = AI_CHARS[oppGender];
-    const char = pool[Math.floor(Math.random()*pool.length)];
-    chatPartner = { name: char.name, isAI: true, gender: oppGender };
-  } else {
-    const names = oppGender==='female'
-      ? ['jessica','amanda','sarah','diana','melanie']
-      : ['kevin','brian','alex','steven','jordan'];
-    chatPartner = {
-      name: names[Math.floor(Math.random()*names.length)],
-      isAI: false, gender: oppGender
-    };
+// ── REAL USER PRIORITY + 1 MINUTE QUEUE ─────────
+async function findRealUserFirst() {
+  // Tampilkan loading indicator di chat room
+  $('chatMessages').innerHTML = '';
+  $('distressBanner').classList.remove('show');
+  $('chatRoom').classList.add('on');
+  
+  // Tampilkan pesan "mencari teman..."
+  const searchingEl = document.createElement('div');
+  searchingEl.className = 'chat-msg other searching-message';
+  searchingEl.id = 'searching-indicator';
+  searchingEl.innerHTML = `<div class="chat-bubble">🔍 sedang dicarikan teman ngobrol...</div>`;
+  $('chatMessages').appendChild(searchingEl);
+  
+  // Timer 1 menit (60 detik)
+  let searchTimeLeft = 60;
+  const searchTimer = setInterval(() => {
+    searchTimeLeft--;
+    const searchEl = $('searching-indicator');
+    if (searchEl) {
+      const bubble = searchEl.querySelector('.chat-bubble');
+      if (bubble) {
+        bubble.textContent = `🔍 mencari teman... (${searchTimeLeft}s)`;
+      }
+    }
+    
+    if (searchTimeLeft <= 0) {
+      clearInterval(searchTimer);
+      // Jika 1 menit tidak dapat real user, fallback ke AI
+      if ($('searching-indicator')) {
+        $('searching-indicator').remove();
+        fallbackToAI();
+      }
+    }
+  }, 1000);
+  
+  // Simulasi cek real user (random 40% chance dapat dalam 1 menit)
+  // Dalam implementasi nyata, ini akan cek ke database/socket
+  const foundReal = Math.random() < 0.4; // 40% chance dapat real user
+  
+  if (foundReal) {
+    // Dapat real user dalam waktu random (5-30 detik)
+    const connectTime = 5000 + Math.random() * 25000;
+    setTimeout(() => {
+      clearInterval(searchTimer);
+      if ($('searching-indicator')) {
+        $('searching-indicator').remove();
+        
+        const oppGender = currentGender === 'male' ? 'female' : 'male';
+        const names = oppGender === 'female' 
+          ? ['jessica', 'amanda', 'sarah', 'diana', 'melanie']
+          : ['kevin', 'brian', 'alex', 'steven', 'jordan'];
+        
+        chatPartner = {
+          name: names[Math.floor(Math.random() * names.length)],
+          isAI: false,
+          gender: oppGender
+        };
+        
+        // Lanjut ke chat
+        startRealChat();
+      }
+    }, connectTime);
   }
-  openChat();
+  // Jika tidak dapat real user, akan fallback ke AI setelah 1 menit
+  // (sudah di-handle oleh timer di atas)
+}
+
+function fallbackToAI() {
+  const oppGender = currentGender === 'male' ? 'female' : 'male';
+  const pool = AI_CHARS[oppGender];
+  const char = pool[Math.floor(Math.random() * pool.length)];
+  
+  chatPartner = { 
+    name: char.name, 
+    isAI: true, 
+    gender: oppGender 
+  };
+  
+  toast('💬 Sementara ditemani AI dulu ya, real user sedang sibuk');
+  startRealChat();
+}
+
+function startRealChat() {
+  chatTimeLeft = 900; // 15 menit
+  $('chatMessages').innerHTML = '';
+  $('distressBanner').classList.remove('show');
+  startTimer();
+  
+  const hour = new Date().getHours();
+  const greets = hour<5  ? ['masih begadang? sama wkwk','eh belum tidur juga?'] :
+                 hour<10 ? ['pagi, udah ngopi belom?','halo, baru bangun?'] :
+                 hour<15 ? ['siang, udah makan?','eh lagi santai ga?'] :
+                 hour<18 ? ['sore, capek ga?','lagi ngapain?'] :
+                           ['malem, lagi santuy?','eh belum tidur?'];
+  
+  setTimeout(() => {
+    const greeting = greets[Math.floor(Math.random()*greets.length)];
+    addMsg(greeting, false);
+  }, 800);
+}
+
+function closeChat() {
+  clearInterval(timerInterval); timerInterval=null;
+  $('chatRoom').classList.remove('on');
+  toast('👋 Sampai jumpa!');
+}
+
+function startTimer() {
+  updateTimer();
+  timerInterval = setInterval(()=>{
+    chatTimeLeft--;
+    updateTimer();
+    if(chatTimeLeft===300) toast('⚠️ Sisa 5 menit! Upgrade untuk lanjut.');
+    if(chatTimeLeft<=0) endChat();
+  }, 1000);
+}
+
+function updateTimer() {
+  const m=Math.floor(chatTimeLeft/60), s=chatTimeLeft%60;
+  $('chatTimer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  $('chatTimer').classList.toggle('warn', chatTimeLeft<=300);
+}
+
+function endChat() {
+  clearInterval(timerInterval); timerInterval=null;
+  $('chatRoom').classList.remove('on');
+  $('upgradeModal').classList.add('on');
 }
 
 // ── TYPING ENGINE ─────────────────────────────────
@@ -1604,55 +1732,7 @@ class TypingEngine {
 
 const typingEngine = new TypingEngine();
 
-// ── CHAT ──────────────────────────────────────────
-function openChat() {
-  chatTimeLeft = 900; // 15 menit
-  $('chatMessages').innerHTML = '';
-  $('distressBanner').classList.remove('show');
-  $('chatRoom').classList.add('on');
-  startTimer();
-  
-  const hour = new Date().getHours();
-  const greets = hour<5  ? ['masih begadang? sama wkwk','eh belum tidur juga?'] :
-                 hour<10 ? ['pagi, udah ngopi belom?','halo, baru bangun?'] :
-                 hour<15 ? ['siang, udah makan?','eh lagi santai ga?'] :
-                 hour<18 ? ['sore, capek ga?','lagi ngapain?'] :
-                           ['malem, lagi santuy?','eh belum tidur?'];
-  
-  setTimeout(() => {
-    const greeting = greets[Math.floor(Math.random()*greets.length)];
-    addMsg(greeting, false);
-  }, 800);
-}
-
-function closeChat() {
-  clearInterval(timerInterval); timerInterval=null;
-  $('chatRoom').classList.remove('on');
-  toast('👋 Sampai jumpa!');
-}
-
-function startTimer() {
-  updateTimer();
-  timerInterval = setInterval(()=>{
-    chatTimeLeft--;
-    updateTimer();
-    if(chatTimeLeft===300) toast('⚠️ Sisa 5 menit! Upgrade untuk lanjut.');
-    if(chatTimeLeft<=0) endChat();
-  }, 1000);
-}
-
-function updateTimer() {
-  const m=Math.floor(chatTimeLeft/60), s=chatTimeLeft%60;
-  $('chatTimer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  $('chatTimer').classList.toggle('warn', chatTimeLeft<=300);
-}
-
-function endChat() {
-  clearInterval(timerInterval); timerInterval=null;
-  $('chatRoom').classList.remove('on');
-  $('upgradeModal').classList.add('on');
-}
-
+// ── CHAT FUNCTIONS ────────────────────────────────
 function getHistory(n) {
   return [...$('chatMessages').querySelectorAll('.chat-msg:not(#typing-indicator-real)')]
     .slice(-n).map(el=>({
