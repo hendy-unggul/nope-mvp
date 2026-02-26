@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JEJAK - FIX UPLOAD</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background: #0A0A0A; color: white; font-family: system-ui; padding: 20px; max-width: 500px; margin: 0 auto; }
+        button { background: #FF4D00; color: black; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer; width: 100%; margin: 10px 0; }
+        #log { background: #111; border: 2px solid #333; padding: 20px; margin-top: 20px; font-family: monospace; min-height: 200px; }
+        .success { color: #39FF14; }
+        .error { color: #FF006E; }
+    </style>
+</head>
+<body>
+
+<h2 style="color: #FF4D00;">🔧 JEJAK - FIX UPLOAD</h2>
+
+<button onclick="testConnection()">1. TEST KONEKSI</button>
+<button onclick="document.getElementById('fileInput').click()">2. PILIH FOTO</button>
+<button onclick="checkDatabase()">3. CEK DATABASE</button>
+
+<div id="log">Ready...</div>
+
+<input type="file" id="fileInput" accept="image/*" style="display: none;">
+
+<script>
+// ============================================
+// SUPABASE CLIENT
+// ============================================
+const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const BUCKET = 'artefacts';
+
+// User test
+const TEST_USER = {
+    id: 'test-user-123',
+    username: 'tester'
+};
+
+// ============================================
+// LOGGING
+// ============================================
+const logEl = document.getElementById('log');
+
+function log(msg, type = 'info') {
+    const color = type === 'error' ? '#FF006E' : type === 'success' ? '#39FF14' : '#00F0FF';
+    logEl.innerHTML += `<div style="color: ${color}; margin: 5px 0; padding: 5px; border-bottom: 1px solid #333;">> ${msg}</div>`;
+    logEl.scrollTop = logEl.scrollHeight;
+    console.log(msg);
+}
+
+function clearLog() {
+    logEl.innerHTML = '';
+}
+
+// ============================================
+// TEST KONEKSI
+// ============================================
+window.testConnection = async function() {
+    clearLog();
+    log('🔍 TEST KONEKSI...');
+    
+    // Test 1: Cek tabel
+    try {
+        log('→ Cek tabel artefacts...');
+        const { data: tableData, error: tableError } = await supabase
+            .from('artefacts')
+            .select('count')
+            .limit(1);
+        
+        if (tableError) {
+            log(`❌ Tabel error: ${tableError.message}`, 'error');
+        } else {
+            log('✓ Tabel artefacts OK', 'success');
+        }
+    } catch (e) {
+        log(`❌ Exception: ${e.message}`, 'error');
+    }
+    
+    // Test 2: Cek bucket
+    try {
+        log('→ Cek bucket artefacts...');
+        const { data: buckets, error: bucketError } = await supabase
+            .storage
+            .listBuckets();
+        
+        if (bucketError) {
+            log(`❌ Bucket error: ${bucketError.message}`, 'error');
+        } else {
+            const bucket = buckets.find(b => b.name === BUCKET);
+            if (bucket) {
+                log(`✓ Bucket ditemukan: ${bucket.name} (public: ${bucket.public})`, 'success');
+            } else {
+                log(`❌ Bucket "${BUCKET}" tidak ditemukan!`, 'error');
+            }
+        }
+    } catch (e) {
+        log(`❌ Exception: ${e.message}`, 'error');
+    }
+};
+
+// ============================================
+// UPLOAD
+// ============================================
+document.getElementById('fileInput').onchange = async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    clearLog();
+    log(`📸 File: ${file.name} (${(file.size/1024).toFixed(1)}KB)`);
+    
+    const fileName = `test-${Date.now()}.${file.name.split('.').pop() || 'jpg'}`;
+    
+    try {
+        // STEP 1: UPLOAD STORAGE
+        log('→ Upload ke storage...');
+        const { error: uploadError } = await supabase.storage
+            .from(BUCKET)
+            .upload(fileName, file);
+        
+        if (uploadError) {
+            log(`❌ Upload gagal: ${uploadError.message}`, 'error');
+            log(`📋 Detail: ${JSON.stringify(uploadError)}`);
+            return;
+        }
+        log('✓ Upload sukses', 'success');
+        
+        // STEP 2: GET URL
+        const { data: { publicUrl } } = supabase.storage
+            .from(BUCKET)
+            .getPublicUrl(fileName);
+        log(`→ URL: ${publicUrl}`);
+        
+        // STEP 3: INSERT DATABASE
+        log('→ Insert ke database...');
+        const { error: insertError } = await supabase
+            .from('artefacts')
+            .insert({
+                user_id: TEST_USER.id,
+                username: TEST_USER.username,
+                url: publicUrl,
+                note: 'test upload',
+                has_face: false,
+                faces: []
+            });
+        
+        if (insertError) {
+            log(`❌ Insert gagal: ${insertError.message}`, 'error');
+            log(`📋 Detail: ${JSON.stringify(insertError)}`);
+        } else {
+            log('✓ Insert sukses!', 'success');
+        }
+        
+    } catch (err) {
+        log(`❌ Error: ${err.message}`, 'error');
+    }
+};
+
+// ============================================
+// CEK DATABASE
+// ============================================
+window.checkDatabase = async function() {
+    clearLog();
+    log('🔍 CEK DATABASE...');
+    
+    try {
+        const { data, error } = await supabase
+            .from('artefacts')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(5);
+        
+        if (error) {
+            log(`❌ Error: ${error.message}`, 'error');
+        } else {
+            log(`✓ Total data: ${data.length}`, 'success');
+            data.forEach((item, i) => {
+                log(`  ${i+1}. ${item.note || 'no note'} - ${new Date(item.created_at).toLocaleTimeString()}`);
+            });
+        }
+    } catch (e) {
+        log(`❌ Exception: ${e.message}`, 'error');
+    }
+};
+
+log('Ready - Klik tombol TEST KONEKSI dulu');
+</script>
+</body>
+</html>
