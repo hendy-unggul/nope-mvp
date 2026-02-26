@@ -160,19 +160,17 @@ export default async function handler(req, res) {
   const charGender = persona.gender;
 
   // Siapkan history dengan format yang benar
-  const history = lastMessages.slice(-8).map(m => ({ 
-    role: m.role, 
-    content: m.content 
-  }));
-  
   // Deteksi apakah user nanya nama
-  const isNameQuestion = /nama (kamu|lu|lo|kmu|luu)|kamu siapa|kenalan|nama lu/i.test(message);
-  
-  // Tambah instruksi khusus kalo lagi nanya nama
-  let nameInstruction = '';
-  if (isNameQuestion) {
-    nameInstruction = `\n\n⚠️ INSTRUKSI KHUSUS: User nanya nama lo. WAJIB jawab dengan "aku ${characterName}" atau "gue ${characterName}" atau "${characterName}". JANGAN balik nanya duluan.`;
-  }
+const isNameQuestion = /nama (kamu|lu|lo|kmu|luu)|kamu siapa|kenalan|nama lu/i.test(message);
+
+// Ambil nama pendek dari karakter (ambil kata pertama sebelum titik)
+const shortCharName = characterName.split('.')[0]; // "little.fairy" → "little"
+
+// Tambah instruksi khusus kalo lagi nanya nama
+let nameInstruction = '';
+if (isNameQuestion) {
+  nameInstruction = `\n\n📌 INSTRUKSI PENTING: User nanya nama lo. WAJIB jawab PAKAI NAMA PENDEK "${shortCharName}". Contoh: "aku ${shortCharName}", "gue ${shortCharName}", "panggil aja ${shortCharName}". JANGAN PAKAI NAMA LENGKAP "${characterName}"!`;
+}
 
   // Cek apakah ada pola repetisi di history
   const lastReplies = history.filter(m => m.role === 'assistant').slice(-3);
