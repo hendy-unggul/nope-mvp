@@ -17,11 +17,7 @@
   --text-secondary:#888;
   --text-muted:#555;
   --primary:#FF4D00;
-  --emosi:#00F0FF;
-  --agak:#FF006E;
   --surviving:#39FF14;
-  --chaotic:#00F0FF;
-  --doom:#8B5CF6;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{
@@ -624,7 +620,7 @@ header{
   color:var(--text);
 }
 
-/* MODAL GENDER */
+/* GENDER MODAL */
 .gender-modal {
   display: none;
   position: fixed;
@@ -774,7 +770,7 @@ header{
   box-shadow: none;
 }
 
-/* MODAL UPGRADE */
+/* UPGRADE MODAL */
 .upgrade-modal {
   display: none;
   position: fixed;
@@ -969,21 +965,23 @@ header{
   background: var(--surface-light);
 }
 
-/* CHAT ROOM */
+/* CHAT ROOM - NATIVE CASUAL */
 .chat-room {
   display: none;
   position: fixed;
   inset: 0;
   background: var(--bg);
-  z-index: 15000;
+  z-index: 20000;
   flex-direction: column;
+  width: 100%;
+  height: 100%;
 }
 
 .chat-room.on { display: flex; }
 
 .chat-header {
-  padding: 16px 20px;
-  border-bottom: 3px solid var(--primary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -992,30 +990,48 @@ header{
 
 .chat-info {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 }
 
-.chat-with {
-  font-size: 12px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 1px;
+.chat-eyes {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  height: 32px;
 }
 
-.chat-name {
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--primary);
+.eye-left, .eye-right {
+  font-size: 24px;
+  display: inline-block;
+  animation: glance 3s infinite ease-in-out;
+}
+
+.eye-left {
+  animation-delay: 0s;
+}
+
+.eye-right {
+  animation-delay: 0.2s;
+}
+
+@keyframes glance {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-2px); }
+  30% { transform: translateX(2px); }
+  45% { transform: translateX(-1px); }
+  60% { transform: translateX(1px); }
+  75% { transform: translateX(0); }
 }
 
 .chat-timer {
-  background: var(--surface-light);
-  border: 2px solid var(--border);
-  padding: 8px 16px;
-  font-size: 20px;
-  font-weight: 800;
-  font-family: monospace;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
   color: var(--surviving);
+  background: var(--surface-light);
+  padding: 4px 12px;
+  border-radius: 30px;
 }
 
 .chat-timer.warning {
@@ -1023,25 +1039,39 @@ header{
   animation: pulse 1s infinite;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+.chat-close {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 20px;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.chat-close:hover {
+  background: var(--surface-light);
+  color: var(--text);
 }
 
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   background: var(--bg);
 }
 
 .chat-message {
   display: flex;
   flex-direction: column;
-  max-width: 80%;
+  max-width: 85%;
 }
 
 .chat-message.own {
@@ -1053,49 +1083,75 @@ header{
 }
 
 .chat-bubble {
-  padding: 12px 16px;
-  border-radius: 20px;
-  font-size: 14px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 15px;
   line-height: 1.5;
   word-wrap: break-word;
-  border: 2px solid var(--border);
 }
 
 .own .chat-bubble {
   background: var(--primary);
   color: var(--bg);
-  border-color: var(--primary);
   border-bottom-right-radius: 4px;
 }
 
 .other .chat-bubble {
   background: var(--surface);
   color: var(--text);
+  border: 1px solid var(--border);
   border-bottom-left-radius: 4px;
 }
 
 .chat-meta {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-muted);
   margin: 4px 8px 0;
 }
 
-.chat-input-area {
-  padding: 16px;
-  border-top: 3px solid var(--border);
+/* Typing indicator */
+.typing {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  padding: 12px 16px !important;
   display: flex;
-  gap: 12px;
+  gap: 4px;
+}
+
+.dot-typing {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  animation: typing 1.4s infinite;
+}
+
+.dot-typing:nth-child(2) { animation-delay: 0.2s; }
+.dot-typing:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+.chat-input-area {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: 8px;
   background: var(--surface);
 }
 
 .chat-input {
   flex: 1;
   background: var(--bg);
-  border: 2px solid var(--border);
+  border: 1px solid var(--border);
   color: var(--text);
   padding: 12px 16px;
-  font-size: 14px;
+  font-size: 16px;
   font-family: inherit;
+  border-radius: 24px;
+  -webkit-appearance: none;
 }
 
 .chat-input:focus {
@@ -1107,11 +1163,12 @@ header{
   background: var(--primary);
   color: var(--bg);
   border: none;
-  padding: 0 24px;
+  padding: 0 20px;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
   cursor: pointer;
+  border-radius: 24px;
   transition: all 0.2s;
 }
 
@@ -1124,7 +1181,7 @@ header{
   font-size: 10px;
   color: var(--text-muted);
   text-align: center;
-  padding: 4px;
+  padding: 6px;
   background: var(--surface);
   border-top: 1px solid var(--border);
 }
@@ -1321,14 +1378,17 @@ header{
   </div>
 </div>
 
-<!-- CHAT ROOM -->
+<!-- CHAT ROOM - NATIVE CASUAL -->
 <div class="chat-room" id="chatRoom">
   <div class="chat-header">
     <div class="chat-info">
-      <span class="chat-with">ngobrol dengan</span>
-      <span class="chat-name" id="chatPartnerName">@beby.manis</span>
+      <div class="chat-eyes">
+        <span class="eye-left">👀</span>
+        <span class="eye-right">👀</span>
+      </div>
     </div>
     <div class="chat-timer" id="chatTimer">30:00</div>
+    <button class="chat-close" onclick="closeChat()">✕</button>
   </div>
   
   <div class="chat-messages" id="chatMessages"></div>
@@ -1366,13 +1426,13 @@ header{
 
 <script>
 // ============================================
-// VIBE CHECK STATE
+// STATE
 // ============================================
 let currentGender = null;
 let chatPartner = null;
 let chatMessages = [];
 let chatTimerInterval = null;
-let chatTimeLeft = 30 * 60; // 30 menit dalam detik
+let chatTimeLeft = 30 * 60;
 let selectedPlan = null;
 
 // AI Characters pool
@@ -1392,99 +1452,7 @@ const AI_CHARACTERS = {
     { name: 'cinnamon.girl', avatar: '🥨' }
   ]
 };
-// ============================================
-// TYPING INDICATOR REALISTIS
-// ============================================
-function simulateTyping(characterName, messageLength) {
-  const typingEl = document.createElement('div');
-  typingEl.className = 'chat-message other';
-  typingEl.innerHTML = `
-    <div class="chat-bubble typing">
-      <span class="dot-typing"></span>
-      <span class="dot-typing"></span>
-      <span class="dot-typing"></span>
-    </div>
-  `;
-  
-  document.getElementById('chatMessages').appendChild(typingEl);
-  
-  // Hitung delay berdasarkan panjang pesan (realistis)
-  // Rata-rata orang ngetik 40 kata/menit = 0.67 kata/detik
-  // Asumsi 1 kata = 5 karakter
-  const wordCount = messageLength / 5;
-  const baseDelay = 1000; // 1 detik minimal
-  const typingDelay = baseDelay + (wordCount * 150); // 150ms per kata
-  
-  // Tambah variasi random (±30%)
-  const finalDelay = typingDelay * (0.7 + Math.random() * 0.6);
-  
-  // Hapus typing indicator setelah delay
-  setTimeout(() => {
-    typingEl.remove();
-  }, finalDelay);
-  
-  return finalDelay;
-}
 
-// Update fungsi sendChatMessage
-async function sendChatMessage() {
-  const input = document.getElementById('chatInput');
-  const text = input.value.trim();
-  if (!text) return;
-  
-  // Add user message
-  addMessage(text, true);
-  input.value = '';
-  
-  // Show typing indicator
-  const typingDelay = simulateTyping(chatPartner.name, text.length);
-  
-  // Kirim ke API setelah typing selesai
-  setTimeout(async () => {
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: text,
-          characterName: chatPartner.name,
-          userName: currentUser,
-          room: 'private',
-          lastMessages: getLastMessages(5)
-        })
-      });
-      
-      const data = await response.json();
-      if (data.reply) {
-        addMessage(data.reply, false);
-      }
-    } catch (e) {
-      console.error('Chat error:', e);
-      addMessage('*error koneksi*', false);
-    }
-  }, typingDelay);
-}
-
-// Ambil last messages untuk konteks
-function getLastMessages(count) {
-  const messages = [];
-  const msgElements = document.querySelectorAll('#chatMessages .chat-message');
-  
-  for (let i = Math.max(0, msgElements.length - count); i < msgElements.length; i++) {
-    const el = msgElements[i];
-    const isOwn = el.classList.contains('own');
-    const bubble = el.querySelector('.chat-bubble');
-    
-    if (bubble && !bubble.classList.contains('typing')) {
-      messages.push({
-        role: isOwn ? 'user' : 'assistant',
-        content: bubble.textContent
-      });
-    }
-  }
-  
-  return messages;
-}
 // ============================================
 // RADAR EFFECTS
 // ============================================
@@ -1507,7 +1475,6 @@ function generateRadarDots() {
   
   container.innerHTML = '';
   
-  // Generate 8-15 dots random
   const dotCount = 8 + Math.floor(Math.random() * 8);
   
   for (let i = 0; i < dotCount; i++) {
@@ -1530,7 +1497,6 @@ function generateRadarDots() {
     container.appendChild(dot);
   }
   
-  // Add AI dots
   for (let i = 0; i < 3; i++) {
     const gender = Math.random() > 0.5 ? 'purple' : 'red';
     const angle = Math.random() * Math.PI * 2;
@@ -1616,12 +1582,10 @@ function startVibeCheck() {
 }
 
 function selectGender(gender) {
-  // Remove selected class from all options
   document.querySelectorAll('.gender-option').forEach(opt => {
     opt.classList.remove('selected');
   });
   
-  // Add selected class to clicked option
   document.querySelector(`.gender-option[data-gender="${gender}"]`).classList.add('selected');
   
   currentGender = gender;
@@ -1631,19 +1595,15 @@ function selectGender(gender) {
 function confirmGender() {
   if (!currentGender) return;
   
-  // Close gender modal
   document.getElementById('genderModal').classList.remove('on');
   
-  // Find chat partner (real user first, then AI)
   findChatPartner();
 }
 
 function findChatPartner() {
-  // Simulate finding real user (70% chance)
   const foundRealUser = Math.random() < 0.7;
   
   if (foundRealUser) {
-    // Fake real user
     const oppositeGender = currentGender === 'male' ? 'female' : 'male';
     const names = oppositeGender === 'female' 
       ? ['jessica', 'amanda', 'sarah', 'diana', 'melanie']
@@ -1654,10 +1614,7 @@ function findChatPartner() {
       isAI: false,
       gender: oppositeGender
     };
-    
-    toast(`✨ Bertemu dengan @${chatPartner.name}`);
   } else {
-    // AI partner
     const oppositePool = currentGender === 'male' ? AI_CHARACTERS.female : AI_CHARACTERS.male;
     const aiChar = oppositePool[Math.floor(Math.random() * oppositePool.length)];
     
@@ -1671,38 +1628,15 @@ function findChatPartner() {
     toast(`💬 Bertemu dengan @${chatPartner.name} (AI)`);
   }
   
-  // Open chat room
   openChatRoom();
 }
 
-function openChatRoom() {
-  // Reset chat
-  chatMessages = [];
-  chatTimeLeft = 30 * 60;
-  
-  // Clear messages
-  document.getElementById('chatMessages').innerHTML = '';
-  
-  // Show chat room
-  document.getElementById('chatRoom').classList.add('on');
-  
-  // Start timer
-  startChatTimer();
-  
-  // Add casual greeting based on partner type and time
-  setTimeout(() => {
-    const greeting = getCasualGreeting(chatPartner);
-    addMessage(greeting, false);
-  }, 800);
-}
-
-function getCasualGreeting(partner) {
+function getCasualGreeting() {
   const hour = new Date().getHours();
   const greetings = [];
   
-  if (partner.isAI) {
-    // AI greetings
-    if (partner.gender === 'female') {
+  if (chatPartner && chatPartner.isAI) {
+    if (chatPartner.gender === 'female') {
       greetings.push(
         "pa kabar cuy?",
         "haloo, lg ngapain?",
@@ -1720,7 +1654,6 @@ function getCasualGreeting(partner) {
       );
     }
   } else {
-    // Real user greetings (simulasi)
     greetings.push(
       "halo juga, pa kabar?",
       "eh ada yang chat, lg apa?",
@@ -1729,7 +1662,6 @@ function getCasualGreeting(partner) {
     );
   }
   
-  // Add time-based greeting
   if (hour < 5) {
     greetings.push("eh masih begadang? sama wkwk");
   } else if (hour < 10) {
@@ -1746,6 +1678,32 @@ function getCasualGreeting(partner) {
   
   return greetings[Math.floor(Math.random() * greetings.length)];
 }
+
+function openChatRoom() {
+  chatMessages = [];
+  chatTimeLeft = 30 * 60;
+  
+  document.getElementById('chatMessages').innerHTML = '';
+  document.getElementById('chatRoom').classList.add('on');
+  
+  startChatTimer();
+  
+  setTimeout(() => {
+    const greeting = getCasualGreeting();
+    addMessage(greeting, false);
+  }, 800);
+}
+
+function closeChat() {
+  if (chatTimerInterval) {
+    clearInterval(chatTimerInterval);
+    chatTimerInterval = null;
+  }
+  
+  document.getElementById('chatRoom').classList.remove('on');
+  toast('👋 Sampai jumpa!');
+}
+
 function startChatTimer() {
   updateTimerDisplay();
   
@@ -1753,12 +1711,10 @@ function startChatTimer() {
     chatTimeLeft--;
     updateTimerDisplay();
     
-    // Warning at 5 minutes
     if (chatTimeLeft === 300) {
       toast('⚠️ Sisa 5 menit! Upgrade untuk lanjut.');
     }
     
-    // Time's up
     if (chatTimeLeft <= 0) {
       endChatSession();
     }
@@ -1780,46 +1736,96 @@ function updateTimerDisplay() {
 }
 
 function endChatSession() {
-  // Stop timer
   if (chatTimerInterval) {
     clearInterval(chatTimerInterval);
     chatTimerInterval = null;
   }
   
-  // Hide chat room
   document.getElementById('chatRoom').classList.remove('on');
-  
-  // Show upgrade modal
   document.getElementById('upgradeModal').classList.add('on');
   
   toast('⏰ Sesi chat selesai');
 }
 
-function sendChatMessage() {
+function simulateTyping(messageLength) {
+  const typingEl = document.createElement('div');
+  typingEl.className = 'chat-message other';
+  typingEl.innerHTML = `
+    <div class="chat-bubble typing">
+      <span class="dot-typing"></span>
+      <span class="dot-typing"></span>
+      <span class="dot-typing"></span>
+    </div>
+  `;
+  
+  document.getElementById('chatMessages').appendChild(typingEl);
+  
+  const wordCount = messageLength / 5;
+  const baseDelay = 1000;
+  const typingDelay = baseDelay + (wordCount * 150);
+  const finalDelay = typingDelay * (0.7 + Math.random() * 0.6);
+  
+  setTimeout(() => {
+    typingEl.remove();
+  }, finalDelay);
+  
+  return finalDelay;
+}
+
+function getLastMessages(count) {
+  const messages = [];
+  const msgElements = document.querySelectorAll('#chatMessages .chat-message');
+  
+  for (let i = Math.max(0, msgElements.length - count); i < msgElements.length; i++) {
+    const el = msgElements[i];
+    const isOwn = el.classList.contains('own');
+    const bubble = el.querySelector('.chat-bubble');
+    
+    if (bubble && !bubble.classList.contains('typing')) {
+      messages.push({
+        role: isOwn ? 'user' : 'assistant',
+        content: bubble.textContent
+      });
+    }
+  }
+  
+  return messages;
+}
+
+async function sendChatMessage() {
   const input = document.getElementById('chatInput');
   const text = input.value.trim();
-  
   if (!text) return;
   
-  // Add user message
   addMessage(text, true);
   input.value = '';
   
-  // Simulate reply (only if partner is AI or simulate real user typing)
-  setTimeout(() => {
-    if (chatPartner.isAI) {
-      // AI reply
-      const replies = [
-        'iya, aku setuju banget!',
-        'wkwk ngakak bacanya',
-        'ceritain lebih lanjut dong',
-        'aku juga ngerasain kok',
-        'seriusan? gila sih'
-      ];
-      const reply = replies[Math.floor(Math.random() * replies.length)];
-      addMessage(reply, false);
+  const typingDelay = simulateTyping(text.length);
+  
+  setTimeout(async () => {
+    if (chatPartner && chatPartner.isAI) {
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: text,
+            characterName: chatPartner.name,
+            userName: 'user',
+            room: 'private',
+            lastMessages: getLastMessages(5)
+          })
+        });
+        
+        const data = await response.json();
+        if (data.reply) {
+          addMessage(data.reply, false);
+        }
+      } catch (e) {
+        console.error('Chat error:', e);
+        addMessage('*error koneksi*', false);
+      }
     } else {
-      // Random reply (simulate real user)
       if (Math.random() < 0.7) {
         const replies = [
           'haha iya nih',
@@ -1832,7 +1838,7 @@ function sendChatMessage() {
         addMessage(reply, false);
       }
     }
-  }, 1000 + Math.random() * 2000);
+  }, typingDelay);
 }
 
 function addMessage(text, isOwn) {
@@ -1850,36 +1856,21 @@ function addMessage(text, isOwn) {
   
   messagesEl.appendChild(messageDiv);
   
-  // FIFO: keep only last 20 messages
   while (messagesEl.children.length > 20) {
     messagesEl.removeChild(messagesEl.firstChild);
   }
   
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
-function closeChat() {
-  // Stop timer
-  if (chatTimerInterval) {
-    clearInterval(chatTimerInterval);
-    chatTimerInterval = null;
-  }
-  
-  // Hide chat room
-  document.getElementById('chatRoom').classList.remove('on');
-  
-  // Optional: show confirmation
-  toast('👋 Sampai jumpa!');
-}
+
 // ============================================
 // UPGRADE FLOW
 // ============================================
 function selectPlan(plan) {
-  // Remove selected class from all cards
   document.querySelectorAll('.pricing-card').forEach(card => {
     card.classList.remove('selected');
   });
   
-  // Add selected class to clicked card
   document.querySelector(`.pricing-card[data-plan="${plan}"]`).classList.add('selected');
   
   selectedPlan = plan;
@@ -1889,20 +1880,14 @@ function selectPlan(plan) {
 function upgradeNow() {
   if (!selectedPlan) return;
   
-  const planDetails = selectedPlan === 'weekly' 
-    ? { price: 10000, days: 7, hoursPerDay: 2 }
-    : { price: 50000, days: 30, hoursPerDay: 3 };
-  
   toast(`🔄 Proses upgrade ${selectedPlan}... (integrasi payment nanti)`);
   
-  // Simulate success
   setTimeout(() => {
-    toast(`✅ Upgrade berhasil! ${planDetails.days} hari @ ${planDetails.hoursPerDay}jam/hari`);
+    toast(`✅ Upgrade berhasil!`);
     closeUpgradeModal();
     
-    // Reopen chat with extended time (simulate)
     if (chatPartner) {
-      chatTimeLeft = planDetails.hoursPerDay * 3600;
+      chatTimeLeft = selectedPlan === 'weekly' ? 2 * 3600 : 3 * 3600;
       document.getElementById('chatRoom').classList.add('on');
       startChatTimer();
       addMessage('Obrolan dilanjut!', false);
@@ -1954,7 +1939,6 @@ function refreshSpills() {
 document.addEventListener('DOMContentLoaded', () => {
   initRadar();
   
-  // Cleanup intervals on page unload
   window.addEventListener('beforeunload', () => {
     if (radarInterval) clearInterval(radarInterval);
     if (sweepInterval) clearInterval(sweepInterval);
