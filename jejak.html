@@ -71,6 +71,26 @@ header{
   padding:4px 8px;
   border-radius:4px;
 }
+.dot{
+  width:8px;
+  height:8px;
+  background:var(--aq);
+  border-radius:50%;
+  animation:blink 2s infinite;
+}
+.dot.off{
+  background:var(--at);
+  animation:none;
+}
+@keyframes blink{
+  0%,100%{opacity:1}
+  50%{opacity:.3}
+}
+.top-right{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
 .hero-s{
   margin:0 -16px 24px
 }
@@ -380,7 +400,10 @@ header{
     <div class="logo">JEJAK</div>
     <div class="tagline">no filter, just truth</div>
   </div>
-  <div class="huser" id="huser">@anon</div>
+  <div class="top-right">
+    <div class="huser" id="huser">@anon</div>
+    <div class="dot" id="dot"></div>
+  </div>
 </header>
 
 <!-- HERO -->
@@ -390,7 +413,7 @@ header{
     <div class="hnote" id="hnote">"jeda"</div>
     <div class="upctrls">
       <div class="qtimer" id="qtimer">Window aktif</div>
-      <button class="upbtn" id="upbtn">+<span class="upcnt" id="ucnt" style="display:none">0</span></button>
+      <button class="upbtn" id="upbtn">+<span class="upcnt" id="ucnt">0</span></button>
     </div>
   </div>
 </section>
@@ -400,10 +423,10 @@ header{
   <textarea class="ri" id="ri" placeholder="What's eating you alive right now?" maxlength="500"></textarea>
   
   <div class="mgrid">
-    <div class="mc act" data-mood="surviving" onclick="selMood('surviving')">😮‍💨 Surviving</div>
-    <div class="mc" data-mood="thriving" onclick="selMood('thriving')">✨ Thriving</div>
-    <div class="mc" data-mood="chaotic" onclick="selMood('chaotic')">🌀 Chaotic</div>
-    <div class="mc" data-mood="doom" onclick="selMood('doom')">🛌 Doom</div>
+    <div class="mc act" data-mood="surviving" onclick="window.selMood('surviving')">😮‍💨 Surviving</div>
+    <div class="mc" data-mood="thriving" onclick="window.selMood('thriving')">✨ Thriving</div>
+    <div class="mc" data-mood="chaotic" onclick="window.selMood('chaotic')">🌀 Chaotic</div>
+    <div class="mc" data-mood="doom" onclick="window.selMood('doom')">🛌 Doom</div>
   </div>
   
   <button class="sbtn" id="sbtn">JEJAKKAN & SPILL</button>
@@ -438,8 +461,8 @@ header{
     <div class="ggrid" id="ggrid"></div>
     <input type="text" class="noti" id="noti" placeholder="Notasi (opsional)">
     <div style="display:flex; gap:8px; justify-content:flex-end;">
-      <button class="sbtn" onclick="closeGallery()" style="background:var(--sf); color:var(--tx);">Batal</button>
-      <button class="sbtn" onclick="confirmUpload()">Konfirmasi</button>
+      <button class="sbtn" onclick="window.closeGallery()" style="background:var(--sf); color:var(--tx);">Batal</button>
+      <button class="sbtn" onclick="window.confirmUpload()">Konfirmasi</button>
     </div>
   </div>
 </div>
@@ -458,304 +481,323 @@ header{
 
 <script>
 // ============================================
-// SUPABASE - FINAL VERSION
+// SUPABASE - PASTI HANYA SEKALI
 // ============================================
-const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+const SB_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+// PAKAI NAMA UNIK - BUKAN "supabase"
+const sb = supabase.createClient(SB_URL, SB_KEY);
 const BUCKET = 'artefacts';
 
 // ============================================
-// STATE
+// STATE - PASTI ADA
 // ============================================
-const S = {
-  user: localStorage.getItem('jejak_username') || '@anon',
-  userId: localStorage.getItem('user_id') || 'user-' + Date.now(),
-  entries: [],
-  artefacts: []
-};
+const USER_ID = 'user-' + Date.now();
+const USERNAME = '@anon';
 
-// Save user ID
-if (!localStorage.getItem('user_id')) {
-  localStorage.setItem('user_id', S.userId);
+// Cek localStorage
+let savedUser = localStorage.getItem('jejak_username');
+if (!savedUser) {
+    localStorage.setItem('jejak_username', USERNAME);
 }
 
 // Upload quota
 let uploads = parseInt(localStorage.getItem('jejak_uploads') || '0');
 let quotaStart = localStorage.getItem('jejak_quota_start') || Date.now();
 
+// Data
+let myEntries = [];
+let myArtefacts = [];
+
 // Upload temp
 let pendingFiles = [];
 let selectedIndexes = new Set();
 
 // ============================================
-// HELPERS
+// HELPER FUNCTIONS
 // ============================================
-const $ = id => document.getElementById(id);
-
-function toast(msg, isError = false) {
-  const t = $('toast');
-  t.textContent = msg;
-  t.style.background = isError ? '#FF006E' : '#FFF';
-  t.style.color = isError ? '#FFF' : '#000';
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+function $(id) {
+    return document.getElementById(id);
 }
 
-function showProc() {
-  $('proc').classList.add('on');
+function showToast(msg, isError = false) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.style.background = isError ? '#FF006E' : '#FFF';
+    t.style.color = isError ? '#FFF' : '#000';
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-function hideProc() {
-  $('proc').classList.remove('on');
+function showLoading() {
+    $('proc').classList.add('on');
 }
 
-window.selMood = function(mood) {
-  document.querySelectorAll('.mc').forEach(c => 
-    c.classList.toggle('act', c.dataset.mood === mood)
-  );
-};
+function hideLoading() {
+    $('proc').classList.remove('on');
+}
+
+// Update dot status
+function updateDot(status) {
+    const dot = $('dot');
+    if (status === 'online') {
+        dot.className = 'dot';
+    } else {
+        dot.className = 'dot off';
+    }
+}
 
 // ============================================
 // QUOTA
 // ============================================
 function updateQuota() {
-  const now = Date.now();
-  const windowDays = 3 * 86400000;
-  
-  if (now - parseInt(quotaStart) > windowDays) {
-    uploads = 0;
-    quotaStart = now;
-    localStorage.setItem('jejak_uploads', '0');
-    localStorage.setItem('jejak_quota_start', now.toString());
-  }
-  
-  const rem = Math.max(0, windowDays - (now - parseInt(quotaStart)));
-  const days = Math.ceil(rem / 86400000);
-  const slots = 6 - uploads;
-  
-  $('qtimer').innerHTML = `${slots} slot tersisa • ${days} hari`;
-  $('ucnt').textContent = uploads;
-  $('ucnt').style.display = uploads > 0 ? 'block' : 'none';
+    const now = Date.now();
+    const windowDays = 3 * 86400000;
+    
+    if (now - parseInt(quotaStart) > windowDays) {
+        uploads = 0;
+        quotaStart = now;
+        localStorage.setItem('jejak_uploads', '0');
+        localStorage.setItem('jejak_quota_start', now.toString());
+    }
+    
+    const rem = Math.max(0, windowDays - (now - parseInt(quotaStart)));
+    const days = Math.ceil(rem / 86400000);
+    const slots = 6 - uploads;
+    
+    $('qtimer').innerHTML = `${slots} slot • ${days} hari`;
+    $('ucnt').textContent = uploads;
+    $('ucnt').style.display = uploads > 0 ? 'block' : 'none';
 }
+
+// ============================================
+// MOOD SELECTOR
+// ============================================
+window.selMood = function(mood) {
+    document.querySelectorAll('.mc').forEach(c => 
+        c.classList.toggle('act', c.dataset.mood === mood)
+    );
+};
 
 // ============================================
 // LOAD DATA
 // ============================================
 async function loadRants() {
-  const { data, error } = await supabase
-    .from('rants')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(10);
-  
-  if (!error && data) S.entries = data;
-  renderEntries();
+    try {
+        const { data, error } = await sb
+            .from('rants')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(10);
+        
+        if (!error && data) {
+            myEntries = data;
+        }
+    } catch (e) {
+        console.log('Load rants error:', e);
+    }
+    renderEntries();
 }
 
 async function loadArtefacts() {
-  const { data, error } = await supabase
-    .from('artefacts')
-    .select('*')
-    .eq('user_id', S.userId)
-    .order('created_at', { ascending: false })
-    .limit(6);
-  
-  if (!error && data) S.artefacts = data;
-  renderTray();
+    try {
+        const { data, error } = await sb
+            .from('artefacts')
+            .select('*')
+            .eq('user_id', USER_ID)
+            .order('created_at', { ascending: false })
+            .limit(6);
+        
+        if (!error && data) {
+            myArtefacts = data;
+        }
+    } catch (e) {
+        console.log('Load artefacts error:', e);
+    }
+    renderTray();
 }
 
 // ============================================
 // RENDER
 // ============================================
 function renderEntries() {
-  const container = $('econ');
-  if (!S.entries.length) {
-    container.innerHTML = '<div style="text-align:center; padding:32px; color:var(--txs);">Belum ada jejak</div>';
-    return;
-  }
-  
-  container.innerHTML = S.entries.map(e => `
-    <div class="entry">
-      <div class="ehdr">
-        <span>@${e.username || 'anon'}</span>
-        <span style="color:var(--txs);">${new Date(e.created_at).toLocaleDateString('id-ID')}</span>
-      </div>
-      <div class="econt">${e.content}</div>
-    </div>
-  `).join('');
+    const container = $('econ');
+    if (!myEntries.length) {
+        container.innerHTML = '<div style="text-align:center; padding:32px; color:var(--txs);">Belum ada jejak</div>';
+        return;
+    }
+    
+    container.innerHTML = myEntries.map(e => `
+        <div class="entry">
+            <div class="ehdr">
+                <span>@${e.username || 'anon'}</span>
+                <span style="color:var(--txs);">${new Date(e.created_at).toLocaleDateString('id-ID')}</span>
+            </div>
+            <div class="econt">${e.content}</div>
+        </div>
+    `).join('');
 }
 
 function renderTray() {
-  const container = $('tgrid');
-  
-  if (!S.artefacts.length) {
-    container.innerHTML = '<div class="ti empty" onclick="$(\'upbtn\').click()">+</div>'.repeat(6);
-    return;
-  }
-  
-  let html = S.artefacts.map(a => `
-    <div class="ti" onclick="setHero('${a.id}')">
-      <img src="${a.url}" alt="${a.note || 'memory'}">
-    </div>
-  `).join('');
-  
-  for (let i = S.artefacts.length; i < 6; i++) {
-    html += '<div class="ti empty" onclick="$(\'upbtn\').click()">+</div>';
-  }
-  
-  container.innerHTML = html;
+    const container = $('tgrid');
+    
+    if (!myArtefacts.length) {
+        let html = '';
+        for (let i = 0; i < 6; i++) {
+            html += '<div class="ti empty" onclick="document.getElementById(\'upbtn\').click()">+</div>';
+        }
+        container.innerHTML = html;
+        return;
+    }
+    
+    let html = myArtefacts.map(a => `
+        <div class="ti" onclick="setHero('${a.id}')">
+            <img src="${a.url}" alt="${a.note || 'memory'}">
+        </div>
+    `).join('');
+    
+    for (let i = myArtefacts.length; i < 6; i++) {
+        html += '<div class="ti empty" onclick="document.getElementById(\'upbtn\').click()">+</div>';
+    }
+    
+    container.innerHTML = html;
 }
 
 window.setHero = function(id) {
-  const a = S.artefacts.find(a => a.id === id);
-  if (a) {
-    $('himg').src = a.url;
-    $('hnote').innerHTML = `"${a.note || 'memory'}"`;
-  }
+    const a = myArtefacts.find(a => a.id === id);
+    if (a) {
+        $('himg').src = a.url;
+        $('hnote').innerHTML = `"${a.note || 'memory'}"`;
+    }
 };
 
 // ============================================
 // UPLOAD
 // ============================================
 $('upbtn').onclick = () => {
-  if (uploads >= 6) {
-    toast('Quota habis (max 6 foto per 3 hari)');
-    return;
-  }
-  $('finput').click();
+    if (uploads >= 6) {
+        showToast('Quota habis (max 6 foto per 3 hari)');
+        return;
+    }
+    $('finput').click();
 };
 
 $('finput').onchange = (e) => {
-  const files = Array.from(e.target.files).slice(0, 6);
-  if (!files.length) return;
-  
-  pendingFiles = files.map(f => ({
-    file: f,
-    preview: URL.createObjectURL(f)
-  }));
-  
-  selectedIndexes = new Set(pendingFiles.map((_, i) => i));
-  openGallery();
+    const files = Array.from(e.target.files).slice(0, 6);
+    if (!files.length) return;
+    
+    pendingFiles = files.map(f => ({
+        file: f,
+        preview: URL.createObjectURL(f)
+    }));
+    
+    selectedIndexes = new Set(pendingFiles.map((_, i) => i));
+    openGallery();
 };
 
 function openGallery() {
-  const grid = $('ggrid');
-  grid.innerHTML = '';
-  
-  pendingFiles.forEach((f, i) => {
-    const div = document.createElement('div');
-    div.className = 'gi sel';
-    div.innerHTML = `<img src="${f.preview}">`;
-    div.onclick = () => {
-      if (selectedIndexes.has(i)) {
-        selectedIndexes.delete(i);
-        div.classList.remove('sel');
-      } else {
-        selectedIndexes.add(i);
-        div.classList.add('sel');
-      }
-    };
-    grid.appendChild(div);
-  });
-  
-  $('gmodal').classList.add('on');
+    const grid = $('ggrid');
+    grid.innerHTML = '';
+    
+    pendingFiles.forEach((f, i) => {
+        const div = document.createElement('div');
+        div.className = 'gi sel';
+        div.innerHTML = `<img src="${f.preview}">`;
+        div.onclick = () => {
+            if (selectedIndexes.has(i)) {
+                selectedIndexes.delete(i);
+                div.classList.remove('sel');
+            } else {
+                selectedIndexes.add(i);
+                div.classList.add('sel');
+            }
+        };
+        grid.appendChild(div);
+    });
+    
+    $('gmodal').classList.add('on');
 }
 
 window.closeGallery = function() {
-  $('gmodal').classList.remove('on');
-  pendingFiles = [];
-  selectedIndexes.clear();
+    $('gmodal').classList.remove('on');
+    pendingFiles = [];
+    selectedIndexes.clear();
 };
 
 window.confirmUpload = async function() {
-  if (!selectedIndexes.size) {
-    toast('Pilih minimal 1 foto');
-    return;
-  }
-  
-  closeGallery();
-  showProc();
-  
-  const note = $('noti').value.trim() || 'memory';
-  const username = S.user.replace('@', '');
-  let success = 0;
-  
-  for (const i of selectedIndexes) {
-    const file = pendingFiles[i].file;
-    const ext = file.name.split('.').pop() || 'jpg';
-    const fileName = `${username}/${Date.now()}_${i}.${ext}`;
-    
-    try {
-      // Upload ke storage
-      const { error: uploadError } = await supabase.storage
-        .from(BUCKET)
-        .upload(fileName, file);
-      
-      if (uploadError) throw uploadError;
-      
-      // Get URL
-      const { data: { publicUrl } } = supabase.storage
-        .from(BUCKET)
-        .getPublicUrl(fileName);
-      
-      // Insert database - user_id sudah TEXT, bisa pakai string apapun
-      const { error: insertError } = await supabase
-        .from('artefacts')
-        .insert({
-          user_id: S.userId,  // BISA string biasa, sudah diubah ke TEXT
-          username: username,
-          url: publicUrl,
-          note: note,
-          has_face: false,
-          faces: []
-        });
-      
-      if (insertError) throw insertError;
-      success++;
-      
-    } catch (err) {
-      console.error(err);
-      toast(err.message, true);
+    if (!selectedIndexes.size) {
+        showToast('Pilih minimal 1 foto');
+        return;
     }
-  }
-  
-  hideProc();
-  
-  if (success > 0) {
-    uploads += success;
-    localStorage.setItem('jejak_uploads', uploads.toString());
-    await loadArtefacts();
-    if (S.artefacts.length) setHero(S.artefacts[0].id);
-    toast(`✓ ${success} foto berhasil diupload!`);
-  }
-  
-  updateQuota();
+    
+    closeGallery();
+    showLoading();
+    
+    const note = $('noti').value.trim() || 'memory';
+    const username = 'anon';
+    let success = 0;
+    
+    for (const i of selectedIndexes) {
+        const file = pendingFiles[i].file;
+        const ext = file.name.split('.').pop() || 'jpg';
+        const fileName = `${username}/${Date.now()}_${i}.${ext}`;
+        
+        try {
+            // Upload ke storage
+            const { error: uploadError } = await sb.storage
+                .from(BUCKET)
+                .upload(fileName, file);
+            
+            if (uploadError) throw uploadError;
+            
+            // Get URL
+            const { data: { publicUrl } } = sb.storage
+                .from(BUCKET)
+                .getPublicUrl(fileName);
+            
+            // Insert database
+            const { error: insertError } = await sb
+                .from('artefacts')
+                .insert({
+                    user_id: USER_ID,
+                    username: username,
+                    url: publicUrl,
+                    note: note,
+                    has_face: false,
+                    faces: []
+                });
+            
+            if (insertError) throw insertError;
+            success++;
+            
+        } catch (err) {
+            console.error(err);
+            showToast(err.message, true);
+        }
+    }
+    
+    hideLoading();
+    
+    if (success > 0) {
+        uploads += success;
+        localStorage.setItem('jejak_uploads', uploads.toString());
+        await loadArtefacts();
+        if (myArtefacts.length) setHero(myArtefacts[0].id);
+        showToast(`✓ ${success} foto berhasil diupload!`);
+    }
+    
+    updateQuota();
 };
 
 // ============================================
-// INIT
+// SUBMIT RANTS
 // ============================================
-document.addEventListener('DOMContentLoaded', async () => {
-  $('huser').textContent = S.user;
-  
-  await loadRants();
-  await loadArtefacts();
-  
-  if (S.artefacts.length) {
-    setHero(S.artefacts[0].id);
-  }
-  
-  updateQuota();
-  setInterval(updateQuota, 60000);
-  
-  // Submit rants
-  $('sbtn').onclick = async () => {
+$('sbtn').onclick = async () => {
     const content = $('ri').value.trim();
     if (!content) {
-      toast('Tulis sesuatu...');
-      return;
+        showToast('Tulis sesuatu...');
+        return;
     }
     
     const mood = document.querySelector('.mc.act')?.dataset.mood || 'surviving';
@@ -764,27 +806,73 @@ document.addEventListener('DOMContentLoaded', async () => {
     btn.disabled = true;
     btn.textContent = 'Menyimpan...';
     
-    const { error } = await supabase
-      .from('rants')
-      .insert({
-        user_id: S.userId,  // BISA string biasa
-        username: S.user.replace('@', ''),
-        content: content,
-        mood: mood,
-        reaction_count: { skull: 0, cry: 0, fire: 0, upside: 0 }
-      });
-    
-    btn.disabled = false;
-    btn.textContent = 'JEJAKKAN & SPILL';
-    
-    if (error) {
-      toast('✗ Gagal: ' + error.message, true);
-    } else {
-      $('ri').value = '';
-      await loadRants();
-      toast('✓ Tersimpan!');
+    try {
+        const { error } = await sb
+            .from('rants')
+            .insert({
+                user_id: USER_ID,
+                username: 'anon',
+                content: content,
+                mood: mood,
+                reaction_count: { skull: 0, cry: 0, fire: 0, upside: 0 }
+            });
+        
+        if (error) throw error;
+        
+        $('ri').value = '';
+        await loadRants();
+        showToast('✓ Tersimpan!');
+        
+    } catch (err) {
+        showToast('✗ Gagal: ' + err.message, true);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'JEJAKKAN & SPILL';
     }
-  };
+};
+
+// ============================================
+// TEST KONEKSI
+// ============================================
+async function testConnection() {
+    try {
+        const { error } = await sb.from('rants').select('count').limit(1);
+        if (error) {
+            updateDot('offline');
+            console.log('Offline mode');
+        } else {
+            updateDot('online');
+            console.log('Online mode');
+        }
+    } catch {
+        updateDot('offline');
+    }
+}
+
+// ============================================
+// INIT - JALANKAN SEMUA
+// ============================================
+document.addEventListener('DOMContentLoaded', async () => {
+    // Set username
+    $('huser').textContent = '@anon';
+    
+    // Test koneksi
+    await testConnection();
+    
+    // Load data
+    await loadRants();
+    await loadArtefacts();
+    
+    // Set hero pertama
+    if (myArtefacts.length) {
+        setHero(myArtefacts[0].id);
+    }
+    
+    // Update quota
+    updateQuota();
+    setInterval(updateQuota, 60000);
+    
+    console.log('JEJAK READY!');
 });
 </script>
 </body>
