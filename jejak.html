@@ -53,7 +53,28 @@ header{
   letter-spacing:-.04em;
   cursor:pointer;
   line-height:.9;
-  color:var(--ap)
+  color:var(--ap);
+  position:relative;
+}
+.logo::before{
+  content:'JEJAK';
+  position:absolute;
+  top:0;
+  left:0;
+  color:var(--as);
+  transform:translate(-2px,0);
+  opacity:0;
+  transition:opacity .1s;
+}
+.logo:hover::before{
+  opacity:.8;
+  animation:g .3s infinite;
+}
+@keyframes g{
+  0%,100%{transform:translate(-2px,0)}
+  25%{transform:translate(2px,2px)}
+  50%{transform:translate(-2px,-2px)}
+  75%{transform:translate(2px,0)}
 }
 .tagline{
   font-family:'Instrument Serif',serif;
@@ -70,6 +91,10 @@ header{
   border:1px solid var(--bd);
   padding:4px 8px;
   border-radius:4px;
+  max-width:120px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
 }
 .dot{
   width:8px;
@@ -90,6 +115,63 @@ header{
   display:flex;
   align-items:center;
   gap:8px;
+}
+.smenu{
+  position:relative;
+}
+.mtrig{
+  width:32px;
+  height:32px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  background:transparent;
+  border:none;
+  cursor:pointer;
+}
+.mtrig span{
+  width:4px;
+  height:4px;
+  background:var(--tx);
+  border-radius:50%;
+  transition:all .2s;
+}
+.mtrig:hover span{
+  background:var(--ap);
+}
+.mdd{
+  position:absolute;
+  top:100%;
+  right:0;
+  margin-top:8px;
+  background:var(--sf);
+  border:2px solid var(--bd);
+  min-width:120px;
+  display:none;
+  z-index:100;
+  border-radius:4px;
+}
+.mdd.on{
+  display:block;
+}
+.mi{
+  width:100%;
+  padding:8px 16px;
+  background:transparent;
+  border:none;
+  color:var(--tx);
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:12px;
+  font-weight:600;
+  text-align:left;
+  cursor:pointer;
+  transition:all .2s;
+}
+.mi:hover{
+  background:var(--sfe);
+  color:var(--ap);
 }
 .hero-s{
   margin:0 -16px 24px
@@ -139,6 +221,11 @@ header{
   cursor:pointer;
   box-shadow:4px 4px 0 var(--bg);
   border-radius:8px;
+  position:relative;
+}
+.upbtn:hover:not(:disabled){
+  transform:translate(2px,2px);
+  box-shadow:2px 2px 0 var(--bg);
 }
 .upbtn:disabled{
   background:var(--txm);
@@ -186,6 +273,23 @@ header{
   border-color:var(--ap);
 }
 .ri::placeholder{
+  color:var(--txm);
+}
+.ihdr{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+}
+.ilbl{
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  color:var(--txs);
+}
+.ccount{
+  font-size:12px;
   color:var(--txm);
 }
 .mgrid{
@@ -237,13 +341,33 @@ header{
   opacity:.5;
   cursor:not-allowed;
 }
+.shdr{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:16px;
+  padding-bottom:8px;
+  border-bottom:2px solid var(--bd);
+}
+.stit{
+  font-size:12px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.15em;
+  color:var(--tx);
+}
+.sline{
+  flex:1;
+  height:2px;
+  background:var(--bd);
+}
 .tgrid{
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:2px;
   background:var(--bd);
   border:2px solid var(--bd);
-  margin:16px 0;
+  margin:16px 0 32px 0;
   border-radius:8px;
   overflow:hidden;
 }
@@ -284,9 +408,6 @@ header{
 .entry:hover{
   border-color:var(--ap);
 }
-.entry.own-rant{
-  border-left:4px solid var(--ap);
-}
 .ehdr{
   display:flex;
   justify-content:space-between;
@@ -295,6 +416,26 @@ header{
   background:var(--sfe);
   font-size:12px;
 }
+.emeta{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.etime{
+  color:var(--txm);
+}
+.emood{
+  font-size:10px;
+  font-weight:700;
+  text-transform:uppercase;
+  padding:2px 8px;
+  border-radius:4px;
+  border:1px solid currentColor;
+}
+.emood.surviving{color:var(--ms); border-color:var(--ms);}
+.emood.thriving{color:var(--mt); border-color:var(--mt);}
+.emood.chaotic{color:var(--mc); border-color:var(--mc);}
+.emood.doom{color:var(--md); border-color:var(--md);}
 .econt{
   padding:16px;
   line-height:1.6;
@@ -318,6 +459,20 @@ header{
   border:2px solid var(--bd);
   padding:24px;
   border-radius:12px;
+}
+.gwarn{
+  background:var(--at);
+  color:var(--tx);
+  padding:12px;
+  margin-bottom:16px;
+  border-radius:8px;
+  text-align:center;
+  font-weight:bold;
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%,100%{opacity:1;}
+  50%{opacity:.8;}
 }
 .ggrid{
   display:grid;
@@ -371,6 +526,32 @@ header{
 .noti:focus{
   outline:none;
   border-color:var(--ap);
+}
+.macts{
+  display:flex;
+  gap:8px;
+  justify-content:flex-end;
+  margin-top:16px;
+}
+.mbtn{
+  padding:12px 24px;
+  font-size:12px;
+  font-weight:700;
+  text-transform:uppercase;
+  border:2px solid var(--bd);
+  background:var(--sf);
+  color:var(--tx);
+  cursor:pointer;
+  border-radius:8px;
+  transition:all .2s;
+}
+.mbtn.pri{
+  background:var(--ap);
+  border-color:var(--ap);
+  color:var(--bg);
+}
+.mbtn:hover{
+  transform:translateY(-2px);
 }
 .toast{
   position:fixed;
@@ -477,8 +658,16 @@ header{
     <div class="tagline">no filter, just truth</div>
   </div>
   <div class="top-right">
-    <div class="huser" id="huser">@anon</div>
+    <div class="huser" id="huser">@lalu.lintas</div>
     <div class="dot" id="dot"></div>
+    <div class="smenu">
+      <button class="mtrig" onclick="window.toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="mdd" id="mdd">
+        <button class="mi" onclick="window.logout()">Logout</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -496,6 +685,10 @@ header{
 
 <!-- INPUT SECTION -->
 <section>
+  <div class="ihdr">
+    <span class="ilbl">Spill your truth</span>
+    <span class="ccount" id="ccount">0/500</span>
+  </div>
   <textarea class="ri" id="ri" placeholder="What's eating you alive right now? No cap, no filter..." maxlength="500"></textarea>
   
   <div class="mgrid">
@@ -508,22 +701,23 @@ header{
   <button class="sbtn" id="sbtn">JEJAKKAN & SPILL</button>
 </section>
 
+<!-- RIWAYAT SECTION - PERSONAL DIARY -->
+<section style="margin-top:32px">
+  <div class="shdr">
+    <span class="stit">RIWAYAT</span>
+    <div class="sline"></div>
+  </div>
+  <div id="econ"></div>
+</section>
+
 <!-- MEMORI SECTION -->
 <section style="margin-top:32px">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-    <h3 style="color:var(--txs);">MEMORI</h3>
+  <div class="shdr">
+    <span class="stit">MEMORI</span>
+    <div class="sline"></div>
     <span style="font-size:10px; color:var(--txm);">FIFO • MAX 6</span>
   </div>
   <div class="tgrid" id="tgrid"></div>
-</section>
-
-<!-- RIWAYAT SECTION -->
-<section style="margin-top:32px">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-    <h3 style="color:var(--txs);">RIWAYAT</h3>
-    <span style="font-size:10px; color:var(--txm);">FIFO • MAX 10</span>
-  </div>
-  <div id="econ"></div>
 </section>
 
 <footer class="footer">
@@ -544,14 +738,12 @@ header{
 <div class="modal" id="gmodal">
   <div class="mc2">
     <h3 style="margin-bottom:16px; color:var(--ap);">Upload Artefak</h3>
-    <div class="gwarn" style="background:var(--at); color:var(--tx); padding:12px; margin-bottom:16px; border-radius:8px; text-align:center; font-weight:bold;">
-      DILARANG UPLOAD FOTO WAJAH!
-    </div>
+    <div class="gwarn">DILARANG UPLOAD FOTO WAJAH!</div>
     <div class="ggrid" id="ggrid"></div>
     <input type="text" class="noti" id="noti" placeholder="Notasi (opsional, max 4 kata)" maxlength="30">
-    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:16px;">
-      <button class="sbtn" onclick="window.closeGallery()" style="background:var(--sf); color:var(--tx);">Batal</button>
-      <button class="sbtn" onclick="window.confirmUpload()">Konfirmasi</button>
+    <div class="macts">
+      <button class="mbtn" onclick="window.closeGallery()">Batal</button>
+      <button class="mbtn pri" onclick="window.confirmUpload()">Konfirmasi</button>
     </div>
   </div>
 </div>
@@ -575,36 +767,20 @@ header{
 const SB_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-// PAKAI NAMA UNIK
 const sb = supabase.createClient(SB_URL, SB_KEY);
 const BUCKET = 'artefacts';
 
 // ============================================
-// STATE - PASTI ADA
+// STATE - AMBIL DARI LOCALSTORAGE (SET DARI INDEX.HTML)
 // ============================================
-// AMBIL USERNAME DARI LOCALSTORAGE ATAU BUAT BARU
-let USERNAME = localStorage.getItem('jejak_username');
-let USER_ID = localStorage.getItem('user_id');
-
-// KALO BELUM ADA, BUAT BARU
-if (!USERNAME) {
-    // GENERATE USERNAME UNIK
-    const names = ['dog.dog', 'lalu.lintas', 'anon.kucing', 'sleepy.head', 'chaos.queen'];
-    const randomName = names[Math.floor(Math.random() * names.length)];
-    USERNAME = randomName;
-    USER_ID = 'user-' + Date.now() + '-' + Math.random().toString(36).substring(7);
-    
-    localStorage.setItem('jejak_username', USERNAME);
-    localStorage.setItem('user_id', USER_ID);
-}
-
-console.log('Login sebagai:', USERNAME, 'ID:', USER_ID);
+const currentUser = localStorage.getItem('jejak_username') || 'lalu.lintas';
+const USER_ID = localStorage.getItem('user_id') || 'user-' + Date.now();
 
 // Upload quota
 let uploads = parseInt(localStorage.getItem('jejak_uploads') || '0');
 let quotaStart = localStorage.getItem('jejak_quota_start') || Date.now();
 
-// Data arrays
+// Data arrays - personal diary
 let myEntries = [];
 let myArtefacts = [];
 
@@ -647,13 +823,25 @@ function updateConnectionStatus(status) {
 }
 
 // ============================================
+// MENU FUNCTIONS
+// ============================================
+window.toggleMenu = function() {
+    $('mdd').classList.toggle('on');
+};
+
+window.logout = function() {
+    if (!confirm('Yakin logout?')) return;
+    localStorage.clear();
+    window.location.href = 'index.html';
+};
+
+// ============================================
 // QUOTA MANAGEMENT
 // ============================================
 function updateQuota() {
     const now = Date.now();
-    const windowDays = 3 * 86400000; // 3 hari
+    const windowDays = 3 * 86400000;
     
-    // Reset quota jika sudah lewat 3 hari
     if (now - parseInt(quotaStart) > windowDays) {
         uploads = 0;
         quotaStart = now;
@@ -679,17 +867,16 @@ window.selMood = function(mood) {
 };
 
 // ============================================
-// LOAD DATA FROM SUPABASE
+// LOAD DATA - HANYA UNTUK USER INI
 // ============================================
-async function loadRants() {
+async function loadMyRants() {
     try {
-        // AMBIL HANYA RANT DENGAN USERNAME YANG SAMA
         const { data, error } = await sb
             .from('rants')
             .select('*')
-            .eq('username', USERNAME)  // FILTER PAKAI USERNAME
+            .eq('username', currentUser)
             .order('created_at', { ascending: false })
-            .limit(10);
+            .limit(20);
         
         if (error) {
             console.error('Load rants error:', error);
@@ -697,19 +884,18 @@ async function loadRants() {
         }
         
         myEntries = data || [];
-        console.log('Rants loaded:', myEntries.length, 'untuk user', USERNAME);
         renderEntries();
     } catch (e) {
         console.error('Load rants exception:', e);
     }
 }
 
-async function loadArtefacts() {
+async function loadMyArtefacts() {
     try {
-        // Ambil SEMUA artefak, tanpa filter user_id
         const { data, error } = await sb
             .from('artefacts')
             .select('*')
+            .eq('username', currentUser)
             .order('created_at', { ascending: false })
             .limit(6);
         
@@ -719,7 +905,6 @@ async function loadArtefacts() {
         }
         
         myArtefacts = data || [];
-        console.log('Artefacts loaded:', myArtefacts.length);
         renderTray();
     } catch (e) {
         console.error('Load artefacts exception:', e);
@@ -732,19 +917,25 @@ async function loadArtefacts() {
 function renderEntries() {
     const container = $('econ');
     if (!myEntries.length) {
-        container.innerHTML = '<div class="es"><span class="ee">🍃</span><div>Belum ada jejak</div><div style="margin-top:8px; font-size:12px;">Jadilah yang pertama spill your truth</div></div>';
+        container.innerHTML = '<div class="es"><span class="ee">📔</span><div>Belum ada jejak</div><div style="margin-top:8px; font-size:12px;">Mulai spill your truth...</div></div>';
         return;
     }
     
-    container.innerHTML = myEntries.map(e => `
-        <div class="entry own-rant">
+    container.innerHTML = myEntries.map(e => {
+        const moodClass = e.mood || 'surviving';
+        const moodEmoji = moodClass === 'surviving' ? '😮‍💨' : moodClass === 'thriving' ? '✨' : moodClass === 'chaotic' ? '🌀' : '🛌';
+        
+        return `
+        <div class="entry">
             <div class="ehdr">
-                <span>@${e.username || 'anon'}</span>
-                <span style="color:var(--txs);">${new Date(e.created_at).toLocaleDateString('id-ID', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}</span>
+                <div class="emeta">
+                    <span class="etime">${new Date(e.created_at).toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
+                    <span class="emood ${moodClass}">${moodEmoji} ${moodClass}</span>
+                </div>
             </div>
             <div class="econt">${escapeHtml(e.content)}</div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 function escapeHtml(text) {
@@ -757,7 +948,6 @@ function renderTray() {
     const container = $('tgrid');
     
     if (!myArtefacts.length) {
-        // Tampilkan 6 placeholder
         let html = '';
         for (let i = 0; i < 6; i++) {
             html += '<div class="ti empty" onclick="document.getElementById(\'upbtn\').click()">+</div>';
@@ -766,14 +956,12 @@ function renderTray() {
         return;
     }
     
-    // Tampilkan artefak yang ada
     let html = myArtefacts.map(a => `
         <div class="ti" onclick="window.setHero('${a.id}')">
             <img src="${a.url}" alt="${a.note || 'memory'}">
         </div>
     `).join('');
     
-    // Tambah placeholder jika kurang dari 6
     for (let i = myArtefacts.length; i < 6; i++) {
         html += '<div class="ti empty" onclick="document.getElementById(\'upbtn\').click()">+</div>';
     }
@@ -858,27 +1046,24 @@ window.confirmUpload = async function() {
     for (const i of selectedIndexes) {
         const file = pendingFiles[i].file;
         const ext = file.name.split('.').pop() || 'jpg';
-        const fileName = `${USERNAME}/${Date.now()}_${i}.${ext}`;
+        const fileName = `${currentUser}/${Date.now()}_${i}.${ext}`;
         
         try {
-            // Upload ke storage
             const { error: uploadError } = await sb.storage
                 .from(BUCKET)
                 .upload(fileName, file);
             
             if (uploadError) throw uploadError;
             
-            // Get public URL
             const { data: { publicUrl } } = sb.storage
                 .from(BUCKET)
                 .getPublicUrl(fileName);
             
-            // Insert ke database
             const { error: insertError } = await sb
                 .from('artefacts')
                 .insert({
                     user_id: USER_ID,
-                    username: USERNAME,
+                    username: currentUser,
                     url: publicUrl,
                     note: note,
                     has_face: false,
@@ -899,7 +1084,7 @@ window.confirmUpload = async function() {
     if (success > 0) {
         uploads += success;
         localStorage.setItem('jejak_uploads', uploads.toString());
-        await loadArtefacts();
+        await loadMyArtefacts();
         if (myArtefacts.length) {
             window.setHero(myArtefacts[0].id);
         }
@@ -930,7 +1115,7 @@ $('sbtn').onclick = async () => {
             .from('rants')
             .insert({
                 user_id: USER_ID,
-                username: USERNAME,
+                username: currentUser,
                 content: content,
                 mood: mood,
                 reaction_count: { skull: 0, cry: 0, fire: 0, upside: 0 }
@@ -939,7 +1124,8 @@ $('sbtn').onclick = async () => {
         if (error) throw error;
         
         $('ri').value = '';
-        await loadRants();
+        $('ccount').textContent = '0/500';
+        await loadMyRants();
         showToast('✓ Tersimpan!');
         
     } catch (err) {
@@ -950,6 +1136,15 @@ $('sbtn').onclick = async () => {
         btn.textContent = 'JEJAKKAN & SPILL';
     }
 };
+
+// ============================================
+// CHARACTER COUNTER
+// ============================================
+$('ri').addEventListener('input', function() {
+    const len = this.value.length;
+    $('ccount').textContent = `${len}/500`;
+    $('ccount').style.color = len >= 450 ? 'var(--at)' : 'var(--txm)';
+});
 
 // ============================================
 // TEST CONNECTION
@@ -973,15 +1168,15 @@ async function testConnection() {
 // INITIALIZATION
 // ============================================
 document.addEventListener('DOMContentLoaded', async () => {
-    // Set username di kanan atas
-    $('huser').textContent = '@' + USERNAME;
+    // Tampilkan username dari localStorage
+    $('huser').textContent = `@${currentUser}`;
     
     // Test koneksi
     await testConnection();
     
-    // Load data
-    await loadRants();
-    await loadArtefacts();
+    // Load data pribadi
+    await loadMyRants();
+    await loadMyArtefacts();
     
     // Set hero pertama jika ada
     if (myArtefacts.length) {
@@ -992,7 +1187,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateQuota();
     setInterval(updateQuota, 60000);
     
-    console.log('JEJAK READY! User:', USERNAME);
+    console.log('JEJAK READY - Personal Diary Mode');
+    
+    // Click outside to close menu
+    document.addEventListener('click', function(e) {
+        const menu = $('mdd');
+        const trig = document.querySelector('.mtrig');
+        if (menu && trig && !trig.contains(e.target) && !menu.contains(e.target)) {
+            menu.classList.remove('on');
+        }
+    });
 });
 </script>
 </body>
