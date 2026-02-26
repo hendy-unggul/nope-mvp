@@ -185,6 +185,9 @@ header{
   outline:none;
   border-color:var(--ap);
 }
+.ri::placeholder{
+  color:var(--txm);
+}
 .mgrid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
@@ -198,6 +201,11 @@ header{
   cursor:pointer;
   text-align:center;
   border-radius:8px;
+  transition:all .2s;
+}
+.mc:hover{
+  border-color:var(--txs);
+  transform:translateY(-2px);
 }
 .mc.act{
   border-color:var(--ap);
@@ -219,6 +227,11 @@ header{
   box-shadow:4px 4px 0 var(--sfe);
   width:100%;
   border-radius:8px;
+  transition:all .2s;
+}
+.sbtn:hover:not(:disabled){
+  transform:translate(2px,2px);
+  box-shadow:2px 2px 0 var(--sfe);
 }
 .sbtn:disabled{
   opacity:.5;
@@ -239,7 +252,11 @@ header{
   background:var(--sf);
   position:relative;
   overflow:hidden;
-  cursor:pointer
+  cursor:pointer;
+  transition:all .3s;
+}
+.ti:hover img{
+  transform:scale(1.1);
 }
 .ti.empty{
   display:flex;
@@ -247,12 +264,14 @@ header{
   justify-content:center;
   color:var(--txm);
   font-size:20px;
-  border:2px dashed var(--bd)
+  border:2px dashed var(--bd);
+  background:var(--sfe);
 }
 .ti img{
   width:100%;
   height:100%;
   object-fit:cover;
+  transition:transform .3s;
 }
 .entry{
   background:var(--sf);
@@ -260,16 +279,22 @@ header{
   margin-bottom:16px;
   border-radius:8px;
   overflow:hidden;
+  transition:all .2s;
+}
+.entry:hover{
+  border-color:var(--ap);
 }
 .ehdr{
   display:flex;
   justify-content:space-between;
   padding:8px 16px;
   border-bottom:1px solid var(--bd);
-  background:var(--sfe)
+  background:var(--sfe);
+  font-size:12px;
 }
 .econt{
   padding:16px;
+  line-height:1.6;
 }
 .modal{
   display:none;
@@ -314,6 +339,21 @@ header{
   border-color:var(--ap);
   box-shadow:0 0 0 2px var(--ap)
 }
+.gi.sel::after{
+  content:'✓';
+  position:absolute;
+  top:4px;
+  right:4px;
+  background:var(--ap);
+  color:var(--bg);
+  width:20px;
+  height:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  font-weight:bold;
+}
 .noti{
   width:100%;
   background:var(--sf);
@@ -323,6 +363,10 @@ header{
   font-size:14px;
   margin:16px 0;
   border-radius:8px;
+}
+.noti:focus{
+  outline:none;
+  border-color:var(--ap);
 }
 .toast{
   position:fixed;
@@ -365,6 +409,10 @@ header{
 @keyframes sp{
   to{transform:rotate(360deg)}
 }
+.ptxt{
+  margin-top:16px;
+  color:var(--txs);
+}
 .bnav{
   position:fixed;
   bottom:0;
@@ -387,9 +435,33 @@ header{
   font-size:12px;
   font-weight:700;
   text-transform:uppercase;
+  transition:color .2s;
+}
+.ni:hover{
+  color:var(--txs);
 }
 .ni.act{
   color:var(--ap)
+}
+.es{
+  padding:32px 16px;
+  text-align:center;
+  border:2px dashed var(--bd);
+  border-radius:8px;
+  color:var(--txm);
+}
+.ee{
+  font-size:48px;
+  margin-bottom:16px;
+  display:block;
+}
+.footer{
+  padding:32px 0;
+  text-align:center;
+  color:var(--txm);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.2em;
 }
 </style>
 </head>
@@ -406,7 +478,7 @@ header{
   </div>
 </header>
 
-<!-- HERO -->
+<!-- HERO SECTION -->
 <section class="hero-s">
   <div class="hero" id="hero">
     <img id="himg" src="https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80" alt="hero">
@@ -418,9 +490,9 @@ header{
   </div>
 </section>
 
-<!-- INPUT -->
+<!-- INPUT SECTION -->
 <section>
-  <textarea class="ri" id="ri" placeholder="What's eating you alive right now?" maxlength="500"></textarea>
+  <textarea class="ri" id="ri" placeholder="What's eating you alive right now? No cap, no filter..." maxlength="500"></textarea>
   
   <div class="mgrid">
     <div class="mc act" data-mood="surviving" onclick="window.selMood('surviving')">😮‍💨 Surviving</div>
@@ -432,20 +504,30 @@ header{
   <button class="sbtn" id="sbtn">JEJAKKAN & SPILL</button>
 </section>
 
-<!-- MEMORI -->
+<!-- MEMORI SECTION -->
 <section style="margin-top:32px">
-  <h3 style="color:var(--txs); margin-bottom:16px;">MEMORI</h3>
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <h3 style="color:var(--txs);">MEMORI</h3>
+    <span style="font-size:10px; color:var(--txm);">FIFO • MAX 6</span>
+  </div>
   <div class="tgrid" id="tgrid"></div>
 </section>
 
-<!-- RIWAYAT -->
+<!-- RIWAYAT SECTION -->
 <section style="margin-top:32px">
-  <h3 style="color:var(--txs); margin-bottom:16px;">RIWAYAT</h3>
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <h3 style="color:var(--txs);">RIWAYAT</h3>
+    <span style="font-size:10px; color:var(--txm);">FIFO • MAX 10</span>
+  </div>
   <div id="econ"></div>
 </section>
+
+<footer class="footer">
+  <p>Nyambat • Aksi • Solusi</p>
+</footer>
 </div>
 
-<!-- BOTTOM NAV -->
+<!-- BOTTOM NAVIGATION -->
 <nav class="bnav">
   <div class="bnav-c">
     <a href="#" class="ni act">Jejak</a>
@@ -458,47 +540,49 @@ header{
 <div class="modal" id="gmodal">
   <div class="mc2">
     <h3 style="margin-bottom:16px; color:var(--ap);">Upload Artefak</h3>
+    <div class="gwarn" style="background:var(--at); color:var(--tx); padding:12px; margin-bottom:16px; border-radius:8px; text-align:center; font-weight:bold;">
+      DILARANG UPLOAD FOTO WAJAH!
+    </div>
     <div class="ggrid" id="ggrid"></div>
-    <input type="text" class="noti" id="noti" placeholder="Notasi (opsional)">
-    <div style="display:flex; gap:8px; justify-content:flex-end;">
+    <input type="text" class="noti" id="noti" placeholder="Notasi (opsional, max 4 kata)" maxlength="30">
+    <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:16px;">
       <button class="sbtn" onclick="window.closeGallery()" style="background:var(--sf); color:var(--tx);">Batal</button>
       <button class="sbtn" onclick="window.confirmUpload()">Konfirmasi</button>
     </div>
   </div>
 </div>
 
-<!-- LOADING -->
+<!-- LOADING OVERLAY -->
 <div class="proc" id="proc">
   <div class="pspin"></div>
-  <div style="margin-top:16px; color:var(--txs);">Processing...</div>
+  <div class="ptxt" id="proctxt">Processing...</div>
 </div>
 
-<!-- TOAST -->
+<!-- TOAST NOTIFICATION -->
 <div class="toast" id="toast"></div>
 
-<!-- FILE INPUT -->
+<!-- HIDDEN FILE INPUT -->
 <input type="file" id="finput" accept="image/*" multiple style="display:none">
 
 <script>
 // ============================================
-// SUPABASE - PASTI HANYA SEKALI
+// SUPABASE CONFIG
 // ============================================
 const SB_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
-// PAKAI NAMA UNIK - BUKAN "supabase"
+// PAKAI NAMA UNIK
 const sb = supabase.createClient(SB_URL, SB_KEY);
 const BUCKET = 'artefacts';
 
 // ============================================
-// STATE - PASTI ADA
+// STATE
 // ============================================
 const USER_ID = 'user-' + Date.now();
 const USERNAME = '@anon';
 
-// Cek localStorage
-let savedUser = localStorage.getItem('jejak_username');
-if (!savedUser) {
+// Simpan ke localStorage
+if (!localStorage.getItem('jejak_username')) {
     localStorage.setItem('jejak_username', USERNAME);
 }
 
@@ -506,7 +590,7 @@ if (!savedUser) {
 let uploads = parseInt(localStorage.getItem('jejak_uploads') || '0');
 let quotaStart = localStorage.getItem('jejak_quota_start') || Date.now();
 
-// Data
+// Data arrays
 let myEntries = [];
 let myArtefacts = [];
 
@@ -530,7 +614,8 @@ function showToast(msg, isError = false) {
     setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-function showLoading() {
+function showLoading(text = 'Processing...') {
+    $('proctxt').textContent = text;
     $('proc').classList.add('on');
 }
 
@@ -538,8 +623,7 @@ function hideLoading() {
     $('proc').classList.remove('on');
 }
 
-// Update dot status
-function updateDot(status) {
+function updateConnectionStatus(status) {
     const dot = $('dot');
     if (status === 'online') {
         dot.className = 'dot';
@@ -549,12 +633,13 @@ function updateDot(status) {
 }
 
 // ============================================
-// QUOTA
+// QUOTA MANAGEMENT
 // ============================================
 function updateQuota() {
     const now = Date.now();
-    const windowDays = 3 * 86400000;
+    const windowDays = 3 * 86400000; // 3 hari
     
+    // Reset quota jika sudah lewat 3 hari
     if (now - parseInt(quotaStart) > windowDays) {
         uploads = 0;
         quotaStart = now;
@@ -568,7 +653,6 @@ function updateQuota() {
     
     $('qtimer').innerHTML = `${slots} slot • ${days} hari`;
     $('ucnt').textContent = uploads;
-    $('ucnt').style.display = uploads > 0 ? 'block' : 'none';
 }
 
 // ============================================
@@ -581,7 +665,7 @@ window.selMood = function(mood) {
 };
 
 // ============================================
-// LOAD DATA
+// LOAD DATA FROM SUPABASE
 // ============================================
 async function loadRants() {
     try {
@@ -591,40 +675,47 @@ async function loadRants() {
             .order('created_at', { ascending: false })
             .limit(10);
         
-        if (!error && data) {
-            myEntries = data;
+        if (error) {
+            console.error('Load rants error:', error);
+            return;
         }
+        
+        myEntries = data || [];
+        renderEntries();
     } catch (e) {
-        console.log('Load rants error:', e);
+        console.error('Load rants exception:', e);
     }
-    renderEntries();
 }
 
 async function loadArtefacts() {
     try {
+        // Ambil SEMUA artefak, tanpa filter user_id
         const { data, error } = await sb
             .from('artefacts')
             .select('*')
-            .eq('user_id', USER_ID)
             .order('created_at', { ascending: false })
             .limit(6);
         
-        if (!error && data) {
-            myArtefacts = data;
+        if (error) {
+            console.error('Load artefacts error:', error);
+            return;
         }
+        
+        myArtefacts = data || [];
+        console.log('Artefacts loaded:', myArtefacts.length);
+        renderTray();
     } catch (e) {
-        console.log('Load artefacts error:', e);
+        console.error('Load artefacts exception:', e);
     }
-    renderTray();
 }
 
 // ============================================
-// RENDER
+// RENDER FUNCTIONS
 // ============================================
 function renderEntries() {
     const container = $('econ');
     if (!myEntries.length) {
-        container.innerHTML = '<div style="text-align:center; padding:32px; color:var(--txs);">Belum ada jejak</div>';
+        container.innerHTML = '<div class="es"><span class="ee">🍃</span><div>Belum ada jejak</div><div style="margin-top:8px; font-size:12px;">Jadilah yang pertama spill your truth</div></div>';
         return;
     }
     
@@ -632,17 +723,24 @@ function renderEntries() {
         <div class="entry">
             <div class="ehdr">
                 <span>@${e.username || 'anon'}</span>
-                <span style="color:var(--txs);">${new Date(e.created_at).toLocaleDateString('id-ID')}</span>
+                <span style="color:var(--txs);">${new Date(e.created_at).toLocaleDateString('id-ID', {day:'numeric', month:'short', hour:'2-digit', minute:'2-digit'})}</span>
             </div>
-            <div class="econt">${e.content}</div>
+            <div class="econt">${escapeHtml(e.content)}</div>
         </div>
     `).join('');
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function renderTray() {
     const container = $('tgrid');
     
     if (!myArtefacts.length) {
+        // Tampilkan 6 placeholder
         let html = '';
         for (let i = 0; i < 6; i++) {
             html += '<div class="ti empty" onclick="document.getElementById(\'upbtn\').click()">+</div>';
@@ -651,12 +749,14 @@ function renderTray() {
         return;
     }
     
+    // Tampilkan artefak yang ada
     let html = myArtefacts.map(a => `
-        <div class="ti" onclick="setHero('${a.id}')">
+        <div class="ti" onclick="window.setHero('${a.id}')">
             <img src="${a.url}" alt="${a.note || 'memory'}">
         </div>
     `).join('');
     
+    // Tambah placeholder jika kurang dari 6
     for (let i = myArtefacts.length; i < 6; i++) {
         html += '<div class="ti empty" onclick="document.getElementById(\'upbtn\').click()">+</div>';
     }
@@ -665,15 +765,15 @@ function renderTray() {
 }
 
 window.setHero = function(id) {
-    const a = myArtefacts.find(a => a.id === id);
-    if (a) {
-        $('himg').src = a.url;
-        $('hnote').innerHTML = `"${a.note || 'memory'}"`;
+    const artefact = myArtefacts.find(a => a.id === id);
+    if (artefact) {
+        $('himg').src = artefact.url;
+        $('hnote').innerHTML = `"${artefact.note || 'memory'}"`;
     }
 };
 
 // ============================================
-// UPLOAD
+// UPLOAD FUNCTIONS
 // ============================================
 $('upbtn').onclick = () => {
     if (uploads >= 6) {
@@ -723,6 +823,7 @@ window.closeGallery = function() {
     $('gmodal').classList.remove('on');
     pendingFiles = [];
     selectedIndexes.clear();
+    $('noti').value = '';
 };
 
 window.confirmUpload = async function() {
@@ -732,7 +833,7 @@ window.confirmUpload = async function() {
     }
     
     closeGallery();
-    showLoading();
+    showLoading('Uploading...');
     
     const note = $('noti').value.trim() || 'memory';
     const username = 'anon';
@@ -751,12 +852,12 @@ window.confirmUpload = async function() {
             
             if (uploadError) throw uploadError;
             
-            // Get URL
+            // Get public URL
             const { data: { publicUrl } } = sb.storage
                 .from(BUCKET)
                 .getPublicUrl(fileName);
             
-            // Insert database
+            // Insert ke database
             const { error: insertError } = await sb
                 .from('artefacts')
                 .insert({
@@ -772,7 +873,7 @@ window.confirmUpload = async function() {
             success++;
             
         } catch (err) {
-            console.error(err);
+            console.error('Upload error:', err);
             showToast(err.message, true);
         }
     }
@@ -783,7 +884,9 @@ window.confirmUpload = async function() {
         uploads += success;
         localStorage.setItem('jejak_uploads', uploads.toString());
         await loadArtefacts();
-        if (myArtefacts.length) setHero(myArtefacts[0].id);
+        if (myArtefacts.length) {
+            window.setHero(myArtefacts[0].id);
+        }
         showToast(`✓ ${success} foto berhasil diupload!`);
     }
     
@@ -824,6 +927,7 @@ $('sbtn').onclick = async () => {
         showToast('✓ Tersimpan!');
         
     } catch (err) {
+        console.error('Rant error:', err);
         showToast('✗ Gagal: ' + err.message, true);
     } finally {
         btn.disabled = false;
@@ -832,29 +936,29 @@ $('sbtn').onclick = async () => {
 };
 
 // ============================================
-// TEST KONEKSI
+// TEST CONNECTION
 // ============================================
 async function testConnection() {
     try {
         const { error } = await sb.from('rants').select('count').limit(1);
         if (error) {
-            updateDot('offline');
+            updateConnectionStatus('offline');
             console.log('Offline mode');
         } else {
-            updateDot('online');
+            updateConnectionStatus('online');
             console.log('Online mode');
         }
     } catch {
-        updateDot('offline');
+        updateConnectionStatus('offline');
     }
 }
 
 // ============================================
-// INIT - JALANKAN SEMUA
+// INITIALIZATION
 // ============================================
 document.addEventListener('DOMContentLoaded', async () => {
     // Set username
-    $('huser').textContent = '@anon';
+    $('huser').textContent = USERNAME;
     
     // Test koneksi
     await testConnection();
@@ -863,14 +967,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     await loadRants();
     await loadArtefacts();
     
-    // Set hero pertama
+    // Set hero pertama jika ada
     if (myArtefacts.length) {
-        setHero(myArtefacts[0].id);
+        window.setHero(myArtefacts[0].id);
     }
     
     // Update quota
     updateQuota();
     setInterval(updateQuota, 60000);
+    
+    // Character counter
+    const ri = $('ri');
+    ri.addEventListener('input', () => {
+        // Bisa ditambah counter jika mau
+    });
     
     console.log('JEJAK READY!');
 });
