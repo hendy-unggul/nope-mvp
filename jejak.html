@@ -1,505 +1,272 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>JEJAK — Spill Your Truth</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-/* [CSS SAMA SEPERTI SEBELUMNYA - TIDAK BERUBAH] */
-:root{
-  --bg:#0A0A0A;
-  --sf:#141414;
-  --sfe:#1E1E1E;
-  --bd:#2A2A2A;
-  --tx:#FFF;
-  --txs:#888;
-  --txm:#555;
-  --ap:#FF4D00;
-  --as:#00F0FF;
-  --at:#FF006E;
-  --aq:#39FF14;
-  --aw:#FFD700;
-  --ms:#FF9500;
-  --mt:#39FF14;
-  --mc:#00F0FF;
-  --md:#8B5CF6;
-  --rd:#FF3333;
-  --rd-dark:#990000;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{
-  background:var(--bg);
-  color:var(--tx);
-  font-family:'Plus Jakarta Sans',sans-serif;
-  font-weight:500;
-  font-size:15px;
-  min-height:100vh;
-  padding-bottom:100px
-}
-.w{
-  max-width:480px;
-  margin:0 auto;
-  padding:0 16px
-}
-/* ... semua CSS yang sama ... */
-</style>
+    <title>JEJAK - Upload Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
-<div class="w">
-<header>
-  <div>
-    <div class="logo" onclick="location.reload()">JEJAK</div>
-    <div class="tagline">no filter, just truth</div>
-  </div>
-  <div class="top-right">
-    <div class="huser" id="huser">@anon</div>
-    <div class="dot off" id="odot"></div>
-  </div>
-</header>
+<body style="font-family: system-ui; padding: 20px; max-width: 500px; margin: 0 auto; background: #0A0A0A; color: white;">
 
-<!-- HERO SECTION -->
-<section class="hero-s">
-  <div class="hero" id="hero">
-    <img id="himg" src="https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80" alt="artefak">
-    <div class="hnote" id="hnote">"jeda"</div>
-    <div class="upctrls">
-      <div class="qtimer" id="qtimer">Window aktif • Sisa 2 hari</div>
-      <button class="upbtn" id="upbtn">+<span class="upcnt" id="ucnt" style="display:none"></span></button>
-    </div>
-  </div>
-</section>
+<h1 style="color: #FF4D00;">JEJAK - UPLOAD TEST</h1>
 
-<!-- INPUT SECTION -->
-<section class="isec">
-  <div class="ihdr"><span class="ilbl">Spill your truth</span><span class="ccount" id="ccount">0/500</span></div>
-  <textarea class="ri" id="ri" placeholder="What's eating you alive right now?" maxlength="500"></textarea>
-  <div class="msec">
-    <div class="mlbl">Pilih mood-mu sekarang</div>
-    <div class="mgrid">
-      <div class="mc act" data-mood="surviving" onclick="selMood('surviving')"><span class="me">😮‍💨</span><span class="mn">Surviving</span></div>
-      <div class="mc" data-mood="thriving" onclick="selMood('thriving')"><span class="me">✨</span><span class="mn">Thriving</span></div>
-      <div class="mc" data-mood="chaotic" onclick="selMood('chaotic')"><span class="me">🌀</span><span class="mn">Chaotic</span></div>
-      <div class="mc" data-mood="doom" onclick="selMood('doom')"><span class="me">🛌</span><span class="mn">Doom</span></div>
-    </div>
-  </div>
-  <div class="iact"><button class="sbtn" id="sbtn">Jejakkan & Spill</button></div>
-</section>
-
-<!-- RIWAYAT SECTION -->
-<section>
-  <div class="shdr">
-    <span class="stit">Riwayat</span>
-    <div class="sline"></div>
-  </div>
-  <div id="econ"></div>
-</section>
-
-<!-- MEMORI SECTION -->
-<section style="margin-bottom:32px">
-  <div class="shdr">
-    <span class="stit">Memori</span>
-    <div class="sline"></div>
-  </div>
-  <div class="tgrid" id="tgrid"></div>
-</section>
-
-<footer><p class="ftxt">Nyambat • Aksi • Solusi</p></footer>
+<div style="margin: 20px 0; padding: 20px; background: #141414; border: 2px solid #2A2A2A;">
+    <h3>Status:</h3>
+    <div id="status" style="color: #888; margin: 10px 0;">Menunggu...</div>
+    <div id="quota" style="color: #39FF14; font-size: 14px;"></div>
 </div>
 
-<nav class="bnav">
-  <div class="bnav-c">
-    <a href="#" class="ni act"><span class="nico">✦</span><span>Jejak</span></a>
-    <a href="#" class="ni"><span class="nico">✕</span><span>Spill</span></a>
-  </div>
-</nav>
-
-<div class="proc" id="proc">
-  <div class="pspin"></div>
-  <div class="ptxt" id="proctxt">Processing...</div>
+<div style="margin: 20px 0;">
+    <button id="btnUpload" style="background: #FF4D00; color: black; border: none; padding: 15px 30px; font-weight: bold; cursor: pointer;">PILIH FOTO</button>
+    <span id="selectedCount" style="margin-left: 10px; color: #888;">0 dipilih</span>
 </div>
 
-<!-- MODAL UPLOAD -->
-<div class="modal" id="gmodal">
-  <div class="mc2">
-    <div class="mhdr"><h3 class="mtit">Upload Artefak</h3><button class="mcls" onclick="closeGallery()">×</button></div>
-    <div class="ggrid" id="ggrid"></div>
-    <div class="notsec">
-      <input type="text" class="noti" id="noti" placeholder="Notasi (max 4 kata)" maxlength="30">
-    </div>
-    <div class="macts">
-      <button class="mbtn" onclick="closeGallery()">Batal</button>
-      <button class="mbtn pri" onclick="confirmUpload()">Konfirmasi (<span id="selcnt">0</span>)</button>
-    </div>
-  </div>
-</div>
+<div id="preview" style="display: grid; grid-template-columns: repeat(3,1fr); gap: 5px; margin: 20px 0;"></div>
 
-<div class="toast" id="toast"></div>
-<input type="file" id="finput" accept="image/*" multiple style="display:none">
+<button id="btnConfirm" disabled style="background: #555; color: white; border: none; padding: 15px 30px; font-weight: bold; cursor: not-allowed; width: 100%;">KONFIRMASI UPLOAD</button>
+
+<div id="result" style="margin: 20px 0; padding: 10px; background: #1E1E1E; border: 2px solid #2A2A2A; min-height: 50px;"></div>
+
+<input type="file" id="fileInput" accept="image/*" multiple style="display: none;">
 
 <script>
 // ============================================
-// SUPABASE CONFIG
+// SUPABASE (HANYA SATU KALI DEKLARASI)
 // ============================================
 const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
 
+// BUAT CLIENT
 const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-const BUCKET = 'artefacts';
 
 // ============================================
 // STATE
 // ============================================
-const S = {
-  user: localStorage.getItem('jejak_username') || '@anon',
-  userId: localStorage.getItem('user_id') || 'user-' + Date.now(), // Generate dummy ID
-  entries: [],
-  artefacts: []
-};
+const BUCKET = 'artefacts';
+const USER_ID = 'user-test-' + Date.now(); // ID unik setiap session
+const USERNAME = 'test.user';
 
-// Simpan user_id dummy
-if (!localStorage.getItem('user_id')) {
-  localStorage.setItem('user_id', S.userId);
-}
+let uploads = parseInt(localStorage.getItem('test_uploads') || '0');
+let quotaStart = localStorage.getItem('test_quota_start') || Date.now();
+let selectedFiles = [];
 
 // ============================================
-// HELPER FUNCTIONS
+// DOM ELEMENTS
 // ============================================
-const $ = id => document.getElementById(id);
-
-function toast(msg, isError = false) {
-  const t = $('toast');
-  t.textContent = msg;
-  t.style.background = isError ? 'var(--rd)' : 'var(--tx)';
-  t.style.color = isError ? 'var(--tx)' : 'var(--bg)';
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-function esc(t) {
-  const d = document.createElement('div');
-  d.textContent = t;
-  return d.innerHTML;
-}
-
-function showProc(msg) {
-  $('proctxt').innerHTML = msg || 'Processing...';
-  $('proc').classList.add('on');
-}
-
-function hideProc() {
-  $('proc').classList.remove('on');
-}
-
-function selMood(mood) {
-  document.querySelectorAll('.mc').forEach(c => 
-    c.classList.toggle('act', c.dataset.mood === mood)
-  );
-}
+const statusEl = document.getElementById('status');
+const quotaEl = document.getElementById('quota');
+const btnUpload = document.getElementById('btnUpload');
+const btnConfirm = document.getElementById('btnConfirm');
+const fileInput = document.getElementById('fileInput');
+const previewEl = document.getElementById('preview');
+const selectedCountEl = document.getElementById('selectedCount');
+const resultEl = document.getElementById('result');
 
 // ============================================
-// LOAD DATA
+// FUNCTIONS
 // ============================================
-async function loadRants() {
-  try {
-    const { data, error } = await supabase
-      .from('rants')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(10);
-    
-    if (error) throw error;
-    S.entries = data || [];
-  } catch (e) {
-    console.error('Load rants error:', e);
-    S.entries = [];
-  }
-  renderEntries();
-}
-
-async function loadArtefacts() {
-  try {
-    const { data, error } = await supabase
-      .from('artefacts')
-      .select('*')
-      .eq('user_id', S.userId)
-      .order('created_at', { ascending: false })
-      .limit(6);
-    
-    if (error) throw error;
-    S.artefacts = data || [];
-  } catch (e) {
-    console.error('Load artefacts error:', e);
-    S.artefacts = [];
-  }
-  renderTray();
-}
-
-// ============================================
-// RENDER
-// ============================================
-function renderEntries() {
-  const container = $('econ');
-  if (!container) return;
-  
-  if (!S.entries.length) {
-    container.innerHTML = '<div class="es"><span class="ee">🍃</span><div class="et">Belum ada jejak</div></div>';
-    return;
-  }
-  
-  container.innerHTML = S.entries.map(e => `
-    <article class="entry">
-      <div class="ehdr">
-        <div class="emeta">
-          <span class="etime">${new Date(e.created_at).toLocaleString('id-ID')}</span>
-          <span class="emood ${e.mood}">${e.mood}</span>
-        </div>
-        <span class="fifo-i">@${e.username}</span>
-      </div>
-      <div class="econt">${esc(e.content)}</div>
-    </article>
-  `).join('');
-}
-
-function renderTray() {
-  const container = $('tgrid');
-  if (!container) return;
-  
-  if (!S.artefacts.length) {
-    container.innerHTML = '<div class="ti empty" onclick="$(\'upbtn\').click()">+</div>'.repeat(6);
-    return;
-  }
-  
-  let html = S.artefacts.map(a => `
-    <div class="ti" onclick="setHero('${a.id}')">
-      <img src="${a.url}" alt="${a.note || 'memory'}">
-      ${a.has_face ? '<div class="sensored-overlay"><span>SENSORED</span></div>' : ''}
-    </div>
-  `).join('');
-  
-  // Tambah placeholder
-  for (let i = S.artefacts.length; i < 6; i++) {
-    html += '<div class="ti empty" onclick="$(\'upbtn\').click()">+</div>';
-  }
-  
-  container.innerHTML = html;
-}
-
-function setHero(id) {
-  const artefact = S.artefacts.find(a => a.id === id);
-  if (!artefact) return;
-  
-  $('himg').src = artefact.url;
-  $('hnote').textContent = `"${artefact.note || 'memory'}"`;
-}
-
-// ============================================
-// UPLOAD
-// ============================================
-let uploads = parseInt(localStorage.getItem('jejak_uploads') || '0');
-let quotaStart = localStorage.getItem('jejak_quota_start') || Date.now();
-let pendingFiles = [];
-let selectedIndexes = new Set();
-
-function initUpload() {
-  $('upbtn').onclick = () => {
-    if (uploads >= 6) {
-      toast('Quota habis (max 6 foto per 3 hari)');
-      return;
-    }
-    $('finput').click();
-  };
-  
-  $('finput').onchange = handleFiles;
-}
-
-async function handleFiles(e) {
-  const files = Array.from(e.target.files).slice(0, 6);
-  if (!files.length) return;
-  
-  pendingFiles = files.map(f => ({
-    file: f,
-    preview: URL.createObjectURL(f)
-  }));
-  
-  selectedIndexes = new Set(pendingFiles.map((_, i) => i));
-  openGallery();
-}
-
-function openGallery() {
-  const grid = $('ggrid');
-  grid.innerHTML = '';
-  
-  pendingFiles.forEach((file, i) => {
-    const div = document.createElement('div');
-    div.className = 'gi sel';
-    div.innerHTML = `<img src="${file.preview}">`;
-    div.onclick = () => {
-      if (selectedIndexes.has(i)) {
-        selectedIndexes.delete(i);
-        div.classList.remove('sel');
-      } else {
-        selectedIndexes.add(i);
-        div.classList.add('sel');
-      }
-      $('selcnt').textContent = selectedIndexes.size;
-    };
-    grid.appendChild(div);
-  });
-  
-  $('selcnt').textContent = selectedIndexes.size;
-  $('gmodal').classList.add('on');
-}
-
-function closeGallery() {
-  $('gmodal').classList.remove('on');
-  pendingFiles = [];
-  selectedIndexes.clear();
-}
-
-async function confirmUpload() {
-  if (!selectedIndexes.size) {
-    toast('Pilih minimal 1 foto');
-    return;
-  }
-  
-  closeGallery();
-  showProc('Uploading...');
-  
-  const note = $('noti').value.trim() || 'memory';
-  const username = S.user.replace('@', '');
-  let success = 0;
-  
-  for (const i of selectedIndexes) {
-    const file = pendingFiles[i].file;
-    const fileName = `${username}/${Date.now()}_${i}.${file.name.split('.').pop() || 'jpg'}`;
-    
-    try {
-      // Upload ke storage
-      const { error: uploadError } = await supabase.storage
-        .from(BUCKET)
-        .upload(fileName, file);
-      
-      if (uploadError) throw uploadError;
-      
-      // Dapatkan URL
-      const { data: { publicUrl } } = supabase.storage
-        .from(BUCKET)
-        .getPublicUrl(fileName);
-      
-      // Insert ke database
-      const { error: insertError } = await supabase
-        .from('artefacts')
-        .insert({
-          user_id: S.userId,
-          username: username,
-          url: publicUrl,
-          note: note,
-          has_face: false,
-          faces: []
-        });
-      
-      if (insertError) throw insertError;
-      
-      success++;
-      
-    } catch (err) {
-      console.error('Upload error:', err);
-    }
-  }
-  
-  hideProc();
-  
-  if (success > 0) {
-    uploads += success;
-    localStorage.setItem('jejak_uploads', uploads.toString());
-    await loadArtefacts();
-    if (S.artefacts.length) setHero(S.artefacts[0].id);
-    toast(`✓ ${success} foto berhasil diupload!`);
-  } else {
-    toast('✗ Gagal upload', true);
-  }
-}
-
-// ============================================
-// INIT
-// ============================================
-document.addEventListener('DOMContentLoaded', async () => {
-  // Tampilkan username
-  $('huser').textContent = S.user;
-  
-  // Load data
-  await loadRants();
-  await loadArtefacts();
-  
-  // Init upload
-  initUpload();
-  
-  // Textarea counter
-  const ri = $('ri');
-  const cc = $('ccount');
-  ri.oninput = () => {
-    cc.textContent = `${ri.value.length}/500`;
-  };
-  
-  // Submit button
-  $('sbtn').onclick = async () => {
-    const content = ri.value.trim();
-    if (!content) {
-      toast('Tulis sesuatu...');
-      return;
-    }
-    
-    const mood = document.querySelector('.mc.act')?.dataset.mood || 'surviving';
-    const btn = $('sbtn');
-    
-    btn.disabled = true;
-    btn.textContent = 'Menyimpan...';
-    
-    try {
-      const { error } = await supabase
-        .from('rants')
-        .insert({
-          user_id: S.userId,
-          username: S.user.replace('@', ''),
-          content: content,
-          mood: mood,
-          reaction_count: { skull: 0, cry: 0, fire: 0, upside: 0 }
-        });
-      
-      if (error) throw error;
-      
-      await loadRants();
-      ri.value = '';
-      cc.textContent = '0/500';
-      toast('✓ Tersimpan!');
-      
-    } catch (err) {
-      console.error(err);
-      toast('✗ Gagal: ' + err.message, true);
-    } finally {
-      btn.disabled = false;
-      btn.textContent = 'Jejakkan & Spill';
-    }
-  };
-  
-  // Update quota display
-  function updQuota() {
+function updateQuota() {
     const now = Date.now();
-    const windowDays = 3 * 86400000;
+    const windowDays = 3 * 86400000; // 3 hari
+    
+    if (now - parseInt(quotaStart) > windowDays) {
+        uploads = 0;
+        quotaStart = now;
+        localStorage.setItem('test_uploads', '0');
+        localStorage.setItem('test_quota_start', now.toString());
+    }
+    
     const rem = Math.max(0, windowDays - (now - parseInt(quotaStart)));
     const days = Math.ceil(rem / 86400000);
-    $('qtimer').textContent = `Window aktif • ${days} hari • ${6-uploads} slot`;
-    $('ucnt').textContent = uploads;
-    $('ucnt').style.display = uploads > 0 ? 'block' : 'none';
-  }
-  
-  updQuota();
-  setInterval(updQuota, 60000);
-});
+    const slots = 6 - uploads;
+    
+    quotaEl.innerHTML = `📊 QUOTA: ${slots} slot tersisa (dari 6 foto per 3 hari)<br>⏰ Reset dalam ${days} hari`;
+    quotaEl.style.color = slots <= 2 ? '#FF006E' : '#39FF14';
+}
+
+function log(msg, isError = false) {
+    console.log(msg);
+    resultEl.innerHTML += `<div style="color: ${isError ? '#FF3333' : '#888'}; padding: 5px; border-bottom: 1px solid #2A2A2A;">${msg}</div>`;
+    resultEl.scrollTop = resultEl.scrollHeight;
+}
+
+function clearLog() {
+    resultEl.innerHTML = '';
+}
+
+// ============================================
+// UPLOAD FLOW
+// ============================================
+btnUpload.onclick = () => {
+    if (uploads >= 6) {
+        log('❌ QUOTA HABIS! Tunggu reset quota', true);
+        return;
+    }
+    fileInput.click();
+};
+
+fileInput.onchange = (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    
+    // Batasi 6 foto
+    selectedFiles = files.slice(0, 6);
+    
+    // Update counter
+    selectedCountEl.textContent = `${selectedFiles.length} dipilih`;
+    
+    // Tampilkan preview
+    previewEl.innerHTML = '';
+    selectedFiles.forEach((file, i) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const div = document.createElement('div');
+            div.style.aspectRatio = '1/1';
+            div.style.background = '#1E1E1E';
+            div.style.border = '2px solid #2A2A2A';
+            div.style.overflow = 'hidden';
+            div.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;">`;
+            previewEl.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+    
+    // Enable confirm button
+    btnConfirm.disabled = false;
+    btnConfirm.style.background = '#FF4D00';
+    btnConfirm.style.cursor = 'pointer';
+    
+    log(`📸 ${selectedFiles.length} file siap diupload`);
+};
+
+btnConfirm.onclick = async () => {
+    if (!selectedFiles.length) return;
+    
+    // Disable button
+    btnConfirm.disabled = true;
+    btnConfirm.textContent = 'UPLOADING...';
+    clearLog();
+    log('🚀 MULAI UPLOAD...');
+    
+    let success = 0;
+    let failed = 0;
+    
+    for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
+        const fileName = `${USERNAME}/${Date.now()}_${i}.${file.name.split('.').pop() || 'jpg'}`;
+        
+        log(`📤 Uploading file ${i+1}/${selectedFiles.length}: ${file.name}`);
+        
+        try {
+            // STEP 1: UPLOAD KE STORAGE
+            log(`   → Storage: ${BUCKET}/${fileName}`);
+            const { error: uploadError } = await supabase.storage
+                .from(BUCKET)
+                .upload(fileName, file);
+            
+            if (uploadError) {
+                throw new Error(`Storage error: ${uploadError.message}`);
+            }
+            log(`   ✅ Storage OK`);
+            
+            // STEP 2: GET PUBLIC URL
+            const { data: { publicUrl } } = supabase.storage
+                .from(BUCKET)
+                .getPublicUrl(fileName);
+            log(`   → URL: ${publicUrl.substring(0, 50)}...`);
+            
+            // STEP 3: INSERT KE TABEL artefacts
+            log(`   → Insert ke database...`);
+            const { error: insertError } = await supabase
+                .from('artefacts')
+                .insert({
+                    user_id: USER_ID,
+                    username: USERNAME,
+                    url: publicUrl,
+                    note: 'test upload',
+                    has_face: false,
+                    faces: []
+                });
+            
+            if (insertError) {
+                throw new Error(`Database error: ${insertError.message}`);
+            }
+            
+            log(`   ✅ Database OK`);
+            success++;
+            
+        } catch (err) {
+            log(`   ❌ GAGAL: ${err.message}`, true);
+            failed++;
+            console.error(err);
+        }
+    }
+    
+    // Update quota
+    if (success > 0) {
+        uploads += success;
+        localStorage.setItem('test_uploads', uploads.toString());
+    }
+    
+    // Update UI
+    updateQuota();
+    
+    log('=================================');
+    log(`✅ SUKSES: ${success} foto`);
+    log(`❌ GAGAL: ${failed} foto`);
+    log('=================================');
+    
+    // Reset form
+    if (success === selectedFiles.length) {
+        selectedFiles = [];
+        previewEl.innerHTML = '';
+        selectedCountEl.textContent = '0 dipilih';
+    }
+    
+    btnConfirm.textContent = 'KONFIRMASI UPLOAD';
+    btnConfirm.disabled = success === 0;
+    btnConfirm.style.background = success === 0 ? '#555' : '#FF4D00';
+    btnConfirm.style.cursor = success === 0 ? 'not-allowed' : 'pointer';
+    
+    // Cek hasil di database
+    if (success > 0) {
+        setTimeout(async () => {
+            log('\n🔍 CEK DATA DI DATABASE:');
+            const { data, error } = await supabase
+                .from('artefacts')
+                .select('*')
+                .eq('user_id', USER_ID)
+                .order('created_at', { ascending: false })
+                .limit(5);
+            
+            if (error) {
+                log(`❌ Gagal cek database: ${error.message}`, true);
+            } else {
+                log(`📊 Total data user: ${data.length} foto`);
+                data.forEach((d, i) => {
+                    log(`   ${i+1}. ${d.note} - ${new Date(d.created_at).toLocaleTimeString()}`);
+                });
+            }
+        }, 1000);
+    }
+};
+
+// Initial update
+updateQuota();
+log('✅ READY - Pilih foto untuk mulai upload');
+log(`👤 User ID: ${USER_ID}`);
+
+// Test koneksi
+(async () => {
+    try {
+        const { error } = await supabase.from('artefacts').select('count', { count: 'exact', head: true });
+        if (error) {
+            log(`❌ Koneksi database error: ${error.message}`, true);
+        } else {
+            log(`✅ Koneksi database OK`);
+        }
+    } catch (e) {
+        log(`❌ Koneksi error: ${e.message}`, true);
+    }
+})();
 </script>
 </body>
 </html>
