@@ -1,6 +1,6 @@
 // api/chat.js — JEJAK AI Chat Backend
 // Vercel Serverless Function
-// Env: DEEPSEEK_API_KEY → ganti ANTHROPIC_API_KEY setelah Deepseek habis
+// Env: DEEPSEEK_API_KEY
 
 const PERSONAS = {
   'beby.manis':          { style: 'manja tapi asik, sering bilang "ih", "yaampun", "serius??"', gender: 'female' },
@@ -12,8 +12,19 @@ const PERSONAS = {
   'moon.child':          { style: 'filosofis, suka nanya balik, deep tapi ga lebay',              gender: 'male'   },
   'si.kocak':            { style: 'lucu, sering bikin jokes receh, tapi dengerin beneran',        gender: 'male'   },
   'si.pedas':            { style: 'sarkas halus, witty, tapi hangat di baliknya',                 gender: 'male'   },
-  'abang.gaul':            { style: 'update, tau semua tren, slang heavy tapi ga lebay',            gender: 'male'   },
+  'abang.gaul':          { style: 'update, tau semua tren, slang heavy tapi ga lebay',            gender: 'male'   },
 };
+
+// Daftar kata/frasa yang harus dihindari (template banget)
+const FORBIDDEN_PHRASES = [
+  'haha iya nih',
+  'iya nih',
+  'iya banget',
+  'haha iya',
+  'haha gitu',
+  'wkwk iya',
+  'iya wkwk'
+];
 
 function detectDistress(message) {
   const msg = message.toLowerCase();
@@ -28,7 +39,30 @@ function detectDistress(message) {
   return { isHigh, isLow };
 }
 
-const SYSTEM = (name, style) => `Kamu adalah ${name}. Kamu lagi ngobrol santai di sebuah app.
+// Cek apakah ada frasa terlarang
+function containsForbiddenPhrase(text) {
+  const lower = text.toLowerCase();
+  return FORBIDDEN_PHRASES.some(phrase => lower.includes(phrase));
+}
+
+const SYSTEM = (name, style, lastMessages) => {
+  // Analisis lastMessages buat deteksi repetisi
+  const lastReplies = lastMessages
+    .filter(m => m.role === 'assistant')
+    .slice(-3)
+    .map(m => m.content);
+  
+  let repetitionWarning = '';
+  if (lastReplies.length >= 2) {
+    const unique = new Set(lastReplies);
+    if (unique.size === 1) {
+      repetitionWarning = '\n\nPERHATIAN: Kamu baru aja ngasih respons yang sama persis 2-3 kali. Jangan ulangi kata/frasa yang sama. Variasikan responsmu!';
+    } else if (unique.size < lastReplies.length) {
+      repetitionWarning = '\n\nPERHATIAN: Ada pengulangan pola di respons terakhir. Coba variasi lebih banyak!';
+    }
+  }
+
+  return `Kamu adalah ${name}. Kamu lagi ngobrol santai di sebuah app.
 
 SIAPA KAMU:
 Kamu manusia biasa. Style ngobrolmu: ${style}.
@@ -40,6 +74,13 @@ CARA NGOBROL:
 - Sesekali typo kecil yang natural (bkn, yg, gk, napa, gmn) — jangan tiap pesan, cukup 1 dari 5 pesan
 - Kadang mulai dengan "eh", "lah", "wah", "hm" — terasa natural
 - Kalau nggak tau mau bilang apa, cukup "hmm" atau "..." dulu sebelum lanjut
+
+PENTING BANGET:
+- JANGAN PERNAH PAKAI FRASA YANG SAMA PERSIS DENGAN RESPONS SEBELUMNYA
+- Variasikan respons: kadang nanya, kadang komen, kadang diam, kadang balik nanya
+- JANGAN PAKAI TEMPLATE KAYAK "haha iya nih" berulang-ulang
+- Setiap respons harus UNIK, jangan ngulang pola yang sama
+- Kalo user ngeluh, jangan cuma "iya nih" — tanya balik atau kasih reaksi yang beda
 
 CARA DENGERIN (INI YANG PALING PENTING):
 - Jangan langsung kasih solusi. JANGAN. Kecuali user minta eksplisit.
@@ -68,17 +109,20 @@ JANGAN PERNAH:
 - Pakai emoji berlebihan (max 1 per pesan, sering tanpa emoji)
 - Bilang "tentu", "tentunya", "pastinya", "sebagai teman"
 - Kasih list atau bullet point
-- Tulis kalimat lebih dari 2 baris`;
+- Tulis kalimat lebih dari 2 baris
+- ULANGI FRASA YANG SAMA PERSIS DENGAN RESPONS SEBELUMNYA${repetitionWarning}`;
+};
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { message, characterName, lastMessages = [] } = req.body || {};
-  if (!message?.trim())             return res.status(400).json({ error: 'Message required' });
+  if (!message?.trim()) return res.status(400).json({ error: 'Message required' });
   if (!process.env.DEEPSEEK_API_KEY) return res.status(500).json({ error: 'API key missing' });
 
   const persona = PERSONAS[characterName];
@@ -86,15 +130,20 @@ export default async function handler(req, res) {
 
   const { isHigh, isLow } = detectDistress(message);
 
-  const history = [
-    ...lastMessages.slice(-10).map(m => ({ role: m.role, content: m.content })),
-    { role: 'user', content: message.trim() }
-  ];
+  // Siapkan history
+  const history = lastMessages.slice(-10).map(m => ({ 
+    role: m.role, 
+    content: m.content 
+  }));
+  history.push({ role: 'user', content: message.trim() });
 
   const systemPrompt = isHigh
-    ? SYSTEM(characterName, persona.style) + '\n\n[SEKARANG: user mungkin lagi di titik sangat berat. Tanya pelan, kasih ruang, tetap hangat dan casual — jangan panik, jangan tiba-tiba formal.]'
-    : SYSTEM(characterName, persona.style);
+    ? SYSTEM(characterName, persona.style, lastMessages) + '\n\n[SEKARANG: user mungkin lagi di titik sangat berat. Tanya pelan, kasih ruang, tetap hangat dan casual — jangan panik, jangan tiba-tiba formal.]'
+    : SYSTEM(characterName, persona.style, lastMessages);
 
+  // Tambah instruksi anti-repetisi langsung di user prompt terakhir
+  const antiRepetitionNote = '\n\nPENTING: Respons harus UNIK dan BERBEDA dari respons sebelumnya. Jangan ulangi frasa yang sama. Variasikan antara nanya, komen, atau reaksi.';
+  
   try {
     // Deepseek pakai OpenAI-compatible API
     const response = await fetch('https://api.deepseek.com/chat/completions', {
@@ -105,11 +154,15 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'deepseek-chat',
-        max_tokens: 120,
-        temperature: 0.9,
+        max_tokens: 150,
+        temperature: 0.65, // Turunin dari 0.9 biar lebih fokus tapi tetap kreatif
+        top_p: 0.9,
+        frequency_penalty: 0.7, // Tambah penalty biar gak ngulang kata
+        presence_penalty: 0.5,  // Tambah penalty biar gak stuck di topik
         messages: [
           { role: 'system', content: systemPrompt },
-          ...history
+          ...history.slice(0, -1), // History tanpa pesan terakhir
+          { role: 'user', content: message.trim() + antiRepetitionNote }
         ]
       })
     });
@@ -121,8 +174,40 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
-    const reply = data.choices?.[0]?.message?.content?.trim();
+    let reply = data.choices?.[0]?.message?.content?.trim();
+    
     if (!reply) return res.status(502).json({ error: 'Empty response' });
+
+    // Cek apakah reply mengandung frasa terlarang
+    if (containsForbiddenPhrase(reply)) {
+      // Paksa regenerate dengan instruksi lebih keras
+      console.warn('Forbidden phrase detected, regenerating...');
+      
+      const retryResponse = await fetch('https://api.deepseek.com/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          max_tokens: 150,
+          temperature: 0.7,
+          frequency_penalty: 1.0, // Naikin penalty
+          presence_penalty: 0.8,
+          messages: [
+            { role: 'system', content: systemPrompt + '\n\n⚠️ RESPONS SEBELUMNYA MENGANDUNG FRASA TERLARANG. JANGAN ULANGI FRASA ITU. BUAT RESPONS YANG SAMA SEKALI BERBEDA.' },
+            ...history.slice(0, -1),
+            { role: 'user', content: message.trim() }
+          ]
+        })
+      });
+      
+      if (retryResponse.ok) {
+        const retryData = await retryResponse.json();
+        reply = retryData.choices?.[0]?.message?.content?.trim() || reply;
+      }
+    }
 
     return res.status(200).json({
       reply,
