@@ -1,1071 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>SPILL — vibe radar</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<style>
-/* CSS SAMA PERSIS DENGAN SEBELUMNYA */
-:root{
-  --bg:#000;--sf:#0a0a0a;--sfe:#111;--bd:#1a1a1a;--tx:#fff;
-  --txs:#666;--txm:#444;--ap:#ff3d00;--as:#00f0ff;--aq:#00ff41;
-  --war:#ff0040;--ms:#ff9500;--mt:#00ff41;--mc:#00f0ff;--md:#8b5cf6;
-  --safe-bottom:env(safe-area-inset-bottom);--safe-top:env(safe-area-inset-top)
-}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
-html{height:100%;overflow:hidden}
-body{
-  height:100%;background:var(--bg);color:var(--tx);
-  font-family:'Inter',-apple-system,sans-serif;font-size:14px;line-height:1.4;
-  overflow:hidden;position:fixed;width:100%;overscroll-behavior:none
-}
-.app{height:100%;display:flex;flex-direction:column;overflow:hidden}
-
-/* ── HEADER ── */
-.header{
-  padding:12px 16px;padding-top:calc(12px + var(--safe-top));
-  display:flex;justify-content:space-between;align-items:center;
-  border-bottom:1px solid var(--bd);background:var(--bg);flex-shrink:0
-}
-.logo{font-size:28px;font-weight:800;letter-spacing:-2px;line-height:1}
-.logo span{color:var(--as)}
-.status{display:flex;align-items:center;gap:6px}
-
-/* ── SCROLL ── */
-.scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
-.scroll::-webkit-scrollbar{display:none}
-
-/* ── RADAR ── */
-.radar-sect{background:var(--sf);border-bottom:1px solid var(--bd);padding:12px 0}
-.radar-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:0 16px 12px
-}
-.radar-label{
-  font-family:'Space Mono',monospace;
-  font-size:9px;
-  color:var(--as);
-  letter-spacing:1px;
-  display:flex;
-  align-items:center;
-  gap:6px
-}
-.radar-label::before{
-  content:'';
-  width:6px;
-  height:6px;
-  background:var(--as);
-  border-radius:50%;
-  animation:blink 1s infinite
-}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-.radar-stat{
-  font-family:'Space Mono',monospace;
-  font-size:10px;
-  color:var(--aq);
-  background:#0f0f0f;
-  padding:4px 10px;
-  border-radius:4px;
-  border:1px solid #2a2a2a;
-  display:flex;
-  align-items:center;
-  gap:6px
-}
-.radar-stat::before{
-  content:'';
-  width:6px;
-  height:6px;
-  background:var(--aq);
-  border-radius:0;
-  animation:blink 1.5s step-end infinite
-}
-.radar-wrapper{padding:0 16px}
-.radar-bezel{
-  position:relative;
-  border-radius:16px;
-  padding:18px 18px 22px;
-  background:linear-gradient(160deg,#3c3c3c 0%,#282828 8%,#1e1e1e 30%,#161616 50%,#1a1a1a 72%,#242424 92%,#2e2e2e 100%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 1px 0 0 rgba(255,255,255,.04),inset 0 -2px 0 rgba(0,0,0,.7),inset -1px 0 0 rgba(0,0,0,.5),0 2px 0 #0a0a0a,0 4px 0 #060606,0 8px 24px rgba(0,0,0,.85),0 2px 6px rgba(0,0,0,.9);
-  background-image:repeating-linear-gradient(90deg,transparent,transparent 3px,rgba(0,0,0,.08)3px,rgba(0,0,0,.08)4px),linear-gradient(160deg,#3c3c3c 0%,#282828 8%,#1e1e1e 30%,#161616 50%,#1a1a1a 72%,#242424 92%,#2e2e2e 100%)
-}
-.radar-screw{
-  position:absolute;
-  width:14px;height:14px;border-radius:50%;z-index:20;
-  background:radial-gradient(circle at 38% 32%,#4a4a4a 0%,#2e2e2e 35%,#1a1a1a 65%,#111 100%);
-  box-shadow:0 0 0 2px #0e0e0e,0 0 0 3px #2a2a2a,inset 0 1px 2px rgba(255,255,255,.12),inset 0 -1px 2px rgba(0,0,0,.9),0 1px 3px rgba(0,0,0,.8)
-}
-.radar-screw::before,.radar-screw::after{
-  content:'';position:absolute;border-radius:1px;
-  background:rgba(0,0,0,.65)
-}
-.radar-screw::before{width:7px;height:1.5px;top:6.25px;left:3.5px;transform:rotate(var(--sr,0deg))}
-.radar-screw::after{width:1.5px;height:7px;top:3.5px;left:6.25px;transform:rotate(var(--sr,0deg))}
-.screw-tl{top:7px;left:7px;--sr:15deg}
-.screw-tr{top:7px;right:7px;--sr:-20deg}
-.screw-bl{bottom:11px;left:7px;--sr:-10deg}
-.screw-br{bottom:11px;right:7px;--sr:25deg}
-.radar-bezel-label{
-  position:absolute;top:6px;left:0;right:0;
-  text-align:center;font-family:'Space Mono',monospace;
-  font-size:7px;font-weight:700;letter-spacing:5px;
-  text-transform:uppercase;color:transparent;
-  text-shadow:0 1px 0 rgba(255,255,255,.1),0 -1px 0 rgba(0,0,0,.8);
-  -webkit-text-stroke:.5px rgba(255,255,255,.15)
-}
-.radar-bezel-range{
-  position:absolute;bottom:7px;left:0;right:0;
-  display:flex;justify-content:space-between;padding:0 22px;
-  font-family:'Space Mono',monospace;font-size:6px;color:rgba(255,255,255,.14);
-  pointer-events:none
-}
-.radar-bezel::after{
-  content:'';position:absolute;bottom:0;left:18px;right:18px;height:3px;
-  border-radius:0 0 14px 14px;
-  background:linear-gradient(90deg,transparent,var(--as) 30%,var(--as) 70%,transparent);
-  opacity:.35
-}
-.radar-cont{
-  position:relative;width:100%;
-  aspect-ratio:1/1;
-  background:radial-gradient(ellipse at 42% 38%,#0b1a0b 0%,#040d04 55%,#010501 100%);
-  border-radius:6px;overflow:hidden;
-  box-shadow:inset 0 0 0 2px #000,inset 0 2px 8px rgba(0,0,0,.95),inset 0 0 60px rgba(0,0,0,.9)
-}
-.radar-cont::after{
-  content:'';position:absolute;inset:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07)2px,rgba(0,0,0,.07)3px)
-}
-.radar-cont::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse at 28% 22%,rgba(255,255,255,.04)0%,transparent 55%),linear-gradient(135deg,rgba(255,255,255,.015)0%,transparent 50%)
-}
-.radar-grid{
-  position:absolute;inset:0;opacity:.065;
-  background-image:repeating-linear-gradient(0deg,rgba(0,255,65,.7)0px,transparent 1px,transparent 22px),repeating-linear-gradient(90deg,rgba(0,255,65,.7)0px,transparent 1px,transparent 22px)
-}
-.radar-ring{position:absolute;inset:6%;border:1px solid rgba(0,255,65,.1);border-radius:50%}
-.radar-ring::before,.radar-ring::after{content:'';position:absolute;border-radius:50%;border:1px solid rgba(0,255,65,.07)}
-.radar-ring::before{inset:25%}.radar-ring::after{inset:50%;border-color:rgba(0,255,65,.05)}
-.radar-cross{
-  position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent calc(50% - .5px),rgba(0,255,65,.06)calc(50% - .5px),rgba(0,255,65,.06)calc(50% + .5px),transparent calc(50% + .5px)),linear-gradient(0deg,transparent calc(50% - .5px),rgba(0,255,65,.06)calc(50% - .5px),rgba(0,255,65,.06)calc(50% + .5px),transparent calc(50% + .5px))
-}
-.radar-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:5}
-.radar-dots{position:absolute;inset:0;z-index:10}
-.radar-dot{
-  position:absolute;width:8px;height:8px;border-radius:50%;
-  transform:translate(-50%,-50%);opacity:.35;will-change:transform,opacity,filter;
-  transition:opacity .1s ease-out
-}
-.radar-dot.active{opacity:1;transform:translate(-50%,-50%) scale(2.2);filter:brightness(2) drop-shadow(0 0 6px currentColor)}
-.radar-dot.purple{background:#b026ff;box-shadow:0 0 6px #b026ff}
-.radar-dot.red{background:var(--war);box-shadow:0 0 6px var(--war)}
-.radar-dot.ai{background:var(--aq);box-shadow:0 0 6px var(--aq)}
-
-/* ── RADAR ACTIONS ── */
-.radar-actions{
-  display:flex;
-  gap:12px;
-  padding:16px 16px 8px;
-  margin-top:4px
-}
-.action-btn{
-  flex:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  padding:14px 0;
-  border:none;
-  border-radius:8px;
-  font-family:'Space Mono',monospace;
-  font-size:13px;
-  font-weight:700;
-  letter-spacing:1px;
-  text-transform:uppercase;
-  cursor:pointer;
-  position:relative;
-  box-shadow:0 4px 0 rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.1);
-  transition:all .1s ease
-}
-.action-btn.left{
-  background:linear-gradient(180deg,#1a2a2a,#0f1a1a);
-  color:var(--as);
-  border:1px solid #2a4a4a
-}
-.action-btn.right{
-  background:linear-gradient(180deg,#2a1a1a,#1a0f0f);
-  color:var(--ap);
-  border:1px solid #4a2a2a
-}
-.action-btn:active{
-  transform:translateY(3px);
-  box-shadow:0 1px 0 rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.1)
-}
-.action-icon{font-size:18px}
-.action-label{font-size:12px;letter-spacing:1.5px}
-.action-badge{
-  position:absolute;
-  top:-4px;
-  right:10px;
-  min-width:20px;
-  height:20px;
-  background:var(--as);
-  color:#000;
-  font-size:10px;
-  font-weight:800;
-  border-radius:4px;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding:0 6px;
-  border:1px solid #000
-}
-.action-badge.show{display:flex}
-
-.vt-dot-wrap{position:relative;width:14px;height:14px;flex-shrink:0}
-.vt-dot-inner{width:8px;height:8px;background:#111;border:1px solid #1e1e1e;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);transition:all .5s}
-.vt-dot-wrap.has-tap .vt-dot-inner{animation:vt-breathe 3s ease-in-out infinite}
-@keyframes vt-breathe{0%,100%{box-shadow:none;border-color:#1e1e1e}50%{box-shadow:0 0 0 3px rgba(30,30,30,.5);border-color:#2a2a2a}}
-
-/* ── FILTER ── */
-.filter-sect{padding:16px;border-bottom:1px solid var(--bd)}
-.filter-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.filter-title{font-size:11px;font-weight:700;color:var(--txs);letter-spacing:.5px}
-.match-pct{font-family:'Space Mono',monospace;font-size:14px;color:var(--ap);font-weight:700}
-.vibe-slider{
-  width:100%;height:4px;background:var(--bd);border-radius:2px;
-  outline:none;-webkit-appearance:none;display:block;margin-bottom:6px
-}
-.vibe-slider::-webkit-slider-thumb{
-  -webkit-appearance:none;width:24px;height:24px;background:var(--ap);
-  border:3px solid var(--bg);border-radius:50%;
-  box-shadow:0 0 0 1px var(--ap),0 2px 8px rgba(255,61,0,.4);margin-top:-10px
-}
-.vibe-slider::-webkit-slider-runnable-track{
-  height:4px;background:linear-gradient(90deg,var(--ap) 0%,var(--ap) 87%,var(--bd) 87%);border-radius:2px
-}
-.slider-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--txm);font-weight:600;margin-top:4px;margin-bottom:12px}
-.mood-scroll{display:flex;gap:8px;overflow-x:auto;margin:0 -16px;padding:0 16px 4px;scrollbar-width:none}
-.mood-scroll::-webkit-scrollbar{display:none}
-.mood-chip{
-  flex-shrink:0;padding:10px 16px;background:var(--sf);border:1px solid var(--bd);
-  border-radius:24px;font-size:12px;font-weight:600;color:var(--txs);white-space:nowrap;
-  touch-action:manipulation;transition:all .15s;cursor:pointer;font-family:inherit
-}
-.mood-chip.active{background:var(--ap);border-color:var(--ap);color:#000}
-.mood-chip:active{transform:scale(.95);opacity:.8}
-
-/* ── SPILLS ── */
-.spills-sect{padding:16px;padding-bottom:calc(80px + var(--safe-bottom))}
-.sect-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.sect-title{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--txs)}
-.sect-meta{font-family:'Space Mono',monospace;font-size:9px;color:var(--txm)}
-.spill-card{background:var(--sf);border:1px solid var(--bd);border-radius:16px;margin-bottom:12px;overflow:hidden}
-.spill-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--bd);background:var(--bg)}
-.spill-user{font-family:'Space Mono',monospace;font-size:11px;color:var(--txs);font-weight:600}
-.spill-mood{font-size:10px;font-weight:700;padding:6px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
-.spill-mood.surviving{color:var(--ms);background:rgba(255,149,0,.1)}
-.spill-mood.thriving{color:var(--mt);background:rgba(57,255,20,.1)}
-.spill-mood.chaotic{color:var(--mc);background:rgba(0,240,255,.1)}
-.spill-mood.doom{color:var(--md);background:rgba(139,92,246,.1)}
-.spill-body{padding:16px;font-size:15px;line-height:1.6;color:var(--tx)}
-.spill-actions{
-  display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--bd);
-  background:var(--bg);overflow-x:auto;scrollbar-width:none
-}
-.spill-actions::-webkit-scrollbar{display:none}
-.react-btn{
-  display:flex;align-items:center;gap:6px;padding:10px 16px;
-  background:var(--sf);border:1px solid var(--bd);border-radius:24px;
-  font-size:14px;color:var(--txs);flex-shrink:0;touch-action:manipulation;
-  transition:all .15s;cursor:pointer;font-family:inherit
-}
-.react-btn.active{background:var(--ap);border-color:var(--ap);color:#000}
-.react-btn:active{transform:scale(.95)}
-.react-count{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;min-width:18px}
-.refresh-btn{
-  width:100%;padding:16px;background:transparent;border:1px dashed var(--bd);border-radius:16px;
-  color:var(--txs);font-size:13px;font-weight:600;display:flex;align-items:center;
-  justify-content:center;gap:8px;margin-top:8px;touch-action:manipulation;
-  transition:all .15s;cursor:pointer;font-family:inherit
-}
-.refresh-btn:active{background:var(--sf)}
-.empty-state{text-align:center;padding:60px 20px}
-.empty-icon{font-size:48px;margin-bottom:16px;opacity:.5}
-.empty-title{font-size:16px;font-weight:700;color:var(--txs);margin-bottom:6px}
-.empty-text{font-size:13px;color:var(--txm)}
-
-/* ── BOTTOM NAV ── */
-.bnav{
-  position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,.95);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-top:1px solid var(--bd);padding-bottom:var(--safe-bottom);z-index:100
-}
-.bnav-inner{display:flex;justify-content:space-around;align-items:center;height:60px;max-width:480px;margin:0 auto}
-.nav-item{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;height:100%;color:var(--txs);text-decoration:none;font-size:10px;
-  font-weight:600;letter-spacing:.3px;position:relative;touch-action:manipulation;transition:all .15s
-}
-.nav-item.active{color:var(--as)}
-.nav-item.active::before{
-  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
-  width:20px;height:2px;background:var(--as);border-radius:0 0 2px 2px
-}
-.nav-icon{font-size:22px;line-height:1;margin-bottom:-2px}
-
-/* ── MODAL GENDER ── */
-.modal{display:none;position:fixed;inset:0;background:var(--bg);z-index:200;flex-direction:column;overflow:hidden}
-.modal.on{display:flex}
-.modal-header{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:16px;padding-top:calc(16px + var(--safe-top));border-bottom:1px solid var(--bd)
-}
-.modal-title{
-  font-size:17px;
-  font-weight:700;
-  letter-spacing:-.3px;
-  color:var(--tx)
-}
-.modal-close{
-  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
-  background:var(--sf);border:1px solid var(--bd);border-radius:10px;color:var(--txs);
-  font-size:18px;touch-action:manipulation;cursor:pointer;transition:all .15s
-}
-.modal-close:active{background:var(--bd)}
-.modal-body{
-  flex:1;
-  overflow-y:auto;
-  padding:24px 20px calc(24px + var(--safe-bottom));
-  -webkit-overflow-scrolling:touch
-}
-.modal-tag{
-  font-family:'Space Mono',monospace;
-  font-size:9px;
-  color:var(--ap);
-  margin-bottom:12px;
-  letter-spacing:2px;
-  font-weight:700;
-  display:block;
-  text-transform:uppercase
-}
-.modal-h{
-  font-size:28px;
-  font-weight:800;
-  margin-bottom:8px;
-  letter-spacing:-.5px;
-  line-height:1.2;
-  color:var(--tx)
-}
-.modal-sub{
-  font-size:14px;
-  color:var(--txs);
-  margin-bottom:28px;
-  line-height:1.5
-}
-.gender-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin-bottom:24px
-}
-.gender-card{
-  background:var(--sf);
-  border:1px solid var(--bd);
-  border-radius:16px;
-  padding:28px 16px;
-  text-align:center;
-  touch-action:manipulation;
-  transition:all .15s;
-  cursor:pointer
-}
-.gender-card.selected{
-  border-color:var(--ap);
-  background:rgba(255,61,0,.08)
-}
-.gender-card:active{transform:scale(.96)}
-.gender-icon{
-  font-size:36px;
-  margin-bottom:12px;
-  display:block
-}
-.gender-label{
-  font-size:15px;
-  font-weight:700;
-  margin-bottom:4px;
-  color:var(--tx)
-}
-.gender-desc{
-  font-size:12px;
-  color:var(--txs)
-}
-.info-box{
-  background:var(--sf);
-  border-left:3px solid var(--ap);
-  padding:16px;
-  margin-bottom:28px;
-  border-radius:0 12px 12px 0
-}
-.info-box p{
-  font-family:'Space Mono',monospace;
-  font-size:11px;
-  color:var(--txs);
-  line-height:1.7
-}
-.info-box strong{
-  color:var(--ap);
-  font-weight:700
-}
-.modal-action-btn{
-  width:100%;
-  padding:18px;
-  background:var(--ap);
-  color:#000;
-  border:none;
-  border-radius:12px;
-  font-size:15px;
-  font-weight:700;
-  letter-spacing:.3px;
-  touch-action:manipulation;
-  cursor:pointer;
-  transition:all .15s;
-  font-family:inherit;
-  text-transform:uppercase;
-  margin-bottom:16px
-}
-.modal-action-btn:disabled{
-  opacity:.3;
-  cursor:not-allowed
-}
-.modal-action-btn:active{
-  transform:scale(.98)
-}
-.modal-hint{
-  font-size:12px;
-  color:var(--txm);
-  text-align:center;
-  line-height:1.6;
-  padding:0 12px
-}
-.modal-hint-link{
-  background:none;
-  border:none;
-  color:var(--as);
-  font-size:12px;
-  font-weight:700;
-  cursor:pointer;
-  text-decoration:underline;
-  font-family:inherit;
-  padding:0
-}
-
-/* ── CHAT ROOM (DUA MATA) ── */
-.chat-room{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column}
-.chat-room.on{display:flex}
-.chat-head{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px 16px;
-  padding-top:calc(12px + var(--safe-top));
-  border-bottom:1px solid var(--bd);
-  background:var(--sf)
-}
-.chat-info{
-  flex:1;
-  display:flex;
-  align-items:center;
-  gap:8px
-}
-.eyes-container{
-  display:flex;
-  gap:6px;
-  align-items:center
-}
-.eye{
-  width:24px;
-  height:24px;
-  background:var(--bd);
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  position:relative;
-  animation: eyeMove 3s ease-in-out infinite
-}
-.eye::after{
-  content:'';
-  width:8px;
-  height:8px;
-  background:var(--aq);
-  border-radius:50%;
-  position:absolute;
-  animation: pupilMove 3s ease-in-out infinite
-}
-.eye.left::after{left:4px}
-.eye.right::after{right:4px}
-@keyframes eyeMove{
-  0%,100%{transform:translateX(0)}
-  25%{transform:translateX(-2px)}
-  75%{transform:translateX(2px)}
-}
-@keyframes pupilMove{
-  0%,100%{transform:translate(0,0)}
-  25%{transform:translate(-2px,-1px)}
-  75%{transform:translate(2px,1px)}
-}
-.chat-timer{
-  font-family:'Space Mono',monospace;
-  font-size:16px;
-  font-weight:700;
-  color:var(--aq);
-  background:var(--bg);
-  padding:8px 14px;
-  border-radius:10px;
-  border:1px solid var(--bd);
-  letter-spacing:-1px
-}
-.chat-timer.warn{
-  color:var(--war);
-  border-color:var(--war);
-  animation:blink 1s infinite;
-  background:rgba(255,0,64,.1)
-}
-.chat-close{
-  width:40px;
-  height:40px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:var(--bg);
-  border:1px solid var(--bd);
-  border-radius:12px;
-  color:var(--txs);
-  margin-left:12px;
-  font-size:18px;
-  touch-action:manipulation;
-  cursor:pointer;
-  transition:all .15s
-}
-.chat-close:active{background:var(--bd)}
-.chat-messages{
-  flex:1;
-  overflow-y:auto;
-  padding:16px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  -webkit-overflow-scrolling:touch
-}
-.chat-bubble{
-  max-width:85%;
-  padding:14px 18px;
-  border-radius:20px;
-  font-size:15px;
-  line-height:1.5;
-  word-wrap:break-word;
-  animation:popIn .25s cubic-bezier(.175,.885,.32,1.275)
-}
-@keyframes popIn{
-  from{opacity:0;transform:scale(.8) translateY(10px)}
-  to{opacity:1;transform:scale(1) translateY(0)}
-}
-.chat-bubble.me{align-self:flex-end;background:var(--ap);color:#000;border-bottom-right-radius:6px;font-weight:600}
-.chat-bubble.them{align-self:flex-start;background:var(--sf);border:1px solid var(--bd);border-bottom-left-radius:6px}
-.chat-msg{display:flex;flex-direction:column;max-width:85%}
-.chat-msg.own{align-self:flex-end}
-.chat-msg.other{align-self:flex-start}
-.chat-msg .chat-bubble{max-width:100%}
-.own .chat-bubble{background:var(--ap);color:#000;border-bottom-right-radius:6px;font-weight:600;align-self:flex-end}
-.other .chat-bubble{background:var(--sf);border:1px solid var(--bd);border-bottom-left-radius:6px;align-self:flex-start}
-.chat-time{
-  font-size:10px;
-  color:var(--txm);
-  margin-top:6px;
-  font-family:'Space Mono',monospace;
-  font-weight:600
-}
-.typing{
-  display:flex;
-  gap:4px;
-  padding:18px 22px;
-  background:var(--sf);
-  border:1px solid var(--bd);
-  border-radius:20px;
-  border-bottom-left-radius:6px;
-  align-self:flex-start;
-  width:fit-content
-}
-.typing-dot{
-  width:8px;
-  height:8px;
-  background:var(--aq);
-  border-radius:50%;
-  animation:typing 1.4s infinite
-}
-.typing-dot:nth-child(2){animation-delay:.2s}
-.typing-dot:nth-child(3){animation-delay:.4s}
-@keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
-.chat-msg.searching-msg{align-self:center!important;max-width:90%!important}
-.searching-msg .chat-bubble{
-  background:var(--sfe)!important;
-  color:var(--txs)!important;
-  border:1px dashed var(--aq)!important;
-  font-style:italic;
-  text-align:center
-}
-.distress{
-  display:none;
-  padding:14px 16px;
-  background:var(--war);
-  color:#fff;
-  font-size:12px;
-  font-weight:700;
-  text-align:center;
-  letter-spacing:.3px
-}
-.distress.show{display:block}
-.chat-input-wrap{
-  padding:12px 16px;
-  padding-bottom:calc(12px + var(--safe-bottom));
-  border-top:1px solid var(--bd);
-  background:var(--sf);
-  display:flex;
-  gap:10px;
-  align-items:center
-}
-.vt-trigger{
-  width:40px;
-  height:48px;
-  background:transparent;
-  border:1px solid #1a1a1a;
-  color:#333;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-shrink:0;
-  cursor:pointer;
-  border-radius:12px;
-  font-size:13px;
-  transition:all .2s
-}
-.vt-trigger:hover{border-color:#333;color:#555}
-.chat-input{
-  flex:1;
-  background:var(--bg);
-  border:1px solid var(--bd);
-  border-radius:24px;
-  padding:14px 18px;
-  font-size:15px;
-  color:var(--tx);
-  outline:none;
-  -webkit-appearance:none;
-  transition:all .15s;
-  font-family:inherit
-}
-.chat-input:focus{border-color:var(--ap)}
-.chat-send{
-  width:48px;
-  height:48px;
-  background:var(--ap);
-  border:none;
-  border-radius:50%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:#000;
-  font-size:20px;
-  flex-shrink:0;
-  touch-action:manipulation;
-  cursor:pointer;
-  box-shadow:0 4px 0 rgba(255,61,0,.3);
-  transition:all .15s
-}
-.chat-send:active{
-  transform:translateY(4px);
-  box-shadow:0 0 0 rgba(255,61,0,.3)
-}
-
-/* ── WHISPERER ── */
-.ws-feature-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
-.ws-feature{font-size:12px;color:var(--txs);padding:10px 14px;background:var(--sfe);border-left:2px solid var(--as);border-radius:0 8px 8px 0;font-weight:600}
-.ws-price-box{background:var(--sf);border:1px solid rgba(0,240,255,.25);padding:20px;text-align:center;margin-bottom:20px;border-radius:16px}
-.ws-price{font-size:40px;font-weight:800;color:var(--as);letter-spacing:-2px;line-height:1}
-.ws-price-sub{font-size:11px;color:var(--txm);margin-top:6px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;font-family:'Space Mono',monospace}
-.ws-inbox-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.ws-compose-btn{background:var(--as);color:#000;border:none;padding:10px 18px;font-size:12px;font-weight:700;border-radius:10px;cursor:pointer;font-family:inherit;touch-action:manipulation}
-.ws-compose-btn:active{opacity:.8}
-.ws-thread-item{
-  background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;
-  margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;
-  touch-action:manipulation;transition:all .15s;position:relative;overflow:hidden
-}
-.ws-thread-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--as);opacity:0;transition:opacity .15s;border-radius:3px 0 0 3px}
-.ws-thread-item.unread::before{opacity:1}
-.ws-thread-item:active{transform:scale(.98)}
-.ws-avatar{width:40px;height:40px;background:var(--sfe);border:1px solid var(--bd);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--txs);flex-shrink:0}
-.ws-thread-info{flex:1;min-width:0}
-.ws-thread-name{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:3px}
-.ws-thread-preview{font-size:11px;color:var(--txm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ws-thread-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
-.ws-thread-time{font-size:9px;color:var(--txm);font-family:'Space Mono',monospace}
-.ws-unread-badge{min-width:20px;height:20px;background:var(--as);color:#000;font-size:9px;font-weight:800;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 5px}
-.ws-empty{text-align:center;padding:40px 0}
-.ws-empty-icon{font-size:36px;display:block;margin-bottom:12px;opacity:.3}
-.ws-empty-title{font-size:15px;font-weight:700;color:var(--txs);margin-bottom:4px}
-.ws-empty-sub{font-size:12px;color:var(--txm)}
-.ws-compose{display:none;position:fixed;inset:0;background:var(--bg);z-index:350;flex-direction:column}
-.ws-compose.on{display:flex}
-.ws-compose-head{
-  display:flex;align-items:center;gap:12px;padding:14px 16px;
-  padding-top:calc(14px + var(--safe-top));border-bottom:1px solid var(--bd);background:var(--sf)
-}
-.ws-to-label{font-size:11px;font-weight:700;color:var(--txm);white-space:nowrap;font-family:'Space Mono',monospace}
-.ws-to-input{flex:1;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--tx);font-size:16px;font-family:inherit;padding:4px 0;outline:none;transition:border-color .15s}
-.ws-to-input:focus{border-bottom-color:var(--as)}
-.ws-to-input::placeholder{color:var(--txm)}
-.ws-close-btn{width:36px;height:36px;background:var(--bg);border:1px solid var(--bd);border-radius:10px;color:var(--txs);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0}
-.ws-body{flex:1;background:transparent;border:none;color:var(--tx);font-family:inherit;font-size:16px;line-height:1.6;resize:none;padding:20px 16px;outline:none}
-.ws-body::placeholder{color:var(--txm)}
-.ws-compose-foot{
-  padding:12px 16px;padding-bottom:calc(12px + var(--safe-bottom));
-  border-top:1px solid var(--bd);background:var(--sf);display:flex;justify-content:space-between;align-items:center
-}
-.ws-char-count{font-size:10px;color:var(--txm);font-family:'Space Mono',monospace}
-.ws-send-btn{background:var(--as);color:#000;border:none;padding:12px 24px;font-size:13px;font-weight:700;border-radius:12px;cursor:pointer;font-family:inherit;transition:all .15s;box-shadow:0 4px 0 rgba(0,240,255,.2)}
-.ws-send-btn:active{transform:translateY(3px);box-shadow:none}
-.ws-send-btn:disabled{opacity:.3;cursor:not-allowed;box-shadow:none}
-.ws-thread{display:none;position:fixed;inset:0;background:var(--bg);z-index:350;flex-direction:column}
-.ws-thread.on{display:flex}
-.ws-thread-head{
-  display:flex;align-items:center;gap:12px;padding:12px 16px;
-  padding-top:calc(12px + var(--safe-top));border-bottom:1px solid var(--bd);background:var(--sf)
-}
-.ws-back-btn{width:36px;height:36px;background:var(--bg);border:1px solid var(--bd);border-radius:10px;color:var(--txs);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0;touch-action:manipulation}
-.ws-thread-title{flex:1;font-size:15px;font-weight:700}
-.ws-vt-btn{background:transparent;border:1px solid #1a1a1a;color:#333;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;transition:all .2s;flex-shrink:0}
-.ws-vt-btn:hover{border-color:#333;color:#555}
-.ws-thread-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch}
-.ws-thread-input-wrap{
-  padding:12px 16px;padding-bottom:calc(12px + var(--safe-bottom));
-  border-top:1px solid var(--bd);background:var(--sf);display:flex;gap:10px;align-items:center
-}
-.ws-thread-input{flex:1;background:var(--bg);border:1px solid var(--bd);border-radius:24px;padding:14px 18px;font-size:15px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .15s}
-.ws-thread-input:focus{border-color:var(--as)}
-.ws-thread-send{width:48px;height:48px;background:var(--as);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#000;font-size:20px;flex-shrink:0;cursor:pointer;touch-action:manipulation;transition:all .15s;box-shadow:0 4px 0 rgba(0,240,255,.2)}
-.ws-thread-send:active{transform:translateY(4px);box-shadow:none}
-
-/* ── VOID TAP ── */
-.vt-compose{display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column;align-items:stretch;justify-content:center}
-.vt-compose.on{display:flex;animation:vtFade .2s ease}
-@keyframes vtFade{from{opacity:0}to{opacity:1}}
-.vt-compose-inner{max-width:480px;width:100%;margin:0 auto;padding:40px 24px;display:flex;flex-direction:column;gap:28px}
-.vt-lbl{font-size:9px;font-weight:700;color:#2a2a2a;text-transform:uppercase;letter-spacing:.2em;font-family:'Space Mono',monospace}
-.vt-textarea{background:transparent;border:none;border-bottom:1px solid #1a1a1a;color:#444;font-family:'Inter',sans-serif;font-size:18px;line-height:1.7;resize:none;height:130px;outline:none;caret-color:#333;padding:8px 0}
-.vt-textarea::placeholder{color:#1a1a1a;font-style:italic}
-.vt-textarea:focus{border-bottom-color:#252525}
-.vt-meta{display:flex;justify-content:space-between;align-items:center}
-.vt-quota{font-size:10px;color:#222;font-family:'Space Mono',monospace}
-.vt-quota.low{color:#331111}
-.vt-actions{display:flex;gap:8px}
-.vt-cancel{background:transparent;border:1px solid #181818;color:#2a2a2a;padding:10px 18px;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;font-family:inherit;border-radius:8px}
-.vt-cancel:hover{border-color:#2a2a2a;color:#444}
-.vt-send{background:#0a0a0a;border:1px solid #1e1e1e;color:#333;padding:10px 22px;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;font-family:inherit;border-radius:8px;transition:all .15s}
-.vt-send:hover:not(:disabled){border-color:#333;color:#666}
-.vt-send:disabled{opacity:.2;cursor:not-allowed}
-.vt-reader{display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column;align-items:center;justify-content:center;user-select:none}
-.vt-reader.on{display:flex;animation:vtFade .2s ease}
-.vt-reader-from{position:absolute;top:calc(52px + var(--safe-top));left:50%;transform:translateX(-50%);font-size:9px;color:#1a1a1a;font-weight:700;text-transform:uppercase;letter-spacing:.25em;white-space:nowrap;font-family:'Space Mono',monospace}
-.vt-reader-msg{max-width:300px;padding:0 24px;text-align:center;color:#3d3d3d;font-size:17px;line-height:1.8}
-.vt-reader-timer{position:absolute;bottom:calc(52px + var(--safe-bottom));left:50%;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:10px;color:#1e1e1e;letter-spacing:.15em;text-transform:uppercase}
-.vt-reader.burning .vt-reader-msg,.vt-reader.burning .vt-reader-timer,.vt-reader.burning .vt-reader-from{animation:vtBurn .7s ease forwards}
-@keyframes vtBurn{0%{opacity:1;filter:none}50%{opacity:.4;filter:blur(2px)}100%{opacity:0;filter:blur(12px)}}
-.vt-upgrade-nudge{display:none;position:fixed;bottom:calc(84px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(16px);background:#0a0a0a;border:1px solid #1a1a1a;padding:12px 20px;font-size:12px;color:#333;white-space:nowrap;z-index:400;opacity:0;transition:all .3s;cursor:pointer;border-radius:20px}
-.vt-upgrade-nudge.show{display:block;opacity:1;transform:translateX(-50%) translateY(0)}
-.vt-upgrade-nudge b{color:#555}
-
-/* TOAST */
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--tx);color:var(--bg);padding:14px 24px;border-radius:30px;font-size:14px;font-weight:700;z-index:600;opacity:0;transition:all .3s cubic-bezier(.175,.885,.32,1.275);pointer-events:none;white-space:nowrap;box-shadow:0 10px 40px rgba(0,0,0,.5)}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.error{background:var(--war);color:#fff}
-</style>
-</head>
-<body>
-<div class="app">
-
-<!-- HEADER -->
-<div class="header">
-  <div class="logo">SP<span>✕</span>LL</div>
-  <div class="status"><div class="pulse"></div></div>
-</div>
-
-<!-- SCROLL AREA -->
-<div class="scroll">
-
-<!-- RADAR -->
-<div class="radar-sect">
-  <div class="radar-header">
-    <span class="radar-label">VIBE RADAR</span>
-    <span class="radar-stat" id="onlineCount">21 ONLINE</span>
-  </div>
-  <div class="radar-wrapper">
-    <div class="radar-bezel">
-      <div class="radar-screw screw-tl"></div>
-      <div class="radar-screw screw-tr"></div>
-      <div class="radar-screw screw-bl"></div>
-      <div class="radar-screw screw-br"></div>
-      <div class="radar-bezel-label">VIBE RADAR — SYS ACTIVE</div>
-      <div class="radar-cont" id="radarCont">
-        <div class="radar-grid"></div>
-        <div class="radar-ring"></div>
-        <div class="radar-cross"></div>
-        <canvas class="radar-canvas" id="radarCanvas"></canvas>
-        <div class="radar-dots" id="radarDots"></div>
-      </div>
-      <div class="radar-bezel-range"><span>0.5km</span><span>RNG</span><span>50km</span></div>
-    </div>
-  </div>
-  
-  <!-- DUAL BUTTON INSTRUMEN -->
-  <div class="radar-actions">
-    <button class="action-btn left" onclick="openWsModal()">
-      <span class="action-icon">✦</span>
-      <span class="action-label">WHISPERER</span>
-      <span class="action-badge" id="wsBadge">0</span>
-    </button>
-    <button class="action-btn right" onclick="startVibeCheck()">
-      <span class="action-icon">⬡</span>
-      <span class="action-label">VIBE CHECK</span>
-    </button>
-  </div>
-</div>
-
-<!-- FILTER -->
-<div class="filter-sect">
-  <div class="filter-top">
-    <span class="filter-title">KESELARASAN</span>
-    <span class="match-pct" id="vibePct">87%</span>
-  </div>
-  <input type="range" class="vibe-slider" id="vibeSlider" min="0" max="100" value="87" oninput="updateVibePct(this.value)">
-  <div class="slider-labels"><span>Homie</span><span>Semi</span><span>All</span></div>
-  <div class="mood-scroll">
-    <button class="mood-chip active" data-mood="all" onclick="filterMood(this)">Semua</button>
-    <button class="mood-chip" data-mood="surviving" onclick="filterMood(this)">😮‍💨 Surviving</button>
-    <button class="mood-chip" data-mood="thriving" onclick="filterMood(this)">✨ Thriving</button>
-    <button class="mood-chip" data-mood="chaotic" onclick="filterMood(this)">🌀 Chaotic</button>
-    <button class="mood-chip" data-mood="doom" onclick="filterMood(this)">🛌 Doom</button>
-  </div>
-</div>
-
-<!-- SPILLS -->
-<div class="spills-sect">
-  <div class="sect-header">
-    <span class="sect-title">SPILL TERKINI</span>
-    <span class="sect-meta">FIFO</span>
-  </div>
-  <div id="spillsList"></div>
-  <button class="refresh-btn" onclick="refreshSpills()">
-    <div class="vt-dot-wrap" id="vtIndicator" onclick="event.stopPropagation();checkVoidTaps()">
-      <div class="vt-dot-inner"></div>
-    </div>
-    <span>↻</span>
-    <span>Seduh Teh Baru</span>
-  </button>
-</div>
-
-</div><!-- /scroll -->
-
-<!-- BOTTOM NAV -->
-<nav class="bnav">
-  <div class="bnav-inner">
-    <a href="#" class="nav-item active" onclick="return false"><span class="nav-icon">✕</span><span>Spill</span></a>
-    <a href="#" class="nav-item" onclick="return false"><span class="nav-icon">⬡</span><span>Vibe</span></a>
-    <a href="#" class="nav-item" onclick="return false"><span class="nav-icon">✦</span><span>Whisper</span></a>
-    <a href="#" class="nav-item" onclick="return false"><span class="nav-icon">⚡</span><span>Glitch</span></a>
-  </div>
-</nav>
-
-</div><!-- /app -->
-
-<!-- MODAL GENDER -->
-<div class="modal" id="genderModal">
-  <div class="modal-header">
-    <div class="modal-title">pilih gender</div>
-    <button class="modal-close" onclick="closeModal('genderModal')">✕</button>
-  </div>
-  <div class="modal-body">
-    <span class="modal-tag">STEP 1/2</span>
-    <div class="modal-h">vibe check butuh konteks</div>
-    <div class="modal-sub">biar algoritma bisa match kamu dengan vibe yang tepat</div>
-    
-    <div class="gender-grid">
-      <div class="gender-card" onclick="selectGender(this,'female')">
-        <span class="gender-icon">♀️</span>
-        <span class="gender-label">Cewek</span>
-        <span class="gender-desc">connect with similar vibes</span>
-      </div>
-      <div class="gender-card" onclick="selectGender(this,'male')">
-        <span class="gender-icon">♂️</span>
-        <span class="gender-label">Cowok</span>
-        <span class="gender-desc">find your wavelength</span>
-      </div>
-    </div>
-    
-    <div class="info-box">
-      <p>🔒 <strong>privacy first</strong> — gender cuma dipakai buat matching sesi, ga disimpan & ga muncul di profil</p>
-      <p style="margin-top:8px; color:var(--aq)">⚠️ <strong>Jangan pernah ungkap data pribadi — stay safe, stay anonim</strong></p>
-    </div>
-    
-    <button class="modal-action-btn" id="confirmGenderBtn" onclick="confirmGender()" disabled>GASKEUN →</button>
-    
-    <div class="modal-hint">dengan lanjut, kamu setuju sama <button class="modal-hint-link" onclick="alert('kebijakan anonim: ga ada log, ga ada trace')">kebijakan anonim</button></div>
-  </div>
-</div>
-
-<!-- UPGRADE MODAL -->
-<div class="modal" id="upgradeModal">
-  <div class="modal-header">
-    <div class="modal-title">upgrade plan</div>
-    <button class="modal-close" onclick="closeModal('upgradeModal')">✕</button>
-  </div>
-  <div class="modal-body">
-    <span class="modal-tag">VIP ACCESS</span>
-    <div class="modal-h">unlock fitur eksklusif</div>
-    <div class="modal-sub">pilih paket yang sesuai vibe kamu</div>
-    
-    <div class="price-card" onclick="selectPlan(this, 'monthly')">
-      <div>
-        <div class="price-main">Rp 25K</div>
-        <div class="price-sub">per bulan</div>
-      </div>
-      <div class="price-right">
-        <span class="price-tag">POPULER</span>
-        <div class="price-note">✅ unlimited void taps</div>
-      </div>
-    </div>
-    
-    <div class="price-card" onclick="selectPlan(this, 'yearly')">
-      <div>
-        <div class="price-main">Rp 250K</div>
-        <div class="price-sub">per tahun</div>
-      </div>
-      <div class="price-right">
-        <span class="price-tag">HEMAT 20%</span>
-        <div class="price-note">✅ semua fitur + early access</div>
-      </div>
-    </div>
-    
-    <div class="timer-big">
-      <div class="num">24:00:00</div>
-      <div class="label">offer berakhir</div>
-    </div>
-    
-    <button class="modal-action-btn" onclick="upgradeNow()">upgrade sekarang</button>
-    <button class="modal-action-btn sec" onclick="closeModal('upgradeModal')" style="background:var(--sf); color:var(--tx); border:1px solid var(--bd); margin-top:8px">nanti dulu</button>
-  </div>
-</div>
-
-<!-- CHAT ROOM (DUA MATA) -->
-<div class="chat-room" id="chatRoom">
-  <div class="chat-head">
-    <div class="chat-info">
-      <div class="eyes-container">
-        <div class="eye left"></div>
-        <div class="eye right"></div>
-      </div>
-    </div>
-    <div class="chat-timer" id="chatTimer">15:00</div>
-    <button class="chat-close" onclick="closeChat()">✕</button>
-  </div>
-  <div class="distress" id="distressMsg">⚠️ partner terdeteksi toxic — tim sedang investigasi</div>
-  <div class="chat-messages" id="chatMessages"></div>
-  <div class="chat-input-wrap">
-    <button class="vt-trigger" onclick="openVtCompose()" title="void tap">⬡</button>
-    <input type="text" class="chat-input" id="chatInput" placeholder="ketik sesuatu..." maxlength="200">
-    <button class="chat-send" onclick="sendMsg()">➤</button>
-  </div>
-</div>
-
-<!-- WHISPERER MODAL -->
-<div class="modal" id="wsModal">
-  <div class="modal-header">
-    <div class="modal-title">whisperer</div>
-    <button class="modal-close" onclick="closeModal('wsModal')">✕</button>
-  </div>
-  <div class="modal-body">
-    <div class="ws-inbox-hdr">
-      <span class="modal-tag">INBOX ANONIM</span>
-      <button class="ws-compose-btn" onclick="openWsCompose()">+ tulis whisper</button>
-    </div>
-    <div id="wsInboxList"></div>
-  </div>
-</div>
-
-<!-- WHISPERER COMPOSE -->
-<div class="ws-compose" id="wsComposeScreen">
-  <div class="ws-compose-head">
-    <span class="ws-to-label">to:</span>
-    <input type="text" class="ws-to-input" id="wsToInput" placeholder="username tujuan" maxlength="30">
-    <button class="ws-close-btn" onclick="closeWsCompose()">✕</button>
-  </div>
-  <textarea class="ws-body" id="wsBodyInput" placeholder="tulis pesan rahasia..." maxlength="200"></textarea>
-  <div class="ws-compose-foot">
-    <span class="ws-char-count" id="wsCharCount">0/200</span>
-    <button class="ws-send-btn" id="wsSendBtn" onclick="sendWs()" disabled>kirim</button>
-  </div>
-</div>
-
-<!-- WHISPERER THREAD -->
-<div class="ws-thread" id="wsThreadScreen">
-  <div class="ws-thread-head">
-    <button class="ws-back-btn" onclick="closeWsThread()">←</button>
-    <span class="ws-thread-title" id="wsThreadTitle">whisper</span>
-    <button class="ws-vt-btn" onclick="openVtCompose()">⬡</button>
-  </div>
-  <div class="ws-thread-msgs" id="wsThreadMessages"></div>
-  <div class="ws-thread-input-wrap">
-    <input type="text" class="ws-thread-input" id="wsThreadInput" placeholder="balas whisper..." maxlength="200">
-    <button class="ws-thread-send" onclick="sendWsReply()">➤</button>
-  </div>
-</div>
-
-<!-- VOID TAP COMPOSE -->
-<div class="vt-compose" id="vtCompose">
-  <div class="vt-compose-inner">
-    <span class="vt-lbl">void tap — pesan yang menghilang</span>
-    <textarea class="vt-textarea" id="vtTextarea" placeholder="tulis sesuatu yang akan terbaca sekali & hilang..." maxlength="150"></textarea>
-    <div class="vt-meta">
-      <span class="vt-quota" id="vtQuota">sisa 3/3 hari ini</span>
-      <span class="vt-quota" id="vtCharCount">0/150</span>
-    </div>
-    <div class="vt-actions">
-      <button class="vt-cancel" onclick="closeVtCompose()">batal</button>
-      <button class="vt-send" id="vtSendBtn" onclick="sendVoidTap()" disabled>kirim</button>
-    </div>
-  </div>
-</div>
-
-<!-- VOID TAP READER -->
-<div class="vt-reader" id="vtReader">
-  <span class="vt-reader-from" id="vtReaderFrom">dari: @anonymous</span>
-  <div class="vt-reader-msg" id="vtReaderMsg">pesan akan muncul di sini</div>
-  <span class="vt-reader-timer" id="vtReaderTimer">menghilang dalam 5s</span>
-</div>
-
-<!-- UPGRADE NUDGE -->
-<div class="vt-upgrade-nudge" id="vtUpgradeNudge" onclick="showUpgradeModal()">limit harian habis — <b>upgrade</b></div>
-<div class="toast" id="toast"></div>
-
 <script>
 // ==================== KONFIGURASI API ====================
-const API_URL = 'https://api.spill-app.com/chat'; // Ganti dengan URL Vercel deployment
-const API_KEY = 'dummy-key';
+// Ganti dengan URL yang benar (Vercel deployment atau local untuk development)
+const API_URL = 'http://localhost:3000/api/chat'; // Untuk local development
+// const API_URL = 'https://your-vercel-app.vercel.app/api/chat'; // Untuk production
 
 // ==================== STATE ====================
 let currentGender = null;
@@ -1085,6 +22,9 @@ let chatHistory = [];
 
 // Timer untuk fallback ke AI (60 detik)
 let fallbackTimer = null;
+
+// Flag untuk menandai API dalam mode offline
+let apiOffline = false;
 
 // Daftar karakter AI (hanya untuk referensi, logika ada di chat.js)
 const AI_CHARACTERS = {
@@ -1247,7 +187,7 @@ function refreshSpills() {
   toast('Teh baru diseduh ☕');
 }
 
-// ==================== RADAR (TIDAK BERUBAH) ====================
+// ==================== RADAR ====================
 let radarDots = [];
 let needleAngle = 0;
 let needleOmega = 0;
@@ -1491,7 +431,7 @@ function confirmGender() {
   const messages = $('chatMessages');
   messages.innerHTML = `
     <div class="chat-msg searching-msg">
-      <div class="chat-bubble">🔍 mencari teman ${currentGender === 'female' ? 'cewek' : 'cowok'}...</div>
+      <div class="chat-bubble">🔍 mencari real user dengan preferensi ${currentGender === 'female' ? 'cewek' : 'cowok'}...</div>
     </div>
   `;
   
@@ -1544,6 +484,9 @@ function fallbackToAI() {
   const messages = $('chatMessages');
   messages.innerHTML = '';
   
+  // Reset apiOffline flag untuk setiap sesi baru
+  apiOffline = false;
+  
   // Panggil API untuk first message
   callChatAPI('', true);
   
@@ -1590,9 +533,15 @@ function closeChat() {
   }
 }
 
-// FUNGSI UTAMA: Call Chat API - SEMUA LOGIKA PERCAKAPAN DI SINI
+// FUNGSI UTAMA: Call Chat API - DENGAN ERROR HANDLING YANG LEBIH BAIK
 async function callChatAPI(userMessage, isFirstMessage = false) {
   if (!chatPartner || !chatPartner.isAI) return;
+  
+  // Jika API sudah terdeteksi offline, jangan coba-coba lagi
+  if (apiOffline) {
+    console.log('API is offline, skipping call');
+    return;
+  }
   
   // Tampilkan typing indicator
   const typingDiv = document.createElement('div');
@@ -1602,12 +551,19 @@ async function callChatAPI(userMessage, isFirstMessage = false) {
   typingDiv.scrollIntoView({ behavior: 'smooth' });
   
   try {
+    // Cek apakah API_URL valid
+    if (!API_URL || API_URL === 'https://api.spill-app.com/chat') {
+      throw new Error('API_URL not configured. Please set the correct API URL.');
+    }
+    
     const payload = {
       message: isFirstMessage ? '' : userMessage,
       characterName: chatPartner.name,
       userName: userName,
       lastMessages: chatHistory.slice(-8)
     };
+    
+    console.log('Calling API:', API_URL, payload);
     
     const response = await fetch(API_URL, {
       method: 'POST',
@@ -1621,7 +577,7 @@ async function callChatAPI(userMessage, isFirstMessage = false) {
     typingDiv.remove();
     
     if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
     }
     
     const data = await response.json();
@@ -1650,19 +606,22 @@ async function callChatAPI(userMessage, isFirstMessage = false) {
     console.error('Error calling chat API:', error);
     typingDiv.remove();
     
-    // FALLBACK SEDERHANA - TIDAK BOLEH ADA LOGIKA AI
-    // Hanya pesan error yang sangat generik
-    const errorMsg = isFirstMessage 
-      ? '...' 
-      : '...';
+    // Tandai API offline agar tidak terus mencoba
+    apiOffline = true;
     
-    addMsg(errorMsg, false);
+    // Tampilkan pesan error yang informatif ke user
+    toast('Gagal terhubung ke server chat. Cek koneksi atau hubungi admin.', true);
     
-    // Tetap update history agar tidak error
-    if (!isFirstMessage) {
-      chatHistory.push({ role: 'user', content: userMessage });
+    // Untuk first message, kita perlu kasih tahu user kalau AI tidak tersedia
+    if (isFirstMessage) {
+      addMsg('⚠️ Layanan chat sedang tidak tersedia. Silakan coba lagi nanti.', false);
+      
+      // Update history
+      chatHistory.push({ role: 'assistant', content: '[system: service unavailable]' });
     }
-    chatHistory.push({ role: 'assistant', content: '[system: service unavailable]' });
+    
+    // Jika ini bukan first message, kita tidak perlu melakukan apa-apa
+    // User sudah melihat error toast
   }
 }
 
@@ -1676,8 +635,10 @@ function sendMsg() {
   
   chatHistory.push({ role: 'user', content: text });
   
-  if (chatPartner && chatPartner.isAI) {
+  if (chatPartner && chatPartner.isAI && !apiOffline) {
     callChatAPI(text);
+  } else if (apiOffline) {
+    toast('Server chat sedang offline', true);
   }
 }
 
@@ -1697,7 +658,7 @@ function addMsg(text, isOwn) {
   msgDiv.scrollIntoView({ behavior: 'smooth' });
 }
 
-// ==================== WHISPERER (TIDAK BERUBAH) ====================
+// ==================== WHISPERER ====================
 function openWsModal() {
   renderWsInbox();
   $('wsModal').classList.add('on');
@@ -1987,5 +948,3 @@ document.addEventListener('DOMContentLoaded', () => {
   setInterval(updateOnlineCount, 30000);
 });
 </script>
-</body>
-</html>
