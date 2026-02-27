@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1,user-scalable=no">
-<title>Spill — JEJAK</title>
+<title>Spill — JEJAK with AI Rants</title>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+/* [CSS SAME AS BEFORE - unchanged for brevity] */
 :root{
   --bg:#0A0A0A;
   --sf:#141414;
@@ -1315,19 +1316,138 @@ header{
 let currentGender = null, chatPartner = null;
 let timerInterval = null, chatTimeLeft = 900; // 15 menit = 900 detik
 let selectedPlan = null, activeMood = 'all', radarInterval, sweepInterval;
+let userName = 'user'; // akan diganti nanti
 
+// AI Characters dengan personality dan karakter spesifik
 const AI_CHARS = {
   female: [
-    {name:'beby.manis'},{name:'strawberry.shortcake'},
-    {name:'pretty.sad'},{name:'little.fairy'},{name:'cinnamon.girl'}
+    { 
+      name: 'beby.manis',
+      personality: 'sweet, caring, sedikit overthinking',
+      rants: [
+        "hari ini gue liat mantan sama cewek baru, dan tau gak? rambutnya lebih bagus dari rambut gue 😭",
+        "cape bener jadi cewek, setiap bulan harus nahan sakit perut sambil tetep senyum di depan client",
+        "kenapa sih cowok kalo ditanya 'lagi apa' pasti jawabnya 'lagi main'? ga ada variasi lain?",
+        "gue lagi fase pengen dimengerti tanpa harus jelasin panjang lebar",
+        "bete banget skincare gue habis, padahal baru kemarin beli. ada yang ngutil?"
+      ],
+      mood: ['surviving', 'thriving', 'chaotic']
+    },
+    { 
+      name: 'strawberry.shortcake',
+      personality: 'cute, playful, suka drama ringan',
+      rants: [
+        "hari ini gue salah kirim chat pacar ke grup keluarga. isinya 'sayang udah mandi belom?' 😭",
+        "kenapa orangtua selalu curiga kalo kita lagi seneng? 'lagi seneng-seneng ya? nanti belajar'",
+        "gue lagi diet, tapi tiap liat roti, rotinya yang liat gue duluan",
+        "stress skripsi tapi yang keluar peluh dan air mata doang",
+        "hari ini gue nangis karena ga bisa buka toples. lemah?"
+      ],
+      mood: ['surviving', 'doom', 'chaotic']
+    },
+    { 
+      name: 'pretty.sad',
+      personality: 'melankolis, deep thinker, suka puisi galau',
+      rants: [
+        "kadang gue mikir, apa kita yang terlalu berharap atau emang janjinya ga pernah ditepatin?",
+        "hujan hari ini, tapi gaada yang tanya 'udah makan belom?'",
+        "capek pura-pura baik-baik aja. gue juga manusia, bisa hancur",
+        "kenapa ya orang lebih peduli sama 'kabar' daripada 'perasaan'?",
+        "malam ini gue lagi fase nerima kenyataan kalo dia ga akan balik"
+      ],
+      mood: ['doom', 'surviving']
+    },
+    { 
+      name: 'little.fairy',
+      personality: 'imaginative, sedikit aneh, suka hal random',
+      rants: [
+        "kalo gue jadi kucing, gue bakal tidur 20 jam sehari dan ga bakal di-judge malas",
+        "hari ini gue nangis karena liat video kura-kura lagi berantem. mereka kayak 'ga ada yang mundur!'",
+        "kok bisa sih orang dagang pake sound toa keras banget? emang gaada kerjaan lain?",
+        "gue percaya kalo alam semesta itu lagi iseng sama gue",
+        "ada yang percaya rejeki ga bakal kemana? gue, tapi tetep nangis tiap liat saldo"
+      ],
+      mood: ['chaotic', 'thriving', 'surviving']
+    },
+    { 
+      name: 'cinnamon.girl',
+      personality: 'too nice for this world, easy to cry',
+      rants: [
+        "hari ini gue nangis di angkot gegara liat kucing dipukul orang. mental gue udah kayak kerupuk kena hujan.",
+        "kenapa sih orang jahat bisa tidur nyenyak? gue yang baik aja susah tidur",
+        "hari ini gue bantu orang, eh malah dijadiin 'teman curhat' seharian. capek fisik mental",
+        "tolong kasih gue tanda kalo dunia ini ga sekejam kelihatannya",
+        "lagi fase sulit bilang 'ga' ke orang. jadi numpuk kerjaan sendiri"
+      ],
+      mood: ['doom', 'surviving']
+    }
   ],
   male: [
-    {name:'si.badai'},{name:'moon.child'},
-    {name:'si.kocak'},{name:'si.pedas'},{name:'mba.gaul'}
+    { 
+      name: 'si.badai',
+      personality: 'cool, mysterious, sedikit dark humor',
+      rants: [
+        "hari ini gue ditagih utang sama mantan. utang apa? utang perasaan katanya",
+        "capek jadi orang yang dianggap kuat terus. gue juga pengen nangis dipeluk",
+        "kenapa sih kalo udah malem suka overthinking? badan capek tapi pikiran lari maraton",
+        "jadi cowok tuh gaboleh lemah katanya. tapi dalemnya ancur",
+        "gue capek jadi 'tembok' tempat orang bersandar. giliran gue butuh sandaran, pada pergi"
+      ],
+      mood: ['doom', 'surviving', 'chaotic']
+    },
+    { 
+      name: 'moon.child',
+      personality: 'romantic sad boy, suka puisi',
+      rants: [
+        "malam ini gue liat bulan sendirian. sama kayak gue. tapi bulan masih punya bintang.",
+        "kenapa cinta harus pergi? apa karena gue ga bisa jadi alasan buat dia bertahan?",
+        "hari ini gue dapet kabar doi udah tunangan. selamat ya, semoga dia bahagia (gue bohong)",
+        "capek nungguin orang yang ga pasti. tapi lebih capek ngelepasinnya",
+        "jangan tanya gue 'kabar baik?'. kabar gue baik-baik aja, cuma hati lagi berdarah-darah"
+      ],
+      mood: ['doom', 'surviving']
+    },
+    { 
+      name: 'si.kocak',
+      personality: 'humoris, tapi sebenernya sedih',
+      rants: [
+        "hidup tuh kayak sinetron. kadang bahagia, kadang nangis, tapi endingnya selalu bikin kesel",
+        "hari ini gue ditilang polisi. katanya motor gue terlalu keren. padahal cuma mau pamer",
+        "stress mikirin masa depan. solusi gue: tidur. besok dipikirin lagi. atau lusa",
+        "orang bilang kalo kamu ketawa berarti kamu bahagia. berarti gue artis pemenang Oscar",
+        "hari ini gue ketawa terbahak-bahak. abis itu nangis. abis itu ketawa lagi. am i okay?"
+      ],
+      mood: ['chaotic', 'surviving']
+    },
+    { 
+      name: 'si.pedas',
+      personality: 'sarkastik, ga bisa diemin orang',
+      rants: [
+        "hari ini gue dikatain 'kamu berubah'. iya lah, gua bukan nasi bisa tetep sama",
+        "tolong ya, kalo chat itu dibales. jangan cuma diliat doang, matanya apa hpnya yang liat?",
+        "ada yang bilang 'kerja keras ga akan khianati hasil'. hasilnya: gue dikhianati sama kesehatan",
+        "lagi fase males bales chat semua orang. bukan depresi, cuma lagi males sama dunia",
+        "orang suka bilang 'sabar ya'. gue pengen jawab 'sabarin aja tai'"
+      ],
+      mood: ['chaotic', 'thriving', 'surviving']
+    },
+    { 
+      name: 'mba.gaul',
+      personality: 'random, absurd, suka hal aneh',
+      rants: [
+        "hari ini gue liat orang bawa balon. mungkin balon itu temen curhatnya",
+        "kenapa sih kalo lagi di kamar mandi suka inget kejadian memalukan 5 tahun lalu?",
+        "gue pengen jadi kucing tetangga. tidur, makan, tidur lagi, ga pernah mikir cicilan",
+        "hari ini gue nangis gegara kehabisan kuota pas lagi nonton drakor climax",
+        "ada yang pernah ngerasa jadi orang paling sendiri di keramaian? iyalah kita di jalan tol"
+      ],
+      mood: ['chaotic', 'surviving', 'doom']
+    }
   ]
 };
 
-const DUMMY_SPILLS = [
+// Rants yang digabung dengan real user rants
+const USER_RANTS = [
   {id:1, author:'anon.kucing', mood:'surviving', content:'Hari ini gue nangis di angkot gegara liat kucing dipukul orang. Mental gue udah kayak kerupuk kena hujan.', reactions:{skull:42,cry:89,fire:12,upside:7}},
   {id:2, author:'sleepy.head', mood:'thriving',  content:'akhirnya bisa tidur nyenyak semalaman setelah 3 minggu insomnia. makasih buat yang chat tadi malem.', reactions:{skull:23,cry:15,fire:67,upside:31}},
   {id:3, author:'chaos.queen', mood:'chaotic',   content:'hari ini chaos abis! dari bangun tidur udah salah ambil kaki, sampe kantor lupa bawa laptop.', reactions:{skull:89,cry:23,fire:45,upside:78}},
@@ -1374,9 +1494,17 @@ function resetFilters() {
 // ── SPILLS ────────────────────────────────────────
 function renderSpills() {
   const area = $('contentArea');
+  
+  // Generate AI rants random
+  const aiRants = generateAIRants(6); // generate 6 AI rants
+  
+  // Gabung dengan user rants
+  const allSpills = [...USER_RANTS, ...aiRants];
+  
+  // Filter by mood
   const filtered = activeMood === 'all'
-    ? DUMMY_SPILLS
-    : DUMMY_SPILLS.filter(s => s.mood === activeMood);
+    ? allSpills
+    : allSpills.filter(s => s.mood === activeMood);
 
   if (!filtered.length) {
     area.className = 'content-area';
@@ -1388,7 +1516,7 @@ function renderSpills() {
   area.innerHTML = filtered.map(s => `
     <div class="spill-card">
       <div class="spill-header">
-        <span class="spill-author">@${esc(s.author)}</span>
+        <span class="spill-author">@${esc(s.author)}${s.isAI ? ' 🤖' : ''}</span>
         <span class="spill-mood" style="color:${MOOD_COLOR[s.mood]}">${s.mood}</span>
       </div>
       <div class="spill-content">${esc(s.content)}</div>
@@ -1402,15 +1530,60 @@ function renderSpills() {
     </div>`).join('');
 }
 
+function generateAIRants(count = 3) {
+  const rants = [];
+  const usedIds = USER_RANTS.map(u => u.id);
+  let nextId = Math.max(...usedIds) + 1;
+  
+  for (let i = 0; i < count; i++) {
+    // Pilih gender random
+    const gender = Math.random() > 0.5 ? 'female' : 'male';
+    const chars = AI_CHARS[gender];
+    const char = chars[Math.floor(Math.random() * chars.length)];
+    
+    // Pilih rant random dari karakter
+    const rantContent = char.rants[Math.floor(Math.random() * char.rants.length)];
+    
+    // Tentukan mood berdasarkan karakter (random atau sesuai mood chart)
+    let mood;
+    if (char.mood && char.mood.length > 0) {
+      mood = char.mood[Math.floor(Math.random() * char.mood.length)];
+    } else {
+      const moods = ['surviving', 'thriving', 'chaotic', 'doom'];
+      mood = moods[Math.floor(Math.random() * moods.length)];
+    }
+    
+    rants.push({
+      id: nextId++,
+      author: char.name,
+      isAI: true,
+      mood: mood,
+      content: rantContent,
+      reactions: {
+        skull: Math.floor(Math.random() * 50),
+        cry: Math.floor(Math.random() * 100),
+        fire: Math.floor(Math.random() * 40),
+        upside: Math.floor(Math.random() * 30)
+      }
+    });
+  }
+  
+  return rants;
+}
+
 function react(btn, id, key) {
-  const spill = DUMMY_SPILLS.find(s=>s.id===id);
+  // Cari di semua spills (user + AI)
+  const allSpills = [...USER_RANTS, ...generateAIRants(0)]; // hacky, tapi untuk demo
+  const spill = allSpills.find(s=>s.id===id);
   if (!spill) return;
+  
   const wasReacted = btn.classList.contains('reacted');
   // Reset semua reaksi pada spill ini
   document.querySelectorAll(`[id^="rc-${id}-"]`).forEach(el => {
     const k = el.id.split('-')[3];
     el.closest('button').classList.remove('reacted');
   });
+  
   if (!wasReacted) {
     spill.reactions[key]++;
     btn.classList.add('reacted');
@@ -1492,6 +1665,13 @@ function selectGender(g) {
 function confirmGender() {
   if(!currentGender) return;
   closeModal('genderModal');
+  
+  // Minta nama user
+  const nameInput = prompt('Masukkan nama panggilan kamu (untuk personalisasi):', 'user');
+  if (nameInput && nameInput.trim()) {
+    userName = nameInput.trim();
+  }
+  
   findRealUserFirst();
 }
 
@@ -1532,7 +1712,6 @@ async function findRealUserFirst() {
   }, 1000);
   
   // Simulasi cek real user (random 40% chance dapat dalam 1 menit)
-  // Dalam implementasi nyata, ini akan cek ke database/socket
   const foundReal = Math.random() < 0.4; // 40% chance dapat real user
   
   if (foundReal) {
@@ -1560,7 +1739,6 @@ async function findRealUserFirst() {
     }, connectTime);
   }
   // Jika tidak dapat real user, akan fallback ke AI setelah 1 menit
-  // (sudah di-handle oleh timer di atas)
 }
 
 function fallbackToAI() {
@@ -1570,8 +1748,10 @@ function fallbackToAI() {
   
   chatPartner = { 
     name: char.name, 
+    personality: char.personality,
     isAI: true, 
-    gender: oppGender 
+    gender: oppGender,
+    charData: char
   };
   
   toast('💬 Sementara ditemani AI dulu ya, real user sedang sibuk');
@@ -1584,15 +1764,26 @@ function startRealChat() {
   $('distressBanner').classList.remove('show');
   startTimer();
   
-  const hour = new Date().getHours();
-  const greets = hour<5  ? ['masih begadang? sama wkwk','eh belum tidur juga?'] :
-                 hour<10 ? ['pagi, udah ngopi belom?','halo, baru bangun?'] :
-                 hour<15 ? ['siang, udah makan?','eh lagi santai ga?'] :
-                 hour<18 ? ['sore, capek ga?','lagi ngapain?'] :
-                           ['malem, lagi santuy?','eh belum tidur?'];
-  
+  // Generate greeting personal dengan nama user
   setTimeout(() => {
-    const greeting = greets[Math.floor(Math.random()*greets.length)];
+    let greeting;
+    if (chatPartner.isAI) {
+      const greets = [
+        `hai @${userName}! gue ${chatPartner.name}. lagi apa?`,
+        `halo ${userName}~ kenalin gue ${chatPartner.name}`,
+        `${userName}! akhirnya ketemu juga. gue ${chatPartner.name}`,
+        `haiii @${userName}, gue ${chatPartner.name}. lagi apa nih?`
+      ];
+      greeting = greets[Math.floor(Math.random() * greets.length)];
+    } else {
+      const hour = new Date().getHours();
+      const greets = hour<5 ? [`halo ${userName}, masih begadang?`] :
+                     hour<10 ? [`pagi ${userName}, udah ngopi?`] :
+                     hour<15 ? [`siang ${userName}, udah makan?`] :
+                     hour<18 ? [`sore ${userName}, capek ga?`] :
+                               [`malem ${userName}, lagi ngapain?`];
+      greeting = greets[0];
+    }
     addMsg(greeting, false);
   }, 800);
 }
@@ -1732,6 +1923,35 @@ class TypingEngine {
 
 const typingEngine = new TypingEngine();
 
+// ── AI RANT GENERATOR ─────────────────────────────
+function generateAIRant(context = '') {
+  if (!chatPartner || !chatPartner.isAI || !chatPartner.charData) return null;
+  
+  const char = chatPartner.charData;
+  const rants = char.rants;
+  
+  // Pilih rant random
+  let rant = rants[Math.floor(Math.random() * rants.length)];
+  
+  // Tambahin personalisasi dengan nama user
+  rant = rant.replace(/\b(gue|aku)\b/g, `gue (@${userName})`);
+  
+  // Tentukan mood
+  const moods = ['surviving', 'thriving', 'chaotic', 'doom'];
+  let mood;
+  
+  if (char.mood && char.mood.length > 0) {
+    mood = char.mood[Math.floor(Math.random() * char.mood.length)];
+  } else {
+    mood = moods[Math.floor(Math.random() * moods.length)];
+  }
+  
+  return {
+    text: rant,
+    mood: mood
+  };
+}
+
 // ── CHAT FUNCTIONS ────────────────────────────────
 function getHistory(n) {
   return [...$('chatMessages').querySelectorAll('.chat-msg:not(#typing-indicator-real)')]
@@ -1753,27 +1973,50 @@ async function sendMsg() {
 
   if(chatPartner?.isAI) {
     try {
-      const res = await fetch('/api/chat', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({
-          message: text,
-          characterName: chatPartner.name,
-          userName: 'user',
-          lastMessages: getHistory(8)
-        })
-      });
-      const data = await res.json();
-      
+      // Untuk demo, kita generate response sendiri tanpa API
       setTimeout(async () => {
         typingIndicator.remove();
-        if(data.reply) {
-          await typingEngine.typeMessage(data.reply);
-          if(data.distress==='high') {
-            $('distressBanner').classList.add('show');
+        
+        // 30% chance untuk random rant (nggak nyambung)
+        if (Math.random() < 0.3) {
+          const rant = generateAIRant(text);
+          if (rant) {
+            await typingEngine.typeMessage(rant.text);
+            
+            // Klasifikasi mood
+            const moodColors = {
+              surviving: '#FF9500',
+              thriving: '#39FF14', 
+              chaotic: '#00F0FF',
+              doom: '#8B5CF6'
+            };
+            
+            // Tampilkan badge mood (opsional)
+            if (Math.random() < 0.5) {
+              setTimeout(() => {
+                addMsg(`[mood: ${rant.mood}]`, false);
+              }, 500);
+            }
+            
+            if (rant.mood === 'doom' || rant.mood === 'surviving') {
+              $('distressBanner').classList.add('show');
+            }
+          } else {
+            await typingEngine.typeMessage('*ngelantur sendiri*');
           }
+        } else {
+          // Response normal
+          const replies = [
+            `haha iya @${userName} gitu deh`,
+            `sama @${userName} wkwk`,
+            `eh @${userName} gue juga gitu`,
+            `nggak nyangka @${userName} lo jg`,
+            `ya ampun @${userName} relate banget`
+          ];
+          await typingEngine.typeMessage(replies[Math.floor(Math.random()*replies.length)]);
         }
       }, delay);
+      
     } catch(e) {
       setTimeout(async () => {
         typingIndicator.remove();
@@ -1781,7 +2024,14 @@ async function sendMsg() {
       }, delay);
     }
   } else {
-    const replies=['haha iya nih','sama wkwk','eh gue juga','nggak nyangka lo jg','ya ampun relate'];
+    // Real user response simulation
+    const replies = [
+      `haha iya @${userName} gitu deh`,
+      `sama @${userName} wkwk`,
+      `eh @${userName} gue juga`,
+      `nggak nyangka @${userName} lo jg`,
+      `ya ampun @${userName} relate`
+    ];
     setTimeout(async () => {
       typingIndicator.remove();
       if(Math.random()<.75) {
