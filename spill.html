@@ -310,7 +310,7 @@ header{padding:24px 0 16px;display:flex;justify-content:space-between;align-item
     </div>
   </div>
 
-  <!-- SPILLS -->
+  <!-- SPILLS (READ-ONLY, CUMA BUAT TAMPILAN) -->
   <div class="shdr">
     <span class="stit">Spill Terkini</span>
     <div class="sline"></div>
@@ -415,45 +415,21 @@ let selectedPlan = null;
 let activeMood = 'all';
 let radarInterval;
 let userName = 'user';
+let chatHistory = []; // nyimpen history buat dikirim ke API
 
-// PANGGILAN BERDASARKAN GENDER
-const CALLS = {
-  male: ['bang', 'bro', 'abang', 'cuy', 'brother'],
-  female: ['kak', 'sis', 'mbak', 'say', 'sister']
-};
-
-// Fungsi ambil panggilan random
-function getRandomCall() {
-  if (!currentGender) return '';
-  const calls = CALLS[currentGender] || CALLS.male;
-  return calls[Math.floor(Math.random() * calls.length)];
-}
-
+// Data dummy cuma buat tampilan radar & spill cards
 const AI_CHARS = {
-  female: [
-    {name:'beby.manis', shortName:'beby', mood:['surviving','thriving','chaotic'], rants:["hari ini gue liat mantan sama cewek baru, dan tau gak? rambutnya lebih bagus dari rambut gue 😭","cape bener jadi cewek, setiap bulan harus nahan sakit perut sambil tetep senyum di depan client","kenapa sih cowok kalo ditanya 'lagi apa' pasti jawabnya 'lagi main'? ga ada variasi lain?","gue lagi fase pengen dimengerti tanpa harus jelasin panjang lebar","bete banget skincare gue habis, padahal baru kemarin beli. ada yang ngutil?"]},
-    {name:'strawberry.shortcake', shortName:'strawberry', mood:['surviving','doom','chaotic'], rants:["hari ini gue salah kirim chat pacar ke grup keluarga. isinya 'sayang udah mandi belom?' 😭","kenapa orangtua selalu curiga kalo kita lagi seneng? 'lagi seneng-seneng ya? nanti belajar'","gue lagi diet, tapi tiap liat roti, rotinya yang liat gue duluan","stress skripsi tapi yang keluar peluh dan air mata doang","hari ini gue nangis karena ga bisa buka toples. lemah?"]},
-    {name:'pretty.sad', shortName:'pretty', mood:['doom','surviving'], rants:["kadang gue mikir, apa kita yang terlalu berharap atau emang janjinya ga pernah ditepatin?","hujan hari ini, tapi gaada yang tanya 'udah makan belom?'","capek pura-pura baik-baik aja. gue juga manusia, bisa hancur","kenapa ya orang lebih peduli sama 'kabar' daripada 'perasaan'?","malam ini gue lagi fase nerima kenyataan kalo dia ga akan balik"]},
-    {name:'little.fairy', shortName:'little', mood:['chaotic','thriving','surviving'], rants:["kalo gue jadi kucing, gue bakal tidur 20 jam sehari dan ga bakal di-judge malas","hari ini gue nangis karena liat video kura-kura lagi berantem. mereka kayak 'ga ada yang mundur!'","kok bisa sih orang dagang pake sound toa keras banget? emang gaada kerjaan lain?","gue percaya kalo alam semesta itu lagi iseng sama gue","ada yang percaya rejeki ga bakal kemana? gue, tapi tetep nangis tiap liat saldo"]},
-    {name:'cinnamon.girl', shortName:'cinnamon', mood:['doom','surviving'], rants:["hari ini gue nangis di angkot gegara liat kucing dipukul orang. mental gue udah kayak kerupuk kena hujan.","kenapa sih orang jahat bisa tidur nyenyak? gue yang baik aja susah tidur","hari ini gue bantu orang, eh malah dijadiin 'teman curhat' seharian. capek fisik mental","tolong kasih gue tanda kalo dunia ini ga sekejam kelihatannya","lagi fase sulit bilang 'ga' ke orang. jadi numpuk kerjaan sendiri"]}
-  ],
-  male: [
-    {name:'si.badai', shortName:'badai', mood:['doom','surviving','chaotic'], rants:["hari ini gue ditagih utang sama mantan. utang apa? utang perasaan katanya","capek jadi orang yang dianggap kuat terus. gue juga pengen nangis dipeluk","kenapa sih kalo udah malem suka overthinking? badan capek tapi pikiran lari maraton","jadi cowok tuh gaboleh lemah katanya. tapi dalemnya ancur","gue capek jadi 'tembok' tempat orang bersandar. giliran gue butuh sandaran, pada pergi"]},
-    {name:'moon.child', shortName:'moon', mood:['doom','surviving'], rants:["malam ini gue liat bulan sendirian. sama kayak gue. tapi bulan masih punya bintang.","kenapa cinta harus pergi? apa karena gue ga bisa jadi alasan buat dia bertahan?","hari ini gue dapet kabar doi udah tunangan. selamat ya, semoga dia bahagia (gue bohong)","capek nungguin orang yang ga pasti. tapi lebih capek ngelepasinnya","jangan tanya gue 'kabar baik?'. kabar gue baik-baik aja, cuma hati lagi berdarah-darah"]},
-    {name:'si.kocak', shortName:'kocak', mood:['chaotic','surviving'], rants:["hidup tuh kayak sinetron. kadang bahagia, kadang nangis, tapi endingnya selalu bikin kesel","hari ini gue ditilang polisi. katanya motor gue terlalu keren. padahal cuma mau pamer","stress mikirin masa depan. solusi gue: tidur. besok dipikirin lagi. atau lusa","orang bilang kalo kamu ketawa berarti kamu bahagia. berarti gue artis pemenang Oscar","hari ini gue ketawa terbahak-bahak. abis itu nangis. abis itu ketawa lagi. am i okay?"]},
-    {name:'si.pedas', shortName:'pedas', mood:['chaotic','thriving','surviving'], rants:["hari ini gue dikatain 'kamu berubah'. iya lah, gua bukan nasi bisa tetep sama","tolong ya, kalo chat itu dibales. jangan cuma diliat doang, matanya apa hpnya yang liat?","ada yang bilang 'kerja keras ga akan khianati hasil'. hasilnya: gue dikhianati sama kesehatan","lagi fase males bales chat semua orang. bukan depresi, cuma lagi males sama dunia","orang suka bilang 'sabar ya'. gue pengen jawab 'sabarin aja tai'"]},
-    {name:'abang.gaul', shortName:'abang', mood:['chaotic','surviving','doom'], rants:["hari ini gue liat orang bawa balon. mungkin balon itu temen curhatnya","kenapa sih kalo lagi di kamar mandi suka inget kejadian memalukan 5 tahun lalu?","gue pengen jadi kucing tetangga. tidur, makan, tidur lagi, ga pernah mikir cicilan","hari ini gue nangis gegara kehabisan kuota pas lagi nonton drakor climax","ada yang pernah ngerasa jadi orang paling sendiri di keramaian? iyalah kita di jalan tol"]}
-  ]
+  female: ['beby.manis', 'strawberry.shortcake', 'pretty.sad', 'little.fairy', 'cinnamon.girl'],
+  male: ['si.badai', 'moon.child', 'si.kocak', 'si.pedas', 'abang.gaul']
 };
 
 const USER_RANTS = [
-  {id:1,author:'anon.kucing',mood:'surviving',content:'Hari ini gue nangis di angkot gegara liat kucing dipukul orang. Mental gue udah kayak kerupuk kena hujan.',reactions:{skull:42,cry:89,fire:12,upside:7}},
-  {id:2,author:'sleepy.head',mood:'thriving',content:'akhirnya bisa tidur nyenyak semalaman setelah 3 minggu insomnia. makasih buat yang chat tadi malem.',reactions:{skull:23,cry:15,fire:67,upside:31}},
-  {id:3,author:'chaos.queen',mood:'chaotic',content:'hari ini chaos abis! dari bangun tidur udah salah ambil kaki, sampe kantor lupa bawa laptop.',reactions:{skull:89,cry:23,fire:45,upside:78}},
-  {id:4,author:'quiet.one',mood:'doom',content:'udah seminggu nggak keluar kamar. bukan karena sibuk. cuma nggak tau mau ngapain.',reactions:{skull:67,cry:112,fire:8,upside:34}}
+  {id:1,author:'anon.kucing',mood:'surviving',content:'Hari ini gue nangis di angkot gegara liat kucing dipukul orang.',reactions:{skull:42,cry:89,fire:12,upside:7}},
+  {id:2,author:'sleepy.head',mood:'thriving',content:'akhirnya bisa tidur nyenyak semalaman setelah 3 minggu insomnia.',reactions:{skull:23,cry:15,fire:67,upside:31}},
+  {id:3,author:'chaos.queen',mood:'chaotic',content:'hari ini chaos abis! dari bangun tidur udah salah ambil kaki.',reactions:{skull:89,cry:23,fire:45,upside:78}},
+  {id:4,author:'quiet.one',mood:'doom',content:'udah seminggu nggak keluar kamar. bukan karena sibuk.',reactions:{skull:67,cry:112,fire:8,upside:34}}
 ];
 
-const MOOD_COLOR = {surviving:'var(--ms)',thriving:'var(--mt)',chaotic:'var(--mc)',doom:'var(--md)'};
 const REACTION_EMOJI = {skull:'💀',cry:'😭',fire:'🔥',upside:'🙃'};
 
 const $ = id => document.getElementById(id);
@@ -487,39 +463,14 @@ function resetFilters() {
   renderSpills();
 }
 
-// ── SPILLS ──
-function generateAIRants(count = 3) {
-  const rants = [];
-  let nextId = Math.max(...USER_RANTS.map(u => u.id)) + 1;
-  for (let i = 0; i < count; i++) {
-    const gender = Math.random() > .5 ? 'female' : 'male';
-    const char = AI_CHARS[gender][Math.floor(Math.random() * AI_CHARS[gender].length)];
-    const mood = char.mood[Math.floor(Math.random() * char.mood.length)];
-    rants.push({
-      id: nextId++,
-      author: char.name, // Tetap pake nama lengkap buat display
-      isAI: true,
-      mood,
-      content: char.rants[Math.floor(Math.random() * char.rants.length)],
-      reactions: {
-        skull: Math.floor(Math.random() * 50),
-        cry: Math.floor(Math.random() * 100),
-        fire: Math.floor(Math.random() * 40),
-        upside: Math.floor(Math.random() * 30)
-      }
-    });
-  }
-  return rants;
-}
-
+// ── SPILLS (READ-ONLY, CUMA BUAT TAMPILAN) ──
 function renderSpills() {
   const area = $('contentArea');
-  const allSpills = [...USER_RANTS, ...generateAIRants(6)];
-  const filtered = activeMood === 'all' ? allSpills : allSpills.filter(s => s.mood === activeMood);
+  const filtered = activeMood === 'all' ? USER_RANTS : USER_RANTS.filter(s => s.mood === activeMood);
   
   if (!filtered.length) {
     area.className = 'content-area';
-    area.innerHTML = `<div class="empty-state"><span class="empty-icon">🍃</span><div class="empty-text">Belum ada spill dengan mood ini</div><div class="empty-subtext">Coba filter lain</div></div>`;
+    area.innerHTML = `<div class="empty-state"><span class="empty-icon">🍃</span><div class="empty-text">Belum ada spill</div><div class="empty-subtext">Coba filter lain</div></div>`;
     return;
   }
   
@@ -527,7 +478,7 @@ function renderSpills() {
   area.innerHTML = filtered.map(s => `
     <article class="spill-card">
       <div class="spill-header">
-        <span class="spill-author">@${esc(s.author)}${s.isAI ? ' 🤖' : ''}</span>
+        <span class="spill-author">@${esc(s.author)}</span>
         <span class="spill-mood ${s.mood}">${s.mood}</span>
       </div>
       <div class="spill-content">${esc(s.content)}</div>
@@ -542,7 +493,7 @@ function renderSpills() {
 }
 
 function react(btn, id, key) {
-  const spill = [...USER_RANTS, ...generateAIRants(0)].find(s => s.id === id);
+  const spill = USER_RANTS.find(s => s.id === id);
   if (!spill) return;
   const wasReacted = btn.classList.contains('reacted');
   document.querySelectorAll(`[id^="rc-${id}-"]`).forEach(el => el.closest('button').classList.remove('reacted'));
@@ -555,7 +506,7 @@ function react(btn, id, key) {
 
 function refreshSpills() { renderSpills(); toast('Teh baru diseduh ☕'); }
 
-// ── RADAR ──
+// ── RADAR (SAMA PERSIS, GA BERUBAH) ──
 let radarDots = [], radarAngle = 0, radarRAF = null;
 const SWEEP_SPEED = Math.PI * 2 / (4 * 60);
 
@@ -683,102 +634,185 @@ function confirmGender() {
   closeModal('genderModal');
   const n = prompt('Nama panggilan kamu:', 'user');
   if (n?.trim()) userName = n.trim();
-  findRealUserFirst();
+  startChat();
 }
 
-async function findRealUserFirst() {
+// ── CHAT ── SEMUA RESPONS 100% DARI API!
+async function startChat() {
+  chatHistory = [];
   $('chatMessages').innerHTML = '';
   $('distressBanner').classList.remove('show');
   $('chatRoom').classList.add('on');
+  chatTimeLeft = 900;
+  startTimer();
   
-  const el = document.createElement('div');
-  el.className = 'chat-msg other searching-message';
-  el.id = 'searching-indicator';
-  el.innerHTML = `<div class="chat-bubble">🔍 sedang dicarikan teman ngobrol...</div>`;
-  $('chatMessages').appendChild(el);
-  
-  let t = 60;
-  const timer = setInterval(() => {
-    t--;
-    const e = $('searching-indicator');
-    if (e) {
-      const b = e.querySelector('.chat-bubble');
-      if (b) b.textContent = `🔍 mencari teman... (${t}s)`;
-    }
-    if (t <= 0) {
-      clearInterval(timer);
-      if ($('searching-indicator')) {
-        $('searching-indicator').remove();
-        fallbackToAI();
-      }
-    }
-  }, 1000);
-  
-  if (Math.random() < .4) {
-    setTimeout(() => {
-      clearInterval(timer);
-      if ($('searching-indicator')) {
-        $('searching-indicator').remove();
-        const opp = currentGender === 'male' ? 'female' : 'male';
-        const names = opp === 'female' ? ['jessica','amanda','sarah','diana','melanie'] : ['kevin','brian','alex','steven','jordan'];
-        chatPartner = { name: names[Math.floor(Math.random() * names.length)], isAI: false, gender: opp };
-        startRealChat();
-      }
-    }, 5000 + Math.random() * 25000);
+  // Pilih karakter random dari API
+  try {
+    const res = await fetch('/api/random-character', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ gender: currentGender === 'male' ? 'female' : 'male' })
+    });
+    
+    if (!res.ok) throw new Error('Failed to get character');
+    
+    const data = await res.json();
+    chatPartner = {
+      name: data.name,
+      shortName: data.shortName,
+      isAI: true,
+      gender: data.gender
+    };
+    
+    // Minta greeting dari chat.js
+    const greetingRes = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: 'START_CHAT',
+        characterName: chatPartner.name,
+        userName: userName,
+        lastMessages: []
+      })
+    });
+    
+    const greetingData = await greetingRes.json();
+    addMsg(greetingData.reply, false);
+    if (greetingData.distress) $('distressBanner').classList.add('show');
+    
+  } catch (error) {
+    toast('Gagal mulai chat', true);
+    $('chatRoom').classList.remove('on');
   }
 }
 
-function fallbackToAI() {
-  const opp = currentGender === 'male' ? 'female' : 'male';
-  const char = AI_CHARS[opp][Math.floor(Math.random() * AI_CHARS[opp].length)];
-  chatPartner = { 
-    name: char.name, 
-    shortName: char.shortName,
-    isAI: true, 
-    gender: opp, 
-    charData: char 
-  };
-  toast('💬 Ditemani AI dulu ya');
-  startRealChat();
+function getLastMessages() {
+  // Ambil 10 pesan terakhir buat dikirim ke API
+  return chatHistory.slice(-10);
 }
 
-function startRealChat() {
-  chatTimeLeft = 900;
-  $('chatMessages').innerHTML = '';
-  $('distressBanner').classList.remove('show');
-  startTimer();
+async function sendMsg() {
+  const inp = $('chatInput');
+  const text = inp.value.trim();
+  if (!text || !chatPartner) return;
   
-  setTimeout(() => {
-    let greeting;
-    const panggilan = getRandomCall();
+  // Tampilin pesan user
+  addMsg(text, true);
+  inp.value = '';
+  
+  // Tampilin typing indicator
+  const typingDiv = showTypingIndicator();
+  
+  try {
+    // PANGGIL API CHAT.JS - INI SATU-SATUNYA SUMBER RESPONS!
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: text,
+        characterName: chatPartner.name,
+        userName: userName,
+        lastMessages: getLastMessages()
+      })
+    });
     
-    if (chatPartner.isAI) {
-      // PAKAI NAMA PENDEK, BUKAN NAMA LENGKAP!
-      greeting = [
-        `hai ${panggilan}! gue ${chatPartner.shortName}. lagi apa?`,
-        `halo ${panggilan}~ kenalin gue ${chatPartner.shortName}`,
-        `${panggilan}! akhirnya ketemu juga. gue ${chatPartner.shortName}`,
-        `haiii ${panggilan}, gue ${chatPartner.shortName}. lagi apa nih?`
-      ][Math.floor(Math.random() * 4)];
-    } else {
-      const h = new Date().getHours();
-      greeting = h < 5 ? `halo ${panggilan}, masih begadang?` :
-                 h < 10 ? `pagi ${panggilan}, udah ngopi?` :
-                 h < 15 ? `siang ${panggilan}, udah makan?` :
-                 h < 18 ? `sore ${panggilan}, capek ga?` :
-                 `malem ${panggilan}, lagi ngapain?`;
+    if (!response.ok) throw new Error('API error');
+    
+    const data = await response.json();
+    hideTypingIndicator(typingDiv);
+    
+    // Tampilin respons dari AI
+    await typeMessage(data.reply);
+    
+    // Update chat history
+    chatHistory.push({ role: 'user', content: text });
+    chatHistory.push({ role: 'assistant', content: data.reply });
+    
+    // Cek distress signal
+    if (data.distress === 'high' || data.distress === 'low') {
+      $('distressBanner').classList.add('show');
     }
-    addMsg(greeting, false);
-  }, 800);
+    
+  } catch (error) {
+    hideTypingIndicator(typingDiv);
+    toast('Gagal kirim pesan', true);
+    addMsg('*pesan gagal terkirim*', false);
+  }
 }
 
-function closeChat() {
-  clearInterval(timerInterval);
-  timerInterval = null;
-  $('chatRoom').classList.remove('on');
-  toast('👋 Sampai jumpa!');
+// ── UTILITIES CHAT ──
+function addMsg(text, isOwn) {
+  const el = document.createElement('div');
+  el.className = 'chat-msg ' + (isOwn ? 'own' : 'other');
+  const time = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+  el.innerHTML = `<div class="chat-bubble">${esc(text)}</div><div class="chat-meta">${time}</div>`;
+  
+  const msgs = $('chatMessages');
+  msgs.appendChild(el);
+  
+  // FIFO: hapus pesan lama kalo kebanyakan
+  while (msgs.children.length > 20) msgs.removeChild(msgs.firstChild);
+  
+  msgs.scrollTop = msgs.scrollHeight;
 }
 
+function showTypingIndicator() {
+  const div = document.createElement('div');
+  div.className = 'chat-msg other typing-message';
+  div.id = 'typing-' + Date.now();
+  div.innerHTML = `<div class="chat-bubble typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>`;
+  $('chatMessages').appendChild(div);
+  $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
+  return div;
+}
+
+function hideTypingIndicator(div) {
+  if (div && div.parentNode) div.remove();
+}
+
+async function typeMessage(text) {
+  const container = $('chatMessages');
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'chat-msg other';
+  const bubbleDiv = document.createElement('div');
+  bubbleDiv.className = 'chat-bubble';
+  msgDiv.appendChild(bubbleDiv);
+  container.appendChild(msgDiv);
+  
+  // Typing effect
+  const cursor = document.createElement('span');
+  cursor.className = 'typing-cursor';
+  bubbleDiv.appendChild(cursor);
+  
+  let typed = '';
+  for (let i = 0; i <= text.length; i++) {
+    if (i < text.length) {
+      typed += text[i];
+      bubbleDiv.innerHTML = typed;
+      bubbleDiv.appendChild(cursor);
+      
+      // Delay sesuai karakter
+      let delay = 40 + Math.random() * 80;
+      if (text[i] === ',' || text[i] === ';') delay = 200;
+      if (text[i] === '.' || text[i] === '?' || text[i] === '!') delay = 300;
+      await sleep(delay);
+    }
+  }
+  
+  cursor.remove();
+  
+  // Tambah timestamp
+  const ts = document.createElement('div');
+  ts.className = 'chat-meta';
+  ts.textContent = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+  msgDiv.appendChild(ts);
+  
+  container.scrollTop = container.scrollHeight;
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── TIMER & UPGRADE ──
 function startTimer() {
   updateTimer();
   timerInterval = setInterval(() => {
@@ -803,170 +837,11 @@ function endChat() {
   $('upgradeModal').classList.add('on');
 }
 
-class TypingEngine {
-  showTypingIndicator() {
-    const el = document.createElement('div');
-    el.className = 'chat-msg other typing-message';
-    el.id = 'typing-indicator-real';
-    el.innerHTML = `<div class="chat-bubble typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>`;
-    $('chatMessages').appendChild(el);
-    $('chatMessages').scrollTop = 9999;
-    return el;
-  }
-  
-  async typeMessage(text) {
-    const container = $('chatMessages');
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'chat-msg other';
-    const bubbleDiv = document.createElement('div');
-    bubbleDiv.className = 'chat-bubble';
-    msgDiv.appendChild(bubbleDiv);
-    container.appendChild(msgDiv);
-    
-    const cur = document.createElement('span');
-    cur.className = 'typing-cursor';
-    bubbleDiv.appendChild(cur);
-    
-    let typed = '';
-    let willTypo = Math.random() < .15;
-    let typoIdx = -1, typoChar = '', typoFixed = false;
-    
-    if (willTypo) {
-      typoIdx = Math.floor(Math.random() * (text.length / 2)) + 3;
-      typoChar = 'asdfghjklzxcvbnmqwertyuiop'[Math.floor(Math.random() * 26)];
-    }
-    
-    for (let i = 0; i <= text.length; i++) {
-      if (willTypo && !typoFixed && i === typoIdx) {
-        typed += typoChar;
-        bubbleDiv.innerHTML = typed;
-        cur.remove();
-        bubbleDiv.appendChild(cur);
-        await this.sleep(150 + Math.random() * 100);
-        
-        for (let b = 0; b < 2; b++) {
-          typed = typed.slice(0, -1);
-          bubbleDiv.innerHTML = typed;
-          cur.remove();
-          bubbleDiv.appendChild(cur);
-          await this.sleep(100 + Math.random() * 50);
-        }
-        typoFixed = true;
-        continue;
-      }
-      
-      if (i < text.length) {
-        typed += text[i];
-        bubbleDiv.innerHTML = typed;
-        cur.remove();
-        bubbleDiv.appendChild(cur);
-        
-        let d = 50 + Math.random() * 150;
-        if (text[i] === ',' || text[i] === ';') d = 300;
-        if (text[i] === '.' || text[i] === '?' || text[i] === '!') d = 500;
-        await this.sleep(d);
-      }
-    }
-    
-    cur.remove();
-    const ts = document.createElement('div');
-    ts.className = 'chat-meta';
-    ts.textContent = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-    msgDiv.appendChild(ts);
-    container.scrollTop = container.scrollHeight;
-    return msgDiv;
-  }
-  
-  sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-}
-
-const typingEngine = new TypingEngine();
-
-function generateAIRant() {
-  if (!chatPartner?.isAI || !chatPartner?.charData) return null;
-  const char = chatPartner.charData;
-  const panggilan = getRandomCall();
-  
-  // HAPUS SEMUA @ DARI RANT!
-  let rant = char.rants[Math.floor(Math.random() * char.rants.length)];
-  
-  // Ganti "gue/aku" dengan konteks, TANPA PAKAI @
-  rant = rant.replace(/\b(gue|aku)\b/g, `gue`);
-  
-  const mood = char.mood?.length ? char.mood[Math.floor(Math.random() * char.mood.length)] : 'surviving';
-  return { text: rant, mood };
-}
-
-async function sendMsg() {
-  const inp = $('chatInput');
-  const text = inp.value.trim();
-  if (!text) return;
-  
-  addMsg(text, true);
-  inp.value = '';
-  
-  const delay = Math.min(3000, Math.max(800, text.length * 120)) * (0.7 + Math.random() * .6);
-  const ind = typingEngine.showTypingIndicator();
-  const panggilan = getRandomCall();
-  
-  if (chatPartner?.isAI) {
-    setTimeout(async () => {
-      ind.remove();
-      
-      if (Math.random() < .3) {
-        // KIRIM RANT YANG LEBIH DALEM
-        const rant = generateAIRant();
-        if (rant) {
-          await typingEngine.typeMessage(rant.text);
-          if (Math.random() < .5) {
-            setTimeout(() => addMsg(`[mood: ${rant.mood}]`, false), 500);
-          }
-          if (rant.mood === 'doom' || rant.mood === 'surviving') {
-            $('distressBanner').classList.add('show');
-          }
-        } else {
-          await typingEngine.typeMessage('*ngelantur sendiri*');
-        }
-      } else {
-        // RESPONS BIASA TANPA @
-        const responses = [
-          `haha iya ${panggilan} gitu deh`,
-          `sama ${panggilan} wkwk`,
-          `eh ${panggilan} gue juga gitu`,
-          `nggak nyangka ${panggilan} lo jg`,
-          `ya ampun ${panggilan} relate banget`
-        ];
-        await typingEngine.typeMessage(responses[Math.floor(Math.random() * responses.length)]);
-      }
-    }, delay);
-  } else {
-    // UNTUK REAL USER, TETAP TANPA @
-    const responses = [
-      `haha iya ${panggilan} gitu deh`,
-      `sama ${panggilan} wkwk`,
-      `eh ${panggilan} gue juga`,
-      `nggak nyangka ${panggilan} lo jg`,
-      `ya ampun ${panggilan} relate`
-    ];
-    
-    setTimeout(async () => {
-      ind.remove();
-      if (Math.random() < .75) {
-        await typingEngine.typeMessage(responses[Math.floor(Math.random() * responses.length)]);
-      }
-    }, delay);
-  }
-}
-
-function addMsg(text, isOwn) {
-  const el = document.createElement('div');
-  el.className = 'chat-msg ' + (isOwn ? 'own' : 'other');
-  const time = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
-  el.innerHTML = `<div class="chat-bubble">${esc(text)}</div><div class="chat-meta">${time}</div>`;
-  const msgs = $('chatMessages');
-  msgs.appendChild(el);
-  while (msgs.children.length > 20) msgs.removeChild(msgs.firstChild);
-  msgs.scrollTop = 9999;
+function closeChat() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  $('chatRoom').classList.remove('on');
+  toast('👋 Sampai jumpa!');
 }
 
 function selectPlan(plan) {
@@ -992,6 +867,7 @@ function upgradeNow() {
   }, 1500);
 }
 
+// ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
   initRadar();
   renderSpills();
