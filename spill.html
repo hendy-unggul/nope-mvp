@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
+/* CSS SAMA PERSIS DENGAN SEBELUMNYA */
 :root{
   --bg:#000;--sf:#0a0a0a;--sfe:#111;--bd:#1a1a1a;--tx:#fff;
   --txs:#666;--txm:#444;--ap:#ff3d00;--as:#00f0ff;--aq:#00ff41;
@@ -319,7 +320,7 @@ body{
 }
 .nav-icon{font-size:22px;line-height:1;margin-bottom:-2px}
 
-/* ── MODAL GENDER (SEDERHANA) ── */
+/* ── MODAL GENDER ── */
 .modal{display:none;position:fixed;inset:0;background:var(--bg);z-index:200;flex-direction:column;overflow:hidden}
 .modal.on{display:flex}
 .modal-header{
@@ -464,7 +465,7 @@ body{
   padding:0
 }
 
-/* ── CHAT ROOM (REVISI: HANYA DUA MATA) ── */
+/* ── CHAT ROOM (DUA MATA) ── */
 .chat-room{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column}
 .chat-room.on{display:flex}
 .chat-head{
@@ -482,7 +483,6 @@ body{
   align-items:center;
   gap:8px
 }
-/* DUA MATA BERGERAK - TANPA NAMA */
 .eyes-container{
   display:flex;
   gap:6px;
@@ -588,14 +588,6 @@ body{
   font-size:10px;
   color:var(--txm);
   margin-top:6px;
-  font-family:'Space Mono',monospace;
-  font-weight:600
-}
-.chat-meta{
-  font-size:10px;
-  color:var(--txm);
-  margin-top:4px;
-  padding:0 2px;
   font-family:'Space Mono',monospace;
   font-weight:600
 }
@@ -901,7 +893,7 @@ body{
 
 </div><!-- /app -->
 
-<!-- MODAL GENDER (SEDERHANA) -->
+<!-- MODAL GENDER -->
 <div class="modal" id="genderModal">
   <div class="modal-header">
     <div class="modal-title">pilih gender</div>
@@ -979,11 +971,10 @@ body{
   </div>
 </div>
 
-<!-- CHAT ROOM (DENGAN DUA MATA - TANPA NAMA) -->
+<!-- CHAT ROOM (DUA MATA) -->
 <div class="chat-room" id="chatRoom">
   <div class="chat-head">
     <div class="chat-info">
-      <!-- DUA MATA BERGERAK - TANPA NAMA APAPUN -->
       <div class="eyes-container">
         <div class="eye left"></div>
         <div class="eye right"></div>
@@ -1073,8 +1064,8 @@ body{
 
 <script>
 // ==================== KONFIGURASI API ====================
-const API_URL = 'https://api.spill-app.com/chat'; // Ganti dengan URL Vercel deployment nanti
-const API_KEY = 'dummy-key'; // Akan diganti dengan env di production
+const API_URL = 'https://api.spill-app.com/chat'; // Ganti dengan URL Vercel deployment
+const API_KEY = 'dummy-key';
 
 // ==================== STATE ====================
 let currentGender = null;
@@ -1095,7 +1086,7 @@ let chatHistory = [];
 // Timer untuk fallback ke AI (60 detik)
 let fallbackTimer = null;
 
-// Daftar karakter AI (hanya nama, sisanya diatur oleh chat.js)
+// Daftar karakter AI (hanya untuk referensi, logika ada di chat.js)
 const AI_CHARACTERS = {
   female: ['beby.manis', 'strawberry.shortcake', 'pretty.sad', 'little.fairy', 'cinnamon.girl'],
   male: ['sejuta.badai', 'kue.bulan', 'agak.koplak', 'chili.padi', 'abang.gaul']
@@ -1113,7 +1104,7 @@ let whispers = [
   { id: 'w2', from: 'sejuta.badai', to: userName, content: 'salam kenal, boleh ngobrol?', timestamp: Date.now() - 360000, read: true, thread: [] }
 ];
 
-// Data spill
+// Data spill (konten publik, bukan chat)
 const USER_RANTS = [
   {id:1,author:'anon.kucing',mood:'surviving',content:'Hari ini gue nangis di angkot gegara liat kucing dipukul orang. Mental gue udah kayak kerupuk kena hujan.',reactions:{skull:42,cry:89,fire:12,upside:7},userReacted:null},
   {id:2,author:'sleepy.head',mood:'thriving',content:'akhirnya bisa tidur nyenyak semalaman setelah 3 minggu insomnia. makasih buat yang chat tadi malem.',reactions:{skull:23,cry:15,fire:67,upside:31},userReacted:null},
@@ -1150,12 +1141,10 @@ function filterMood(btn) {
   renderSpills();
 }
 
-// ==================== SPILLS ====================
-function generateAIRants(count = 3) {
-  // Untuk spill, kita tetap generate random dari data lokal
-  // Ini bukan untuk chat, hanya untuk konten spill
-  const aiNames = ['beby.manis', 'strawberry.shortcake', 'pretty.sad', 'little.fairy', 'cinnamon.girl', 'sejuta.badai', 'kue.bulan', 'agak.koplak', 'chili.padi', 'abang.gaul'];
-  const aiRants = [
+// ==================== SPILLS (KONTEN PUBLIK) ====================
+function generateSpillContent(count = 6) {
+  // Ini untuk konten publik di halaman utama, BUKAN untuk chat
+  const sampleSpills = [
     "hari ini gue liat mantan sama cewek baru, dan tau gak? rambutnya lebih bagus dari rambut gue 😭",
     "cape bener jadi cewek, setiap bulan harus nahan sakit perut sambil tetep senyum di depan client",
     "kenapa sih cowok kalo ditanya 'lagi apa' pasti jawabnya 'lagi main'? ga ada variasi lain?",
@@ -1170,19 +1159,33 @@ function generateAIRants(count = 3) {
     "hujan hari ini, tapi gaada yang tanya 'udah makan belom?'",
     "capek pura-pura baik-baik aja. gue juga manusia, bisa hancur",
     "kenapa ya orang lebih peduli sama 'kabar' daripada 'perasaan'?",
-    "malam ini gue lagi fase nerima kenyataan kalo dia ga akan balik"
+    "malam ini gue lagi fase nerima kenyataan kalo dia ga akan balik",
+    "hari ini gue ditagih utang sama mantan. utang apa? utang perasaan katanya",
+    "capek jadi orang yang dianggap kuat terus. gue juga pengen nangis dipeluk",
+    "kenapa sih kalo udah malem suka overthinking? badan capek tapi pikiran lari maraton",
+    "jadi cowok tuh gaboleh lemah katanya. tapi dalemnya ancur",
+    "gue capek jadi 'tembok' tempat orang bersandar. giliran gue butuh sandaran, pada pergi"
   ];
   
+  const moodList = ['surviving','thriving','chaotic','doom'];
+  const nameList = ['anon.kucing','sleepy.head','chaos.queen','quiet.one','beby.manis','strawberry.shortcake','pretty.sad','little.fairy','cinnamon.girl','sejuta.badai','kue.bulan','agak.koplak','chili.padi','abang.gaul'];
+  
   let result = [];
-  let nextId = Math.max(...USER_RANTS.map(u => u.id)) + 1;
+  let nextId = Math.max(...USER_RANTS.map(u => u.id), 5) + 1;
+  
   for (let i = 0; i < count; i++) {
     result.push({
       id: nextId++,
-      author: aiNames[Math.floor(Math.random() * aiNames.length)],
-      isAI: true,
-      mood: ['surviving','thriving','chaotic','doom'][Math.floor(Math.random() * 4)],
-      content: aiRants[Math.floor(Math.random() * aiRants.length)],
-      reactions: { skull: Math.floor(Math.random() * 50), cry: Math.floor(Math.random() * 100), fire: Math.floor(Math.random() * 40), upside: Math.floor(Math.random() * 30) },
+      author: nameList[Math.floor(Math.random() * nameList.length)],
+      isAI: Math.random() > 0.7,
+      mood: moodList[Math.floor(Math.random() * moodList.length)],
+      content: sampleSpills[Math.floor(Math.random() * sampleSpills.length)],
+      reactions: { 
+        skull: Math.floor(Math.random() * 50), 
+        cry: Math.floor(Math.random() * 100), 
+        fire: Math.floor(Math.random() * 40), 
+        upside: Math.floor(Math.random() * 30) 
+      },
       userReacted: null
     });
   }
@@ -1191,7 +1194,7 @@ function generateAIRants(count = 3) {
 
 function renderSpills() {
   const list = $('spillsList');
-  let allSpills = [...USER_RANTS, ...generateAIRants(6)];
+  let allSpills = [...USER_RANTS, ...generateSpillContent(6)];
   let filtered = activeMood === 'all' ? allSpills : allSpills.filter(s => s.mood === activeMood);
   
   if (!filtered.length) {
@@ -1218,7 +1221,7 @@ function renderSpills() {
 }
 
 function react(btn, id, key) {
-  let spill = [...USER_RANTS, ...generateAIRants(0)].find(s => s.id === id);
+  let spill = [...USER_RANTS, ...generateSpillContent(0)].find(s => s.id === id);
   if (!spill) return;
   
   let wasActive = btn.classList.contains('active');
@@ -1244,7 +1247,7 @@ function refreshSpills() {
   toast('Teh baru diseduh ☕');
 }
 
-// ==================== RADAR ====================
+// ==================== RADAR (TIDAK BERUBAH) ====================
 let radarDots = [];
 let needleAngle = 0;
 let needleOmega = 0;
@@ -1342,7 +1345,6 @@ function radarLoop(canvas) {
     trail[trailPtr] = needleAngle;
     trailPtr = (trailPtr + 1) % TRAIL_CAP;
     
-    // Fade background
     const fade = 0.09 + Math.sin(now * 0.0011) * 0.008;
     ctx.fillStyle = `rgba(1,5,1,${fade})`;
     ctx.fillRect(0, 0, W, H);
@@ -1455,20 +1457,18 @@ function updateOnlineCount() {
   }
 }
 
-// ==================== VIBE CHECK (TERINTEGRASI DENGAN CHAT.JS) ====================
+// ==================== VIBE CHECK - MURNI API CALL ====================
 function startVibeCheck() {
   // Reset state
   chatPartner = null;
   chatTimeLeft = 900;
   chatHistory = [];
   
-  // Reset fallback timer jika ada
   if (fallbackTimer) {
     clearTimeout(fallbackTimer);
     fallbackTimer = null;
   }
   
-  // Tampilkan modal gender
   $('genderModal').classList.add('on');
 }
 
@@ -1484,7 +1484,6 @@ function confirmGender() {
   
   closeModal('genderModal');
   
-  // Tampilkan loading di chat
   $('chatRoom').classList.add('on');
   $('chatTimer').textContent = '15:00';
   $('chatTimer').classList.remove('warn');
@@ -1492,60 +1491,47 @@ function confirmGender() {
   const messages = $('chatMessages');
   messages.innerHTML = `
     <div class="chat-msg searching-msg">
-      <div class="chat-bubble">🔍 mencari real user dengan preferensi ${currentGender}...</div>
+      <div class="chat-bubble">🔍 mencari real user dengan preferensi ${currentGender === 'female' ? 'cewek' : 'cowok'}...</div>
     </div>
   `;
   
-  // Mulai pencarian real user
   findRealUser();
   
-  // Set timer 60 detik untuk fallback ke AI
   fallbackTimer = setTimeout(() => {
-    // Cek apakah masih dalam mode pencarian (belum dapat partner)
     if (!chatPartner && $('chatRoom').classList.contains('on')) {
       fallbackToAI();
     }
-  }, 60000); // 60 detik
+  }, 60000);
 }
 
 async function findRealUser() {
-  // TODO: Implementasi pencarian real user
-  // Untuk sekarang, simulasi 30% chance dapet real user dalam 3 detik
-  // Tapi karena ini demo, kita selalu gagal dapet real user
-  
+  // Simulasi pencarian real user - 5% chance dapet real user
   setTimeout(() => {
-    // Hanya jika masih dalam mode pencarian dan belum dapat partner
     if (!chatPartner && $('chatRoom').classList.contains('on')) {
-      // 30% chance dapet real user (untuk demo, kecilin jadi 5%)
       const hasRealUser = Math.random() < 0.05;
       
       if (hasRealUser) {
-        // Batalkan fallback timer
         if (fallbackTimer) {
           clearTimeout(fallbackTimer);
           fallbackTimer = null;
         }
         startRealChat();
       }
-      // Kalau gagal, biarkan fallback timer yang jalan (60 detik)
     }
   }, 3000);
 }
 
 function startRealChat() {
-  // Implementasi real chat
-  // Untuk demo, kita tetap pake AI dulu
+  // Untuk demo, fallback ke AI
   fallbackToAI();
 }
 
 function fallbackToAI() {
-  // Batalkan fallback timer jika masih ada
   if (fallbackTimer) {
     clearTimeout(fallbackTimer);
     fallbackTimer = null;
   }
   
-  // Pilih karakter AI random sesuai gender
   const gender = currentGender === 'female' ? 'female' : 'male';
   const charList = AI_CHARACTERS[gender];
   const randomChar = charList[Math.floor(Math.random() * charList.length)];
@@ -1555,12 +1541,11 @@ function fallbackToAI() {
     isAI: true
   };
   
-  // Clear searching message
   const messages = $('chatMessages');
   messages.innerHTML = '';
   
-  // Kirim pesan salam melalui API
-  sendAIMessage('', true); // true untuk pesan salam (tanpa input user)
+  // Panggil API untuk first message
+  callChatAPI('', true);
   
   startTimer();
 }
@@ -1581,7 +1566,6 @@ function updateTimer() {
   const secs = chatTimeLeft % 60;
   $('chatTimer').textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   
-  // Warning jika kurang dari 1 menit
   if (chatTimeLeft < 60) {
     $('chatTimer').classList.add('warn');
   }
@@ -1600,15 +1584,14 @@ function closeChat() {
   $('chatRoom').classList.remove('on');
   clearInterval(timerInterval);
   
-  // Batalkan fallback timer
   if (fallbackTimer) {
     clearTimeout(fallbackTimer);
     fallbackTimer = null;
   }
 }
 
-// Fungsi untuk mengirim pesan ke API chat.js
-async function sendAIMessage(userMessage, isFirstMessage = false) {
+// FUNGSI UTAMA: Call Chat API - SEMUA LOGIKA PERCAKAPAN DI SINI
+async function callChatAPI(userMessage, isFirstMessage = false) {
   if (!chatPartner || !chatPartner.isAI) return;
   
   // Tampilkan typing indicator
@@ -1619,16 +1602,13 @@ async function sendAIMessage(userMessage, isFirstMessage = false) {
   typingDiv.scrollIntoView({ behavior: 'smooth' });
   
   try {
-    // Untuk first message, kita kirim empty string sebagai trigger
-    // API akan generate pesan salam
     const payload = {
       message: isFirstMessage ? '' : userMessage,
       characterName: chatPartner.name,
       userName: userName,
-      lastMessages: chatHistory.slice(-8) // Kirim 8 pesan terakhir
+      lastMessages: chatHistory.slice(-8)
     };
     
-    // Panggil API
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
@@ -1638,7 +1618,6 @@ async function sendAIMessage(userMessage, isFirstMessage = false) {
       body: JSON.stringify(payload)
     });
     
-    // Hapus typing indicator
     typingDiv.remove();
     
     if (!response.ok) {
@@ -1647,10 +1626,10 @@ async function sendAIMessage(userMessage, isFirstMessage = false) {
     
     const data = await response.json();
     
-    // Tambah pesan balasan
+    // Tampilkan reply dari API
     addMsg(data.reply, false);
     
-    // Simpan ke history
+    // Update history
     if (!isFirstMessage) {
       chatHistory.push({ role: 'user', content: userMessage });
     }
@@ -1671,31 +1650,19 @@ async function sendAIMessage(userMessage, isFirstMessage = false) {
     console.error('Error calling chat API:', error);
     typingDiv.remove();
     
-    // Fallback ke pesan lokal jika API error
-    const fallbackMessages = {
-      'beby.manis': 'halo, gue beby. salam kenal ya',
-      'strawberry.shortcake': 'haiii, gue strawberry! salam kenal 😊',
-      'pretty.sad': 'halo, gue pretty. salam kenal',
-      'little.fairy': 'hai! gue little.fairy, senang kenal kamu',
-      'cinnamon.girl': 'halo, gue cinnamon.girl. salam kenal 😊',
-      'sejuta.badai': 'yo, gue sejuta.badai. salam kenal',
-      'kue.bulan': 'halo, gue kue.bulan. salam kenal',
-      'agak.koplak': 'wow, gue agak.koplak. salam kenal cuy',
-      'chili.padi': 'halo, gue chili.padi. salam kenal',
-      'abang.gaul': 'salam kenal, gue abang.gaul'
-    };
+    // FALLBACK SEDERHANA - TIDAK BOLEH ADA LOGIKA AI
+    // Hanya pesan error yang sangat generik
+    const errorMsg = isFirstMessage 
+      ? '...' 
+      : '...';
     
-    const shortName = chatPartner.name.split('.')[0];
-    const fallbackMsg = isFirstMessage 
-      ? (fallbackMessages[chatPartner.name] || `halo, gue ${shortName}. salam kenal 😊`)
-      : `${shortName}: maaf, lagi sibuk. nanti gue balas ya`;
+    addMsg(errorMsg, false);
     
-    addMsg(fallbackMsg, false);
-    
+    // Tetap update history agar tidak error
     if (!isFirstMessage) {
       chatHistory.push({ role: 'user', content: userMessage });
     }
-    chatHistory.push({ role: 'assistant', content: fallbackMsg });
+    chatHistory.push({ role: 'assistant', content: '[system: service unavailable]' });
   }
 }
 
@@ -1704,19 +1671,13 @@ function sendMsg() {
   const text = input.value.trim();
   if (!text) return;
   
-  // Tambah pesan user
   addMsg(text, true);
   input.value = '';
   
-  // Simpan ke history
   chatHistory.push({ role: 'user', content: text });
   
-  // Kirim ke API jika partner adalah AI
   if (chatPartner && chatPartner.isAI) {
-    sendAIMessage(text);
-  } else if (chatPartner && !chatPartner.isAI) {
-    // TODO: Implementasi untuk real user
-    // Kirim via WebSocket atau mekanisme real-time lainnya
+    callChatAPI(text);
   }
 }
 
@@ -1736,7 +1697,7 @@ function addMsg(text, isOwn) {
   msgDiv.scrollIntoView({ behavior: 'smooth' });
 }
 
-// ==================== WHISPERER ====================
+// ==================== WHISPERER (TIDAK BERUBAH) ====================
 function openWsModal() {
   renderWsInbox();
   $('wsModal').classList.add('on');
@@ -1992,7 +1953,7 @@ function upgradeNow() {
   
   toast('Fitur premium diaktifkan (demo)');
   closeModal('upgradeModal');
-  vtQuota = 999; // Unlimited untuk demo
+  vtQuota = 999;
 }
 
 function showUpgradeModal() {
