@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com " crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0 ;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0A0A0A;--sf:#141414;--sfe:#1E1E1E;--bd:#2A2A2A;--tx:#FFF;--txs:#888;--txm:#555;--ap:#FF4D00;--as:#00F0FF;--at:#FF006E;--aq:#39FF14;--aw:#FFD700;--ms:#FF9500;--mt:#39FF14;--mc:#00F0FF;--md:#8B5CF6;--rd:#FF3333;--rd-dark:#990000;--secret:#FF006E}
+:root{--bg:#0A0A0A;--sf:#141414;--sfe:#1E1E1E;--bd:#2A2A2A;--tx:#FFF;--txs:#888;--txm:#555;--ap:#FF4D00;--as:#00F0FF;--at:#FF006E;--aq:#39FF14;--aw:#FFD700;--ms:#FF9500;--mt:#39FF14;--mc:#00F0FF;--md:#8B5CF6;--rd:#FF3333;--rd-dark:#990000;--void:#050505}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--tx);font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:500;font-size:15px;line-height:1.4;min-height:100vh;overflow-x:hidden;padding-bottom:100px}
@@ -122,7 +122,7 @@ header{padding:24px 0 16px;display:flex;justify-content:space-between;align-item
 @keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 .et{font-family:'Instrument Serif',serif;font-size:20px;font-style:italic;color:var(--txs);margin-bottom:8px}
 .est{font-size:13px;color:var(--txm)}
-footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bottom:80px}
+footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bottom:80px;position:relative}
 .ftxt{font-size:11px;color:var(--txm);text-transform:uppercase;letter-spacing:.2em}
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--tx);color:var(--bg);padding:8px 16px;font-size:13px;font-weight:600;z-index:10000;opacity:0;transition:all .3s}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -181,62 +181,113 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 .premium-badge{display:inline-block;background:linear-gradient(135deg,var(--ap),var(--at));color:var(--tx);font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:8px;text-transform:uppercase}
 
 /* ============================================
-   SECRET CHAT STYLES - PREMIUM FEATURE
+   THE VOID - Hidden Secret System
    ============================================ */
-.secret-section{margin:24px 0;padding:20px;background:linear-gradient(145deg,var(--sf),#1a0a0a);border:2px solid var(--secret);position:relative;overflow:hidden}
-.secret-section::before{content:'🔒';position:absolute;top:10px;right:10px;font-size:24px;opacity:0.3}
-.secret-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.secret-icon{width:40px;height:40px;background:var(--secret);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;animation:pulse-secret 2s infinite}
-@keyframes pulse-secret{0%,100%{box-shadow:0 0 0 0 rgba(255,0,110,0.4)}50%{box-shadow:0 0 20px 5px rgba(255,0,110,0.2)}}
-.secret-title{font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--secret)}
-.secret-desc{font-size:11px;color:var(--txs);margin-top:2px}
-.secret-input{width:100%;background:rgba(255,0,110,0.1);border:2px solid var(--secret);padding:12px;color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;margin-bottom:12px;transition:all .2s}
-.secret-input:focus{outline:none;background:rgba(255,0,110,0.2);box-shadow:0 0 20px rgba(255,0,110,0.3)}
-.secret-textarea{width:100%;background:rgba(255,0,110,0.1);border:2px solid var(--secret);padding:12px;color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;min-height:100px;resize:none;margin-bottom:12px;transition:all .2s}
-.secret-textarea:focus{outline:none;background:rgba(255,0,110,0.2);box-shadow:0 0 20px rgba(255,0,110,0.3)}
-.secret-btn{width:100%;padding:14px;background:var(--secret);border:none;color:var(--tx);font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.secret-btn:hover:not(:disabled){background:#ff1a8c;box-shadow:0 0 30px rgba(255,0,110,0.5)}
-.secret-btn:disabled{opacity:0.5;cursor:not-allowed}
-.secret-btn.sending::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);animation:shimmer 1s infinite}
-@keyframes shimmer{to{left:100%}}
+.void-node{position:fixed;bottom:100px;right:20px;width:24px;height:24px;background:var(--void);border:1px solid #1a1a1a;cursor:pointer;z-index:9998;transition:all 0.3s;opacity:0.6}
+.void-node:hover{opacity:1;border-color:#333}
+.void-node.active{animation:void-pulse 2s infinite;border-color:#ff006e;box-shadow:0 0 10px rgba(255,0,110,0.3)}
+@keyframes void-pulse{0%,100%{box-shadow:0 0 5px rgba(255,0,110,0.2)}50%{box-shadow:0 0 20px rgba(255,0,110,0.6)}}
+.void-node::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:4px;height:4px;background:#333;border-radius:50%;transition:all 0.3s}
+.void-node.active::after{background:#ff006e;width:6px;height:6px}
 
-/* Secret Message Viewer */
-.secret-viewer{position:fixed;inset:0;background:rgba(0,0,0,0.98);z-index:10003;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px}
-.secret-viewer.on{display:flex}
-.secret-viewer-content{max-width:480px;width:100%;background:var(--sf);border:3px solid var(--secret);padding:24px;position:relative;animation:glitch-in 0.3s ease}
-@keyframes glitch-in{0%{transform:scale(0.9);opacity:0}50%{transform:scale(1.02)}100%{transform:scale(1);opacity:1}}
-.secret-warning{background:var(--secret);color:var(--tx);padding:12px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;margin:-24px -24px 16px -24px}
-.secret-timer{font-size:48px;font-weight:800;color:var(--secret);text-align:center;margin:24px 0;font-family:'Instrument Serif',serif;text-shadow:0 0 20px rgba(255,0,110,0.5)}
-.secret-message{font-size:18px;line-height:1.6;color:var(--tx);text-align:center;padding:24px;background:rgba(255,0,110,0.05);border:1px dashed var(--secret);margin-bottom:16px;word-break:break-word}
-.secret-sender{text-align:center;font-size:12px;color:var(--txs);margin-bottom:24px}
-.secret-progress{width:100%;height:4px;background:var(--bd);margin-bottom:24px;position:relative;overflow:hidden}
-.secret-progress-bar{height:100%;background:var(--secret);width:100%;transition:width 0.1s linear}
-.secret-close{width:100%;padding:12px;background:transparent;border:2px solid var(--secret);color:var(--secret);font-size:12px;font-weight:700;text-transform:uppercase;cursor:pointer;transition:all .2s}
-.secret-close:hover{background:var(--secret);color:var(--tx)}
-.secret-destroyed{text-align:center;padding:48px 24px}
-.secret-destroyed-icon{font-size:64px;margin-bottom:16px;display:block;animation:burn 1s ease forwards}
-@keyframes burn{0%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.2);filter:brightness(2) hue-rotate(30deg)}100%{transform:scale(0);opacity:0;filter:brightness(3) hue-rotate(60deg)}}
-.secret-destroyed-text{font-size:18px;font-weight:700;color:var(--secret);text-transform:uppercase;letter-spacing:.1em}
+/* Void Portal - Hidden Interface */
+.void-portal{position:fixed;inset:0;background:rgba(5,5,5,0.98);z-index:10005;display:none;flex-direction:column;padding:0}
+.void-portal.on{display:flex;animation:void-fade 0.3s ease}
+@keyframes void-fade{from{opacity:0}to{opacity:1}}
 
-/* Screenshot Protection */
-.secret-viewer::before{content:'';position:fixed;inset:0;background:transparent;z-index:10004;pointer-events:none}
-.secret-message{user-select:none;-webkit-user-select:none}
+.void-header{padding:20px;border-bottom:1px solid #1a1a1a;display:flex;justify-content:space-between;align-items:center}
+.void-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;color:#444}
+.void-close{width:32px;height:32px;background:transparent;border:1px solid #333;color:#666;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;font-size:18px}
+.void-close:hover{border-color:#ff006e;color:#ff006e}
 
-/* Secret Inbox */
-.secret-inbox{margin-top:16px}
-.secret-item{display:flex;align-items:center;gap:12px;padding:12px;background:var(--sfe);border:1px solid var(--bd);margin-bottom:8px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.secret-item:hover{border-color:var(--secret);background:rgba(255,0,110,0.1)}
-.secret-item::before{content:'🔒';font-size:16px}
-.secret-item.unread::after{content:'';position:absolute;top:8px;right:8px;width:8px;height:8px;background:var(--secret);border-radius:50%;animation:pulse-secret 2s infinite}
-.secret-item-info{flex:1}
-.secret-item-from{font-size:12px;font-weight:700;color:var(--tx)}
-.secret-item-preview{font-size:11px;color:var(--txs);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px}
-.secret-item-time{font-size:10px;color:var(--txm)}
-.secret-empty{text-align:center;padding:32px;color:var(--txs);font-size:13px}
+.void-content{flex:1;overflow-y:auto;padding:20px}
 
-/* Locked State */
-.secret-locked{position:relative;opacity:0.5;pointer-events:none}
-.secret-locked::after{content:'🔒 PREMIUM';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--secret);color:var(--tx);padding:8px 16px;font-size:12px;font-weight:700;border-radius:4px}
+/* Contact Request System */
+.void-requests{margin-bottom:32px}
+.void-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:#555;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.void-section-title::before{content:'';flex:1;height:1px;background:#1a1a1a}
+.void-section-title::after{content:'';flex:1;height:1px;background:#1a1a1a}
+
+.void-request{display:flex;align-items:center;gap:12px;padding:16px;background:#0d0d0d;border:1px solid #1a1a1a;margin-bottom:8px;transition:all 0.2s}
+.void-request:hover{border-color:#333}
+.void-request-avatar{width:40px;height:40px;background:#141414;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-size:16px}
+.void-request-info{flex:1}
+.void-request-from{font-size:13px;font-weight:600;color:#888}
+.void-request-meta{font-size:10px;color:#444;margin-top:2px}
+.void-request-actions{display:flex;gap:8px}
+.void-btn{padding:8px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;border:1px solid #333;background:transparent;color:#666;cursor:pointer;transition:all 0.2s}
+.void-btn:hover{border-color:#555;color:#888}
+.void-btn.accept{border-color:#39ff14;color:#39ff14}
+.void-btn.accept:hover{background:rgba(57,255,20,0.1)}
+.void-btn.deny{border-color:#ff3333;color:#ff3333}
+.void-btn.deny:hover{background:rgba(255,51,51,0.1)}
+
+/* Contacts List */
+.void-contacts{margin-bottom:32px}
+.void-contact{display:flex;align-items:center;gap:12px;padding:16px;background:#0d0d0d;border:1px solid #1a1a1a;margin-bottom:8px;cursor:pointer;transition:all 0.2s;position:relative}
+.void-contact:hover{border-color:#ff006e;background:rgba(255,0,110,0.05)}
+.void-contact::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:#ff006e;opacity:0;transition:opacity 0.2s}
+.void-contact:hover::before{opacity:1}
+.void-contact-avatar{width:40px;height:40px;background:#141414;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-size:16px}
+.void-contact-info{flex:1}
+.void-contact-name{font-size:13px;font-weight:600;color:#888}
+.void-contact-status{font-size:10px;color:#444;margin-top:2px}
+.void-contact-status.online{color:#39ff14}
+.void-contact-unread{min-width:20px;height:20px;background:#ff006e;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:50%;animation:void-pulse 2s infinite}
+
+/* Add Contact */
+.void-add{display:flex;gap:8px;margin-bottom:32px}
+.void-input{flex:1;background:#0d0d0d;border:1px solid #1a1a1a;padding:12px;color:#888;font-family:inherit;font-size:13px;transition:all 0.2s}
+.void-input:focus{outline:none;border-color:#333;color:#aaa}
+.void-input::placeholder{color:#444}
+.void-add-btn{padding:12px 24px;background:#141414;border:1px solid #2a2a2a;color:#666;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;transition:all 0.2s}
+.void-add-btn:hover{border-color:#ff006e;color:#ff006e}
+
+/* Chat Interface */
+.void-chat{position:fixed;inset:0;background:var(--void);z-index:10006;display:none;flex-direction:column}
+.void-chat.on{display:flex;animation:void-fade 0.2s ease}
+
+.void-chat-header{padding:16px 20px;border-bottom:1px solid #1a1a1a;display:flex;align-items:center;gap:12px}
+.void-chat-back{width:32px;height:32px;background:transparent;border:1px solid #333;color:#666;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s}
+.void-chat-back:hover{border-color:#ff006e;color:#ff006e}
+.void-chat-info{flex:1}
+.void-chat-name{font-size:14px;font-weight:600;color:#888}
+.void-chat-status{font-size:10px;color:#444;margin-top:2px}
+.void-chat-timer{font-size:18px;font-weight:700;color:#ff006e;font-family:'Instrument Serif',serif}
+
+.void-chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px}
+
+.void-message{max-width:80%;padding:16px;font-size:13px;line-height:1.5;position:relative;animation:message-fade 0.3s ease}
+@keyframes message-fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.void-message.sent{align-self:flex-end;background:#1a0a0f;border:1px solid #2a1a1f;color:#aaa}
+.void-message.received{align-self:flex-start;background:#0d0d0d;border:1px solid #1a1a1a;color:#888}
+.void-message-time{font-size:9px;color:#444;margin-top:8px;text-transform:uppercase;letter-spacing:0.05em}
+
+.void-chat-input{padding:20px;border-top:1px solid #1a1a1a;display:flex;gap:8px}
+.void-chat-textarea{flex:1;background:#0d0d0d;border:1px solid #1a1a1a;padding:12px;color:#aaa;font-family:inherit;font-size:13px;resize:none;height:60px;transition:all 0.2s}
+.void-chat-textarea:focus{outline:none;border-color:#ff006e}
+.void-chat-send{padding:12px 24px;background:#ff006e;border:none;color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;transition:all 0.2s}
+.void-chat-send:hover{background:#ff1a7a;box-shadow:0 0 20px rgba(255,0,110,0.4)}
+.void-chat-send:disabled{opacity:0.3;cursor:not-allowed;box-shadow:none}
+
+/* Burn Notice */
+.void-burn{position:fixed;inset:0;background:var(--void);z-index:10007;display:none;flex-direction:column;align-items:center;justify-content:center;animation:burn-fade 0.5s ease}
+.void-burn.on{display:flex}
+@keyframes burn-fade{from{opacity:0}to{opacity:1}}
+.void-burn-icon{font-size:80px;margin-bottom:24px;animation:burn-anim 1s ease forwards}
+@keyframes burn-anim{0%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.3);filter:brightness(3) blur(2px)}100%{transform:scale(0);opacity:0;filter:brightness(5) blur(10px)}}
+.void-burn-text{font-size:14px;font-weight:700;color:#ff006e;text-transform:uppercase;letter-spacing:0.2em}
+
+/* Empty States */
+.void-empty{text-align:center;padding:48px 20px;color:#444;font-size:12px}
+.void-empty-icon{font-size:32px;margin-bottom:12px;display:block;opacity:0.3}
+
+/* Locked for non-premium */
+.void-locked{position:fixed;inset:0;background:var(--void);z-index:10005;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center}
+.void-locked.on{display:flex}
+.void-locked-icon{font-size:48px;margin-bottom:16px;opacity:0.3}
+.void-locked-text{font-size:14px;font-weight:700;color:#444;margin-bottom:8px}
+.void-locked-sub{font-size:11px;color:#333;line-height:1.6}
 </style>
 </head>
 <body>
@@ -300,63 +351,81 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
   <div class="tgrid" id="tgrid"></div>
 </section>
 
-<!-- ============================================
-     SECRET CHAT SECTION - PREMIUM FEATURE
-     ============================================ -->
-<section class="secret-section" id="secret-section">
-  <div class="secret-header">
-    <div class="secret-icon">🕵️</div>
-    <div>
-      <div class="secret-title">Secret Chat <span class="premium-badge">Premium</span></div>
-      <div class="secret-desc">Enkripsi end-to-end • Self-destruct 15s • No trace</div>
-    </div>
-  </div>
-  
-  <!-- Form Kirim Secret Message -->
-  <div id="secret-form">
-    <input type="text" class="secret-input" id="secret-to" placeholder="Kirim ke @username..." maxlength="30">
-    <textarea class="secret-textarea" id="secret-message" placeholder="Pesan rahasia akan terhapus 15 detik setelah dibaca..." maxlength="500"></textarea>
-    <button class="secret-btn" id="secret-send" onclick="sendSecretMessage()">
-      🔥 Kirim Pesan Rahasia
-    </button>
-  </div>
-  
-  <!-- Secret Inbox -->
-  <div class="secret-inbox" id="secret-inbox">
-    <div class="shdr" style="margin-top:24px;margin-bottom:12px;">
-      <span class="stit" style="color:var(--secret)">Secret Inbox</span>
-      <div class="sline" style="background:var(--secret);opacity:0.3"></div>
-    </div>
-    <div id="secret-list">
-      <div class="secret-empty">Belum ada pesan rahasia</div>
-    </div>
-  </div>
-</section>
+<footer>
+  <p class="ftxt">Nyambat • Aksi • Solusi</p>
+</footer>
+</div>
 
 <!-- ============================================
-     SECRET MESSAGE VIEWER MODAL
-     ============================================ -->
-<div class="secret-viewer" id="secret-viewer">
-  <div class="secret-viewer-content" id="viewer-content">
-    <div class="secret-warning">⚠️ PESAN INI AKAN TERHAPUS PERMANEN DALAM 15 DETIK</div>
-    <div class="secret-sender" id="viewer-sender">Dari: @anonymous</div>
-    <div class="secret-message" id="viewer-message"></div>
-    <div class="secret-timer" id="viewer-timer">15</div>
-    <div class="secret-progress">
-      <div class="secret-progress-bar" id="viewer-progress"></div>
-    </div>
-    <button class="secret-close" onclick="closeSecretViewer()">Tutup & Hapus Sekarang</button>
+   THE VOID - Hidden Secret System
+   ============================================ -->
+
+<!-- Void Node - Hidden Indicator -->
+<div class="void-node" id="void-node" onclick="openVoid()"></div>
+
+<!-- Void Portal - Main Interface -->
+<div class="void-portal" id="void-portal">
+  <div class="void-header">
+    <div class="void-title">/// THE VOID</div>
+    <button class="void-close" onclick="closeVoid()">×</button>
   </div>
   
-  <!-- Destroyed State -->
-  <div class="secret-destroyed" id="viewer-destroyed" style="display:none;">
-    <span class="secret-destroyed-icon">🔥</span>
-    <div class="secret-destroyed-text">Pesan Telah Terhapus Permanen</div>
-    <div style="font-size:12px;color:var(--txs);margin-top:8px;">No trace left behind</div>
+  <div class="void-content">
+    <!-- Add Contact -->
+    <div class="void-add">
+      <input type="text" class="void-input" id="void-add-input" placeholder="Enter username to request...">
+      <button class="void-add-btn" onclick="sendContactRequest()">Request</button>
+    </div>
+    
+    <!-- Pending Requests -->
+    <div class="void-requests" id="void-requests" style="display:none;">
+      <div class="void-section-title">Incoming Requests</div>
+      <div id="void-requests-list"></div>
+    </div>
+    
+    <!-- Contacts -->
+    <div class="void-contacts" id="void-contacts">
+      <div class="void-section-title">Established Contacts</div>
+      <div id="void-contacts-list">
+        <div class="void-empty">
+          <span class="void-empty-icon">◼</span>
+          <div>No active contacts</div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<footer><p class="ftxt">Nyambat • Aksi • Solusi</p></footer>
+<!-- Void Chat - Conversation -->
+<div class="void-chat" id="void-chat">
+  <div class="void-chat-header">
+    <button class="void-chat-back" onclick="closeVoidChat()">←</button>
+    <div class="void-chat-info">
+      <div class="void-chat-name" id="chat-contact-name">@username</div>
+      <div class="void-chat-status" id="chat-contact-status">Connected</div>
+    </div>
+    <div class="void-chat-timer" id="void-timer" style="display:none;">7</div>
+  </div>
+  
+  <div class="void-chat-messages" id="void-chat-messages"></div>
+  
+  <div class="void-chat-input">
+    <textarea class="void-chat-textarea" id="void-message-input" placeholder="Type message..." maxlength="280"></textarea>
+    <button class="void-chat-send" id="void-send-btn" onclick="sendVoidMessage()">Send</button>
+  </div>
+</div>
+
+<!-- Burn Notice -->
+<div class="void-burn" id="void-burn">
+  <div class="void-burn-icon">🔥</div>
+  <div class="void-burn-text">Message Destroyed</div>
+</div>
+
+<!-- Locked for Non-Premium -->
+<div class="void-locked" id="void-locked">
+  <div class="void-locked-icon">◼</div>
+  <div class="void-locked-text">THE VOID IS SEALED</div>
+  <div class="void-locked-sub">Upgrade to Premium to access<br>end-to-end encrypted ephemeral messaging</div>
 </div>
 
 <nav class="bnav">
@@ -407,12 +476,20 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const BUCKET = 'artefacts';
 
 // ============================================
-// ENCRYPTION KEY - Generate dari user session
+// THE VOID CONFIG
+// ============================================
+const VOID_CONFIG = {
+  messageLifetime: 7, // detik
+  pollInterval: 3000, // ms
+  maxContacts: 5
+};
+
+// ============================================
+// ENCRYPTION
 // ============================================
 function getEncryptionKey() {
-  // Generate key dari userId + salt (sederhana tapi efektif untuk demo)
-  const userId = S.userId || 'anonymous';
-  const salt = 'JEJAK_SECRET_SALT_2024';
+  const userId = S.userId || 'void';
+  const salt = 'VOID_SALT_2024';
   let hash = 0;
   const str = userId + salt;
   for (let i = 0; i < str.length; i++) {
@@ -423,14 +500,13 @@ function getEncryptionKey() {
   return Math.abs(hash).toString(16).padStart(16, '0');
 }
 
-// Simple XOR Encryption (untuk demo - production gunakan Web Crypto API)
 function encrypt(text, key) {
   let result = '';
   for (let i = 0; i < text.length; i++) {
     const charCode = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
     result += String.fromCharCode(charCode);
   }
-  return btoa(result); // Base64 encode
+  return btoa(result);
 }
 
 function decrypt(encrypted, key) {
@@ -474,7 +550,11 @@ const S = {
   isPremium: localStorage.getItem('jejak_premium') === 'true',
   entries: [],
   artefacts: [],
-  secretMessages: []
+  voidContacts: [],
+  voidRequests: [],
+  voidMessages: [],
+  currentChat: null,
+  destroyTimer: null
 };
 
 // ============================================
@@ -543,9 +623,27 @@ async function sbSelect(table, query = '') {
   }
 }
 
-async function sbDelete(table, id) {
+async function sbUpdate(table, id, data) {
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    return res.ok;
+  } catch(e) {
+    console.error('sbUpdate error:', e);
+    return false;
+  }
+}
+
+async function sbDelete(table, query) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${query}`, {
       method: 'DELETE',
       headers: { 
         'apikey': SUPABASE_KEY, 
@@ -781,210 +879,314 @@ async function confirmUpload() {
 }
 
 // ============================================
-// SECRET CHAT - PREMIUM FEATURE
+// THE VOID - Secret System
 // ============================================
 
-let currentSecretId = null;
-let destroyTimer = null;
-const DESTROY_TIME = 15; // detik
+function updateVoidNode() {
+  const node = $('void-node');
+  if (!node) return;
+  
+  const hasUnread = S.voidMessages.some(m => 
+    m.recipient_id === S.userId && !m.read && m.contact_id === S.currentChat
+  );
+  
+  const hasPending = S.voidRequests.length > 0;
+  
+  if (hasUnread || hasPending) {
+    node.classList.add('active');
+  } else {
+    node.classList.remove('active');
+  }
+}
 
-// Kirim secret message
-async function sendSecretMessage() {
+function openVoid() {
   if (!S.isPremium) {
-    toast('🔒 Upgrade ke Premium untuk fitur Secret Chat');
+    $('void-locked').classList.add('on');
     return;
   }
+  $('void-portal').classList.add('on');
+  loadVoidData();
+}
+
+function closeVoid() {
+  $('void-portal').classList.remove('on');
+}
+
+function closeVoidLocked() {
+  $('void-locked').classList.remove('on');
+}
+
+async function loadVoidData() {
+  // Load contacts
+  const contacts = await sbSelect('void_contacts', `?or=(user_a.eq.${S.userId},user_b.eq.${S.userId})&status.eq.accepted`);
+  if (contacts) {
+    S.voidContacts = contacts;
+    renderVoidContacts();
+  }
   
-  const toInput = $('secret-to');
-  const msgInput = $('secret-message');
-  const btn = $('secret-send');
-  
-  const to = toInput.value.trim().replace('@', '');
-  const message = msgInput.value.trim();
-  
-  if (!to) { toast('Masukkan username tujuan'); return; }
-  if (!message) { toast('Masukkan pesan rahasia'); return; }
-  if (to === S.user.replace('@', '')) { toast('Gak bisa kirim ke diri sendiri'); return; }
-  
-  btn.disabled = true;
-  btn.classList.add('sending');
-  btn.textContent = 'Mengenkripsi & Mengirim...';
-  
-  // Enkripsi pesan
-  const key = getEncryptionKey();
-  const encrypted = encrypt(message, key);
-  
-  // Simpan ke DB (hanya encrypted text)
-  const secretData = {
-    sender_id: S.userId,
-    sender_username: S.user.replace('@', ''),
-    recipient_username: to,
-    encrypted_content: encrypted,
-    created_at: new Date().toISOString(),
-    is_read: false,
-    destroyed: false
-  };
-  
-  const result = await sbInsert('secret_messages', secretData);
-  
-  btn.disabled = false;
-  btn.classList.remove('sending');
-  btn.textContent = '🔥 Kirim Pesan Rahasia';
-  
-  if (result) {
-    toast('✓ Pesan rahasia terkirim!');
-    toInput.value = '';
-    msgInput.value = '';
-    loadSecretInbox(); // Refresh inbox
-  } else {
-    toast('⚠ Gagal mengirim, coba lagi');
+  // Load requests
+  const requests = await sbSelect('void_contacts', `?user_b.eq.${S.userId}&status.eq.pending`);
+  if (requests) {
+    S.voidRequests = requests;
+    renderVoidRequests();
   }
 }
 
-// Load secret inbox
-async function loadSecretInbox() {
-  if (!S.isPremium || !S.isLoggedIn) return;
-  
-  const myUsername = S.user.replace('@', '');
-  const messages = await sbSelect('secret_messages', `?recipient_username=eq.${myUsername}&destroyed=eq.false&order=created_at.desc`);
-  
-  if (!messages) return;
-  
-  S.secretMessages = messages;
-  renderSecretInbox();
-}
-
-function renderSecretInbox() {
-  const list = $('secret-list');
+function renderVoidContacts() {
+  const list = $('void-contacts-list');
   if (!list) return;
   
-  if (S.secretMessages.length === 0) {
-    list.innerHTML = '<div class="secret-empty">Belum ada pesan rahasia</div>';
+  if (S.voidContacts.length === 0) {
+    list.innerHTML = `
+      <div class="void-empty">
+        <span class="void-empty-icon">◼</span>
+        <div>No active contacts</div>
+      </div>
+    `;
     return;
   }
   
-  list.innerHTML = S.secretMessages.map(msg => `
-    <div class="secret-item ${!msg.is_read ? 'unread' : ''}" onclick="openSecretMessage('${msg.id}')">
-      <div class="secret-item-info">
-        <div class="secret-item-from">Dari: @${esc(msg.sender_username)}</div>
-        <div class="secret-item-preview">${msg.is_read ? '🔥 Sudah dibaca' : '🔒 Pesan rahasia terenkripsi'}</div>
+  list.innerHTML = S.voidContacts.map(c => {
+    const otherUser = c.user_a === S.userId ? c.user_b_username : c.user_a_username;
+    return `
+      <div class="void-contact" onclick="openVoidChat('${c.id}', '${otherUser}')">
+        <div class="void-contact-avatar">◼</div>
+        <div class="void-contact-info">
+          <div class="void-contact-name">@${esc(otherUser)}</div>
+          <div class="void-contact-status online">● Connected</div>
+        </div>
       </div>
-      <div class="secret-item-time">${new Date(msg.created_at).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</div>
+    `;
+  }).join('');
+}
+
+function renderVoidRequests() {
+  const container = $('void-requests');
+  const list = $('void-requests-list');
+  if (!container || !list) return;
+  
+  if (S.voidRequests.length === 0) {
+    container.style.display = 'none';
+    return;
+  }
+  
+  container.style.display = 'block';
+  list.innerHTML = S.voidRequests.map(r => `
+    <div class="void-request">
+      <div class="void-request-avatar">◼</div>
+      <div class="void-request-info">
+        <div class="void-request-from">@${esc(r.user_a_username)}</div>
+        <div class="void-request-meta">Wants to establish secure connection</div>
+      </div>
+      <div class="void-request-actions">
+        <button class="void-btn accept" onclick="acceptRequest('${r.id}')">Accept</button>
+        <button class="void-btn deny" onclick="denyRequest('${r.id}')">Deny</button>
+      </div>
     </div>
   `).join('');
 }
 
-// Buka secret message
-async function openSecretMessage(id) {
-  const msg = S.secretMessages.find(m => m.id === id);
-  if (!msg) return;
+async function sendContactRequest() {
+  const input = $('void-add-input');
+  const username = input.value.trim().replace('@', '');
   
-  currentSecretId = id;
-  
-  const viewer = $('secret-viewer');
-  const content = $('viewer-content');
-  const destroyed = $('viewer-destroyed');
-  const sender = $('viewer-sender');
-  const messageEl = $('viewer-message');
-  const timerEl = $('viewer-timer');
-  const progressEl = $('viewer-progress');
-  
-  // Reset tampilan
-  content.style.display = 'block';
-  destroyed.style.display = 'none';
-  timerEl.textContent = DESTROY_TIME;
-  progressEl.style.width = '100%';
-  
-  // Dekripsi pesan
-  const key = getEncryptionKey();
-  const decrypted = decrypt(msg.encrypted_content, key);
-  
-  if (!decrypted) {
-    toast('⚠ Gagal mendekripsi pesan');
+  if (!username) {
+    toast('Enter username');
+    return;
+  }
+  if (username === S.user.replace('@', '')) {
+    toast('Cannot request yourself');
     return;
   }
   
-  sender.textContent = `Dari: @${msg.sender_username}`;
-  messageEl.textContent = decrypted;
-  
-  // Tandai sudah dibaca
-  if (!msg.is_read) {
-    await fetch(`${SUPABASE_URL}/rest/v1/secret_messages?id=eq.${id}`, {
-      method: 'PATCH',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ is_read: true, read_at: new Date().toISOString() })
-    });
+  // Cari user_id dari username
+  const profile = await sbSelect('profiles', `?username=eq.${username}`);
+  if (!profile || profile.length === 0) {
+    toast('User not found');
+    return;
   }
   
-  viewer.classList.add('on');
+  const targetId = profile[0].id;
   
-  // Start countdown
-  let timeLeft = DESTROY_TIME;
-  destroyTimer = setInterval(async () => {
+  // Cek apakah sudah ada request/contact
+  const existing = await sbSelect('void_contacts', 
+    `?or=(and(user_a.eq.${S.userId},user_b.eq.${targetId}),and(user_a.eq.${targetId},user_b.eq.${S.userId}))`
+  );
+  
+  if (existing && existing.length > 0) {
+    toast('Request already exists or contact established');
+    return;
+  }
+  
+  const result = await sbInsert('void_contacts', {
+    user_a: S.userId,
+    user_a_username: S.user.replace('@', ''),
+    user_b: targetId,
+    user_b_username: username,
+    status: 'pending',
+    created_at: new Date().toISOString()
+  });
+  
+  if (result) {
+    toast('Request sent');
+    input.value = '';
+  } else {
+    toast('Failed to send request');
+  }
+}
+
+async function acceptRequest(id) {
+  const success = await sbUpdate('void_contacts', id, { 
+    status: 'accepted',
+    accepted_at: new Date().toISOString()
+  });
+  
+  if (success) {
+    toast('Contact established');
+    loadVoidData();
+  }
+}
+
+async function denyRequest(id) {
+  const success = await sbDelete('void_contacts', `?id=eq.${id}`);
+  if (success) {
+    toast('Request denied');
+    loadVoidData();
+  }
+}
+
+function openVoidChat(contactId, username) {
+  S.currentChat = contactId;
+  $('chat-contact-name').textContent = '@' + username;
+  $('void-chat').classList.add('on');
+  loadVoidMessages();
+}
+
+function closeVoidChat() {
+  S.currentChat = null;
+  if (S.destroyTimer) {
+    clearInterval(S.destroyTimer);
+    S.destroyTimer = null;
+  }
+  $('void-chat').classList.remove('on');
+  $('void-timer').style.display = 'none';
+}
+
+async function loadVoidMessages() {
+  const messages = await sbSelect('void_messages', 
+    `?contact_id=eq.${S.currentChat}&or=(sender_id.eq.${S.userId},recipient_id.eq.${S.userId})&destroyed.eq.false&order=created_at.desc&limit=20`
+  );
+  
+  if (messages) {
+    S.voidMessages = messages;
+    renderVoidMessages();
+  }
+}
+
+function renderVoidMessages() {
+  const container = $('void-chat-messages');
+  if (!container) return;
+  
+  const key = getEncryptionKey();
+  
+  container.innerHTML = S.voidMessages.map(m => {
+    const isSent = m.sender_id === S.userId;
+    const decrypted = decrypt(m.encrypted_content, key) || '[ENCRYPTED]';
+    const time = new Date(m.created_at).toLocaleTimeString('id-ID', {
+      hour: '2-digit', 
+      minute: '2-digit'
+    });
+    
+    return `
+      <div class="void-message ${isSent ? 'sent' : 'received'}">
+        ${esc(decrypted)}
+        <div class="void-message-time">${time} ${m.read ? '✓' : ''}</div>
+      </div>
+    `;
+  }).reverse().join('');
+  
+  container.scrollTop = container.scrollHeight;
+}
+
+async function sendVoidMessage() {
+  const input = $('void-message-input');
+  const btn = $('void-send-btn');
+  const text = input.value.trim();
+  
+  if (!text || !S.currentChat) return;
+  
+  btn.disabled = true;
+  
+  // Get recipient from contact
+  const contact = S.voidContacts.find(c => c.id === S.currentChat);
+  if (!contact) {
+    btn.disabled = false;
+    return;
+  }
+  
+  const recipientId = contact.user_a === S.userId ? contact.user_b : contact.user_a;
+  const key = getEncryptionKey();
+  const encrypted = encrypt(text, key);
+  
+  const result = await sbInsert('void_messages', {
+    contact_id: S.currentChat,
+    sender_id: S.userId,
+    recipient_id: recipientId,
+    encrypted_content: encrypted,
+    created_at: new Date().toISOString(),
+    read: false,
+    destroyed: false
+  });
+  
+  if (result) {
+    input.value = '';
+    loadVoidMessages();
+    
+    // Start timer if this is first message in conversation
+    if (!S.destroyTimer) {
+      startDestroyTimer();
+    }
+  }
+  
+  btn.disabled = false;
+}
+
+function startDestroyTimer() {
+  const timerEl = $('void-timer');
+  timerEl.style.display = 'block';
+  let timeLeft = VOID_CONFIG.messageLifetime;
+  timerEl.textContent = timeLeft;
+  
+  S.destroyTimer = setInterval(async () => {
     timeLeft--;
     timerEl.textContent = timeLeft;
-    progressEl.style.width = `${(timeLeft / DESTROY_TIME) * 100}%`;
     
     if (timeLeft <= 0) {
-      await destroyMessage();
+      await destroyAllMessages();
     }
   }, 1000);
 }
 
-// Hancurkan pesan
-async function destroyMessage() {
-  if (destroyTimer) {
-    clearInterval(destroyTimer);
-    destroyTimer = null;
+async function destroyAllMessages() {
+  if (S.destroyTimer) {
+    clearInterval(S.destroyTimer);
+    S.destroyTimer = null;
   }
   
-  if (!currentSecretId) return;
-  
-  // Hapus dari DB (atau tandai destroyed)
-  await fetch(`${SUPABASE_URL}/rest/v1/secret_messages?id=eq.${currentSecretId}`, {
-    method: 'PATCH',
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ destroyed: true, destroyed_at: new Date().toISOString() })
+  // Mark all as destroyed
+  await sbUpdate('void_messages', S.currentChat, { 
+    destroyed: true,
+    destroyed_at: new Date().toISOString()
   });
   
-  // Tampilkan animasi terbakar
-  const content = $('viewer-content');
-  const destroyed = $('viewer-destroyed');
+  // Show burn animation
+  $('void-burn').classList.add('on');
   
-  content.style.display = 'none';
-  destroyed.style.display = 'block';
-  
-  // Hapus dari local array
-  S.secretMessages = S.secretMessages.filter(m => m.id !== currentSecretId);
-  renderSecretInbox();
-  
-  // Auto close setelah animasi
   setTimeout(() => {
-    closeSecretViewer();
-  }, 2000);
-}
-
-function closeSecretViewer() {
-  if (destroyTimer) {
-    clearInterval(destroyTimer);
-    destroyTimer = null;
-  }
-  
-  // Jika ditutup manual sebelum waktu habis, tetap hancurkan
-  if (currentSecretId) {
-    destroyMessage();
-  }
-  
-  $('secret-viewer').classList.remove('on');
-  currentSecretId = null;
+    $('void-burn').classList.remove('on');
+    closeVoidChat();
+    toast('All messages destroyed');
+  }, 1500);
 }
 
 // ============================================
@@ -999,109 +1201,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   try { 
-    S.artefacts = JSON.parse(localStorage.getItem('jejak_artefacts')) || [...DUMMY_ARTEFACTS]; 
-  } catch { 
-    S.artefacts = [...DUMMY_ARTEFACTS]; 
-  }
-
-  renderEntries();
-  renderTray();
-  initUpload();
-  updQuota();
-
-  if(S.artefacts.length>0) setHero(S.artefacts[0].id);
-
-  if (!S.isLoggedIn) {
-    console.log('User not logged in, redirecting...');
-    toast('Silakan login terlebih dahulu');
-    setTimeout(() => {
-      window.location.href = 'index.html';
-    }, 1500);
-    return;
-  }
-
-  const hu = $('huser');
-  if(hu) hu.textContent = S.user;
-  
-  const odot = $('odot');
-  if(odot) {
-    odot.classList.remove('off');
-    odot.classList.add('on');
-  }
-
-  // Setup Secret Chat
-  if (S.isPremium) {
-    loadSecretInbox();
-    // Poll inbox setiap 10 detik
-    setInterval(loadSecretInbox, 10000);
-  } else {
-    // Lock secret chat untuk non-premium
-    const secretForm = $('secret-form');
-    if(secretForm) {
-      secretForm.classList.add('secret-locked');
-      secretForm.innerHTML = '<div style="text-align:center;padding:24px;"><div style="font-size:32px;margin-bottom:8px;">🔒</div><div style="font-size:14px;font-weight:700;color:var(--secret);margin-bottom:4px;">SECRET CHAT LOCKED</div><div style="font-size:11px;color:var(--txs);">Upgrade ke Premium untuk membuka</div></div>';
-    }
-  }
-
-  console.log('User logged in:', S.user, 'Premium:', S.isPremium);
-
-  const ri=$('ri'), cc=$('ccount');
-  if(ri&&cc){ ri.oninput=()=>{ const n=ri.value.length; cc.textContent=`${n}/500`; cc.style.color=n>=450?'var(--at)':'var(--txm)'; }; }
-
-  const sb=$('sbtn');
-  if(sb&&ri){
-    sb.onclick=async()=>{
-      const c=ri.value.trim(); if(!c){toast('Tulis sesuatu...');return;}
-      const mood=document.querySelector('.mc.act')?.dataset.mood||'surviving';
-      
-      if(!S.isLoggedIn || !S.userId){
-        toast('Silakan login terlebih dahulu');
-        setTimeout(() => window.location.href = 'index.html', 1500);
-        return;
-      }
-      
-      sb.disabled=true; sb.textContent='Menyimpan...';
-      
-      const rantData={
-        user_id: S.userId,
-        content: c,
-        mood: mood,
-        is_anonymous: false,
-        created_at: new Date().toISOString(),
-        response_count: 0,
-        vibes: {},
-        reaction_count: {skull:0, cry:0, fire:0, upside:0},
-        ai_metadata: {}
-      };
-      
-      const ok = await sbInsert('rants', rantData);
-      
-      const newEntry={
-        id: 'user_'+Date.now(),
-        content: c,
-        mood: mood,
-        timestamp: Date.now(),
-        reactions: {skull:0, cry:0, fire:0, upside:0},
-        isDummy: false,
-        author: S.user
-      };
-      
-      S.entries.unshift(newEntry);
-      if(S.entries.length > 6) S.entries.pop();
-      localStorage.setItem('jejak_entries', JSON.stringify(S.entries));
-      
-      renderEntries();
-      ri.value=''; 
-      if(cc) cc.textContent='0/500';
-      toast(ok ? '✓ Tersimpan di database' : '⚠ Tersimpan lokal saja');
-      
-      sb.disabled=false; 
-      sb.textContent='Jejakkan & Spill';
-    };
-  }
-
-  setInterval(updQuota, 60000);
-});
-</script>
-</body>
-</html>
+    S.
