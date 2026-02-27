@@ -49,6 +49,12 @@ const TOO_SOON_RESPONSES = [
   "slow bro/sis, kita obrolin yang ringan-ringan dulu"
 ];
 
+// Panggilan berdasarkan gender
+const CALLS = {
+  male: ['bang', 'bro', 'cuy', 'abang', 'brother'],
+  female: ['kak', 'sis', 'say', 'mbak', 'sister']
+};
+
 function detectDistress(message) {
   const msg = message.toLowerCase();
   const highSignals = ['mau mati', 'bunuh diri', 'nyakitin diri', 'pengen mati'];
@@ -79,6 +85,11 @@ function getRandomTooSoonResponse() {
   return TOO_SOON_RESPONSES[Math.floor(Math.random() * TOO_SOON_RESPONSES.length)];
 }
 
+function getRandomCall(gender) {
+  const calls = CALLS[gender] || CALLS.male;
+  return calls[Math.floor(Math.random() * calls.length)];
+}
+
 function getShortName(username) {
   if (!username || username === 'user') return '';
   const clean = username.replace('@', '');
@@ -86,6 +97,41 @@ function getShortName(username) {
   if (parts.length >= 2) return parts[Math.floor(Math.random() * 2)];
   if (clean.length > 8) return clean.substring(0, 5);
   return clean;
+}
+
+// FUNGSI FILTER UTAMA: Bersihin response dari @ dan nama lengkap
+function cleanResponse(reply, userName, shortName, characterName, charGender) {
+  if (!reply) return reply;
+  
+  let cleaned = reply;
+  const shortCharName = characterName.split('.')[0];
+  const randomCall = getRandomCall(charGender);
+  
+  // 1. HAPUS SEMUA "@" DAN YANG NEMPEL
+  //    "@abang" → "abang", "@bro" → "bro"
+  cleaned = cleaned.replace(/@(\w+)/g, '$1');
+  
+  // 2. GANTI NAMA LENGKAP KARAKTER DENGAN NAMA PENDEK
+  //    "gue beby.manis" → "gue beby"
+  //    "aku strawberry.shortcake" → "aku strawberry"
+  const nameRegex = new RegExp(`(\\b\\w*?\\s*)${characterName.replace(/\./g, '\\.')}(\\b)`, 'gi');
+  cleaned = cleaned.replace(nameRegex, `$1${shortCharName}$2`);
+  
+  // 3. KALO MASIH ADA NAMA DENGAN TITIK, POTONG
+  //    "beby.manis" → "beby"
+  cleaned = cleaned.replace(/(\w+)\.\w+/g, '$1');
+  
+  // 4. PASTIKAN PANGGILAN PAKAI KATA YANG PANTAS, BUKAN USERNAME
+  if (userName && userName !== 'user') {
+    // Ganti penyebutan username exact dengan panggilan random
+    const usernameRegex = new RegExp(`\\b${userName.replace('@', '')}\\b`, 'gi');
+    cleaned = cleaned.replace(usernameRegex, randomCall);
+  }
+  
+  // 5. KALO MASIH ADA "user" (default), GANTI DENGAN PANGGILAN
+  cleaned = cleaned.replace(/\buser\b/gi, randomCall);
+  
+  return cleaned;
 }
 
 const SYSTEM = (name, style, lastMessages, userName, shortName, charGender, currentTime, interactionCount) => {
@@ -117,15 +163,17 @@ CARA NGOBROL:
 - Sesekali typo kecil natural (bkn, yg, gk) — 1 dari 5 pesan
 - Kadang mulai dengan "eh", "lah", "wah", "hm"
 
-PANGGILAN KE USER:
-- User: @${userName}
-- Panggil dia dengan nama pendek: "${shortName}" (sekali-sekala)
-- Bisa juga: ${charGender === 'male' ? 'bro, bang, cuy' : 'sis, kak, say'}
+🚫 LARANGAN KERAS BANGET YANG GA BOLEH DILANGGAR:
+1. JANGAN PERNAH PAKAI "@" UNTUK NYAPA USER! Cukup panggil langsung: "abang", "bro", "kak", dll.
+2. JANGAN PERNAH SEBUTIN NAMA LENGKAP DENGAN TITIK! Contoh: JANGAN "gue beby.manis", cukup "gue beby".
+3. JANGAN PAKAI FRASA "eh gue juga", "nggak nyangka" BERULANG
+4. JANGAN ULANGI RESPONS YANG SAMA PERSIS
+5. Jangan cuma "iya nih" atau "sama wkwk" terus
 
-🚫 LARANGAN KERAS:
-- JANGAN PAKAI FRASA "eh gue juga", "nggak nyangka" BERULANG
-- JANGAN ULANGI RESPONS YANG SAMA PERSIS
-- Jangan cuma "iya nih" atau "sama wkwk" terus
+PANGGILAN KE USER:
+- JANGAN PAKAI @ APAPUN!
+- Panggil dia dengan: ${charGender === 'male' ? 'bro, bang, abang, cuy' : 'kak, sis, mbak, say'} (sesekali)
+- Boleh juga panggil nama pendeknya: "${shortName}" (kalau udah agak akrab)
 
 📌 ATURAN PENTING UNTUK NAMA:
 KALAU USER NANYA "nama kamu siapa" atau "kamu siapa" atau "kenalan":
@@ -206,7 +254,7 @@ export default async function handler(req, res) {
 
   // Tambah instruksi khusus untuk pertanyaan nama
   if (isNameQuestion) {
-    systemPrompt += `\n\n🔥 INSTRUKSI WAJIB: User nanya nama lo. JAWAB HARUS: "aku ${shortCharName}" atau "gue ${shortCharName}" atau "${shortCharName}". JANGAN PAKAI NAMA LENGKAP "${characterName}"!`;
+    systemPrompt += `\n\n🔥 INSTRUKSI WAJIB: User nanya nama lo. JAWAB HARUS: "aku ${shortCharName}" atau "gue ${shortCharName}" atau "${shortCharName}". JANGAN PAKAI NAMA LENGKAP "${characterName}"! JANGAN PAKAI TITIK!`;
   }
 
   try {
@@ -241,7 +289,10 @@ export default async function handler(req, res) {
     let reply = data.choices?.[0]?.message?.content?.trim();
     if (!reply) return res.status(502).json({ error: 'Empty response' });
 
-    // Cek forbidden phrases
+    // FILTER UTAMA: Bersihin response dari @ dan nama lengkap
+    reply = cleanResponse(reply, userName, shortName, characterName, charGender);
+
+    // Cek forbidden phrases (setelah difilter)
     if (containsForbiddenPhrase(reply)) {
       console.warn('Forbidden phrase detected, regenerating...');
       const retryResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
@@ -266,6 +317,8 @@ export default async function handler(req, res) {
       if (retryResponse.ok) {
         const retryData = await retryResponse.json();
         reply = retryData.choices?.[0]?.message?.content?.trim() || reply;
+        // Filter lagi
+        reply = cleanResponse(reply, userName, shortName, characterName, charGender);
       }
     }
 
