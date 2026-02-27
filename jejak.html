@@ -274,7 +274,9 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
     <div class="dot off" id="odot"></div>
     <div class="smenu">
       <button class="mtrig" onclick="toggleMenu()"><span></span><span></span><span></span></button>
-      <div class="mdd" id="mdd"><button class="mi" onclick="logoutUser()">Logout</button></div>
+      <div class="mdd" id="mdd">
+        <button class="mi" onclick="logoutUser()">Logout</button>
+      </div>
     </div>
   </div>
 </header>
@@ -418,16 +420,10 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 <div class="toast" id="toast"></div>
 <input type="file" id="finput" accept="image/*" multiple style="display:none">
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================
-// CONFIG - Simplified, no auth complexity
-// ============================================
-const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
-const BUCKET = 'artefacts';
-
-// ============================================
-// DUMMY DATA
+// DUMMY DATA - ALWAYS AVAILABLE
 // ============================================
 const DUMMY_ENTRIES = [
   {id:'d1',content:'Hari ini gue nangis di angkot gegara liat kucing dipukul orang. Mental gue udah kayak kerupuk kena hujan.',mood:'surviving',timestamp:Date.now()-3600000,reactions:{skull:42,cry:89,fire:12,upside:7},isDummy:true},
@@ -445,19 +441,14 @@ const DUMMY_ARTEFACTS = [
 ];
 
 // ============================================
-// STATE - Ghost Mode (No friction login)
+// STATE
 // ============================================
 const S = {
-  // User data dari localStorage - persisten selamanya
-  user: localStorage.getItem('jejak_user') || null,
-  userId: localStorage.getItem('jejak_uid') || null,
-  isPremium: localStorage.getItem('jejak_premium') === 'true',
-  
-  // Data lokal
+  user: null,
+  userId: null,
+  isPremium: false,
   entries: [],
   artefacts: [],
-  
-  // Void data
   voidContacts: [],
   voidRequests: [],
   voidMessages: [],
@@ -509,78 +500,22 @@ function timeAgo(timestamp) {
 }
 
 // ============================================
-// API - Simplified, no auth tokens
-// ============================================
-async function sbInsert(table, data) {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
-      method: 'POST',
-      headers: { 
-        'apikey': SUPABASE_KEY, 
-        'Authorization': `Bearer ${SUPABASE_KEY}`, 
-        'Content-Type': 'application/json', 
-        'Prefer': 'return=representation' 
-      },
-      body: JSON.stringify(data)
-    });
-    if (!res.ok) { 
-      console.error('Insert error:', await res.text()); 
-      return null; 
-    }
-    return await res.json();
-  } catch(e) { 
-    console.error('Insert error:', e); 
-    return null; 
-  }
-}
-
-async function sbSelect(table, query = '') {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}${query}`, {
-      method: 'GET',
-      headers: { 
-        'apikey': SUPABASE_KEY, 
-        'Authorization': `Bearer ${SUPABASE_KEY}`
-      }
-    });
-    if (!res.ok) return null;
-    return await res.json();
-  } catch(e) {
-    return null;
-  }
-}
-
-async function sbStorageUpload(file, path) {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`, {
-      method: 'POST',
-      headers: { 
-        'apikey': SUPABASE_KEY, 
-        'Authorization': `Bearer ${SUPABASE_KEY}`, 
-        'Content-Type': file.type
-      },
-      body: file
-    });
-    if (!res.ok) return null;
-    return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${path}`;
-  } catch(e) { 
-    return null; 
-  }
-}
-
-// ============================================
-// RENDER
+// RENDER FUNCTIONS - WORK EVEN WITHOUT AUTH
 // ============================================
 function renderEntries() {
   const con = $('econ'); 
-  if(!con) return;
-  
-  if(!S.entries || S.entries.length === 0) {
-    con.innerHTML = '<div class="es"><span class="ee">🍃</span><div class="et">Belum ada jejak</div><div class="est">Jadilah yang pertama spill your truth</div></div>';
+  if(!con) {
+    console.error('econ not found');
     return;
   }
   
-  con.innerHTML = S.entries.map(e => {
+  // Use dummies if no real entries
+  const hasRealEntries = S.entries && S.entries.length > 0;
+  const displayEntries = hasRealEntries ? S.entries : DUMMY_ENTRIES;
+  
+  console.log('Rendering entries:', displayEntries.length, hasRealEntries ? 'real' : 'dummies');
+  
+  con.innerHTML = displayEntries.map(e => {
     const ta = e.isDummy ? 'contoh' : timeAgo(e.timestamp);
     const emoji = {surviving:'😮‍💨',thriving:'✨',chaotic:'🌀',doom:'🛌'}[e.mood]||'';
     return `<article class="entry${e.isDummy?' entry-dummy':''}">
@@ -603,14 +538,19 @@ function renderEntries() {
 
 function renderTray() {
   const con = $('tgrid'); 
-  if(!con) return;
-  
-  if(!S.artefacts || S.artefacts.length === 0) {
-    S.artefacts = [...DUMMY_ARTEFACTS];
+  if(!con) {
+    console.error('tgrid not found');
+    return;
   }
   
+  // Use dummies if no real artefacts
+  const hasRealArtefacts = S.artefacts && S.artefacts.length > 0;
+  const displayArtefacts = hasRealArtefacts ? S.artefacts : DUMMY_ARTEFACTS;
+  
+  console.log('Rendering artefacts:', displayArtefacts.length, hasRealArtefacts ? 'real' : 'dummies');
+  
   let html = '';
-  S.artefacts.slice(0,6).forEach(a => {
+  displayArtefacts.slice(0,6).forEach(a => {
     if(a.hasFace) {
       html += `<div class="ti" onclick="setHero('${a.id}')" style="position:relative">
         <img src="${a.url}" class="${a.theme}" alt="${a.note}">
@@ -623,7 +563,7 @@ function renderTray() {
     }
   });
   
-  for(let i = S.artefacts.length; i < 6; i++) {
+  for(let i = displayArtefacts.length; i < 6; i++) {
     html += '<div class="ti empty" onclick="document.getElementById(\'upbtn\').click()">+</div>';
   }
   
@@ -631,7 +571,9 @@ function renderTray() {
 }
 
 function setHero(id) {
-  const a = S.artefacts.find(x => x.id === id); 
+  // Check in user artefacts first, then dummies
+  let a = S.artefacts.find(x => x.id === id);
+  if (!a) a = DUMMY_ARTEFACTS.find(x => x.id === id);
   if(!a) return;
   
   const img = $('himg'), note = $('hnote');
@@ -641,11 +583,77 @@ function setHero(id) {
   }
   if(note) note.textContent = `"${a.note}"`;
   
-  localStorage.setItem('jejak_hero', JSON.stringify({id: a.id, url: a.url, note: a.note, theme: a.theme}));
+  // Only save if user data
+  if (!a.isDummy && S.userId) {
+    localStorage.setItem(`jejak_hero_${S.userId}`, JSON.stringify({id: a.id, url: a.url, note: a.note, theme: a.theme}));
+  }
 }
 
 // ============================================
-// UPLOAD - Unlimited, no quota
+// SUPABASE & AUTH (Optional - app works without it)
+// ============================================
+let supabase = null;
+
+function initSupabase() {
+  try {
+    if (window.supabase && window.supabase.createClient) {
+      supabase = window.supabase.createClient(
+        'https://fuovfrdicdhnlymnacpz.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0'
+      );
+      console.log('Supabase initialized');
+      return true;
+    }
+  } catch(e) {
+    console.error('Supabase init failed:', e);
+  }
+  return false;
+}
+
+async function checkAuth() {
+  if (!supabase) return false;
+  
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (session) {
+      S.userId = session.user.id;
+      S.user = session.user.user_metadata?.username || session.user.email?.split('@')[0] || 'user';
+      S.isPremium = session.user.user_metadata?.is_premium === true;
+      
+      // Update UI
+      $('huser').textContent = '@' + S.user;
+      $('odot').classList.remove('off');
+      
+      // Load user data from localStorage
+      loadUserData();
+      
+      console.log('Auth success:', S.user);
+      return true;
+    }
+  } catch(e) {
+    console.error('Auth error:', e);
+  }
+  return false;
+}
+
+function loadUserData() {
+  if (!S.userId) return;
+  
+  try {
+    const savedEntries = localStorage.getItem(`jejak_entries_${S.userId}`);
+    if (savedEntries) S.entries = JSON.parse(savedEntries);
+    
+    const savedArtefacts = localStorage.getItem(`jejak_artefacts_${S.userId}`);
+    if (savedArtefacts) S.artefacts = JSON.parse(savedArtefacts);
+    
+    console.log('Loaded user data:', S.entries.length, 'entries,', S.artefacts.length, 'artefacts');
+  } catch(e) {
+    console.error('Load data error:', e);
+  }
+}
+
+// ============================================
+// UPLOAD (Works with or without auth)
 // ============================================
 let pendingFiles = [], selFiles = new Set(), currentTheme = 0, currentNote = '';
 
@@ -669,6 +677,13 @@ function initUpload() {
 async function handleFiles(e) {
   const files = Array.from(e.target.files).slice(0, 6);
   if(!files.length) return;
+  
+  // Check auth first
+  if (!S.userId) {
+    toast('Login dulu untuk upload');
+    setTimeout(() => location.href='index.html', 1500);
+    return;
+  }
   
   const pf = files.map(f => ({ 
     file: f, 
@@ -755,7 +770,6 @@ async function confirmUpload() {
 
   const theme = THEMES[currentTheme];
   const note = currentNote || 'memory';
-  const author = S.user ? S.user.replace('@', '') : 'anon';
   let uploadedCount = 0;
 
   for(const i of selFiles){
@@ -763,22 +777,50 @@ async function confirmUpload() {
     const file = item.file;
     const ext = file.name.split('.').pop() || 'jpg';
     const timestamp = Date.now();
-    const storagePath = `${author}/${timestamp}_${i}.${ext}`;
+    const storagePath = `${S.userId}/${timestamp}_${i}.${ext}`;
 
-    const publicUrl = await sbStorageUpload(file, storagePath);
-    const displayUrl = publicUrl || item.preview;
+    if (supabase) {
+      // Upload to Supabase
+      const { data: uploadData, error: uploadError } = await supabase
+        .storage
+        .from('artefacts')
+        .upload(storagePath, file, {
+          contentType: file.type,
+          upsert: false
+        });
 
-    const newArtefact = {
-      id: 'local_' + timestamp + '_' + i,
-      url: displayUrl,
-      note: note,
-      hasFace: item.hasFace,
-      theme: theme.filter,
-      timestamp: timestamp,
-      isDummy: false
-    };
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        continue;
+      }
 
-    S.artefacts.unshift(newArtefact);
+      const { data: { publicUrl } } = supabase
+        .storage
+        .from('artefacts')
+        .getPublicUrl(storagePath);
+
+      S.artefacts.unshift({
+        id: 'local_' + timestamp + '_' + i,
+        url: publicUrl,
+        note: note,
+        hasFace: item.hasFace,
+        theme: theme.filter,
+        timestamp: timestamp,
+        isDummy: false
+      });
+    } else {
+      // Fallback - just use object URL
+      S.artefacts.unshift({
+        id: 'local_' + timestamp + '_' + i,
+        url: item.preview,
+        note: note,
+        hasFace: item.hasFace,
+        theme: theme.filter,
+        timestamp: timestamp,
+        isDummy: false
+      });
+    }
+    
     if(S.artefacts.length > 6) {
       S.artefacts = S.artefacts.slice(0, 6);
     }
@@ -786,8 +828,12 @@ async function confirmUpload() {
     uploadedCount++;
   }
 
-  localStorage.setItem('jejak_artefacts', JSON.stringify(S.artefacts));
+  // Save to localStorage
+  if (S.userId) {
+    localStorage.setItem(`jejak_artefacts_${S.userId}`, JSON.stringify(S.artefacts));
+  }
   
+  // Re-render - now with REAL data (dummies disappear)
   renderTray();
   
   if(S.artefacts.length > 0) {
@@ -801,62 +847,14 @@ async function confirmUpload() {
 }
 
 // ============================================
-// THE VOID - Premium Secret Chat
+// THE VOID
 // ============================================
-function getEncryptionKey() {
-  const uid = S.userId || 'void';
-  let hash = 0;
-  for (let i = 0; i < uid.length; i++) {
-    const char = uid.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash).toString(16).padStart(16, '0');
-}
-
-function encrypt(text, key) {
-  let result = '';
-  for (let i = 0; i < text.length; i++) {
-    const charCode = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
-    result += String.fromCharCode(charCode);
-  }
-  return btoa(result);
-}
-
-function decrypt(encrypted, key) {
-  try {
-    const text = atob(encrypted);
-    let result = '';
-    for (let i = 0; i < text.length; i++) {
-      const charCode = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
-      result += String.fromCharCode(charCode);
-    }
-    return result;
-  } catch(e) {
-    return null;
-  }
-}
-
-function updateVoidNode() {
-  const node = $('void-node');
-  if (!node) return;
-  
-  const hasActivity = S.voidRequests.length > 0 || S.voidMessages.some(m => !m.read);
-  
-  if (hasActivity) {
-    node.classList.add('active');
-  } else {
-    node.classList.remove('active');
-  }
-}
-
 function openVoid() {
   if (!S.isPremium) {
     $('void-locked').classList.add('on');
     return;
   }
   $('void-portal').classList.add('on');
-  loadVoidData();
 }
 
 function closeVoid() {
@@ -867,284 +865,42 @@ function closeVoidLocked() {
   $('void-locked').classList.remove('on');
 }
 
-async function loadVoidData() {
-  if (!S.userId) return;
-  
-  const contacts = await sbSelect('void_contacts', `?or=(user_a.eq.${S.userId},user_b.eq.${S.userId})&status.eq.accepted`);
-  if (contacts) {
-    S.voidContacts = contacts;
-    renderVoidContacts();
-  }
-  
-  const requests = await sbSelect('void_contacts', `?user_b.eq.${S.userId}&status.eq.pending`);
-  if (requests) {
-    S.voidRequests = requests;
-    renderVoidRequests();
-  }
-  
-  updateVoidNode();
-}
-
-function renderVoidContacts() {
-  const list = $('void-contacts-list');
-  if (!list) return;
-  
-  if (S.voidContacts.length === 0) {
-    list.innerHTML = `
-      <div class="void-empty">
-        <span class="void-empty-icon">◼</span>
-        <div>No active contacts</div>
-      </div>
-    `;
-    return;
-  }
-  
-  list.innerHTML = S.voidContacts.map(c => {
-    const otherUser = c.user_a === S.userId ? c.user_b_username : c.user_a_username;
-    return `
-      <div class="void-contact" onclick="openVoidChat('${c.id}', '${otherUser}')">
-        <div class="void-contact-avatar">◼</div>
-        <div class="void-contact-info">
-          <div class="void-contact-name">@${esc(otherUser)}</div>
-          <div class="void-contact-status online">● Connected</div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function renderVoidRequests() {
-  const container = $('void-requests');
-  const list = $('void-requests-list');
-  if (!container || !list) return;
-  
-  if (S.voidRequests.length === 0) {
-    container.style.display = 'none';
-    return;
-  }
-  
-  container.style.display = 'block';
-  list.innerHTML = S.voidRequests.map(r => `
-    <div class="void-request">
-      <div class="void-request-avatar">◼</div>
-      <div class="void-request-info">
-        <div class="void-request-from">@${esc(r.user_a_username)}</div>
-        <div class="void-request-meta">Wants to establish secure connection</div>
-      </div>
-      <div class="void-request-actions">
-        <button class="void-btn accept" onclick="acceptRequest('${r.id}')">Accept</button>
-        <button class="void-btn deny" onclick="denyRequest('${r.id}')">Deny</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-async function sendContactRequest() {
-  const input = $('void-add-input');
-  const username = input.value.trim().replace('@', '');
-  
-  if (!username) {
-    toast('Enter username');
-    return;
-  }
-  
-  const profile = await sbSelect('profiles', `?username=eq.${username}`);
-  if (!profile || profile.length === 0) {
-    toast('User not found');
-    return;
-  }
-  
-  const targetId = profile[0].id;
-  
-  const result = await sbInsert('void_contacts', {
-    user_a: S.userId,
-    user_a_username: S.user.replace('@', ''),
-    user_b: targetId,
-    user_b_username: username,
-    status: 'pending',
-    created_at: new Date().toISOString()
-  });
-  
-  if (result) {
-    toast('Request sent');
-    input.value = '';
-  }
-}
-
-async function acceptRequest(id) {
-  await fetch(`${SUPABASE_URL}/rest/v1/void_contacts?id=eq.${id}`, {
-    method: 'PATCH',
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ status: 'accepted' })
-  });
-  loadVoidData();
-}
-
-async function denyRequest(id) {
-  await fetch(`${SUPABASE_URL}/rest/v1/void_contacts?id=eq.${id}`, {
-    method: 'DELETE',
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`
-    }
-  });
-  loadVoidData();
-}
-
-function openVoidChat(contactId, username) {
-  S.currentChat = contactId;
-  $('chat-contact-name').textContent = '@' + username;
-  $('void-chat').classList.add('on');
-  loadVoidMessages();
-}
-
 function closeVoidChat() {
-  S.currentChat = null;
-  if (S.destroyTimer) {
-    clearInterval(S.destroyTimer);
-    S.destroyTimer = null;
-  }
   $('void-chat').classList.remove('on');
-  $('void-timer').style.display = 'none';
-}
-
-async function loadVoidMessages() {
-  const messages = await sbSelect('void_messages', 
-    `?contact_id=eq.${S.currentChat}&destroyed.eq.false&order=created_at.desc`
-  );
-  
-  if (messages) {
-    S.voidMessages = messages;
-    renderVoidMessages();
-  }
-}
-
-function renderVoidMessages() {
-  const container = $('void-chat-messages');
-  if (!container) return;
-  
-  const key = getEncryptionKey();
-  
-  container.innerHTML = S.voidMessages.map(m => {
-    const isSent = m.sender_id === S.userId;
-    const decrypted = decrypt(m.encrypted_content, key) || '[ENCRYPTED]';
-    const time = new Date(m.created_at).toLocaleTimeString('id-ID', {
-      hour: '2-digit', 
-      minute: '2-digit'
-    });
-    
-    return `
-      <div class="void-message ${isSent ? 'sent' : 'received'}">
-        ${esc(decrypted)}
-        <div class="void-message-time">${time}</div>
-      </div>
-    `;
-  }).reverse().join('');
-  
-  container.scrollTop = container.scrollHeight;
-}
-
-async function sendVoidMessage() {
-  const input = $('void-message-input');
-  const btn = $('void-send-btn');
-  const text = input.value.trim();
-  
-  if (!text || !S.currentChat) return;
-  
-  btn.disabled = true;
-  
-  const contact = S.voidContacts.find(c => c.id === S.currentChat);
-  if (!contact) {
-    btn.disabled = false;
-    return;
-  }
-  
-  const recipientId = contact.user_a === S.userId ? contact.user_b : contact.user_a;
-  const key = getEncryptionKey();
-  const encrypted = encrypt(text, key);
-  
-  await sbInsert('void_messages', {
-    contact_id: S.currentChat,
-    sender_id: S.userId,
-    recipient_id: recipientId,
-    encrypted_content: encrypted,
-    created_at: new Date().toISOString(),
-    read: false,
-    destroyed: false
-  });
-  
-  input.value = '';
-  loadVoidMessages();
-  
-  if (!S.destroyTimer) {
-    startDestroyTimer();
-  }
-  
-  btn.disabled = false;
-}
-
-function startDestroyTimer() {
-  const timerEl = $('void-timer');
-  timerEl.style.display = 'block';
-  let timeLeft = 7;
-  timerEl.textContent = timeLeft;
-  
-  S.destroyTimer = setInterval(async () => {
-    timeLeft--;
-    timerEl.textContent = timeLeft;
-    
-    if (timeLeft <= 0) {
-      clearInterval(S.destroyTimer);
-      S.destroyTimer = null;
-      
-      await fetch(`${SUPABASE_URL}/rest/v1/void_messages?contact_id=eq.${S.currentChat}`, {
-        method: 'PATCH',
-        headers: {
-          'apikey': SUPABASE_KEY,
-          'Authorization': `Bearer ${SUPABASE_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ destroyed: true })
-      });
-      
-      $('void-burn').classList.add('on');
-      setTimeout(() => {
-        $('void-burn').classList.remove('on');
-        closeVoidChat();
-      }, 1500);
-    }
-  }, 1000);
 }
 
 // ============================================
-// INIT - Ghost Mode (No friction)
+// INIT - RENDER IMMEDIATELY, AUTH IS SECONDARY
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('=== JEJAK APP STARTING ===');
   
-  // Cek apakah sudah punya identity
-  if (!S.user || !S.userId) {
-    // Redirect ke index untuk setup (sekali saja)
-    toast('Setup your ghost identity...');
-    setTimeout(() => {
-      window.location.href = 'index.html';
-    }, 1000);
-    return;
-  }
+  // 1. Render dummies IMMEDIATELY (don't wait for auth)
+  renderEntries();
+  renderTray();
   
-  // Load data
-  try { 
-    const saved = localStorage.getItem('jejak_entries');
-    S.entries = saved ? JSON.parse(saved) : [...DUMMY_ENTRIES];
-    if (!S.entries || S.entries.length === 0) S.entries = [...DUMMY_ENTRIES];
-  } catch { 
-    S.entries = [...DUMMY_ENTRIES]; 
-  }
+  // 2. Setup upload
+  initUpload();
   
-  try { 
-    const saved = localStorage.getItem('jejak_artefacts');
-    S.artefacts = saved ? JSON.parse(saved) : [...DUMMY_ARTEFACTS];
-    if (!S.artefacts || S.artefacts.length === 0) S.artefacts = [...D
+  // 3. Try auth (optional - doesn't block rendering)
+  initSupabase();
+  checkAuth().then(authed => {
+    if (authed) {
+      // Re-render with user data if we have it
+      renderEntries();
+      renderTray();
+    }
+  });
+  
+  // 4. Menu close handler
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.smenu')) {
+      $('mdd').classList.remove('on');
+    }
+  });
+  
+  console.log('=== APP READY ===');
+});
+</script>
+</body>
+</html>
