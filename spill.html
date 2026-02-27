@@ -2,1201 +2,301 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1,user-scalable=no">
-<title>Spill — JEJAK with AI Rants</title>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Spill — JEJAK</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Share+Tech+Mono&family=Oswald:wght@700&display=swap" rel="stylesheet">
 <style>
-/* [CSS SAME AS BEFORE - unchanged for brevity] */
-:root{
-  --bg:#0A0A0A;
-  --sf:#141414;
-  --sfl:#1E1E1E;
-  --bd:#2A2A2A;
-  --tx:#FFF;
-  --txs:#888;
-  --txm:#555;
-  --ap:#FF4D00;
-  --gn:#39FF14;
-}
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  background:var(--bg);
-  color:var(--tx);
-  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
-  min-height:100vh;
-  padding-bottom:80px
-}
-.wrapper{
-  max-width:480px;
-  margin:0 auto;
-  padding:24px 16px
-}
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:32px;
-  padding-bottom:16px;
-  border-bottom:1px solid var(--bd)
-}
-.brand{
-  display:flex;
-  align-items:center;
-  gap:12px
-}
-.brand-icon{
-  font-size:32px
-}
-.brand-text{
-  font-size:28px;
-  font-weight:800;
-  letter-spacing:-.02em;
-  background:linear-gradient(135deg,var(--ap),#FF8A5C);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent
-}
-.header-actions{
-  display:flex;
-  align-items:center;
-  gap:12px
-}
-.conn-dot{
-  width:8px;
-  height:8px;
-  background:var(--gn);
-  border-radius:50%;
-  animation:blink 2s infinite;
-  margin-right:8px
-}
-@keyframes blink{
-  0%,100%{opacity:1}
-  50%{opacity:.3}
-}
-.menu-trigger{
-  width:32px;
-  height:32px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:3px;
-  background:transparent;
-  border:none;
-  cursor:pointer
-}
-.menu-trigger span{
-  width:4px;
-  height:4px;
-  background:var(--tx);
-  border-radius:50%;
-  transition:all .2s
-}
-.menu-trigger:hover span{
-  background:var(--ap)
-}
+/* ── TOKENS (same as Jejak) ── */
+:root{--bg:#0A0A0A;--sf:#141414;--sfe:#1E1E1E;--bd:#2A2A2A;--tx:#FFF;--txs:#888;--txm:#555;--ap:#FF4D00;--as:#00F0FF;--at:#FF006E;--aq:#39FF14;--ms:#FF9500;--mt:#39FF14;--mc:#00F0FF;--md:#8B5CF6;--gn:#39FF14}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:500;font-size:15px;line-height:1.4;min-height:100vh;overflow-x:hidden;padding-bottom:100px}
+/* noise grain — identical to Jejak */
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.4}
+.w{max-width:480px;margin:0 auto;padding:0 16px}
 
-/* RADAR */
+/* ── HEADER — same as Jejak ── */
+header{padding:24px 0 16px;display:flex;justify-content:space-between;align-items:flex-start}
+.logo{font-size:42px;font-weight:800;letter-spacing:-.04em;line-height:.9;cursor:default}
+.logo span{color:var(--ap)}
+.tagline{font-family:'Instrument Serif',serif;font-size:13px;color:var(--txs);font-style:italic;margin-top:4px}
+.top-right{display:flex;align-items:center;gap:8px;padding-top:6px}
+.conn-dot{width:8px;height:8px;background:var(--aq);border-radius:50%;animation:blink 2s infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.menu-trigger{width:32px;height:32px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:transparent;border:none;cursor:pointer}
+.menu-trigger span{width:4px;height:4px;background:var(--tx);border-radius:50%;transition:all .2s}
+.menu-trigger:hover span{background:var(--ap)}
+
+/* ── RADAR — Bell & Ross panel, full-bleed like Jejak .hero-s ── */
+.radar-wrap{position:relative;margin:0 -16px 24px;border-top:2px solid var(--bd);border-bottom:2px solid var(--bd)}
 .radar-hero{
-  width:100%;
-  aspect-ratio:1/1;
-  margin-bottom:24px;
-  border-radius:20px;
-  overflow:hidden;
-  border:2px solid var(--bd);
-  position:relative;
-  background:#000
+  width:100%;position:relative;
+  background:linear-gradient(160deg,#303030 0%,#1a1a1a 20%,#0e0e0e 50%,#181818 80%,#242424 100%);
+  padding:42px 36px 58px 36px;
 }
-.radar-container{
-  position:relative;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:radial-gradient(circle at 30% 30%,#1A3A1A,#0A1A0A)
+/* 4 screws */
+.radar-hero::before,.radar-hero::after,.screw-bl,.screw-br{
+  position:absolute;width:28px;height:28px;border-radius:50%;z-index:50;
+  background:
+    linear-gradient(0deg,transparent 41%,rgba(0,0,0,.95) 41%,rgba(0,0,0,.95) 59%,transparent 59%),
+    linear-gradient(90deg,transparent 41%,rgba(0,0,0,.95) 41%,rgba(0,0,0,.95) 59%,transparent 59%),
+    linear-gradient(0deg,transparent 43%,rgba(255,255,255,.06) 45%,rgba(255,255,255,.06) 55%,transparent 57%),
+    linear-gradient(90deg,transparent 43%,rgba(255,255,255,.06) 45%,rgba(255,255,255,.06) 55%,transparent 57%),
+    radial-gradient(circle at 36% 30%,#888 0%,#666 15%,#444 35%,#2c2c2c 60%,#181818 100%);
+  box-shadow:0 3px 6px rgba(0,0,0,.95),inset 0 2px 2px rgba(255,255,255,.22),inset -1px -1px 2px rgba(0,0,0,.8),0 0 0 3px #080808,0 0 0 5px #303030,0 0 0 6px #080808;
 }
-.radar-grid{
-  position:absolute;
-  inset:0;
-  background-image:repeating-linear-gradient(0deg,var(--bd) 0px,transparent 1px,transparent 20px),repeating-linear-gradient(90deg,var(--bd) 0px,transparent 1px,transparent 20px);
-  opacity:.3;
-  animation:rscan 8s infinite linear
-}
-@keyframes rscan{
-  to{transform:rotate(360deg)}
-}
-.radar-circles{
-  position:absolute;
-  inset:0;
-  border-radius:50%;
-  box-shadow:inset 0 0 0 2px var(--gn)
-}
-.radar-circles::before,.radar-circles::after{
-  content:'';
-  position:absolute;
-  inset:25%;
-  border-radius:50%;
-  box-shadow:inset 0 0 0 2px var(--gn);
-  opacity:.5
-}
-.radar-circles::after{
-  inset:50%
-}
-.radar-line{
-  position:absolute;
-  top:50%;
-  left:50%;
-  width:50%;
-  height:2px;
-  background:linear-gradient(90deg,var(--gn),transparent);
-  transform-origin:left;
-  animation:rspin 4s infinite linear;
-  opacity:.8;
-  z-index:25;
-  pointer-events:none
-}
-.radar-sweep{
-  position:absolute;
-  top:50%;
-  left:50%;
-  width:70%;
-  height:70%;
-  background:radial-gradient(circle at 0% 50%,rgba(57,255,20,.3),transparent 70%);
-  transform-origin:left;
-  animation:rspin 4s infinite linear;
-  z-index:20;
-  pointer-events:none;
-  filter:blur(10px)
-}
-@keyframes rspin{
-  to{transform:rotate(360deg)}
-}
-.radar-dot{
-  position:absolute;
-  border-radius:50%;
-  transform:translate(-50%,-50%);
-  animation:rdot 1.5s infinite ease-in-out;
-  z-index:30;
-  cursor:pointer;
-  transition:all .2s;
-  box-shadow:0 0 10px currentColor
-}
-.radar-dot:hover{
-  transform:translate(-50%,-50%) scale(2);
-  box-shadow:0 0 30px currentColor;
-  z-index:50
-}
-.radar-dot.purple{
-  background:#B026FF;
-  box-shadow:0 0 15px #B026FF
-}
-.radar-dot.red{
-  background:#FF3333;
-  box-shadow:0 0 15px #FF3333
-}
-.radar-dot.ai{
-  background:var(--gn);
-  box-shadow:0 0 15px var(--gn);
-  animation:rdot 2.5s infinite
-}
-@keyframes rdot{
-  0%,100%{opacity:1;transform:translate(-50%,-50%) scale(1)}
-  50%{opacity:.7;transform:translate(-50%,-50%) scale(.9)}
-}
-.radar-overlay{
-  position:absolute;
-  inset:0;
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-start;
-  align-items:flex-start;
-  z-index:10;
-  pointer-events:none;
-  padding:16px
-}
-.radar-title{
-  font-size:24px;
-  font-weight:800;
-  text-transform:uppercase;
-  color:#fff;
-  text-shadow:2px 0 0 #FF3333,-2px 0 0 #B026FF,0 0 20px var(--gn);
-  letter-spacing:4px;
-  pointer-events:auto;
-  background:rgba(0,0,0,.5);
-  padding:4px 12px;
-  border-radius:30px;
-  border:1px solid var(--bd)
-}
-.quota-display{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  background:rgba(0,0,0,.7);
-  padding:4px 12px;
-  border-radius:30px;
-  border:1px solid var(--bd);
-  font-size:12px;
-  pointer-events:auto;
-  margin-top:8px
-}
-.quota-badge{
-  color:var(--gn);
-  font-weight:700;
-  font-size:18px
-}
-.quota-text{
-  color:var(--txs);
-  font-size:12px
-}
-.radar-guide{
-  margin-top:12px;
-  background:rgba(57,255,20,0.1);
-  border-left:4px solid var(--gn);
-  padding:8px 12px;
-  border-radius:8px;
-  pointer-events:auto;
-  max-width:220px;
-  animation:pulse-guide 2s infinite
-}
-@keyframes pulse-guide{
-  0%,100%{opacity:0.8}
-  50%{opacity:1;background:rgba(57,255,20,0.15)}
-}
-.guide-text{
-  color:var(--gn);
-  font-size:11px;
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:0.5px
-}
-.vibe-check-btn{
-  position:absolute;
-  bottom:16px;
-  right:16px;
-  background:var(--ap);
-  color:var(--bg);
-  border:none;
-  padding:12px 24px;
-  font-size:14px;
-  font-weight:700;
-  text-transform:uppercase;
-  cursor:pointer;
-  border-radius:40px;
-  transition:all .2s;
-  z-index:30;
-  box-shadow:0 0 20px rgba(255,77,0,.5);
-  display:inline-flex;
-  align-items:center;
-  gap:8px
-}
-.vibe-check-btn:hover{
-  background:var(--tx);
-  color:var(--bg);
-  transform:scale(1.05)
-}
+.radar-hero::before{content:'';top:14px;left:14px}
+.radar-hero::after{content:'';top:14px;right:14px}
+.screw-bl{bottom:14px;left:14px}
+.screw-br{bottom:14px;right:14px}
+/* CRT screen */
+.radar-container{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:radial-gradient(ellipse at 40% 40%,#0d1f0d 0%,#050e05 60%,#020802 100%);box-shadow:inset 0 0 0 1px #1a2a1a,inset 0 0 60px rgba(0,0,0,.8),inset 0 0 120px rgba(0,20,0,.6)}
+.radar-container::before{content:'';position:absolute;inset:0;z-index:40;pointer-events:none;background:radial-gradient(ellipse at 25% 20%,rgba(255,255,255,.04) 0%,transparent 55%),linear-gradient(180deg,rgba(255,255,255,.015) 0%,transparent 30%)}
+.radar-container::after{content:'';position:absolute;inset:0;z-index:41;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.08) 3px,rgba(0,0,0,.08) 4px)}
+.radar-grid{position:absolute;inset:0;opacity:.12;background-image:repeating-linear-gradient(0deg,rgba(57,255,20,.4) 0px,transparent 1px,transparent 28px),repeating-linear-gradient(90deg,rgba(57,255,20,.4) 0px,transparent 1px,transparent 28px)}
+.radar-circles{position:absolute;inset:4%;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(57,255,20,.35)}
+.radar-circles::before,.radar-circles::after{content:'';position:absolute;inset:25%;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(57,255,20,.2)}
+.radar-circles::after{inset:50%;box-shadow:inset 0 0 0 1px rgba(57,255,20,.15)}
+.radar-crosshair{position:absolute;inset:0;z-index:8;pointer-events:none;background:linear-gradient(90deg,transparent calc(50% - .5px),rgba(57,255,20,.15) calc(50% - .5px),rgba(57,255,20,.15) calc(50% + .5px),transparent calc(50% + .5px)),linear-gradient(0deg,transparent calc(50% - .5px),rgba(57,255,20,.15) calc(50% - .5px),rgba(57,255,20,.15) calc(50% + .5px),transparent calc(50% + .5px))}
+.radar-line,.radar-sweep{display:none}
+.radar-dot{position:absolute;border-radius:50%;transform:translate(-50%,-50%);z-index:30;cursor:pointer;opacity:.35;transition:opacity .1s}
+.radar-dot:hover{transform:translate(-50%,-50%) scale(2.2);z-index:50;opacity:1}
+.radar-dot.purple{background:#B026FF}.radar-dot.red{background:#FF3333}.radar-dot.ai{background:var(--gn)}
+.radar-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:22;pointer-events:none}
+.radar-overlay{position:absolute;inset:0;z-index:34;pointer-events:none}
+/* Panel lettering */
+.radar-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:8px;color:rgba(57,255,20,.5);text-shadow:0 0 8px rgba(57,255,20,.3);position:absolute;top:0;left:0;right:0;height:42px;display:flex;align-items:center;justify-content:center;white-space:nowrap;z-index:35;pointer-events:none}
+.radar-footer{position:absolute;bottom:0;left:56px;right:36px;height:58px;display:flex;justify-content:space-between;align-items:center;z-index:36}
+.quota-display{display:flex;align-items:center;gap:6px}
+.quota-badge{font-family:'Share Tech Mono',monospace;color:var(--gn);font-size:22px;line-height:1;text-shadow:0 0 10px var(--gn),0 0 20px rgba(57,255,20,.35);letter-spacing:-1px}
+.quota-text{font-family:'Share Tech Mono',monospace;color:rgba(57,255,20,.4);font-size:8px;text-transform:uppercase;letter-spacing:1.5px;line-height:1.3}
+/* VIBE CHECK btn — Jejak .upbtn style but with Oswald label */
+.vibe-check-btn{font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:2px;background:var(--ap);color:#000;border:none;padding:10px 18px;font-size:12px;text-transform:uppercase;cursor:pointer;box-shadow:4px 4px 0 rgba(0,0,0,.8);display:inline-flex;align-items:center;gap:6px;transition:all .2s}
+.vibe-check-btn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 rgba(0,0,0,.8)}
+.vibe-check-btn:active{transform:translate(4px,4px);box-shadow:none}
 
-/* FILTER */
-.filter-section{
-  background:var(--sf);
-  border:1px solid var(--bd);
-  padding:20px;
-  margin-bottom:24px;
-  border-radius:20px
-}
-.filter-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:16px
-}
-.filter-title{
-  font-size:14px;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:.05em;
-  display:flex;
-  align-items:center;
-  gap:8px
-}
-.vibe-pct{
-  color:var(--ap);
-  font-weight:800
-}
-.reset-btn{
-  background:transparent;
-  border:1px solid var(--ap);
-  color:var(--ap);
-  padding:6px 12px;
-  font-size:11px;
-  font-weight:700;
-  text-transform:uppercase;
-  cursor:pointer;
-  border-radius:30px;
-  transition:all .2s
-}
-.reset-btn:hover{
-  background:var(--ap);
-  color:var(--bg)
-}
-.vibe-slider{
-  width:100%;
-  height:4px;
-  background:var(--bd);
-  outline:none;
-  -webkit-appearance:none;
-  margin-bottom:8px;
-  display:block
-}
-.vibe-slider::-webkit-slider-thumb{
-  -webkit-appearance:none;
-  width:24px;
-  height:24px;
-  background:var(--ap);
-  border:2px solid var(--tx);
-  border-radius:50%;
-  cursor:pointer
-}
-.vibe-labels{
-  display:flex;
-  justify-content:space-between;
-  font-size:11px;
-  color:var(--txm);
-  text-transform:uppercase;
-  margin-bottom:20px
-}
-.mood-filters{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px
-}
-.mood-btn{
-  padding:8px 16px;
-  background:var(--sfl);
-  border:1px solid var(--bd);
-  color:var(--txs);
-  font-size:12px;
-  font-weight:600;
-  text-transform:uppercase;
-  cursor:pointer;
-  border-radius:30px;
-  transition:all .2s
-}
-.mood-btn.active{
-  background:var(--ap);
-  border-color:var(--ap);
-  color:var(--bg)
-}
-.mood-btn:hover:not(.active){
-  border-color:var(--tx)
-}
+/* ── SECTION DIVIDER — exact Jejak .shdr ── */
+.shdr{display:flex;align-items:center;gap:8px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--bd)}
+.stit{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.15em;color:var(--tx)}
+.sline{flex:1;height:2px;background:var(--bd)}
+.shdr-meta{font-size:10px;color:var(--txm);white-space:nowrap}
 
-/* CONTENT */
-.content-area{
-  min-height:300px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  border:2px dashed var(--bd);
-  padding:40px;
-  border-radius:20px;
-  margin-bottom:24px
-}
-.content-area.has-content{
-  border:none;
-  padding:0;
-  align-items:stretch;
-  justify-content:flex-start
-}
-.spinner{
-  width:48px;
-  height:48px;
-  border:3px solid var(--bd);
-  border-top-color:var(--ap);
-  border-radius:50%;
-  animation:spin 1s linear infinite;
-  margin-bottom:16px
-}
-@keyframes spin{
-  to{transform:rotate(360deg)}
-}
-.loading-text{
-  color:var(--txs);
-  font-size:12px;
-  text-transform:uppercase;
-  letter-spacing:.1em
-}
-.spill-card{
-  background:var(--sf);
-  border:1px solid var(--bd);
-  padding:20px;
-  border-radius:20px;
-  animation:fadeIn .4s ease;
-  margin-bottom:16px
-}
-@keyframes fadeIn{
-  from{opacity:0;transform:translateY(20px)}
-  to{opacity:1;transform:translateY(0)}
-}
-.spill-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:12px;
-  padding-bottom:12px;
-  border-bottom:1px solid var(--bd)
-}
-.spill-author{
-  font-size:12px;
-  font-weight:700;
-  color:var(--txs);
-  cursor:pointer;
-  transition:color .2s
-}
-.spill-author:hover{
-  color:var(--ap)
-}
-.spill-mood{
-  font-size:10px;
-  padding:4px 8px;
-  border:1px solid currentColor;
-  border-radius:30px;
-  text-transform:uppercase
-}
-.spill-content{
-  font-size:15px;
-  line-height:1.6;
-  margin-bottom:16px
-}
-.spill-reactions{
-  display:flex;
-  gap:6px;
-  flex-wrap:nowrap;
-  justify-content:space-between
-}
-.reaction-btn{
-  display:flex;
-  align-items:center;
-  gap:4px;
-  background:var(--sfl);
-  border:1px solid var(--bd);
-  color:var(--txs);
-  padding:6px 10px;
-  font-size:12px;
-  cursor:pointer;
-  transition:all .2s;
-  border-radius:30px;
-  flex:1;
-  justify-content:center
-}
-.reaction-btn:hover,.reaction-btn.reacted{
-  border-color:var(--ap);
-  background:var(--ap);
-  color:var(--bg);
-  transform:scale(1.05)
-}
-.reaction-count{
-  font-weight:600;
-  font-size:11px;
-  min-width:14px;
-  text-align:center
-}
-.new-spill-btn{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:12px;
-  width:100%;
-  padding:16px;
-  background:transparent;
-  border:2px solid var(--ap);
-  color:var(--ap);
-  font-size:14px;
-  font-weight:700;
-  text-transform:uppercase;
-  cursor:pointer;
-  margin-top:24px;
-  margin-bottom:32px;
-  border-radius:40px;
-  transition:all .2s
-}
-.new-spill-btn:hover{
-  background:var(--ap);
-  color:var(--bg)
-}
-.empty-state{
-  text-align:center;
-  padding:40px
-}
-.empty-icon{
-  font-size:48px;
-  margin-bottom:16px;
-  opacity:.5
-}
-.empty-text{
-  color:var(--txs);
-  font-style:italic;
-  margin-bottom:8px
-}
-.empty-subtext{
-  color:var(--txm);
-  font-size:12px
-}
+/* ── FILTER ── */
+.filter-wrap{margin-bottom:24px}
+.filter-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.filter-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--txs);display:flex;align-items:center;gap:6px}
+.vibe-pct{color:var(--ap);font-weight:800;font-size:15px}
+/* reset btn — Jejak secondary button style */
+.reset-btn{padding:6px 12px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;background:transparent;border:2px solid var(--bd);color:var(--txm);cursor:pointer;transition:all .15s;font-family:inherit}
+.reset-btn:hover{border-color:var(--ap);color:var(--ap)}
+.vibe-slider{width:100%;height:4px;background:var(--bd);outline:none;-webkit-appearance:none;margin-bottom:8px;display:block}
+.vibe-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--ap);border:2px solid var(--tx);cursor:pointer;box-shadow:2px 2px 0 var(--bg)}
+.vibe-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--txm);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px;font-weight:700}
+.mood-filters{display:flex;flex-wrap:wrap;gap:6px}
+/* mood btns — same border style as Jejak .mc */
+.mood-btn{padding:7px 14px;background:var(--sf);border:2px solid var(--bd);color:var(--txs);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;transition:all .15s;font-family:inherit}
+.mood-btn.active{background:var(--ap);border-color:var(--ap);color:#000}
+.mood-btn:hover:not(.active){border-color:var(--txs);color:var(--tx);transform:translateY(-1px)}
 
-/* TOAST */
-.toast{
-  position:fixed;
-  bottom:100px;
-  left:50%;
-  transform:translateX(-50%) translateY(100px);
-  background:var(--tx);
-  color:var(--bg);
-  padding:12px 24px;
-  font-size:13px;
-  font-weight:600;
-  border-radius:40px;
-  z-index:10000;
-  opacity:0;
-  transition:all .3s;
-  box-shadow:0 4px 20px rgba(0,0,0,.5)
-}
-.toast.show{
-  opacity:1;
-  transform:translateX(-50%) translateY(0)
-}
-.toast.error{
-  background:#FF3333;
-  color:var(--tx)
-}
+/* ── SPILL CARDS — Jejak .entry style ── */
+.content-area{min-height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 0}
+.content-area.has-content{padding:0;align-items:stretch;justify-content:flex-start}
+.spinner{width:36px;height:36px;border:3px solid var(--bd);border-top-color:var(--ap);border-radius:50%;animation:sp 1s linear infinite;margin-bottom:12px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.loading-text{font-size:10px;color:var(--txs);text-transform:uppercase;letter-spacing:.15em;font-weight:700}
+/* card = .entry */
+.spill-card{background:var(--sf);border:2px solid var(--bd);margin-bottom:16px;position:relative;animation:si .4s ease;transition:border-color .15s}
+@keyframes si{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.spill-card:hover{border-color:var(--ap)}
+/* header bar = .ehdr */
+.spill-header{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;border-bottom:1px solid var(--bd);background:var(--sfe)}
+.spill-author{font-size:11px;font-weight:700;color:var(--txm);letter-spacing:.05em;cursor:pointer;transition:color .15s}
+.spill-author:hover{color:var(--ap)}
+/* mood badge = .emood */
+.spill-mood{font-size:10px;font-weight:700;padding:4px 8px;border:1px solid currentColor;text-transform:uppercase;letter-spacing:.1em}
+.spill-mood.surviving{color:var(--ms)}
+.spill-mood.thriving{color:var(--mt)}
+.spill-mood.chaotic{color:var(--mc)}
+.spill-mood.doom{color:var(--md)}
+/* body = .econt */
+.spill-content{padding:16px;font-size:15px;line-height:1.6;color:var(--tx)}
+/* reaction bar — Jejak .reaction-bar */
+.spill-reactions{display:flex;align-items:center;padding:8px 16px;border-top:1px solid var(--bd);background:var(--sfe);gap:6px;flex-wrap:wrap}
+.reaction-btn{position:relative;display:flex;align-items:center;gap:4px;padding:5px 10px;background:var(--sf);border:2px solid var(--bd);cursor:pointer;transition:all .15s;border-radius:4px;font-family:inherit}
+.reaction-btn:hover{border-color:var(--txs);transform:translateY(-2px);background:var(--sfe)}
+.reaction-btn.reacted{border-color:var(--ap);background:var(--ap)}
+.reaction-btn.reacted .reaction-count{color:#000}
+.reaction-count{font-size:11px;font-weight:700;color:var(--txs);min-width:14px;text-align:center;font-variant-numeric:tabular-nums}
 
-/* MODALS */
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.98);
-  z-index:20000;
-  padding:20px;
-  overflow-y:auto;
-  backdrop-filter:blur(10px);
-  align-items:center;
-  justify-content:center
-}
-.modal.on{
-  display:flex
-}
-.modal-box{
-  max-width:480px;
-  width:100%;
-  background:var(--sf);
-  border:3px solid var(--ap);
-  padding:32px 24px;
-  position:relative;
-  box-shadow:10px 10px 0 var(--ap)
-}
-.modal-tag{
-  position:absolute;
-  top:-12px;
-  left:20px;
-  background:var(--sf);
-  padding:0 10px;
-  font-size:12px;
-  font-weight:800;
-  color:var(--ap);
-  letter-spacing:2px
-}
-.modal-title{
-  font-size:32px;
-  font-weight:800;
-  text-transform:uppercase;
-  margin-bottom:8px;
-  background:linear-gradient(135deg,var(--ap),#FF8A5C);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  text-align:center
-}
-.modal-sub{
-  color:var(--txs);
-  font-size:14px;
-  margin-bottom:32px;
-  text-align:center;
-  font-style:italic
-}
-.gender-options{
-  display:flex;
-  gap:16px;
-  margin-bottom:32px
-}
-.gender-opt{
-  flex:1;
-  background:var(--sfl);
-  border:3px solid var(--bd);
-  padding:24px 16px;
-  text-align:center;
-  cursor:pointer;
-  transition:all .2s;
-  position:relative
-}
-.gender-opt:hover{
-  border-color:var(--ap);
-  transform:translateY(-4px)
-}
-.gender-opt.selected{
-  border-color:var(--ap);
-  background:linear-gradient(145deg,var(--sfl),#2A2A2A)
-}
-.gender-opt.selected::after{
-  content:'✓';
-  position:absolute;
-  top:8px;
-  right:8px;
-  color:var(--ap);
-  font-weight:800
-}
-.gender-icon{
-  font-size:48px;
-  margin-bottom:12px;
-  display:block
-}
-.gender-label{
-  font-size:18px;
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:2px;
-  margin-bottom:4px
-}
-.gender-desc{
-  font-size:11px;
-  color:var(--txs)
-}
-.modal-note{
-  background:rgba(255,77,0,.1);
-  border-left:4px solid var(--ap);
-  padding:16px;
-  margin-bottom:24px;
-  font-size:13px;
-  color:var(--txs)
-}
-.modal-note strong{
-  color:var(--ap)
-}
-.modal-confirm{
-  width:100%;
-  padding:16px;
-  background:var(--ap);
-  color:var(--bg);
-  border:none;
-  font-size:16px;
-  font-weight:800;
-  text-transform:uppercase;
-  cursor:pointer;
-  transition:all .2s;
-  box-shadow:6px 6px 0 var(--bg),6px 6px 0 2px var(--ap)
-}
-.modal-confirm:hover{
-  transform:translate(3px,3px);
-  box-shadow:3px 3px 0 var(--bg),3px 3px 0 2px var(--ap)
-}
-.modal-confirm:disabled{
-  opacity:.5;
-  cursor:not-allowed;
-  transform:none;
-  box-shadow:none
-}
+/* refresh btn — Jejak .sbtn secondary */
+.new-spill-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:14px;background:transparent;border:2px solid var(--bd);color:var(--txm);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;cursor:pointer;margin-top:8px;margin-bottom:32px;transition:all .15s;font-family:inherit}
+.new-spill-btn:hover{border-color:var(--ap);color:var(--ap);box-shadow:4px 4px 0 var(--ap)}
+.new-spill-btn:hover .nbtn-icon{transform:rotate(180deg)}
+.nbtn-icon{transition:transform .3s}
 
-/* UPGRADE */
-.upgrade-tag{
-  color:#FF3333
-}
-.upgrade-title{
-  background:linear-gradient(135deg,#FF3333,#FF8A5C);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent
-}
-.timer-warn{
-  background:rgba(255,51,51,.1);
-  border:2px solid #FF3333;
-  padding:20px;
-  margin-bottom:24px;
-  text-align:center
-}
-.timer-warn .big{
-  font-size:48px;
-  font-weight:800;
-  color:#FF3333;
-  line-height:1;
-  margin-bottom:8px
-}
-.timer-warn .small{
-  font-size:12px;
-  color:var(--txs);
-  text-transform:uppercase;
-  letter-spacing:2px
-}
-.pricing-grid{
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-  margin-bottom:24px
-}
-.pricing-card{
-  background:var(--sfl);
-  border:3px solid var(--bd);
-  padding:20px;
-  cursor:pointer;
-  transition:all .2s;
-  position:relative;
-  display:flex;
-  align-items:center;
-  gap:16px
-}
-.pricing-card:hover{
-  border-color:var(--ap);
-  transform:translateY(-2px)
-}
-.pricing-card.selected{
-  border-color:var(--ap);
-  background:linear-gradient(145deg,var(--sfl),#2A2A2A)
-}
-.pricing-card.selected::after{
-  content:'✓';
-  position:absolute;
-  top:8px;
-  right:8px;
-  color:var(--ap);
-  font-weight:800
-}
-.pricing-price{
-  font-size:28px;
-  font-weight:800;
-  color:var(--ap);
-  line-height:1;
-  margin-bottom:4px
-}
-.pricing-desc{
-  font-size:11px;
-  color:var(--txs);
-  text-transform:uppercase;
-  letter-spacing:1px
-}
-.pricing-right{
-  text-align:right
-}
-.pricing-duration{
-  font-size:14px;
-  font-weight:700;
-  color:var(--tx);
-  margin-bottom:4px
-}
-.pricing-limit{
-  font-size:11px;
-  color:var(--gn);
-  background:rgba(57,255,20,.1);
-  padding:2px 8px;
-  border-radius:20px
-}
-.pricing-total{
-  font-size:10px;
-  color:var(--txm)
-}
-.upgrade-actions{
-  display:flex;
-  gap:12px
-}
-.upgrade-btn{
-  flex:1;
-  padding:16px;
-  background:var(--ap);
-  color:var(--bg);
-  border:none;
-  font-size:14px;
-  font-weight:800;
-  text-transform:uppercase;
-  cursor:pointer;
-  transition:all .2s;
-  box-shadow:4px 4px 0 var(--bg),4px 4px 0 2px var(--ap)
-}
-.upgrade-btn:hover{
-  transform:translate(2px,2px);
-  box-shadow:2px 2px 0 var(--bg),2px 2px 0 2px var(--ap)
-}
-.upgrade-btn:disabled{
-  opacity:.5;
-  cursor:not-allowed;
-  transform:none;
-  box-shadow:none
-}
-.upgrade-btn.sec{
-  background:transparent;
-  color:var(--tx);
-  border:2px solid var(--bd);
-  box-shadow:none
-}
-.upgrade-btn.sec:hover{
-  background:var(--sfl);
-  transform:none;
-  box-shadow:none
-}
+/* empty */
+.empty-state{padding:40px 16px;text-align:center;border:2px dashed var(--bd)}
+.empty-icon{font-size:40px;margin-bottom:14px;display:block;animation:fl 3s ease-in-out infinite}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.empty-text{font-family:'Instrument Serif',serif;font-size:18px;font-style:italic;color:var(--txs);margin-bottom:6px}
+.empty-subtext{font-size:11px;color:var(--txm)}
 
-/* CHAT */
-.chat-room{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:var(--bg);
-  z-index:20000;
-  flex-direction:column
-}
-.chat-room.on{
-  display:flex
-}
-.chat-header{
-  padding:12px 16px;
-  border-bottom:1px solid var(--bd);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:var(--sf)
-}
-.chat-eyes{
-  display:flex;
-  gap:2px;
-  align-items:center;
-  height:32px
-}
-.eye-l,.eye-r{
-  font-size:24px;
-  display:inline-block;
-  animation:glance 3s infinite ease-in-out
-}
-.eye-r{
-  animation-delay:.2s
-}
-@keyframes glance{
-  0%,100%{transform:translateX(0)}
-  15%{transform:translateX(-2px)}
-  30%{transform:translateX(2px)}
-  45%{transform:translateX(-1px)}
-  60%{transform:translateX(1px)}
-  75%{transform:translateX(0)}
-}
-.chat-timer{
-  font-size:16px;
-  font-weight:600;
-  font-family:'Courier New',monospace;
-  color:var(--gn);
-  background:var(--sfl);
-  padding:4px 12px;
-  border-radius:30px
-}
-.chat-timer.warn{
-  color:#FF3333;
-  animation:pulse 1s infinite
-}
-@keyframes pulse{
-  0%,100%{opacity:1}
-  50%{opacity:.5}
-}
-.chat-close{
-  background:transparent;
-  border:none;
-  color:var(--txs);
-  font-size:20px;
-  cursor:pointer;
-  width:40px;
-  height:40px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:50%
-}
-.chat-close:hover{
-  background:var(--sfl);
-  color:var(--tx)
-}
-.chat-messages{
-  flex:1;
-  overflow-y:auto;
-  padding:16px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  background:var(--bg)
-}
-.chat-msg{
-  display:flex;
-  flex-direction:column;
-  max-width:85%
-}
-.chat-msg.own{
-  align-self:flex-end
-}
-.chat-msg.other{
-  align-self:flex-start
-}
-.chat-bubble{
-  padding:10px 14px;
-  border-radius:18px;
-  font-size:15px;
-  line-height:1.5;
-  word-wrap:break-word
-}
-.own .chat-bubble{
-  background:var(--ap);
-  color:var(--bg);
-  border-bottom-right-radius:4px
-}
-.other .chat-bubble{
-  background:var(--sf);
-  color:var(--tx);
-  border:1px solid var(--bd);
-  border-bottom-left-radius:4px
-}
-.chat-meta{
-  font-size:11px;
-  color:var(--txm);
-  margin:4px 8px 0
-}
-.typing{
-  background:var(--sf)!important;
-  border:1px solid var(--bd)!important;
-  padding:12px 16px!important;
-  display:flex;
-  gap:4px
-}
-.dot-t{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:var(--txs);
-  animation:typing 1.4s infinite
-}
-.dot-t:nth-child(2){
-  animation-delay:.2s
-}
-.dot-t:nth-child(3){
-  animation-delay:.4s
-}
-@keyframes typing{
-  0%,60%,100%{transform:translateY(0);opacity:.6}
-  30%{transform:translateY(-4px);opacity:1}
-}
-.chat-input-area{
-  padding:12px 16px;
-  border-top:1px solid var(--bd);
-  display:flex;
-  gap:8px;
-  background:var(--sf)
-}
-.chat-input{
-  flex:1;
-  background:var(--bg);
-  border:1px solid var(--bd);
-  color:var(--tx);
-  padding:12px 16px;
-  font-size:16px;
-  font-family:inherit;
-  border-radius:24px;
-  -webkit-appearance:none
-}
-.chat-input:focus{
-  outline:none;
-  border-color:var(--ap)
-}
-.chat-send{
-  background:var(--ap);
-  color:var(--bg);
-  border:none;
-  padding:0 20px;
-  font-size:14px;
-  font-weight:600;
-  text-transform:uppercase;
-  cursor:pointer;
-  border-radius:24px;
-  transition:all .2s
-}
-.chat-send:hover{
-  background:var(--tx);
-  color:var(--bg)
-}
-.chat-fifo{
-  font-size:10px;
-  color:var(--txm);
-  text-align:center;
-  padding:6px;
-  background:var(--sf);
-  border-top:1px solid var(--bd)
-}
+/* ── TOAST — same as Jejak ── */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--tx);color:var(--bg);padding:8px 16px;font-size:13px;font-weight:600;z-index:10000;opacity:0;transition:all .3s}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.error{background:#FF3333;color:var(--tx)}
 
-/* SEARCHING INDICATOR */
-.searching-message{
-  align-self:center!important;
-  max-width:90%!important;
-  margin:20px 0
-}
-.searching-message .chat-bubble{
-  background:var(--sfl)!important;
-  color:var(--txs)!important;
-  border:1px dashed var(--gn)!important;
-  font-style:italic;
-  text-align:center;
-  animation:pulse-search 2s infinite
-}
-@keyframes pulse-search{
-  0%,100%{opacity:0.8}
-  50%{opacity:1;border-color:var(--gn)}
-}
+/* ── MODALS — Jejak flat style ── */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:20000;padding:16px;overflow-y:auto}
+.modal.on{display:block}
+.modal-box{max-width:480px;margin:40px auto 0;background:var(--sf);border:2px solid var(--bd);padding:24px}
+.modal-tag{font-size:10px;font-weight:800;color:var(--ap);letter-spacing:.2em;text-transform:uppercase;margin-bottom:10px;display:block}
+.modal-title{font-size:30px;font-weight:800;text-transform:uppercase;letter-spacing:-.02em;margin-bottom:4px}
+.modal-sub{font-family:'Instrument Serif',serif;font-size:14px;font-style:italic;color:var(--txs);margin-bottom:24px}
+/* gender picks = Jejak .mc */
+.gender-options{display:flex;gap:10px;margin-bottom:20px}
+.gender-opt{flex:1;background:var(--sfe);border:2px solid var(--bd);padding:20px 10px;text-align:center;cursor:pointer;transition:all .15s;position:relative}
+.gender-opt:hover{border-color:var(--txs);transform:translateY(-2px)}
+.gender-opt.selected{border-color:var(--ap)}
+.gender-opt.selected::after{content:'✓';position:absolute;top:8px;right:8px;color:var(--ap);font-size:12px;font-weight:700}
+.gender-icon{font-size:36px;margin-bottom:8px;display:block}
+.gender-label{font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px}
+.gender-desc{font-size:11px;color:var(--txs)}
+.modal-note{background:var(--sfe);border-left:3px solid var(--ap);padding:12px 14px;margin-bottom:18px;font-size:12px;color:var(--txs);line-height:1.5}
+.modal-note strong{color:var(--ap)}
+/* primary btn = Jejak .sbtn */
+.modal-confirm{width:100%;padding:14px;background:var(--ap);color:#000;border:none;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;transition:all .2s;box-shadow:4px 4px 0 var(--sfe),4px 4px 0 2px var(--ap);font-family:inherit}
+.modal-confirm:hover:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 var(--sfe),2px 2px 0 2px var(--ap)}
+.modal-confirm:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+/* upgrade */
+.upgrade-tag{color:#FF3333}
+.upgrade-title{color:#FF3333}
+.timer-warn{background:var(--sfe);border:2px solid #FF3333;padding:20px;margin-bottom:18px;text-align:center}
+.timer-warn .big{font-size:48px;font-weight:800;color:#FF3333;line-height:1;margin-bottom:6px;font-variant-numeric:tabular-nums;font-family:'Share Tech Mono',monospace}
+.timer-warn .small{font-size:10px;color:var(--txs);text-transform:uppercase;letter-spacing:.2em;font-weight:700}
+.pricing-grid{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.pricing-card{background:var(--sfe);border:2px solid var(--bd);padding:14px 16px;cursor:pointer;transition:border-color .15s;position:relative;display:flex;align-items:center;gap:16px}
+.pricing-card:hover{border-color:var(--ap);transform:translateY(-1px)}
+.pricing-card.selected{border-color:var(--ap)}
+.pricing-card.selected::after{content:'✓';position:absolute;top:8px;right:12px;color:var(--ap);font-weight:800;font-size:13px}
+.pricing-price{font-size:24px;font-weight:800;color:var(--ap);line-height:1;margin-bottom:2px}
+.pricing-desc{font-size:10px;color:var(--txs);text-transform:uppercase;letter-spacing:.08em}
+.pricing-right{text-align:right;margin-left:auto}
+.pricing-duration{font-size:12px;font-weight:700;color:var(--tx);margin-bottom:2px}
+.pricing-limit{font-size:10px;color:var(--gn);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.pricing-total{font-size:10px;color:var(--txm)}
+.upgrade-actions{display:flex;gap:8px}
+.upgrade-btn{flex:1;padding:12px;background:var(--ap);color:#000;border:2px solid var(--ap);font-size:12px;font-weight:800;text-transform:uppercase;cursor:pointer;transition:all .2s;box-shadow:4px 4px 0 var(--sfe),4px 4px 0 2px var(--ap);font-family:inherit;letter-spacing:.05em}
+.upgrade-btn:hover:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 var(--sfe),2px 2px 0 2px var(--ap)}
+.upgrade-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.upgrade-btn.sec{background:transparent;color:var(--txs);border-color:var(--bd);box-shadow:none}
+.upgrade-btn.sec:hover{background:var(--sfe);color:var(--tx);transform:none;box-shadow:none}
 
-/* TYPING CURSOR */
-.typing-cursor{
-  display:inline-block;
-  width:2px;
-  height:16px;
-  background:var(--ap);
-  margin-left:2px;
-  animation:blink 1s infinite;
-  vertical-align:middle
-}
-.thinking-message{
-  background:var(--sf)!important;
-  border:1px solid var(--bd)!important;
-  padding:12px 16px!important;
-  color:var(--txs);
-  font-size:13px;
-  font-style:italic
-}
-.typing-message{
-  background:var(--sf)!important;
-  border:1px solid var(--bd)!important;
-  padding:12px 16px!important;
-  min-width:60px
-}
-.typing-dots{
-  display:flex;
-  gap:4px;
-  padding:4px 0
-}
-.typing-dot{
-  width:8px;
-  height:8px;
-  background:var(--txs);
-  border-radius:50%;
-  animation:typing-wave 1.4s infinite
-}
-.typing-dot:nth-child(2){
-  animation-delay:.2s
-}
-.typing-dot:nth-child(3){
-  animation-delay:.4s
-}
-@keyframes typing-wave{
-  0%,60%,100%{transform:translateY(0);opacity:.6}
-  30%{transform:translateY(-6px);opacity:1}
-}
+/* ── CHAT ROOM ── */
+.chat-room{display:none;position:fixed;inset:0;background:var(--bg);z-index:20000;flex-direction:column}
+.chat-room.on{display:flex}
+.chat-header{padding:12px 16px;border-bottom:2px solid var(--bd);display:flex;justify-content:space-between;align-items:center;background:var(--sf)}
+.chat-eyes{display:flex;gap:2px;align-items:center;height:28px}
+.eye-l,.eye-r{font-size:20px;display:inline-block;animation:glance 3s infinite ease-in-out}
+.eye-r{animation-delay:.2s}
+@keyframes glance{0%,100%{transform:translateX(0)}15%{transform:translateX(-2px)}30%{transform:translateX(2px)}45%{transform:translateX(-1px)}60%{transform:translateX(1px)}75%{transform:translateX(0)}}
+.chat-timer{font-size:14px;font-weight:700;font-family:'Share Tech Mono',monospace;color:var(--gn);background:var(--sfe);padding:4px 10px;border:1px solid var(--bd);letter-spacing:.05em}
+.chat-timer.warn{color:#FF3333;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.chat-close{background:transparent;border:2px solid var(--bd);color:var(--txs);font-size:14px;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.chat-close:hover{border-color:var(--ap);color:var(--tx)}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--bg)}
+.chat-msg{display:flex;flex-direction:column;max-width:82%}
+.chat-msg.own{align-self:flex-end}
+.chat-msg.other{align-self:flex-start}
+.chat-bubble{padding:10px 14px;font-size:14px;line-height:1.5;word-wrap:break-word}
+/* own = AP orange, clip corner */
+.own .chat-bubble{background:var(--ap);color:#000;clip-path:polygon(0 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%)}
+/* other = flat dark */
+.other .chat-bubble{background:var(--sf);color:var(--tx);border:2px solid var(--bd)}
+.chat-meta{font-size:9px;color:var(--txm);margin:3px 4px 0;font-weight:600;letter-spacing:.03em}
+.typing-message{background:var(--sf)!important;border:2px solid var(--bd)!important;padding:12px 16px!important;min-width:56px}
+.typing-dots{display:flex;gap:4px;padding:2px 0}
+.typing-dot{width:7px;height:7px;background:var(--txs);border-radius:50%;animation:tw 1.4s infinite}
+.typing-dot:nth-child(2){animation-delay:.2s}.typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes tw{0%,60%,100%{transform:translateY(0);opacity:.6}30%{transform:translateY(-5px);opacity:1}}
+.typing-cursor{display:inline-block;width:2px;height:13px;background:var(--ap);margin-left:2px;animation:blink 1s infinite;vertical-align:middle}
+.searching-message{align-self:center!important;max-width:90%!important;margin:14px 0}
+.searching-message .chat-bubble{background:var(--sfe)!important;color:var(--txs)!important;border:2px dashed var(--aq)!important;font-family:'Instrument Serif',serif;font-style:italic;text-align:center;font-size:14px}
+.distress-banner{display:none;padding:8px 16px;background:rgba(255,51,51,.1);border-top:2px solid #FF3333;font-size:11px;color:#FF6666;text-align:center;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.distress-banner.show{display:block}
+.chat-input-area{padding:10px 16px;border-top:2px solid var(--bd);display:flex;gap:8px;background:var(--sf)}
+.chat-input{flex:1;background:var(--bg);border:2px solid var(--bd);color:var(--tx);padding:10px 14px;font-size:15px;font-family:inherit;-webkit-appearance:none;transition:border-color .15s}
+.chat-input:focus{outline:none;border-color:var(--ap)}
+/* send = Jejak .sbtn style */
+.chat-send{background:var(--ap);color:#000;border:none;padding:0 18px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;transition:all .15s;font-family:inherit}
+.chat-send:hover{background:var(--tx)}
+.chat-fifo{font-size:9px;color:var(--txm);text-align:center;padding:5px;background:var(--sf);border-top:1px solid var(--bd);text-transform:uppercase;letter-spacing:.1em;font-weight:700}
 
-/* DISTRESS BANNER */
-.distress-banner{
-  display:none;
-  padding:10px 16px;
-  background:rgba(255,51,51,.15);
-  border-top:1px solid #FF3333;
-  font-size:12px;
-  color:#FF6666;
-  text-align:center
-}
-.distress-banner.show{
-  display:block
-}
-
-/* NAV */
-.bottom-nav{
-  position:fixed;
-  bottom:0;
-  left:0;
-  right:0;
-  background:var(--sf);
-  border-top:2px solid var(--bd);
-  z-index:1000
-}
-.nav-container{
-  max-width:480px;
-  margin:0 auto;
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  height:70px
-}
-.nav-item{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:4px;
-  background:transparent;
-  border:none;
-  color:var(--txm);
-  cursor:pointer;
-  padding:8px 0;
-  transition:all .2s;
-  text-decoration:none;
-  flex:1;
-  font-size:12px;
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:.05em
-}
-.nav-item.active{
-  color:var(--ap)
-}
-.nav-item:hover{
-  color:var(--tx)
-}
-.nav-icon{
-  font-size:20px;
-  margin-bottom:2px
-}
+/* ── BOTTOM NAV — identical to Jejak ── */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--sf);border-top:2px solid var(--bd);z-index:1000;padding-bottom:env(safe-area-inset-bottom)}
+.bnav-c{max-width:480px;margin:0 auto;display:flex;justify-content:space-around;align-items:center;height:64px}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:100%;color:var(--txm);text-decoration:none;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;transition:all .2s;position:relative;cursor:pointer}
+.ni::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:0;height:2px;background:var(--ap);transition:width .2s}
+.ni:hover{color:var(--txs);background:var(--sfe)}
+.ni.act{color:var(--ap)}.ni.act::before{width:100%}
+.nico{font-size:20px;line-height:1}
 </style>
 </head>
 <body>
-<div class="wrapper">
+
+<!-- HEADER -->
+<div class="w">
   <header>
-    <div class="brand">
-      <span class="brand-icon">🍵</span>
-      <span class="brand-text">Spill</span>
+    <div>
+      <div class="logo">SP<span>✕</span>LL</div>
+      <div class="tagline">siapa lagi ngerasain apa</div>
     </div>
-    <div class="header-actions">
+    <div class="top-right">
       <div class="conn-dot"></div>
       <button class="menu-trigger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
     </div>
   </header>
+</div>
 
-  <!-- RADAR HERO -->
-  <section class="radar-hero">
+<!-- RADAR — full bleed, same positioning as .hero-s -->
+<div class="radar-wrap">
+  <div class="radar-hero">
+    <div class="screw-bl"></div>
+    <div class="screw-br"></div>
     <div class="radar-container">
       <div class="radar-grid"></div>
       <div class="radar-circles"></div>
-      <div class="radar-line"></div>
-      <div class="radar-sweep"></div>
+      <div class="radar-crosshair"></div>
+      <canvas class="radar-canvas" id="radarCanvas"></canvas>
       <div id="radarDots"></div>
-      
-      <div class="radar-overlay">
-        <div class="radar-title">VIBE RADAR</div>
-        <div class="quota-display">
-          <span class="quota-badge" id="quotaBadge">24</span>
-          <span class="quota-text">online siap diajak ngobrol</span>
-        </div>
-        <div class="radar-guide">
-          <span class="guide-text">✨ 15 menit cukup buat tahu kalian cocok</span>
-        </div>
-      </div>
-      
-      <button class="vibe-check-btn" onclick="startVibeCheck()">
-        <span>✨</span> Vibe Check
-      </button>
+      <div class="radar-overlay"></div>
     </div>
-  </section>
+    <div class="radar-title">VIBE RADAR</div>
+    <div class="radar-footer">
+      <div class="quota-display">
+        <span class="quota-badge" id="quotaBadge">24</span>
+        <span class="quota-text">ONLINE<br>READY</span>
+      </div>
+      <button class="vibe-check-btn" onclick="startVibeCheck()">⬡ VIBE CHECK</button>
+    </div>
+  </div>
+</div>
 
-  <div class="filter-section">
+<!-- MAIN CONTENT -->
+<div class="w">
+
+  <!-- FILTER -->
+  <div class="shdr" style="margin-top:24px">
+    <span class="stit">Filter Vibe</span>
+    <div class="sline"></div>
+    <span class="shdr-meta">KESELARASAN</span>
+  </div>
+  <div class="filter-wrap">
     <div class="filter-header">
-      <span class="filter-title"><span class="vibe-pct" id="vibePct">87%</span><span>Keselarasan</span></span>
+      <span class="filter-label"><span class="vibe-pct" id="vibePct">87%</span> match</span>
       <button class="reset-btn" onclick="resetFilters()">Reset</button>
     </div>
     <input type="range" class="vibe-slider" id="vibeSlider" min="0" max="100" value="87" oninput="updateVibePct(this.value)">
@@ -1210,29 +310,38 @@ header{
     </div>
   </div>
 
+  <!-- SPILLS -->
+  <div class="shdr">
+    <span class="stit">Spill Terkini</span>
+    <div class="sline"></div>
+    <span class="shdr-meta">FIFO • AUTO</span>
+  </div>
   <div class="content-area" id="contentArea">
     <div class="spinner"></div>
-    <p class="loading-text">Menyedu teh...</p>
+    <p class="loading-text">Nyeduh teh...</p>
   </div>
+  <button class="new-spill-btn" onclick="refreshSpills()">
+    <span class="nbtn-icon">↻</span>
+    <span>Seduh Teh Baru</span>
+  </button>
 
-  <button class="new-spill-btn" onclick="refreshSpills()"><span>🔄</span><span>Seduh Teh Baru</span></button>
-</div>
+</div><!-- /.w -->
 
 <!-- GENDER MODAL -->
 <div class="modal" id="genderModal">
   <div class="modal-box">
-    <div class="modal-tag">VIBE CHECK</div>
-    <div class="modal-title">VIBE CHECK</div>
+    <span class="modal-tag">Vibe Check</span>
+    <div class="modal-title">Siapa Kamu?</div>
     <div class="modal-sub">pilih identitasmu untuk bertemu lawan jenis</div>
     <div class="gender-options">
       <div class="gender-opt" data-gender="male" onclick="selectGender('male')">
         <span class="gender-icon">♂️</span>
-        <div class="gender-label">PRIA</div>
+        <div class="gender-label">Pria</div>
         <div class="gender-desc">akan bertemu cewek</div>
       </div>
       <div class="gender-opt" data-gender="female" onclick="selectGender('female')">
         <span class="gender-icon">♀️</span>
-        <div class="gender-label">WANITA</div>
+        <div class="gender-label">Wanita</div>
         <div class="gender-desc">akan bertemu cowok</div>
       </div>
     </div>
@@ -1244,8 +353,8 @@ header{
 <!-- UPGRADE MODAL -->
 <div class="modal" id="upgradeModal">
   <div class="modal-box">
-    <div class="modal-tag upgrade-tag">WAKTU HABIS</div>
-    <div class="modal-title upgrade-title">WAKTU HABIS</div>
+    <span class="modal-tag upgrade-tag">Waktu Habis</span>
+    <div class="modal-title upgrade-title">Waktu Habis</div>
     <div class="modal-sub">lanjutkan obrolan dengan upgrade</div>
     <div class="timer-warn">
       <div class="big">15:00</div>
@@ -1253,26 +362,12 @@ header{
     </div>
     <div class="pricing-grid">
       <div class="pricing-card" data-plan="weekly" onclick="selectPlan('weekly')">
-        <div class="flex-1">
-          <div class="pricing-price">Rp 10k</div>
-          <div class="pricing-desc">7 hari</div>
-        </div>
-        <div class="pricing-right">
-          <div class="pricing-duration">@ 2jam/hari</div>
-          <div class="pricing-limit">14 jam total</div>
-          <div class="pricing-total">Rp 1.428/jam</div>
-        </div>
+        <div><div class="pricing-price">Rp 10k</div><div class="pricing-desc">7 hari</div></div>
+        <div class="pricing-right"><div class="pricing-duration">@ 2jam/hari</div><div class="pricing-limit">14 jam total</div><div class="pricing-total">Rp 1.428/jam</div></div>
       </div>
       <div class="pricing-card" data-plan="monthly" onclick="selectPlan('monthly')">
-        <div class="flex-1">
-          <div class="pricing-price">Rp 50k</div>
-          <div class="pricing-desc">30 hari</div>
-        </div>
-        <div class="pricing-right">
-          <div class="pricing-duration">@ 3jam/hari</div>
-          <div class="pricing-limit">90 jam total</div>
-          <div class="pricing-total">Rp 555/jam</div>
-        </div>
+        <div><div class="pricing-price">Rp 50k</div><div class="pricing-desc">30 hari</div></div>
+        <div class="pricing-right"><div class="pricing-duration">@ 3jam/hari</div><div class="pricing-limit">90 jam total</div><div class="pricing-total">Rp 555/jam</div></div>
       </div>
     </div>
     <div class="upgrade-actions">
@@ -1290,9 +385,7 @@ header{
     <button class="chat-close" onclick="closeChat()">✕</button>
   </div>
   <div class="chat-messages" id="chatMessages"></div>
-  <div class="distress-banner" id="distressBanner">
-    ada yang bisa dihubungi malam ini? Into The Light: 119 ext 8
-  </div>
+  <div class="distress-banner" id="distressBanner">ada yang bisa dihubungi malam ini? Into The Light: 119 ext 8</div>
   <div class="chat-input-area">
     <input type="text" class="chat-input" id="chatInput" placeholder="Tulis pesan..." maxlength="200">
     <button class="chat-send" onclick="sendMsg()">Kirim</button>
@@ -1302,792 +395,335 @@ header{
 
 <div class="toast" id="toast"></div>
 
-<nav class="bottom-nav">
-  <div class="nav-container">
-    <a href="jejak.html" class="nav-item"><span class="nav-icon">✦</span><span>Jejak</span></a>
-    <a href="spill.html" class="nav-item active"><span class="nav-icon">✕</span><span>Spill</span></a>
-    <a href="cocomeo.html" class="nav-item"><span class="nav-icon">〜</span><span>Cocomeo</span></a>
-    <a href="glitch.html" class="nav-item"><span class="nav-icon">⚡</span><span>Glitch</span></a>
+<!-- NAV — identical to Jejak -->
+<nav class="bnav">
+  <div class="bnav-c">
+    <a href="jejak.html" class="ni"><span class="nico">✦</span><span>Jejak</span></a>
+    <a href="spill.html" class="ni act"><span class="nico">✕</span><span>Spill</span></a>
+    <a href="cocomeo.html" class="ni"><span class="nico">〜</span><span>Cocomeo</span></a>
+    <a href="glitch.html" class="ni"><span class="nico">⚡</span><span>Glitch</span></a>
   </div>
 </nav>
 
 <script>
-// ── STATE ──────────────────────────────────────────
-let currentGender = null, chatPartner = null;
-let timerInterval = null, chatTimeLeft = 900; // 15 menit = 900 detik
-let selectedPlan = null, activeMood = 'all', radarInterval, sweepInterval;
-let userName = 'user'; // akan diganti nanti
+// ── STATE ──
+let currentGender=null,chatPartner=null,timerInterval=null,chatTimeLeft=900;
+let selectedPlan=null,activeMood='all',radarInterval,userName='user';
 
-// AI Characters dengan personality dan karakter spesifik
-const AI_CHARS = {
-  female: [
-    { 
-      name: 'beby.manis',
-      personality: 'sweet, caring, sedikit overthinking',
-      rants: [
-        "hari ini gue liat mantan sama cewek baru, dan tau gak? rambutnya lebih bagus dari rambut gue 😭",
-        "cape bener jadi cewek, setiap bulan harus nahan sakit perut sambil tetep senyum di depan client",
-        "kenapa sih cowok kalo ditanya 'lagi apa' pasti jawabnya 'lagi main'? ga ada variasi lain?",
-        "gue lagi fase pengen dimengerti tanpa harus jelasin panjang lebar",
-        "bete banget skincare gue habis, padahal baru kemarin beli. ada yang ngutil?"
-      ],
-      mood: ['surviving', 'thriving', 'chaotic']
-    },
-    { 
-      name: 'strawberry.shortcake',
-      personality: 'cute, playful, suka drama ringan',
-      rants: [
-        "hari ini gue salah kirim chat pacar ke grup keluarga. isinya 'sayang udah mandi belom?' 😭",
-        "kenapa orangtua selalu curiga kalo kita lagi seneng? 'lagi seneng-seneng ya? nanti belajar'",
-        "gue lagi diet, tapi tiap liat roti, rotinya yang liat gue duluan",
-        "stress skripsi tapi yang keluar peluh dan air mata doang",
-        "hari ini gue nangis karena ga bisa buka toples. lemah?"
-      ],
-      mood: ['surviving', 'doom', 'chaotic']
-    },
-    { 
-      name: 'pretty.sad',
-      personality: 'melankolis, deep thinker, suka puisi galau',
-      rants: [
-        "kadang gue mikir, apa kita yang terlalu berharap atau emang janjinya ga pernah ditepatin?",
-        "hujan hari ini, tapi gaada yang tanya 'udah makan belom?'",
-        "capek pura-pura baik-baik aja. gue juga manusia, bisa hancur",
-        "kenapa ya orang lebih peduli sama 'kabar' daripada 'perasaan'?",
-        "malam ini gue lagi fase nerima kenyataan kalo dia ga akan balik"
-      ],
-      mood: ['doom', 'surviving']
-    },
-    { 
-      name: 'little.fairy',
-      personality: 'imaginative, sedikit aneh, suka hal random',
-      rants: [
-        "kalo gue jadi kucing, gue bakal tidur 20 jam sehari dan ga bakal di-judge malas",
-        "hari ini gue nangis karena liat video kura-kura lagi berantem. mereka kayak 'ga ada yang mundur!'",
-        "kok bisa sih orang dagang pake sound toa keras banget? emang gaada kerjaan lain?",
-        "gue percaya kalo alam semesta itu lagi iseng sama gue",
-        "ada yang percaya rejeki ga bakal kemana? gue, tapi tetep nangis tiap liat saldo"
-      ],
-      mood: ['chaotic', 'thriving', 'surviving']
-    },
-    { 
-      name: 'cinnamon.girl',
-      personality: 'too nice for this world, easy to cry',
-      rants: [
-        "hari ini gue nangis di angkot gegara liat kucing dipukul orang. mental gue udah kayak kerupuk kena hujan.",
-        "kenapa sih orang jahat bisa tidur nyenyak? gue yang baik aja susah tidur",
-        "hari ini gue bantu orang, eh malah dijadiin 'teman curhat' seharian. capek fisik mental",
-        "tolong kasih gue tanda kalo dunia ini ga sekejam kelihatannya",
-        "lagi fase sulit bilang 'ga' ke orang. jadi numpuk kerjaan sendiri"
-      ],
-      mood: ['doom', 'surviving']
-    }
+const AI_CHARS={
+  female:[
+    {name:'beby.manis',mood:['surviving','thriving','chaotic'],rants:["hari ini gue liat mantan sama cewek baru, dan tau gak? rambutnya lebih bagus dari rambut gue 😭","cape bener jadi cewek, setiap bulan harus nahan sakit perut sambil tetep senyum di depan client","kenapa sih cowok kalo ditanya 'lagi apa' pasti jawabnya 'lagi main'? ga ada variasi lain?","gue lagi fase pengen dimengerti tanpa harus jelasin panjang lebar","bete banget skincare gue habis, padahal baru kemarin beli. ada yang ngutil?"]},
+    {name:'strawberry.shortcake',mood:['surviving','doom','chaotic'],rants:["hari ini gue salah kirim chat pacar ke grup keluarga. isinya 'sayang udah mandi belom?' 😭","kenapa orangtua selalu curiga kalo kita lagi seneng? 'lagi seneng-seneng ya? nanti belajar'","gue lagi diet, tapi tiap liat roti, rotinya yang liat gue duluan","stress skripsi tapi yang keluar peluh dan air mata doang","hari ini gue nangis karena ga bisa buka toples. lemah?"]},
+    {name:'pretty.sad',mood:['doom','surviving'],rants:["kadang gue mikir, apa kita yang terlalu berharap atau emang janjinya ga pernah ditepatin?","hujan hari ini, tapi gaada yang tanya 'udah makan belom?'","capek pura-pura baik-baik aja. gue juga manusia, bisa hancur","kenapa ya orang lebih peduli sama 'kabar' daripada 'perasaan'?","malam ini gue lagi fase nerima kenyataan kalo dia ga akan balik"]},
+    {name:'little.fairy',mood:['chaotic','thriving','surviving'],rants:["kalo gue jadi kucing, gue bakal tidur 20 jam sehari dan ga bakal di-judge malas","hari ini gue nangis karena liat video kura-kura lagi berantem. mereka kayak 'ga ada yang mundur!'","kok bisa sih orang dagang pake sound toa keras banget? emang gaada kerjaan lain?","gue percaya kalo alam semesta itu lagi iseng sama gue","ada yang percaya rejeki ga bakal kemana? gue, tapi tetep nangis tiap liat saldo"]},
+    {name:'cinnamon.girl',mood:['doom','surviving'],rants:["hari ini gue nangis di angkot gegara liat kucing dipukul orang. mental gue udah kayak kerupuk kena hujan.","kenapa sih orang jahat bisa tidur nyenyak? gue yang baik aja susah tidur","hari ini gue bantu orang, eh malah dijadiin 'teman curhat' seharian. capek fisik mental","tolong kasih gue tanda kalo dunia ini ga sekejam kelihatannya","lagi fase sulit bilang 'ga' ke orang. jadi numpuk kerjaan sendiri"]}
   ],
-  male: [
-    { 
-      name: 'si.badai',
-      personality: 'cool, mysterious, sedikit dark humor',
-      rants: [
-        "hari ini gue ditagih utang sama mantan. utang apa? utang perasaan katanya",
-        "capek jadi orang yang dianggap kuat terus. gue juga pengen nangis dipeluk",
-        "kenapa sih kalo udah malem suka overthinking? badan capek tapi pikiran lari maraton",
-        "jadi cowok tuh gaboleh lemah katanya. tapi dalemnya ancur",
-        "gue capek jadi 'tembok' tempat orang bersandar. giliran gue butuh sandaran, pada pergi"
-      ],
-      mood: ['doom', 'surviving', 'chaotic']
-    },
-    { 
-      name: 'moon.child',
-      personality: 'romantic sad boy, suka puisi',
-      rants: [
-        "malam ini gue liat bulan sendirian. sama kayak gue. tapi bulan masih punya bintang.",
-        "kenapa cinta harus pergi? apa karena gue ga bisa jadi alasan buat dia bertahan?",
-        "hari ini gue dapet kabar doi udah tunangan. selamat ya, semoga dia bahagia (gue bohong)",
-        "capek nungguin orang yang ga pasti. tapi lebih capek ngelepasinnya",
-        "jangan tanya gue 'kabar baik?'. kabar gue baik-baik aja, cuma hati lagi berdarah-darah"
-      ],
-      mood: ['doom', 'surviving']
-    },
-    { 
-      name: 'si.kocak',
-      personality: 'humoris, tapi sebenernya sedih',
-      rants: [
-        "hidup tuh kayak sinetron. kadang bahagia, kadang nangis, tapi endingnya selalu bikin kesel",
-        "hari ini gue ditilang polisi. katanya motor gue terlalu keren. padahal cuma mau pamer",
-        "stress mikirin masa depan. solusi gue: tidur. besok dipikirin lagi. atau lusa",
-        "orang bilang kalo kamu ketawa berarti kamu bahagia. berarti gue artis pemenang Oscar",
-        "hari ini gue ketawa terbahak-bahak. abis itu nangis. abis itu ketawa lagi. am i okay?"
-      ],
-      mood: ['chaotic', 'surviving']
-    },
-    { 
-      name: 'si.pedas',
-      personality: 'sarkastik, ga bisa diemin orang',
-      rants: [
-        "hari ini gue dikatain 'kamu berubah'. iya lah, gua bukan nasi bisa tetep sama",
-        "tolong ya, kalo chat itu dibales. jangan cuma diliat doang, matanya apa hpnya yang liat?",
-        "ada yang bilang 'kerja keras ga akan khianati hasil'. hasilnya: gue dikhianati sama kesehatan",
-        "lagi fase males bales chat semua orang. bukan depresi, cuma lagi males sama dunia",
-        "orang suka bilang 'sabar ya'. gue pengen jawab 'sabarin aja tai'"
-      ],
-      mood: ['chaotic', 'thriving', 'surviving']
-    },
-    { 
-      name: 'mba.gaul',
-      personality: 'random, absurd, suka hal aneh',
-      rants: [
-        "hari ini gue liat orang bawa balon. mungkin balon itu temen curhatnya",
-        "kenapa sih kalo lagi di kamar mandi suka inget kejadian memalukan 5 tahun lalu?",
-        "gue pengen jadi kucing tetangga. tidur, makan, tidur lagi, ga pernah mikir cicilan",
-        "hari ini gue nangis gegara kehabisan kuota pas lagi nonton drakor climax",
-        "ada yang pernah ngerasa jadi orang paling sendiri di keramaian? iyalah kita di jalan tol"
-      ],
-      mood: ['chaotic', 'surviving', 'doom']
-    }
+  male:[
+    {name:'si.badai',mood:['doom','surviving','chaotic'],rants:["hari ini gue ditagih utang sama mantan. utang apa? utang perasaan katanya","capek jadi orang yang dianggap kuat terus. gue juga pengen nangis dipeluk","kenapa sih kalo udah malem suka overthinking? badan capek tapi pikiran lari maraton","jadi cowok tuh gaboleh lemah katanya. tapi dalemnya ancur","gue capek jadi 'tembok' tempat orang bersandar. giliran gue butuh sandaran, pada pergi"]},
+    {name:'moon.child',mood:['doom','surviving'],rants:["malam ini gue liat bulan sendirian. sama kayak gue. tapi bulan masih punya bintang.","kenapa cinta harus pergi? apa karena gue ga bisa jadi alasan buat dia bertahan?","hari ini gue dapet kabar doi udah tunangan. selamat ya, semoga dia bahagia (gue bohong)","capek nungguin orang yang ga pasti. tapi lebih capek ngelepasinnya","jangan tanya gue 'kabar baik?'. kabar gue baik-baik aja, cuma hati lagi berdarah-darah"]},
+    {name:'si.kocak',mood:['chaotic','surviving'],rants:["hidup tuh kayak sinetron. kadang bahagia, kadang nangis, tapi endingnya selalu bikin kesel","hari ini gue ditilang polisi. katanya motor gue terlalu keren. padahal cuma mau pamer","stress mikirin masa depan. solusi gue: tidur. besok dipikirin lagi. atau lusa","orang bilang kalo kamu ketawa berarti kamu bahagia. berarti gue artis pemenang Oscar","hari ini gue ketawa terbahak-bahak. abis itu nangis. abis itu ketawa lagi. am i okay?"]},
+    {name:'si.pedas',mood:['chaotic','thriving','surviving'],rants:["hari ini gue dikatain 'kamu berubah'. iya lah, gua bukan nasi bisa tetep sama","tolong ya, kalo chat itu dibales. jangan cuma diliat doang, matanya apa hpnya yang liat?","ada yang bilang 'kerja keras ga akan khianati hasil'. hasilnya: gue dikhianati sama kesehatan","lagi fase males bales chat semua orang. bukan depresi, cuma lagi males sama dunia","orang suka bilang 'sabar ya'. gue pengen jawab 'sabarin aja tai'"]},
+    {name:'mba.gaul',mood:['chaotic','surviving','doom'],rants:["hari ini gue liat orang bawa balon. mungkin balon itu temen curhatnya","kenapa sih kalo lagi di kamar mandi suka inget kejadian memalukan 5 tahun lalu?","gue pengen jadi kucing tetangga. tidur, makan, tidur lagi, ga pernah mikir cicilan","hari ini gue nangis gegara kehabisan kuota pas lagi nonton drakor climax","ada yang pernah ngerasa jadi orang paling sendiri di keramaian? iyalah kita di jalan tol"]}
   ]
 };
 
-// Rants yang digabung dengan real user rants
-const USER_RANTS = [
-  {id:1, author:'anon.kucing', mood:'surviving', content:'Hari ini gue nangis di angkot gegara liat kucing dipukul orang. Mental gue udah kayak kerupuk kena hujan.', reactions:{skull:42,cry:89,fire:12,upside:7}},
-  {id:2, author:'sleepy.head', mood:'thriving',  content:'akhirnya bisa tidur nyenyak semalaman setelah 3 minggu insomnia. makasih buat yang chat tadi malem.', reactions:{skull:23,cry:15,fire:67,upside:31}},
-  {id:3, author:'chaos.queen', mood:'chaotic',   content:'hari ini chaos abis! dari bangun tidur udah salah ambil kaki, sampe kantor lupa bawa laptop.', reactions:{skull:89,cry:23,fire:45,upside:78}},
-  {id:4, author:'quiet.one',   mood:'doom',      content:'udah seminggu nggak keluar kamar. bukan karena sibuk. cuma nggak tau mau ngapain.', reactions:{skull:67,cry:112,fire:8,upside:34}},
+const USER_RANTS=[
+  {id:1,author:'anon.kucing',mood:'surviving',content:'Hari ini gue nangis di angkot gegara liat kucing dipukul orang. Mental gue udah kayak kerupuk kena hujan.',reactions:{skull:42,cry:89,fire:12,upside:7}},
+  {id:2,author:'sleepy.head',mood:'thriving',content:'akhirnya bisa tidur nyenyak semalaman setelah 3 minggu insomnia. makasih buat yang chat tadi malem.',reactions:{skull:23,cry:15,fire:67,upside:31}},
+  {id:3,author:'chaos.queen',mood:'chaotic',content:'hari ini chaos abis! dari bangun tidur udah salah ambil kaki, sampe kantor lupa bawa laptop.',reactions:{skull:89,cry:23,fire:45,upside:78}},
+  {id:4,author:'quiet.one',mood:'doom',content:'udah seminggu nggak keluar kamar. bukan karena sibuk. cuma nggak tau mau ngapain.',reactions:{skull:67,cry:112,fire:8,upside:34}}
 ];
 
-const MOOD_COLOR = {surviving:'#FF9500',thriving:'#39FF14',chaotic:'#00F0FF',doom:'#8B5CF6'};
-const REACTION_EMOJI = {skull:'💀',cry:'😭',fire:'🔥',upside:'🙃'};
+const MOOD_COLOR={surviving:'var(--ms)',thriving:'var(--mt)',chaotic:'var(--mc)',doom:'var(--md)'};
+const REACTION_EMOJI={skull:'💀',cry:'😭',fire:'🔥',upside:'🙃'};
 
-// ── UTILS ──────────────────────────────────────────
-const $  = id => document.getElementById(id);
-const esc = t => { const d=document.createElement('div'); d.textContent=t; return d.innerHTML; };
+const $=id=>document.getElementById(id);
+const esc=t=>{const d=document.createElement('div');d.textContent=t;return d.innerHTML};
+function toast(msg,isErr=false){const t=$('toast');t.textContent=msg;t.className='toast'+(isErr?' error':'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+function closeModal(id){$(id).classList.remove('on')}
+function toggleMenu(){toast('Menu coming soon')}
+function updateVibePct(val){$('vibePct').textContent=val+'%'}
+function filterMood(btn){document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');activeMood=btn.dataset.mood;renderSpills()}
+function resetFilters(){$('vibeSlider').value=87;updateVibePct(87);document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));document.querySelector('.mood-btn[data-mood="all"]').classList.add('active');activeMood='all';renderSpills()}
 
-function toast(msg, isErr=false) {
-  const t=$('toast');
-  t.textContent=msg;
-  t.className='toast'+(isErr?' error':'');
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),3000);
-}
-
-function closeModal(id) { $(id).classList.remove('on'); }
-function toggleMenu()   { toast('Menu coming soon'); }
-
-// ── FILTER ────────────────────────────────────────
-function updateVibePct(val) { $('vibePct').textContent = val+'%'; }
-
-function filterMood(btn) {
-  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  activeMood = btn.dataset.mood;
-  renderSpills();
-}
-
-function resetFilters() {
-  $('vibeSlider').value = 87;
-  updateVibePct(87);
-  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelector('.mood-btn[data-mood="all"]').classList.add('active');
-  activeMood = 'all';
-  renderSpills();
-}
-
-// ── SPILLS ────────────────────────────────────────
-function renderSpills() {
-  const area = $('contentArea');
-  
-  // Generate AI rants random
-  const aiRants = generateAIRants(6); // generate 6 AI rants
-  
-  // Gabung dengan user rants
-  const allSpills = [...USER_RANTS, ...aiRants];
-  
-  // Filter by mood
-  const filtered = activeMood === 'all'
-    ? allSpills
-    : allSpills.filter(s => s.mood === activeMood);
-
-  if (!filtered.length) {
-    area.className = 'content-area';
-    area.innerHTML = `<div class="empty-state"><div class="empty-icon">🍃</div><div class="empty-text">Belum ada spill dengan mood ini</div><div class="empty-subtext">Coba filter lain</div></div>`;
-    return;
+// ── SPILLS ──
+function generateAIRants(count=3){
+  const rants=[];let nextId=Math.max(...USER_RANTS.map(u=>u.id))+1;
+  for(let i=0;i<count;i++){
+    const gender=Math.random()>.5?'female':'male';
+    const char=AI_CHARS[gender][Math.floor(Math.random()*AI_CHARS[gender].length)];
+    const mood=char.mood[Math.floor(Math.random()*char.mood.length)];
+    rants.push({id:nextId++,author:char.name,isAI:true,mood,content:char.rants[Math.floor(Math.random()*char.rants.length)],reactions:{skull:Math.floor(Math.random()*50),cry:Math.floor(Math.random()*100),fire:Math.floor(Math.random()*40),upside:Math.floor(Math.random()*30)}});
   }
-
-  area.className = 'content-area has-content';
-  area.innerHTML = filtered.map(s => `
-    <div class="spill-card">
-      <div class="spill-header">
-        <span class="spill-author">@${esc(s.author)}${s.isAI ? ' 🤖' : ''}</span>
-        <span class="spill-mood" style="color:${MOOD_COLOR[s.mood]}">${s.mood}</span>
-      </div>
-      <div class="spill-content">${esc(s.content)}</div>
-      <div class="spill-reactions">
-        ${Object.entries(REACTION_EMOJI).map(([k,em])=>`
-          <button class="reaction-btn" onclick="react(this,${s.id},'${k}')">
-            <span>${em}</span>
-            <span class="reaction-count" id="rc-${s.id}-${k}">${s.reactions[k]}</span>
-          </button>`).join('')}
-      </div>
-    </div>`).join('');
-}
-
-function generateAIRants(count = 3) {
-  const rants = [];
-  const usedIds = USER_RANTS.map(u => u.id);
-  let nextId = Math.max(...usedIds) + 1;
-  
-  for (let i = 0; i < count; i++) {
-    // Pilih gender random
-    const gender = Math.random() > 0.5 ? 'female' : 'male';
-    const chars = AI_CHARS[gender];
-    const char = chars[Math.floor(Math.random() * chars.length)];
-    
-    // Pilih rant random dari karakter
-    const rantContent = char.rants[Math.floor(Math.random() * char.rants.length)];
-    
-    // Tentukan mood berdasarkan karakter (random atau sesuai mood chart)
-    let mood;
-    if (char.mood && char.mood.length > 0) {
-      mood = char.mood[Math.floor(Math.random() * char.mood.length)];
-    } else {
-      const moods = ['surviving', 'thriving', 'chaotic', 'doom'];
-      mood = moods[Math.floor(Math.random() * moods.length)];
-    }
-    
-    rants.push({
-      id: nextId++,
-      author: char.name,
-      isAI: true,
-      mood: mood,
-      content: rantContent,
-      reactions: {
-        skull: Math.floor(Math.random() * 50),
-        cry: Math.floor(Math.random() * 100),
-        fire: Math.floor(Math.random() * 40),
-        upside: Math.floor(Math.random() * 30)
-      }
-    });
-  }
-  
   return rants;
 }
 
-function react(btn, id, key) {
-  // Cari di semua spills (user + AI)
-  const allSpills = [...USER_RANTS, ...generateAIRants(0)]; // hacky, tapi untuk demo
-  const spill = allSpills.find(s=>s.id===id);
-  if (!spill) return;
-  
-  const wasReacted = btn.classList.contains('reacted');
-  // Reset semua reaksi pada spill ini
-  document.querySelectorAll(`[id^="rc-${id}-"]`).forEach(el => {
-    const k = el.id.split('-')[3];
-    el.closest('button').classList.remove('reacted');
-  });
-  
-  if (!wasReacted) {
-    spill.reactions[key]++;
-    btn.classList.add('reacted');
-  } else {
-    spill.reactions[key]--;
+function renderSpills(){
+  const area=$('contentArea');
+  const allSpills=[...USER_RANTS,...generateAIRants(6)];
+  const filtered=activeMood==='all'?allSpills:allSpills.filter(s=>s.mood===activeMood);
+  if(!filtered.length){
+    area.className='content-area';
+    area.innerHTML=`<div class="empty-state"><span class="empty-icon">🍃</span><div class="empty-text">Belum ada spill dengan mood ini</div><div class="empty-subtext">Coba filter lain</div></div>`;
+    return;
   }
-  Object.keys(spill.reactions).forEach(k => {
-    const el = $(`rc-${id}-${k}`);
-    if (el) el.textContent = spill.reactions[k];
-  });
+  area.className='content-area has-content';
+  area.innerHTML=filtered.map(s=>`
+    <article class="spill-card">
+      <div class="spill-header">
+        <span class="spill-author">@${esc(s.author)}${s.isAI?' 🤖':''}</span>
+        <span class="spill-mood ${s.mood}">${s.mood}</span>
+      </div>
+      <div class="spill-content">${esc(s.content)}</div>
+      <div class="spill-reactions">
+        ${Object.entries(REACTION_EMOJI).map(([k,em])=>`<button class="reaction-btn" onclick="react(this,${s.id},'${k}')"><span>${em}</span><span class="reaction-count" id="rc-${s.id}-${k}">${s.reactions[k]}</span></button>`).join('')}
+      </div>
+    </article>`).join('');
 }
 
-function refreshSpills() { renderSpills(); toast('Teh baru diseduh ☕'); }
-
-// ── RADAR ─────────────────────────────────────────
-function initRadar() {
-  genDots();
-  radarInterval = setInterval(moveDots, 5000);
-  sweepInterval = setInterval(sweepEffect, 50);
-  
-  // Set random couple online (20-30)
-  document.getElementById('quotaBadge').textContent = Math.floor(20 + Math.random() * 10);
+function react(btn,id,key){
+  const spill=[...USER_RANTS,...generateAIRants(0)].find(s=>s.id===id);
+  if(!spill)return;
+  const wasReacted=btn.classList.contains('reacted');
+  document.querySelectorAll(`[id^="rc-${id}-"]`).forEach(el=>el.closest('button').classList.remove('reacted'));
+  wasReacted?spill.reactions[key]--:(spill.reactions[key]++,btn.classList.add('reacted'));
+  Object.keys(spill.reactions).forEach(k=>{const el=$(`rc-${id}-${k}`);if(el)el.textContent=spill.reactions[k]});
 }
 
-function genDots() {
-  const con = $('radarDots');
-  con.innerHTML = '';
-  const total = 8 + Math.floor(Math.random()*8);
-  for (let i=0; i<total+3; i++) {
-    const isAI = i >= total;
-    const angle = Math.random()*Math.PI*2;
-    const dist  = 10 + Math.random()*(isAI?70:80);
-    const x = 50 + Math.cos(angle)*dist/2;
-    const y = 50 + Math.sin(angle)*dist/2;
-    const size = (isAI?10:8) + Math.floor(Math.random()*8);
-    const d = document.createElement('div');
-    d.className = 'radar-dot ' + (isAI ? 'ai' : (Math.random()>.5?'purple':'red'));
-    d.style.cssText = `left:${x}%;top:${y}%;width:${size}px;height:${size}px`;
+function refreshSpills(){renderSpills();toast('Teh baru diseduh ☕')}
+
+// ── RADAR ──
+let radarDots=[],radarAngle=0,radarRAF=null;
+const SWEEP_SPEED=Math.PI*2/(4*60);
+
+function initRadar(){
+  const canvas=$('radarCanvas');
+  const hero=canvas.parentElement;
+  function resize(){canvas.width=hero.offsetWidth;canvas.height=hero.offsetHeight}
+  resize();
+  new ResizeObserver(resize).observe(hero);
+  spawnDots();
+  radarInterval=setInterval(()=>{radarDots.forEach(d=>{d.x=Math.max(5,Math.min(95,d.x+(Math.random()-.5)*1.5));d.y=Math.max(5,Math.min(95,d.y+(Math.random()-.5)*1.5))})},4000);
+  $('quotaBadge').textContent=Math.floor(20+Math.random()*10);
+  radarLoop(canvas);
+}
+
+function spawnDots(){
+  const con=$('radarDots');con.innerHTML='';radarDots=[];
+  const total=8+Math.floor(Math.random()*8);
+  for(let i=0;i<total+3;i++){
+    const isAI=i>=total,angle=Math.random()*Math.PI*2,dist=10+Math.random()*(isAI?70:80);
+    const x=50+Math.cos(angle)*dist/2,y=50+Math.sin(angle)*dist/2;
+    const size=(isAI?10:8)+Math.floor(Math.random()*8);
+    const color=isAI?'#39FF14':(Math.random()>.5?'#B026FF':'#FF3333');
+    const d=document.createElement('div');
+    d.className='radar-dot '+(isAI?'ai':(color==='#B026FF'?'purple':'red'));
+    d.style.cssText=`left:${x}%;top:${y}%;width:${size}px;height:${size}px`;
     con.appendChild(d);
+    radarDots.push({el:d,x,y,size,color,isAI,trail:0,trailDecay:0});
   }
 }
 
-function moveDots() {
-  document.querySelectorAll('.radar-dot').forEach(d=>{
-    let l=parseFloat(d.style.left), t=parseFloat(d.style.top);
-    if(isNaN(l)||isNaN(t)) return;
-    d.style.left = Math.max(5,Math.min(95,l+(Math.random()-.5)*3))+'%';
-    d.style.top  = Math.max(5,Math.min(95,t+(Math.random()-.5)*3))+'%';
-  });
-}
-
-function sweepEffect() {
-  const angle = (Date.now()/150)%360;
-  document.querySelectorAll('.radar-dot').forEach(d=>{
-    const l=parseFloat(d.style.left), t=parseFloat(d.style.top);
-    if(isNaN(l)||isNaN(t)) return;
-    const da = (Math.atan2(t-50,l-50)*180/Math.PI+360)%360;
-    let diff = Math.abs(da-angle); diff = Math.min(diff,360-diff);
-    if(diff<35) {
-      const i=1-(diff/35);
-      d.style.filter=`brightness(${1+i}) drop-shadow(0 0 ${10+i*20}px currentColor)`;
-      d.style.transform=`translate(-50%,-50%) scale(${1.2+i*.5})`;
-    } else {
-      d.style.filter=''; d.style.transform='';
+function radarLoop(canvas){
+  const ctx=canvas.getContext('2d');
+  function frame(){
+    radarAngle=(radarAngle+SWEEP_SPEED)%(Math.PI*2);
+    const W=canvas.width,H=canvas.height,cx=W/2,cy=H/2;
+    ctx.fillStyle='rgba(10,26,10,0.055)';
+    ctx.fillRect(0,0,W,H);
+    const steps=60;
+    for(let i=0;i<steps;i++){
+      const a=radarAngle-(i/steps)*(Math.PI*.55);
+      ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,Math.min(W,H)*.6,a,a+Math.PI/steps);ctx.closePath();
+      ctx.fillStyle=`rgba(57,255,20,${(1-i/steps)*.18})`;ctx.fill();
     }
-  });
+    ctx.save();ctx.translate(cx,cy);ctx.rotate(radarAngle);
+    const lg=ctx.createLinearGradient(0,0,Math.min(W,H)*.52,0);
+    lg.addColorStop(0,'rgba(57,255,20,0.9)');lg.addColorStop(1,'rgba(57,255,20,0)');
+    ctx.fillStyle=lg;ctx.fillRect(0,-1,Math.min(W,H)*.52,2);ctx.restore();
+    radarDots.forEach(d=>{
+      const px=d.x/100*W,py=d.y/100*H,dx=px-cx,dy=py-cy;
+      const dotAngle=(Math.atan2(dy,dx)+Math.PI*2)%(Math.PI*2);
+      let diff=radarAngle-dotAngle;if(diff<0)diff+=Math.PI*2;
+      if(diff<SWEEP_SPEED*2){d.trail=1.0;d.trailDecay=0}
+      if(d.trail>0){
+        d.trailDecay+=.008;d.trail=Math.max(0,1-d.trailDecay*d.trailDecay*2.5);
+        const r=d.size*(1+d.trail*1.2);
+        const col=d.color.replace('#','');
+        const rc=parseInt(col.slice(0,2),16),gc=parseInt(col.slice(2,4),16),bc=parseInt(col.slice(4,6),16);
+        const g=ctx.createRadialGradient(px,py,0,px,py,r*3.5);
+        g.addColorStop(0,`rgba(${rc},${gc},${bc},${d.trail*.9})`);
+        g.addColorStop(.3,`rgba(${rc},${gc},${bc},${d.trail*.4})`);
+        g.addColorStop(1,`rgba(${rc},${gc},${bc},0)`);
+        ctx.beginPath();ctx.arc(px,py,r*3.5,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+        d.el.style.filter=`brightness(${1+d.trail*2}) drop-shadow(0 0 ${6+d.trail*18}px ${d.color})`;
+        d.el.style.transform=`translate(-50%,-50%) scale(${1+d.trail*.8})`;
+        d.el.style.opacity=`${.4+d.trail*.6}`;
+      } else {d.el.style.filter='';d.el.style.transform='';d.el.style.opacity='.5'}
+    });
+    radarRAF=requestAnimationFrame(frame);
+  }
+  radarRAF=requestAnimationFrame(frame);
 }
 
-// ── VIBE CHECK FLOW ───────────────────────────────
-function startVibeCheck() { $('genderModal').classList.add('on'); }
-
-function selectGender(g) {
+// ── VIBE CHECK ──
+function startVibeCheck(){$('genderModal').classList.add('on')}
+function selectGender(g){
   document.querySelectorAll('.gender-opt').forEach(o=>o.classList.remove('selected'));
   document.querySelector(`.gender-opt[data-gender="${g}"]`).classList.add('selected');
-  currentGender = g;
-  $('genderConfirm').disabled = false;
+  currentGender=g;$('genderConfirm').disabled=false;
 }
-
-function confirmGender() {
-  if(!currentGender) return;
+function confirmGender(){
+  if(!currentGender)return;
   closeModal('genderModal');
-  
-  // Minta nama user
-  const nameInput = prompt('Masukkan nama panggilan kamu (untuk personalisasi):', 'user');
-  if (nameInput && nameInput.trim()) {
-    userName = nameInput.trim();
-  }
-  
+  const n=prompt('Nama panggilan kamu:','user');
+  if(n?.trim())userName=n.trim();
   findRealUserFirst();
 }
 
-// ── REAL USER PRIORITY + 1 MINUTE QUEUE ─────────
-async function findRealUserFirst() {
-  // Tampilkan loading indicator di chat room
-  $('chatMessages').innerHTML = '';
-  $('distressBanner').classList.remove('show');
-  $('chatRoom').classList.add('on');
-  
-  // Tampilkan pesan "mencari teman..."
-  const searchingEl = document.createElement('div');
-  searchingEl.className = 'chat-msg other searching-message';
-  searchingEl.id = 'searching-indicator';
-  searchingEl.innerHTML = `<div class="chat-bubble">🔍 sedang dicarikan teman ngobrol...</div>`;
-  $('chatMessages').appendChild(searchingEl);
-  
-  // Timer 1 menit (60 detik)
-  let searchTimeLeft = 60;
-  const searchTimer = setInterval(() => {
-    searchTimeLeft--;
-    const searchEl = $('searching-indicator');
-    if (searchEl) {
-      const bubble = searchEl.querySelector('.chat-bubble');
-      if (bubble) {
-        bubble.textContent = `🔍 mencari teman... (${searchTimeLeft}s)`;
-      }
-    }
-    
-    if (searchTimeLeft <= 0) {
-      clearInterval(searchTimer);
-      // Jika 1 menit tidak dapat real user, fallback ke AI
-      if ($('searching-indicator')) {
+async function findRealUserFirst(){
+  $('chatMessages').innerHTML='';$('distressBanner').classList.remove('show');$('chatRoom').classList.add('on');
+  const el=document.createElement('div');el.className='chat-msg other searching-message';el.id='searching-indicator';
+  el.innerHTML=`<div class="chat-bubble">🔍 sedang dicarikan teman ngobrol...</div>`;
+  $('chatMessages').appendChild(el);
+  let t=60;
+  const timer=setInterval(()=>{
+    t--;const e=$('searching-indicator');
+    if(e){const b=e.querySelector('.chat-bubble');if(b)b.textContent=`🔍 mencari teman... (${t}s)`}
+    if(t<=0){clearInterval(timer);if($('searching-indicator')){$('searching-indicator').remove();fallbackToAI()}}
+  },1000);
+  if(Math.random()<.4){
+    setTimeout(()=>{
+      clearInterval(timer);
+      if($('searching-indicator')){
         $('searching-indicator').remove();
-        fallbackToAI();
-      }
-    }
-  }, 1000);
-  
-  // Simulasi cek real user (random 40% chance dapat dalam 1 menit)
-  const foundReal = Math.random() < 0.4; // 40% chance dapat real user
-  
-  if (foundReal) {
-    // Dapat real user dalam waktu random (5-30 detik)
-    const connectTime = 5000 + Math.random() * 25000;
-    setTimeout(() => {
-      clearInterval(searchTimer);
-      if ($('searching-indicator')) {
-        $('searching-indicator').remove();
-        
-        const oppGender = currentGender === 'male' ? 'female' : 'male';
-        const names = oppGender === 'female' 
-          ? ['jessica', 'amanda', 'sarah', 'diana', 'melanie']
-          : ['kevin', 'brian', 'alex', 'steven', 'jordan'];
-        
-        chatPartner = {
-          name: names[Math.floor(Math.random() * names.length)],
-          isAI: false,
-          gender: oppGender
-        };
-        
-        // Lanjut ke chat
+        const opp=currentGender==='male'?'female':'male';
+        const names=opp==='female'?['jessica','amanda','sarah','diana','melanie']:['kevin','brian','alex','steven','jordan'];
+        chatPartner={name:names[Math.floor(Math.random()*names.length)],isAI:false,gender:opp};
         startRealChat();
       }
-    }, connectTime);
+    },5000+Math.random()*25000);
   }
-  // Jika tidak dapat real user, akan fallback ke AI setelah 1 menit
 }
 
-function fallbackToAI() {
-  const oppGender = currentGender === 'male' ? 'female' : 'male';
-  const pool = AI_CHARS[oppGender];
-  const char = pool[Math.floor(Math.random() * pool.length)];
-  
-  chatPartner = { 
-    name: char.name, 
-    personality: char.personality,
-    isAI: true, 
-    gender: oppGender,
-    charData: char
-  };
-  
-  toast('💬 Sementara ditemani AI dulu ya, real user sedang sibuk');
+function fallbackToAI(){
+  const opp=currentGender==='male'?'female':'male';
+  const char=AI_CHARS[opp][Math.floor(Math.random()*AI_CHARS[opp].length)];
+  chatPartner={name:char.name,isAI:true,gender:opp,charData:char};
+  toast('💬 Ditemani AI dulu ya');
   startRealChat();
 }
 
-function startRealChat() {
-  chatTimeLeft = 900; // 15 menit
-  $('chatMessages').innerHTML = '';
-  $('distressBanner').classList.remove('show');
-  startTimer();
-  
-  // Generate greeting personal dengan nama user
-  setTimeout(() => {
-    let greeting;
-    if (chatPartner.isAI) {
-      const greets = [
-        `hai @${userName}! gue ${chatPartner.name}. lagi apa?`,
-        `halo ${userName}~ kenalin gue ${chatPartner.name}`,
-        `${userName}! akhirnya ketemu juga. gue ${chatPartner.name}`,
-        `haiii @${userName}, gue ${chatPartner.name}. lagi apa nih?`
-      ];
-      greeting = greets[Math.floor(Math.random() * greets.length)];
+function startRealChat(){
+  chatTimeLeft=900;$('chatMessages').innerHTML='';$('distressBanner').classList.remove('show');startTimer();
+  setTimeout(()=>{
+    let g;
+    if(chatPartner.isAI){
+      const gs=[`hai @${userName}! gue ${chatPartner.name}. lagi apa?`,`halo ${userName}~ kenalin gue ${chatPartner.name}`,`${userName}! akhirnya ketemu juga. gue ${chatPartner.name}`,`haiii @${userName}, gue ${chatPartner.name}. lagi apa nih?`];
+      g=gs[Math.floor(Math.random()*gs.length)];
     } else {
-      const hour = new Date().getHours();
-      const greets = hour<5 ? [`halo ${userName}, masih begadang?`] :
-                     hour<10 ? [`pagi ${userName}, udah ngopi?`] :
-                     hour<15 ? [`siang ${userName}, udah makan?`] :
-                     hour<18 ? [`sore ${userName}, capek ga?`] :
-                               [`malem ${userName}, lagi ngapain?`];
-      greeting = greets[0];
+      const h=new Date().getHours();
+      g=h<5?`halo ${userName}, masih begadang?`:h<10?`pagi ${userName}, udah ngopi?`:h<15?`siang ${userName}, udah makan?`:h<18?`sore ${userName}, capek ga?`:`malem ${userName}, lagi ngapain?`;
     }
-    addMsg(greeting, false);
-  }, 800);
+    addMsg(g,false);
+  },800);
 }
 
-function closeChat() {
-  clearInterval(timerInterval); timerInterval=null;
-  $('chatRoom').classList.remove('on');
-  toast('👋 Sampai jumpa!');
-}
+function closeChat(){clearInterval(timerInterval);timerInterval=null;$('chatRoom').classList.remove('on');toast('👋 Sampai jumpa!')}
+function startTimer(){updateTimer();timerInterval=setInterval(()=>{chatTimeLeft--;updateTimer();if(chatTimeLeft===300)toast('⚠️ Sisa 5 menit! Upgrade untuk lanjut.');if(chatTimeLeft<=0)endChat()},1000)}
+function updateTimer(){const m=Math.floor(chatTimeLeft/60),s=chatTimeLeft%60;$('chatTimer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;$('chatTimer').classList.toggle('warn',chatTimeLeft<=300)}
+function endChat(){clearInterval(timerInterval);timerInterval=null;$('chatRoom').classList.remove('on');$('upgradeModal').classList.add('on')}
 
-function startTimer() {
-  updateTimer();
-  timerInterval = setInterval(()=>{
-    chatTimeLeft--;
-    updateTimer();
-    if(chatTimeLeft===300) toast('⚠️ Sisa 5 menit! Upgrade untuk lanjut.');
-    if(chatTimeLeft<=0) endChat();
-  }, 1000);
-}
-
-function updateTimer() {
-  const m=Math.floor(chatTimeLeft/60), s=chatTimeLeft%60;
-  $('chatTimer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  $('chatTimer').classList.toggle('warn', chatTimeLeft<=300);
-}
-
-function endChat() {
-  clearInterval(timerInterval); timerInterval=null;
-  $('chatRoom').classList.remove('on');
-  $('upgradeModal').classList.add('on');
-}
-
-// ── TYPING ENGINE ─────────────────────────────────
-class TypingEngine {
-  constructor() {
-    this.isTyping = false;
-  }
-
-  async think(duration = null) {
-    const thinkingTime = duration || (3000 + Math.random() * 4000);
-    const thinkingEl = this.showThinking();
-    await this.sleep(thinkingTime);
-    thinkingEl.remove();
-    return thinkingTime;
-  }
-
-  showThinking() {
-    const el = document.createElement('div');
-    el.className = 'chat-msg other thinking-message';
-    el.innerHTML = `<div class="chat-bubble">...</div>`;
-    $('chatMessages').appendChild(el);
-    $('chatMessages').scrollTop = 9999;
-    return el;
-  }
-
-  showTypingIndicator() {
-    const el = document.createElement('div');
-    el.className = 'chat-msg other typing-message';
-    el.id = 'typing-indicator-real';
-    el.innerHTML = `<div class="chat-bubble typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>`;
-    $('chatMessages').appendChild(el);
-    $('chatMessages').scrollTop = 9999;
-    return el;
-  }
-
-  async typeMessage(text) {
-    const container = $('chatMessages');
-    const msgDiv = document.createElement('div');
-    msgDiv.className = 'chat-msg other';
-    
-    const bubbleDiv = document.createElement('div');
-    bubbleDiv.className = 'chat-bubble';
-    msgDiv.appendChild(bubbleDiv);
-    
-    container.appendChild(msgDiv);
-    
-    const cursorSpan = document.createElement('span');
-    cursorSpan.className = 'typing-cursor';
-    bubbleDiv.appendChild(cursorSpan);
-    
-    let typed = '';
-    const willTypo = Math.random() < 0.15;
-    let typoIdx = -1, typoChar = '', typoFixed = false;
-    
-    if (willTypo) {
-      typoIdx = Math.floor(Math.random() * (text.length / 2)) + 3;
-      const chars = 'asdfghjklzxcvbnmqwertyuiop';
-      typoChar = chars[Math.floor(Math.random() * chars.length)];
-    }
-    
-    for (let i = 0; i <= text.length; i++) {
-      if (willTypo && !typoFixed && i === typoIdx) {
-        typed += typoChar;
-        bubbleDiv.innerHTML = typed;
-        cursorSpan.remove();
-        bubbleDiv.appendChild(cursorSpan);
-        await this.sleep(150 + Math.random() * 100);
-        
-        for (let b = 0; b < 2; b++) {
-          typed = typed.slice(0, -1);
-          bubbleDiv.innerHTML = typed;
-          cursorSpan.remove();
-          bubbleDiv.appendChild(cursorSpan);
-          await this.sleep(100 + Math.random() * 50);
-        }
-        typoFixed = true;
-        continue;
+class TypingEngine{
+  showTypingIndicator(){const el=document.createElement('div');el.className='chat-msg other typing-message';el.id='typing-indicator-real';el.innerHTML=`<div class="chat-bubble typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>`;$('chatMessages').appendChild(el);$('chatMessages').scrollTop=9999;return el}
+  async typeMessage(text){
+    const container=$('chatMessages');
+    const msgDiv=document.createElement('div');msgDiv.className='chat-msg other';
+    const bubbleDiv=document.createElement('div');bubbleDiv.className='chat-bubble';
+    msgDiv.appendChild(bubbleDiv);container.appendChild(msgDiv);
+    const cur=document.createElement('span');cur.className='typing-cursor';bubbleDiv.appendChild(cur);
+    let typed='',willTypo=Math.random()<.15,typoIdx=-1,typoChar='',typoFixed=false;
+    if(willTypo){typoIdx=Math.floor(Math.random()*(text.length/2))+3;typoChar='asdfghjklzxcvbnmqwertyuiop'[Math.floor(Math.random()*26)]}
+    for(let i=0;i<=text.length;i++){
+      if(willTypo&&!typoFixed&&i===typoIdx){
+        typed+=typoChar;bubbleDiv.innerHTML=typed;cur.remove();bubbleDiv.appendChild(cur);await this.sleep(150+Math.random()*100);
+        for(let b=0;b<2;b++){typed=typed.slice(0,-1);bubbleDiv.innerHTML=typed;cur.remove();bubbleDiv.appendChild(cur);await this.sleep(100+Math.random()*50)}
+        typoFixed=true;continue;
       }
-      
-      if (i < text.length) {
-        typed += text[i];
-        bubbleDiv.innerHTML = typed;
-        cursorSpan.remove();
-        bubbleDiv.appendChild(cursorSpan);
-        
-        let delay = 50 + Math.random() * 150;
-        if (text[i] === ',' || text[i] === ';') delay = 300;
-        if (text[i] === '.' || text[i] === '?' || text[i] === '!') delay = 500;
-        
-        await this.sleep(delay);
+      if(i<text.length){
+        typed+=text[i];bubbleDiv.innerHTML=typed;cur.remove();bubbleDiv.appendChild(cur);
+        let d=50+Math.random()*150;
+        if(text[i]===','||text[i]===';')d=300;
+        if(text[i]==='.'||text[i]==='?'||text[i]==='!')d=500;
+        await this.sleep(d);
       }
     }
-    
-    cursorSpan.remove();
-    
-    const timeSpan = document.createElement('div');
-    timeSpan.className = 'chat-meta';
-    timeSpan.textContent = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-    msgDiv.appendChild(timeSpan);
-    
-    container.scrollTop = container.scrollHeight;
-    return msgDiv;
+    cur.remove();
+    const ts=document.createElement('div');ts.className='chat-meta';ts.textContent=new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+    msgDiv.appendChild(ts);container.scrollTop=container.scrollHeight;return msgDiv;
   }
-
-  sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+  sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 }
 
-const typingEngine = new TypingEngine();
+const typingEngine=new TypingEngine();
 
-// ── AI RANT GENERATOR ─────────────────────────────
-function generateAIRant(context = '') {
-  if (!chatPartner || !chatPartner.isAI || !chatPartner.charData) return null;
-  
-  const char = chatPartner.charData;
-  const rants = char.rants;
-  
-  // Pilih rant random
-  let rant = rants[Math.floor(Math.random() * rants.length)];
-  
-  // Tambahin personalisasi dengan nama user
-  rant = rant.replace(/\b(gue|aku)\b/g, `gue (@${userName})`);
-  
-  // Tentukan mood
-  const moods = ['surviving', 'thriving', 'chaotic', 'doom'];
-  let mood;
-  
-  if (char.mood && char.mood.length > 0) {
-    mood = char.mood[Math.floor(Math.random() * char.mood.length)];
+function generateAIRant(){
+  if(!chatPartner?.isAI||!chatPartner?.charData)return null;
+  const char=chatPartner.charData;
+  let rant=char.rants[Math.floor(Math.random()*char.rants.length)].replace(/\b(gue|aku)\b/g,`gue (@${userName})`);
+  const mood=char.mood?.length?char.mood[Math.floor(Math.random()*char.mood.length)]:'surviving';
+  return{text:rant,mood};
+}
+
+async function sendMsg(){
+  const inp=$('chatInput'),text=inp.value.trim();
+  if(!text)return;
+  addMsg(text,true);inp.value='';
+  const delay=Math.min(3000,Math.max(800,text.length*120))*(0.7+Math.random()*.6);
+  const ind=typingEngine.showTypingIndicator();
+  if(chatPartner?.isAI){
+    setTimeout(async()=>{
+      ind.remove();
+      if(Math.random()<.3){
+        const rant=generateAIRant();
+        if(rant){
+          await typingEngine.typeMessage(rant.text);
+          if(Math.random()<.5)setTimeout(()=>addMsg(`[mood: ${rant.mood}]`,false),500);
+          if(rant.mood==='doom'||rant.mood==='surviving')$('distressBanner').classList.add('show');
+        } else await typingEngine.typeMessage('*ngelantur sendiri*');
+      } else {
+        const r=[`haha iya @${userName} gitu deh`,`sama @${userName} wkwk`,`eh @${userName} gue juga gitu`,`nggak nyangka @${userName} lo jg`,`ya ampun @${userName} relate banget`];
+        await typingEngine.typeMessage(r[Math.floor(Math.random()*r.length)]);
+      }
+    },delay);
   } else {
-    mood = moods[Math.floor(Math.random() * moods.length)];
-  }
-  
-  return {
-    text: rant,
-    mood: mood
-  };
-}
-
-// ── CHAT FUNCTIONS ────────────────────────────────
-function getHistory(n) {
-  return [...$('chatMessages').querySelectorAll('.chat-msg:not(#typing-indicator-real)')]
-    .slice(-n).map(el=>({
-      role: el.classList.contains('own')?'user':'assistant',
-      content: el.querySelector('.chat-bubble')?.textContent||''
-    }));
-}
-
-async function sendMsg() {
-  const inp=$('chatInput'), text=inp.value.trim();
-  if(!text) return;
-  addMsg(text, true);
-  inp.value='';
-
-  const delay = Math.min(3000, Math.max(800, text.length*120)) * (0.7+Math.random()*.6);
-  
-  const typingIndicator = typingEngine.showTypingIndicator();
-
-  if(chatPartner?.isAI) {
-    try {
-      // Untuk demo, kita generate response sendiri tanpa API
-      setTimeout(async () => {
-        typingIndicator.remove();
-        
-        // 30% chance untuk random rant (nggak nyambung)
-        if (Math.random() < 0.3) {
-          const rant = generateAIRant(text);
-          if (rant) {
-            await typingEngine.typeMessage(rant.text);
-            
-            // Klasifikasi mood
-            const moodColors = {
-              surviving: '#FF9500',
-              thriving: '#39FF14', 
-              chaotic: '#00F0FF',
-              doom: '#8B5CF6'
-            };
-            
-            // Tampilkan badge mood (opsional)
-            if (Math.random() < 0.5) {
-              setTimeout(() => {
-                addMsg(`[mood: ${rant.mood}]`, false);
-              }, 500);
-            }
-            
-            if (rant.mood === 'doom' || rant.mood === 'surviving') {
-              $('distressBanner').classList.add('show');
-            }
-          } else {
-            await typingEngine.typeMessage('*ngelantur sendiri*');
-          }
-        } else {
-          // Response normal
-          const replies = [
-            `haha iya @${userName} gitu deh`,
-            `sama @${userName} wkwk`,
-            `eh @${userName} gue juga gitu`,
-            `nggak nyangka @${userName} lo jg`,
-            `ya ampun @${userName} relate banget`
-          ];
-          await typingEngine.typeMessage(replies[Math.floor(Math.random()*replies.length)]);
-        }
-      }, delay);
-      
-    } catch(e) {
-      setTimeout(async () => {
-        typingIndicator.remove();
-        await typingEngine.typeMessage('*koneksi putus sebentar*');
-      }, delay);
-    }
-  } else {
-    // Real user response simulation
-    const replies = [
-      `haha iya @${userName} gitu deh`,
-      `sama @${userName} wkwk`,
-      `eh @${userName} gue juga`,
-      `nggak nyangka @${userName} lo jg`,
-      `ya ampun @${userName} relate`
-    ];
-    setTimeout(async () => {
-      typingIndicator.remove();
-      if(Math.random()<.75) {
-        await typingEngine.typeMessage(replies[Math.floor(Math.random()*replies.length)]);
-      }
-    }, delay);
+    const r=[`haha iya @${userName} gitu deh`,`sama @${userName} wkwk`,`eh @${userName} gue juga`,`nggak nyangka @${userName} lo jg`,`ya ampun @${userName} relate`];
+    setTimeout(async()=>{ind.remove();if(Math.random()<.75)await typingEngine.typeMessage(r[Math.floor(Math.random()*r.length)])},delay);
   }
 }
 
-function addMsg(text, isOwn) {
-  const el=document.createElement('div');
-  el.className='chat-msg '+(isOwn?'own':'other');
+function addMsg(text,isOwn){
+  const el=document.createElement('div');el.className='chat-msg '+(isOwn?'own':'other');
   const time=new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
   el.innerHTML=`<div class="chat-bubble">${esc(text)}</div><div class="chat-meta">${time}</div>`;
-  const msgs=$('chatMessages');
-  msgs.appendChild(el);
-  while(msgs.children.length>20) msgs.removeChild(msgs.firstChild);
+  const msgs=$('chatMessages');msgs.appendChild(el);
+  while(msgs.children.length>20)msgs.removeChild(msgs.firstChild);
   msgs.scrollTop=9999;
 }
 
-// ── UPGRADE ───────────────────────────────────────
-function selectPlan(plan) {
-  document.querySelectorAll('.pricing-card').forEach(c=>c.classList.remove('selected'));
-  document.querySelector(`.pricing-card[data-plan="${plan}"]`).classList.add('selected');
-  selectedPlan=plan;
-  $('upgradeNow').disabled=false;
-}
-
-function upgradeNow() {
-  if(!selectedPlan) return;
-  toast('🔄 Memproses upgrade...');
+function selectPlan(plan){document.querySelectorAll('.pricing-card').forEach(c=>c.classList.remove('selected'));document.querySelector(`.pricing-card[data-plan="${plan}"]`).classList.add('selected');selectedPlan=plan;$('upgradeNow').disabled=false}
+function upgradeNow(){
+  if(!selectedPlan)return;toast('🔄 Memproses upgrade...');
   setTimeout(()=>{
-    toast('✅ Upgrade berhasil!');
-    closeModal('upgradeModal');
-    if(chatPartner) {
-      chatTimeLeft = selectedPlan==='weekly' ? 7200 : 10800;
-      $('chatRoom').classList.add('on');
-      clearInterval(timerInterval);
-      startTimer();
-      addMsg('obrolan dilanjut!', false);
-    }
-  }, 1500);
+    toast('✅ Upgrade berhasil!');closeModal('upgradeModal');
+    if(chatPartner){chatTimeLeft=selectedPlan==='weekly'?7200:10800;$('chatRoom').classList.add('on');clearInterval(timerInterval);startTimer();addMsg('obrolan dilanjut!',false)}
+  },1500);
 }
 
-// ── INIT ──────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', ()=>{
-  initRadar();
-  renderSpills();
-
-  $('chatInput').addEventListener('keydown', e=>{ if(e.key==='Enter') sendMsg(); });
-
-  window.addEventListener('beforeunload', ()=>{
-    clearInterval(radarInterval);
-    clearInterval(sweepInterval);
-    clearInterval(timerInterval);
-  });
+document.addEventListener('DOMContentLoaded',()=>{
+  initRadar();renderSpills();
+  $('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg()});
+  window.addEventListener('beforeunload',()=>{clearInterval(radarInterval);clearInterval(timerInterval);if(radarRAF)cancelAnimationFrame(radarRAF)});
 });
 </script>
 </body>
