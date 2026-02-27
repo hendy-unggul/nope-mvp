@@ -407,323 +407,600 @@ header{padding:24px 0 16px;display:flex;justify-content:space-between;align-item
 
 <script>
 // ── STATE ──
-let currentGender=null,chatPartner=null,timerInterval=null,chatTimeLeft=900;
-let selectedPlan=null,activeMood='all',radarInterval,userName='user';
+let currentGender = null;
+let chatPartner = null;
+let timerInterval = null;
+let chatTimeLeft = 900;
+let selectedPlan = null;
+let activeMood = 'all';
+let radarInterval;
+let userName = 'user';
 
-const AI_CHARS={
-  female:[
-    {name:'beby.manis',mood:['surviving','thriving','chaotic'],rants:["hari ini gue liat mantan sama cewek baru, dan tau gak? rambutnya lebih bagus dari rambut gue 😭","cape bener jadi cewek, setiap bulan harus nahan sakit perut sambil tetep senyum di depan client","kenapa sih cowok kalo ditanya 'lagi apa' pasti jawabnya 'lagi main'? ga ada variasi lain?","gue lagi fase pengen dimengerti tanpa harus jelasin panjang lebar","bete banget skincare gue habis, padahal baru kemarin beli. ada yang ngutil?"]},
-    {name:'strawberry.shortcake',mood:['surviving','doom','chaotic'],rants:["hari ini gue salah kirim chat pacar ke grup keluarga. isinya 'sayang udah mandi belom?' 😭","kenapa orangtua selalu curiga kalo kita lagi seneng? 'lagi seneng-seneng ya? nanti belajar'","gue lagi diet, tapi tiap liat roti, rotinya yang liat gue duluan","stress skripsi tapi yang keluar peluh dan air mata doang","hari ini gue nangis karena ga bisa buka toples. lemah?"]},
-    {name:'pretty.sad',mood:['doom','surviving'],rants:["kadang gue mikir, apa kita yang terlalu berharap atau emang janjinya ga pernah ditepatin?","hujan hari ini, tapi gaada yang tanya 'udah makan belom?'","capek pura-pura baik-baik aja. gue juga manusia, bisa hancur","kenapa ya orang lebih peduli sama 'kabar' daripada 'perasaan'?","malam ini gue lagi fase nerima kenyataan kalo dia ga akan balik"]},
-    {name:'little.fairy',mood:['chaotic','thriving','surviving'],rants:["kalo gue jadi kucing, gue bakal tidur 20 jam sehari dan ga bakal di-judge malas","hari ini gue nangis karena liat video kura-kura lagi berantem. mereka kayak 'ga ada yang mundur!'","kok bisa sih orang dagang pake sound toa keras banget? emang gaada kerjaan lain?","gue percaya kalo alam semesta itu lagi iseng sama gue","ada yang percaya rejeki ga bakal kemana? gue, tapi tetep nangis tiap liat saldo"]},
-    {name:'cinnamon.girl',mood:['doom','surviving'],rants:["hari ini gue nangis di angkot gegara liat kucing dipukul orang. mental gue udah kayak kerupuk kena hujan.","kenapa sih orang jahat bisa tidur nyenyak? gue yang baik aja susah tidur","hari ini gue bantu orang, eh malah dijadiin 'teman curhat' seharian. capek fisik mental","tolong kasih gue tanda kalo dunia ini ga sekejam kelihatannya","lagi fase sulit bilang 'ga' ke orang. jadi numpuk kerjaan sendiri"]}
+// PANGGILAN BERDASARKAN GENDER
+const CALLS = {
+  male: ['bang', 'bro', 'abang', 'cuy', 'brother'],
+  female: ['kak', 'sis', 'mbak', 'say', 'sister']
+};
+
+// Fungsi ambil panggilan random
+function getRandomCall() {
+  if (!currentGender) return '';
+  const calls = CALLS[currentGender] || CALLS.male;
+  return calls[Math.floor(Math.random() * calls.length)];
+}
+
+const AI_CHARS = {
+  female: [
+    {name:'beby.manis', shortName:'beby', mood:['surviving','thriving','chaotic'], rants:["hari ini gue liat mantan sama cewek baru, dan tau gak? rambutnya lebih bagus dari rambut gue 😭","cape bener jadi cewek, setiap bulan harus nahan sakit perut sambil tetep senyum di depan client","kenapa sih cowok kalo ditanya 'lagi apa' pasti jawabnya 'lagi main'? ga ada variasi lain?","gue lagi fase pengen dimengerti tanpa harus jelasin panjang lebar","bete banget skincare gue habis, padahal baru kemarin beli. ada yang ngutil?"]},
+    {name:'strawberry.shortcake', shortName:'strawberry', mood:['surviving','doom','chaotic'], rants:["hari ini gue salah kirim chat pacar ke grup keluarga. isinya 'sayang udah mandi belom?' 😭","kenapa orangtua selalu curiga kalo kita lagi seneng? 'lagi seneng-seneng ya? nanti belajar'","gue lagi diet, tapi tiap liat roti, rotinya yang liat gue duluan","stress skripsi tapi yang keluar peluh dan air mata doang","hari ini gue nangis karena ga bisa buka toples. lemah?"]},
+    {name:'pretty.sad', shortName:'pretty', mood:['doom','surviving'], rants:["kadang gue mikir, apa kita yang terlalu berharap atau emang janjinya ga pernah ditepatin?","hujan hari ini, tapi gaada yang tanya 'udah makan belom?'","capek pura-pura baik-baik aja. gue juga manusia, bisa hancur","kenapa ya orang lebih peduli sama 'kabar' daripada 'perasaan'?","malam ini gue lagi fase nerima kenyataan kalo dia ga akan balik"]},
+    {name:'little.fairy', shortName:'little', mood:['chaotic','thriving','surviving'], rants:["kalo gue jadi kucing, gue bakal tidur 20 jam sehari dan ga bakal di-judge malas","hari ini gue nangis karena liat video kura-kura lagi berantem. mereka kayak 'ga ada yang mundur!'","kok bisa sih orang dagang pake sound toa keras banget? emang gaada kerjaan lain?","gue percaya kalo alam semesta itu lagi iseng sama gue","ada yang percaya rejeki ga bakal kemana? gue, tapi tetep nangis tiap liat saldo"]},
+    {name:'cinnamon.girl', shortName:'cinnamon', mood:['doom','surviving'], rants:["hari ini gue nangis di angkot gegara liat kucing dipukul orang. mental gue udah kayak kerupuk kena hujan.","kenapa sih orang jahat bisa tidur nyenyak? gue yang baik aja susah tidur","hari ini gue bantu orang, eh malah dijadiin 'teman curhat' seharian. capek fisik mental","tolong kasih gue tanda kalo dunia ini ga sekejam kelihatannya","lagi fase sulit bilang 'ga' ke orang. jadi numpuk kerjaan sendiri"]}
   ],
-  male:[
-    {name:'si.badai',mood:['doom','surviving','chaotic'],rants:["hari ini gue ditagih utang sama mantan. utang apa? utang perasaan katanya","capek jadi orang yang dianggap kuat terus. gue juga pengen nangis dipeluk","kenapa sih kalo udah malem suka overthinking? badan capek tapi pikiran lari maraton","jadi cowok tuh gaboleh lemah katanya. tapi dalemnya ancur","gue capek jadi 'tembok' tempat orang bersandar. giliran gue butuh sandaran, pada pergi"]},
-    {name:'moon.child',mood:['doom','surviving'],rants:["malam ini gue liat bulan sendirian. sama kayak gue. tapi bulan masih punya bintang.","kenapa cinta harus pergi? apa karena gue ga bisa jadi alasan buat dia bertahan?","hari ini gue dapet kabar doi udah tunangan. selamat ya, semoga dia bahagia (gue bohong)","capek nungguin orang yang ga pasti. tapi lebih capek ngelepasinnya","jangan tanya gue 'kabar baik?'. kabar gue baik-baik aja, cuma hati lagi berdarah-darah"]},
-    {name:'si.kocak',mood:['chaotic','surviving'],rants:["hidup tuh kayak sinetron. kadang bahagia, kadang nangis, tapi endingnya selalu bikin kesel","hari ini gue ditilang polisi. katanya motor gue terlalu keren. padahal cuma mau pamer","stress mikirin masa depan. solusi gue: tidur. besok dipikirin lagi. atau lusa","orang bilang kalo kamu ketawa berarti kamu bahagia. berarti gue artis pemenang Oscar","hari ini gue ketawa terbahak-bahak. abis itu nangis. abis itu ketawa lagi. am i okay?"]},
-    {name:'si.pedas',mood:['chaotic','thriving','surviving'],rants:["hari ini gue dikatain 'kamu berubah'. iya lah, gua bukan nasi bisa tetep sama","tolong ya, kalo chat itu dibales. jangan cuma diliat doang, matanya apa hpnya yang liat?","ada yang bilang 'kerja keras ga akan khianati hasil'. hasilnya: gue dikhianati sama kesehatan","lagi fase males bales chat semua orang. bukan depresi, cuma lagi males sama dunia","orang suka bilang 'sabar ya'. gue pengen jawab 'sabarin aja tai'"]},
-    {name:'mba.gaul',mood:['chaotic','surviving','doom'],rants:["hari ini gue liat orang bawa balon. mungkin balon itu temen curhatnya","kenapa sih kalo lagi di kamar mandi suka inget kejadian memalukan 5 tahun lalu?","gue pengen jadi kucing tetangga. tidur, makan, tidur lagi, ga pernah mikir cicilan","hari ini gue nangis gegara kehabisan kuota pas lagi nonton drakor climax","ada yang pernah ngerasa jadi orang paling sendiri di keramaian? iyalah kita di jalan tol"]}
+  male: [
+    {name:'si.badai', shortName:'badai', mood:['doom','surviving','chaotic'], rants:["hari ini gue ditagih utang sama mantan. utang apa? utang perasaan katanya","capek jadi orang yang dianggap kuat terus. gue juga pengen nangis dipeluk","kenapa sih kalo udah malem suka overthinking? badan capek tapi pikiran lari maraton","jadi cowok tuh gaboleh lemah katanya. tapi dalemnya ancur","gue capek jadi 'tembok' tempat orang bersandar. giliran gue butuh sandaran, pada pergi"]},
+    {name:'moon.child', shortName:'moon', mood:['doom','surviving'], rants:["malam ini gue liat bulan sendirian. sama kayak gue. tapi bulan masih punya bintang.","kenapa cinta harus pergi? apa karena gue ga bisa jadi alasan buat dia bertahan?","hari ini gue dapet kabar doi udah tunangan. selamat ya, semoga dia bahagia (gue bohong)","capek nungguin orang yang ga pasti. tapi lebih capek ngelepasinnya","jangan tanya gue 'kabar baik?'. kabar gue baik-baik aja, cuma hati lagi berdarah-darah"]},
+    {name:'si.kocak', shortName:'kocak', mood:['chaotic','surviving'], rants:["hidup tuh kayak sinetron. kadang bahagia, kadang nangis, tapi endingnya selalu bikin kesel","hari ini gue ditilang polisi. katanya motor gue terlalu keren. padahal cuma mau pamer","stress mikirin masa depan. solusi gue: tidur. besok dipikirin lagi. atau lusa","orang bilang kalo kamu ketawa berarti kamu bahagia. berarti gue artis pemenang Oscar","hari ini gue ketawa terbahak-bahak. abis itu nangis. abis itu ketawa lagi. am i okay?"]},
+    {name:'si.pedas', shortName:'pedas', mood:['chaotic','thriving','surviving'], rants:["hari ini gue dikatain 'kamu berubah'. iya lah, gua bukan nasi bisa tetep sama","tolong ya, kalo chat itu dibales. jangan cuma diliat doang, matanya apa hpnya yang liat?","ada yang bilang 'kerja keras ga akan khianati hasil'. hasilnya: gue dikhianati sama kesehatan","lagi fase males bales chat semua orang. bukan depresi, cuma lagi males sama dunia","orang suka bilang 'sabar ya'. gue pengen jawab 'sabarin aja tai'"]},
+    {name:'abang.gaul', shortName:'abang', mood:['chaotic','surviving','doom'], rants:["hari ini gue liat orang bawa balon. mungkin balon itu temen curhatnya","kenapa sih kalo lagi di kamar mandi suka inget kejadian memalukan 5 tahun lalu?","gue pengen jadi kucing tetangga. tidur, makan, tidur lagi, ga pernah mikir cicilan","hari ini gue nangis gegara kehabisan kuota pas lagi nonton drakor climax","ada yang pernah ngerasa jadi orang paling sendiri di keramaian? iyalah kita di jalan tol"]}
   ]
 };
 
-const USER_RANTS=[
+const USER_RANTS = [
   {id:1,author:'anon.kucing',mood:'surviving',content:'Hari ini gue nangis di angkot gegara liat kucing dipukul orang. Mental gue udah kayak kerupuk kena hujan.',reactions:{skull:42,cry:89,fire:12,upside:7}},
   {id:2,author:'sleepy.head',mood:'thriving',content:'akhirnya bisa tidur nyenyak semalaman setelah 3 minggu insomnia. makasih buat yang chat tadi malem.',reactions:{skull:23,cry:15,fire:67,upside:31}},
   {id:3,author:'chaos.queen',mood:'chaotic',content:'hari ini chaos abis! dari bangun tidur udah salah ambil kaki, sampe kantor lupa bawa laptop.',reactions:{skull:89,cry:23,fire:45,upside:78}},
   {id:4,author:'quiet.one',mood:'doom',content:'udah seminggu nggak keluar kamar. bukan karena sibuk. cuma nggak tau mau ngapain.',reactions:{skull:67,cry:112,fire:8,upside:34}}
 ];
 
-const MOOD_COLOR={surviving:'var(--ms)',thriving:'var(--mt)',chaotic:'var(--mc)',doom:'var(--md)'};
-const REACTION_EMOJI={skull:'💀',cry:'😭',fire:'🔥',upside:'🙃'};
+const MOOD_COLOR = {surviving:'var(--ms)',thriving:'var(--mt)',chaotic:'var(--mc)',doom:'var(--md)'};
+const REACTION_EMOJI = {skull:'💀',cry:'😭',fire:'🔥',upside:'🙃'};
 
-const $=id=>document.getElementById(id);
-const esc=t=>{const d=document.createElement('div');d.textContent=t;return d.innerHTML};
-function toast(msg,isErr=false){const t=$('toast');t.textContent=msg;t.className='toast'+(isErr?' error':'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
-function closeModal(id){$(id).classList.remove('on')}
-function toggleMenu(){toast('Menu coming soon')}
-function updateVibePct(val){$('vibePct').textContent=val+'%'}
-function filterMood(btn){document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');activeMood=btn.dataset.mood;renderSpills()}
-function resetFilters(){$('vibeSlider').value=87;updateVibePct(87);document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));document.querySelector('.mood-btn[data-mood="all"]').classList.add('active');activeMood='all';renderSpills()}
+const $ = id => document.getElementById(id);
+const esc = t => {const d=document.createElement('div'); d.textContent=t; return d.innerHTML};
+
+function toast(msg, isErr=false) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isErr ? ' error' : '');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function closeModal(id) { $(id).classList.remove('on'); }
+function toggleMenu() { toast('Menu coming soon'); }
+function updateVibePct(val) { $('vibePct').textContent = val+'%'; }
+
+function filterMood(btn) {
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeMood = btn.dataset.mood;
+  renderSpills();
+}
+
+function resetFilters() {
+  $('vibeSlider').value = 87;
+  updateVibePct(87);
+  document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.mood-btn[data-mood="all"]').classList.add('active');
+  activeMood = 'all';
+  renderSpills();
+}
 
 // ── SPILLS ──
-function generateAIRants(count=3){
-  const rants=[];let nextId=Math.max(...USER_RANTS.map(u=>u.id))+1;
-  for(let i=0;i<count;i++){
-    const gender=Math.random()>.5?'female':'male';
-    const char=AI_CHARS[gender][Math.floor(Math.random()*AI_CHARS[gender].length)];
-    const mood=char.mood[Math.floor(Math.random()*char.mood.length)];
-    rants.push({id:nextId++,author:char.name,isAI:true,mood,content:char.rants[Math.floor(Math.random()*char.rants.length)],reactions:{skull:Math.floor(Math.random()*50),cry:Math.floor(Math.random()*100),fire:Math.floor(Math.random()*40),upside:Math.floor(Math.random()*30)}});
+function generateAIRants(count = 3) {
+  const rants = [];
+  let nextId = Math.max(...USER_RANTS.map(u => u.id)) + 1;
+  for (let i = 0; i < count; i++) {
+    const gender = Math.random() > .5 ? 'female' : 'male';
+    const char = AI_CHARS[gender][Math.floor(Math.random() * AI_CHARS[gender].length)];
+    const mood = char.mood[Math.floor(Math.random() * char.mood.length)];
+    rants.push({
+      id: nextId++,
+      author: char.name, // Tetap pake nama lengkap buat display
+      isAI: true,
+      mood,
+      content: char.rants[Math.floor(Math.random() * char.rants.length)],
+      reactions: {
+        skull: Math.floor(Math.random() * 50),
+        cry: Math.floor(Math.random() * 100),
+        fire: Math.floor(Math.random() * 40),
+        upside: Math.floor(Math.random() * 30)
+      }
+    });
   }
   return rants;
 }
 
-function renderSpills(){
-  const area=$('contentArea');
-  const allSpills=[...USER_RANTS,...generateAIRants(6)];
-  const filtered=activeMood==='all'?allSpills:allSpills.filter(s=>s.mood===activeMood);
-  if(!filtered.length){
-    area.className='content-area';
-    area.innerHTML=`<div class="empty-state"><span class="empty-icon">🍃</span><div class="empty-text">Belum ada spill dengan mood ini</div><div class="empty-subtext">Coba filter lain</div></div>`;
+function renderSpills() {
+  const area = $('contentArea');
+  const allSpills = [...USER_RANTS, ...generateAIRants(6)];
+  const filtered = activeMood === 'all' ? allSpills : allSpills.filter(s => s.mood === activeMood);
+  
+  if (!filtered.length) {
+    area.className = 'content-area';
+    area.innerHTML = `<div class="empty-state"><span class="empty-icon">🍃</span><div class="empty-text">Belum ada spill dengan mood ini</div><div class="empty-subtext">Coba filter lain</div></div>`;
     return;
   }
-  area.className='content-area has-content';
-  area.innerHTML=filtered.map(s=>`
+  
+  area.className = 'content-area has-content';
+  area.innerHTML = filtered.map(s => `
     <article class="spill-card">
       <div class="spill-header">
-        <span class="spill-author">@${esc(s.author)}${s.isAI?' 🤖':''}</span>
+        <span class="spill-author">@${esc(s.author)}${s.isAI ? ' 🤖' : ''}</span>
         <span class="spill-mood ${s.mood}">${s.mood}</span>
       </div>
       <div class="spill-content">${esc(s.content)}</div>
       <div class="spill-reactions">
-        ${Object.entries(REACTION_EMOJI).map(([k,em])=>`<button class="reaction-btn" onclick="react(this,${s.id},'${k}')"><span>${em}</span><span class="reaction-count" id="rc-${s.id}-${k}">${s.reactions[k]}</span></button>`).join('')}
+        ${Object.entries(REACTION_EMOJI).map(([k, em]) => `
+          <button class="reaction-btn" onclick="react(this,${s.id},'${k}')">
+            <span>${em}</span>
+            <span class="reaction-count" id="rc-${s.id}-${k}">${s.reactions[k]}</span>
+          </button>`).join('')}
       </div>
     </article>`).join('');
 }
 
-function react(btn,id,key){
-  const spill=[...USER_RANTS,...generateAIRants(0)].find(s=>s.id===id);
-  if(!spill)return;
-  const wasReacted=btn.classList.contains('reacted');
-  document.querySelectorAll(`[id^="rc-${id}-"]`).forEach(el=>el.closest('button').classList.remove('reacted'));
-  wasReacted?spill.reactions[key]--:(spill.reactions[key]++,btn.classList.add('reacted'));
-  Object.keys(spill.reactions).forEach(k=>{const el=$(`rc-${id}-${k}`);if(el)el.textContent=spill.reactions[k]});
+function react(btn, id, key) {
+  const spill = [...USER_RANTS, ...generateAIRants(0)].find(s => s.id === id);
+  if (!spill) return;
+  const wasReacted = btn.classList.contains('reacted');
+  document.querySelectorAll(`[id^="rc-${id}-"]`).forEach(el => el.closest('button').classList.remove('reacted'));
+  wasReacted ? spill.reactions[key]-- : (spill.reactions[key]++, btn.classList.add('reacted'));
+  Object.keys(spill.reactions).forEach(k => {
+    const el = $(`rc-${id}-${k}`);
+    if (el) el.textContent = spill.reactions[k];
+  });
 }
 
-function refreshSpills(){renderSpills();toast('Teh baru diseduh ☕')}
+function refreshSpills() { renderSpills(); toast('Teh baru diseduh ☕'); }
 
 // ── RADAR ──
-let radarDots=[],radarAngle=0,radarRAF=null;
-const SWEEP_SPEED=Math.PI*2/(4*60);
+let radarDots = [], radarAngle = 0, radarRAF = null;
+const SWEEP_SPEED = Math.PI * 2 / (4 * 60);
 
-function initRadar(){
-  const canvas=$('radarCanvas');
-  const hero=canvas.parentElement;
-  function resize(){canvas.width=hero.offsetWidth;canvas.height=hero.offsetHeight}
+function initRadar() {
+  const canvas = $('radarCanvas');
+  const hero = canvas.parentElement;
+  function resize() { canvas.width = hero.offsetWidth; canvas.height = hero.offsetHeight; }
   resize();
   new ResizeObserver(resize).observe(hero);
   spawnDots();
-  radarInterval=setInterval(()=>{radarDots.forEach(d=>{d.x=Math.max(5,Math.min(95,d.x+(Math.random()-.5)*1.5));d.y=Math.max(5,Math.min(95,d.y+(Math.random()-.5)*1.5))})},4000);
-  $('quotaBadge').textContent=Math.floor(20+Math.random()*10);
+  radarInterval = setInterval(() => {
+    radarDots.forEach(d => {
+      d.x = Math.max(5, Math.min(95, d.x + (Math.random() - .5) * 1.5));
+      d.y = Math.max(5, Math.min(95, d.y + (Math.random() - .5) * 1.5));
+    });
+  }, 4000);
+  $('quotaBadge').textContent = Math.floor(20 + Math.random() * 10);
   radarLoop(canvas);
 }
 
-function spawnDots(){
-  const con=$('radarDots');con.innerHTML='';radarDots=[];
-  const total=8+Math.floor(Math.random()*8);
-  for(let i=0;i<total+3;i++){
-    const isAI=i>=total,angle=Math.random()*Math.PI*2,dist=10+Math.random()*(isAI?70:80);
-    const x=50+Math.cos(angle)*dist/2,y=50+Math.sin(angle)*dist/2;
-    const size=(isAI?10:8)+Math.floor(Math.random()*8);
-    const color=isAI?'#39FF14':(Math.random()>.5?'#B026FF':'#FF3333');
-    const d=document.createElement('div');
-    d.className='radar-dot '+(isAI?'ai':(color==='#B026FF'?'purple':'red'));
-    d.style.cssText=`left:${x}%;top:${y}%;width:${size}px;height:${size}px`;
+function spawnDots() {
+  const con = $('radarDots');
+  con.innerHTML = '';
+  radarDots = [];
+  const total = 8 + Math.floor(Math.random() * 8);
+  for (let i = 0; i < total + 3; i++) {
+    const isAI = i >= total;
+    const angle = Math.random() * Math.PI * 2;
+    const dist = 10 + Math.random() * (isAI ? 70 : 80);
+    const x = 50 + Math.cos(angle) * dist / 2;
+    const y = 50 + Math.sin(angle) * dist / 2;
+    const size = (isAI ? 10 : 8) + Math.floor(Math.random() * 8);
+    const color = isAI ? '#39FF14' : (Math.random() > .5 ? '#B026FF' : '#FF3333');
+    const d = document.createElement('div');
+    d.className = 'radar-dot ' + (isAI ? 'ai' : (color === '#B026FF' ? 'purple' : 'red'));
+    d.style.cssText = `left:${x}%;top:${y}%;width:${size}px;height:${size}px`;
     con.appendChild(d);
-    radarDots.push({el:d,x,y,size,color,isAI,trail:0,trailDecay:0});
+    radarDots.push({el:d, x, y, size, color, isAI, trail:0, trailDecay:0});
   }
 }
 
-function radarLoop(canvas){
-  const ctx=canvas.getContext('2d');
-  function frame(){
-    radarAngle=(radarAngle+SWEEP_SPEED)%(Math.PI*2);
-    const W=canvas.width,H=canvas.height,cx=W/2,cy=H/2;
-    ctx.fillStyle='rgba(10,26,10,0.055)';
+function radarLoop(canvas) {
+  const ctx = canvas.getContext('2d');
+  function frame() {
+    radarAngle = (radarAngle + SWEEP_SPEED) % (Math.PI * 2);
+    const W = canvas.width, H = canvas.height, cx = W/2, cy = H/2;
+    
+    ctx.fillStyle = 'rgba(10,26,10,0.055)';
     ctx.fillRect(0,0,W,H);
-    const steps=60;
-    for(let i=0;i<steps;i++){
-      const a=radarAngle-(i/steps)*(Math.PI*.55);
-      ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,Math.min(W,H)*.6,a,a+Math.PI/steps);ctx.closePath();
-      ctx.fillStyle=`rgba(57,255,20,${(1-i/steps)*.18})`;ctx.fill();
+    
+    const steps = 60;
+    for (let i = 0; i < steps; i++) {
+      const a = radarAngle - (i/steps) * (Math.PI * .55);
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.arc(cx, cy, Math.min(W,H) * .6, a, a + Math.PI/steps);
+      ctx.closePath();
+      ctx.fillStyle = `rgba(57,255,20,${(1-i/steps)*.18})`;
+      ctx.fill();
     }
-    ctx.save();ctx.translate(cx,cy);ctx.rotate(radarAngle);
-    const lg=ctx.createLinearGradient(0,0,Math.min(W,H)*.52,0);
-    lg.addColorStop(0,'rgba(57,255,20,0.9)');lg.addColorStop(1,'rgba(57,255,20,0)');
-    ctx.fillStyle=lg;ctx.fillRect(0,-1,Math.min(W,H)*.52,2);ctx.restore();
-    radarDots.forEach(d=>{
-      const px=d.x/100*W,py=d.y/100*H,dx=px-cx,dy=py-cy;
-      const dotAngle=(Math.atan2(dy,dx)+Math.PI*2)%(Math.PI*2);
-      let diff=radarAngle-dotAngle;if(diff<0)diff+=Math.PI*2;
-      if(diff<SWEEP_SPEED*2){d.trail=1.0;d.trailDecay=0}
-      if(d.trail>0){
-        d.trailDecay+=.008;d.trail=Math.max(0,1-d.trailDecay*d.trailDecay*2.5);
-        const r=d.size*(1+d.trail*1.2);
-        const col=d.color.replace('#','');
-        const rc=parseInt(col.slice(0,2),16),gc=parseInt(col.slice(2,4),16),bc=parseInt(col.slice(4,6),16);
-        const g=ctx.createRadialGradient(px,py,0,px,py,r*3.5);
-        g.addColorStop(0,`rgba(${rc},${gc},${bc},${d.trail*.9})`);
-        g.addColorStop(.3,`rgba(${rc},${gc},${bc},${d.trail*.4})`);
-        g.addColorStop(1,`rgba(${rc},${gc},${bc},0)`);
-        ctx.beginPath();ctx.arc(px,py,r*3.5,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
-        d.el.style.filter=`brightness(${1+d.trail*2}) drop-shadow(0 0 ${6+d.trail*18}px ${d.color})`;
-        d.el.style.transform=`translate(-50%,-50%) scale(${1+d.trail*.8})`;
-        d.el.style.opacity=`${.4+d.trail*.6}`;
-      } else {d.el.style.filter='';d.el.style.transform='';d.el.style.opacity='.5'}
+    
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(radarAngle);
+    const lg = ctx.createLinearGradient(0, 0, Math.min(W,H) * .52, 0);
+    lg.addColorStop(0, 'rgba(57,255,20,0.9)');
+    lg.addColorStop(1, 'rgba(57,255,20,0)');
+    ctx.fillStyle = lg;
+    ctx.fillRect(0, -1, Math.min(W,H) * .52, 2);
+    ctx.restore();
+    
+    radarDots.forEach(d => {
+      const px = d.x/100 * W, py = d.y/100 * H;
+      const dx = px - cx, dy = py - cy;
+      const dotAngle = (Math.atan2(dy, dx) + Math.PI * 2) % (Math.PI * 2);
+      let diff = radarAngle - dotAngle;
+      if (diff < 0) diff += Math.PI * 2;
+      
+      if (diff < SWEEP_SPEED * 2) { d.trail = 1.0; d.trailDecay = 0; }
+      
+      if (d.trail > 0) {
+        d.trailDecay += .008;
+        d.trail = Math.max(0, 1 - d.trailDecay * d.trailDecay * 2.5);
+        const r = d.size * (1 + d.trail * 1.2);
+        const col = d.color.replace('#','');
+        const rc = parseInt(col.slice(0,2),16);
+        const gc = parseInt(col.slice(2,4),16);
+        const bc = parseInt(col.slice(4,6),16);
+        const g = ctx.createRadialGradient(px, py, 0, px, py, r * 3.5);
+        g.addColorStop(0, `rgba(${rc},${gc},${bc},${d.trail*.9})`);
+        g.addColorStop(.3, `rgba(${rc},${gc},${bc},${d.trail*.4})`);
+        g.addColorStop(1, `rgba(${rc},${gc},${bc},0)`);
+        ctx.beginPath();
+        ctx.arc(px, py, r * 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = g;
+        ctx.fill();
+        
+        d.el.style.filter = `brightness(${1+d.trail*2}) drop-shadow(0 0 ${6+d.trail*18}px ${d.color})`;
+        d.el.style.transform = `translate(-50%,-50%) scale(${1+d.trail*.8})`;
+        d.el.style.opacity = `${.4+d.trail*.6}`;
+      } else {
+        d.el.style.filter = '';
+        d.el.style.transform = '';
+        d.el.style.opacity = '.5';
+      }
     });
-    radarRAF=requestAnimationFrame(frame);
+    
+    radarRAF = requestAnimationFrame(frame);
   }
-  radarRAF=requestAnimationFrame(frame);
+  radarRAF = requestAnimationFrame(frame);
 }
 
 // ── VIBE CHECK ──
-function startVibeCheck(){$('genderModal').classList.add('on')}
-function selectGender(g){
-  document.querySelectorAll('.gender-opt').forEach(o=>o.classList.remove('selected'));
+function startVibeCheck() { $('genderModal').classList.add('on'); }
+
+function selectGender(g) {
+  document.querySelectorAll('.gender-opt').forEach(o => o.classList.remove('selected'));
   document.querySelector(`.gender-opt[data-gender="${g}"]`).classList.add('selected');
-  currentGender=g;$('genderConfirm').disabled=false;
+  currentGender = g;
+  $('genderConfirm').disabled = false;
 }
-function confirmGender(){
-  if(!currentGender)return;
+
+function confirmGender() {
+  if (!currentGender) return;
   closeModal('genderModal');
-  const n=prompt('Nama panggilan kamu:','user');
-  if(n?.trim())userName=n.trim();
+  const n = prompt('Nama panggilan kamu:', 'user');
+  if (n?.trim()) userName = n.trim();
   findRealUserFirst();
 }
 
-async function findRealUserFirst(){
-  $('chatMessages').innerHTML='';$('distressBanner').classList.remove('show');$('chatRoom').classList.add('on');
-  const el=document.createElement('div');el.className='chat-msg other searching-message';el.id='searching-indicator';
-  el.innerHTML=`<div class="chat-bubble">🔍 sedang dicarikan teman ngobrol...</div>`;
+async function findRealUserFirst() {
+  $('chatMessages').innerHTML = '';
+  $('distressBanner').classList.remove('show');
+  $('chatRoom').classList.add('on');
+  
+  const el = document.createElement('div');
+  el.className = 'chat-msg other searching-message';
+  el.id = 'searching-indicator';
+  el.innerHTML = `<div class="chat-bubble">🔍 sedang dicarikan teman ngobrol...</div>`;
   $('chatMessages').appendChild(el);
-  let t=60;
-  const timer=setInterval(()=>{
-    t--;const e=$('searching-indicator');
-    if(e){const b=e.querySelector('.chat-bubble');if(b)b.textContent=`🔍 mencari teman... (${t}s)`}
-    if(t<=0){clearInterval(timer);if($('searching-indicator')){$('searching-indicator').remove();fallbackToAI()}}
-  },1000);
-  if(Math.random()<.4){
-    setTimeout(()=>{
+  
+  let t = 60;
+  const timer = setInterval(() => {
+    t--;
+    const e = $('searching-indicator');
+    if (e) {
+      const b = e.querySelector('.chat-bubble');
+      if (b) b.textContent = `🔍 mencari teman... (${t}s)`;
+    }
+    if (t <= 0) {
       clearInterval(timer);
-      if($('searching-indicator')){
+      if ($('searching-indicator')) {
         $('searching-indicator').remove();
-        const opp=currentGender==='male'?'female':'male';
-        const names=opp==='female'?['jessica','amanda','sarah','diana','melanie']:['kevin','brian','alex','steven','jordan'];
-        chatPartner={name:names[Math.floor(Math.random()*names.length)],isAI:false,gender:opp};
+        fallbackToAI();
+      }
+    }
+  }, 1000);
+  
+  if (Math.random() < .4) {
+    setTimeout(() => {
+      clearInterval(timer);
+      if ($('searching-indicator')) {
+        $('searching-indicator').remove();
+        const opp = currentGender === 'male' ? 'female' : 'male';
+        const names = opp === 'female' ? ['jessica','amanda','sarah','diana','melanie'] : ['kevin','brian','alex','steven','jordan'];
+        chatPartner = { name: names[Math.floor(Math.random() * names.length)], isAI: false, gender: opp };
         startRealChat();
       }
-    },5000+Math.random()*25000);
+    }, 5000 + Math.random() * 25000);
   }
 }
 
-function fallbackToAI(){
-  const opp=currentGender==='male'?'female':'male';
-  const char=AI_CHARS[opp][Math.floor(Math.random()*AI_CHARS[opp].length)];
-  chatPartner={name:char.name,isAI:true,gender:opp,charData:char};
+function fallbackToAI() {
+  const opp = currentGender === 'male' ? 'female' : 'male';
+  const char = AI_CHARS[opp][Math.floor(Math.random() * AI_CHARS[opp].length)];
+  chatPartner = { 
+    name: char.name, 
+    shortName: char.shortName,
+    isAI: true, 
+    gender: opp, 
+    charData: char 
+  };
   toast('💬 Ditemani AI dulu ya');
   startRealChat();
 }
 
-function startRealChat(){
-  chatTimeLeft=900;$('chatMessages').innerHTML='';$('distressBanner').classList.remove('show');startTimer();
-  setTimeout(()=>{
-    let g;
-    if(chatPartner.isAI){
-      const gs=[`hai @${userName}! gue ${chatPartner.name}. lagi apa?`,`halo ${userName}~ kenalin gue ${chatPartner.name}`,`${userName}! akhirnya ketemu juga. gue ${chatPartner.name}`,`haiii @${userName}, gue ${chatPartner.name}. lagi apa nih?`];
-      g=gs[Math.floor(Math.random()*gs.length)];
+function startRealChat() {
+  chatTimeLeft = 900;
+  $('chatMessages').innerHTML = '';
+  $('distressBanner').classList.remove('show');
+  startTimer();
+  
+  setTimeout(() => {
+    let greeting;
+    const panggilan = getRandomCall();
+    
+    if (chatPartner.isAI) {
+      // PAKAI NAMA PENDEK, BUKAN NAMA LENGKAP!
+      greeting = [
+        `hai ${panggilan}! gue ${chatPartner.shortName}. lagi apa?`,
+        `halo ${panggilan}~ kenalin gue ${chatPartner.shortName}`,
+        `${panggilan}! akhirnya ketemu juga. gue ${chatPartner.shortName}`,
+        `haiii ${panggilan}, gue ${chatPartner.shortName}. lagi apa nih?`
+      ][Math.floor(Math.random() * 4)];
     } else {
-      const h=new Date().getHours();
-      g=h<5?`halo ${userName}, masih begadang?`:h<10?`pagi ${userName}, udah ngopi?`:h<15?`siang ${userName}, udah makan?`:h<18?`sore ${userName}, capek ga?`:`malem ${userName}, lagi ngapain?`;
+      const h = new Date().getHours();
+      greeting = h < 5 ? `halo ${panggilan}, masih begadang?` :
+                 h < 10 ? `pagi ${panggilan}, udah ngopi?` :
+                 h < 15 ? `siang ${panggilan}, udah makan?` :
+                 h < 18 ? `sore ${panggilan}, capek ga?` :
+                 `malem ${panggilan}, lagi ngapain?`;
     }
-    addMsg(g,false);
-  },800);
+    addMsg(greeting, false);
+  }, 800);
 }
 
-function closeChat(){clearInterval(timerInterval);timerInterval=null;$('chatRoom').classList.remove('on');toast('👋 Sampai jumpa!')}
-function startTimer(){updateTimer();timerInterval=setInterval(()=>{chatTimeLeft--;updateTimer();if(chatTimeLeft===300)toast('⚠️ Sisa 5 menit! Upgrade untuk lanjut.');if(chatTimeLeft<=0)endChat()},1000)}
-function updateTimer(){const m=Math.floor(chatTimeLeft/60),s=chatTimeLeft%60;$('chatTimer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;$('chatTimer').classList.toggle('warn',chatTimeLeft<=300)}
-function endChat(){clearInterval(timerInterval);timerInterval=null;$('chatRoom').classList.remove('on');$('upgradeModal').classList.add('on')}
+function closeChat() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  $('chatRoom').classList.remove('on');
+  toast('👋 Sampai jumpa!');
+}
 
-class TypingEngine{
-  showTypingIndicator(){const el=document.createElement('div');el.className='chat-msg other typing-message';el.id='typing-indicator-real';el.innerHTML=`<div class="chat-bubble typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>`;$('chatMessages').appendChild(el);$('chatMessages').scrollTop=9999;return el}
-  async typeMessage(text){
-    const container=$('chatMessages');
-    const msgDiv=document.createElement('div');msgDiv.className='chat-msg other';
-    const bubbleDiv=document.createElement('div');bubbleDiv.className='chat-bubble';
-    msgDiv.appendChild(bubbleDiv);container.appendChild(msgDiv);
-    const cur=document.createElement('span');cur.className='typing-cursor';bubbleDiv.appendChild(cur);
-    let typed='',willTypo=Math.random()<.15,typoIdx=-1,typoChar='',typoFixed=false;
-    if(willTypo){typoIdx=Math.floor(Math.random()*(text.length/2))+3;typoChar='asdfghjklzxcvbnmqwertyuiop'[Math.floor(Math.random()*26)]}
-    for(let i=0;i<=text.length;i++){
-      if(willTypo&&!typoFixed&&i===typoIdx){
-        typed+=typoChar;bubbleDiv.innerHTML=typed;cur.remove();bubbleDiv.appendChild(cur);await this.sleep(150+Math.random()*100);
-        for(let b=0;b<2;b++){typed=typed.slice(0,-1);bubbleDiv.innerHTML=typed;cur.remove();bubbleDiv.appendChild(cur);await this.sleep(100+Math.random()*50)}
-        typoFixed=true;continue;
+function startTimer() {
+  updateTimer();
+  timerInterval = setInterval(() => {
+    chatTimeLeft--;
+    updateTimer();
+    if (chatTimeLeft === 300) toast('⚠️ Sisa 5 menit! Upgrade untuk lanjut.');
+    if (chatTimeLeft <= 0) endChat();
+  }, 1000);
+}
+
+function updateTimer() {
+  const m = Math.floor(chatTimeLeft / 60);
+  const s = chatTimeLeft % 60;
+  $('chatTimer').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  $('chatTimer').classList.toggle('warn', chatTimeLeft <= 300);
+}
+
+function endChat() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  $('chatRoom').classList.remove('on');
+  $('upgradeModal').classList.add('on');
+}
+
+class TypingEngine {
+  showTypingIndicator() {
+    const el = document.createElement('div');
+    el.className = 'chat-msg other typing-message';
+    el.id = 'typing-indicator-real';
+    el.innerHTML = `<div class="chat-bubble typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>`;
+    $('chatMessages').appendChild(el);
+    $('chatMessages').scrollTop = 9999;
+    return el;
+  }
+  
+  async typeMessage(text) {
+    const container = $('chatMessages');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'chat-msg other';
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.className = 'chat-bubble';
+    msgDiv.appendChild(bubbleDiv);
+    container.appendChild(msgDiv);
+    
+    const cur = document.createElement('span');
+    cur.className = 'typing-cursor';
+    bubbleDiv.appendChild(cur);
+    
+    let typed = '';
+    let willTypo = Math.random() < .15;
+    let typoIdx = -1, typoChar = '', typoFixed = false;
+    
+    if (willTypo) {
+      typoIdx = Math.floor(Math.random() * (text.length / 2)) + 3;
+      typoChar = 'asdfghjklzxcvbnmqwertyuiop'[Math.floor(Math.random() * 26)];
+    }
+    
+    for (let i = 0; i <= text.length; i++) {
+      if (willTypo && !typoFixed && i === typoIdx) {
+        typed += typoChar;
+        bubbleDiv.innerHTML = typed;
+        cur.remove();
+        bubbleDiv.appendChild(cur);
+        await this.sleep(150 + Math.random() * 100);
+        
+        for (let b = 0; b < 2; b++) {
+          typed = typed.slice(0, -1);
+          bubbleDiv.innerHTML = typed;
+          cur.remove();
+          bubbleDiv.appendChild(cur);
+          await this.sleep(100 + Math.random() * 50);
+        }
+        typoFixed = true;
+        continue;
       }
-      if(i<text.length){
-        typed+=text[i];bubbleDiv.innerHTML=typed;cur.remove();bubbleDiv.appendChild(cur);
-        let d=50+Math.random()*150;
-        if(text[i]===','||text[i]===';')d=300;
-        if(text[i]==='.'||text[i]==='?'||text[i]==='!')d=500;
+      
+      if (i < text.length) {
+        typed += text[i];
+        bubbleDiv.innerHTML = typed;
+        cur.remove();
+        bubbleDiv.appendChild(cur);
+        
+        let d = 50 + Math.random() * 150;
+        if (text[i] === ',' || text[i] === ';') d = 300;
+        if (text[i] === '.' || text[i] === '?' || text[i] === '!') d = 500;
         await this.sleep(d);
       }
     }
+    
     cur.remove();
-    const ts=document.createElement('div');ts.className='chat-meta';ts.textContent=new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
-    msgDiv.appendChild(ts);container.scrollTop=container.scrollHeight;return msgDiv;
+    const ts = document.createElement('div');
+    ts.className = 'chat-meta';
+    ts.textContent = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+    msgDiv.appendChild(ts);
+    container.scrollTop = container.scrollHeight;
+    return msgDiv;
   }
-  sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+  
+  sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 }
 
-const typingEngine=new TypingEngine();
+const typingEngine = new TypingEngine();
 
-function generateAIRant(){
-  if(!chatPartner?.isAI||!chatPartner?.charData)return null;
-  const char=chatPartner.charData;
-  let rant=char.rants[Math.floor(Math.random()*char.rants.length)].replace(/\b(gue|aku)\b/g,`gue (@${userName})`);
-  const mood=char.mood?.length?char.mood[Math.floor(Math.random()*char.mood.length)]:'surviving';
-  return{text:rant,mood};
+function generateAIRant() {
+  if (!chatPartner?.isAI || !chatPartner?.charData) return null;
+  const char = chatPartner.charData;
+  const panggilan = getRandomCall();
+  
+  // HAPUS SEMUA @ DARI RANT!
+  let rant = char.rants[Math.floor(Math.random() * char.rants.length)];
+  
+  // Ganti "gue/aku" dengan konteks, TANPA PAKAI @
+  rant = rant.replace(/\b(gue|aku)\b/g, `gue`);
+  
+  const mood = char.mood?.length ? char.mood[Math.floor(Math.random() * char.mood.length)] : 'surviving';
+  return { text: rant, mood };
 }
 
-async function sendMsg(){
-  const inp=$('chatInput'),text=inp.value.trim();
-  if(!text)return;
-  addMsg(text,true);inp.value='';
-  const delay=Math.min(3000,Math.max(800,text.length*120))*(0.7+Math.random()*.6);
-  const ind=typingEngine.showTypingIndicator();
-  if(chatPartner?.isAI){
-    setTimeout(async()=>{
+async function sendMsg() {
+  const inp = $('chatInput');
+  const text = inp.value.trim();
+  if (!text) return;
+  
+  addMsg(text, true);
+  inp.value = '';
+  
+  const delay = Math.min(3000, Math.max(800, text.length * 120)) * (0.7 + Math.random() * .6);
+  const ind = typingEngine.showTypingIndicator();
+  const panggilan = getRandomCall();
+  
+  if (chatPartner?.isAI) {
+    setTimeout(async () => {
       ind.remove();
-      if(Math.random()<.3){
-        const rant=generateAIRant();
-        if(rant){
+      
+      if (Math.random() < .3) {
+        // KIRIM RANT YANG LEBIH DALEM
+        const rant = generateAIRant();
+        if (rant) {
           await typingEngine.typeMessage(rant.text);
-          if(Math.random()<.5)setTimeout(()=>addMsg(`[mood: ${rant.mood}]`,false),500);
-          if(rant.mood==='doom'||rant.mood==='surviving')$('distressBanner').classList.add('show');
-        } else await typingEngine.typeMessage('*ngelantur sendiri*');
+          if (Math.random() < .5) {
+            setTimeout(() => addMsg(`[mood: ${rant.mood}]`, false), 500);
+          }
+          if (rant.mood === 'doom' || rant.mood === 'surviving') {
+            $('distressBanner').classList.add('show');
+          }
+        } else {
+          await typingEngine.typeMessage('*ngelantur sendiri*');
+        }
       } else {
-        const r=[`haha iya @${userName} gitu deh`,`sama @${userName} wkwk`,`eh @${userName} gue juga gitu`,`nggak nyangka @${userName} lo jg`,`ya ampun @${userName} relate banget`];
-        await typingEngine.typeMessage(r[Math.floor(Math.random()*r.length)]);
+        // RESPONS BIASA TANPA @
+        const responses = [
+          `haha iya ${panggilan} gitu deh`,
+          `sama ${panggilan} wkwk`,
+          `eh ${panggilan} gue juga gitu`,
+          `nggak nyangka ${panggilan} lo jg`,
+          `ya ampun ${panggilan} relate banget`
+        ];
+        await typingEngine.typeMessage(responses[Math.floor(Math.random() * responses.length)]);
       }
-    },delay);
+    }, delay);
   } else {
-    const r=[`haha iya @${userName} gitu deh`,`sama @${userName} wkwk`,`eh @${userName} gue juga`,`nggak nyangka @${userName} lo jg`,`ya ampun @${userName} relate`];
-    setTimeout(async()=>{ind.remove();if(Math.random()<.75)await typingEngine.typeMessage(r[Math.floor(Math.random()*r.length)])},delay);
+    // UNTUK REAL USER, TETAP TANPA @
+    const responses = [
+      `haha iya ${panggilan} gitu deh`,
+      `sama ${panggilan} wkwk`,
+      `eh ${panggilan} gue juga`,
+      `nggak nyangka ${panggilan} lo jg`,
+      `ya ampun ${panggilan} relate`
+    ];
+    
+    setTimeout(async () => {
+      ind.remove();
+      if (Math.random() < .75) {
+        await typingEngine.typeMessage(responses[Math.floor(Math.random() * responses.length)]);
+      }
+    }, delay);
   }
 }
 
-function addMsg(text,isOwn){
-  const el=document.createElement('div');el.className='chat-msg '+(isOwn?'own':'other');
-  const time=new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
-  el.innerHTML=`<div class="chat-bubble">${esc(text)}</div><div class="chat-meta">${time}</div>`;
-  const msgs=$('chatMessages');msgs.appendChild(el);
-  while(msgs.children.length>20)msgs.removeChild(msgs.firstChild);
-  msgs.scrollTop=9999;
+function addMsg(text, isOwn) {
+  const el = document.createElement('div');
+  el.className = 'chat-msg ' + (isOwn ? 'own' : 'other');
+  const time = new Date().toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+  el.innerHTML = `<div class="chat-bubble">${esc(text)}</div><div class="chat-meta">${time}</div>`;
+  const msgs = $('chatMessages');
+  msgs.appendChild(el);
+  while (msgs.children.length > 20) msgs.removeChild(msgs.firstChild);
+  msgs.scrollTop = 9999;
 }
 
-function selectPlan(plan){document.querySelectorAll('.pricing-card').forEach(c=>c.classList.remove('selected'));document.querySelector(`.pricing-card[data-plan="${plan}"]`).classList.add('selected');selectedPlan=plan;$('upgradeNow').disabled=false}
-function upgradeNow(){
-  if(!selectedPlan)return;toast('🔄 Memproses upgrade...');
-  setTimeout(()=>{
-    toast('✅ Upgrade berhasil!');closeModal('upgradeModal');
-    if(chatPartner){chatTimeLeft=selectedPlan==='weekly'?7200:10800;$('chatRoom').classList.add('on');clearInterval(timerInterval);startTimer();addMsg('obrolan dilanjut!',false)}
-  },1500);
+function selectPlan(plan) {
+  document.querySelectorAll('.pricing-card').forEach(c => c.classList.remove('selected'));
+  document.querySelector(`.pricing-card[data-plan="${plan}"]`).classList.add('selected');
+  selectedPlan = plan;
+  $('upgradeNow').disabled = false;
 }
 
-document.addEventListener('DOMContentLoaded',()=>{
-  initRadar();renderSpills();
-  $('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg()});
-  window.addEventListener('beforeunload',()=>{clearInterval(radarInterval);clearInterval(timerInterval);if(radarRAF)cancelAnimationFrame(radarRAF)});
+function upgradeNow() {
+  if (!selectedPlan) return;
+  toast('🔄 Memproses upgrade...');
+  setTimeout(() => {
+    toast('✅ Upgrade berhasil!');
+    closeModal('upgradeModal');
+    if (chatPartner) {
+      chatTimeLeft = selectedPlan === 'weekly' ? 7200 : 10800;
+      $('chatRoom').classList.add('on');
+      clearInterval(timerInterval);
+      startTimer();
+      addMsg('obrolan dilanjut!', false);
+    }
+  }, 1500);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initRadar();
+  renderSpills();
+  $('chatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendMsg(); });
+  window.addEventListener('beforeunload', () => {
+    clearInterval(radarInterval);
+    clearInterval(timerInterval);
+    if (radarRAF) cancelAnimationFrame(radarRAF);
+  });
 });
 </script>
 </body>
