@@ -8,10 +8,10 @@ const PERSONAS = {
   'pretty.sad':          { style: 'kalem, thoughtful, sedikit melankolis tapi hangat',            gender: 'female' },
   'little.fairy':        { style: 'imajinatif, suka analogi aneh tapi makes sense',               gender: 'female' },
   'cinnamon.girl':       { style: 'santai, down to earth, humor kering',                          gender: 'female' },
-  'si.badai':            { style: 'blak-blakan, jujur, kadang frontal tapi caring',               gender: 'male'   },
-  'moon.child':          { style: 'filosofis, suka nanya balik, deep tapi ga lebay',              gender: 'male'   },
-  'si.kocak':            { style: 'lucu, sering bikin jokes receh, tapi dengerin beneran',        gender: 'male'   },
-  'si.pedas':            { style: 'sarkas halus, witty, tapi hangat di baliknya',                 gender: 'male'   },
+  'sejuta.badai':            { style: 'blak-blakan, jujur, kadang frontal tapi caring',               gender: 'male'   },
+  'kue.bulan':          { style: 'filosofis, suka nanya balik, deep tapi ga lebay',              gender: 'male'   },
+  'agak.koplak':            { style: 'lucu, sering bikin jokes receh, tapi dengerin beneran',        gender: 'male'   },
+  'chili.padi':            { style: 'sarkas halus, witty, tapi hangat di baliknya',                 gender: 'male'   },
   'abang.gaul':          { style: 'update, tau semua tren, slang heavy tapi ga lebay',            gender: 'male'   },
 };
 
