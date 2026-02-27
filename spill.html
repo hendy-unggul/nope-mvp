@@ -6,28 +6,53 @@
 <title>Spill — JEJAK</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#000;--sf:#0a0a0a;--sfe:#111;--bd:#1a1a1a;--tx:#fff;
-  --txs:#666;--txm:#444;--ap:#ff3d00;--as:#00f0ff;--aq:#00ff41;
-  --war:#ff0040;--ms:#ff9500;--mt:#00ff41;--mc:#00f0ff;--md:#8b5cf6;
-  --safe-bottom:env(safe-area-inset-bottom);--safe-top:env(safe-area-inset-top)
+  --bg:#000;
+  --sf:#0a0a0a;
+  --sfe:#111;
+  --bd:#1a1a1a;
+  --tx:#fff;
+  --txs:#666;
+  --txm:#444;
+  --ap:#ff3d00;
+  --as:#00f0ff;
+  --aq:#00ff41;
+  --war:#ff0040;
+  --ms:#ff9500;
+  --mt:#00ff41;
+  --mc:#00f0ff;
+  --md:#8b5cf6;
+  --safe-bottom:env(safe-area-inset-bottom);
+  --safe-top:env(safe-area-inset-top)
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
 html{height:100%;overflow:hidden}
 body{
-  height:100%;background:var(--bg);color:var(--tx);
-  font-family:'Inter',-apple-system,sans-serif;font-size:14px;line-height:1.4;
-  overflow:hidden;position:fixed;width:100%;overscroll-behavior:none
+  height:100%;
+  background:var(--bg);
+  color:var(--tx);
+  font-family:'Inter',-apple-system,sans-serif;
+  font-size:14px;
+  line-height:1.4;
+  overflow:hidden;
+  position:fixed;
+  width:100%;
+  overscroll-behavior:none
 }
 .app{height:100%;display:flex;flex-direction:column;overflow:hidden}
 
 /* ── HEADER ── */
 .header{
-  padding:12px 16px;padding-top:calc(12px + var(--safe-top));
-  display:flex;justify-content:space-between;align-items:center;
-  border-bottom:1px solid var(--bd);background:var(--bg);flex-shrink:0
+  padding:12px 16px;
+  padding-top:calc(12px + var(--safe-top));
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  border-bottom:1px solid var(--bd);
+  background:var(--bg);
+  flex-shrink:0
 }
 .logo{font-size:28px;font-weight:800;letter-spacing:-2px;line-height:1}
 .logo span{color:var(--ap)}
@@ -40,266 +65,469 @@ body{
 .scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
 .scroll::-webkit-scrollbar{display:none}
 
-/* ── RADAR ── */
-.radar-sect{background:var(--sf);border-bottom:1px solid var(--bd);padding:12px 0}
-.radar-header{display:flex;justify-content:space-between;align-items:center;padding:0 16px 12px}
-.radar-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--aq);letter-spacing:1px;display:flex;align-items:center;gap:6px}
-.radar-label::before{content:'';width:6px;height:6px;background:var(--aq);border-radius:50%;animation:blink 1s infinite}
+/* ── RADAR BELL & ROSS STYLE ── */
+.radar-sect{
+  background:var(--sf);
+  border-bottom:1px solid var(--bd);
+  padding:16px 0
+}
+.radar-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 16px 12px
+}
+.radar-label{
+  font-family:'Space Mono',monospace;
+  font-size:9px;
+  color:var(--aq);
+  letter-spacing:2px;
+  display:flex;
+  align-items:center;
+  gap:6px
+}
+.radar-label::before{
+  content:'';
+  width:6px;
+  height:6px;
+  background:var(--aq);
+  border-radius:50%;
+  animation:blink 1s infinite
+}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 .radar-stat{font-family:'Space Mono',monospace;font-size:9px;color:var(--txs)}
-/* ── RADAR WRAPPER — Bell & Ross military bezel ── */
+
+/* BELL & ROSS INSTRUMENT CASE */
 .radar-wrapper{padding:0 16px}
-
-/* bezel outer shell — brushed aluminium instrument panel */
-.radar-bezel{
+.radar-case{
   position:relative;
-  /* chamfered square with rounded cut corners — BR style */
-  border-radius:16px;
-  padding:18px 18px 22px;
-  /* layered metal gradient: highlight edge → matte centre → shadow edge */
-  background:
-    linear-gradient(160deg,
-      #3c3c3c 0%, #282828 8%,
-      #1e1e1e 30%, #161616 50%,
-      #1a1a1a 72%, #242424 92%,
-      #2e2e2e 100%);
-  /* stacked box-shadows = thick bezel depth */
+  background:linear-gradient(145deg,#1a1a1a 0%,#0f0f0f 50%,#1a1a1a 100%);
+  border-radius:24px;
+  padding:20px;
   box-shadow:
-    /* outer bright highlight — chamfer top-left */
     inset 0 1px 0 rgba(255,255,255,.08),
-    inset 1px 0 0 rgba(255,255,255,.04),
-    /* outer dark shadow — bottom-right chamfer */
-    inset 0 -2px 0 rgba(0,0,0,.7),
-    inset -1px 0 0 rgba(0,0,0,.5),
-    /* raised plate illusion */
-    0 2px 0 #0a0a0a,
-    0 4px 0 #060606,
-    /* ambient drop shadow */
-    0 8px 24px rgba(0,0,0,.85),
-    0 2px 6px rgba(0,0,0,.9);
-  /* subtle knurling texture via repeating gradient */
-  background-image:
-    repeating-linear-gradient(
-      90deg,
-      transparent, transparent 3px,
-      rgba(0,0,0,.08) 3px, rgba(0,0,0,.08) 4px
-    ),
-    linear-gradient(160deg,
-      #3c3c3c 0%, #282828 8%,
-      #1e1e1e 30%, #161616 50%,
-      #1a1a1a 72%, #242424 92%,
-      #2e2e2e 100%)
+    inset 0 -1px 0 rgba(0,0,0,.8),
+    0 20px 40px rgba(0,0,0,.6),
+    0 0 0 1px #000
 }
-
-/* corner screws — BR signature detail */
+/* Screws at corners */
 .radar-screw{
   position:absolute;
-  width:14px;height:14px;border-radius:50%;z-index:20;
-  /* recessed metal disc */
-  background:
-    radial-gradient(circle at 38% 32%,
-      #4a4a4a 0%,#2e2e2e 35%,#1a1a1a 65%,#111 100%);
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  background:radial-gradient(circle at 30% 30%,#3a3a3a 0%,#1a1a1a 50%,#0a0a0a 100%);
   box-shadow:
-    /* recessed ring */
-    0 0 0 2px #0e0e0e,
-    0 0 0 3px #2a2a2a,
-    /* inner shadow — depth */
-    inset 0 1px 2px rgba(255,255,255,.12),
-    inset 0 -1px 2px rgba(0,0,0,.9),
-    /* drop */
-    0 1px 3px rgba(0,0,0,.8)
+    inset 0 1px 1px rgba(255,255,255,.15),
+    inset 0 -1px 1px rgba(0,0,0,.8),
+    0 1px 2px rgba(0,0,0,.5)
 }
-/* Phillips cross slot */
-.radar-screw::before,.radar-screw::after{
-  content:'';position:absolute;border-radius:1px;
-  background:rgba(0,0,0,.65)
+.radar-screw::before,
+.radar-screw::after{
+  content:'';
+  position:absolute;
+  background:rgba(0,0,0,.6);
+  border-radius:1px
 }
-.radar-screw::before{width:7px;height:1.5px;top:6.25px;left:3.5px;transform:rotate(var(--sr,0deg))}
-.radar-screw::after{width:1.5px;height:7px;top:3.5px;left:6.25px;transform:rotate(var(--sr,0deg))}
-.screw-tl{top:7px;left:7px;--sr:15deg}
-.screw-tr{top:7px;right:7px;--sr:-20deg}
-.screw-bl{bottom:11px;left:7px;--sr:-10deg}
-.screw-br{bottom:11px;right:7px;--sr:25deg}
+.radar-screw::before{width:8px;height:2px;top:7px;left:4px}
+.radar-screw::after{width:2px;height:8px;top:4px;left:7px}
+.screw-tl{top:8px;left:8px;transform:rotate(15deg)}
+.screw-tr{top:8px;right:8px;transform:rotate(-20deg)}
+.screw-bl{bottom:8px;left:8px;transform:rotate(-10deg)}
+.screw-br{bottom:8px;right:8px;transform:rotate(25deg)}
 
-/* bezel top label — stencil engraving */
-.radar-bezel-label{
-  position:absolute;top:6px;left:0;right:0;
-  text-align:center;font-family:'Space Mono',monospace;
-  font-size:7px;font-weight:700;letter-spacing:5px;
-  text-transform:uppercase;pointer-events:none;z-index:21;
-  color:transparent;
-  /* engraved text effect */
-  text-shadow:0 1px 0 rgba(255,255,255,.1),0 -1px 0 rgba(0,0,0,.8);
-  -webkit-text-stroke:0.5px rgba(255,255,255,.15)
+/* Bezel markings */
+.radar-bezel-mark{
+  position:absolute;
+  top:6px;
+  left:50%;
+  transform:translateX(-50%);
+  font-family:'Oswald',sans-serif;
+  font-size:8px;
+  color:rgba(255,255,255,.15);
+  letter-spacing:3px;
+  font-weight:500
 }
-/* bezel bottom — range markings */
-.radar-bezel-range{
-  position:absolute;bottom:7px;left:0;right:0;
-  display:flex;justify-content:space-between;padding:0 22px;
-  font-family:'Space Mono',monospace;font-size:6px;color:rgba(255,255,255,.14);
-  letter-spacing:1px;pointer-events:none;z-index:21
+.radar-bezel-num{
+  position:absolute;
+  font-family:'Oswald',sans-serif;
+  font-size:10px;
+  font-weight:700;
+  color:rgba(255,255,255,.2)
 }
-/* orange accent stripe — BR style strap detail, bottom */
-.radar-bezel::after{
-  content:'';position:absolute;
-  bottom:0;left:18px;right:18px;height:3px;
-  border-radius:0 0 14px 14px;
-  background:linear-gradient(90deg,transparent,var(--ap) 30%,var(--ap) 70%,transparent);
-  opacity:.35
-}
+.bzn-12{top:28px;left:50%;transform:translateX(-50%)}
+.bzn-3{right:28px;top:50%;transform:translateY(-50%)}
+.bzn-6{bottom:28px;left:50%;transform:translateX(-50%)}
+.bzn-9{left:28px;top:50%;transform:translateY(-50%)}
 
-/* inner CRT display — deep inset */
-.radar-cont{
-  position:relative;width:100%;
-  /* square aspect like a real radar scope */
-  aspect-ratio:1/1;
-  background:radial-gradient(ellipse at 42% 38%,#0b1a0b 0%,#040d04 55%,#010501 100%);
-  border-radius:6px;overflow:hidden;
+/* CRT Display - FIXED ASPECT RATIO */
+.radar-display{
+  position:relative;
+  width:100%;
+  padding-bottom:100%; /* Square aspect ratio */
+  background:#000;
+  border-radius:50%;
+  overflow:hidden;
   box-shadow:
-    /* very deep inset — like a real CRT bezel cutout */
+    inset 0 0 60px rgba(0,0,0,.9),
     inset 0 0 0 2px #000,
-    inset 0 2px 8px rgba(0,0,0,.95),
-    inset 0 0 60px rgba(0,0,0,.9)
+    0 0 0 1px rgba(255,255,255,.05)
 }
-/* CRT phosphor scanlines */
-.radar-cont::after{
-  content:'';position:absolute;inset:0;z-index:30;pointer-events:none;
+.radar-display-inner{
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+}
+/* Glass reflection */
+.radar-display-inner::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  background:
+    radial-gradient(ellipse at 35% 25%,rgba(255,255,255,.06) 0%,transparent 50%),
+    linear-gradient(135deg,rgba(255,255,255,.03) 0%,transparent 40%);
+  z-index:20;
+  pointer-events:none
+}
+/* Scanlines */
+.radar-display-inner::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:50%;
   background:repeating-linear-gradient(
-    0deg,transparent,transparent 2px,
-    rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 3px
-  )
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,.1) 2px,
+    rgba(0,0,0,.1) 3px
+  );
+  z-index:15;
+  pointer-events:none
 }
-/* CRT glare reflection */
-.radar-cont::before{
-  content:'';position:absolute;inset:0;z-index:31;pointer-events:none;
-  background:
-    radial-gradient(ellipse at 28% 22%,rgba(255,255,255,.04) 0%,transparent 55%),
-    linear-gradient(135deg,rgba(255,255,255,.015) 0%,transparent 50%)
-}
+
+/* Grid - military green */
 .radar-grid{
-  position:absolute;inset:0;opacity:.065;
-  background-image:
-    repeating-linear-gradient(0deg,rgba(0,255,65,.7) 0px,transparent 1px,transparent 22px),
-    repeating-linear-gradient(90deg,rgba(0,255,65,.7) 0px,transparent 1px,transparent 22px)
+  position:absolute;
+  inset:8%;
+  border-radius:50%;
+  border:1px solid rgba(0,255,65,.08)
 }
-.radar-ring{position:absolute;inset:6%;border:1px solid rgba(0,255,65,.1);border-radius:50%}
-.radar-ring::before,.radar-ring::after{content:'';position:absolute;border-radius:50%;border:1px solid rgba(0,255,65,.07)}
-.radar-ring::before{inset:25%}.radar-ring::after{inset:50%;border-color:rgba(0,255,65,.05)}
+.radar-grid::before,
+.radar-grid::after{
+  content:'';
+  position:absolute;
+  border-radius:50%;
+  border:1px solid rgba(0,255,65,.06)
+}
+.radar-grid::before{inset:25%}
+.radar-grid::after{inset:50%;border-color:rgba(0,255,65,.04)}
+
+/* Crosshair */
 .radar-cross{
-  position:absolute;inset:0;
+  position:absolute;
+  inset:0;
   background:
-    linear-gradient(90deg,transparent calc(50% - .5px),rgba(0,255,65,.06) calc(50% - .5px),rgba(0,255,65,.06) calc(50% + .5px),transparent calc(50% + .5px)),
-    linear-gradient(0deg,transparent calc(50% - .5px),rgba(0,255,65,.06) calc(50% - .5px),rgba(0,255,65,.06) calc(50% + .5px),transparent calc(50% + .5px))
+    linear-gradient(90deg,transparent calc(50% - .5px),rgba(0,255,65,.1) calc(50% - .5px),rgba(0,255,65,.1) calc(50% + .5px),transparent calc(50% + .5px)),
+    linear-gradient(0deg,transparent calc(50% - .5px),rgba(0,255,65,.1) calc(50% - .5px),rgba(0,255,65,.1) calc(50% + .5px),transparent calc(50% + .5px))
 }
-.radar-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:5}
-.radar-dots{position:absolute;inset:0;z-index:10}
+
+/* Range rings */
+.radar-rings{
+  position:absolute;
+  inset:0;
+  border-radius:50%
+}
+.radar-ring{
+  position:absolute;
+  border:1px solid rgba(0,255,65,.05);
+  border-radius:50%
+}
+.ring-1{inset:15%}
+.ring-2{inset:35%}
+.ring-3{inset:55%}
+.ring-4{inset:75%}
+
+/* Canvas - FIXED */
+.radar-canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:5;
+  border-radius:50%
+}
+
+/* Dots container */
+.radar-dots{
+  position:absolute;
+  inset:0;
+  z-index:10;
+  border-radius:50%;
+  overflow:hidden
+}
 .radar-dot{
-  position:absolute;width:8px;height:8px;border-radius:50%;
-  transform:translate(-50%,-50%);opacity:.35;will-change:transform,opacity,filter;
+  position:absolute;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  opacity:.4;
+  will-change:transform,opacity;
   transition:opacity .1s ease-out
 }
-.radar-dot.active{opacity:1;transform:translate(-50%,-50%) scale(2.2);filter:brightness(2) drop-shadow(0 0 6px currentColor)}
+.radar-dot.hit{
+  opacity:1;
+  transform:translate(-50%,-50%) scale(2);
+  filter:brightness(2) drop-shadow(0 0 8px currentColor)
+}
 .radar-dot.purple{background:#b026ff;box-shadow:0 0 6px #b026ff}
 .radar-dot.red{background:var(--war);box-shadow:0 0 6px var(--war)}
 .radar-dot.ai{background:var(--aq);box-shadow:0 0 6px var(--aq)}
 
-/* radar footer — 3 cols: count | vibe-btn (center) | whisper-btn */
-.radar-footer{display:flex;justify-content:space-between;align-items:center;padding:12px 16px 0;gap:10px}
-.radar-info{display:flex;flex-direction:column;min-width:56px}
-.radar-count{font-family:'Space Mono',monospace;font-size:32px;font-weight:700;color:var(--aq);line-height:1;text-shadow:0 0 15px rgba(0,255,65,.4);letter-spacing:-2px}
-.radar-sub{font-size:10px;color:var(--txs);margin-top:2px;font-weight:500}
-.vibe-btn{
-  background:var(--ap);color:#000;border:none;padding:14px 22px;
-  font-size:13px;font-weight:700;letter-spacing:.3px;border-radius:10px;
-  display:flex;align-items:center;gap:8px;flex-shrink:0;
-  touch-action:manipulation;box-shadow:0 4px 0 rgba(255,61,0,.3);
-  transition:all .1s;cursor:pointer
+/* Brand text on display */
+.radar-brand{
+  position:absolute;
+  top:28%;
+  left:50%;
+  transform:translateX(-50%);
+  font-family:'Oswald',sans-serif;
+  font-size:8px;
+  letter-spacing:4px;
+  color:rgba(0,255,65,.3);
+  text-transform:uppercase;
+  z-index:12;
+  pointer-events:none
 }
-.vibe-btn:active{transform:translateY(4px);box-shadow:0 0 0 rgba(255,61,0,.3)}
-/* Whisper button — right side, subtle */
-.whisper-btn{
-  position:relative;background:transparent;color:var(--as);
-  border:1px solid rgba(0,240,255,.25);padding:14px 16px;
-  font-size:12px;font-weight:700;letter-spacing:.3px;border-radius:10px;
-  display:flex;align-items:center;gap:6px;flex-shrink:0;
-  touch-action:manipulation;transition:all .1s;cursor:pointer
+.radar-model{
+  position:absolute;
+  bottom:28%;
+  left:50%;
+  transform:translateX(-50%);
+  font-family:'Space Mono',monospace;
+  font-size:7px;
+  letter-spacing:2px;
+  color:rgba(0,255,65,.2);
+  z-index:12;
+  pointer-events:none
 }
-.whisper-btn:active{transform:translateY(2px);opacity:.8}
-.ws-badge{
-  position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;
-  background:var(--as);color:#000;font-size:9px;font-weight:800;
-  border-radius:9px;display:none;align-items:center;justify-content:center;padding:0 4px;
-  border:2px solid var(--bg)
-}
-.ws-badge.show{display:flex}
 
-/* VT dot in refresh btn */
-.vt-dot-wrap{position:relative;width:14px;height:14px;flex-shrink:0}
-.vt-dot-inner{width:8px;height:8px;background:#111;border:1px solid #1e1e1e;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);transition:all .5s}
-.vt-dot-wrap.has-tap .vt-dot-inner{animation:vt-breathe 3s ease-in-out infinite}
-@keyframes vt-breathe{0%,100%{box-shadow:none;border-color:#1e1e1e}50%{box-shadow:0 0 0 3px rgba(30,30,30,.5);border-color:#2a2a2a}}
+/* Footer stats */
+.radar-footer{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px 16px 0;
+  gap:12px
+}
+.radar-stat-box{
+  display:flex;
+  flex-direction:column;
+  gap:2px
+}
+.radar-stat-label{
+  font-family:'Space Mono',monospace;
+  font-size:8px;
+  color:var(--txm);
+  letter-spacing:1px
+}
+.radar-stat-value{
+  font-family:'Oswald',sans-serif;
+  font-size:28px;
+  font-weight:700;
+  color:var(--aq);
+  line-height:1;
+  text-shadow:0 0 20px rgba(0,255,65,.4);
+  letter-spacing:-1px
+}
+.radar-stat-unit{font-size:10px;color:var(--txs);margin-left:4px}
+.vibe-btn{
+  background:var(--ap);
+  color:#000;
+  border:none;
+  padding:16px 24px;
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.5px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-shrink:0;
+  touch-action:manipulation;
+  box-shadow:0 4px 0 rgba(255,61,0,.3),0 8px 20px rgba(255,61,0,.2);
+  transition:all .1s;
+  font-family:'Oswald',sans-serif;
+  text-transform:uppercase
+}
+.vibe-btn:active{
+  transform:translateY(4px);
+  box-shadow:0 0 0 rgba(255,61,0,.3),0 0 0 rgba(255,61,0,.2)
+}
 
 /* ── FILTER ── */
 .filter-sect{padding:16px;border-bottom:1px solid var(--bd)}
-.filter-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.filter-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px
+}
 .filter-title{font-size:11px;font-weight:700;color:var(--txs);letter-spacing:.5px}
 .match-pct{font-family:'Space Mono',monospace;font-size:14px;color:var(--ap);font-weight:700}
 .vibe-slider{
-  width:100%;height:4px;background:var(--bd);border-radius:2px;
-  outline:none;-webkit-appearance:none;display:block;margin-bottom:6px
+  width:100%;
+  height:4px;
+  background:var(--bd);
+  border-radius:2px;
+  outline:none;
+  -webkit-appearance:none;
+  display:block;
+  margin-bottom:6px
 }
 .vibe-slider::-webkit-slider-thumb{
-  -webkit-appearance:none;width:24px;height:24px;background:var(--ap);
-  border:3px solid var(--bg);border-radius:50%;
-  box-shadow:0 0 0 1px var(--ap),0 2px 8px rgba(255,61,0,.4);margin-top:-10px
+  -webkit-appearance:none;
+  width:24px;
+  height:24px;
+  background:var(--ap);
+  border:3px solid var(--bg);
+  border-radius:50%;
+  box-shadow:0 0 0 1px var(--ap),0 2px 8px rgba(255,61,0,.4);
+  margin-top:-10px
 }
 .vibe-slider::-webkit-slider-runnable-track{
-  height:4px;background:linear-gradient(90deg,var(--ap) 0%,var(--ap) 87%,var(--bd) 87%);border-radius:2px
+  height:4px;
+  background:linear-gradient(90deg,var(--ap) 0%,var(--ap) 87%,var(--bd) 87%);
+  border-radius:2px
 }
-.slider-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--txm);font-weight:600;margin-top:4px;margin-bottom:12px}
-.mood-scroll{display:flex;gap:8px;overflow-x:auto;margin:0 -16px;padding:0 16px 4px;scrollbar-width:none}
+.slider-labels{
+  display:flex;
+  justify-content:space-between;
+  font-size:9px;
+  color:var(--txm);
+  font-weight:600;
+  margin-top:4px;
+  margin-bottom:12px
+}
+.mood-scroll{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  margin:0 -16px;
+  padding:0 16px 4px;
+  scrollbar-width:none
+}
 .mood-scroll::-webkit-scrollbar{display:none}
 .mood-chip{
-  flex-shrink:0;padding:10px 16px;background:var(--sf);border:1px solid var(--bd);
-  border-radius:24px;font-size:12px;font-weight:600;color:var(--txs);white-space:nowrap;
-  touch-action:manipulation;transition:all .15s;cursor:pointer;font-family:inherit
+  flex-shrink:0;
+  padding:10px 16px;
+  background:var(--sf);
+  border:1px solid var(--bd);
+  border-radius:24px;
+  font-size:12px;
+  font-weight:600;
+  color:var(--txs);
+  white-space:nowrap;
+  touch-action:manipulation;
+  transition:all .15s;
+  cursor:pointer;
+  font-family:inherit
 }
 .mood-chip.active{background:var(--ap);border-color:var(--ap);color:#000}
 .mood-chip:active{transform:scale(.95);opacity:.8}
 
 /* ── SPILLS ── */
 .spills-sect{padding:16px;padding-bottom:calc(80px + var(--safe-bottom))}
-.sect-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.sect-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px
+}
 .sect-title{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--txs)}
 .sect-meta{font-family:'Space Mono',monospace;font-size:9px;color:var(--txm)}
-.spill-card{background:var(--sf);border:1px solid var(--bd);border-radius:16px;margin-bottom:12px;overflow:hidden}
-.spill-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--bd);background:var(--bg)}
-.spill-user{font-family:'Space Mono',monospace;font-size:11px;color:var(--txs);font-weight:600}
-.spill-mood{font-size:10px;font-weight:700;padding:6px 12px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.spill-card{
+  background:var(--sf);
+  border:1px solid var(--bd);
+  border-radius:16px;
+  margin-bottom:12px;
+  overflow:hidden
+}
+.spill-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 16px;
+  border-bottom:1px solid var(--bd);
+  background:var(--bg)
+}
+.spill-user{
+  font-family:'Space Mono',monospace;
+  font-size:11px;
+  color:var(--txs);
+  font-weight:600
+}
+.spill-mood{
+  font-size:10px;
+  font-weight:700;
+  padding:6px 12px;
+  border-radius:20px;
+  text-transform:uppercase;
+  letter-spacing:.5px
+}
 .spill-mood.surviving{color:var(--ms);background:rgba(255,149,0,.1)}
 .spill-mood.thriving{color:var(--mt);background:rgba(57,255,20,.1)}
 .spill-mood.chaotic{color:var(--mc);background:rgba(0,240,255,.1)}
 .spill-mood.doom{color:var(--md);background:rgba(139,92,246,.1)}
 .spill-body{padding:16px;font-size:15px;line-height:1.6;color:var(--tx)}
 .spill-actions{
-  display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--bd);
-  background:var(--bg);overflow-x:auto;scrollbar-width:none
+  display:flex;
+  gap:8px;
+  padding:12px 16px;
+  border-top:1px solid var(--bd);
+  background:var(--bg);
+  overflow-x:auto;
+  scrollbar-width:none
 }
 .spill-actions::-webkit-scrollbar{display:none}
 .react-btn{
-  display:flex;align-items:center;gap:6px;padding:10px 16px;
-  background:var(--sf);border:1px solid var(--bd);border-radius:24px;
-  font-size:14px;color:var(--txs);flex-shrink:0;touch-action:manipulation;
-  transition:all .15s;cursor:pointer;font-family:inherit
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:10px 16px;
+  background:var(--sf);
+  border:1px solid var(--bd);
+  border-radius:24px;
+  font-size:14px;
+  color:var(--txs);
+  flex-shrink:0;
+  touch-action:manipulation;
+  transition:all .15s;
+  cursor:pointer;
+  font-family:inherit
 }
 .react-btn.active{background:var(--ap);border-color:var(--ap);color:#000}
 .react-btn:active{transform:scale(.95)}
 .react-count{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;min-width:18px}
 .refresh-btn{
-  width:100%;padding:16px;background:transparent;border:1px dashed var(--bd);border-radius:16px;
-  color:var(--txs);font-size:13px;font-weight:600;display:flex;align-items:center;
-  justify-content:center;gap:8px;margin-top:8px;touch-action:manipulation;
-  transition:all .15s;cursor:pointer;font-family:inherit
+  width:100%;
+  padding:16px;
+  background:transparent;
+  border:1px dashed var(--bd);
+  border-radius:16px;
+  color:var(--txs);
+  font-size:13px;
+  font-weight:600;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin-top:8px;
+  touch-action:manipulation;
+  transition:all .15s;
+  cursor:pointer;
+  font-family:inherit
 }
 .refresh-btn:active{background:var(--sf)}
 .empty-state{text-align:center;padding:60px 20px}
@@ -309,70 +537,194 @@ body{
 
 /* ── BOTTOM NAV ── */
 .bnav{
-  position:fixed;bottom:0;left:0;right:0;background:rgba(0,0,0,.95);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-top:1px solid var(--bd);padding-bottom:var(--safe-bottom);z-index:100
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:rgba(0,0,0,.95);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-top:1px solid var(--bd);
+  padding-bottom:var(--safe-bottom);
+  z-index:100
 }
-.bnav-inner{display:flex;justify-content:space-around;align-items:center;height:60px;max-width:480px;margin:0 auto}
+.bnav-inner{
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  height:60px;
+  max-width:480px;
+  margin:0 auto
+}
 .nav-item{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;height:100%;color:var(--txs);text-decoration:none;font-size:10px;
-  font-weight:600;letter-spacing:.3px;position:relative;touch-action:manipulation;transition:all .15s
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  height:100%;
+  color:var(--txs);
+  text-decoration:none;
+  font-size:10px;
+  font-weight:600;
+  letter-spacing:.3px;
+  position:relative;
+  touch-action:manipulation;
+  transition:all .15s
 }
 .nav-item.active{color:var(--ap)}
 .nav-item.active::before{
-  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
-  width:20px;height:2px;background:var(--ap);border-radius:0 0 2px 2px
+  content:'';
+  position:absolute;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:20px;
+  height:2px;
+  background:var(--ap);
+  border-radius:0 0 2px 2px
 }
 .nav-icon{font-size:22px;line-height:1;margin-bottom:-2px}
 
-/* ── MODALS (fullscreen, from doc1) ── */
-.modal{display:none;position:fixed;inset:0;background:var(--bg);z-index:200;flex-direction:column;overflow:hidden}
+/* ── MODALS ── */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  z-index:200;
+  flex-direction:column;
+  overflow:hidden
+}
 .modal.on{display:flex}
 .modal-header{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:16px;padding-top:calc(16px + var(--safe-top));border-bottom:1px solid var(--bd)
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:16px;
+  padding-top:calc(16px + var(--safe-top));
+  border-bottom:1px solid var(--bd)
 }
 .modal-title{font-size:17px;font-weight:700;letter-spacing:-.3px}
 .modal-close{
-  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
-  background:var(--sf);border:1px solid var(--bd);border-radius:10px;color:var(--txs);
-  font-size:18px;touch-action:manipulation;cursor:pointer;transition:all .15s
+  width:36px;
+  height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--sf);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  color:var(--txs);
+  font-size:18px;
+  touch-action:manipulation;
+  cursor:pointer;
+  transition:all .15s
 }
 .modal-close:active{background:var(--bd)}
-.modal-body{flex:1;overflow-y:auto;padding:20px 16px calc(20px + var(--safe-bottom));-webkit-overflow-scrolling:touch}
-.modal-tag{font-family:'Space Mono',monospace;font-size:10px;color:var(--ap);margin-bottom:8px;letter-spacing:1px;font-weight:700;display:block}
+.modal-body{
+  flex:1;
+  overflow-y:auto;
+  padding:20px 16px calc(20px + var(--safe-bottom));
+  -webkit-overflow-scrolling:touch
+}
+.modal-tag{
+  font-family:'Space Mono',monospace;
+  font-size:10px;
+  color:var(--ap);
+  margin-bottom:8px;
+  letter-spacing:1px;
+  font-weight:700;
+  display:block
+}
 .modal-h{font-size:26px;font-weight:800;margin-bottom:6px;letter-spacing:-.5px;line-height:1.2}
 .modal-sub{font-size:14px;color:var(--txs);margin-bottom:28px;line-height:1.5}
-.gender-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.gender-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-bottom:24px
+}
 .gender-card{
-  background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:28px 16px;
-  text-align:center;touch-action:manipulation;transition:all .15s;cursor:pointer
+  background:var(--sf);
+  border:1px solid var(--bd);
+  border-radius:20px;
+  padding:28px 16px;
+  text-align:center;
+  touch-action:manipulation;
+  transition:all .15s;
+  cursor:pointer
 }
 .gender-card.selected{border-color:var(--ap);background:rgba(255,61,0,.08)}
 .gender-card:active{transform:scale(.96)}
 .gender-icon{font-size:36px;margin-bottom:12px;display:block}
 .gender-label{font-size:15px;font-weight:700;margin-bottom:4px}
 .gender-desc{font-size:12px;color:var(--txs)}
-.info-box{background:var(--sf);border-left:3px solid var(--ap);padding:16px;margin-bottom:28px;border-radius:0 16px 16px 0}
-.info-box p{font-family:'Space Mono',monospace;font-size:11px;color:var(--txs);line-height:1.7}
+.info-box{
+  background:var(--sf);
+  border-left:3px solid var(--ap);
+  padding:16px;
+  margin-bottom:28px;
+  border-radius:0 16px 16px 0
+}
+.info-box p{
+  font-family:'Space Mono',monospace;
+  font-size:11px;
+  color:var(--txs);
+  line-height:1.7
+}
 .info-box strong{color:var(--ap);font-weight:700}
 .action-btn{
-  width:100%;padding:18px;background:var(--ap);color:#000;border:none;border-radius:14px;
-  font-size:15px;font-weight:700;letter-spacing:.3px;touch-action:manipulation;
-  cursor:pointer;transition:all .15s;font-family:inherit
+  width:100%;
+  padding:18px;
+  background:var(--ap);
+  color:#000;
+  border:none;
+  border-radius:14px;
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:.3px;
+  touch-action:manipulation;
+  cursor:pointer;
+  transition:all .15s;
+  font-family:inherit
 }
 .action-btn:disabled{opacity:.3;cursor:not-allowed}
 .action-btn:active{transform:scale(.98)}
 .action-btn.sec{background:var(--sf);color:var(--tx);border:1px solid var(--bd)}
-.modal-hint{font-size:12px;color:var(--txm);text-align:center;margin-top:16px;line-height:1.6}
-.modal-hint-link{background:none;border:none;color:var(--as);font-size:12px;font-weight:700;cursor:pointer;text-decoration:underline;font-family:inherit;padding:0}
+.modal-hint{
+  font-size:12px;
+  color:var(--txm);
+  text-align:center;
+  margin-top:16px;
+  line-height:1.6
+}
+.modal-hint-link{
+  background:none;
+  border:none;
+  color:var(--as);
+  font-size:12px;
+  font-weight:700;
+  cursor:pointer;
+  text-decoration:underline;
+  font-family:inherit;
+  padding:0
+}
 
 /* PRICING */
 .price-card{
-  background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:24px 20px;
-  margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;
-  touch-action:manipulation;transition:all .15s;cursor:pointer
+  background:var(--sf);
+  border:1px solid var(--bd);
+  border-radius:20px;
+  padding:24px 20px;
+  margin-bottom:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  touch-action:manipulation;
+  transition:all .15s;
+  cursor:pointer
 }
 .price-card.selected{border-color:var(--ap);background:rgba(255,61,0,.08)}
 .price-card:active{transform:scale(.98)}
@@ -381,194 +733,237 @@ body{
 .price-right{text-align:right}
 .price-tag{font-size:13px;font-weight:700;color:var(--aq);margin-bottom:3px}
 .price-note{font-size:11px;color:var(--txm);font-family:'Space Mono',monospace}
-.timer-big{text-align:center;padding:40px 24px;background:var(--sf);border-radius:20px;margin-bottom:24px;border:1px solid var(--bd)}
-.timer-big .num{font-family:'Space Mono',monospace;font-size:56px;font-weight:700;color:var(--war);line-height:1;letter-spacing:-3px}
-.timer-big .label{font-size:12px;color:var(--txs);margin-top:12px;text-transform:uppercase;letter-spacing:2px;font-weight:600}
+.timer-big{
+  text-align:center;
+  padding:40px 24px;
+  background:var(--sf);
+  border-radius:20px;
+  margin-bottom:24px;
+  border:1px solid var(--bd)
+}
+.timer-big .num{
+  font-family:'Space Mono',monospace;
+  font-size:56px;
+  font-weight:700;
+  color:var(--war);
+  line-height:1;
+  letter-spacing:-3px
+}
+.timer-big .label{
+  font-size:12px;
+  color:var(--txs);
+  margin-top:12px;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  font-weight:600
+}
 
 /* ── CHAT ROOM ── */
-.chat-room{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column}
+.chat-room{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  z-index:300;
+  flex-direction:column
+}
 .chat-room.on{display:flex}
 .chat-head{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:12px 16px;padding-top:calc(12px + var(--safe-top));
-  border-bottom:1px solid var(--bd);background:var(--sf)
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 16px;
+  padding-top:calc(12px + var(--safe-top));
+  border-bottom:1px solid var(--bd);
+  background:var(--sf)
 }
 .chat-info{flex:1}
-.chat-label{font-family:'Space Mono',monospace;font-size:9px;color:var(--aq);letter-spacing:1px;margin-bottom:3px;font-weight:700}
+.chat-label{
+  font-family:'Space Mono',monospace;
+  font-size:9px;
+  color:var(--aq);
+  letter-spacing:1px;
+  margin-bottom:3px;
+  font-weight:700
+}
 .chat-name{font-size:15px;font-weight:700}
 .chat-timer{
-  font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--aq);
-  background:var(--bg);padding:8px 14px;border-radius:10px;border:1px solid var(--bd);letter-spacing:-1px
+  font-family:'Space Mono',monospace;
+  font-size:16px;
+  font-weight:700;
+  color:var(--aq);
+  background:var(--bg);
+  padding:8px 14px;
+  border-radius:10px;
+  border:1px solid var(--bd);
+  letter-spacing:-1px
 }
-.chat-timer.warn{color:var(--war);border-color:var(--war);animation:blink 1s infinite;background:rgba(255,0,64,.1)}
+.chat-timer.warn{
+  color:var(--war);
+  border-color:var(--war);
+  animation:blink 1s infinite;
+  background:rgba(255,0,64,.1)
+}
 .chat-close{
-  width:40px;height:40px;display:flex;align-items:center;justify-content:center;
-  background:var(--bg);border:1px solid var(--bd);border-radius:12px;
-  color:var(--txs);margin-left:12px;font-size:18px;touch-action:manipulation;cursor:pointer;transition:all .15s
+  width:40px;
+  height:40px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--bg);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  color:var(--txs);
+  margin-left:12px;
+  font-size:18px;
+  touch-action:manipulation;
+  cursor:pointer;
+  transition:all .15s
 }
 .chat-close:active{background:var(--bd)}
-.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch}
-/* chat bubbles — from doc1 (me/them classes) */
+.chat-messages{
+  flex:1;
+  overflow-y:auto;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  -webkit-overflow-scrolling:touch
+}
 .chat-bubble{
-  max-width:85%;padding:14px 18px;border-radius:20px;font-size:15px;line-height:1.5;
-  word-wrap:break-word;animation:popIn .25s cubic-bezier(.175,.885,.32,1.275)
+  max-width:85%;
+  padding:14px 18px;
+  border-radius:20px;
+  font-size:15px;
+  line-height:1.5;
+  word-wrap:break-word;
+  animation:popIn .25s cubic-bezier(.175,.885,.32,1.275)
 }
-@keyframes popIn{from{opacity:0;transform:scale(.8) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
-.chat-bubble.me{align-self:flex-end;background:var(--ap);color:#000;border-bottom-right-radius:6px;font-weight:600}
-.chat-bubble.them{align-self:flex-start;background:var(--sf);border:1px solid var(--bd);border-bottom-left-radius:6px}
-/* wrapper for bubble + meta (used by TypingEngine) */
-.chat-msg{display:flex;flex-direction:column;max-width:85%}
-.chat-msg.own{align-self:flex-end}
-.chat-msg.other{align-self:flex-start}
-.chat-msg .chat-bubble{max-width:100%}
-.own .chat-bubble{background:var(--ap);color:#000;border-bottom-right-radius:6px;font-weight:600;align-self:flex-end}
-.other .chat-bubble{background:var(--sf);border:1px solid var(--bd);border-bottom-left-radius:6px;align-self:flex-start}
-.chat-time{font-size:10px;color:var(--txm);margin-top:6px;font-family:'Space Mono',monospace;font-weight:600}
-.chat-meta{font-size:10px;color:var(--txm);margin-top:4px;padding:0 2px;font-family:'Space Mono',monospace;font-weight:600}
-/* typing */
-.typing{display:flex;gap:4px;padding:18px 22px;background:var(--sf);border:1px solid var(--bd);border-radius:20px;border-bottom-left-radius:6px;align-self:flex-start;width:fit-content}
-.typing-dot{width:8px;height:8px;background:var(--aq);border-radius:50%;animation:typing 1.4s infinite}
-.typing-dot:nth-child(2){animation-delay:.2s}.typing-dot:nth-child(3){animation-delay:.4s}
-@keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
-.typing-cursor{display:inline-block;width:2px;height:14px;background:var(--aq);margin-left:2px;animation:blink 1s infinite;vertical-align:middle}
-/* searching */
-.chat-msg.searching-msg{align-self:center!important;max-width:90%!important}
-.searching-msg .chat-bubble{background:var(--sfe)!important;color:var(--txs)!important;border:1px dashed var(--aq)!important;font-style:italic;text-align:center}
-/* distress */
-.distress{display:none;padding:14px 16px;background:var(--war);color:#fff;font-size:12px;font-weight:700;text-align:center;letter-spacing:.3px}
+@keyframes popIn{
+  from{opacity:0;transform:scale(.8) translateY(10px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
+.chat-bubble.me{
+  align-self:flex-end;
+  background:var(--ap);
+  color:#000;
+  border-bottom-right-radius:6px;
+  font-weight:600
+}
+.chat-bubble.them{
+  align-self:flex-start;
+  background:var(--sf);
+  border:1px solid var(--bd);
+  border-bottom-left-radius:6px
+}
+.chat-time{
+  font-size:10px;
+  color:var(--txm);
+  margin-top:6px;
+  font-family:'Space Mono',monospace;
+  font-weight:600
+}
+.typing{
+  display:flex;
+  gap:4px;
+  padding:18px 22px;
+  background:var(--sf);
+  border:1px solid var(--bd);
+  border-radius:20px;
+  border-bottom-left-radius:6px;
+  align-self:flex-start;
+  width:fit-content
+}
+.typing-dot{
+  width:8px;
+  height:8px;
+  background:var(--aq);
+  border-radius:50%;
+  animation:typing 1.4s infinite
+}
+.typing-dot:nth-child(2){animation-delay:.2s}
+.typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes typing{
+  0%,60%,100%{transform:translateY(0)}
+  30%{transform:translateY(-5px)}
+}
+.distress{
+  display:none;
+  padding:14px 16px;
+  background:var(--war);
+  color:#fff;
+  font-size:12px;
+  font-weight:700;
+  text-align:center;
+  letter-spacing:.3px
+}
 .distress.show{display:block}
-/* input area */
 .chat-input-wrap{
-  padding:12px 16px;padding-bottom:calc(12px + var(--safe-bottom));
-  border-top:1px solid var(--bd);background:var(--sf);display:flex;gap:10px;align-items:center
+  padding:12px 16px;
+  padding-bottom:calc(12px + var(--safe-bottom));
+  border-top:1px solid var(--bd);
+  background:var(--sf);
+  display:flex;
+  gap:10px
 }
-.vt-trigger{
-  width:40px;height:48px;background:transparent;border:1px solid #1a1a1a;color:#333;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;
-  border-radius:12px;font-size:13px;transition:all .2s
-}
-.vt-trigger:hover{border-color:#333;color:#555}
 .chat-input{
-  flex:1;background:var(--bg);border:1px solid var(--bd);border-radius:24px;
-  padding:14px 18px;font-size:15px;color:var(--tx);outline:none;
-  -webkit-appearance:none;transition:all .15s;font-family:inherit
+  flex:1;
+  background:var(--bg);
+  border:1px solid var(--bd);
+  border-radius:24px;
+  padding:14px 18px;
+  font-size:15px;
+  color:var(--tx);
+  outline:none;
+  -webkit-appearance:none;
+  transition:all .15s
 }
 .chat-input:focus{border-color:var(--ap)}
 .chat-send{
-  width:48px;height:48px;background:var(--ap);border:none;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;color:#000;font-size:20px;
-  flex-shrink:0;touch-action:manipulation;cursor:pointer;
-  box-shadow:0 4px 0 rgba(255,61,0,.3);transition:all .15s
+  width:48px;
+  height:48px;
+  background:var(--ap);
+  border:none;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#000;
+  font-size:20px;
+  flex-shrink:0;
+  touch-action:manipulation;
+  cursor:pointer;
+  transition:all .15s;
+  box-shadow:0 4px 0 rgba(255,61,0,.3)
 }
-.chat-send:active{transform:translateY(4px);box-shadow:0 0 0 rgba(255,61,0,.3)}
-
-/* ── WHISPERER (Model B) ── */
-.ws-feature-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
-.ws-feature{font-size:12px;color:var(--txs);padding:10px 14px;background:var(--sfe);border-left:2px solid var(--as);border-radius:0 8px 8px 0;font-weight:600}
-.ws-price-box{background:var(--sf);border:1px solid rgba(0,240,255,.25);padding:20px;text-align:center;margin-bottom:20px;border-radius:16px}
-.ws-price{font-size:40px;font-weight:800;color:var(--as);letter-spacing:-2px;line-height:1}
-.ws-price-sub{font-size:11px;color:var(--txm);margin-top:6px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;font-family:'Space Mono',monospace}
-.ws-inbox-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.ws-compose-btn{background:var(--as);color:#000;border:none;padding:10px 18px;font-size:12px;font-weight:700;border-radius:10px;cursor:pointer;font-family:inherit;touch-action:manipulation}
-.ws-compose-btn:active{opacity:.8}
-.ws-thread-item{
-  background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;
-  margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;
-  touch-action:manipulation;transition:all .15s;position:relative;overflow:hidden
+.chat-send:active{
+  transform:translateY(4px);
+  box-shadow:0 0 0 rgba(255,61,0,.3)
 }
-.ws-thread-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--as);opacity:0;transition:opacity .15s;border-radius:3px 0 0 3px}
-.ws-thread-item.unread::before{opacity:1}
-.ws-thread-item:active{transform:scale(.98)}
-.ws-avatar{width:40px;height:40px;background:var(--sfe);border:1px solid var(--bd);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--txs);flex-shrink:0}
-.ws-thread-info{flex:1;min-width:0}
-.ws-thread-name{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:3px}
-.ws-thread-preview{font-size:11px;color:var(--txm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ws-thread-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
-.ws-thread-time{font-size:9px;color:var(--txm);font-family:'Space Mono',monospace}
-.ws-unread-badge{min-width:20px;height:20px;background:var(--as);color:#000;font-size:9px;font-weight:800;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 5px}
-.ws-empty{text-align:center;padding:40px 0}
-.ws-empty-icon{font-size:36px;display:block;margin-bottom:12px;opacity:.3}
-.ws-empty-title{font-size:15px;font-weight:700;color:var(--txs);margin-bottom:4px}
-.ws-empty-sub{font-size:12px;color:var(--txm)}
-
-/* WHISPERER COMPOSE — fullscreen */
-.ws-compose{display:none;position:fixed;inset:0;background:var(--bg);z-index:350;flex-direction:column}
-.ws-compose.on{display:flex}
-.ws-compose-head{
-  display:flex;align-items:center;gap:12px;padding:14px 16px;
-  padding-top:calc(14px + var(--safe-top));border-bottom:1px solid var(--bd);background:var(--sf)
-}
-.ws-to-label{font-size:11px;font-weight:700;color:var(--txm);white-space:nowrap;font-family:'Space Mono',monospace}
-.ws-to-input{flex:1;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--tx);font-size:16px;font-family:inherit;padding:4px 0;outline:none;transition:border-color .15s}
-.ws-to-input:focus{border-bottom-color:var(--as)}
-.ws-to-input::placeholder{color:var(--txm)}
-.ws-close-btn{width:36px;height:36px;background:var(--bg);border:1px solid var(--bd);border-radius:10px;color:var(--txs);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0}
-.ws-body{flex:1;background:transparent;border:none;color:var(--tx);font-family:inherit;font-size:16px;line-height:1.6;resize:none;padding:20px 16px;outline:none}
-.ws-body::placeholder{color:var(--txm)}
-.ws-compose-foot{
-  padding:12px 16px;padding-bottom:calc(12px + var(--safe-bottom));
-  border-top:1px solid var(--bd);background:var(--sf);display:flex;justify-content:space-between;align-items:center
-}
-.ws-char-count{font-size:10px;color:var(--txm);font-family:'Space Mono',monospace}
-.ws-send-btn{background:var(--as);color:#000;border:none;padding:12px 24px;font-size:13px;font-weight:700;border-radius:12px;cursor:pointer;font-family:inherit;transition:all .15s;box-shadow:0 4px 0 rgba(0,240,255,.2)}
-.ws-send-btn:active{transform:translateY(3px);box-shadow:none}
-.ws-send-btn:disabled{opacity:.3;cursor:not-allowed;box-shadow:none}
-
-/* WHISPERER THREAD — fullscreen */
-.ws-thread{display:none;position:fixed;inset:0;background:var(--bg);z-index:350;flex-direction:column}
-.ws-thread.on{display:flex}
-.ws-thread-head{
-  display:flex;align-items:center;gap:12px;padding:12px 16px;
-  padding-top:calc(12px + var(--safe-top));border-bottom:1px solid var(--bd);background:var(--sf)
-}
-.ws-back-btn{width:36px;height:36px;background:var(--bg);border:1px solid var(--bd);border-radius:10px;color:var(--txs);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0;touch-action:manipulation}
-.ws-thread-title{flex:1;font-size:15px;font-weight:700}
-.ws-vt-btn{background:transparent;border:1px solid #1a1a1a;color:#333;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;transition:all .2s;flex-shrink:0}
-.ws-vt-btn:hover{border-color:#333;color:#555}
-.ws-thread-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch}
-.ws-thread-input-wrap{
-  padding:12px 16px;padding-bottom:calc(12px + var(--safe-bottom));
-  border-top:1px solid var(--bd);background:var(--sf);display:flex;gap:10px;align-items:center
-}
-.ws-thread-input{flex:1;background:var(--bg);border:1px solid var(--bd);border-radius:24px;padding:14px 18px;font-size:15px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .15s}
-.ws-thread-input:focus{border-color:var(--as)}
-.ws-thread-send{width:48px;height:48px;background:var(--as);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#000;font-size:20px;flex-shrink:0;cursor:pointer;touch-action:manipulation;transition:all .15s;box-shadow:0 4px 0 rgba(0,240,255,.2)}
-.ws-thread-send:active{transform:translateY(4px);box-shadow:none}
-
-/* ── VOID TAP ── */
-.vt-compose{display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column;align-items:stretch;justify-content:center}
-.vt-compose.on{display:flex;animation:vtFade .2s ease}
-@keyframes vtFade{from{opacity:0}to{opacity:1}}
-.vt-compose-inner{max-width:480px;width:100%;margin:0 auto;padding:40px 24px;display:flex;flex-direction:column;gap:28px}
-.vt-lbl{font-size:9px;font-weight:700;color:#2a2a2a;text-transform:uppercase;letter-spacing:.2em;font-family:'Space Mono',monospace}
-.vt-textarea{background:transparent;border:none;border-bottom:1px solid #1a1a1a;color:#444;font-family:'Inter',sans-serif;font-size:18px;line-height:1.7;resize:none;height:130px;outline:none;caret-color:#333;padding:8px 0}
-.vt-textarea::placeholder{color:#1a1a1a;font-style:italic}
-.vt-textarea:focus{border-bottom-color:#252525}
-.vt-meta{display:flex;justify-content:space-between;align-items:center}
-.vt-quota{font-size:10px;color:#222;font-family:'Space Mono',monospace}
-.vt-quota.low{color:#331111}
-.vt-actions{display:flex;gap:8px}
-.vt-cancel{background:transparent;border:1px solid #181818;color:#2a2a2a;padding:10px 18px;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;font-family:inherit;border-radius:8px}
-.vt-cancel:hover{border-color:#2a2a2a;color:#444}
-.vt-send{background:#0a0a0a;border:1px solid #1e1e1e;color:#333;padding:10px 22px;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;font-family:inherit;border-radius:8px;transition:all .15s}
-.vt-send:hover:not(:disabled){border-color:#333;color:#666}
-.vt-send:disabled{opacity:.2;cursor:not-allowed}
-.vt-reader{display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column;align-items:center;justify-content:center;user-select:none}
-.vt-reader.on{display:flex;animation:vtFade .2s ease}
-.vt-reader-from{position:absolute;top:calc(52px + var(--safe-top));left:50%;transform:translateX(-50%);font-size:9px;color:#1a1a1a;font-weight:700;text-transform:uppercase;letter-spacing:.25em;white-space:nowrap;font-family:'Space Mono',monospace}
-.vt-reader-msg{max-width:300px;padding:0 24px;text-align:center;color:#3d3d3d;font-size:17px;line-height:1.8}
-.vt-reader-timer{position:absolute;bottom:calc(52px + var(--safe-bottom));left:50%;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:10px;color:#1e1e1e;letter-spacing:.15em;text-transform:uppercase}
-.vt-reader.burning .vt-reader-msg,.vt-reader.burning .vt-reader-timer,.vt-reader.burning .vt-reader-from{animation:vtBurn .7s ease forwards}
-@keyframes vtBurn{0%{opacity:1;filter:none}50%{opacity:.4;filter:blur(2px)}100%{opacity:0;filter:blur(12px)}}
-.vt-upgrade-nudge{display:none;position:fixed;bottom:calc(84px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(16px);background:#0a0a0a;border:1px solid #1a1a1a;padding:12px 20px;font-size:12px;color:#333;white-space:nowrap;z-index:400;opacity:0;transition:all .3s;cursor:pointer;border-radius:20px}
-.vt-upgrade-nudge.show{display:block;opacity:1;transform:translateX(-50%) translateY(0)}
-.vt-upgrade-nudge b{color:#555}
 
 /* TOAST */
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--tx);color:var(--bg);padding:14px 24px;border-radius:30px;font-size:14px;font-weight:700;z-index:600;opacity:0;transition:all .3s cubic-bezier(.175,.885,.32,1.275);pointer-events:none;white-space:nowrap;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.toast{
+  position:fixed;
+  bottom:100px;
+  left:50%;
+  transform:translateX(-50%) translateY(100px);
+  background:var(--tx);
+  color:var(--bg);
+  padding:14px 24px;
+  border-radius:30px;
+  font-size:14px;
+  font-weight:700;
+  z-index:400;
+  opacity:0;
+  transition:all .3s cubic-bezier(.175,.885,.32,1.275);
+  pointer-events:none;
+  white-space:nowrap;
+  box-shadow:0 10px 40px rgba(0,0,0,.5)
+}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .toast.error{background:var(--war);color:#fff}
 </style>
+<base target="_blank">
 </head>
 <body>
 <div class="app">
@@ -576,44 +971,64 @@ body{
 <!-- HEADER -->
 <div class="header">
   <div class="logo">SP<span>✕</span>LL</div>
-  <div class="status"><div class="pulse"></div><span class="live">LIVE</span></div>
+  <div class="status">
+    <div class="pulse"></div>
+    <span class="live">LIVE</span>
+  </div>
 </div>
 
 <!-- SCROLL AREA -->
 <div class="scroll">
 
-<!-- RADAR -->
+<!-- RADAR BELL & ROSS -->
 <div class="radar-sect">
   <div class="radar-header">
     <span class="radar-label">VIBE RADAR</span>
     <span class="radar-stat">ONLINE</span>
   </div>
   <div class="radar-wrapper">
-    <div class="radar-bezel">
+    <div class="radar-case">
+      <!-- Screws -->
       <div class="radar-screw screw-tl"></div>
       <div class="radar-screw screw-tr"></div>
       <div class="radar-screw screw-bl"></div>
       <div class="radar-screw screw-br"></div>
-      <div class="radar-bezel-label">VIBE RADAR — SYS ACTIVE</div>
-      <div class="radar-cont" id="radarCont">
-        <div class="radar-grid"></div>
-        <div class="radar-ring"></div>
-        <div class="radar-cross"></div>
-        <canvas class="radar-canvas" id="radarCanvas"></canvas>
-        <div class="radar-dots" id="radarDots"></div>
+      
+      <!-- Bezel markings -->
+      <div class="radar-bezel-mark">VIBE RADAR</div>
+      <div class="radar-bezel-num bzn-12">12</div>
+      <div class="radar-bezel-num bzn-3">3</div>
+      <div class="radar-bezel-num bzn-6">6</div>
+      <div class="radar-bezel-num bzn-9">9</div>
+      
+      <!-- Display -->
+      <div class="radar-display" id="radarDisplay">
+        <div class="radar-display-inner">
+          <div class="radar-brand">JEJAK</div>
+          <div class="radar-model">BR-03 RADAR</div>
+          <div class="radar-grid"></div>
+          <div class="radar-rings">
+            <div class="radar-ring ring-1"></div>
+            <div class="radar-ring ring-2"></div>
+            <div class="radar-ring ring-3"></div>
+            <div class="radar-ring ring-4"></div>
+          </div>
+          <div class="radar-cross"></div>
+          <canvas class="radar-canvas" id="radarCanvas"></canvas>
+          <div class="radar-dots" id="radarDots"></div>
+        </div>
       </div>
-      <div class="radar-bezel-range"><span>0.5km</span><span>RNG</span><span>50km</span></div>
     </div>
   </div>
+  
   <div class="radar-footer">
-    <div class="radar-info">
-      <div class="radar-count" id="quotaBadge">—</div>
-      <div class="radar-sub">Online · Ready</div>
+    <div class="radar-stat-box">
+      <span class="radar-stat-label">ONLINE</span>
+      <span class="radar-stat-value" id="quotaBadge">24<span class="radar-stat-unit">USERS</span></span>
     </div>
-    <button class="vibe-btn" onclick="startVibeCheck()"><span>⬡</span><span>VIBE CHECK</span></button>
-    <button class="whisper-btn" onclick="openWsModal()">
-      <span>✦</span><span>Whisper</span>
-      <div class="ws-badge" id="wsBadge">0</div>
+    <button class="vibe-btn" onclick="startVibeCheck()">
+      <span>⬡</span>
+      <span>VIBE CHECK</span>
     </button>
   </div>
 </div>
@@ -643,9 +1058,6 @@ body{
   </div>
   <div id="spillsList"></div>
   <button class="refresh-btn" onclick="refreshSpills()">
-    <div class="vt-dot-wrap" id="vtIndicator" onclick="event.stopPropagation();checkVoidTaps()">
-      <div class="vt-dot-inner"></div>
-    </div>
     <span>↻</span>
     <span>Seduh Teh Baru</span>
   </button>
@@ -656,23 +1068,35 @@ body{
 <!-- BOTTOM NAV -->
 <nav class="bnav">
   <div class="bnav-inner">
-    <a href="jejak.html" class="nav-item"><span class="nav-icon">✦</span><span>Jejak</span></a>
-    <a href="spill.html" class="nav-item active"><span class="nav-icon">✕</span><span>Spill</span></a>
-    <a href="cocomeo.html" class="nav-item"><span class="nav-icon">〜</span><span>Cocomeo</span></a>
-    <a href="glitch.html" class="nav-item"><span class="nav-icon">⚡</span><span>Glitch</span></a>
+    <a href="jejak.html" class="nav-item">
+      <span class="nav-icon">✦</span>
+      <span>Jejak</span>
+    </a>
+    <a href="spill.html" class="nav-item active">
+      <span class="nav-icon">✕</span>
+      <span>Spill</span>
+    </a>
+    <a href="cocomeo.html" class="nav-item">
+      <span class="nav-icon">〜</span>
+      <span>Cocomeo</span>
+    </a>
+    <a href="glitch.html" class="nav-item">
+      <span class="nav-icon">⚡</span>
+      <span>Glitch</span>
+    </a>
   </div>
 </nav>
 
 </div><!-- /app -->
 
-<!-- ══ MODEL A: GENDER MODAL ══ -->
+<!-- GENDER MODAL -->
 <div class="modal" id="genderModal">
   <div class="modal-header">
     <span class="modal-title">Vibe Check</span>
     <button class="modal-close" onclick="closeModal('genderModal')">✕</button>
   </div>
   <div class="modal-body">
-    <div class="modal-tag">MODEL_A // STRANGER</div>
+    <div class="modal-tag">INIT_SESSION</div>
     <div class="modal-h">Siapa Kamu?</div>
     <div class="modal-sub">Ketemu stranger lawan jenis — zero identity, zero history</div>
     <div class="gender-grid">
@@ -695,31 +1119,45 @@ body{
   </div>
 </div>
 
-<!-- ══ MODEL A: UPGRADE MODAL ══ -->
+<!-- UPGRADE MODAL -->
 <div class="modal" id="upgradeModal">
   <div class="modal-header">
     <span class="modal-title">Waktu Habis</span>
     <button class="modal-close" onclick="closeModal('upgradeModal')">✕</button>
   </div>
   <div class="modal-body">
-    <div class="timer-big"><div class="num">15:00</div><div class="label">Sesi Gratis Selesai</div></div>
+    <div class="timer-big">
+      <div class="num">15:00</div>
+      <div class="label">Sesi Gratis Selesai</div>
+    </div>
     <div class="price-card" id="pc-weekly" onclick="selectPlan(this,'weekly')">
-      <div><div class="price-main">10K</div><div class="price-sub">7 HARI · 2 JAM/HARI</div></div>
-      <div class="price-right"><div class="price-tag">14 JAM</div><div class="price-note">@1.428/jam</div></div>
+      <div>
+        <div class="price-main">10K</div>
+        <div class="price-sub">7 HARI · 2 JAM/HARI</div>
+      </div>
+      <div class="price-right">
+        <div class="price-tag">14 JAM</div>
+        <div class="price-note">@1.428/jam</div>
+      </div>
     </div>
     <div class="price-card" id="pc-monthly" onclick="selectPlan(this,'monthly')">
-      <div><div class="price-main">50K</div><div class="price-sub">30 HARI · 3 JAM/HARI</div></div>
-      <div class="price-right"><div class="price-tag">90 JAM</div><div class="price-note">@555/jam</div></div>
+      <div>
+        <div class="price-main">50K</div>
+        <div class="price-sub">30 HARI · 3 JAM/HARI</div>
+      </div>
+      <div class="price-right">
+        <div class="price-tag">90 JAM</div>
+        <div class="price-note">@555/jam</div>
+      </div>
     </div>
     <div style="display:flex;gap:12px;margin-top:8px">
       <button class="action-btn" id="upgradeNow" onclick="upgradeNow()" disabled style="flex:1">Lanjut Chat</button>
       <button class="action-btn sec" onclick="closeModal('upgradeModal')" style="flex:1">Nanti</button>
     </div>
-    <div class="modal-hint">Perlu DM ke username spesifik? <button class="modal-hint-link" onclick="closeModal('upgradeModal');openWsModal()">Coba Whisperer →</button></div>
   </div>
 </div>
 
-<!-- ══ MODEL A: CHAT ROOM ══ -->
+<!-- CHAT ROOM -->
 <div class="chat-room" id="chatRoom">
   <div class="chat-head">
     <div class="chat-info">
@@ -732,117 +1170,16 @@ body{
   <div class="chat-messages" id="chatMessages"></div>
   <div class="distress" id="distressBanner">Butuh bantuan? Into The Light: 119 ext 8</div>
   <div class="chat-input-wrap">
-    <button class="vt-trigger" onclick="openVtCompose()" title="Void Tap">◼</button>
     <input type="text" class="chat-input" id="chatInput" placeholder="Ketik pesan..." maxlength="200">
     <button class="chat-send" onclick="sendMsg()">➤</button>
   </div>
-</div>
-
-<!-- ══ MODEL B: WHISPERER MODAL ══ -->
-<div class="modal" id="wsModal">
-  <div class="modal-header">
-    <span class="modal-title">Whisperer</span>
-    <button class="modal-close" onclick="closeModal('wsModal')">✕</button>
-  </div>
-  <div class="modal-body">
-    <!-- GATE -->
-    <div id="wsGate">
-      <div class="modal-tag" style="color:var(--as)">MODEL_B // PRIVATE</div>
-      <div class="modal-h">Whisperer</div>
-      <div class="modal-sub">DM ke username spesifik — subscribers only</div>
-      <div class="ws-feature-list">
-        <div class="ws-feature">✦ DM ke username manapun di JEJAK</div>
-        <div class="ws-feature">✦ Riwayat pesan tersimpan</div>
-        <div class="ws-feature">✦ Void Tap unlimited (5s burn)</div>
-        <div class="ws-feature">✦ Stranger Chat 3jam/hari included</div>
-      </div>
-      <div class="ws-price-box">
-        <div class="ws-price">Rp 50K</div>
-        <div class="ws-price-sub">per bulan · cancel kapanpun</div>
-      </div>
-      <button class="action-btn" style="background:var(--as);color:#000" onclick="subscribeWs()">Subscribe & Aktifkan</button>
-      <div class="modal-hint"><button class="modal-hint-link" onclick="closeModal('wsModal')">Nanti aja</button></div>
-    </div>
-    <!-- INBOX -->
-    <div id="wsInbox" style="display:none">
-      <div class="ws-inbox-hdr">
-        <div>
-          <div class="modal-tag" style="color:var(--as)">MODEL_B // PRIVATE</div>
-          <div style="font-size:20px;font-weight:800;letter-spacing:-.5px">Pesan</div>
-        </div>
-        <button class="ws-compose-btn" onclick="openWsCompose()">+ Tulis</button>
-      </div>
-      <div id="wsThreadList"></div>
-      <div class="ws-empty" id="wsEmptyState" style="display:none">
-        <span class="ws-empty-icon">✉</span>
-        <div class="ws-empty-title">Belum ada pesan</div>
-        <div class="ws-empty-sub">Mulai whisper ke seseorang</div>
-        <button class="action-btn" style="margin-top:20px;background:var(--as);color:#000" onclick="openWsCompose()">Mulai Whisper</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ WHISPERER COMPOSE ══ -->
-<div class="ws-compose" id="wsComposeScreen">
-  <div class="ws-compose-head">
-    <span class="ws-to-label">KE:</span>
-    <input class="ws-to-input" id="wsToInput" placeholder="@username" maxlength="32" oninput="validateWsTo()">
-    <button class="ws-close-btn" onclick="closeWsCompose()">✕</button>
-  </div>
-  <textarea class="ws-body" id="wsBodyInput" placeholder="Tulis pesanmu..." maxlength="1000" oninput="validateWsBody()"></textarea>
-  <div class="ws-compose-foot">
-    <span class="ws-char-count" id="wsCharCount">0 / 1000</span>
-    <button class="ws-send-btn" id="wsSendBtn" onclick="sendWs()" disabled>Kirim ✦</button>
-  </div>
-</div>
-
-<!-- ══ WHISPERER THREAD ══ -->
-<div class="ws-thread" id="wsThreadScreen">
-  <div class="ws-thread-head">
-    <button class="ws-back-btn" onclick="closeWsThread()">←</button>
-    <div class="ws-thread-title" id="wsThreadTitle">@username</div>
-    <button class="ws-vt-btn" onclick="openVtCompose()" title="Void Tap">◼</button>
-  </div>
-  <div class="ws-thread-msgs" id="wsThreadMsgs"></div>
-  <div class="ws-thread-input-wrap">
-    <input class="ws-thread-input" id="wsThreadInput" placeholder="Balas..." maxlength="1000">
-    <button class="ws-thread-send" onclick="sendWsReply()">➤</button>
-  </div>
-</div>
-
-<!-- ══ VOID TAP COMPOSE ══ -->
-<div class="vt-compose" id="vtCompose">
-  <div class="vt-compose-inner">
-    <div class="vt-lbl">Void Tap — hilang 5 detik setelah dibuka</div>
-    <textarea class="vt-textarea" id="vtText" placeholder="tulis sesuatu yang ga bisa kamu bilang di tempat lain..." maxlength="280"></textarea>
-    <div class="vt-meta">
-      <span class="vt-quota" id="vtQuotaDisplay">3 void tap tersisa hari ini</span>
-      <div class="vt-actions">
-        <button class="vt-cancel" onclick="closeVtCompose()">Batal</button>
-        <button class="vt-send" id="vtSendBtn" onclick="sendVoidTap()" disabled>Kirim</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ VOID TAP READER ══ -->
-<div class="vt-reader" id="vtReader">
-  <div class="vt-reader-from" id="vtReaderFrom">dari seseorang</div>
-  <div class="vt-reader-msg" id="vtReaderMsg"></div>
-  <div class="vt-reader-timer" id="vtReaderTimer">menghilang dalam 5</div>
-</div>
-
-<!-- UPGRADE NUDGE -->
-<div class="vt-upgrade-nudge" id="vtUpgradeNudge" onclick="showUpgradeModal()">
-  limit harian habis — <b>upgrade untuk unlimited void tap</b>
 </div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ── STATE ──
+// STATE
 let currentGender=null,chatPartner=null,timerInterval=null,chatTimeLeft=900;
 let selectedPlan=null,activeMood='all',radarInterval,radarRAF=null,userName='stranger';
 
@@ -875,24 +1212,40 @@ const $=id=>document.getElementById(id);
 const esc=t=>{const d=document.createElement('div');d.textContent=t;return d.innerHTML};
 
 function toast(msg,isErr=false){
-  const t=$('toast');t.textContent=msg;t.className='toast'+(isErr?' error':'');
-  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);
-}
-function closeModal(id){$(id).classList.remove('on')}
-function updateVibePct(val){$('vibePct').textContent=val+'%'}
-function filterMood(btn){
-  document.querySelectorAll('.mood-chip').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');activeMood=btn.dataset.mood;renderSpills();
+  const t=$('toast');
+  t.textContent=msg;
+  t.className='toast'+(isErr?' error':'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
 }
 
-// ── SPILLS ──
+function closeModal(id){$(id).classList.remove('on');}
+function updateVibePct(val){$('vibePct').textContent=val+'%';}
+
+function filterMood(btn){
+  document.querySelectorAll('.mood-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  activeMood=btn.dataset.mood;
+  renderSpills();
+}
+
+// SPILLS
 function generateAIRants(count=3){
-  const rants=[];let nextId=Math.max(...USER_RANTS.map(u=>u.id))+1;
+  const rants=[];
+  let nextId=Math.max(...USER_RANTS.map(u=>u.id))+1;
   for(let i=0;i<count;i++){
     const gender=Math.random()>.5?'female':'male';
     const char=AI_CHARS[gender][Math.floor(Math.random()*AI_CHARS[gender].length)];
     const mood=char.mood[Math.floor(Math.random()*char.mood.length)];
-    rants.push({id:nextId++,author:char.name,isAI:true,mood,content:char.rants[Math.floor(Math.random()*char.rants.length)],reactions:{skull:Math.floor(Math.random()*50),cry:Math.floor(Math.random()*100),fire:Math.floor(Math.random()*40),upside:Math.floor(Math.random()*30)},userReacted:null});
+    rants.push({
+      id:nextId++,
+      author:char.name,
+      isAI:true,
+      mood,
+      content:char.rants[Math.floor(Math.random()*char.rants.length)],
+      reactions:{skull:Math.floor(Math.random()*50),cry:Math.floor(Math.random()*100),fire:Math.floor(Math.random()*40),upside:Math.floor(Math.random()*30)},
+      userReacted:null
+    });
   }
   return rants;
 }
@@ -901,10 +1254,12 @@ function renderSpills(){
   const list=$('spillsList');
   const allSpills=[...USER_RANTS,...generateAIRants(6)];
   const filtered=activeMood==='all'?allSpills:allSpills.filter(s=>s.mood===activeMood);
+  
   if(!filtered.length){
     list.innerHTML='<div class="empty-state"><div class="empty-icon">🍃</div><div class="empty-title">Belum ada spill</div><div class="empty-text">Coba filter lain</div></div>';
     return;
   }
+  
   list.innerHTML=filtered.map(s=>`
     <div class="spill-card">
       <div class="spill-head">
@@ -913,9 +1268,14 @@ function renderSpills(){
       </div>
       <div class="spill-body">${esc(s.content)}</div>
       <div class="spill-actions">
-        ${Object.entries(REACTION_EMOJI).map(([k,em])=>`<button class="react-btn ${s.userReacted===k?'active':''}" onclick="react(this,${s.id},'${k}')">${em}<span class="react-count" id="rc-${s.id}-${k}">${s.reactions[k]}</span></button>`).join('')}
+        ${Object.entries(REACTION_EMOJI).map(([k,em])=>`
+          <button class="react-btn ${s.userReacted===k?'active':''}" onclick="react(this,${s.id},'${k}')">
+            ${em}<span class="react-count" id="rc-${s.id}-${k}">${s.reactions[k]}</span>
+          </button>
+        `).join('')}
       </div>
-    </div>`).join('');
+    </div>
+  `).join('');
 }
 
 function react(btn,id,key){
@@ -925,254 +1285,216 @@ function react(btn,id,key){
   document.querySelectorAll(`[id^="rc-${id}-"]`).forEach(el=>el.closest('button').classList.remove('active'));
   was?spill.reactions[key]--:(spill.reactions[key]++,btn.classList.add('active'));
   spill.userReacted=was?null:key;
-  Object.keys(spill.reactions).forEach(k=>{const el=$(`rc-${id}-${k}`);if(el)el.textContent=spill.reactions[k]});
+  Object.keys(spill.reactions).forEach(k=>{
+    const el=$(`rc-${id}-${k}`);
+    if(el)el.textContent=spill.reactions[k];
+  });
 }
-function refreshSpills(){renderSpills();toast('Teh baru diseduh ☕')}
 
-// ── RADAR — organic needle + phosphor trail ──
-let radarDots = [];
+function refreshSpills(){renderSpills();toast('Teh baru diseduh ☕');}
 
-// needle state
-let needleAngle   = 0;
-let needleOmega   = 0;          // angular velocity rad/frame
-let phaseA        = Math.random() * Math.PI * 2;  // primary speed oscillation
-let phaseB        = Math.random() * Math.PI * 2;  // secondary oscillation
-let phaseC        = Math.random() * Math.PI * 2;  // micro-jitter
-
-const BASE_RPM    = 60 / 4;    // ~4 s per revolution → ~15 RPM
-const BASE_OMEGA  = (BASE_RPM * Math.PI * 2) / (60 * 60); // rad/frame @60fps
-
-// phosphor trail — stores angle history
-const TRAIL_CAP   = 120;
-const trail       = new Float32Array(TRAIL_CAP);
-let   trailPtr    = 0;
-
-// dot residual glow
-const dotGlow     = new Map();  // dotIndex → age in frames since last hit
+// RADAR BELL & ROSS - FIXED NEEDLE
+let radarDots=[],radarAngle=0,radarRAF=null;
+const SWEEP_SPEED=Math.PI*2/(4*60); // 4 seconds per rotation
 
 function initRadar(){
-  const canvas = $('radarCanvas'), cont = $('radarCont');
+  const canvas=$('radarCanvas');
+  const display=$('radarDisplay');
+  
+  // Set canvas size to match display
   function resize(){
-    const r = cont.getBoundingClientRect();
-    canvas.width  = r.width;
-    canvas.height = r.height;
+    const rect=display.getBoundingClientRect();
+    // Use actual pixel size for crisp rendering
+    const dpr=window.devicePixelRatio||1;
+    canvas.width=rect.width*dpr;
+    canvas.height=rect.height*dpr;
+    canvas.style.width=rect.width+'px';
+    canvas.style.height=rect.height+'px';
+    
+    const ctx=canvas.getContext('2d');
+    ctx.scale(dpr,dpr);
   }
+  
   resize();
-  window.addEventListener('resize', resize, {passive:true});
+  window.addEventListener('resize',resize,{passive:true});
+  
   spawnDots();
-
-  // organic drift: each dot drifts slowly with individual momentum
-  radarInterval = setInterval(()=>{
-    radarDots.forEach(d => {
-      d.vx = (d.vx * 0.88) + (Math.random() - 0.5) * 0.3;
-      d.vy = (d.vy * 0.88) + (Math.random() - 0.5) * 0.3;
-      d.x  = Math.max(9, Math.min(91, d.x + d.vx));
-      d.y  = Math.max(9, Math.min(91, d.y + d.vy));
-      d.el.style.left = d.x + '%';
-      d.el.style.top  = d.y + '%';
+  
+  // Move dots periodically
+  radarInterval=setInterval(()=>{
+    radarDots.forEach(d=>{
+      d.x=Math.max(10,Math.min(90,d.x+(Math.random()-.5)*2));
+      d.y=Math.max(10,Math.min(90,d.y+(Math.random()-.5)*2));
+      d.el.style.left=d.x+'%';
+      d.el.style.top=d.y+'%';
     });
-  }, 100);
-
-  $('quotaBadge').textContent = Math.floor(18 + Math.random() * 15);
-  needleAngle = Math.random() * Math.PI * 2;
-  trail.fill(needleAngle);
-
+  },3000);
+  
+  $('quotaBadge').innerHTML=Math.floor(18+Math.random()*15)+'<span class="radar-stat-unit">USERS</span>';
+  
+  // Start animation loop
   radarLoop(canvas);
 }
 
 function spawnDots(){
-  const con = $('radarDots');
-  con.innerHTML = ''; radarDots = [];
-  const count = 5 + Math.floor(Math.random() * 5);
-  for(let i = 0; i < count + 2; i++){
-    const isAI  = i >= count;
-    const ang   = Math.random() * Math.PI * 2;
-    const dist  = 12 + Math.random() * 70;
-    const x     = 50 + Math.cos(ang) * dist / 2;
-    const y     = 50 + Math.sin(ang) * dist / 2;
-    const dot   = document.createElement('div');
-    const type  = isAI ? 'ai' : (Math.random() > 0.5 ? 'purple' : 'red');
-    dot.className = 'radar-dot ' + type;
-    dot.style.left = x + '%';
-    dot.style.top  = y + '%';
+  const con=$('radarDots');
+  con.innerHTML='';
+  radarDots=[];
+  const count=6+Math.floor(Math.random()*4);
+  
+  for(let i=0;i<count+2;i++){
+    const isAI=i>=count;
+    const angle=Math.random()*Math.PI*2;
+    const dist=15+Math.random()*65;
+    const x=50+Math.cos(angle)*dist/2;
+    const y=50+Math.sin(angle)*dist/2;
+    
+    const dot=document.createElement('div');
+    const type=isAI?'ai':(Math.random()>.5?'purple':'red');
+    dot.className='radar-dot '+type;
+    dot.style.left=x+'%';
+    dot.style.top=y+'%';
     con.appendChild(dot);
-    radarDots.push({el:dot, x, y, vx:0, vy:0, type, id:i});
+    
+    radarDots.push({el:dot,x,y,type});
   }
 }
 
 function radarLoop(canvas){
-  const ctx = canvas.getContext('2d');
-
-  function frame(now){
-    const W = canvas.width, H = canvas.height;
-    const cx = W / 2,       cy = H / 2;
-    const R  = Math.min(cx, cy) * 0.88;
-
-    // ── ORGANIC SPEED ──
-    // three overlapping sine waves → the needle feels alive, never mechanical
-    phaseA += 0.007;
-    phaseB += 0.013;
-    phaseC += 0.041;
-    const speedMult =
-      1.0
-      + Math.sin(phaseA) * 0.35        // slow wave ±35%
-      + Math.sin(phaseB) * 0.18        // medium wave ±18%
-      + Math.sin(phaseC) * 0.04;       // micro-jitter ±4%
-    const targetOmega = BASE_OMEGA * speedMult;
-
-    // velocity inertia — smooth acceleration/deceleration
-    needleOmega += (targetOmega - needleOmega) * 0.028;
-
-    needleAngle = (needleAngle + needleOmega) % (Math.PI * 2);
-
-    // store trail
-    trail[trailPtr] = needleAngle;
-    trailPtr = (trailPtr + 1) % TRAIL_CAP;
-
-    // ── FADE CANVAS — CRT phosphor decay ──
-    // slightly variable fade for ghost flicker
-    const fade = 0.09 + Math.sin(now * 0.0011) * 0.008;
-    ctx.fillStyle = `rgba(1,5,1,${fade})`;
-    ctx.fillRect(0, 0, W, H);
-
-    // ── PHOSPHOR TRAIL ──
-    // Draw TRAIL_CAP wedge slices from oldest→newest, exponential brightness
-    // Each slice spans exactly the angular gap between consecutive stored angles
-    for(let i = 0; i < TRAIL_CAP - 1; i++){
-      const newer = (trailPtr - 1 - i + TRAIL_CAP) % TRAIL_CAP;
-      const older = (trailPtr - 2 - i + TRAIL_CAP) % TRAIL_CAP;
-      const a0 = trail[older];
-      const a1 = trail[newer];
-
-      // recency: i=0 → newest, i=TRAIL_CAP-1 → oldest
-      const recency = 1 - i / TRAIL_CAP;
-      // non-linear: square root makes near-needle much brighter
-      const alpha = Math.pow(recency, 1.6) * 0.52;
-      if(alpha < 0.003) break;
-
-      // handle angle wrap-around
-      let start = a0, end = a1;
-      if(end - start > Math.PI)  start += Math.PI * 2;
-      if(start - end > Math.PI)  end   += Math.PI * 2;
-
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.arc(0, 0, R, start, end, false);
-      ctx.closePath();
-      ctx.fillStyle = `rgba(0,255,65,${alpha})`;
-      ctx.fill();
-      ctx.restore();
-    }
-
-    // ── NEEDLE LINE — bright crisp leading edge ──
+  const ctx=canvas.getContext('2d');
+  
+  function frame(){
+    // Get CSS size (not canvas pixel size)
+    const rect=canvas.getBoundingClientRect();
+    const W=rect.width;
+    const H=rect.height;
+    const cx=W/2;
+    const cy=H/2;
+    const R=Math.min(cx,cy)*0.85;
+    
+    // Update angle
+    radarAngle=(radarAngle+SWEEP_SPEED)%(Math.PI*2);
+    
+    // Clear with fade effect (phosphor persistence)
+    ctx.fillStyle='rgba(0,0,0,0.15)';
+    ctx.fillRect(0,0,W,H);
+    
+    // Draw sweep
     ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(needleAngle);
-
-    // glow halo
-    ctx.shadowColor = 'rgba(0,255,65,0.9)';
-    ctx.shadowBlur  = 10;
-
-    // line with radial fade
-    const lg = ctx.createLinearGradient(0, 0, R, 0);
-    lg.addColorStop(0,   'rgba(0,255,65,1)');
-    lg.addColorStop(0.55,'rgba(0,255,65,0.8)');
-    lg.addColorStop(0.85,'rgba(0,255,65,0.35)');
-    lg.addColorStop(1,   'rgba(0,255,65,0)');
+    ctx.translate(cx,cy);
+    ctx.rotate(radarAngle);
+    
+    // Sweep gradient
+    const gradient=ctx.createLinearGradient(0,0,R,0);
+    gradient.addColorStop(0,'rgba(0,255,65,1)');
+    gradient.addColorStop(0.3,'rgba(0,255,65,0.6)');
+    gradient.addColorStop(0.7,'rgba(0,255,65,0.2)');
+    gradient.addColorStop(1,'rgba(0,255,65,0)');
+    
+    // Draw sweep wedge
     ctx.beginPath();
-    ctx.moveTo(4, 0); // small gap at centre
-    ctx.lineTo(R, 0);
-    ctx.strokeStyle = lg;
-    ctx.lineWidth   = 1.8;
-    ctx.stroke();
-
-    // pivot cap
-    ctx.shadowBlur = 16;
-    ctx.shadowColor = 'rgba(0,255,65,1)';
-    ctx.beginPath();
-    ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
-    ctx.fillStyle = '#00ff41';
+    ctx.moveTo(0,0);
+    ctx.arc(0,0,R,-0.15,0.15);
+    ctx.closePath();
+    ctx.fillStyle=gradient;
     ctx.fill();
-
+    
+    // Center pivot
+    ctx.beginPath();
+    ctx.arc(0,0,3,0,Math.PI*2);
+    ctx.fillStyle='#00ff41';
+    ctx.shadowColor='#00ff41';
+    ctx.shadowBlur=10;
+    ctx.fill();
+    ctx.shadowBlur=0;
+    
     ctx.restore();
-
-    // ── DOT HIT — detection + canvas bloom ──
-    radarDots.forEach((d, di) => {
-      const px = d.x / 100 * W;
-      const py = d.y / 100 * H;
-      const dxp = px - cx, dyp = py - cy;
-      let dotAng = Math.atan2(dyp, dxp);
-      if(dotAng < 0) dotAng += Math.PI * 2;
-      let diff = needleAngle - dotAng;
-      if(diff < 0) diff += Math.PI * 2;
-
-      const age = dotGlow.get(di) ?? 999;
-
-      if(diff < 0.14 && age > 40){
-        // fresh sweep hit
-        dotGlow.set(di, 0);
-        d.el.classList.add('active');
-        setTimeout(() => d.el.classList.remove('active'), 700);
-      } else {
-        dotGlow.set(di, age + 1);
-      }
-
-      // residual phosphor bloom on canvas — fades over 60 frames
-      if(age < 60){
-        const t  = age / 60;
-        const ga = (1 - t) * (1 - t) * 0.9;
-        if(ga > 0.01){
-          const col = d.type === 'purple' ? [176,38,255] : d.type === 'red' ? [255,0,64] : [0,255,65];
-          const gr  = ctx.createRadialGradient(px, py, 0, px, py, 14 * (1-t) + 4);
-          gr.addColorStop(0, `rgba(${col[0]},${col[1]},${col[2]},${ga})`);
-          gr.addColorStop(1, `rgba(${col[0]},${col[1]},${col[2]},0)`);
-          ctx.beginPath();
-          ctx.arc(px, py, 14 * (1-t) + 4, 0, Math.PI * 2);
-          ctx.fillStyle = gr;
-          ctx.fill();
-        }
+    
+    // Check dot collisions
+    radarDots.forEach(d=>{
+      const px=d.x/100*W;
+      const py=d.y/100*H;
+      const dx=px-cx;
+      const dy=py-cy;
+      let dotAngle=Math.atan2(dy,dx);
+      if(dotAngle<0)dotAngle+=Math.PI*2;
+      
+      let diff=radarAngle-dotAngle;
+      if(diff<0)diff+=Math.PI*2;
+      if(diff>Math.PI)diff=Math.PI*2-diff;
+      
+      // Hit detection
+      if(diff<0.1){
+        d.el.classList.add('hit');
+        setTimeout(()=>d.el.classList.remove('hit'),500);
+        
+        // Draw hit glow on canvas
+        const col=d.type==='purple'?[176,38,255]:d.type==='red'?[255,0,64]:[0,255,65];
+        const grd=ctx.createRadialGradient(px,py,0,px,py,25);
+        grd.addColorStop(0,`rgba(${col[0]},${col[1]},${col[2]},0.8)`);
+        grd.addColorStop(0.5,`rgba(${col[0]},${col[1]},${col[2]},0.3)`);
+        grd.addColorStop(1,`rgba(${col[0]},${col[1]},${col[2]},0)`);
+        ctx.beginPath();
+        ctx.arc(px,py,25,0,Math.PI*2);
+        ctx.fillStyle=grd;
+        ctx.fill();
       }
     });
-
-    radarRAF = requestAnimationFrame(frame);
+    
+    radarRAF=requestAnimationFrame(frame);
   }
-
-  radarRAF = requestAnimationFrame(frame);
+  
+  radarRAF=requestAnimationFrame(frame);
 }
 
-// ── MODEL A: VIBE CHECK ──
-function startVibeCheck(){$('genderModal').classList.add('on')}
+// VIBE CHECK
+function startVibeCheck(){$('genderModal').classList.add('on');}
 
 function selectGender(el,g){
   document.querySelectorAll('.gender-card').forEach(c=>c.classList.remove('selected'));
-  el.classList.add('selected');currentGender=g;$('genderConfirm').disabled=false;
+  el.classList.add('selected');
+  currentGender=g;
+  $('genderConfirm').disabled=false;
 }
 
 function confirmGender(){
   if(!currentGender)return;
   closeModal('genderModal');
-  userName='stranger'; // fully anonymous — no prompt
+  userName='stranger';
   findRealUserFirst();
 }
 
 async function findRealUserFirst(){
-  $('chatMessages').innerHTML='';$('distressBanner').classList.remove('show');
-  $('chatRoom').classList.add('on');$('chatPartnerName').textContent='MENCARI...';
+  $('chatMessages').innerHTML='';
+  $('distressBanner').classList.remove('show');
+  $('chatRoom').classList.add('on');
+  $('chatPartnerName').textContent='MENCARI...';
+  
   const el=document.createElement('div');
-  el.className='chat-bubble them searching-msg';el.id='searching-indicator';
-  el.style.alignSelf='center';el.style.fontStyle='italic';el.style.borderStyle='dashed';el.style.borderColor='var(--aq)';el.style.color='var(--txs)';
+  el.className='chat-bubble them';
+  el.style.alignSelf='center';
+  el.style.fontStyle='italic';
+  el.style.borderStyle='dashed';
+  el.style.borderColor='var(--aq)';
+  el.style.color='var(--txs)';
+  el.id='searching-indicator';
   el.textContent='🔍 sedang dicarikan teman ngobrol...';
   $('chatMessages').appendChild(el);
-
+  
   let t=60;
   const searchTimer=setInterval(()=>{
-    t--;const e=$('searching-indicator');
+    t--;
+    const e=$('searching-indicator');
     if(e)e.textContent=`🔍 mencari teman... (${t}s)`;
-    if(t<=0){clearInterval(searchTimer);if($('searching-indicator')){$('searching-indicator').remove();fallbackToAI()}}
+    if(t<=0){
+      clearInterval(searchTimer);
+      if($('searching-indicator')){
+        $('searching-indicator').remove();
+        fallbackToAI();
+      }
+    }
   },1000);
-
+  
   if(Math.random()<.4){
     setTimeout(()=>{
       clearInterval(searchTimer);
@@ -1191,11 +1513,14 @@ function fallbackToAI(){
   const opp=currentGender==='male'?'female':'male';
   const char=AI_CHARS[opp][Math.floor(Math.random()*AI_CHARS[opp].length)];
   chatPartner={name:char.name,isAI:true,gender:opp,charData:char};
-  toast('💬 Ditemani AI dulu ya');startRealChat();
+  toast('💬 Ditemani AI dulu ya');
+  startRealChat();
 }
 
 function startRealChat(){
-  chatTimeLeft=900;$('chatMessages').innerHTML='';$('distressBanner').classList.remove('show');
+  chatTimeLeft=900;
+  $('chatMessages').innerHTML='';
+  $('distressBanner').classList.remove('show');
   $('chatPartnerName').textContent='STRANGER_'+String(Math.floor(Math.random()*99)).padStart(2,'0');
   startTimer();
   setTimeout(()=>{
@@ -1206,57 +1531,74 @@ function startRealChat(){
   },800);
 }
 
-function closeChat(){clearInterval(timerInterval);timerInterval=null;$('chatRoom').classList.remove('on');toast('👋 Sampai jumpa!')}
+function closeChat(){
+  clearInterval(timerInterval);
+  timerInterval=null;
+  $('chatRoom').classList.remove('on');
+  toast('👋 Sampai jumpa!');
+}
+
 function startTimer(){
   updateTimer();
   timerInterval=setInterval(()=>{
-    chatTimeLeft--;updateTimer();
+    chatTimeLeft--;
+    updateTimer();
     if(chatTimeLeft===300)toast('⚠️ Sisa 5 menit! Upgrade untuk lanjut.');
     if(chatTimeLeft<=0)endChat();
   },1000);
 }
+
 function updateTimer(){
   const m=Math.floor(chatTimeLeft/60),s=chatTimeLeft%60;
   $('chatTimer').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   $('chatTimer').classList.toggle('warn',chatTimeLeft<=300);
 }
-function endChat(){clearInterval(timerInterval);timerInterval=null;$('chatRoom').classList.remove('on');$('upgradeModal').classList.add('on')}
 
-// ── TYPING ENGINE (preserved intact) ──
+function endChat(){
+  clearInterval(timerInterval);
+  timerInterval=null;
+  $('chatRoom').classList.remove('on');
+  $('upgradeModal').classList.add('on');
+}
+
+// TYPING ENGINE
 class TypingEngine{
   showTypingIndicator(){
     const el=document.createElement('div');
-    el.className='typing';el.id='typing-indicator-real';
+    el.className='typing';
+    el.id='typing-indicator-real';
     el.innerHTML='<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
-    $('chatMessages').appendChild(el);$('chatMessages').scrollTop=9999;return el;
+    $('chatMessages').appendChild(el);
+    $('chatMessages').scrollTop=9999;
+    return el;
   }
+  
   async typeMessage(text){
     const container=$('chatMessages');
-    const msgDiv=document.createElement('div');msgDiv.className='chat-msg other';
-    const bubbleDiv=document.createElement('div');bubbleDiv.className='chat-bubble';
-    msgDiv.appendChild(bubbleDiv);container.appendChild(msgDiv);
-    const cur=document.createElement('span');cur.className='typing-cursor';bubbleDiv.appendChild(cur);
-    let typed='',willTypo=Math.random()<.15,typoIdx=-1,typoChar='',typoFixed=false;
-    if(willTypo){typoIdx=Math.floor(Math.random()*(text.length/2))+3;typoChar='asdfghjklzxcvbnmqwertyuiop'[Math.floor(Math.random()*26)]}
-    for(let i=0;i<=text.length;i++){
-      if(willTypo&&!typoFixed&&i===typoIdx){
-        typed+=typoChar;bubbleDiv.innerHTML=typed;cur.remove();bubbleDiv.appendChild(cur);await this.sleep(150+Math.random()*100);
-        for(let b=0;b<2;b++){typed=typed.slice(0,-1);bubbleDiv.innerHTML=typed;cur.remove();bubbleDiv.appendChild(cur);await this.sleep(100+Math.random()*50)}
-        typoFixed=true;continue;
-      }
-      if(i<text.length){
-        typed+=text[i];bubbleDiv.innerHTML=typed;cur.remove();bubbleDiv.appendChild(cur);
-        let d=50+Math.random()*150;
-        if(text[i]===','||text[i]===';')d=300;
-        if(text[i]==='.'||text[i]==='?'||text[i]==='!')d=500;
-        await this.sleep(d);
-      }
+    const msgDiv=document.createElement('div');
+    msgDiv.className='chat-bubble them';
+    container.appendChild(msgDiv);
+    
+    let typed='';
+    for(let i=0;i<text.length;i++){
+      typed+=text[i];
+      msgDiv.textContent=typed;
+      
+      let delay=40+Math.random()*80;
+      if(text[i]===','||text[i]===';')delay=200;
+      if(text[i]==='.'||text[i]==='?'||text[i]==='!')delay=400;
+      await this.sleep(delay);
     }
-    cur.remove();
-    const ts=document.createElement('div');ts.className='chat-meta';ts.textContent=new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
-    msgDiv.appendChild(ts);container.scrollTop=container.scrollHeight;return msgDiv;
+    
+    const time=document.createElement('div');
+    time.className='chat-time';
+    time.textContent=new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+    msgDiv.appendChild(time);
+    
+    container.scrollTop=container.scrollHeight;
   }
-  sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+  
+  sleep(ms){return new Promise(r=>setTimeout(r,ms));}
 }
 const typingEngine=new TypingEngine();
 
@@ -1269,10 +1611,15 @@ function generateAIRant(){
 }
 
 async function sendMsg(){
-  const inp=$('chatInput'),text=inp.value.trim();if(!text)return;
-  addMsg(text,true);inp.value='';
+  const inp=$('chatInput'),text=inp.value.trim();
+  if(!text)return;
+  
+  addMsg(text,true);
+  inp.value='';
+  
   const delay=Math.min(3000,Math.max(800,text.length*120))*(0.7+Math.random()*.6);
   const ind=typingEngine.showTypingIndicator();
+  
   if(chatPartner?.isAI){
     setTimeout(async()=>{
       ind.remove();
@@ -1280,17 +1627,19 @@ async function sendMsg(){
         const rant=generateAIRant();
         if(rant){
           await typingEngine.typeMessage(rant.text);
-          if(Math.random()<.5)setTimeout(()=>addMsg(`[mood: ${rant.mood}]`,false),500);
           if(rant.mood==='doom'||rant.mood==='surviving')$('distressBanner').classList.add('show');
-        } else await typingEngine.typeMessage('*ngelantur sendiri*');
-      } else {
+        }
+      }else{
         const r=['haha iya gitu deh','sama wkwk','eh gue juga gitu','nggak nyangka lo jg','ya ampun relate banget'];
         await typingEngine.typeMessage(r[Math.floor(Math.random()*r.length)]);
       }
     },delay);
-  } else {
+  }else{
     const r=['haha iya gitu deh','sama wkwk','eh gue juga','nggak nyangka lo jg','ya ampun relate'];
-    setTimeout(async()=>{ind.remove();if(Math.random()<.75)await typingEngine.typeMessage(r[Math.floor(Math.random()*r.length)])},delay);
+    setTimeout(async()=>{
+      ind.remove();
+      if(Math.random()<.75)await typingEngine.typeMessage(r[Math.floor(Math.random()*r.length)]);
+    },delay);
   }
 }
 
@@ -1299,217 +1648,40 @@ function addMsg(text,isOwn){
   div.className='chat-bubble '+(isOwn?'me':'them');
   const time=new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
   div.innerHTML=esc(text)+`<div class="chat-time">${time}</div>`;
-  const msgs=$('chatMessages');msgs.appendChild(div);
+  const msgs=$('chatMessages');
+  msgs.appendChild(div);
   while(msgs.children.length>20)msgs.removeChild(msgs.firstChild);
   msgs.scrollTop=9999;
 }
 
 function selectPlan(el,plan){
   document.querySelectorAll('.price-card').forEach(c=>c.classList.remove('selected'));
-  el.classList.add('selected');selectedPlan=plan;$('upgradeNow').disabled=false;
+  el.classList.add('selected');
+  selectedPlan=plan;
+  $('upgradeNow').disabled=false;
 }
+
 function upgradeNow(){
-  if(!selectedPlan)return;toast('🔄 Memproses upgrade...');
+  if(!selectedPlan)return;
+  toast('🔄 Memproses upgrade...');
   setTimeout(()=>{
-    toast('✅ Upgrade berhasil!');closeModal('upgradeModal');
-    if(chatPartner){chatTimeLeft=selectedPlan==='weekly'?7200:10800;$('chatRoom').classList.add('on');clearInterval(timerInterval);startTimer();addMsg('obrolan dilanjut!',false)}
-  },1500);
-}
-
-// ── MODEL B: WHISPERER ──
-const WS={
-  isSubscribed:localStorage.getItem('ws_subscribed')==='true',
-  threads:JSON.parse(localStorage.getItem('ws_threads')||'[]'),
-  save(){localStorage.setItem('ws_threads',JSON.stringify(this.threads))},
-  getThread(u){return this.threads.find(t=>t.username===u)},
-  addMessage(u,text,isOwn){
-    let t=this.getThread(u);
-    if(!t){t={username:u,messages:[],unread:0,updatedAt:Date.now()};this.threads.unshift(t)}
-    else this.threads=[t,...this.threads.filter(x=>x.username!==u)];
-    t.messages.push({id:Date.now(),text,isOwn,time:new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}),timestamp:Date.now()});
-    if(!isOwn)t.unread=(t.unread||0)+1;
-    t.updatedAt=Date.now();
-    if(t.messages.length>50)t.messages=t.messages.slice(-50);
-    this.save();
-  },
-  markRead(u){const t=this.getThread(u);if(t){t.unread=0;this.save()}},
-  totalUnread(){return this.threads.reduce((s,t)=>s+(t.unread||0),0)}
-};
-
-let activeWsThread=null;
-
-function openWsModal(){
-  if(!WS.isSubscribed){$('wsGate').style.display='block';$('wsInbox').style.display='none'}
-  else{$('wsGate').style.display='none';$('wsInbox').style.display='block';renderWsInbox()}
-  $('wsModal').classList.add('on');
-}
-function subscribeWs(){
-  toast('⟳ Memproses pembayaran...');
-  setTimeout(()=>{
-    WS.isSubscribed=true;localStorage.setItem('ws_subscribed','true');
-    if(!WS.threads.length){
-      WS.addMessage('pretty.sad','hei, gue liat spill lo. lo oke?',false);
-      WS.addMessage('cinnamon.girl','thanks udah chat kemarin ya',false);
+    toast('✅ Upgrade berhasil!');
+    closeModal('upgradeModal');
+    if(chatPartner){
+      chatTimeLeft=selectedPlan==='weekly'?7200:10800;
+      $('chatRoom').classList.add('on');
+      clearInterval(timerInterval);
+      startTimer();
+      addMsg('obrolan dilanjut!',false);
     }
-    $('wsGate').style.display='none';$('wsInbox').style.display='block';
-    renderWsInbox();toast('✓ Whisperer aktif');
   },1500);
 }
-function renderWsInbox(){
-  const list=$('wsThreadList'),empty=$('wsEmptyState');if(!list)return;
-  if(!WS.threads.length){list.innerHTML='';empty.style.display='block';return}
-  empty.style.display='none';
-  list.innerHTML=WS.threads.map(t=>{
-    const last=t.messages[t.messages.length-1];
-    const preview=last?(last.isOwn?'Kamu: '+last.text:last.text):'—';
-    const ago=last?timeAgoShort(last.timestamp):'';
-    return`<div class="ws-thread-item${t.unread?' unread':''}" onclick="openWsThread('${t.username}')">
-      <div class="ws-avatar">${t.username[0].toUpperCase()}</div>
-      <div class="ws-thread-info">
-        <div class="ws-thread-name">@${esc(t.username)}</div>
-        <div class="ws-thread-preview">${esc(preview.slice(0,60))}</div>
-      </div>
-      <div class="ws-thread-right">
-        <div class="ws-thread-time">${ago}</div>
-        ${t.unread?`<div class="ws-unread-badge">${t.unread}</div>`:''}
-      </div>
-    </div>`;
-  }).join('');
-}
-function timeAgoShort(ts){
-  const s=Math.floor((Date.now()-ts)/1000);if(s<60)return'baru';
-  const m=Math.floor(s/60);if(m<60)return m+'m';
-  const h=Math.floor(m/60);if(h<24)return h+'j';
-  return Math.floor(h/24)+'h';
-}
-function openWsCompose(){
-  closeModal('wsModal');
-  $('wsToInput').value='';$('wsBodyInput').value='';
-  $('wsCharCount').textContent='0 / 1000';$('wsSendBtn').disabled=true;
-  $('wsComposeScreen').classList.add('on');
-  setTimeout(()=>$('wsToInput').focus(),200);
-}
-function closeWsCompose(){$('wsComposeScreen').classList.remove('on')}
-function validateWsTo(){
-  const to=$('wsToInput').value.replace('@','').trim(),body=$('wsBodyInput').value.trim();
-  $('wsSendBtn').disabled=!(to.length>=2&&body.length>0);
-}
-function validateWsBody(){
-  const body=$('wsBodyInput').value;
-  $('wsCharCount').textContent=`${body.length} / 1000`;
-  $('wsCharCount').style.color=body.length>900?'var(--war)':'var(--txm)';
-  validateWsTo();
-}
-function sendWs(){
-  const to=$('wsToInput').value.replace('@','').trim(),body=$('wsBodyInput').value.trim();
-  if(!to||!body)return;
-  WS.addMessage(to,body,true);closeWsCompose();
-  setTimeout(()=>{
-    const r=['hei! baru liat ini. lagi apa?','wah, sama banget rasanya','makasih udah DM. gue lagi oke kok','haha iya relate banget','eh beneran? gue juga lagi ngerasain itu'];
-    WS.addMessage(to,r[Math.floor(Math.random()*r.length)],false);updateWsBadge();
-  },4000+Math.random()*8000);
-  toast(`✓ Whisper terkirim ke @${to}`);openWsModal();
-}
-function openWsThread(u){
-  activeWsThread=u;WS.markRead(u);
-  $('wsThreadTitle').textContent='@'+u;
-  closeModal('wsModal');renderWsThread(u);
-  $('wsThreadScreen').classList.add('on');
-  setTimeout(()=>$('wsThreadInput').focus(),200);
-}
-function closeWsThread(){$('wsThreadScreen').classList.remove('on');activeWsThread=null;openWsModal()}
-function renderWsThread(u){
-  const thread=WS.getThread(u),container=$('wsThreadMsgs');if(!thread||!container)return;
-  container.innerHTML=thread.messages.map(m=>`<div class="chat-bubble ${m.isOwn?'me':'them'}">${esc(m.text)}<div class="chat-time">${m.time}</div></div>`).join('');
-  container.scrollTop=container.scrollHeight;
-}
-function sendWsReply(){
-  const inp=$('wsThreadInput'),text=inp.value.trim();if(!text||!activeWsThread)return;
-  WS.addMessage(activeWsThread,text,true);inp.value='';renderWsThread(activeWsThread);
-  setTimeout(()=>{
-    const r=['iya gue tau','hm, beneran?','wah relate','haha iya juga sih','eh makasih udah cerita'];
-    WS.addMessage(activeWsThread,r[Math.floor(Math.random()*r.length)],false);
-    renderWsThread(activeWsThread);updateWsBadge();
-  },2000+Math.random()*5000);
-}
-function updateWsBadge(){
-  const badge=$('wsBadge'),total=WS.totalUnread();
-  badge.textContent=total;badge.classList.toggle('show',total>0);
-}
 
-// ── VOID TAP ──
-const VT={
-  FREE_DAILY:3,BURN_SECS:5,isPremium:false,
-  get quotaKey(){return'vt_quota_'+new Date().toDateString()},
-  get remaining(){if(this.isPremium)return Infinity;return Math.max(0,this.FREE_DAILY-parseInt(localStorage.getItem(this.quotaKey)||'0'))},
-  use(){
-    if(this.isPremium)return true;
-    const used=parseInt(localStorage.getItem(this.quotaKey)||'0');
-    if(used>=this.FREE_DAILY)return false;
-    localStorage.setItem(this.quotaKey,String(used+1));return true;
-  },
-  inbox:JSON.parse(localStorage.getItem('vt_inbox')||'[]'),
-  saveInbox(){localStorage.setItem('vt_inbox',JSON.stringify(this.inbox))},
-  addToInbox(msg,from='seseorang'){this.inbox.push({id:Date.now(),msg,from,read:false});this.saveInbox();updateVtIndicator()}
-};
-let vtBurnTimer=null;
-
-function updateVtIndicator(){
-  const ind=$('vtIndicator');if(!ind)return;
-  ind.classList.toggle('has-tap',VT.inbox.some(t=>!t.read));
-}
-function openVtCompose(){
-  const rem=VT.remaining;if(rem<=0){showVtUpgradeNudge();return}
-  const qEl=$('vtQuotaDisplay');
-  if(qEl){qEl.textContent=VT.isPremium?'unlimited':`${rem} void tap tersisa hari ini`;qEl.className='vt-quota'+(rem<=1?' low':'')}
-  const ta=$('vtText');if(ta){ta.value='';$('vtSendBtn').disabled=true}
-  $('vtCompose').classList.add('on');setTimeout(()=>ta?.focus(),200);
-}
-function closeVtCompose(){$('vtCompose').classList.remove('on')}
-function sendVoidTap(){
-  const text=$('vtText').value.trim();if(!text)return;
-  if(!VT.use()){closeVtCompose();showVtUpgradeNudge();return}
-  closeVtCompose();toast('◼  void tap terkirim');
-  setTimeout(()=>VT.addToInbox(text,chatPartner?.name||activeWsThread||'seseorang'),3000);
-}
-function checkVoidTaps(){
-  const unread=VT.inbox.filter(t=>!t.read);if(!unread.length)return;
-  openVtReader(unread[0]);
-}
-function openVtReader(tap){
-  const reader=$('vtReader');if(!reader)return;
-  tap.read=true;VT.saveInbox();updateVtIndicator();
-  $('vtReaderMsg').textContent=tap.msg;
-  $('vtReaderFrom').textContent='dari '+tap.from;
-  $('vtReaderTimer').textContent=`menghilang dalam ${VT.BURN_SECS}`;
-  reader.classList.remove('burning');reader.classList.add('on');
-  let c=VT.BURN_SECS;
-  vtBurnTimer=setInterval(()=>{
-    c--;const t=$('vtReaderTimer');if(t)t.textContent=`menghilang dalam ${c}`;
-    if(c<=0){clearInterval(vtBurnTimer);vtBurnTimer=null;burnVtReader(tap.id)}
-  },1000);
-}
-function burnVtReader(id){
-  const reader=$('vtReader');reader.classList.add('burning');
-  VT.inbox=VT.inbox.filter(t=>t.id!==id);VT.saveInbox();
-  setTimeout(()=>{reader.classList.remove('on','burning');updateVtIndicator()},900);
-}
-function showVtUpgradeNudge(){
-  const el=$('vtUpgradeNudge');if(!el)return;
-  el.classList.add('show');setTimeout(()=>el.classList.remove('show'),4000);
-}
-function showUpgradeModal(){$('vtUpgradeNudge')?.classList.remove('show');$('upgradeModal').classList.add('on')}
-
-// ── INIT ──
+// INIT
 document.addEventListener('DOMContentLoaded',()=>{
-  initRadar();renderSpills();
-  $('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg()});
-  $('wsThreadInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendWsReply()});
-  window.addEventListener('beforeunload',()=>{clearInterval(radarInterval);clearInterval(timerInterval);if(radarRAF)cancelAnimationFrame(radarRAF)});
-  const ta=$('vtText');if(ta)ta.addEventListener('input',()=>{$('vtSendBtn').disabled=ta.value.trim().length===0});
-  updateVtIndicator();updateWsBadge();
-  // Demo VT setelah 8s
-  setTimeout(()=>{if(!VT.inbox.length)VT.addToInbox('gue ga tau siapa lo tapi gue harap lo baik-baik aja malam ini','seseorang')},8000);
+  initRadar();
+  renderSpills();
+  $('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendMsg();});
 });
 </script>
 </body>
