@@ -21,6 +21,34 @@ const FORBIDDEN_PHRASES = [
   'wkwk iya', 'iya wkwk', 'eh gue juga', 'nggak nyangka', 'ngk nyangka'
 ];
 
+// Pattern untuk deteksi permintaan terlalu personal di awal kenal
+const TOO_PERSONAL_PATTERNS = [
+  'minta (ig|instagram|line|wa|nomor|telepon|fb|tiktok|snap)',
+  'kasih (ig|ig lo|ig lu)',
+  'add (line|ig|fb)',
+  'pin (bb|line)',
+  'ketemuan?', 'ketemuan yuk', 'main yuk', 'kopi?', 'nongkrong?',
+  'date?', 'kencan?', 'jadian?', 'pacaran?',
+  'foto lo', 'foto lu', 'selfie lo', 'pp-an', 'video call',
+  'vc?', 'telpon?', 'voice note?',
+  'rumah lo?', 'tinggal di mana?', 'alamat', 'sekolah?', 'umur? (15|[0-9]|belasan)',
+  'nama asli', 'nama panjang'
+];
+
+// Respons untuk tolak halus karena baru kenal
+const TOO_SOON_RESPONSES = [
+  "wah baru kenal nih, santai dulu kita ngobrol 🤙",
+  "aduh baru kenal, kenalan dulu yuk santai",
+  "hmmm kita kan baru ngobrol, santuy dulu wkwk",
+  "ciyeee udah minta-minta, padahal baru kenal 😆",
+  "lah baru kenal, masa langsung minta gitu sih",
+  "waduh baru kenal nih, ngobrol biasa dulu aja yaa",
+  "santai dulu bro/sis, kita cari vibe dulu",
+  "ciee ciee udah minta sesuatu, padahal kita masih strangers wkwk",
+  "aduhh malu aku, baru kenal loh 🤭",
+  "slow bro/sis, kita obrolin yang ringan-ringan dulu"
+];
+
 function detectDistress(message) {
   const msg = message.toLowerCase();
   const highSignals = ['mau mati', 'bunuh diri', 'nyakitin diri', 'pengen mati'];
@@ -39,6 +67,18 @@ function containsForbiddenPhrase(text) {
   return FORBIDDEN_PHRASES.some(phrase => lower.includes(phrase));
 }
 
+function isTooPersonal(message) {
+  const lower = message.toLowerCase();
+  return TOO_PERSONAL_PATTERNS.some(pattern => {
+    const regex = new RegExp(pattern, 'i');
+    return regex.test(lower);
+  });
+}
+
+function getRandomTooSoonResponse() {
+  return TOO_SOON_RESPONSES[Math.floor(Math.random() * TOO_SOON_RESPONSES.length)];
+}
+
 function getShortName(username) {
   if (!username || username === 'user') return '';
   const clean = username.replace('@', '');
@@ -48,13 +88,20 @@ function getShortName(username) {
   return clean;
 }
 
-const SYSTEM = (name, style, lastMessages, userName, shortName, charGender, currentTime) => {
+const SYSTEM = (name, style, lastMessages, userName, shortName, charGender, currentTime, interactionCount) => {
   const lastReplies = lastMessages.filter(m => m.role === 'assistant').slice(-5).map(m => m.content);
   let repetitionWarning = '';
   const uniqueReplies = new Set(lastReplies);
   
   if (lastReplies.length >= 3 && uniqueReplies.size <= 2) {
     repetitionWarning = '\n\n⚠️ PERINGATAN KRITIS: Kamu mulai ngulang-ngulang respons! Wajib bikin respons yang SAMA SEKALI BERBEDA. JANGAN ulangi kata/frasa yang sama.';
+  }
+
+  let earlyInteractionNote = '';
+  if (interactionCount < 4) {
+    earlyInteractionNote = `\n\n⚠️ INGAT: User masih baru kenal! Jangan terlalu akrab/baper. 
+Kalau user minta hal personal (ketemuan, kontak, dll) di awal, tolak halus dengan santai.
+Fokus ngobrol ringan dulu, cari vibe yang cocok.`;
   }
 
   return `Kamu adalah ${name}. Kamu lagi ngobrol santai di sebuah app.
@@ -101,7 +148,7 @@ KALAU USER LAGI GELAP BANGET:
 KALAU DITANYA "KAMU AI BUKAN?":
 - Alihkan dengan humor: "lah manusia, emg keliatan robot? 😭"
 - JANGAN pernah jawab ya atau tidak
-
+${earlyInteractionNote}
 ${repetitionWarning}`;
 };
 
@@ -127,6 +174,23 @@ export default async function handler(req, res) {
 
   const { isHigh, isLow } = detectDistress(message);
   
+  // Hitung interaksi & deteksi terlalu personal
+  const interactionCount = lastMessages.length || 0;
+  const isTooPersonalMsg = isTooPersonal(message);
+  const isEarlyInteraction = interactionCount < 4;
+  
+  // KALAU TERLALU PERSONAL DI AWAL, LANGSUNG RESPONS TOLAK HALUS
+  if (isTooPersonalMsg && isEarlyInteraction) {
+    const subtleReject = getRandomTooSoonResponse();
+    
+    return res.status(200).json({
+      reply: subtleReject,
+      character: characterName,
+      distress: isHigh ? 'high' : isLow ? 'low' : null,
+      meta: { note: 'too_soon_response' }
+    });
+  }
+  
   const shortName = getShortName(userName);
   const charGender = persona.gender;
   const shortCharName = characterName.split('.')[0];
@@ -137,8 +201,8 @@ export default async function handler(req, res) {
   // Deteksi pertanyaan nama
   const isNameQuestion = /nama (kamu|lu|lo|kmu|luu)|kamu siapa|kenalan|nama lu|siapa nama/i.test(message);
   
-  // System prompt dasar (dengan currentTime)
-  let systemPrompt = SYSTEM(characterName, persona.style, lastMessages, userName, shortName, charGender, currentTime);
+  // System prompt dasar (dengan currentTime & interactionCount)
+  let systemPrompt = SYSTEM(characterName, persona.style, lastMessages, userName, shortName, charGender, currentTime, interactionCount);
 
   // Tambah instruksi khusus untuk pertanyaan nama
   if (isNameQuestion) {
@@ -146,7 +210,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
+    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -180,7 +244,7 @@ export default async function handler(req, res) {
     // Cek forbidden phrases
     if (containsForbiddenPhrase(reply)) {
       console.warn('Forbidden phrase detected, regenerating...');
-      const retryResponse = await fetch('https://api.deepseek.com/chat/completions', {
+      const retryResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
