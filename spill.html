@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
+/* ==================== CSS (SAMA PERSIS) ==================== */
 :root{
   --bg:#000;--sf:#0a0a0a;--sfe:#111;--bd:#1a1a1a;--tx:#fff;
   --txs:#666;--txm:#444;--ap:#ff3d00;--as:#00f0ff;--aq:#00ff41;
@@ -1577,7 +1578,7 @@ function closeChat() {
   }
 }
 
-// FUNGSI UTAMA: Call Chat API
+// FUNGSI UTAMA: Call Chat API - DENGAN PERBAIKAN
 async function callChatAPI(userMessage, isFirstMessage = false) {
   if (!chatPartner || !chatPartner.isAI) return;
   
@@ -1604,14 +1605,9 @@ async function callChatAPI(userMessage, isFirstMessage = false) {
     } else {
       // PRODUCTION - Panggil API beneran
       
-      // Validasi URL
-      if (!API_URL || API_URL === 'https://your-app.vercel.app/api/chat') {
-        throw new Error('API_URL belum dikonfigurasi dengan benar. Ganti dengan URL Vercel Anda!');
-      }
-      
-      // Siapkan payload sesuai format chat.js
+      // PERBAIKAN: Untuk first message, kirim pesan "halo" bukan empty string
       const payload = {
-        message: isFirstMessage ? '' : userMessage,
+        message: isFirstMessage ? "halo" : userMessage,
         characterName: chatPartner.name,
         userName: userName,
         lastMessages: chatHistory.slice(-8)
@@ -1663,15 +1659,17 @@ async function callChatAPI(userMessage, isFirstMessage = false) {
     chatHistory.push({ role: 'assistant', content: reply });
     
   } catch (error) {
-    console.error('Error calling chat API:', error);
+    console.error('❌ Error calling chat API:', error);
     typingDiv.remove();
     
     apiOffline = true;
     toast('Gagal terhubung ke server chat. Periksa koneksi atau hubungi admin.', true);
     
     if (isFirstMessage) {
-      addMsg('⚠️ Layanan chat sedang tidak tersedia. Silakan coba lagi nanti.', false);
-      chatHistory.push({ role: 'assistant', content: '[system: service unavailable]' });
+      // Fallback message jika API error
+      const fallbackMsg = `halo, gue ${chatPartner.name.split('.')[0]}. salam kenal 😊`;
+      addMsg(fallbackMsg, false);
+      chatHistory.push({ role: 'assistant', content: fallbackMsg });
     }
   }
 }
