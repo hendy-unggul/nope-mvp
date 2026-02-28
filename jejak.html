@@ -287,13 +287,14 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
     <div class="hnote" id="hnote">"jeda"</div>
     <div class="upctrls">
       <button class="upbtn" id="upbtn">+</button>
+      <div class="qtimer" id="qtimer">Klik untuk upload foto (maks 6)</div>
     </div>
   </div>
 </section>
 
 <section class="isec">
   <div class="ihdr"><span class="ilbl">Spill your truth</span><span class="ccount" id="ccount">0/500</span></div>
-  <textarea class="ri" id="ri" placeholder="What's eating you alive right now? No cap, no filter..." maxlength="500"></textarea>
+  <textarea class="ri" id="ri" placeholder="What's eating you alive right now? No cap, no filter..." maxlength="500" oninput="updateCharCount()"></textarea>
   <div class="msec">
     <div class="mlbl">Pilih mood-mu sekarang</div>
     <div class="mgrid">
@@ -387,7 +388,6 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
     <a href="jejak.html" class="ni act"><span class="nico">✦</span><span>Jejak</span></a>
     <a href="glitch.html" class="ni"><span class="nico">⚡</span><span>Glitch</span></a>
     <a href="cocomeo.html" class="ni"><span class="nico">〜</span><span>Cocomeo</span></a>
-    
   </div>
 </nav>
 
@@ -499,6 +499,10 @@ function timeAgo(timestamp) {
   if (hours < 24) return `${hours}j lalu`;
   return `${Math.floor(hours / 24)}h lalu`;
 }
+function updateCharCount() {
+  const val = $('ri').value.length;
+  $('ccount').textContent = val + '/500';
+}
 
 // ============================================
 // RENDER FUNCTIONS - WORK EVEN WITHOUT AUTH
@@ -591,7 +595,7 @@ function setHero(id) {
 }
 
 // ============================================
-// SUPABASE & AUTH (Optional - app works without it)
+// SUPABASE & AUTH
 // ============================================
 let supabase = null;
 
@@ -625,8 +629,9 @@ async function checkAuth() {
       $('huser').textContent = '@' + S.user;
       $('odot').classList.remove('off');
       
-      // Load user data from localStorage
-      loadUserData();
+      // Load real data from database
+      await loadEntries();
+      await loadArtefacts();
       
       console.log('Auth success:', S.user);
       return true;
@@ -637,24 +642,139 @@ async function checkAuth() {
   return false;
 }
 
-function loadUserData() {
-  if (!S.userId) return;
-  
+// ============================================
+// LOAD DATA FROM SUPABASE
+// ============================================
+async function loadEntries() {
   try {
-    const savedEntries = localStorage.getItem(`jejak_entries_${S.userId}`);
-    if (savedEntries) S.entries = JSON.parse(savedEntries);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
     
-    const savedArtefacts = localStorage.getItem(`jejak_artefacts_${S.userId}`);
-    if (savedArtefacts) S.artefacts = JSON.parse(savedArtefacts);
+    const { data, error } = await supabase
+      .from('entries')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false })
+      .limit(6);
     
-    console.log('Loaded user data:', S.entries.length, 'entries,', S.artefacts.length, 'artefacts');
-  } catch(e) {
-    console.error('Load data error:', e);
+    if (error) throw error;
+    
+    if (data && data.length > 0) {
+      // Convert ke format yang sama dengan dummy
+      S.entries = data.map(e => ({
+        id: e.id,
+        content: e.content,
+        mood: e.mood,
+        timestamp: new Date(e.created_at).getTime(),
+        reactions: e.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 },
+        isDummy: false
+      }));
+    } else {
+      S.entries = [];
+    }
+    
+    renderEntries();
+    
+  } catch (err) {
+    console.error('Load entries error:', err);
+  }
+}
+
+async function loadArtefacts() {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    
+    const { data, error } = await supabase
+      .from('artefacts')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false })
+      .limit(6);
+    
+    if (error) throw error;
+    
+    if (data && data.length > 0) {
+      S.artefacts = data.map(a => ({
+        id: a.id,
+        url: a.url,
+        note: a.note,
+        hasFace: a.has_face,
+        theme: a.theme,
+        timestamp: new Date(a.created_at).getTime(),
+        isDummy: false
+      }));
+    } else {
+      S.artefacts = [];
+    }
+    
+    renderTray();
+    
+  } catch (err) {
+    console.error('Load artefacts error:', err);
   }
 }
 
 // ============================================
-// UPLOAD (Works with or without auth)
+// SAVE SPILL TO SUPABASE
+// ============================================
+async function saveEntry() {
+  const content = $('ri').value.trim();
+  if (!content) {
+    toast('Tulis dulu spill-nya');
+    return;
+  }
+  
+  const activeMood = document.querySelector('.mc.act')?.dataset.mood || 'surviving';
+  
+  // Tampilkan loading
+  showProc('Menyimpan spill...');
+  
+  try {
+    // Get current user
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      toast('Login dulu untuk spill');
+      hideProc();
+      setTimeout(() => location.href='index.html', 1500);
+      return;
+    }
+    
+    const userId = session.user.id;
+    
+    // Insert ke tabel entries
+    const { data, error } = await supabase
+      .from('entries')
+      .insert({
+        user_id: userId,
+        content: content,
+        mood: activeMood,
+        reactions: { skull: 0, cry: 0, fire: 0, upside: 0 },
+        created_at: new Date().toISOString()
+      })
+      .select();
+    
+    if (error) throw error;
+    
+    // Clear input
+    $('ri').value = '';
+    $('ccount').textContent = '0/500';
+    
+    // Refresh entries
+    await loadEntries();
+    
+    toast('Spill terkirim!');
+    
+  } catch (err) {
+    console.error('Save error:', err);
+    toast('Gagal menyimpan: ' + err.message);
+  } finally {
+    hideProc();
+  }
+}
+
+// ============================================
+// UPLOAD
 // ============================================
 let pendingFiles = [], selFiles = new Set(), currentTheme = 0, currentNote = '';
 
@@ -781,7 +901,7 @@ async function confirmUpload() {
     const storagePath = `${S.userId}/${timestamp}_${i}.${ext}`;
 
     if (supabase) {
-      // Upload to Supabase
+      // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase
         .storage
         .from('artefacts')
@@ -800,15 +920,42 @@ async function confirmUpload() {
         .from('artefacts')
         .getPublicUrl(storagePath);
 
-      S.artefacts.unshift({
-        id: 'local_' + timestamp + '_' + i,
-        url: publicUrl,
-        note: note,
-        hasFace: item.hasFace,
-        theme: theme.filter,
-        timestamp: timestamp,
-        isDummy: false
-      });
+      // INSERT KE DATABASE
+      const { data: artefactData, error: artefactError } = await supabase
+        .from('artefacts')
+        .insert({
+          user_id: S.userId,
+          url: publicUrl,
+          note: note,
+          has_face: item.hasFace,
+          theme: theme.filter,
+          created_at: new Date().toISOString()
+        })
+        .select();
+      
+      if (!artefactError && artefactData && artefactData[0]) {
+        // Gunakan ID dari database, bukan lokal
+        S.artefacts.unshift({
+          id: artefactData[0].id,
+          url: publicUrl,
+          note: note,
+          hasFace: item.hasFace,
+          theme: theme.filter,
+          timestamp: Date.now(),
+          isDummy: false
+        });
+      } else {
+        // Fallback ke lokal
+        S.artefacts.unshift({
+          id: 'local_' + timestamp + '_' + i,
+          url: publicUrl,
+          note: note,
+          hasFace: item.hasFace,
+          theme: theme.filter,
+          timestamp: timestamp,
+          isDummy: false
+        });
+      }
     } else {
       // Fallback - just use object URL
       S.artefacts.unshift({
@@ -822,20 +969,11 @@ async function confirmUpload() {
       });
     }
     
-    if(S.artefacts.length > 6) {
-      S.artefacts = S.artefacts.slice(0, 6);
-    }
-    
     uploadedCount++;
   }
 
-  // Save to localStorage
-  if (S.userId) {
-    localStorage.setItem(`jejak_artefacts_${S.userId}`, JSON.stringify(S.artefacts));
-  }
-  
-  // Re-render - now with REAL data (dummies disappear)
-  renderTray();
+  // Load dari database setelah upload
+  await loadArtefacts();
   
   if(S.artefacts.length > 0) {
     setHero(S.artefacts[0].id);
@@ -883,7 +1021,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // 2. Setup upload
   initUpload();
   
-  // 3. Try auth (optional - doesn't block rendering)
+  // 3. Connect submit button
+  const sbtn = $('sbtn');
+  if (sbtn) {
+    sbtn.onclick = saveEntry;
+  }
+  
+  // 4. Try auth (optional - doesn't block rendering)
   initSupabase();
   checkAuth().then(authed => {
     if (authed) {
@@ -893,7 +1037,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  // 4. Menu close handler
+  // 5. Menu close handler
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.smenu')) {
       $('mdd').classList.remove('on');
