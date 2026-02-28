@@ -8,7 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* ==================== CSS (SAMA PERSIS) ==================== */
 :root{
   --bg:#000;--sf:#0a0a0a;--sfe:#111;--bd:#1a1a1a;--tx:#fff;
   --txs:#666;--txm:#444;--ap:#ff3d00;--as:#00f0ff;--aq:#00ff41;
@@ -465,7 +464,7 @@ body{
   padding:0
 }
 
-/* ── CHAT ROOM (DUA MATA) ── */
+/* ── CHAT ROOM ── */
 .chat-room{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column}
 .chat-room.on{display:flex}
 .chat-head{
@@ -692,108 +691,621 @@ body{
   box-shadow:0 0 0 rgba(255,61,0,.3)
 }
 
-/* ── WHISPERER ── */
-.ws-feature-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
-.ws-feature{font-size:12px;color:var(--txs);padding:10px 14px;background:var(--sfe);border-left:2px solid var(--as);border-radius:0 8px 8px 0;font-weight:600}
-.ws-price-box{background:var(--sf);border:1px solid rgba(0,240,255,.25);padding:20px;text-align:center;margin-bottom:20px;border-radius:16px}
-.ws-price{font-size:40px;font-weight:800;color:var(--as);letter-spacing:-2px;line-height:1}
-.ws-price-sub{font-size:11px;color:var(--txm);margin-top:6px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;font-family:'Space Mono',monospace}
-.ws-inbox-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.ws-compose-btn{background:var(--as);color:#000;border:none;padding:10px 18px;font-size:12px;font-weight:700;border-radius:10px;cursor:pointer;font-family:inherit;touch-action:manipulation}
+/* ── WHISPERER (PREMIUM FEATURE) ── */
+.ws-premium-badge{
+  background:linear-gradient(90deg, var(--as), var(--aq));
+  color:#000;
+  font-size:9px;
+  font-weight:700;
+  padding:2px 8px;
+  border-radius:30px;
+  display:inline-block;
+  margin-left:6px;
+  text-transform:uppercase;
+}
+.ws-premium-lock{
+  background:var(--sfe);
+  border:1px dashed var(--as);
+  border-radius:16px;
+  padding:30px 20px;
+  text-align:center;
+  margin:20px 0;
+}
+.ws-premium-lock .icon{font-size:48px; margin-bottom:12px; opacity:0.5;}
+.ws-premium-lock .title{font-size:16px; font-weight:700; color:var(--tx); margin-bottom:6px;}
+.ws-premium-lock .desc{font-size:12px; color:var(--txs); margin-bottom:20px;}
+.ws-premium-btn{
+  background:linear-gradient(90deg, var(--as), var(--aq));
+  color:#000;
+  border:none;
+  padding:12px 24px;
+  border-radius:30px;
+  font-weight:700;
+  font-size:13px;
+  cursor:pointer;
+  font-family:inherit;
+  display:inline-block;
+}
+.ws-feature-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:20px
+}
+.ws-feature{
+  font-size:12px;
+  color:var(--txs);
+  padding:10px 14px;
+  background:var(--sfe);
+  border-left:2px solid var(--as);
+  border-radius:0 8px 8px 0;
+  font-weight:600
+}
+.ws-price-box{
+  background:var(--sf);
+  border:1px solid rgba(0,240,255,.25);
+  padding:20px;
+  text-align:center;
+  margin-bottom:20px;
+  border-radius:16px
+}
+.ws-price{
+  font-size:40px;
+  font-weight:800;
+  color:var(--as);
+  letter-spacing:-2px;
+  line-height:1
+}
+.ws-price-sub{
+  font-size:11px;
+  color:var(--txm);
+  margin-top:6px;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  font-weight:700;
+  font-family:'Space Mono',monospace
+}
+.ws-inbox-hdr{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px
+}
+.ws-compose-btn{
+  background:var(--as);
+  color:#000;
+  border:none;
+  padding:10px 18px;
+  font-size:12px;
+  font-weight:700;
+  border-radius:10px;
+  cursor:pointer;
+  font-family:inherit;
+  touch-action:manipulation
+}
 .ws-compose-btn:active{opacity:.8}
 .ws-thread-item{
-  background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;
-  margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;
-  touch-action:manipulation;transition:all .15s;position:relative;overflow:hidden
+  background:var(--sf);
+  border:1px solid var(--bd);
+  border-radius:14px;
+  padding:14px 16px;
+  margin-bottom:8px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  cursor:pointer;
+  touch-action:manipulation;
+  transition:all .15s;
+  position:relative;
+  overflow:hidden
 }
-.ws-thread-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--as);opacity:0;transition:opacity .15s;border-radius:3px 0 0 3px}
+.ws-thread-item.premium{
+  border-color:var(--as);
+  box-shadow:0 0 0 1px var(--as);
+}
+.ws-thread-item::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:3px;
+  background:var(--as);
+  opacity:0;
+  transition:opacity .15s;
+  border-radius:3px 0 0 3px
+}
 .ws-thread-item.unread::before{opacity:1}
 .ws-thread-item:active{transform:scale(.98)}
-.ws-avatar{width:40px;height:40px;background:var(--sfe);border:1px solid var(--bd);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--txs);flex-shrink:0}
+.ws-avatar{
+  width:40px;
+  height:40px;
+  background:var(--sfe);
+  border:1px solid var(--bd);
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  font-weight:800;
+  color:var(--txs);
+  flex-shrink:0
+}
 .ws-thread-info{flex:1;min-width:0}
-.ws-thread-name{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:3px}
-.ws-thread-preview{font-size:11px;color:var(--txm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ws-thread-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
-.ws-thread-time{font-size:9px;color:var(--txm);font-family:'Space Mono',monospace}
-.ws-unread-badge{min-width:20px;height:20px;background:var(--as);color:#000;font-size:9px;font-weight:800;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 5px}
-.ws-empty{text-align:center;padding:40px 0}
-.ws-empty-icon{font-size:36px;display:block;margin-bottom:12px;opacity:.3}
-.ws-empty-title{font-size:15px;font-weight:700;color:var(--txs);margin-bottom:4px}
-.ws-empty-sub{font-size:12px;color:var(--txm)}
-.ws-compose{display:none;position:fixed;inset:0;background:var(--bg);z-index:350;flex-direction:column}
+.ws-thread-name{
+  font-size:13px;
+  font-weight:700;
+  color:var(--tx);
+  margin-bottom:3px
+}
+.ws-thread-preview{
+  font-size:11px;
+  color:var(--txm);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis
+}
+.ws-thread-right{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:5px;
+  flex-shrink:0
+}
+.ws-thread-time{
+  font-size:9px;
+  color:var(--txm);
+  font-family:'Space Mono',monospace
+}
+.ws-unread-badge{
+  min-width:20px;
+  height:20px;
+  background:var(--as);
+  color:#000;
+  font-size:9px;
+  font-weight:800;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 5px
+}
+.ws-empty{
+  text-align:center;
+  padding:40px 0
+}
+.ws-empty-icon{
+  font-size:36px;
+  display:block;
+  margin-bottom:12px;
+  opacity:.3
+}
+.ws-empty-title{
+  font-size:15px;
+  font-weight:700;
+  color:var(--txs);
+  margin-bottom:4px
+}
+.ws-empty-sub{
+  font-size:12px;
+  color:var(--txm)
+}
+.ws-compose{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  z-index:350;
+  flex-direction:column
+}
 .ws-compose.on{display:flex}
 .ws-compose-head{
-  display:flex;align-items:center;gap:12px;padding:14px 16px;
-  padding-top:calc(14px + var(--safe-top));border-bottom:1px solid var(--bd);background:var(--sf)
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:14px 16px;
+  padding-top:calc(14px + var(--safe-top));
+  border-bottom:1px solid var(--bd);
+  background:var(--sf)
 }
-.ws-to-label{font-size:11px;font-weight:700;color:var(--txm);white-space:nowrap;font-family:'Space Mono',monospace}
-.ws-to-input{flex:1;background:transparent;border:none;border-bottom:1px solid var(--bd);color:var(--tx);font-size:16px;font-family:inherit;padding:4px 0;outline:none;transition:border-color .15s}
+.ws-to-label{
+  font-size:11px;
+  font-weight:700;
+  color:var(--txm);
+  white-space:nowrap;
+  font-family:'Space Mono',monospace
+}
+.ws-to-input{
+  flex:1;
+  background:transparent;
+  border:none;
+  border-bottom:1px solid var(--bd);
+  color:var(--tx);
+  font-size:16px;
+  font-family:inherit;
+  padding:4px 0;
+  outline:none;
+  transition:border-color .15s
+}
 .ws-to-input:focus{border-bottom-color:var(--as)}
 .ws-to-input::placeholder{color:var(--txm)}
-.ws-close-btn{width:36px;height:36px;background:var(--bg);border:1px solid var(--bd);border-radius:10px;color:var(--txs);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0}
-.ws-body{flex:1;background:transparent;border:none;color:var(--tx);font-family:inherit;font-size:16px;line-height:1.6;resize:none;padding:20px 16px;outline:none}
+.ws-close-btn{
+  width:36px;
+  height:36px;
+  background:var(--bg);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  color:var(--txs);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:16px;
+  flex-shrink:0
+}
+.ws-body{
+  flex:1;
+  background:transparent;
+  border:none;
+  color:var(--tx);
+  font-family:inherit;
+  font-size:16px;
+  line-height:1.6;
+  resize:none;
+  padding:20px 16px;
+  outline:none
+}
 .ws-body::placeholder{color:var(--txm)}
 .ws-compose-foot{
-  padding:12px 16px;padding-bottom:calc(12px + var(--safe-bottom));
-  border-top:1px solid var(--bd);background:var(--sf);display:flex;justify-content:space-between;align-items:center
+  padding:12px 16px;
+  padding-bottom:calc(12px + var(--safe-bottom));
+  border-top:1px solid var(--bd);
+  background:var(--sf);
+  display:flex;
+  justify-content:space-between;
+  align-items:center
 }
-.ws-char-count{font-size:10px;color:var(--txm);font-family:'Space Mono',monospace}
-.ws-send-btn{background:var(--as);color:#000;border:none;padding:12px 24px;font-size:13px;font-weight:700;border-radius:12px;cursor:pointer;font-family:inherit;transition:all .15s;box-shadow:0 4px 0 rgba(0,240,255,.2)}
-.ws-send-btn:active{transform:translateY(3px);box-shadow:none}
-.ws-send-btn:disabled{opacity:.3;cursor:not-allowed;box-shadow:none}
-.ws-thread{display:none;position:fixed;inset:0;background:var(--bg);z-index:350;flex-direction:column}
+.ws-char-count{
+  font-size:10px;
+  color:var(--txm);
+  font-family:'Space Mono',monospace
+}
+.ws-send-btn{
+  background:var(--as);
+  color:#000;
+  border:none;
+  padding:12px 24px;
+  font-size:13px;
+  font-weight:700;
+  border-radius:12px;
+  cursor:pointer;
+  font-family:inherit;
+  transition:all .15s;
+  box-shadow:0 4px 0 rgba(0,240,255,.2)
+}
+.ws-send-btn:active{
+  transform:translateY(3px);
+  box-shadow:none
+}
+.ws-send-btn:disabled{
+  opacity:.3;
+  cursor:not-allowed;
+  box-shadow:none
+}
+.ws-thread{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:var(--bg);
+  z-index:350;
+  flex-direction:column
+}
 .ws-thread.on{display:flex}
 .ws-thread-head{
-  display:flex;align-items:center;gap:12px;padding:12px 16px;
-  padding-top:calc(12px + var(--safe-top));border-bottom:1px solid var(--bd);background:var(--sf)
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 16px;
+  padding-top:calc(12px + var(--safe-top));
+  border-bottom:1px solid var(--bd);
+  background:var(--sf)
 }
-.ws-back-btn{width:36px;height:36px;background:var(--bg);border:1px solid var(--bd);border-radius:10px;color:var(--txs);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0;touch-action:manipulation}
-.ws-thread-title{flex:1;font-size:15px;font-weight:700}
-.ws-vt-btn{background:transparent;border:1px solid #1a1a1a;color:#333;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;transition:all .2s;flex-shrink:0}
-.ws-vt-btn:hover{border-color:#333;color:#555}
-.ws-thread-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch}
+.ws-back-btn{
+  width:36px;
+  height:36px;
+  background:var(--bg);
+  border:1px solid var(--bd);
+  border-radius:10px;
+  color:var(--txs);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:18px;
+  flex-shrink:0;
+  touch-action:manipulation
+}
+.ws-thread-title{
+  flex:1;
+  font-size:15px;
+  font-weight:700
+}
+.ws-vt-btn{
+  background:transparent;
+  border:1px solid #1a1a1a;
+  color:#333;
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:12px;
+  transition:all .2s;
+  flex-shrink:0
+}
+.ws-vt-btn:hover{
+  border-color:#333;
+  color:#555
+}
+.ws-thread-msgs{
+  flex:1;
+  overflow-y:auto;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  -webkit-overflow-scrolling:touch
+}
 .ws-thread-input-wrap{
-  padding:12px 16px;padding-bottom:calc(12px + var(--safe-bottom));
-  border-top:1px solid var(--bd);background:var(--sf);display:flex;gap:10px;align-items:center
+  padding:12px 16px;
+  padding-bottom:calc(12px + var(--safe-bottom));
+  border-top:1px solid var(--bd);
+  background:var(--sf);
+  display:flex;
+  gap:10px;
+  align-items:center
 }
-.ws-thread-input{flex:1;background:var(--bg);border:1px solid var(--bd);border-radius:24px;padding:14px 18px;font-size:15px;color:var(--tx);outline:none;font-family:inherit;transition:border-color .15s}
+.ws-thread-input{
+  flex:1;
+  background:var(--bg);
+  border:1px solid var(--bd);
+  border-radius:24px;
+  padding:14px 18px;
+  font-size:15px;
+  color:var(--tx);
+  outline:none;
+  font-family:inherit;
+  transition:border-color .15s
+}
 .ws-thread-input:focus{border-color:var(--as)}
-.ws-thread-send{width:48px;height:48px;background:var(--as);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#000;font-size:20px;flex-shrink:0;cursor:pointer;touch-action:manipulation;transition:all .15s;box-shadow:0 4px 0 rgba(0,240,255,.2)}
-.ws-thread-send:active{transform:translateY(4px);box-shadow:none}
+.ws-thread-send{
+  width:48px;
+  height:48px;
+  background:var(--as);
+  border:none;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#000;
+  font-size:20px;
+  flex-shrink:0;
+  cursor:pointer;
+  touch-action:manipulation;
+  transition:all .15s;
+  box-shadow:0 4px 0 rgba(0,240,255,.2)
+}
+.ws-thread-send:active{
+  transform:translateY(4px);
+  box-shadow:none
+}
 
 /* ── VOID TAP ── */
-.vt-compose{display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column;align-items:stretch;justify-content:center}
+.vt-compose{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#000;
+  z-index:500;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:center
+}
 .vt-compose.on{display:flex;animation:vtFade .2s ease}
 @keyframes vtFade{from{opacity:0}to{opacity:1}}
-.vt-compose-inner{max-width:480px;width:100%;margin:0 auto;padding:40px 24px;display:flex;flex-direction:column;gap:28px}
-.vt-lbl{font-size:9px;font-weight:700;color:#2a2a2a;text-transform:uppercase;letter-spacing:.2em;font-family:'Space Mono',monospace}
-.vt-textarea{background:transparent;border:none;border-bottom:1px solid #1a1a1a;color:#444;font-family:'Inter',sans-serif;font-size:18px;line-height:1.7;resize:none;height:130px;outline:none;caret-color:#333;padding:8px 0}
+.vt-compose-inner{
+  max-width:480px;
+  width:100%;
+  margin:0 auto;
+  padding:40px 24px;
+  display:flex;
+  flex-direction:column;
+  gap:28px
+}
+.vt-lbl{
+  font-size:9px;
+  font-weight:700;
+  color:#2a2a2a;
+  text-transform:uppercase;
+  letter-spacing:.2em;
+  font-family:'Space Mono',monospace
+}
+.vt-textarea{
+  background:transparent;
+  border:none;
+  border-bottom:1px solid #1a1a1a;
+  color:#444;
+  font-family:'Inter',sans-serif;
+  font-size:18px;
+  line-height:1.7;
+  resize:none;
+  height:130px;
+  outline:none;
+  caret-color:#333;
+  padding:8px 0
+}
 .vt-textarea::placeholder{color:#1a1a1a;font-style:italic}
 .vt-textarea:focus{border-bottom-color:#252525}
-.vt-meta{display:flex;justify-content:space-between;align-items:center}
-.vt-quota{font-size:10px;color:#222;font-family:'Space Mono',monospace}
+.vt-meta{
+  display:flex;
+  justify-content:space-between;
+  align-items:center
+}
+.vt-quota{
+  font-size:10px;
+  color:#222;
+  font-family:'Space Mono',monospace
+}
 .vt-quota.low{color:#331111}
-.vt-actions{display:flex;gap:8px}
-.vt-cancel{background:transparent;border:1px solid #181818;color:#2a2a2a;padding:10px 18px;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;font-family:inherit;border-radius:8px}
-.vt-cancel:hover{border-color:#2a2a2a;color:#444}
-.vt-send{background:#0a0a0a;border:1px solid #1e1e1e;color:#333;padding:10px 22px;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;font-family:inherit;border-radius:8px;transition:all .15s}
-.vt-send:hover:not(:disabled){border-color:#333;color:#666}
-.vt-send:disabled{opacity:.2;cursor:not-allowed}
-.vt-reader{display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column;align-items:center;justify-content:center;user-select:none}
+.vt-actions{
+  display:flex;
+  gap:8px
+}
+.vt-cancel{
+  background:transparent;
+  border:1px solid #181818;
+  color:#2a2a2a;
+  padding:10px 18px;
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  cursor:pointer;
+  font-family:inherit;
+  border-radius:8px
+}
+.vt-cancel:hover{
+  border-color:#2a2a2a;
+  color:#444
+}
+.vt-send{
+  background:#0a0a0a;
+  border:1px solid #1e1e1e;
+  color:#333;
+  padding:10px 22px;
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  cursor:pointer;
+  font-family:inherit;
+  border-radius:8px;
+  transition:all .15s
+}
+.vt-send:hover:not(:disabled){
+  border-color:#333;
+  color:#666
+}
+.vt-send:disabled{
+  opacity:.2;
+  cursor:not-allowed
+}
+.vt-reader{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#000;
+  z-index:500;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  user-select:none
+}
 .vt-reader.on{display:flex;animation:vtFade .2s ease}
-.vt-reader-from{position:absolute;top:calc(52px + var(--safe-top));left:50%;transform:translateX(-50%);font-size:9px;color:#1a1a1a;font-weight:700;text-transform:uppercase;letter-spacing:.25em;white-space:nowrap;font-family:'Space Mono',monospace}
-.vt-reader-msg{max-width:300px;padding:0 24px;text-align:center;color:#3d3d3d;font-size:17px;line-height:1.8}
-.vt-reader-timer{position:absolute;bottom:calc(52px + var(--safe-bottom));left:50%;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:10px;color:#1e1e1e;letter-spacing:.15em;text-transform:uppercase}
-.vt-reader.burning .vt-reader-msg,.vt-reader.burning .vt-reader-timer,.vt-reader.burning .vt-reader-from{animation:vtBurn .7s ease forwards}
-@keyframes vtBurn{0%{opacity:1;filter:none}50%{opacity:.4;filter:blur(2px)}100%{opacity:0;filter:blur(12px)}}
-.vt-upgrade-nudge{display:none;position:fixed;bottom:calc(84px + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(16px);background:#0a0a0a;border:1px solid #1a1a1a;padding:12px 20px;font-size:12px;color:#333;white-space:nowrap;z-index:400;opacity:0;transition:all .3s;cursor:pointer;border-radius:20px}
-.vt-upgrade-nudge.show{display:block;opacity:1;transform:translateX(-50%) translateY(0)}
+.vt-reader-from{
+  position:absolute;
+  top:calc(52px + var(--safe-top));
+  left:50%;
+  transform:translateX(-50%);
+  font-size:9px;
+  color:#1a1a1a;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.25em;
+  white-space:nowrap;
+  font-family:'Space Mono',monospace
+}
+.vt-reader-msg{
+  max-width:300px;
+  padding:0 24px;
+  text-align:center;
+  color:#3d3d3d;
+  font-size:17px;
+  line-height:1.8
+}
+.vt-reader-timer{
+  position:absolute;
+  bottom:calc(52px + var(--safe-bottom));
+  left:50%;
+  transform:translateX(-50%);
+  font-family:'Space Mono',monospace;
+  font-size:10px;
+  color:#1e1e1e;
+  letter-spacing:.15em;
+  text-transform:uppercase
+}
+.vt-reader.burning .vt-reader-msg,
+.vt-reader.burning .vt-reader-timer,
+.vt-reader.burning .vt-reader-from{
+  animation:vtBurn .7s ease forwards
+}
+@keyframes vtBurn{
+  0%{opacity:1;filter:none}
+  50%{opacity:.4;filter:blur(2px)}
+  100%{opacity:0;filter:blur(12px)}
+}
+.vt-upgrade-nudge{
+  display:none;
+  position:fixed;
+  bottom:calc(84px + var(--safe-bottom));
+  left:50%;
+  transform:translateX(-50%) translateY(16px);
+  background:#0a0a0a;
+  border:1px solid #1a1a1a;
+  padding:12px 20px;
+  font-size:12px;
+  color:#333;
+  white-space:nowrap;
+  z-index:400;
+  opacity:0;
+  transition:all .3s;
+  cursor:pointer;
+  border-radius:20px
+}
+.vt-upgrade-nudge.show{
+  display:block;
+  opacity:1;
+  transform:translateX(-50%) translateY(0)
+}
 .vt-upgrade-nudge b{color:#555}
 
 /* TOAST */
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--tx);color:var(--bg);padding:14px 24px;border-radius:30px;font-size:14px;font-weight:700;z-index:600;opacity:0;transition:all .3s cubic-bezier(.175,.885,.32,1.275);pointer-events:none;white-space:nowrap;box-shadow:0 10px 40px rgba(0,0,0,.5)}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.error{background:var(--war);color:#fff}
+.toast{
+  position:fixed;
+  bottom:100px;
+  left:50%;
+  transform:translateX(-50%) translateY(100px);
+  background:var(--tx);
+  color:var(--bg);
+  padding:14px 24px;
+  border-radius:30px;
+  font-size:14px;
+  font-weight:700;
+  z-index:600;
+  opacity:0;
+  transition:all .3s cubic-bezier(.175,.885,.32,1.275);
+  pointer-events:none;
+  white-space:nowrap;
+  box-shadow:0 10px 40px rgba(0,0,0,.5)
+}
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0)
+}
+.toast.error{
+  background:var(--war);
+  color:#fff
+}
 </style>
 </head>
 <body>
@@ -936,28 +1448,42 @@ body{
   </div>
   <div class="modal-body">
     <span class="modal-tag">VIP ACCESS</span>
-    <div class="modal-h">unlock fitur eksklusif</div>
-    <div class="modal-sub">pilih paket yang sesuai vibe kamu</div>
+    <div class="modal-h">pilih paket yang cocok</div>
+    <div class="modal-sub">tinggal pilih, bayar via Midtrans, langsung aktif</div>
     
-    <div class="price-card" onclick="selectPlan(this, 'monthly')">
+    <div class="price-card" onclick="selectPlan(this, 'weekly')">
       <div>
-        <div class="price-main">Rp 25K</div>
-        <div class="price-sub">per bulan</div>
+        <div class="price-main">Rp 10K</div>
+        <div class="price-sub">7 hari</div>
       </div>
       <div class="price-right">
-        <span class="price-tag">POPULER</span>
-        <div class="price-note">✅ unlimited void taps</div>
+        <span class="price-tag">BASIC</span>
+        <div class="price-note">✅ chat tanpa batas</div>
       </div>
     </div>
     
-    <div class="price-card" onclick="selectPlan(this, 'yearly')">
+    <div class="price-card" onclick="selectPlan(this, 'monthly')">
       <div>
-        <div class="price-main">Rp 250K</div>
-        <div class="price-sub">per tahun</div>
+        <div class="price-main">Rp 50K</div>
+        <div class="price-sub">30 hari</div>
       </div>
       <div class="price-right">
-        <span class="price-tag">HEMAT 20%</span>
-        <div class="price-note">✅ semua fitur + early access</div>
+        <span class="price-tag">✨ PREMIUM</span>
+        <div class="price-note">✅ chat tanpa batas + WHISPERER ✦</div>
+      </div>
+    </div>
+    
+    <!-- PREMIUM FEATURES DETAIL -->
+    <div style="background:var(--sf); border:1px solid var(--bd); border-radius:16px; padding:16px; margin:20px 0;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+        <span style="color:var(--aq); font-size:18px;">✦</span>
+        <span style="font-weight:700; font-size:14px;">WHISPERER (Premium 50K)</span>
+      </div>
+      <div style="font-size:12px; color:var(--txs); line-height:1.8;">
+        • ✦ pesan rahasia yang terenkripsi<br>
+        • ⏳ hilang dalam 5 detik setelah dibaca<br>
+        • 🔒 tidak ada log, tidak ada jejak<br>
+        • 💬 chat paging tanpa batas
       </div>
     </div>
     
@@ -966,12 +1492,12 @@ body{
       <div class="label">offer berakhir</div>
     </div>
     
-    <button class="modal-action-btn" onclick="upgradeNow()">upgrade sekarang</button>
+    <button class="modal-action-btn" onclick="processUpgrade()">upgrade sekarang</button>
     <button class="modal-action-btn sec" onclick="closeModal('upgradeModal')" style="background:var(--sf); color:var(--tx); border:1px solid var(--bd); margin-top:8px">nanti dulu</button>
   </div>
 </div>
 
-<!-- CHAT ROOM (DUA MATA) -->
+<!-- CHAT ROOM -->
 <div class="chat-room" id="chatRoom">
   <div class="chat-head">
     <div class="chat-info">
@@ -995,15 +1521,13 @@ body{
 <!-- WHISPERER MODAL -->
 <div class="modal" id="wsModal">
   <div class="modal-header">
-    <div class="modal-title">whisperer</div>
+    <div class="modal-title">whisperer 
+      <span class="ws-premium-badge" id="wsPremiumBadge" style="display:none;">PREMIUM</span>
+    </div>
     <button class="modal-close" onclick="closeModal('wsModal')">✕</button>
   </div>
-  <div class="modal-body">
-    <div class="ws-inbox-hdr">
-      <span class="modal-tag">INBOX ANONIM</span>
-      <button class="ws-compose-btn" onclick="openWsCompose()">+ tulis whisper</button>
-    </div>
-    <div id="wsInboxList"></div>
+  <div class="modal-body" id="wsModalBody">
+    <!-- Konten akan diisi oleh JavaScript -->
   </div>
 </div>
 
@@ -1014,7 +1538,7 @@ body{
     <input type="text" class="ws-to-input" id="wsToInput" placeholder="username tujuan" maxlength="30">
     <button class="ws-close-btn" onclick="closeWsCompose()">✕</button>
   </div>
-  <textarea class="ws-body" id="wsBodyInput" placeholder="tulis pesan rahasia..." maxlength="200"></textarea>
+  <textarea class="ws-body" id="wsBodyInput" placeholder="tulis pesan rahasia... (akan hilang 5 detik setelah dibaca)" maxlength="200"></textarea>
   <div class="ws-compose-foot">
     <span class="ws-char-count" id="wsCharCount">0/200</span>
     <button class="ws-send-btn" id="wsSendBtn" onclick="sendWs()" disabled>kirim</button>
@@ -1030,7 +1554,7 @@ body{
   </div>
   <div class="ws-thread-msgs" id="wsThreadMessages"></div>
   <div class="ws-thread-input-wrap">
-    <input type="text" class="ws-thread-input" id="wsThreadInput" placeholder="balas whisper..." maxlength="200">
+    <input type="text" class="ws-thread-input" id="wsThreadInput" placeholder="balas whisper... (akan hilang)" maxlength="200">
     <button class="ws-thread-send" onclick="sendWsReply()">➤</button>
   </div>
 </div>
@@ -1061,10 +1585,8 @@ body{
 <!-- UPGRADE NUDGE -->
 <div class="vt-upgrade-nudge" id="vtUpgradeNudge" onclick="showUpgradeModal()">limit harian habis — <b>upgrade</b></div>
 <div class="toast" id="toast"></div>
-
 <script>
 // ==================== KONFIGURASI API ====================
-// GANTI URL INI DENGAN URL VERCEL DEPLOYMENT ANDA!
 const API_URL = 'https://jejak.space/api/chat';
 const USE_MOCK = false;
 
@@ -1080,17 +1602,31 @@ let radarRAF = null;
 let userName = 'stranger_' + Math.floor(Math.random() * 1000);
 let activeWsThread = null;
 let vtBurnTimer = null;
+let countdownInterval = null;
 
-// History chat untuk dikirim ke API (format sesuai chat.js)
-let chatHistory = []; // Array of {role: 'user'|'assistant', content: string}
+// Subscription state
+let userSubscription = {
+  isActive: false,
+  expiresAt: null,
+  type: null // 'weekly' atau 'monthly'
+};
 
-// Timer untuk fallback ke AI (60 detik)
+// Premium features
+let wsQuota = {
+  used: 0,
+  limit: 999 // Unlimited untuk premium
+};
+
+// History chat
+let chatHistory = [];
+
+// Timer untuk fallback ke AI (15 detik)
 let fallbackTimer = null;
 
-// Flag untuk menandai API dalam mode offline
+// Flag API
 let apiOffline = false;
 
-// Daftar karakter AI (harus sama persis dengan di chat.js)
+// Daftar karakter AI
 const AI_CHARACTERS = {
   female: ['beby.manis', 'strawberry.shortcake', 'pretty.sad', 'little.fairy', 'cinnamon.girl'],
   male: ['sejuta.badai', 'kue.bulan', 'agak.koplak', 'chili.padi', 'abang.gaul']
@@ -1108,7 +1644,7 @@ let whispers = [
   { id: 'w2', from: 'sejuta.badai', to: userName, content: 'salam kenal, boleh ngobrol?', timestamp: Date.now() - 360000, read: true, thread: [] }
 ];
 
-// Data spill (konten publik)
+// Data spill
 const USER_RANTS = [
   {id:1,author:'anon.kucing',mood:'surviving',content:'Hari ini gue nangis di angkot gegara liat kucing dipukul orang. Mental gue udah kayak kerupuk kena hujan.',reactions:{skull:42,cry:89,fire:12,upside:7},userReacted:null},
   {id:2,author:'sleepy.head',mood:'thriving',content:'akhirnya bisa tidur nyenyak semalaman setelah 3 minggu insomnia. makasih buat yang chat tadi malem.',reactions:{skull:23,cry:15,fire:67,upside:31},userReacted:null},
@@ -1117,6 +1653,61 @@ const USER_RANTS = [
 ];
 
 const REACTION_EMOJI = {skull:'💀',cry:'😭',fire:'🔥',upside:'🙃'};
+
+// ==================== TERMS & CONDITIONS ====================
+const TERMS_TEXT = `
+Dengan melanjutkan pembayaran, kamu setuju bahwa:
+
+1. 🔄 Layanan ini adalah subscription digital untuk fitur premium di aplikasi SPILL.
+
+2. ⏰ Masa aktif subscription:
+   • Paket 7 hari (10K): chat tanpa batas
+   • Paket 30 hari (50K): chat tanpa batas + WHISPERER (pesan rahasia hilang 5 detik)
+
+3. 💳 Pembayaran diproses oleh Midtrans dengan metode:
+   • Transfer bank (BCA, Mandiri, BNI, BRI)
+   • E-wallet (GoPay, OVO, Dana, LinkAja)
+   • Kartu kredit/debit
+
+4. ⚡ Fitur premium yang didapat:
+   • Chat tanpa batas waktu
+   • Prioritas koneksi ke real user
+   • Void tap unlimited
+   • [PREMIUM 50K] WHISPERER - pesan rahasia terenkripsi yang hilang 5 detik setelah dibaca
+
+5. 🚫 Tidak ada refund untuk paket yang sudah dibeli (kecuali error sistem)
+
+6. 🔒 Data pembayaran aman - SPILL tidak menyimpan data kartu
+
+7. ⏳ Subscription otomatis berakhir sesuai masa aktif, tidak ada auto-renewal
+
+8. ❓ Ada kendala? Hubungi @spill.support di app
+
+Dengan melanjutkan, kamu menyetujui syarat dan ketentuan di atas.
+`;
+
+// Load subscription from localStorage
+function loadSubscription() {
+  const saved = localStorage.getItem('userSubscription');
+  if (saved) {
+    try {
+      const sub = JSON.parse(saved);
+      if (new Date(sub.expiresAt) > new Date()) {
+        userSubscription = sub;
+      } else {
+        localStorage.removeItem('userSubscription');
+      }
+    } catch (e) {}
+  }
+}
+
+// Check subscription
+function checkSubscription() {
+  if (userSubscription.isActive && userSubscription.expiresAt) {
+    return new Date(userSubscription.expiresAt) > new Date();
+  }
+  return false;
+}
 
 // ==================== UTILS ====================
 const $ = id => document.getElementById(id);
@@ -1187,6 +1778,8 @@ function generateSpillContent(count = 6) {
 
 function renderSpills() {
   const list = $('spillsList');
+  if (!list) return;
+  
   let allSpills = [...USER_RANTS, ...generateSpillContent(6)];
   let filtered = activeMood === 'all' ? allSpills : allSpills.filter(s => s.mood === activeMood);
   
@@ -1257,6 +1850,7 @@ const dotGlow = new Map();
 function initRadar() {
   const canvas = $('radarCanvas');
   const container = $('radarCont');
+  if (!canvas || !container) return;
   
   function resizeCanvas() {
     const rect = container.getBoundingClientRect();
@@ -1316,6 +1910,7 @@ function spawnDots() {
 
 function radarLoop(canvas) {
   const ctx = canvas.getContext('2d');
+  if (!ctx) return;
   
   function draw(now) {
     if (!canvas || !ctx) return;
@@ -1446,7 +2041,6 @@ function updateOnlineCount() {
     el.textContent = count + ' ONLINE';
   }
 }
-
 // ==================== VIBE CHECK ====================
 function startVibeCheck() {
   chatPartner = null;
@@ -1478,19 +2072,93 @@ function confirmGender() {
   $('chatTimer').classList.remove('warn');
   
   const messages = $('chatMessages');
+  
   messages.innerHTML = `
-    <div class="chat-msg searching-msg">
-      <div class="chat-bubble">🔍 mencari real user dengan preferensi ${currentGender === 'female' ? 'cewek' : 'cowok'}...</div>
+    <div class="chat-msg system-msg" style="align-self:center; opacity:0.7; margin:20px 0;">
+      <div class="chat-bubble" style="background:transparent; border:1px dashed var(--bd); color:var(--txs); font-style:italic;">
+        ⚡ mengaktifkan radar pencarian...
+      </div>
     </div>
   `;
+  
+  setTimeout(() => {
+    if (!chatPartner) {
+      messages.innerHTML = `
+        <div class="chat-msg system-msg" style="align-self:center;">
+          <div class="chat-bubble" style="background:var(--sfe); border-left:3px solid var(--aq);">
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+              <span style="font-family:'Space Mono',monospace; font-size:10px; color:var(--aq);">RADAR</span>
+              <span style="font-size:10px; color:var(--txs);">${currentGender === 'female' ? '♀ cewek' : '♂ cowok'}</span>
+            </div>
+            <div style="font-size:13px; line-height:1.6;">
+              memindai sekitar 500m... 
+              <span style="display:inline-block; width:12px; text-align:left; font-family:'Space Mono',monospace;" id="scanDots">.</span>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      let dotCount = 1;
+      const scanInterval = setInterval(() => {
+        if (chatPartner) {
+          clearInterval(scanInterval);
+          return;
+        }
+        dotCount = (dotCount % 3) + 1;
+        const dots = $('scanDots');
+        if (dots) dots.textContent = '.'.repeat(dotCount);
+      }, 500);
+    }
+  }, 800);
+  
+  const timeline = [
+    { time: 3000, message: "masih memindai...", emoji: "👀" },
+    { time: 6000, message: "lingkungan sepi, radar melebar", emoji: "📡" },
+    { time: 9000, message: "menjangkau radius 2km", emoji: "🌐" },
+    { time: 12000, message: "hampir selesai...", emoji: "⏳" }
+  ];
+  
+  timeline.forEach(item => {
+    setTimeout(() => {
+      if (!chatPartner) {
+        updateSystemMessage(item.message, item.emoji);
+      }
+    }, item.time);
+  });
   
   findRealUser();
   
   fallbackTimer = setTimeout(() => {
     if (!chatPartner && $('chatRoom').classList.contains('on')) {
+      $('chatMessages').innerHTML = '';
       fallbackToAI();
     }
-  }, 60000);
+  }, 15000);
+}
+
+function updateSystemMessage(text, emoji = '') {
+  const messages = $('chatMessages');
+  if (!messages) return;
+  
+  const lastSystem = messages.lastElementChild;
+  if (lastSystem && lastSystem.classList.contains('system-msg')) {
+    lastSystem.remove();
+  }
+  
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'chat-msg system-msg';
+  msgDiv.style.alignSelf = 'center';
+  msgDiv.style.margin = '4px 0';
+  
+  msgDiv.innerHTML = `
+    <div class="chat-bubble" style="background:var(--sfe); border-left:2px solid var(--bd); padding:10px 16px; font-size:12px; color:var(--txs);">
+      ${emoji} ${text}
+      <span style="display:inline-block; width:12px; text-align:left; font-family:'Space Mono',monospace;" id="scanDots">...</span>
+    </div>
+  `;
+  
+  messages.appendChild(msgDiv);
+  msgDiv.scrollIntoView({ behavior: 'smooth' });
 }
 
 async function findRealUser() {
@@ -1503,10 +2171,36 @@ async function findRealUser() {
           clearTimeout(fallbackTimer);
           fallbackTimer = null;
         }
-        startRealChat();
+        
+        $('chatMessages').innerHTML = '';
+        addSystemCelebration('✨ real user ditemukan! memulai percakapan...', '🎉');
+        
+        setTimeout(() => {
+          startRealChat();
+        }, 1500);
       }
     }
   }, 3000);
+}
+
+function addSystemCelebration(text, emoji) {
+  const messages = $('chatMessages');
+  if (!messages) return;
+  
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'chat-msg system-msg';
+  msgDiv.style.alignSelf = 'center';
+  msgDiv.style.margin = '10px 0';
+  
+  msgDiv.innerHTML = `
+    <div class="chat-bubble" style="background:rgba(0,255,65,0.1); border:1px solid var(--aq); padding:12px 20px; border-radius:30px;">
+      <span style="font-size:20px; margin-right:8px;">${emoji}</span>
+      <span style="color:var(--aq); font-weight:600;">${text}</span>
+    </div>
+  `;
+  
+  messages.appendChild(msgDiv);
+  msgDiv.scrollIntoView({ behavior: 'smooth' });
 }
 
 function startRealChat() {
@@ -1529,13 +2223,16 @@ function fallbackToAI() {
   };
   
   const messages = $('chatMessages');
-  messages.innerHTML = '';
+  if (messages) messages.innerHTML = '';
   
-  apiOffline = false;
+  addSystemCelebration('👤 seseorang ditemukan!', '');
   
-  callChatAPI('', true);
-  
-  startTimer();
+  setTimeout(() => {
+    if (messages) messages.innerHTML = '';
+    apiOffline = false;
+    callChatAPI('', true);
+    startTimer();
+  }, 1000);
 }
 
 function startTimer() {
@@ -1552,20 +2249,376 @@ function updateTimer() {
   chatTimeLeft--;
   const mins = Math.floor(chatTimeLeft / 60);
   const secs = chatTimeLeft % 60;
-  $('chatTimer').textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  const timerEl = $('chatTimer');
+  if (timerEl) timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   
-  if (chatTimeLeft < 60) {
-    $('chatTimer').classList.add('warn');
+  const hasSubscription = checkSubscription();
+  if (hasSubscription) return;
+  
+  if (chatTimeLeft === 120) {
+    addSubscriptionReminder(
+      "⏳ sisa 2 menit...",
+      "ini obrolan cuma 15 menit buat kamu yang belum subscribe. kalau mau lanjut, bisa pilih paket dulu~"
+    );
+  }
+  
+  if (chatTimeLeft === 60) {
+    addSubscriptionReminder(
+      "⏰ 1 menit lagi...",
+      "pengen lanjut ngobrol? 10k/minggu atau 50k/bulan (dapet WHISPERER ✦). santai, pilih sesuai kebutuhan"
+    );
+    const timerEl = $('chatTimer');
+    if (timerEl) timerEl.classList.add('warn');
+  }
+  
+  if (chatTimeLeft === 30) {
+    addSubscriptionReminder(
+      "⚡ 30 detik...",
+      "mau coba subscribe? 7 hari cuma 10k, 30 hari 50k (udah termasuk WHISPERER). terserah kamu~"
+    );
+  }
+  
+  if (chatTimeLeft === 10) {
+    addSubscriptionReminder(
+      "🎯 10 detik terakhir...",
+      "abis ini bakal nutup otomatis ya. kalo masih pengen ngobrol, bisa subscribe dulu"
+    );
+  }
+}
+
+function addSubscriptionReminder(title, message) {
+  const messages = $('chatMessages');
+  if (!messages) return;
+  
+  const existingReminder = document.querySelector('.reminder-msg');
+  if (existingReminder) existingReminder.remove();
+  
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'chat-msg reminder-msg';
+  msgDiv.style.alignSelf = 'center';
+  msgDiv.style.margin = '8px 0';
+  msgDiv.style.maxWidth = '90%';
+  
+  msgDiv.innerHTML = `
+    <div class="chat-bubble" style="background:var(--sfe); border:1px dashed var(--as); border-radius:16px; padding:16px;">
+      <div style="font-size:12px; font-weight:600; color:var(--as); margin-bottom:6px;">${title}</div>
+      <div style="font-size:13px; color:var(--tx); margin-bottom:16px;">${message}</div>
+      
+      <div style="display:flex; gap:8px; margin-bottom:16px;">
+        <div onclick="selectPackage('weekly', this)" style="flex:1; background:var(--bg); border:1px solid var(--bd); border-radius:12px; padding:12px; text-align:center; cursor:pointer;" data-package="weekly">
+          <div style="font-size:16px; font-weight:700; color:var(--as);">10k</div>
+          <div style="font-size:11px; color:var(--txs);">7 hari</div>
+        </div>
+        <div onclick="selectPackage('monthly', this)" style="flex:1; background:var(--bg); border:1px solid var(--bd); border-radius:12px; padding:12px; text-align:center; cursor:pointer;" data-package="monthly">
+          <div style="font-size:16px; font-weight:700; color:var(--aq);">50k</div>
+          <div style="font-size:11px; color:var(--txs);">30 hari + WHISPERER</div>
+        </div>
+      </div>
+      
+      <div style="margin-bottom:12px; text-align:center;">
+        <button onclick="showTermsPopup()" style="background:transparent; border:1px dashed var(--bd); color:var(--txs); padding:8px 16px; border-radius:30px; font-size:11px; cursor:pointer; font-family:inherit;">
+          📋 baca syarat & ketentuan
+        </button>
+      </div>
+      
+      <div id="tcContainer" style="display:none; margin-bottom:16px;">
+        <div style="display:flex; align-items:flex-start; gap:10px; background:var(--bg); padding:12px; border-radius:12px; border:1px solid var(--bd);">
+          <input type="checkbox" id="tcCheckbox" style="width:18px; height:18px; margin-top:2px; accent-color:var(--aq);">
+          <label for="tcCheckbox" style="font-size:11px; color:var(--txs); line-height:1.5;">
+            Saya setuju dengan <button onclick="showTermsPopup()" style="background:none; border:none; color:var(--as); text-decoration:underline; cursor:pointer; font-size:11px; font-family:inherit;">syarat & ketentuan</button> yang berlaku
+          </label>
+        </div>
+      </div>
+      
+      <div id="payButtonContainer" style="display:none; margin-bottom:8px;">
+        <button onclick="processSubscription()" style="width:100%; background:linear-gradient(90deg, var(--as), var(--aq)); color:#000; border:none; padding:14px; border-radius:30px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;">
+          💳 lanjut bayar
+        </button>
+      </div>
+      
+      <div style="display:flex; justify-content:flex-end;">
+        <button onclick="dismissReminder()" style="background:transparent; border:none; color:var(--txm); padding:6px 12px; font-size:11px; cursor:pointer; font-family:inherit;">
+          skip dulu
+        </button>
+      </div>
+      
+      <div style="font-size:8px; color:var(--txm); margin-top:8px; text-align:center; opacity:0.5;">
+        • payment by Midtrans
+      </div>
+    </div>
+  `;
+  
+  messages.appendChild(msgDiv);
+  msgDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
+let selectedPackage = null;
+
+function selectPackage(type, element) {
+  selectedPackage = type;
+  
+  document.querySelectorAll('[data-package]').forEach(el => {
+    el.style.borderColor = 'var(--bd)';
+    el.style.background = 'var(--bg)';
+  });
+  
+  element.style.borderColor = type === 'weekly' ? 'var(--as)' : 'var(--aq)';
+  element.style.background = type === 'weekly' ? 'rgba(0,240,255,0.1)' : 'rgba(0,255,65,0.1)';
+  
+  const tcContainer = document.getElementById('tcContainer');
+  if (tcContainer) tcContainer.style.display = 'block';
+  
+  const tcCheckbox = document.getElementById('tcCheckbox');
+  if (tcCheckbox) {
+    tcCheckbox.onchange = function() {
+      const payButton = document.getElementById('payButtonContainer');
+      if (payButton) payButton.style.display = this.checked ? 'block' : 'none';
+    };
+  }
+}
+
+function dismissReminder() {
+  const reminder = document.querySelector('.reminder-msg');
+  if (reminder) reminder.remove();
+}
+
+function showTermsPopup() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position:fixed; top:0; left:0; right:0; bottom:0; 
+    background:rgba(0,0,0,0.95); z-index:1000; 
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+  `;
+  
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    background:var(--sf); border:1px solid var(--bd); 
+    border-radius:24px; max-width:400px; width:100%;
+    max-height:80vh; overflow-y:auto;
+    box-shadow:0 20px 40px rgba(0,0,0,0.8);
+  `;
+  
+  const header = document.createElement('div');
+  header.style.cssText = `
+    padding:20px; border-bottom:1px solid var(--bd);
+    display:flex; justify-content:space-between; align-items:center;
+  `;
+  header.innerHTML = `
+    <span style="font-weight:700; font-size:16px;">📋 syarat & ketentuan</span>
+    <button onclick="this.closest('.overlay').remove()" style="background:var(--bg); border:1px solid var(--bd); border-radius:10px; width:36px; height:36px; cursor:pointer; color:var(--txs);">✕</button>
+  `;
+  
+  const body = document.createElement('div');
+  body.style.cssText = `
+    padding:20px; font-size:12px; color:var(--txs); 
+    line-height:1.8; white-space:pre-line;
+  `;
+  body.textContent = TERMS_TEXT;
+  
+  const footer = document.createElement('div');
+  footer.style.cssText = `
+    padding:20px; border-top:1px solid var(--bd);
+    display:flex; gap:10px;
+  `;
+  footer.innerHTML = `
+    <button onclick="agreeToTerms(); this.closest('.overlay').remove();" style="flex:2; background:var(--aq); color:#000; border:none; padding:12px; border-radius:30px; font-weight:700; cursor:pointer;">
+      ✅ setuju
+    </button>
+    <button onclick="this.closest('.overlay').remove()" style="flex:1; background:transparent; border:1px solid var(--bd); color:var(--txs); padding:12px; border-radius:30px; cursor:pointer;">
+      tutup
+    </button>
+  `;
+  
+  modal.appendChild(header);
+  modal.appendChild(body);
+  modal.appendChild(footer);
+  overlay.appendChild(modal);
+  overlay.classList.add('overlay');
+  
+  document.body.appendChild(overlay);
+}
+
+function agreeToTerms() {
+  const tcCheckbox = document.getElementById('tcCheckbox');
+  if (tcCheckbox) {
+    tcCheckbox.checked = true;
+    const event = new Event('change', { bubbles: true });
+    tcCheckbox.dispatchEvent(event);
+  }
+}
+
+function processSubscription() {
+  if (!selectedPackage) {
+    toast('pilih paket dulu ya~', true);
+    return;
+  }
+  
+  const tcCheckbox = document.getElementById('tcCheckbox');
+  if (!tcCheckbox || !tcCheckbox.checked) {
+    toast('centang dulu setuju syarat & ketentuannya~', true);
+    return;
+  }
+  
+  const amount = selectedPackage === 'weekly' ? 10000 : 50000;
+  const days = selectedPackage === 'weekly' ? 7 : 30;
+  const packageName = selectedPackage === 'weekly' ? '7 Hari' : '30 Hari + WHISPERER';
+  
+  const loadingMsg = document.createElement('div');
+  loadingMsg.className = 'chat-msg system-msg';
+  loadingMsg.style.alignSelf = 'center';
+  loadingMsg.innerHTML = `
+    <div class="chat-bubble" style="background:var(--sfe); padding:12px 20px;">
+      ⏳ nyiapin pembayaran...
+    </div>
+  `;
+  $('chatMessages').appendChild(loadingMsg);
+  
+  // Simulasi sukses (ganti dengan fetch ke backend nanti)
+  setTimeout(() => {
+    loadingMsg.remove();
+    
+    const expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + days);
+    
+    userSubscription = {
+      isActive: true,
+      expiresAt: expiryDate.toISOString(),
+      type: selectedPackage
+    };
+    
+    localStorage.setItem('userSubscription', JSON.stringify(userSubscription));
+    
+    dismissReminder();
+    
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'chat-msg system-msg';
+    msgDiv.style.alignSelf = 'center';
+    
+    const whispererBonus = selectedPackage === 'monthly' ? ' dan WHISPERER ✦' : '';
+    
+    msgDiv.innerHTML = `
+      <div class="chat-bubble" style="background:rgba(0,255,65,0.1); border:1px solid var(--aq); padding:20px; border-radius:30px;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+          <span style="font-size:28px;">🎉</span>
+          <span style="font-weight:700; font-size:16px;">subscribe berhasil!</span>
+        </div>
+        <div style="font-size:13px; color:var(--txs); margin-bottom:12px;">
+          sekarang kamu bisa ngobrol santai ${days} hari ke depan${whispererBonus}
+        </div>
+        <div style="font-size:12px; color:var(--tx); background:var(--bg); padding:10px; border-radius:12px;">
+          ⚡ fitur premium udah aktif:
+          • chat tanpa batas
+          • prioritas koneksi real user
+          • void tap unlimited
+          ${selectedPackage === 'monthly' ? '• WHISPERER ✦ (pesan rahasia hilang 5 detik)' : ''}
+        </div>
+        <div style="margin-top:16px; font-size:11px; color:var(--txm); font-style:italic;">
+          👆 lanjutin ngobrol aja~
+        </div>
+      </div>
+    `;
+    
+    $('chatMessages').appendChild(msgDiv);
+    msgDiv.scrollIntoView({ behavior: 'smooth' });
+    
+    if (chatTimeLeft > 0) {
+      chatTimeLeft += 900;
+      const timerEl = $('chatTimer');
+      if (timerEl) {
+        timerEl.textContent = '15:00';
+        timerEl.classList.remove('warn');
+      }
+    }
+    
+    toast('selamat datang di keluarga premium! 🎉');
+  }, 1500);
+}
+
+function selectPlan(el, plan) {
+  document.querySelectorAll('.price-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPlan = plan;
+}
+
+function processUpgrade() {
+  if (!selectedPlan) {
+    toast('Pilih paket dulu', true);
+    return;
+  }
+  
+  closeModal('upgradeModal');
+  
+  // Trigger reminder di chat
+  if (chatTimeLeft > 0 && $('chatRoom').classList.contains('on')) {
+    addSubscriptionReminder(
+      "✨ mau upgrade?",
+      `pilih paket yang cocok: 10k/7 hari atau 50k/30 hari + WHISPERER ✦`
+    );
+  } else {
+    toast('Buka VIBE CHECK dulu untuk chat', true);
   }
 }
 
 function endChat() {
   clearInterval(timerInterval);
-  addMsg('⏰ Waktu habis. Sesi vibe check selesai.', false);
-  setTimeout(() => {
-    closeChat();
-    toast('Sesi vibe check selesai');
-  }, 3000);
+  
+  const hasSubscription = checkSubscription();
+  
+  if (hasSubscription) {
+    chatTimeLeft = 900;
+    const timerEl = $('chatTimer');
+    if (timerEl) {
+      timerEl.textContent = '15:00';
+      timerEl.classList.remove('warn');
+    }
+    
+    addSystemCelebration(
+      "🔄 auto-refresh", 
+      "karena kamu subscriber, langsung dapet 15 menit lagi. enjoy~"
+    );
+    return;
+  }
+  
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'chat-msg system-msg';
+  msgDiv.style.alignSelf = 'center';
+  msgDiv.style.margin = '20px 0';
+  
+  msgDiv.innerHTML = `
+    <div class="chat-bubble" style="background:var(--sfe); border:1px solid var(--bd); padding:20px; border-radius:30px; max-width:300px;">
+      <div style="font-size:18px; margin-bottom:12px;">⏰ waktu abis</div>
+      <div style="font-size:13px; color:var(--txs); margin-bottom:16px;">
+        mau lanjut ngobrol? subscribe dulu yuk~
+      </div>
+      
+      <div style="display:flex; gap:8px; margin-bottom:16px;">
+        <div onclick="selectPackage('weekly', this)" style="flex:1; background:var(--bg); border:1px solid var(--bd); border-radius:12px; padding:12px; text-align:center; cursor:pointer;" data-package="weekly">
+          <div style="font-size:16px; font-weight:700; color:var(--as);">10k</div>
+          <div style="font-size:10px; color:var(--txs);">7 hari</div>
+        </div>
+        <div onclick="selectPackage('monthly', this)" style="flex:1; background:var(--bg); border:1px solid var(--bd); border-radius:12px; padding:12px; text-align:center; cursor:pointer;" data-package="monthly">
+          <div style="font-size:16px; font-weight:700; color:var(--aq);">50k</div>
+          <div style="font-size:10px; color:var(--txs);">30 hari + WHISPERER</div>
+        </div>
+      </div>
+      
+      <button onclick="processSubscription()" style="width:100%; background:var(--ap); color:#000; border:none; padding:12px; border-radius:30px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; margin-bottom:8px;">
+        ➕ subscribe sekarang
+      </button>
+      
+      <button onclick="closeChat()" style="width:100%; background:transparent; border:1px solid var(--bd); color:var(--txs); padding:10px; border-radius:30px; font-size:12px; cursor:pointer; font-family:inherit;">
+        tutup dulu
+      </button>
+      
+      <div style="font-size:8px; color:var(--txm); margin-top:12px; text-align:center;">
+        • bayar pake apa aja (Midtrans)
+      </div>
+    </div>
+  `;
+  
+  $('chatMessages').appendChild(msgDiv);
+  msgDiv.scrollIntoView({ behavior: 'smooth' });
 }
 
 function closeChat() {
@@ -1578,137 +2631,24 @@ function closeChat() {
   }
 }
 
-// FUNGSI UTAMA: Call Chat API - DENGAN PERBAIKAN
-async function callChatAPI(userMessage, isFirstMessage = false) {
-  if (!chatPartner || !chatPartner.isAI) return;
+// ==================== WHISPERER ====================
+function openWsModal() {
+  const isPremium = checkSubscription() && userSubscription.type === 'monthly';
   
-  if (apiOffline) {
-    console.log('API is offline, skipping call');
+  if (!isPremium) {
+    $('wsModalBody').innerHTML = `
+      <div class="ws-premium-lock">
+        <div class="icon">✦</div>
+        <div class="title">whisperer premium</div>
+        <div class="desc">fitur ini khusus untuk pengguna paket 50K/30 hari</div>
+        <button class="ws-premium-btn" onclick="closeModal('wsModal'); showUpgradeModal();">upgrade sekarang</button>
+      </div>
+    `;
+    $('wsModal').classList.add('on');
     return;
   }
   
-  const typingDiv = document.createElement('div');
-  typingDiv.className = 'chat-msg other';
-  typingDiv.innerHTML = '<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-  $('chatMessages').appendChild(typingDiv);
-  typingDiv.scrollIntoView({ behavior: 'smooth' });
-  
-  try {
-    let reply;
-    
-    if (USE_MOCK) {
-      // MOCK RESPONSE - Hanya untuk development
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      reply = isFirstMessage 
-        ? `halo, gue ${chatPartner.name.split('.')[0]}. salam kenal 😊`
-        : `${chatPartner.name.split('.')[0]}: iya nih, gue denger...`;
-    } else {
-      // PRODUCTION - Panggil API beneran
-      
-      // PERBAIKAN: Untuk first message, kirim pesan "halo" bukan empty string
-      const payload = {
-        message: isFirstMessage ? "halo" : userMessage,
-        characterName: chatPartner.name,
-        userName: userName,
-        lastMessages: chatHistory.slice(-8)
-      };
-      
-      console.log('Calling API with payload:', payload);
-      
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`API error: ${response.status} - ${errorData.error || 'Unknown error'}`);
-      }
-      
-      const data = await response.json();
-      
-      // Validasi response
-      if (!data.reply) {
-        throw new Error('Response dari API tidak valid: missing reply');
-      }
-      
-      reply = data.reply;
-      
-      // Handle distress signal
-      if (data.distress) {
-        const distressEl = $('distressMsg');
-        distressEl.classList.add('show');
-        if (data.distress === 'high') {
-          distressEl.textContent = '⚠️ Perhatian: Partner menunjukkan tanda-tanda distress serius';
-        } else if (data.distress === 'low') {
-          distressEl.textContent = '⚠️ Partner terlihat sedih, respons dengan empati';
-        }
-      }
-    }
-    
-    typingDiv.remove();
-    
-    addMsg(reply, false);
-    
-    if (!isFirstMessage) {
-      chatHistory.push({ role: 'user', content: userMessage });
-    }
-    chatHistory.push({ role: 'assistant', content: reply });
-    
-  } catch (error) {
-    console.error('❌ Error calling chat API:', error);
-    typingDiv.remove();
-    
-    apiOffline = true;
-    toast('Gagal terhubung ke server chat. Periksa koneksi atau hubungi admin.', true);
-    
-    if (isFirstMessage) {
-      // Fallback message jika API error
-      const fallbackMsg = `halo, gue ${chatPartner.name.split('.')[0]}. salam kenal 😊`;
-      addMsg(fallbackMsg, false);
-      chatHistory.push({ role: 'assistant', content: fallbackMsg });
-    }
-  }
-}
-
-function sendMsg() {
-  const input = $('chatInput');
-  const text = input.value.trim();
-  if (!text) return;
-  
-  addMsg(text, true);
-  input.value = '';
-  
-  chatHistory.push({ role: 'user', content: text });
-  
-  if (chatPartner && chatPartner.isAI && !apiOffline) {
-    callChatAPI(text);
-  } else if (apiOffline) {
-    toast('Server chat sedang offline', true);
-  }
-}
-
-function addMsg(text, isOwn) {
-  const messages = $('chatMessages');
-  const msgDiv = document.createElement('div');
-  msgDiv.className = 'chat-msg ' + (isOwn ? 'own' : 'other');
-  
-  const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-  
-  msgDiv.innerHTML = `
-    <div class="chat-bubble">${esc(text)}</div>
-    <div class="chat-time">${time}</div>
-  `;
-  
-  messages.appendChild(msgDiv);
-  msgDiv.scrollIntoView({ behavior: 'smooth' });
-}
-
-// ==================== WHISPERER ====================
-function openWsModal() {
+  $('wsPremiumBadge').style.display = 'inline-block';
   renderWsInbox();
   $('wsModal').classList.add('on');
 }
@@ -1723,7 +2663,7 @@ function renderWsInbox() {
   }
   
   list.innerHTML = whispers.map(w => `
-    <div class="ws-thread-item ${w.read ? '' : 'unread'}" onclick="openWsThread('${w.from}')">
+    <div class="ws-thread-item ${w.read ? '' : 'unread'} premium" onclick="openWsThread('${w.from}')">
       <div class="ws-avatar">${w.from.charAt(0)}</div>
       <div class="ws-thread-info">
         <div class="ws-thread-name">@${esc(w.from)}</div>
@@ -1748,6 +2688,9 @@ function timeAgoShort(timestamp) {
 }
 
 function updateWsBadge() {
+  const isPremium = checkSubscription() && userSubscription.type === 'monthly';
+  if (!isPremium) return;
+  
   const unread = whispers.filter(w => !w.read).length;
   const badge = $('wsBadge');
   if (unread > 0) {
@@ -1759,6 +2702,12 @@ function updateWsBadge() {
 }
 
 function openWsCompose() {
+  const isPremium = checkSubscription() && userSubscription.type === 'monthly';
+  if (!isPremium) {
+    toast('whisperer khusus premium 50K', true);
+    return;
+  }
+  
   closeModal('wsModal');
   $('wsComposeScreen').classList.add('on');
   $('wsToInput').value = '';
@@ -1798,7 +2747,7 @@ function sendWs() {
     thread: []
   });
   
-  toast('Whisper terkirim');
+  toast('Whisper terkirim (akan hilang 5 detik setelah dibaca)');
   closeWsCompose();
   openWsModal();
 }
@@ -1832,12 +2781,27 @@ function renderWsThread(whisper) {
   
   msgs.innerHTML = allMessages.map(m => `
     <div class="chat-msg ${m.from === userName ? 'own' : 'other'}">
-      <div class="chat-bubble">${esc(m.content)}</div>
+      <div class="chat-bubble" style="${m.from !== userName ? 'border:1px solid var(--as);' : ''}">${esc(m.content)}</div>
       <div class="chat-time">${timeAgoShort(m.timestamp)}</div>
     </div>
   `).join('');
   
   msgs.scrollTop = msgs.scrollHeight;
+  
+  // Auto-delete setelah dibaca
+  const msgBubbles = msgs.querySelectorAll('.chat-bubble');
+  msgBubbles.forEach((bubble, index) => {
+    setTimeout(() => {
+      if (bubble && bubble.parentElement) {
+        bubble.style.animation = 'vtBurn .7s ease forwards';
+        setTimeout(() => {
+          if (bubble.parentElement) {
+            bubble.parentElement.remove();
+          }
+        }, 700);
+      }
+    }, 5000 + (index * 1000));
+  });
 }
 
 function sendWsReply() {
@@ -1870,11 +2834,23 @@ function updateVtIndicator() {
 }
 
 function openVtCompose() {
+  const isPremium = checkSubscription();
+  if (!isPremium && vtQuota <= 0) {
+    showVtUpgradeNudge();
+    return;
+  }
+  
   $('vtCompose').classList.add('on');
   $('vtTextarea').value = '';
   $('vtCharCount').textContent = '0/150';
-  $('vtQuota').textContent = `sisa ${vtQuota}/3 hari ini`;
-  $('vtSendBtn').disabled = vtQuota <= 0;
+  
+  if (isPremium) {
+    $('vtQuota').textContent = 'premium • unlimited';
+  } else {
+    $('vtQuota').textContent = `sisa ${vtQuota}/3 hari ini`;
+  }
+  
+  $('vtSendBtn').disabled = !isPremium && vtQuota <= 0;
 }
 
 function closeVtCompose() {
@@ -1882,7 +2858,9 @@ function closeVtCompose() {
 }
 
 function sendVoidTap() {
-  if (vtQuota <= 0) {
+  const isPremium = checkSubscription();
+  
+  if (!isPremium && vtQuota <= 0) {
     showVtUpgradeNudge();
     return;
   }
@@ -1890,7 +2868,7 @@ function sendVoidTap() {
   const text = $('vtTextarea').value.trim();
   if (!text) return;
   
-  vtQuota--;
+  if (!isPremium) vtQuota--;
   
   voidTaps.push({
     id: 'vt' + Date.now(),
@@ -1949,29 +2927,123 @@ function showVtUpgradeNudge() {
   }, 3000);
 }
 
-function selectPlan(el, plan) {
-  document.querySelectorAll('.price-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedPlan = plan;
-}
-
-function upgradeNow() {
-  if (!selectedPlan) {
-    toast('Pilih paket dulu', true);
-    return;
-  }
-  
-  toast('Fitur premium diaktifkan (demo)');
-  closeModal('upgradeModal');
-  vtQuota = 999;
-}
-
 function showUpgradeModal() {
   $('upgradeModal').classList.add('on');
 }
 
+// ==================== CALL CHAT API ====================
+async function callChatAPI(userMessage, isFirstMessage = false) {
+  if (!chatPartner || !chatPartner.isAI) return;
+  
+  if (apiOffline) {
+    console.log('API is offline, skipping call');
+    return;
+  }
+  
+  const typingDiv = document.createElement('div');
+  typingDiv.className = 'chat-msg other';
+  typingDiv.innerHTML = '<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+  $('chatMessages').appendChild(typingDiv);
+  typingDiv.scrollIntoView({ behavior: 'smooth' });
+  
+  try {
+    let reply;
+    
+    if (USE_MOCK) {
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      reply = isFirstMessage 
+        ? `halo, gue ${chatPartner.name.split('.')[0]}. salam kenal 😊`
+        : `${chatPartner.name.split('.')[0]}: iya nih, gue denger...`;
+    } else {
+      const payload = {
+        message: isFirstMessage ? "halo" : userMessage,
+        characterName: chatPartner.name,
+        userName: userName,
+        lastMessages: chatHistory.slice(-8)
+      };
+      
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`API error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+      }
+      
+      const data = await response.json();
+      if (!data.reply) throw new Error('Response tidak valid');
+      
+      reply = data.reply;
+      
+      if (data.distress) {
+        const distressEl = $('distressMsg');
+        distressEl.classList.add('show');
+        distressEl.textContent = data.distress === 'high' 
+          ? '⚠️ Perhatian: Partner menunjukkan tanda-tanda distress serius'
+          : '⚠️ Partner terlihat sedih, respons dengan empati';
+      }
+    }
+    
+    typingDiv.remove();
+    addMsg(reply, false);
+    
+    if (!isFirstMessage) chatHistory.push({ role: 'user', content: userMessage });
+    chatHistory.push({ role: 'assistant', content: reply });
+    
+  } catch (error) {
+    console.error('❌ Error calling chat API:', error);
+    typingDiv.remove();
+    
+    apiOffline = true;
+    toast('Gagal terhubung ke server chat', true);
+    
+    if (isFirstMessage) {
+      const fallbackMsg = `halo, gue ${chatPartner.name.split('.')[0]}. salam kenal 😊`;
+      addMsg(fallbackMsg, false);
+      chatHistory.push({ role: 'assistant', content: fallbackMsg });
+    }
+  }
+}
+
+function sendMsg() {
+  const input = $('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  
+  addMsg(text, true);
+  input.value = '';
+  
+  chatHistory.push({ role: 'user', content: text });
+  
+  if (chatPartner && chatPartner.isAI && !apiOffline) {
+    callChatAPI(text);
+  } else if (apiOffline) {
+    toast('Server chat sedang offline', true);
+  }
+}
+
+function addMsg(text, isOwn) {
+  const messages = $('chatMessages');
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'chat-msg ' + (isOwn ? 'own' : 'other');
+  
+  const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  
+  msgDiv.innerHTML = `
+    <div class="chat-bubble">${esc(text)}</div>
+    <div class="chat-time">${time}</div>
+  `;
+  
+  messages.appendChild(msgDiv);
+  msgDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', () => {
+  loadSubscription();
   initRadar();
   renderSpills();
   updateOnlineCount();
@@ -1984,7 +3056,8 @@ document.addEventListener('DOMContentLoaded', () => {
   $('wsBodyInput')?.addEventListener('input', validateWsBody);
   $('vtTextarea')?.addEventListener('input', function() {
     $('vtCharCount').textContent = this.value.length + '/150';
-    $('vtSendBtn').disabled = this.value.trim().length === 0 || vtQuota <= 0;
+    const isPremium = checkSubscription();
+    $('vtSendBtn').disabled = this.value.trim().length === 0 || (!isPremium && vtQuota <= 0);
   });
   
   window.addEventListener('beforeunload', () => {
