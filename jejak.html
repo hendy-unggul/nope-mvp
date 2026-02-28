@@ -595,7 +595,7 @@ function setHero(id) {
 }
 
 // ============================================
-// SUPABASE INIT (TANPA AUTH)
+// SUPABASE INIT
 // ============================================
 let supabase = null;
 
@@ -619,7 +619,7 @@ function initSupabase() {
 // AUTH - LANGSUNG DARI LOCALSTORAGE
 // ============================================
 async function checkAuth() {
-  // Ambil data dari localStorage (cara index.html)
+  // Ambil data dari localStorage
   const username = localStorage.getItem('jejak_username');
   const userId = localStorage.getItem('user_id');
   const loggedIn = localStorage.getItem('jejak_logged_in') === 'true';
@@ -650,8 +650,9 @@ async function checkAuth() {
   console.log('Not logged in');
   return false;
 }
+
 // ============================================
-// LOAD DATA FROM SUPABASE (PAKAI USER_ID LANGSUNG)
+// LOAD DATA FROM SUPABASE
 // ============================================
 async function loadEntries() {
   if (!S.userId) return;
@@ -743,7 +744,7 @@ async function saveEntry() {
   showProc('Menyimpan spill...');
   
   try {
-    // Insert ke tabel entries (pake userId dari state)
+    // Insert ke tabel entries
     const { data, error } = await supabase
       .from('entries')
       .insert({
@@ -935,7 +936,7 @@ async function confirmUpload() {
         .select();
       
       if (!artefactError && artefactData && artefactData[0]) {
-        // Gunakan ID dari database, bukan lokal
+        // Gunakan ID dari database
         S.artefacts.unshift({
           id: artefactData[0].id,
           url: publicUrl,
@@ -1010,12 +1011,12 @@ function closeVoidChat() {
 }
 
 // ============================================
-// INIT - RENDER IMMEDIATELY, AUTH IS SECONDARY
+// INIT
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
   console.log('=== JEJAK APP STARTING ===');
   
-  // 1. Render dummies IMMEDIATELY (don't wait for auth)
+  // 1. Render dummies IMMEDIATELY
   renderEntries();
   renderTray();
   
@@ -1034,7 +1035,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 5. Check auth dari localStorage
   checkAuth().then(authed => {
     if (authed) {
-      // Re-render with user data if we have it
+      // Re-render with user data
       renderEntries();
       renderTray();
     }
