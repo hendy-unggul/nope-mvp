@@ -1441,15 +1441,26 @@ body{
 </div><!-- /scroll -->
 
 <!-- BOTTOM NAV -->
-<nav class="bnav">
-  <div class="bnav-inner">
-    <a href="#" class="nav-item active" onclick="return false"><span class="nav-icon">✕</span><span>Spill</span></a>
-    <a href="#" class="nav-item" onclick="return false"><span class="nav-icon">✦</span><span>Jejak</span></a>
-    <a href="#" class="nav-item" onclick="return false"><span class="nav-icon">⚡</span><span>Glitch</span></a>
-    <a href="#" class="nav-item" onclick="return false"><span class="nav-icon">⬡</span><span>Cocomeo</span></a>
+<nav class="bottom-nav">
+  <div class="nav-container">
+    <a href="jejak.html" class="nav-item">
+      <span class="nav-icon">✦</span>
+      <span>Jejak</span>
+    </a>
+    <a href="spill.html" class="nav-item active">
+      <span class="nav-icon">✕</span>
+      <span>Spill</span>
+    </a>
+    <a href="glitch.html" class="nav-item">
+      <span class="nav-icon">⚡</span>
+      <span>Glitch</span>
+    </a>
+    <a href="cocomeo.html" class="nav-item">
+      <span class="nav-icon">⬡</span>
+      <span>Cocomeo</span>
+    </a>
   </div>
 </nav>
-
 </div><!-- /app -->
 
 <!-- MODAL GENDER -->
@@ -2750,7 +2761,7 @@ function updateWsBadge() {
   } else {
     badge.classList.remove('show');
   }
-  // ==================== STEALTH WHISPERER CONTROL ====================
+ // ==================== STEALTH WHISPERER CONTROL ====================
 function updateStealthWhisperer() {
   const wsIcon = document.getElementById('wsIcon');
   const wsLabel = document.getElementById('wsLabel');
@@ -2761,14 +2772,12 @@ function updateStealthWhisperer() {
   const unreadCount = whispers.filter(w => !w.read).length;
   
   if (unreadCount > 0) {
-    // ADA PESAN - TAMPILKAN BADGE DAN AKTIFKAN WARNA PUTIH
     wsIcon.style.color = 'var(--tx)';
     wsLabel.style.color = 'var(--tx)';
     wsLabel.style.fontWeight = '600';
     wsBadge.style.display = 'inline-block';
     wsBadge.textContent = `✦ ${unreadCount}`;
   } else {
-    // TIDAK ADA PESAN - STEALTH MODE (ABU-ABU TIPIS)
     wsIcon.style.color = 'var(--txs)';
     wsLabel.style.color = 'var(--txs)';
     wsLabel.style.fontWeight = '400';
@@ -2776,6 +2785,25 @@ function updateStealthWhisperer() {
   }
 }
 
+// PASTIKAN INI HANYA SATU FUNGSI updateWsBadge
+function updateWsBadge() {
+  const isPremium = checkSubscription() && userSubscription.type === 'monthly';
+  if (!isPremium) return;
+  
+  const unread = whispers.filter(w => !w.read).length;
+  const badge = $('wsBadge');
+  if (badge) {
+    if (unread > 0) {
+      badge.textContent = unread;
+      badge.classList.add('show');
+    } else {
+      badge.classList.remove('show');
+    }
+  }
+  
+  // PANGGIL STEALTH UPDATER
+  updateStealthWhisperer();
+}
 // Modifikasi fungsi updateWsBadge yang sudah ada
 function updateWsBadge() {
   const isPremium = checkSubscription() && userSubscription.type === 'monthly';
