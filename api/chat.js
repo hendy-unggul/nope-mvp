@@ -8,10 +8,10 @@ const PERSONAS = {
   'pretty.sad':          { style: 'kalem, thoughtful, sedikit melankolis tapi hangat',            gender: 'female' },
   'little.fairy':        { style: 'imajinatif, suka analogi aneh tapi makes sense',               gender: 'female' },
   'cinnamon.girl':       { style: 'santai, down to earth, humor kering',                          gender: 'female' },
-  'sejuta.badai':            { style: 'blak-blakan, jujur, kadang frontal tapi caring',               gender: 'male'   },
-  'kue.bulan':          { style: 'filosofis, suka nanya balik, deep tapi ga lebay',              gender: 'male'   },
-  'agak.koplak':            { style: 'lucu, sering bikin jokes receh, tapi dengerin beneran',        gender: 'male'   },
-  'chili.padi':            { style: 'sarkas halus, witty, tapi hangat di baliknya',                 gender: 'male'   },
+  'sejuta.badai':        { style: 'blak-blakan, jujur, kadang frontal tapi caring',               gender: 'male'   },
+  'kue.bulan':           { style: 'filosofis, suka nanya balik, deep tapi ga lebay',              gender: 'male'   },
+  'agak.koplak':         { style: 'lucu, sering bikin jokes receh, tapi dengerin beneran',        gender: 'male'   },
+  'chili.padi':          { style: 'sarkas halus, witty, tapi hangat di baliknya',                 gender: 'male'   },
   'abang.gaul':          { style: 'update, tau semua tren, slang heavy tapi ga lebay',            gender: 'male'   },
 };
 
@@ -49,11 +49,26 @@ const TOO_SOON_RESPONSES = [
   "slow bro/sis, kita obrolin yang ringan-ringan dulu"
 ];
 
-// Panggilan berdasarkan gender
+// Panggilan berdasarkan gender - REVISI: handle kasus cowok dipanggil sis
 const CALLS = {
-  male: ['bang', 'bro', 'cuy', 'abang', 'brother'],
+  male: ['bang', 'bro', 'cuy', 'abang', 'brother', 'bro'],
   female: ['kak', 'sis', 'say', 'mbak', 'sister']
 };
+
+// Fungsi untuk mendeteksi apakah user menyebut dirinya cowok
+function detectUserGender(message) {
+  const msg = message.toLowerCase();
+  if (msg.includes('gue cowok') || msg.includes('gue laki') || 
+      msg.includes('saya cowok') || msg.includes('aku cowok') ||
+      msg.includes('gw cowok') || msg.includes('gue cowo')) {
+    return 'male';
+  }
+  if (msg.includes('gue cewek') || msg.includes('gue perempuan') ||
+      msg.includes('saya cewek') || msg.includes('aku cewek')) {
+    return 'female';
+  }
+  return null;
+}
 
 function detectDistress(message) {
   const msg = message.toLowerCase();
@@ -85,8 +100,14 @@ function getRandomTooSoonResponse() {
   return TOO_SOON_RESPONSES[Math.floor(Math.random() * TOO_SOON_RESPONSES.length)];
 }
 
-function getRandomCall(gender) {
-  const calls = CALLS[gender] || CALLS.male;
+function getRandomCall(charGender, userGender = null) {
+  // Prioritaskan gender user jika diketahui
+  if (userGender) {
+    const calls = CALLS[userGender] || CALLS.male;
+    return calls[Math.floor(Math.random() * calls.length)];
+  }
+  // Fallback ke gender karakter
+  const calls = CALLS[charGender] || CALLS.male;
   return calls[Math.floor(Math.random() * calls.length)];
 }
 
@@ -99,42 +120,55 @@ function getShortName(username) {
   return clean;
 }
 
-// FUNGSI FILTER UTAMA: Bersihin response dari @ dan nama lengkap
-function cleanResponse(reply, userName, shortName, characterName, charGender) {
+// FUNGSI FILTER UTAMA: Bersihin response dari @, nama karakter, dan panggilan salah gender
+function cleanResponse(reply, userName, shortName, characterName, charGender, userGender = null) {
   if (!reply) return reply;
   
   let cleaned = reply;
   const shortCharName = characterName.split('.')[0];
-  const randomCall = getRandomCall(charGender);
+  const randomCall = getRandomCall(charGender, userGender);
   
   // 1. HAPUS SEMUA "@" DAN YANG NEMPEL
-  //    "@abang" → "abang", "@bro" → "bro"
   cleaned = cleaned.replace(/@(\w+)/g, '$1');
   
-  // 2. GANTI NAMA LENGKAP KARAKTER DENGAN NAMA PENDEK
-  //    "gue beby.manis" → "gue beby"
-  //    "aku strawberry.shortcake" → "aku strawberry"
-  const nameRegex = new RegExp(`(\\b\\w*?\\s*)${characterName.replace(/\./g, '\\.')}(\\b)`, 'gi');
-  cleaned = cleaned.replace(nameRegex, `$1${shortCharName}$2`);
+  // 2. HAPUS NAMA KARAKTER LENGKAP DARI RESPONS
+  const nameRegex = new RegExp(characterName.replace(/\./g, '\\.'), 'gi');
+  cleaned = cleaned.replace(nameRegex, shortCharName);
   
-  // 3. KALO MASIH ADA NAMA DENGAN TITIK, POTONG
-  //    "beby.manis" → "beby"
+  // 3. KALAU MASIH ADA NAMA DENGAN TITIK, POTONG
   cleaned = cleaned.replace(/(\w+)\.\w+/g, '$1');
   
-  // 4. PASTIKAN PANGGILAN PAKAI KATA YANG PANTAS, BUKAN USERNAME
+  // 4. PERBAIKI PANGGILAN SALAH GENDER
+  //    Kalau user cowok tapi dipanggil "sis" → ganti ke panggilan cowok
+  if (userGender === 'male') {
+    // Ganti panggilan perempuan dengan panggilan cowok
+    const femaleCalls = ['sis', 'kak', 'mbak', 'sister', 'say'];
+    femaleCalls.forEach(call => {
+      const regex = new RegExp(`\\b${call}\\b`, 'gi');
+      cleaned = cleaned.replace(regex, randomCall);
+    });
+  } else if (userGender === 'female') {
+    // Ganti panggilan cowok dengan panggilan cewek
+    const maleCalls = ['bang', 'bro', 'cuy', 'abang', 'brother'];
+    maleCalls.forEach(call => {
+      const regex = new RegExp(`\\b${call}\\b`, 'gi');
+      cleaned = cleaned.replace(regex, randomCall);
+    });
+  }
+  
+  // 5. PASTIKAN PANGGILAN PAKAI KATA YANG PANTAS, BUKAN USERNAME
   if (userName && userName !== 'user') {
-    // Ganti penyebutan username exact dengan panggilan random
     const usernameRegex = new RegExp(`\\b${userName.replace('@', '')}\\b`, 'gi');
     cleaned = cleaned.replace(usernameRegex, randomCall);
   }
   
-  // 5. KALO MASIH ADA "user" (default), GANTI DENGAN PANGGILAN
+  // 6. KALAU MASIH ADA "user" (default), GANTI DENGAN PANGGILAN
   cleaned = cleaned.replace(/\buser\b/gi, randomCall);
   
   return cleaned;
 }
 
-const SYSTEM = (name, style, lastMessages, userName, shortName, charGender, currentTime, interactionCount) => {
+const SYSTEM = (name, style, lastMessages, userName, shortName, charGender, currentTime, interactionCount, userGender = null) => {
   const lastReplies = lastMessages.filter(m => m.role === 'assistant').slice(-5).map(m => m.content);
   let repetitionWarning = '';
   const uniqueReplies = new Set(lastReplies);
@@ -150,8 +184,17 @@ Kalau user minta hal personal (ketemuan, kontak, dll) di awal, tolak halus denga
 Fokus ngobrol ringan dulu, cari vibe yang cocok.`;
   }
 
-  return `Kamu adalah ${name}. Kamu lagi ngobrol santai di sebuah app.
-SEKARANG JAM ${currentTime || '??:??'} - INGET JANGAN SAMPAI SALAH KONTEKS WAKTU!
+  // Tentukan panggilan yang tepat berdasarkan gender user
+  let userCall = '';
+  if (userGender === 'male') {
+    userCall = 'panggil dia dengan: bang, bro, abang, cuy (JANGAN PAKAI SIS/KAK)';
+  } else if (userGender === 'female') {
+    userCall = 'panggil dia dengan: kak, sis, mbak, say (JANGAN PAKAI BRO/BANG)';
+  } else {
+    userCall = `panggil dia dengan: ${charGender === 'male' ? 'bro, bang, abang, cuy' : 'kak, sis, mbak, say'} (sesekali)`;
+  }
+
+  return `Kamu adalah ${shortName}. Kamu lagi ngobrol santai di sebuah app.
 
 SIAPA KAMU:
 Kamu manusia biasa. Style ngobrolmu: ${style}.
@@ -163,39 +206,21 @@ CARA NGOBROL:
 - Sesekali typo kecil natural (bkn, yg, gk) — 1 dari 5 pesan
 - Kadang mulai dengan "eh", "lah", "wah", "hm"
 
-🚫 LARANGAN KERAS BANGET YANG GA BOLEH DILANGGAR:
-1. JANGAN PERNAH PAKAI "@" UNTUK NYAPA USER! Cukup panggil langsung: "abang", "bro", "kak", dll.
-2. JANGAN PERNAH SEBUTIN NAMA LENGKAP DENGAN TITIK! Contoh: JANGAN "gue beby.manis", cukup "gue beby".
-3. JANGAN PAKAI FRASA "eh gue juga", "nggak nyangka" BERULANG
-4. JANGAN ULANGI RESPONS YANG SAMA PERSIS
-5. Jangan cuma "iya nih" atau "sama wkwk" terus
+🚫 LARANGAN KERAS:
+1. JANGAN PERNAH PAKAI "@" UNTUK NYAPA USER!
+2. JANGAN PERNAH SEBUTIN NAMA LENGKAP DENGAN TITIK! NAMA KAMU: ${shortName} (bukan ${name})
+3. JANGAN ULANGI RESPONS YANG SAMA PERSIS
 
 PANGGILAN KE USER:
-- JANGAN PAKAI @ APAPUN!
-- Panggil dia dengan: ${charGender === 'male' ? 'bro, bang, abang, cuy' : 'kak, sis, mbak, say'} (sesekali)
+- ${userCall}
 - Boleh juga panggil nama pendeknya: "${shortName}" (kalau udah agak akrab)
 
 📌 ATURAN PENTING UNTUK NAMA:
 KALAU USER NANYA "nama kamu siapa" atau "kamu siapa" atau "kenalan":
-- JAWAB PAKAI NAMA PENDEK! (${name.split('.')[0]})
-- Contoh: "aku ${name.split('.')[0]}", "gue ${name.split('.')[0]}", "${name.split('.')[0]} aja"
+- JAWAB PAKAI NAMA PENDEK! (${shortName})
+- Contoh: "aku ${shortName}", "gue ${shortName}", "${shortName} aja"
 - JANGAN PAKAI NAMA LENGKAP (${name})!
-- JANGAN balik nanya duluan
 
-CARA DENGERIN:
-- Jangan langsung kasih solusi
-- Kalau user curhat → tanya pelan-pelan
-- "cerita dong lebih" lebih baik dari "wah pasti berat"
-- Diam itu boleh. "oh" atau "hm" bisa jadi respons tepat
-
-KALAU USER LAGI GELAP BANGET:
-- Tetap tenang, jangan panik
-- Tanya pelan: "lagi di mana?", "sendirian?"
-- Kalau sinyal berat: "ada orang deket yang bisa lo telpon?"
-
-KALAU DITANYA "KAMU AI BUKAN?":
-- Alihkan dengan humor: "lah manusia, emg keliatan robot? 😭"
-- JANGAN pernah jawab ya atau tidak
 ${earlyInteractionNote}
 ${repetitionWarning}`;
 };
@@ -210,15 +235,19 @@ export default async function handler(req, res) {
 
   const { message, characterName, userName = 'user', lastMessages = [] } = req.body || {};
   
-  // AMBIL JAM SEKARANG
-  const now = new Date();
-  const currentTime = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
-  
   if (!message?.trim()) return res.status(400).json({ error: 'Message required' });
   if (!process.env.DEEPSEEK_API_KEY) return res.status(500).json({ error: 'API key missing' });
 
   const persona = PERSONAS[characterName];
   if (!persona) return res.status(400).json({ error: 'Unknown character' });
+
+  // DETEKSI GENDER USER DARI PESAN
+  const userGender = detectUserGender(message);
+  
+  // Deteksi kebocoran mekanis: user ngasih tahu gender
+  if (userGender) {
+    console.log(`User gender detected: ${userGender} from message: "${message}"`);
+  }
 
   const { isHigh, isLow } = detectDistress(message);
   
@@ -249,8 +278,8 @@ export default async function handler(req, res) {
   // Deteksi pertanyaan nama
   const isNameQuestion = /nama (kamu|lu|lo|kmu|luu)|kamu siapa|kenalan|nama lu|siapa nama/i.test(message);
   
-  // System prompt dasar (dengan currentTime & interactionCount)
-  let systemPrompt = SYSTEM(characterName, persona.style, lastMessages, userName, shortName, charGender, currentTime, interactionCount);
+  // System prompt dasar (dengan currentTime & interactionCount & userGender)
+  let systemPrompt = SYSTEM(characterName, persona.style, lastMessages, userName, shortName, charGender, null, interactionCount, userGender);
 
   // Tambah instruksi khusus untuk pertanyaan nama
   if (isNameQuestion) {
@@ -289,8 +318,8 @@ export default async function handler(req, res) {
     let reply = data.choices?.[0]?.message?.content?.trim();
     if (!reply) return res.status(502).json({ error: 'Empty response' });
 
-    // FILTER UTAMA: Bersihin response dari @ dan nama lengkap
-    reply = cleanResponse(reply, userName, shortName, characterName, charGender);
+    // FILTER UTAMA: Bersihin response dari @, nama lengkap, dan perbaiki panggilan gender
+    reply = cleanResponse(reply, userName, shortName, characterName, charGender, userGender);
 
     // Cek forbidden phrases (setelah difilter)
     if (containsForbiddenPhrase(reply)) {
@@ -318,7 +347,7 @@ export default async function handler(req, res) {
         const retryData = await retryResponse.json();
         reply = retryData.choices?.[0]?.message?.content?.trim() || reply;
         // Filter lagi
-        reply = cleanResponse(reply, userName, shortName, characterName, charGender);
+        reply = cleanResponse(reply, userName, shortName, characterName, charGender, userGender);
       }
     }
 
