@@ -1063,11 +1063,9 @@ body{
 
 <script>
 // ==================== KONFIGURASI API ====================
-// Ganti dengan URL yang sesuai:
-// - Untuk development lokal: 'http://localhost:3000/api/chat'
-// - Untuk production: 'https://your-vercel-app.vercel.app/api/chat'
-const API_URL = 'http://localhost:3000/api/chat'; // UBAH INI SESUAI DEPLOYMENT ANDA
-const API_KEY = 'dummy-key';
+// GANTI URL INI DENGAN URL VERCEL DEPLOYMENT ANDA!
+const API_URL = 'https://your-app.vercel.app/api/chat'; // <-- UBAH INI!
+const USE_MOCK = false; // Set ke false untuk pakai API beneran
 
 // ==================== STATE ====================
 let currentGender = null;
@@ -1082,8 +1080,8 @@ let userName = 'stranger_' + Math.floor(Math.random() * 1000);
 let activeWsThread = null;
 let vtBurnTimer = null;
 
-// History chat untuk dikirim ke API
-let chatHistory = [];
+// History chat untuk dikirim ke API (format sesuai chat.js)
+let chatHistory = []; // Array of {role: 'user'|'assistant', content: string}
 
 // Timer untuk fallback ke AI (60 detik)
 let fallbackTimer = null;
@@ -1091,7 +1089,7 @@ let fallbackTimer = null;
 // Flag untuk menandai API dalam mode offline
 let apiOffline = false;
 
-// Daftar karakter AI (hanya untuk referensi, logika ada di chat.js)
+// Daftar karakter AI (harus sama persis dengan di chat.js)
 const AI_CHARACTERS = {
   female: ['beby.manis', 'strawberry.shortcake', 'pretty.sad', 'little.fairy', 'cinnamon.girl'],
   male: ['sejuta.badai', 'kue.bulan', 'agak.koplak', 'chili.padi', 'abang.gaul']
@@ -1109,7 +1107,7 @@ let whispers = [
   { id: 'w2', from: 'sejuta.badai', to: userName, content: 'salam kenal, boleh ngobrol?', timestamp: Date.now() - 360000, read: true, thread: [] }
 ];
 
-// Data spill (konten publik, bukan chat)
+// Data spill (konten publik)
 const USER_RANTS = [
   {id:1,author:'anon.kucing',mood:'surviving',content:'Hari ini gue nangis di angkot gegara liat kucing dipukul orang. Mental gue udah kayak kerupuk kena hujan.',reactions:{skull:42,cry:89,fire:12,upside:7},userReacted:null},
   {id:2,author:'sleepy.head',mood:'thriving',content:'akhirnya bisa tidur nyenyak semalaman setelah 3 minggu insomnia. makasih buat yang chat tadi malem.',reactions:{skull:23,cry:15,fire:67,upside:31},userReacted:null},
@@ -1146,9 +1144,8 @@ function filterMood(btn) {
   renderSpills();
 }
 
-// ==================== SPILLS (KONTEN PUBLIK) ====================
+// ==================== SPILLS ====================
 function generateSpillContent(count = 6) {
-  // Ini untuk konten publik di halaman utama, BUKAN untuk chat
   const sampleSpills = [
     "hari ini gue liat mantan sama cewek baru, dan tau gak? rambutnya lebih bagus dari rambut gue 😭",
     "cape bener jadi cewek, setiap bulan harus nahan sakit perut sambil tetep senyum di depan client",
@@ -1159,17 +1156,7 @@ function generateSpillContent(count = 6) {
     "kenapa orangtua selalu curiga kalo kita lagi seneng? 'lagi seneng-seneng ya? nanti belajar'",
     "gue lagi diet, tapi tiap liat roti, rotinya yang liat gue duluan",
     "stress skripsi tapi yang keluar peluh dan air mata doang",
-    "hari ini gue nangis karena ga bisa buka toples. lemah?",
-    "kadang gue mikir, apa kita yang terlalu berharap atau emang janjinya ga pernah ditepatin?",
-    "hujan hari ini, tapi gaada yang tanya 'udah makan belom?'",
-    "capek pura-pura baik-baik aja. gue juga manusia, bisa hancur",
-    "kenapa ya orang lebih peduli sama 'kabar' daripada 'perasaan'?",
-    "malam ini gue lagi fase nerima kenyataan kalo dia ga akan balik",
-    "hari ini gue ditagih utang sama mantan. utang apa? utang perasaan katanya",
-    "capek jadi orang yang dianggap kuat terus. gue juga pengen nangis dipeluk",
-    "kenapa sih kalo udah malem suka overthinking? badan capek tapi pikiran lari maraton",
-    "jadi cowok tuh gaboleh lemah katanya. tapi dalemnya ancur",
-    "gue capek jadi 'tembok' tempat orang bersandar. giliran gue butuh sandaran, pada pergi"
+    "hari ini gue nangis karena ga bisa buka toples. lemah?"
   ];
   
   const moodList = ['surviving','thriving','chaotic','doom'];
@@ -1354,7 +1341,6 @@ function radarLoop(canvas) {
     ctx.fillStyle = `rgba(1,5,1,${fade})`;
     ctx.fillRect(0, 0, W, H);
     
-    // Draw trail
     for (let i = 0; i < TRAIL_CAP - 1; i++) {
       let newer = (trailPtr - 1 - i + TRAIL_CAP) % TRAIL_CAP;
       let older = (trailPtr - 2 - i + TRAIL_CAP) % TRAIL_CAP;
@@ -1381,7 +1367,6 @@ function radarLoop(canvas) {
       ctx.restore();
     }
     
-    // Draw needle
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(needleAngle);
@@ -1408,7 +1393,6 @@ function radarLoop(canvas) {
     ctx.fill();
     ctx.restore();
     
-    // Draw glow on recently scanned dots
     radarDots.forEach((d, di) => {
       const px = d.x / 100 * W;
       const py = d.y / 100 * H;
@@ -1462,9 +1446,8 @@ function updateOnlineCount() {
   }
 }
 
-// ==================== VIBE CHECK - MURNI API CALL ====================
+// ==================== VIBE CHECK ====================
 function startVibeCheck() {
-  // Reset state
   chatPartner = null;
   chatTimeLeft = 900;
   chatHistory = [];
@@ -1510,7 +1493,6 @@ function confirmGender() {
 }
 
 async function findRealUser() {
-  // Simulasi pencarian real user - 5% chance dapet real user
   setTimeout(() => {
     if (!chatPartner && $('chatRoom').classList.contains('on')) {
       const hasRealUser = Math.random() < 0.05;
@@ -1527,7 +1509,6 @@ async function findRealUser() {
 }
 
 function startRealChat() {
-  // Untuk demo, fallback ke AI
   fallbackToAI();
 }
 
@@ -1549,10 +1530,8 @@ function fallbackToAI() {
   const messages = $('chatMessages');
   messages.innerHTML = '';
   
-  // Reset apiOffline flag untuk setiap sesi baru
   apiOffline = false;
   
-  // Panggil API untuk first message
   callChatAPI('', true);
   
   startTimer();
@@ -1598,17 +1577,15 @@ function closeChat() {
   }
 }
 
-// FUNGSI UTAMA: Call Chat API - DENGAN ERROR HANDLING YANG LEBIH BAIK
+// FUNGSI UTAMA: Call Chat API
 async function callChatAPI(userMessage, isFirstMessage = false) {
   if (!chatPartner || !chatPartner.isAI) return;
   
-  // Jika API sudah terdeteksi offline, jangan coba-coba lagi
   if (apiOffline) {
     console.log('API is offline, skipping call');
     return;
   }
   
-  // Tampilkan typing indicator
   const typingDiv = document.createElement('div');
   typingDiv.className = 'chat-msg other';
   typingDiv.innerHTML = '<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
@@ -1616,77 +1593,84 @@ async function callChatAPI(userMessage, isFirstMessage = false) {
   typingDiv.scrollIntoView({ behavior: 'smooth' });
   
   try {
-    // Cek apakah API_URL valid (bukan default yang salah)
-    if (!API_URL || API_URL === 'https://api.spill-app.com/chat' || API_URL.includes('spill-app.com')) {
-      throw new Error('API_URL tidak dikonfigurasi dengan benar. Harap set URL API yang sesuai.');
+    let reply;
+    
+    if (USE_MOCK) {
+      // MOCK RESPONSE - Hanya untuk development
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      reply = isFirstMessage 
+        ? `halo, gue ${chatPartner.name.split('.')[0]}. salam kenal 😊`
+        : `${chatPartner.name.split('.')[0]}: iya nih, gue denger...`;
+    } else {
+      // PRODUCTION - Panggil API beneran
+      
+      // Validasi URL
+      if (!API_URL || API_URL === 'https://your-app.vercel.app/api/chat') {
+        throw new Error('API_URL belum dikonfigurasi dengan benar. Ganti dengan URL Vercel Anda!');
+      }
+      
+      // Siapkan payload sesuai format chat.js
+      const payload = {
+        message: isFirstMessage ? '' : userMessage,
+        characterName: chatPartner.name,
+        userName: userName,
+        lastMessages: chatHistory.slice(-8)
+      };
+      
+      console.log('Calling API with payload:', payload);
+      
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`API error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+      }
+      
+      const data = await response.json();
+      
+      // Validasi response
+      if (!data.reply) {
+        throw new Error('Response dari API tidak valid: missing reply');
+      }
+      
+      reply = data.reply;
+      
+      // Handle distress signal
+      if (data.distress) {
+        const distressEl = $('distressMsg');
+        distressEl.classList.add('show');
+        if (data.distress === 'high') {
+          distressEl.textContent = '⚠️ Perhatian: Partner menunjukkan tanda-tanda distress serius';
+        } else if (data.distress === 'low') {
+          distressEl.textContent = '⚠️ Partner terlihat sedih, respons dengan empati';
+        }
+      }
     }
-    
-    const payload = {
-      message: isFirstMessage ? '' : userMessage,
-      characterName: chatPartner.name,
-      userName: userName,
-      lastMessages: chatHistory.slice(-8)
-    };
-    
-    console.log('Calling API:', API_URL, payload);
-    
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`
-      },
-      body: JSON.stringify(payload)
-    });
     
     typingDiv.remove();
     
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${response.statusText}`);
-    }
+    addMsg(reply, false);
     
-    const data = await response.json();
-    
-    // Validasi response
-    if (!data.reply) {
-      throw new Error('Response dari API tidak valid');
-    }
-    
-    // Tampilkan reply dari API
-    addMsg(data.reply, false);
-    
-    // Update history
     if (!isFirstMessage) {
       chatHistory.push({ role: 'user', content: userMessage });
     }
-    chatHistory.push({ role: 'assistant', content: data.reply });
-    
-    // Handle distress signal
-    if (data.distress) {
-      const distressEl = $('distressMsg');
-      distressEl.classList.add('show');
-      if (data.distress === 'high') {
-        distressEl.textContent = '⚠️ Perhatian: Partner menunjukkan tanda-tanda distress serius';
-      } else if (data.distress === 'low') {
-        distressEl.textContent = '⚠️ Partner terlihat sedih, respons dengan empati';
-      }
-    }
+    chatHistory.push({ role: 'assistant', content: reply });
     
   } catch (error) {
     console.error('Error calling chat API:', error);
     typingDiv.remove();
     
-    // Tandai API offline agar tidak terus mencoba
     apiOffline = true;
-    
-    // Tampilkan pesan error yang informatif ke user
     toast('Gagal terhubung ke server chat. Periksa koneksi atau hubungi admin.', true);
     
-    // Untuk first message, beri tahu user kalau layanan tidak tersedia
     if (isFirstMessage) {
       addMsg('⚠️ Layanan chat sedang tidak tersedia. Silakan coba lagi nanti.', false);
-      
-      // Update history
       chatHistory.push({ role: 'assistant', content: '[system: service unavailable]' });
     }
   }
