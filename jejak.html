@@ -292,17 +292,19 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 
 <section class="isec">
   <div class="ihdr"><span class="ilbl">Spill your truth</span><span class="ccount" id="ccount">0/500</span></div>
-  <textarea class="ri" id="ri" placeholder="What's eating you alive right now? No cap, no filter..." maxlength="500" oninput="updateCharCount()"></textarea>
+  <!-- FIX: Removed inline oninput handler — attached via JS to avoid ReferenceError -->
+  <textarea class="ri" id="ri" placeholder="What's eating you alive right now? No cap, no filter..." maxlength="500"></textarea>
   <div class="msec">
     <div class="mlbl">Pilih mood-mu sekarang</div>
+    <!-- FIX: Removed inline onclick handlers — attached via JS to avoid ReferenceError -->
     <div class="mgrid">
-      <div class="mc act" data-mood="surviving" onclick="selMood('surviving')"><span class="me">😮‍💨</span><span class="mn" style="color:var(--ms)">Surviving</span><span class="md-desc">Hidup tapi barely</span></div>
-      <div class="mc" data-mood="thriving" onclick="selMood('thriving')"><span class="me">✨</span><span class="mn" style="color:var(--mt)">Thriving</span><span class="md-desc">On top of my game</span></div>
-      <div class="mc" data-mood="chaotic" onclick="selMood('chaotic')"><span class="me">🌀</span><span class="mn" style="color:var(--mc)">Chaotic</span><span class="md-desc">Everything is on fire</span></div>
-      <div class="mc" data-mood="doom" onclick="selMood('doom')"><span class="me">🛌</span><span class="mn" style="color:var(--md)">Doom</span><span class="md-desc">Just wanna disappear</span></div>
+      <div class="mc act" data-mood="surviving"><span class="me">😮‍💨</span><span class="mn" style="color:var(--ms)">Surviving</span><span class="md-desc">Hidup tapi barely</span></div>
+      <div class="mc" data-mood="thriving"><span class="me">✨</span><span class="mn" style="color:var(--mt)">Thriving</span><span class="md-desc">On top of my game</span></div>
+      <div class="mc" data-mood="chaotic"><span class="me">🌀</span><span class="mn" style="color:var(--mc)">Chaotic</span><span class="md-desc">Everything is on fire</span></div>
+      <div class="mc" data-mood="doom"><span class="me">🛌</span><span class="mn" style="color:var(--md)">Doom</span><span class="md-desc">Just wanna disappear</span></div>
     </div>
   </div>
-  <div class="iact"><button class="sbtn" id="sbtn">Jejakkan & Spill</button></div>
+  <div class="iact"><button class="sbtn" id="sbtn">Jejakkan &amp; Spill</button></div>
 </section>
 
 <section>
@@ -328,16 +330,16 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 </footer>
 </div>
 
-<div class="void-node" id="void-node" onclick="openVoid()"></div>
+<div class="void-node" id="void-node"></div>
 <div class="void-portal" id="void-portal">
   <div class="void-header">
     <div class="void-title">/// THE VOID <span class="premium-badge">Premium</span></div>
-    <button class="void-close" onclick="closeVoid()">×</button>
+    <button class="void-close" id="void-close-btn">×</button>
   </div>
   <div class="void-content">
     <div class="void-add">
       <input type="text" class="void-input" id="void-add-input" placeholder="Enter username to request...">
-      <button class="void-add-btn" onclick="sendContactRequest()">Request</button>
+      <button class="void-add-btn" id="void-add-btn">Request</button>
     </div>
     <div class="void-requests" id="void-requests" style="display:none;">
       <div class="void-section-title">Incoming Requests</div>
@@ -356,7 +358,7 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 </div>
 <div class="void-chat" id="void-chat">
   <div class="void-chat-header">
-    <button class="void-chat-back" onclick="closeVoidChat()">←</button>
+    <button class="void-chat-back" id="void-chat-back">←</button>
     <div class="void-chat-info">
       <div class="void-chat-name" id="chat-contact-name">@username</div>
       <div class="void-chat-status" id="chat-contact-status">Connected</div>
@@ -366,7 +368,7 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
   <div class="void-chat-messages" id="void-chat-messages"></div>
   <div class="void-chat-input">
     <textarea class="void-chat-textarea" id="void-message-input" placeholder="Type message..." maxlength="280"></textarea>
-    <button class="void-chat-send" id="void-send-btn" onclick="sendVoidMessage()">Send</button>
+    <button class="void-chat-send" id="void-send-btn">Send</button>
   </div>
 </div>
 <div class="void-burn" id="void-burn">
@@ -393,24 +395,27 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
   <div class="ptxt" id="proctxt">Mengupload foto...<br><small>Mohon tunggu</small></div>
 </div>
 
+<!-- FIX: Removed inline onclick from close button — attached via JS -->
 <div class="modal" id="gmodal">
   <div class="mc2">
-    <div class="mhdr"><h3 class="mtit">Review Artefak</h3><button class="void-close" onclick="closeGallery()">×</button></div>
+    <div class="mhdr"><h3 class="mtit">Review Artefak</h3><button class="void-close" id="gallery-close-btn">×</button></div>
     <div class="gwarn">DILARANG UPLOAD FOTO WAJAH!</div>
     <div style="font-size:11px;color:var(--txs);margin-bottom:16px;text-align:center">Wajah terdeteksi akan otomatis disensor • Sistem FIFO (6 foto max) • Tidak dapat dihapus</div>
     <div class="ggrid" id="ggrid"></div>
+    <!-- FIX: Removed inline oninput from range slider — attached via JS -->
     <div class="tmsec">
       <div class="tmhdr"><span class="tmlbl">🎨 Tema Foto</span><span class="tmnm" id="tmnm">MONOCHROME</span></div>
-      <input type="range" class="tmsl" id="tmsl" min="0" max="11" value="0" step="1" oninput="updTheme(this.value)">
-      <div class="tmlabs"><span>B&W</span><span>Warm</span><span>Cool</span><span>Art</span></div>
+      <input type="range" class="tmsl" id="tmsl" min="0" max="11" value="0" step="1">
+      <div class="tmlabs"><span>B&amp;W</span><span>Warm</span><span>Cool</span><span>Art</span></div>
     </div>
+    <!-- FIX: Removed inline oninput from note input — attached via JS -->
     <div class="notsec">
       <div class="notlbl"><span>📝 Notasi (Max 4 kata)</span><span class="notcnt" id="notcnt">0/4</span></div>
-      <input type="text" class="noti" id="noti" placeholder="Contoh: senja di kamar" maxlength="30" oninput="valNote(this)">
+      <input type="text" class="noti" id="noti" placeholder="Contoh: senja di kamar" maxlength="30">
     </div>
     <div class="macts">
-      <button class="mbtn" onclick="closeGallery()">Batal</button>
-      <button class="mbtn pri" id="konfirmbtn" onclick="confirmUpload()">Konfirmasi (<span id="selcnt">0</span>)</button>
+      <button class="mbtn" id="cancel-upload-btn">Batal</button>
+      <button class="mbtn pri" id="konfirmbtn">Konfirmasi (<span id="selcnt">0</span>)</button>
     </div>
   </div>
 </div>
@@ -423,13 +428,13 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 // ============================================
 // DUMMY DATA
 // ============================================
-const DUMMY_ENTRIES = [
+var DUMMY_ENTRIES = [
   {id:'d1',content:'Hari ini gue nangis di angkot gegara liat kucing dipukul orang. Mental gue udah kayak kerupuk kena hujan.',mood:'surviving',timestamp:Date.now()-3600000,reactions:{skull:42,cry:89,fire:12,upside:7},isDummy:true},
   {id:'d2',content:'akhirnya bisa tidur nyenyak semalaman setelah 3 minggu insomnia. thanks buat chat tadi malam.',mood:'thriving',timestamp:Date.now()-7200000,reactions:{skull:23,cry:15,fire:67,upside:31},isDummy:true},
   {id:'d3',content:'hari ini chaos abis! dari bangun tidur udah salah ambil kaki, sampe kantor lupa bawa laptop.',mood:'chaotic',timestamp:Date.now()-10800000,reactions:{skull:89,cry:23,fire:45,upside:78},isDummy:true}
 ];
 
-const DUMMY_ARTEFACTS = [
+var DUMMY_ARTEFACTS = [
   {id:'a1',url:'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80',note:'jeda',hasFace:false,isDummy:true,theme:'fm'},
   {id:'a2',url:'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80',note:'hijau',hasFace:false,isDummy:true,theme:'fg'},
   {id:'a3',url:'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=400&q=80',note:'gabut',hasFace:false,isDummy:true,theme:'fl'},
@@ -441,7 +446,7 @@ const DUMMY_ARTEFACTS = [
 // ============================================
 // STATE
 // ============================================
-const S = {
+var S = {
   user: null,
   userId: null,
   isPremium: false,
@@ -455,49 +460,51 @@ const S = {
 };
 
 // ============================================
-// HELPERS - Global Functions
+// HELPERS
 // ============================================
 function $(id) { return document.getElementById(id); }
 
 function toast(msg, dur) {
   dur = dur || 3000;
-  var t = $('toast'); 
-  t.textContent = msg; 
+  var t = $('toast');
+  t.textContent = msg;
   t.classList.add('show');
   setTimeout(function() { t.classList.remove('show'); }, dur);
 }
 
-function esc(t) { 
-  var d = document.createElement('div'); 
-  d.textContent = t; 
-  return d.innerHTML; 
+function esc(t) {
+  var d = document.createElement('div');
+  d.textContent = t;
+  return d.innerHTML;
 }
 
-function toggleMenu() { 
-  $('mdd').classList.toggle('on'); 
+// FIX: toggleMenu — defined before DOM ready, globally accessible
+function toggleMenu() {
+  $('mdd').classList.toggle('on');
 }
 
-function logoutUser() { 
-  if(!confirm('Yakin logout? Semua data lokal akan dihapus.')) return; 
+function logoutUser() {
+  if (!confirm('Yakin logout? Semua data lokal akan dihapus.')) return;
   localStorage.clear();
-  location.href='index.html'; 
+  location.href = 'index.html';
 }
 
-function selMood(mood) { 
+// FIX: selMood — now called only from JS event listeners, not inline HTML
+function selMood(mood) {
   var cards = document.querySelectorAll('.mc');
-  for(var i = 0; i < cards.length; i++) {
+  for (var i = 0; i < cards.length; i++) {
     cards[i].classList.toggle('act', cards[i].dataset.mood === mood);
   }
 }
 
-function showProc(msg) { 
+function showProc(msg) {
   msg = msg || 'Mengupload...';
-  $('proctxt').innerHTML = msg; 
-  $('proc').classList.add('on'); 
+  $('proctxt').innerHTML = msg;
+  $('proc').classList.add('on');
 }
 
-function hideProc() { 
-  $('proc').classList.remove('on'); 
+function hideProc() {
+  $('proc').classList.remove('on');
 }
 
 function timeAgo(timestamp) {
@@ -510,6 +517,7 @@ function timeAgo(timestamp) {
   return Math.floor(hours / 24) + 'h lalu';
 }
 
+// FIX: updateCharCount — now attached via addEventListener, not inline oninput
 function updateCharCount() {
   var val = $('ri').value.length;
   $('ccount').textContent = val + '/500';
@@ -519,117 +527,124 @@ function updateCharCount() {
 // RENDER FUNCTIONS
 // ============================================
 function renderEntries() {
-  var con = $('econ'); 
-  if(!con) {
-    console.error('econ not found');
-    return;
-  }
-  
+  var con = $('econ');
+  if (!con) return;
+
   var hasRealEntries = S.entries && S.entries.length > 0;
   var displayEntries = hasRealEntries ? S.entries : DUMMY_ENTRIES;
-  
-  console.log('Rendering entries:', displayEntries.length, hasRealEntries ? 'real' : 'dummies');
-  
+
   var html = '';
-  for(var i = 0; i < displayEntries.length; i++) {
+  for (var i = 0; i < displayEntries.length; i++) {
     var e = displayEntries[i];
     var ta = e.isDummy ? 'contoh' : timeAgo(e.timestamp);
-    var emojiMap = {surviving:'😮‍💨',thriving:'✨',chaotic:'🌀',doom:'🛌'};
+    var emojiMap = { surviving: '😮‍💨', thriving: '✨', chaotic: '🌀', doom: '🛌' };
     var emoji = emojiMap[e.mood] || '';
     var dummyClass = e.isDummy ? ' entry-dummy' : '';
-    var dummyLabel = e.isDummy ? '<span class=\"fifo-i\">Contoh</span>' : '';
-    
+    var dummyLabel = e.isDummy ? '<span class="fifo-i">Contoh</span>' : '';
+
     var reactionsHtml = '';
-    var reactions = {skull:'💀',cry:'😭',fire:'🔥',upside:'🙃'};
-    for(var key in reactions) {
+    var reactions = { skull: '💀', cry: '😭', fire: '🔥', upside: '🙃' };
+    for (var key in reactions) {
       var count = e.reactions && e.reactions[key] ? e.reactions[key] : 0;
-      reactionsHtml += '<button class=\"reaction-btn\" disabled><span class=\"remoji\">' + reactions[key] + '</span><span class=\"rcount\">' + count + '</span></button>';
+      reactionsHtml += '<button class="reaction-btn" disabled><span class="remoji">' + reactions[key] + '</span><span class="rcount">' + count + '</span></button>';
     }
-    
-    html += '<article class=\"entry' + dummyClass + '\">' +
-      '<div class=\"ehdr\">' +
-        '<div class=\"emeta\">' +
-          '<span class=\"etime\">' + ta + '</span>' +
-          '<span class=\"emood ' + e.mood + '\">' + emoji + ' ' + e.mood + '</span>' +
+
+    html += '<article class="entry' + dummyClass + '">' +
+      '<div class="ehdr">' +
+        '<div class="emeta">' +
+          '<span class="etime">' + ta + '</span>' +
+          '<span class="emood ' + e.mood + '">' + emoji + ' ' + e.mood + '</span>' +
         '</div>' + dummyLabel +
       '</div>' +
-      '<div class=\"econt\">' + esc(e.content) + '</div>' +
-      '<div class=\"reaction-bar\">' + reactionsHtml + '</div>' +
+      '<div class="econt">' + esc(e.content) + '</div>' +
+      '<div class="reaction-bar">' + reactionsHtml + '</div>' +
     '</article>';
   }
-  
+
   con.innerHTML = html;
 }
 
 function renderTray() {
-  var con = $('tgrid'); 
-  if(!con) {
-    console.error('tgrid not found');
-    return;
-  }
-  
+  var con = $('tgrid');
+  if (!con) return;
+
   var hasRealArtefacts = S.artefacts && S.artefacts.length > 0;
   var displayArtefacts = hasRealArtefacts ? S.artefacts : DUMMY_ARTEFACTS;
-  
-  console.log('Rendering artefacts:', displayArtefacts.length, hasRealArtefacts ? 'real' : 'dummies');
-  
+
   var html = '';
-  for(var i = 0; i < Math.min(displayArtefacts.length, 6); i++) {
+  for (var i = 0; i < Math.min(displayArtefacts.length, 6); i++) {
     var a = displayArtefacts[i];
-    if(a.hasFace) {
-      html += '<div class=\"ti\" onclick=\"setHero(\\'' + a.id + '\\')\" style=\"position:relative\">' +
-        '<img src=\"' + a.url + '\" class=\"' + a.theme + '\" alt=\"' + a.note + '\">' +
-        '<div class=\"sensored-overlay\"><span class=\"sensored-text\">SENSORED</span></div>' +
+    // FIX: use data-id attribute instead of embedding quotes in onclick string
+    if (a.hasFace) {
+      html += '<div class="ti" data-id="' + a.id + '" style="position:relative">' +
+        '<img src="' + a.url + '" class="' + a.theme + '" alt="' + esc(a.note) + '">' +
+        '<div class="sensored-overlay"><span class="sensored-text">SENSORED</span></div>' +
       '</div>';
     } else {
-      html += '<div class=\"ti\" onclick=\"setHero(\\'' + a.id + '\\')\">' +
-        '<img src=\"' + a.url + '\" class=\"' + a.theme + '\" alt=\"' + a.note + '\">' +
+      html += '<div class="ti" data-id="' + a.id + '">' +
+        '<img src="' + a.url + '" class="' + a.theme + '" alt="' + esc(a.note) + '">' +
       '</div>';
     }
   }
-  
-  for(var j = displayArtefacts.length; j < 6; j++) {
-    html += '<div class=\"ti empty\" onclick=\"document.getElementById(\\'upbtn\\').click()\">+</div>';
+
+  for (var j = displayArtefacts.length; j < 6; j++) {
+    html += '<div class="ti empty" data-action="upload">+</div>';
   }
-  
+
   con.innerHTML = html;
+
+  // FIX: Attach click events via JS after rendering (avoids inline onclick string escaping issues)
+  var tiles = con.querySelectorAll('.ti[data-id]');
+  for (var k = 0; k < tiles.length; k++) {
+    tiles[k].addEventListener('click', function() {
+      setHero(this.getAttribute('data-id'));
+    });
+  }
+  var emptyTiles = con.querySelectorAll('.ti[data-action="upload"]');
+  for (var m = 0; m < emptyTiles.length; m++) {
+    emptyTiles[m].addEventListener('click', function() {
+      var upbtn = $('upbtn');
+      if (upbtn) upbtn.click();
+    });
+  }
 }
 
 function setHero(id) {
   var a = null;
-  for(var i = 0; i < S.artefacts.length; i++) {
-    if(S.artefacts[i].id === id) { a = S.artefacts[i]; break; }
+  for (var i = 0; i < S.artefacts.length; i++) {
+    if (S.artefacts[i].id === id) { a = S.artefacts[i]; break; }
   }
-  if(!a) {
-    for(var j = 0; j < DUMMY_ARTEFACTS.length; j++) {
-      if(DUMMY_ARTEFACTS[j].id === id) { a = DUMMY_ARTEFACTS[j]; break; }
+  if (!a) {
+    for (var j = 0; j < DUMMY_ARTEFACTS.length; j++) {
+      if (DUMMY_ARTEFACTS[j].id === id) { a = DUMMY_ARTEFACTS[j]; break; }
     }
   }
-  if(!a) return;
-  
+  if (!a) return;
+
   var img = $('himg'), note = $('hnote');
-  if(img) { img.src = a.url; img.className = a.theme; }
-  if(note) note.textContent = '"' + a.note + '"';
-  
-  if(!a.isDummy && S.userId) {
-    localStorage.setItem('jejak_hero_' + S.userId, JSON.stringify({id: a.id, url: a.url, note: a.note, theme: a.theme}));
+  if (img) { img.src = a.url; img.className = a.theme; }
+  if (note) note.textContent = '"' + a.note + '"';
+
+  if (!a.isDummy && S.userId) {
+    try {
+      localStorage.setItem('jejak_hero_' + S.userId, JSON.stringify({ id: a.id, url: a.url, note: a.note, theme: a.theme }));
+    } catch(e) {}
   }
 }
 
 // ============================================
-// SUPABASE INIT - TANPA DEKLARASI ULANG
+// SUPABASE INIT
 // ============================================
 function initSupabase() {
   try {
-    if(window.supabase && window.supabase.createClient) {
+    if (window.supabase && window.supabase.createClient) {
       window.supabaseClient = window.supabase.createClient(
         'https://fuovfrdicdhnlymnacpz.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0'
       );
-      console.log('Supabase initialized');
       return true;
     }
-  } catch(e) {
+  } catch (e) {
     console.error('Supabase init failed:', e);
   }
   return false;
@@ -642,28 +657,21 @@ async function checkAuth() {
   var username = localStorage.getItem('jejak_username');
   var userId = localStorage.getItem('user_id');
   var loggedIn = localStorage.getItem('jejak_logged_in') === 'true';
-  
-  console.log('Auth check:', { username: username, userId: userId, loggedIn: loggedIn });
-  
-  if(loggedIn && username && userId) {
+
+  if (loggedIn && username && userId) {
     S.userId = userId;
     S.user = username;
     S.isPremium = false;
-    
+
     var huser = $('huser');
     var odot = $('odot');
-    
-    if(huser) huser.textContent = '@' + S.user;
-    if(odot) odot.classList.remove('off');
-    
+    if (huser) huser.textContent = '@' + S.user;
+    if (odot) odot.classList.remove('off');
+
     await loadEntries();
     await loadArtefacts();
-    
-    console.log('Auth success:', S.user);
     return true;
   }
-  
-  console.log('Not logged in');
   return false;
 }
 
@@ -671,8 +679,7 @@ async function checkAuth() {
 // LOAD DATA
 // ============================================
 async function loadEntries() {
-  if(!S.userId || !window.supabaseClient) return;
-  
+  if (!S.userId || !window.supabaseClient) return;
   try {
     var result = await window.supabaseClient
       .from('entries')
@@ -680,16 +687,13 @@ async function loadEntries() {
       .eq('user_id', S.userId)
       .order('created_at', { ascending: false })
       .limit(6);
-    
-    var data = result.data;
-    var error = result.error;
-    
-    if(error) throw error;
-    
-    if(data && data.length > 0) {
-      S.entries = [];
-      for(var i = 0; i < data.length; i++) {
-        var e = data[i];
+
+    if (result.error) throw result.error;
+
+    S.entries = [];
+    if (result.data && result.data.length > 0) {
+      for (var i = 0; i < result.data.length; i++) {
+        var e = result.data[i];
         S.entries.push({
           id: e.id,
           content: e.content,
@@ -699,20 +703,15 @@ async function loadEntries() {
           isDummy: false
         });
       }
-    } else {
-      S.entries = [];
     }
-    
     renderEntries();
-    
-  } catch(err) {
+  } catch (err) {
     console.error('Load entries error:', err);
   }
 }
 
 async function loadArtefacts() {
-  if(!S.userId || !window.supabaseClient) return;
-  
+  if (!S.userId || !window.supabaseClient) return;
   try {
     var result = await window.supabaseClient
       .from('artefacts')
@@ -720,16 +719,13 @@ async function loadArtefacts() {
       .eq('user_id', S.userId)
       .order('created_at', { ascending: false })
       .limit(6);
-    
-    var data = result.data;
-    var error = result.error;
-    
-    if(error) throw error;
-    
-    if(data && data.length > 0) {
-      S.artefacts = [];
-      for(var i = 0; i < data.length; i++) {
-        var a = data[i];
+
+    if (result.error) throw result.error;
+
+    S.artefacts = [];
+    if (result.data && result.data.length > 0) {
+      for (var i = 0; i < result.data.length; i++) {
+        var a = result.data[i];
         S.artefacts.push({
           id: a.id,
           url: a.url,
@@ -740,13 +736,23 @@ async function loadArtefacts() {
           isDummy: false
         });
       }
-    } else {
-      S.artefacts = [];
     }
-    
     renderTray();
-    
-  } catch(err) {
+
+    // Restore hero from saved state or use first artefact
+    if (S.artefacts.length > 0) {
+      var savedHero = null;
+      try {
+        var saved = localStorage.getItem('jejak_hero_' + S.userId);
+        if (saved) savedHero = JSON.parse(saved);
+      } catch(e) {}
+      if (savedHero) {
+        setHero(savedHero.id);
+      } else {
+        setHero(S.artefacts[0].id);
+      }
+    }
+  } catch (err) {
     console.error('Load artefacts error:', err);
   }
 }
@@ -756,22 +762,18 @@ async function loadArtefacts() {
 // ============================================
 async function saveEntry() {
   var content = $('ri').value.trim();
-  if(!content) {
-    toast('Tulis dulu spill-nya');
-    return;
-  }
-  
+  if (!content) { toast('Tulis dulu spill-nya'); return; }
+
   var activeMoodEl = document.querySelector('.mc.act');
   var activeMood = activeMoodEl ? activeMoodEl.dataset.mood : 'surviving';
-  
-  if(!S.userId) {
+
+  if (!S.userId) {
     toast('Login dulu untuk spill');
-    setTimeout(function() { location.href='index.html'; }, 1500);
+    setTimeout(function() { location.href = 'index.html'; }, 1500);
     return;
   }
-  
+
   showProc('Menyimpan spill...');
-  
   try {
     var result = await window.supabaseClient
       .from('entries')
@@ -783,19 +785,14 @@ async function saveEntry() {
         created_at: new Date().toISOString()
       })
       .select();
-    
-    var data = result.data;
-    var error = result.error;
-    
-    if(error) throw error;
-    
+
+    if (result.error) throw result.error;
+
     $('ri').value = '';
     $('ccount').textContent = '0/500';
-    
     await loadEntries();
     toast('Spill terkirim!');
-    
-  } catch(err) {
+  } catch (err) {
     console.error('Save error:', err);
     toast('Gagal menyimpan: ' + err.message);
   } finally {
@@ -812,157 +809,139 @@ var currentTheme = 0;
 var currentNote = '';
 
 var THEMES = [
-  {name:'MONOCHROME',filter:'fm'},{name:'NOIR',filter:'fn'},{name:'SEPIA',filter:'fsp'},{name:'WARM',filter:'fw'},
-  {name:'GOLDEN',filter:'fg'},{name:'LOMO',filter:'fl'},{name:'DREAM',filter:'fd'},{name:'COLD',filter:'fco'},
-  {name:'CYBER',filter:'fc'},{name:'VIGNETTE',filter:'fv'},{name:'CRISP',filter:'fcr'},{name:'MOODY',filter:'fmo'}
+  { name: 'MONOCHROME', filter: 'fm' }, { name: 'NOIR', filter: 'fn' },
+  { name: 'SEPIA', filter: 'fsp' }, { name: 'WARM', filter: 'fw' },
+  { name: 'GOLDEN', filter: 'fg' }, { name: 'LOMO', filter: 'fl' },
+  { name: 'DREAM', filter: 'fd' }, { name: 'COLD', filter: 'fco' },
+  { name: 'CYBER', filter: 'fc' }, { name: 'VIGNETTE', filter: 'fv' },
+  { name: 'CRISP', filter: 'fcr' }, { name: 'MOODY', filter: 'fmo' }
 ];
 
 function initUpload() {
-  var btn = $('upbtn'), fi = $('finput'); 
-  if(!btn || !fi) return;
-  
-  btn.onclick = function() { 
-    fi.value = ''; 
-    fi.click(); 
-  };
+  var btn = $('upbtn'), fi = $('finput');
+  if (!btn || !fi) return;
+  btn.onclick = function() { fi.value = ''; fi.click(); };
   fi.onchange = handleFiles;
 }
 
 async function handleFiles(e) {
   var files = Array.from(e.target.files).slice(0, 6);
-  if(!files.length) return;
-  
-  if(!S.userId) {
+  if (!files.length) return;
+
+  if (!S.userId) {
     toast('Login dulu untuk upload');
-    setTimeout(function() { location.href='index.html'; }, 1500);
+    setTimeout(function() { location.href = 'index.html'; }, 1500);
     return;
   }
-  
+
   var pf = [];
-  for(var i = 0; i < files.length; i++) {
-    pf.push({
-      file: files[i],
-      hasFace: false,
-      preview: URL.createObjectURL(files[i])
-    });
+  for (var i = 0; i < files.length; i++) {
+    pf.push({ file: files[i], hasFace: false, preview: URL.createObjectURL(files[i]) });
   }
   openGallery(pf);
 }
 
 function openGallery(files) {
   selFiles = new Set();
-  for(var i = 0; i < files.length; i++) {
-    selFiles.add(i);
-  }
-  currentTheme = 0; 
+  for (var i = 0; i < files.length; i++) selFiles.add(i);
+  currentTheme = 0;
   currentNote = '';
-  
-  var grid = $('ggrid'); 
-  if(!grid) return;
-  
+
+  var grid = $('ggrid');
+  if (!grid) return;
+
   grid.innerHTML = '';
-  for(var j = 0; j < files.length; j++) {
+  for (var j = 0; j < files.length; j++) {
     var item = files[j];
-    var d = document.createElement('div'); 
+    var d = document.createElement('div');
     d.className = 'gi sel';
-    d.innerHTML = '<img src=\"' + item.preview + '\" class=\"fm\" id=\"pv' + j + '\">';
-    d.onclick = (function(idx) { return function() { toggleSel(idx, this); }; })(j);
+    d.innerHTML = '<img src="' + item.preview + '" class="fm" id="pv' + j + '">';
+    // FIX: closure via IIFE to capture correct index
+    (function(idx) {
+      d.addEventListener('click', function() { toggleSel(idx, d); });
+    })(j);
     grid.appendChild(d);
   }
-  
-  $('tmsl').value = 0; 
+
+  $('tmsl').value = 0;
   $('tmnm').textContent = 'MONOCHROME';
-  $('noti').value = ''; 
+  $('noti').value = '';
   $('notcnt').textContent = '0/4';
   updSelCnt();
   $('gmodal').classList.add('on');
   pendingFiles = files;
 }
 
-function toggleSel(i, el) { 
-  if(selFiles.has(i)) selFiles.delete(i); 
-  else selFiles.add(i); 
-  el.classList.toggle('sel'); 
-  updSelCnt(); 
+function toggleSel(i, el) {
+  if (selFiles.has(i)) selFiles.delete(i);
+  else selFiles.add(i);
+  el.classList.toggle('sel');
+  updSelCnt();
 }
 
-function updSelCnt() { 
-  $('selcnt').textContent = selFiles.size; 
+function updSelCnt() {
+  $('selcnt').textContent = selFiles.size;
 }
 
-function updTheme(v) { 
-  currentTheme = parseInt(v); 
-  var th = THEMES[currentTheme]; 
+function updTheme(v) {
+  currentTheme = parseInt(v);
+  var th = THEMES[currentTheme];
   $('tmnm').textContent = th.name;
-  for(var i = 0; i < pendingFiles.length; i++) {
-    var img = $('pv' + i); 
-    if(img) {
-      img.className = th.filter;
-    }
+  for (var i = 0; i < pendingFiles.length; i++) {
+    var img = $('pv' + i);
+    if (img) img.className = th.filter;
   }
 }
 
-function valNote(inp) { 
+// FIX: valNote — regex fixed (\s+ needed escaping in original template string; now plain JS)
+function valNote(inp) {
   var val = inp.value.trim();
-  var words = val.split(/\\s+/).filter(function(x) { return x.length > 0; });
+  var words = val.split(/\s+/).filter(function(x) { return x.length > 0; });
   $('notcnt').textContent = Math.min(words.length, 4) + '/4';
-  if(words.length > 4) {
+  if (words.length > 4) {
     inp.value = words.slice(0, 4).join(' ');
   }
   currentNote = inp.value.trim();
 }
 
-function closeGallery() { 
-  $('gmodal').classList.remove('on'); 
+function closeGallery() {
+  $('gmodal').classList.remove('on');
   pendingFiles = [];
   selFiles.clear();
 }
 
 async function confirmUpload() {
-  if(selFiles.size === 0) { 
-    toast('Pilih minimal 1'); 
-    return; 
-  }
-  
-  var kbtn = $('konfirmbtn'); 
-  if(kbtn) kbtn.disabled = true;
-  
+  if (selFiles.size === 0) { toast('Pilih minimal 1'); return; }
+
+  var kbtn = $('konfirmbtn');
+  if (kbtn) kbtn.disabled = true;
+
   closeGallery();
   showProc('Mengupload foto...<br><small>Mohon tunggu</small>');
 
   var theme = THEMES[currentTheme];
   var note = currentNote || 'memory';
   var uploadedCount = 0;
-
   var selFilesArray = Array.from(selFiles);
-  for(var idx = 0; idx < selFilesArray.length; idx++) {
+
+  for (var idx = 0; idx < selFilesArray.length; idx++) {
     var i = selFilesArray[idx];
     var item = pendingFiles[i];
     var file = item.file;
-    var ext = file.name.split('.').pop() || 'jpg';
+    var ext = (file.name.split('.').pop()) || 'jpg';
     var timestamp = Date.now();
     var storagePath = S.userId + '/' + timestamp + '_' + i + '.' + ext;
 
-    if(window.supabaseClient) {
+    if (window.supabaseClient) {
       try {
         var uploadResult = await window.supabaseClient
           .storage
           .from('artefacts')
-          .upload(storagePath, file, {
-            contentType: file.type,
-            upsert: false
-          });
+          .upload(storagePath, file, { contentType: file.type, upsert: false });
 
-        if(uploadResult.error) {
-          console.error('Upload error:', uploadResult.error);
-          continue;
-        }
+        if (uploadResult.error) { console.error('Upload error:', uploadResult.error); continue; }
 
-        var urlResult = window.supabaseClient
-          .storage
-          .from('artefacts')
-          .getPublicUrl(storagePath);
-
+        var urlResult = window.supabaseClient.storage.from('artefacts').getPublicUrl(storagePath);
         var publicUrl = urlResult.data.publicUrl;
 
         var insertResult = await window.supabaseClient
@@ -976,33 +955,24 @@ async function confirmUpload() {
             created_at: new Date().toISOString()
           })
           .select();
-        
-        if(!insertResult.error && insertResult.data && insertResult.data[0]) {
-          S.artefacts.unshift({
-            id: insertResult.data[0].id,
-            url: publicUrl,
-            note: note,
-            hasFace: item.hasFace,
-            theme: theme.filter,
-            timestamp: Date.now(),
-            isDummy: false
-          });
-        } else {
-          S.artefacts.unshift({
-            id: 'local_' + timestamp + '_' + i,
-            url: publicUrl,
-            note: note,
-            hasFace: item.hasFace,
-            theme: theme.filter,
-            timestamp: timestamp,
-            isDummy: false
-          });
-        }
-      } catch(uploadErr) {
+
+        var newId = (insertResult.data && insertResult.data[0]) ? insertResult.data[0].id : ('local_' + timestamp + '_' + i);
+
+        S.artefacts.unshift({
+          id: newId,
+          url: publicUrl,
+          note: note,
+          hasFace: item.hasFace,
+          theme: theme.filter,
+          timestamp: timestamp,
+          isDummy: false
+        });
+      } catch (uploadErr) {
         console.error('Upload failed:', uploadErr);
         continue;
       }
     } else {
+      // Fallback: local blob URL (no Supabase)
       S.artefacts.unshift({
         id: 'local_' + timestamp + '_' + i,
         url: item.preview,
@@ -1013,18 +983,19 @@ async function confirmUpload() {
         isDummy: false
       });
     }
-    
     uploadedCount++;
   }
 
+  // Keep max 6 artefacts (FIFO)
+  if (S.artefacts.length > 6) S.artefacts = S.artefacts.slice(0, 6);
+
   await loadArtefacts();
-  
-  if(S.artefacts.length > 0) {
-    setHero(S.artefacts[0].id);
-  }
+
+  // Set newest upload as hero
+  if (S.artefacts.length > 0) setHero(S.artefacts[0].id);
 
   hideProc();
-  if(kbtn) kbtn.disabled = false;
+  if (kbtn) kbtn.disabled = false;
   toast('✓ ' + uploadedCount + ' foto diupload');
 }
 
@@ -1032,65 +1003,104 @@ async function confirmUpload() {
 // THE VOID
 // ============================================
 function openVoid() {
-  if(!S.isPremium) {
-    $('void-locked').classList.add('on');
-    return;
-  }
+  if (!S.isPremium) { $('void-locked').classList.add('on'); return; }
   $('void-portal').classList.add('on');
 }
 
-function closeVoid() {
-  $('void-portal').classList.remove('on');
-}
-
-function closeVoidLocked() {
-  $('void-locked').classList.remove('on');
-}
-
-function closeVoidChat() {
-  $('void-chat').classList.remove('on');
-}
-
-function sendContactRequest() {
-  toast('Fitur ini memerlukan Premium');
-}
-
-function sendVoidMessage() {
-  toast('Fitur ini memerlukan Premium');
-}
+function closeVoid() { $('void-portal').classList.remove('on'); }
+function closeVoidLocked() { $('void-locked').classList.remove('on'); }
+function closeVoidChat() { $('void-chat').classList.remove('on'); }
+function sendContactRequest() { toast('Fitur ini memerlukan Premium'); }
+function sendVoidMessage() { toast('Fitur ini memerlukan Premium'); }
 
 // ============================================
-// INIT
+// INIT — All event bindings here, no inline HTML handlers
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('=== JEJAK APP STARTING ===');
-  
+
+  // Char counter
+  var riEl = $('ri');
+  if (riEl) riEl.addEventListener('input', updateCharCount);
+
+  // Mood cards
+  var moodCards = document.querySelectorAll('.mc');
+  for (var i = 0; i < moodCards.length; i++) {
+    moodCards[i].addEventListener('click', (function(card) {
+      return function() { selMood(card.dataset.mood); };
+    })(moodCards[i]));
+  }
+
+  // Submit spill
+  var sbtnEl = $('sbtn');
+  if (sbtnEl) sbtnEl.addEventListener('click', saveEntry);
+
+  // Theme slider
+  var tmslEl = $('tmsl');
+  if (tmslEl) tmslEl.addEventListener('input', function() { updTheme(this.value); });
+
+  // Note input
+  var notiEl = $('noti');
+  if (notiEl) notiEl.addEventListener('input', function() { valNote(this); });
+
+  // Gallery close / cancel
+  var galCloseBtn = $('gallery-close-btn');
+  if (galCloseBtn) galCloseBtn.addEventListener('click', closeGallery);
+  var cancelUpBtn = $('cancel-upload-btn');
+  if (cancelUpBtn) cancelUpBtn.addEventListener('click', closeGallery);
+
+  // Confirm upload
+  var konfirmBtn = $('konfirmbtn');
+  if (konfirmBtn) konfirmBtn.addEventListener('click', confirmUpload);
+
+  // Void node
+  var voidNode = $('void-node');
+  if (voidNode) voidNode.addEventListener('click', openVoid);
+
+  // Void portal close
+  var voidCloseBtn = $('void-close-btn');
+  if (voidCloseBtn) voidCloseBtn.addEventListener('click', closeVoid);
+
+  // Void locked close on backdrop tap
+  var voidLocked = $('void-locked');
+  if (voidLocked) voidLocked.addEventListener('click', function(e) {
+    if (e.target === voidLocked) closeVoidLocked();
+  });
+
+  // Void chat back
+  var voidChatBack = $('void-chat-back');
+  if (voidChatBack) voidChatBack.addEventListener('click', closeVoidChat);
+
+  // Void send
+  var voidSendBtn = $('void-send-btn');
+  if (voidSendBtn) voidSendBtn.addEventListener('click', sendVoidMessage);
+
+  // Void add
+  var voidAddBtn = $('void-add-btn');
+  if (voidAddBtn) voidAddBtn.addEventListener('click', sendContactRequest);
+
+  // Close menu when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.smenu')) {
+      var mdd = $('mdd');
+      if (mdd) mdd.classList.remove('on');
+    }
+  });
+
+  // Initial render with dummy data
   renderEntries();
   renderTray();
-  
+
+  // Init upload
   initUpload();
-  
-  var sbtn = $('sbtn');
-  if(sbtn) {
-    sbtn.onclick = saveEntry;
-  }
-  
+
+  // Init Supabase & auth
   initSupabase();
-  
   checkAuth().then(function(authed) {
-    if(authed) {
+    if (authed) {
       renderEntries();
       renderTray();
     }
   });
-  
-  document.addEventListener('click', function(e) {
-    if(!e.target.closest('.smenu')) {
-      $('mdd').classList.remove('on');
-    }
-  });
-  
-  console.log('=== APP READY ===');
 });
 </script>
 </body>
