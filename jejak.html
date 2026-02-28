@@ -595,7 +595,7 @@ function setHero(id) {
 }
 
 // ============================================
-// SUPABASE & AUTH
+// SUPABASE INIT (TANPA AUTH)
 // ============================================
 let supabase = null;
 
@@ -615,52 +615,59 @@ function initSupabase() {
   return false;
 }
 
+// ============================================
+// AUTH - LANGSUNG DARI LOCALSTORAGE (SESUAI INDEX.HTML)
+// ============================================
 async function checkAuth() {
-  if (!supabase) return false;
+  // Ambil data dari localStorage (cara index.html)
+  const username = localStorage.getItem('jejak_username');
+  const userId = localStorage.getItem('user_id');
+  const loggedIn = localStorage.getItem('jejak_logged_in') === 'true';
   
-  try {
-    const { data: { session }, error } = await supabase.auth.getSession();
-    if (session) {
-      S.userId = session.user.id;
-      S.user = session.user.user_metadata?.username || session.user.email?.split('@')[0] || 'user';
-      S.isPremium = session.user.user_metadata?.is_premium === true;
-      
-      // Update UI
-      $('huser').textContent = '@' + S.user;
-      $('odot').classList.remove('off');
-      
-      // Load real data from database
-      await loadEntries();
-      await loadArtefacts();
-      
-      console.log('Auth success:', S.user);
-      return true;
-    }
-  } catch(e) {
-    console.error('Auth error:', e);
+  console.log('Auth check:', { username, userId, loggedIn });
+  
+  if (loggedIn && username && userId) {
+    // Set state
+    S.userId = userId;
+    S.user = username;
+    S.isPremium = false; // Default, bisa di-update nanti
+    
+    // Update UI
+    const huser = $('huser');
+    const odot = $('odot');
+    
+    if (huser) huser.textContent = '@' + S.user;
+    if (odot) odot.classList.remove('off');
+    
+    // Load data dari database
+    await loadEntries();
+    await loadArtefacts();
+    
+    console.log('Auth success:', S.user);
+    return true;
   }
+  
+  console.log('Not logged in');
   return false;
 }
 
 // ============================================
-// LOAD DATA FROM SUPABASE
+// LOAD DATA FROM SUPABASE (PAKAI USER_ID LANGSUNG)
 // ============================================
 async function loadEntries() {
+  if (!S.userId) return;
+  
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-    
     const { data, error } = await supabase
       .from('entries')
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('user_id', S.userId)
       .order('created_at', { ascending: false })
       .limit(6);
     
     if (error) throw error;
     
     if (data && data.length > 0) {
-      // Convert ke format yang sama dengan dummy
       S.entries = data.map(e => ({
         id: e.id,
         content: e.content,
@@ -681,14 +688,13 @@ async function loadEntries() {
 }
 
 async function loadArtefacts() {
+  if (!S.userId) return;
+  
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return;
-    
     const { data, error } = await supabase
       .from('artefacts')
       .select('*')
-      .eq('user_id', session.user.id)
+      .eq('user_id', S.userId)
       .order('created_at', { ascending: false })
       .limit(6);
     
@@ -727,26 +733,22 @@ async function saveEntry() {
   
   const activeMood = document.querySelector('.mc.act')?.dataset.mood || 'surviving';
   
+  // Cek login dari localStorage
+  if (!S.userId) {
+    toast('Login dulu untuk spill');
+    setTimeout(() => location.href='index.html', 1500);
+    return;
+  }
+  
   // Tampilkan loading
   showProc('Menyimpan spill...');
   
   try {
-    // Get current user
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      toast('Login dulu untuk spill');
-      hideProc();
-      setTimeout(() => location.href='index.html', 1500);
-      return;
-    }
-    
-    const userId = session.user.id;
-    
-    // Insert ke tabel entries
+    // Insert ke tabel entries (pake userId dari state)
     const { data, error } = await supabase
       .from('entries')
       .insert({
-        user_id: userId,
+        user_id: S.userId,
         content: content,
         mood: activeMood,
         reactions: { skull: 0, cry: 0, fire: 0, upside: 0 },
@@ -1027,8 +1029,10 @@ document.addEventListener('DOMContentLoaded', () => {
     sbtn.onclick = saveEntry;
   }
   
-  // 4. Try auth (optional - doesn't block rendering)
+  // 4. Init Supabase
   initSupabase();
+  
+  // 5. Check auth dari localStorage
   checkAuth().then(authed => {
     if (authed) {
       // Re-render with user data if we have it
@@ -1037,7 +1041,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  // 5. Menu close handler
+  // 6. Menu close handler
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.smenu')) {
       $('mdd').classList.remove('on');
