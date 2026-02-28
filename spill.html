@@ -160,7 +160,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .timer-big{text-align:center;padding:20px;margin-bottom:20px;border:2px solid var(--bd2);background:var(--sf);box-shadow:3px 3px 0 #000}
 .timer-big .num{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:4px;color:var(--ap)}
 .timer-big .label{font-family:'DM Mono',monospace;font-size:9px;color:var(--txm);letter-spacing:3px;text-transform:uppercase}
-/* CHAT */
+/* CHAT - REVISED: tanpa username & timestamp */
 .chat-room{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column}
 .chat-room.on{display:flex}
 .chat-head{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;padding-top:calc(12px + var(--st));border-bottom:2px solid var(--bd);background:var(--sf)}
@@ -185,8 +185,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .chat-msg.system-msg{align-self:center!important;max-width:90%!important}
 .own .chat-bubble{background:var(--ap);color:#fff;border-color:#000;box-shadow:3px 3px 0 #000;font-weight:600}
 .other .chat-bubble{background:var(--sf);border-color:var(--bd2);box-shadow:3px 3px 0 rgba(0,0,0,.5)}
-.chat-time{font-family:'DM Mono',monospace;font-size:9px;color:var(--txm);margin-top:5px;letter-spacing:.5px}
-.own .chat-time{text-align:right}
+/* HAPUS TIMESTAMP - tidak ditampilkan */
+.chat-time{display:none}
 .typing{display:flex;gap:5px;padding:14px 18px;background:var(--sf);border:2px solid var(--bd2);align-self:flex-start;width:fit-content;box-shadow:3px 3px 0 rgba(0,0,0,.5)}
 .typing-dot{width:7px;height:7px;background:var(--as);transform:rotate(45deg);animation:typi 1.4s infinite}
 .typing-dot:nth-child(2){animation-delay:.2s}
@@ -195,6 +195,12 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .distress{display:none;padding:12px 18px;background:var(--ap);color:#fff;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:1px;text-align:center;border-bottom:2px solid #000}
 .distress.show{display:block}
 .reminder-msg .chat-bubble{background:var(--sfe)!important;border:2px dashed var(--as)!important;box-shadow:4px 4px 0 rgba(0,229,255,.2)!important}
+/* POPUP WARNING 2 MENIT */
+.warning-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg);border:3px solid var(--ap);padding:24px 32px;z-index:1000;box-shadow:8px 8px 0 #000;text-align:center;min-width:280px;animation:popIn .3s ease}
+.warning-popup .title{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--ap);letter-spacing:2px;margin-bottom:12px}
+.warning-popup .msg{font-family:'DM Mono',monospace;font-size:14px;color:var(--tx);margin-bottom:20px;line-height:1.6}
+.warning-popup .btn{background:var(--ap);color:#fff;border:2px solid #000;padding:12px 24px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;cursor:pointer;box-shadow:3px 3px 0 #000;margin-top:12px}
+.warning-popup .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
 .chat-input-wrap{padding:12px 18px;padding-bottom:calc(12px + var(--sb));border-top:2px solid var(--bd);background:var(--sf);display:flex;gap:10px;align-items:center}
 .vt-trigger{width:42px;height:48px;background:transparent;border:2px solid var(--bd2);color:var(--txm);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;font-size:14px;transition:all .15s;font-family:'Bebas Neue',sans-serif}
 .vt-trigger:hover{border-color:var(--as);color:var(--as)}
@@ -385,7 +391,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
   </div>
 </div>
 
-<!-- CHAT ROOM -->
+<!-- CHAT ROOM - TANPA USERNAME & TIMESTAMP -->
 <div class="chat-room" id="chatRoom">
   <div class="chat-head">
     <div class="chat-info"><div class="eyes-container"><div class="eye left"></div><div class="eye right"></div></div><span class="partner-label" id="partnerLabel">MENCARI...</span></div>
@@ -664,13 +670,36 @@ function fallbackToAI(){
 
 const startTimer=()=>{clearInterval(timerInterval);timerInterval=setInterval(updateTimer,1000);};
 
+// ─── POPUP WARNING 2 MENIT ───
+function showTwoMinuteWarning(){
+  // Hapus popup sebelumnya jika ada
+  const existing=document.querySelector('.warning-popup');
+  if(existing)existing.remove();
+  
+  const popup=document.createElement('div');
+  popup.className='warning-popup';
+  popup.innerHTML=`
+    <div class="title">⚠️ 2 MENIT</div>
+    <div class="msg">Sesi chatting akan berakhir dalam 2 menit.<br>Subscribe untuk lanjut ngobrol!</div>
+    <button class="btn" onclick="this.closest('.warning-popup').remove();showUpgradeModal()">UPGRADE</button>
+    <button class="btn" style="background:transparent;color:var(--tx);margin-top:8px" onclick="this.closest('.warning-popup').remove()">TUTUP</button>
+  `;
+  document.body.appendChild(popup);
+}
+
 function updateTimer(){
   if(chatTimeLeft<=0){endChat();return;}
   chatTimeLeft--;
   const m=Math.floor(chatTimeLeft/60),s=chatTimeLeft%60;
   const tel=$('chatTimer');if(tel)tel.textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  
+  // TAMPILKAN POPUP SAAT 2 MENIT (120 detik)
+  if(chatTimeLeft===120){
+    showTwoMinuteWarning();
+  }
+  
   if(checkSub())return;
-  const REM={120:["⏳ sisa 2 menit...","kalau mau lanjut, pilih paket dulu~"],60:["⏰ 1 menit lagi...","10k/minggu atau 50k/bulan (dapet WHISPERER ✦)"],30:["⚡ 30 detik...","mau coba subscribe?"],10:["🎯 10 detik terakhir...","abis ini bakal nutup otomatis ya"]};
+  const REM={60:["⏰ 1 menit lagi...","10k/minggu atau 50k/bulan (dapet WHISPERER ✦)"],30:["⚡ 30 detik...","mau coba subscribe?"],10:["🎯 10 detik terakhir...","abis ini bakal nutup otomatis ya"]};
   if(REM[chatTimeLeft]){addSubReminder(...REM[chatTimeLeft]);if(chatTimeLeft===60&&tel)tel.classList.add('warn');}
 }
 
@@ -902,9 +931,11 @@ function sendMsg(){
   else if(apiOffline)toast('Server chat sedang offline',true);
 }
 
+// MODIFIKASI: HAPUS TIMESTAMP DARI PESAN
 function addMsg(text,isOwn){
   const msgs=$('chatMessages'),d=mk('div','chat-msg '+(isOwn?'own':'other'));
-  d.innerHTML=`<div class="chat-bubble">${esc(text)}</div><div class="chat-time">${new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})}</div>`;
+  // Hanya bubble tanpa timestamp
+  d.innerHTML=`<div class="chat-bubble">${esc(text)}</div>`;
   msgs.appendChild(d);d.scrollIntoView({behavior:'smooth'});
 }
 
