@@ -665,61 +665,89 @@ async function checkAuth() {
   var userId = localStorage.getItem('user_id');
   var loggedIn = localStorage.getItem('jejak_logged_in') === 'true';
 
-  console.log('Auth check:', { username: username, userId: userId, loggedIn: loggedIn });
+  console.log('%c[JEJAK] Auth check:', 'color:#FF9500', {
+    username: username,
+    user_id: userId,
+    logged_in: loggedIn
+  });
 
-  if (loggedIn && username && userId) {
-    S.userId = userId;
-    S.user = username;
-    S.isPremium = false;
-
-    var huser = $('huser');
-    var odot = $('odot');
-    if (huser) huser.textContent = '@' + S.user;
-    if (odot) odot.classList.remove('off');
-
-    // FIX: Verifikasi user_id benar-benar ada di tabel profiles
-    // Jika tidak ada → foreign key akan selalu gagal saat insert
-    if (window.supabaseClient) {
-      try {
-        var checkResult = await window.supabaseClient
-          .from('profiles')
-          .select('id')
-          .eq('id', userId)
-          .maybeSingle();
-
-        if (checkResult.error) {
-          console.warn('Profile check error:', checkResult.error);
-        } else if (!checkResult.data) {
-          // user_id tidak ada di profiles → coba insert profile dulu
-          console.warn('User not found in profiles, attempting to create...');
-          var createProfile = await window.supabaseClient
-            .from('profiles')
-            .insert({ id: userId, username: username })
-            .select();
-          if (createProfile.error) {
-            console.error('Cannot create profile:', createProfile.error);
-            toast('⚠️ Session invalid. Silakan login ulang.');
-            setTimeout(function() {
-              localStorage.clear();
-              location.href = 'index.html';
-            }, 2500);
-            return false;
-          }
-          console.log('Profile created successfully');
-        }
-      } catch(profileErr) {
-        console.warn('Profile validation skipped:', profileErr);
-        // Lanjutkan saja, mungkin RLS yang menghalangi
-      }
-    }
-
-    await loadEntries();
-    await loadArtefacts();
-    return true;
+  if (!loggedIn || !username || !userId) {
+    console.warn('[JEJAK] Incomplete session — missing:', { loggedIn: loggedIn, username: !!username, userId: !!userId });
+    return false;
   }
 
-  console.log('Not logged in, redirecting...');
-  return false;
+  // Validasi userId terlihat seperti UUID (36 chars dengan dash, atau minimal 10 chars)
+  if (userId === 'undefined' || userId === 'null' || userId.length < 10) {
+    console.error('[JEJAK] INVALID user_id in localStorage:', userId);
+    toast('⚠️ Session rusak. Login ulang...');
+    setTimeout(function() {
+      localStorage.removeItem('user_id');
+      localStorage.removeItem('jejak_logged_in');
+      localStorage.removeItem('jejak_username');
+      location.href = 'index.html';
+    }, 2000);
+    return false;
+  }
+
+  S.userId = userId;
+  S.user = username;
+  S.isPremium = false;
+
+  var huser = $('huser');
+  var odot = $('odot');
+  if (huser) huser.textContent = '@' + S.user;
+  if (odot) odot.classList.remove('off');
+
+  // Verifikasi user_id ada di profiles (FK check pre-emptif)
+  if (window.supabaseClient) {
+    try {
+      var profileCheck = await window.supabaseClient
+        .from('profiles')
+        .select('id, username')
+        .eq('id', userId)
+        .limit(1);
+
+      console.log('[JEJAK] Profile check result:', profileCheck);
+
+      if (profileCheck.error) {
+        // Error bisa karena RLS — lanjutkan tapi log warning
+        console.warn('[JEJAK] Profile check error (mungkin RLS):', profileCheck.error.message);
+      } else if (!profileCheck.data || profileCheck.data.length === 0) {
+        // user_id tidak ada di profiles → INILAH penyebab FK error
+        console.error('[JEJAK] user_id', userId, 'NOT FOUND in profiles!');
+        console.log('[JEJAK] Attempting to create missing profile...');
+
+        // Coba buat profile dengan id yang sama
+        var createResult = await window.supabaseClient
+          .from('profiles')
+          .insert({ id: userId, username: username })
+          .select('id');
+
+        if (createResult.error) {
+          // Kalau kolom 'id' tidak bisa di-set manual (policies), redirect ke login
+          console.error('[JEJAK] Cannot create profile:', createResult.error.message);
+          toast('⚠️ User ID tidak valid. Login ulang otomatis...');
+          setTimeout(function() {
+            localStorage.removeItem('user_id');
+            localStorage.removeItem('jejak_logged_in');
+            localStorage.removeItem('jejak_username');
+            location.href = 'index.html';
+          }, 2500);
+          return false;
+        }
+        console.log('[JEJAK] Profile auto-created for:', username);
+      } else {
+        console.log('%c[JEJAK] Profile valid:', 'color:#39FF14', profileCheck.data[0]);
+      }
+    } catch(profileErr) {
+      console.warn('[JEJAK] Profile validation skipped (network?):', profileErr.message);
+      // Non-fatal — lanjutkan, lebih baik coba daripada block
+    }
+  }
+
+  await loadEntries();
+  await loadArtefacts();
+  return true;
 }
 
 // ============================================
@@ -728,9 +756,9 @@ async function checkAuth() {
 async function loadEntries() {
   if (!S.userId || !window.supabaseClient) return;
   try {
-    // FIX: tabel bernama 'rants' bukan 'entries'
+    // Tabel: 'entries' — confirmed dari FK error: entries_user_id_fkey
     var result = await window.supabaseClient
-      .from('rants')
+      .from('entries')
       .select('*')
       .eq('user_id', S.userId)
       .order('created_at', { ascending: false })
@@ -746,10 +774,8 @@ async function loadEntries() {
           id: e.id,
           content: e.content,
           mood: e.mood,
-          // FIX: created_at mungkin tidak ada di schema, fallback ke Date.now()
           timestamp: e.created_at ? new Date(e.created_at).getTime() : Date.now(),
-          // FIX: tabel rants tidak punya kolom reactions — pakai default kosong
-          reactions: { skull: 0, cry: 0, fire: 0, upside: 0 },
+          reactions: e.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 },
           isDummy: false
         });
       }
@@ -757,7 +783,7 @@ async function loadEntries() {
     renderEntries();
   } catch (err) {
     console.error('Load entries error:', err);
-    toast('Gagal load rants: ' + (err.message || err));
+    toast('Gagal load: ' + (err.message || err));
   }
 }
 
@@ -835,8 +861,9 @@ async function saveEntry() {
       mood: activeMood
     };
 
+    // Tabel: 'entries' (confirmed dari FK constraint: entries_user_id_fkey)
     var result = await window.supabaseClient
-      .from('rants')
+      .from('entries')
       .insert(insertData)
       .select();
 
@@ -1074,6 +1101,51 @@ function closeVoidLocked() { $('void-locked').classList.remove('on'); }
 function closeVoidChat() { $('void-chat').classList.remove('on'); }
 function sendContactRequest() { toast('Fitur ini memerlukan Premium'); }
 function sendVoidMessage() { toast('Fitur ini memerlukan Premium'); }
+
+// ============================================
+// DEBUG HELPER — panggil debugSession() di console browser
+// ============================================
+window.debugSession = async function() {
+  var info = {
+    'jejak_username':   localStorage.getItem('jejak_username'),
+    'user_id':          localStorage.getItem('user_id'),
+    'jejak_logged_in':  localStorage.getItem('jejak_logged_in'),
+    'jejak_session_id': localStorage.getItem('jejak_session_id')
+  };
+  console.table(info);
+
+  var userId = info['user_id'];
+  if (!userId || userId === 'undefined') {
+    console.error('❌ user_id KOSONG atau "undefined" — ini penyebab FK error!');
+    console.log('👉 Solusi: logout dan login ulang dari index.html');
+    return;
+  }
+
+  if (window.supabaseClient) {
+    var r = await window.supabaseClient
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .limit(1);
+    if (r.data && r.data.length > 0) {
+      console.log('%c✅ Profile ditemukan di DB:', 'color:#39FF14', r.data[0]);
+    } else {
+      console.error('❌ user_id', userId, 'TIDAK ADA di tabel profiles!');
+      console.log('Error:', r.error);
+      console.log('👉 Ini 100% penyebab FK error di entries & artefacts');
+      console.log('👉 Solusi: jalankan fixSession() untuk reset');
+    }
+  }
+};
+
+window.fixSession = function() {
+  console.log('🔧 Clearing corrupt session...');
+  localStorage.removeItem('user_id');
+  localStorage.removeItem('jejak_logged_in');
+  localStorage.removeItem('jejak_username');
+  console.log('✅ Session cleared. Redirect ke login...');
+  setTimeout(function() { location.href = 'index.html'; }, 500);
+};
 
 // ============================================
 // INIT — All event bindings here, no inline HTML handlers
