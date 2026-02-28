@@ -642,10 +642,17 @@ function initSupabase() {
         'https://fuovfrdicdhnlymnacpz.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0'
       );
+      console.log('%c[JEJAK] Supabase OK', 'color:#39FF14;font-weight:bold');
+      // Debug: tampilkan localStorage yang relevan
+      console.log('%c[JEJAK] Auth state:', 'color:#FF9500', {
+        user_id: localStorage.getItem('user_id'),
+        username: localStorage.getItem('jejak_username'),
+        logged_in: localStorage.getItem('jejak_logged_in')
+      });
       return true;
     }
   } catch (e) {
-    console.error('Supabase init failed:', e);
+    console.error('[JEJAK] Supabase init failed:', e);
   }
   return false;
 }
@@ -658,6 +665,8 @@ async function checkAuth() {
   var userId = localStorage.getItem('user_id');
   var loggedIn = localStorage.getItem('jejak_logged_in') === 'true';
 
+  console.log('Auth check:', { username: username, userId: userId, loggedIn: loggedIn });
+
   if (loggedIn && username && userId) {
     S.userId = userId;
     S.user = username;
@@ -668,10 +677,48 @@ async function checkAuth() {
     if (huser) huser.textContent = '@' + S.user;
     if (odot) odot.classList.remove('off');
 
+    // FIX: Verifikasi user_id benar-benar ada di tabel profiles
+    // Jika tidak ada → foreign key akan selalu gagal saat insert
+    if (window.supabaseClient) {
+      try {
+        var checkResult = await window.supabaseClient
+          .from('profiles')
+          .select('id')
+          .eq('id', userId)
+          .maybeSingle();
+
+        if (checkResult.error) {
+          console.warn('Profile check error:', checkResult.error);
+        } else if (!checkResult.data) {
+          // user_id tidak ada di profiles → coba insert profile dulu
+          console.warn('User not found in profiles, attempting to create...');
+          var createProfile = await window.supabaseClient
+            .from('profiles')
+            .insert({ id: userId, username: username })
+            .select();
+          if (createProfile.error) {
+            console.error('Cannot create profile:', createProfile.error);
+            toast('⚠️ Session invalid. Silakan login ulang.');
+            setTimeout(function() {
+              localStorage.clear();
+              location.href = 'index.html';
+            }, 2500);
+            return false;
+          }
+          console.log('Profile created successfully');
+        }
+      } catch(profileErr) {
+        console.warn('Profile validation skipped:', profileErr);
+        // Lanjutkan saja, mungkin RLS yang menghalangi
+      }
+    }
+
     await loadEntries();
     await loadArtefacts();
     return true;
   }
+
+  console.log('Not logged in, redirecting...');
   return false;
 }
 
@@ -681,8 +728,9 @@ async function checkAuth() {
 async function loadEntries() {
   if (!S.userId || !window.supabaseClient) return;
   try {
+    // FIX: tabel bernama 'rants' bukan 'entries'
     var result = await window.supabaseClient
-      .from('entries')
+      .from('rants')
       .select('*')
       .eq('user_id', S.userId)
       .order('created_at', { ascending: false })
@@ -698,8 +746,10 @@ async function loadEntries() {
           id: e.id,
           content: e.content,
           mood: e.mood,
-          timestamp: new Date(e.created_at).getTime(),
-          reactions: e.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 },
+          // FIX: created_at mungkin tidak ada di schema, fallback ke Date.now()
+          timestamp: e.created_at ? new Date(e.created_at).getTime() : Date.now(),
+          // FIX: tabel rants tidak punya kolom reactions — pakai default kosong
+          reactions: { skull: 0, cry: 0, fire: 0, upside: 0 },
           isDummy: false
         });
       }
@@ -707,6 +757,7 @@ async function loadEntries() {
     renderEntries();
   } catch (err) {
     console.error('Load entries error:', err);
+    toast('Gagal load rants: ' + (err.message || err));
   }
 }
 
@@ -729,10 +780,11 @@ async function loadArtefacts() {
         S.artefacts.push({
           id: a.id,
           url: a.url,
-          note: a.note,
-          hasFace: a.has_face,
-          theme: a.theme,
-          timestamp: new Date(a.created_at).getTime(),
+          note: a.note || 'memory',
+          hasFace: a.has_face || false,
+          theme: a.theme || 'fm',
+          // FIX: created_at mungkin null, fallback ke Date.now()
+          timestamp: a.created_at ? new Date(a.created_at).getTime() : Date.now(),
           isDummy: false
         });
       }
@@ -775,15 +827,17 @@ async function saveEntry() {
 
   showProc('Menyimpan spill...');
   try {
+    // FIX: tabel 'rants', kolom hanya: user_id, content, mood
+    // JANGAN kirim 'reactions' atau 'created_at' jika tidak ada di schema
+    var insertData = {
+      user_id: S.userId,
+      content: content,
+      mood: activeMood
+    };
+
     var result = await window.supabaseClient
-      .from('entries')
-      .insert({
-        user_id: S.userId,
-        content: content,
-        mood: activeMood,
-        reactions: { skull: 0, cry: 0, fire: 0, upside: 0 },
-        created_at: new Date().toISOString()
-      })
+      .from('rants')
+      .insert(insertData)
       .select();
 
     if (result.error) throw result.error;
@@ -791,10 +845,10 @@ async function saveEntry() {
     $('ri').value = '';
     $('ccount').textContent = '0/500';
     await loadEntries();
-    toast('Spill terkirim!');
+    toast('✓ Spill terkirim!');
   } catch (err) {
     console.error('Save error:', err);
-    toast('Gagal menyimpan: ' + err.message);
+    toast('Gagal menyimpan: ' + (err.message || JSON.stringify(err)));
   } finally {
     hideProc();
   }
@@ -951,10 +1005,18 @@ async function confirmUpload() {
             url: publicUrl,
             note: note,
             has_face: item.hasFace,
-            theme: theme.filter,
-            created_at: new Date().toISOString()
+            // FIX: 'faces' kolom ada di schema (jsonb), kirim null jika tidak dipakai
+            faces: null,
+            theme: theme.filter
+            // FIX: hapus created_at — biar DB yang generate via DEFAULT now()
           })
           .select();
+
+        if (insertResult.error) {
+          console.error('Insert artefact error:', insertResult.error);
+          toast('Gagal simpan artefak: ' + insertResult.error.message);
+          continue;
+        }
 
         var newId = (insertResult.data && insertResult.data[0]) ? insertResult.data[0].id : ('local_' + timestamp + '_' + i);
 
