@@ -2699,6 +2699,68 @@ function updateWsBadge() {
   } else {
     badge.classList.remove('show');
   }
+  // ==================== STEALTH WHISPERER CONTROL ====================
+function updateStealthWhisperer() {
+  const wsIcon = document.getElementById('wsIcon');
+  const wsLabel = document.getElementById('wsLabel');
+  const wsBadge = document.getElementById('wsStealthBadge');
+  
+  if (!wsIcon || !wsLabel || !wsBadge) return;
+  
+  const unreadCount = whispers.filter(w => !w.read).length;
+  
+  if (unreadCount > 0) {
+    // ADA PESAN - TAMPILKAN BADGE DAN AKTIFKAN WARNA PUTIH
+    wsIcon.style.color = 'var(--tx)';
+    wsLabel.style.color = 'var(--tx)';
+    wsLabel.style.fontWeight = '600';
+    wsBadge.style.display = 'inline-block';
+    wsBadge.textContent = `✦ ${unreadCount}`;
+  } else {
+    // TIDAK ADA PESAN - STEALTH MODE (ABU-ABU TIPIS)
+    wsIcon.style.color = 'var(--txs)';
+    wsLabel.style.color = 'var(--txs)';
+    wsLabel.style.fontWeight = '400';
+    wsBadge.style.display = 'none';
+  }
+}
+
+// Modifikasi fungsi updateWsBadge yang sudah ada
+function updateWsBadge() {
+  const isPremium = checkSubscription() && userSubscription.type === 'monthly';
+  if (!isPremium) return;
+  
+  const unread = whispers.filter(w => !w.read).length;
+  const badge = $('wsBadge');
+  if (badge) {
+    if (unread > 0) {
+      badge.textContent = unread;
+      badge.classList.add('show');
+    } else {
+      badge.classList.remove('show');
+    }
+  }
+  
+  // PANGGIL STEALTH UPDATER
+  updateStealthWhisperer();
+}
+
+// Panggil di init
+document.addEventListener('DOMContentLoaded', () => {
+  // ... kode init lainnya ...
+  updateStealthWhisperer();
+});
+
+// Panggil juga setiap kali ada perubahan whispers
+function addWhisper() {
+  // ... fungsi tambah whisper ...
+  updateStealthWhisperer();
+}
+
+function markWhisperRead() {
+  // ... fungsi mark read ...
+  updateStealthWhisperer();
+}
 }
 
 function openWsCompose() {
