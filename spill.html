@@ -177,8 +177,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .chat-close{width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--bg);border:2px solid var(--bd);color:var(--txs);margin-left:12px;font-size:18px;cursor:pointer;box-shadow:3px 3px 0 #000;transition:all .08s}
 .chat-close:active{transform:translate(2px,2px);box-shadow:none}
 .chat-messages{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch}
-.chat-bubble{max-width:85%;padding:12px 16px;font-size:15px;line-height:1.55;word-wrap:break-word;border:2px solid;animation:popIn .2s cubic-bezier(.175,.885,.32,1.275)}
-@keyframes popIn{from{opacity:0;transform:scale(.85) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.chat-bubble{max-width:85%;padding:12px 16px;font-size:15px;line-height:1.55;word-wrap:break-word;border:2px solid;min-height:2.5em}
 .chat-msg{display:flex;flex-direction:column;max-width:85%}
 .chat-msg.own{align-self:flex-end}
 .chat-msg.other{align-self:flex-start}
@@ -456,7 +455,8 @@ let currentGender=null,chatPartner=null,timerInterval=null,chatTimeLeft=900,
     selectedPlan=null,activeMood='all',radarInterval,radarRAF=null,
     userName='stranger_'+Math.floor(Math.random()*1000),activeWsThread=null,
     vtBurnTimer=null,fallbackTimer=null,apiOffline=false,vtQuota=3,
-    selectedPackage=null,chatHistory=[];
+    selectedPackage=null,chatHistory=[],
+    isTyping=false; // Flag untuk cek sedang ngetik
 
 let userSub={isActive:false,expiresAt:null,type:null};
 
@@ -491,6 +491,7 @@ const esc=t=>{const d=document.createElement('div');d.textContent=t;return d.inn
 const timeAgo=ts=>{const m=Math.floor((Date.now()-ts)/60000);return m<60?m+'m':Math.floor(m/60)+'h'};
 const rnd=n=>Math.floor(Math.random()*n);
 const checkSub=()=>userSub.isActive&&userSub.expiresAt&&new Date(userSub.expiresAt)>new Date();
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 function toast(msg,err=false){
   const t=$('toast');t.textContent=msg;t.className='toast'+(err?' error':'');t.classList.add('show');
@@ -672,7 +673,6 @@ const startTimer=()=>{clearInterval(timerInterval);timerInterval=setInterval(upd
 
 // ─── POPUP WARNING 2 MENIT ───
 function showTwoMinuteWarning(){
-  // Hapus popup sebelumnya jika ada
   const existing=document.querySelector('.warning-popup');
   if(existing)existing.remove();
   
@@ -899,44 +899,189 @@ function openVtReader(tap){
 const showVtUpgradeNudge=()=>{$('vtUpgradeNudge').classList.add('show');setTimeout(()=>$('vtUpgradeNudge').classList.remove('show'),3000);};
 const showUpgradeModal=()=>$('upgradeModal').classList.add('on');
 
-// ─── CHAT API ───
-async function callChatAPI(userMsg,isFirst=false){
-  if(!chatPartner||!chatPartner.isAI||apiOffline)return;
+// ─── EFEK KETIK REALISTIS ───
+async function typeMessage(element, finalText) {
+  const chars = finalText.split('');
+  let currentText = '';
+  let i = 0;
+  
+  // Kemungkinan salah ketik (15% chance per pesan)
+  const makeMistake = Math.random() < 0.15;
+  let mistakeIndex = -1;
+  let mistakeChar = '';
+  
+  if (makeMistake && chars.length > 5) {
+    mistakeIndex = Math.floor(Math.random() * (chars.length - 3)) + 2;
+    mistakeChar = String.fromCharCode(97 + Math.floor(Math.random() * 26));
+  }
+  
+  while (i < chars.length) {
+    // Efek salah ketik
+    if (makeMistake && i === mistakeIndex) {
+      // Ketik huruf salah
+      currentText += mistakeChar;
+      element.textContent = currentText;
+      await sleep(120 + Math.random() * 80);
+      
+      // Backspace (hapus 1-2 karakter)
+      const backspaceCount = Math.random() > 0.5 ? 1 : 2;
+      for (let b = 0; b < backspaceCount; b++) {
+        currentText = currentText.slice(0, -1);
+        element.textContent = currentText;
+        await sleep(90 + Math.random() * 60);
+      }
+      
+      // Lanjut dengan huruf yang benar
+      continue;
+    }
+    
+    // Ketik normal
+    currentText += chars[i];
+    element.textContent = currentText;
+    
+    // Variasi kecepatan ketik
+    let delay = 40 + Math.random() * 80; // 40-120ms per huruf
+    
+    // Lebih lambat di akhir kalimat
+    if (chars[i] === '.' || chars[i] === '?' || chars[i] === '!') {
+      delay = 250 + Math.random() * 200;
+    }
+    // Lebih lambat setelah koma
+    else if (chars[i] === ',' || chars[i] === ';') {
+      delay = 150 + Math.random() * 100;
+    }
+    // Spasi juga sedikit lebih lambat
+    else if (chars[i] === ' ') {
+      delay = 100 + Math.random() * 70;
+    }
+    
+    await sleep(delay);
+    i++;
+  }
+  
+  // Jeda setelah selesai mengetik
+  await sleep(150);
+}
+
+// ─── CHAT API DENGAN EFEK KETIK ───
+async function callChatAPI(userMsg, isFirst=false){
+  if(!chatPartner||!chatPartner.isAI||apiOffline||isTyping) return;
+  
+  isTyping = true;
+  
+  // TAMPILKAN TYPING INDICATOR
   const td=mk('div','chat-msg other');
   td.innerHTML='<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-  $('chatMessages').appendChild(td);td.scrollIntoView({behavior:'smooth'});
+  $('chatMessages').appendChild(td);
+  td.scrollIntoView({behavior:'smooth'});
+  
   try{
     let reply;
-    if(USE_MOCK){await new Promise(r=>setTimeout(r,1500));reply=isFirst?`halo, gue ${chatPartner.name.split('.')[0]}. salam kenal 😊`:`${chatPartner.name.split('.')[0]}: iya nih, gue denger...`;}
-    else{
-      const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:isFirst?'halo':userMsg,characterName:chatPartner.name,userName,lastMessages:chatHistory.slice(-8)})});
+    const startTime = Date.now();
+    
+    // PANGGIL API
+    if(USE_MOCK){
+      await sleep(1500);
+      reply=isFirst?`halo, gue ${chatPartner.name.split('.')[0]}. salam kenal 😊`:`iya nih, gue lagi bengong aja. lo?`;
+    } else {
+      const res=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+        message:isFirst?'halo':userMsg,
+        characterName:chatPartner.name,
+        userName,
+        lastMessages:chatHistory.slice(-8)
+      })});
       if(!res.ok)throw new Error('API '+res.status);
-      const data=await res.json();if(!data.reply)throw new Error('Bad response');
+      const data=await res.json();
+      if(!data.reply)throw new Error('Bad response');
       reply=data.reply;
-      if(data.distress){const dEl=$('distressMsg');dEl.classList.add('show');dEl.textContent=data.distress==='high'?'⚠️ Partner menunjukkan tanda distress serius':'⚠️ Partner terlihat sedih, respons dengan empati';}
+      
+      if(data.distress){
+        const dEl=$('distressMsg');
+        dEl.classList.add('show');
+        dEl.textContent=data.distress==='high'?'⚠️ Partner menunjukkan tanda distress serius':'⚠️ Partner terlihat sedih, respons dengan empati';
+      }
     }
-    td.remove();addMsg(reply,false);
-    if(!isFirst)chatHistory.push({role:'user',content:userMsg});
+    
+    // HITUNG WAKTU YANG SUDAH DILEWATI
+    const elapsed = Date.now() - startTime;
+    
+    // BASE DELAY 800ms + DELAY BERDASARKAN PANJANG PESAN
+    const baseDelay = 800;
+    const charDelay = Math.min(reply.length * 30, 2000);
+    const randomDelay = Math.random() * 400;
+    const typingDelay = baseDelay + charDelay + randomDelay;
+    
+    // KALAU RESPON API CEPAT, TAMBAH DELAY
+    const remainingDelay = Math.max(0, typingDelay - elapsed);
+    
+    if(remainingDelay > 0) {
+      await sleep(remainingDelay);
+    }
+    
+    // HAPUS TYPING INDICATOR
+    td.remove();
+    
+    // BUAT ELEMEN PESAN KOSONG
+    const msgDiv = mk('div','chat-msg other');
+    const bubble = mk('div','chat-bubble');
+    bubble.textContent = ''; // Mulai kosong
+    msgDiv.appendChild(bubble);
+    $('chatMessages').appendChild(msgDiv);
+    msgDiv.scrollIntoView({behavior:'smooth'});
+    
+    // EFEK KETIK
+    await typeMessage(bubble, reply);
+    
+    if(!isFirst) chatHistory.push({role:'user',content:userMsg});
     chatHistory.push({role:'assistant',content:reply});
-  }catch(e){
-    console.error(e);td.remove();apiOffline=true;toast('Gagal terhubung ke server chat',true);
-    if(isFirst){const fb=`halo, gue ${chatPartner.name.split('.')[0]}. salam kenal 😊`;addMsg(fb,false);chatHistory.push({role:'assistant',content:fb});}
+    
+  } catch(e){
+    console.error(e);
+    td.remove();
+    apiOffline=true;
+    toast('Gagal terhubung ke server chat',true);
+    if(isFirst){
+      const fb=`halo, gue ${chatPartner.name.split('.')[0]}. salam kenal 😊`;
+      
+      // Tetap tampilkan dengan efek ketik
+      const msgDiv = mk('div','chat-msg other');
+      const bubble = mk('div','chat-bubble');
+      bubble.textContent = '';
+      msgDiv.appendChild(bubble);
+      $('chatMessages').appendChild(msgDiv);
+      msgDiv.scrollIntoView({behavior:'smooth'});
+      
+      await typeMessage(bubble, fb);
+      chatHistory.push({role:'assistant',content:fb});
+    }
+  } finally {
+    isTyping = false;
   }
 }
 
 function sendMsg(){
-  const inp=$('chatInput'),text=inp.value.trim();if(!text)return;
-  addMsg(text,true);inp.value='';chatHistory.push({role:'user',content:text});
-  if(chatPartner&&chatPartner.isAI&&!apiOffline)callChatAPI(text);
-  else if(apiOffline)toast('Server chat sedang offline',true);
-}
-
-// MODIFIKASI: HAPUS TIMESTAMP DARI PESAN
-function addMsg(text,isOwn){
-  const msgs=$('chatMessages'),d=mk('div','chat-msg '+(isOwn?'own':'other'));
-  // Hanya bubble tanpa timestamp
-  d.innerHTML=`<div class="chat-bubble">${esc(text)}</div>`;
-  msgs.appendChild(d);d.scrollIntoView({behavior:'smooth'});
+  if(isTyping) {
+    toast('Tunggu partner selesai ngetik...', true);
+    return;
+  }
+  
+  const inp=$('chatInput'),text=inp.value.trim();
+  if(!text)return;
+  
+  // Tampilkan pesan user langsung (tanpa efek ketik untuk user sendiri)
+  const msgs=$('chatMessages');
+  const d=mk('div','chat-msg own');
+  const bubble=mk('div','chat-bubble');
+  bubble.textContent = text;
+  d.appendChild(bubble);
+  msgs.appendChild(d);
+  d.scrollIntoView({behavior:'smooth'});
+  
+  inp.value='';
+  chatHistory.push({role:'user',content:text});
+  
+  if(chatPartner&&chatPartner.isAI&&!apiOffline) callChatAPI(text);
+  else if(apiOffline) toast('Server chat sedang offline',true);
 }
 
 // ─── INIT ───
