@@ -700,6 +700,7 @@ async function checkAuth() {
     return false;
   }
 
+  // Set S.userId DULU sebelum async apapun — mencegah race condition saat upload
   S.userId = userId;
   S.user = username;
   S.isPremium = false;
@@ -709,7 +710,7 @@ async function checkAuth() {
   if (huser) huser.textContent = '@' + S.user;
   if (odot) odot.classList.remove('off');
 
-  // Verifikasi user_id ada di profiles (FK check pre-emptif)
+  // Verifikasi profile ada di DB — simple check, no auto-create
   if (window.supabaseClient) {
     try {
       var profileCheck = await window.supabaseClient
@@ -718,41 +719,22 @@ async function checkAuth() {
         .eq('id', userId)
         .limit(1);
 
-      console.log('[JEJAK] Profile check result:', profileCheck);
-
       if (profileCheck.error) {
-        // Error bisa karena RLS — lanjutkan tapi log warning
-        console.warn('[JEJAK] Profile check error (mungkin RLS):', profileCheck.error.message);
+        console.warn('[JEJAK] Profile check error:', profileCheck.error.message);
+        // Non-fatal — S.userId sudah di-set, lanjutkan
       } else if (!profileCheck.data || profileCheck.data.length === 0) {
-        // user_id tidak ada di profiles → INILAH penyebab FK error
-        console.error('[JEJAK] user_id', userId, 'NOT FOUND in profiles!');
-        console.log('[JEJAK] Attempting to create missing profile...');
-
-        // Coba buat profile dengan id yang sama
-        var createResult = await window.supabaseClient
-          .from('profiles')
-          .insert({ id: userId, username: username })
-          .select('id');
-
-        if (createResult.error) {
-          // Kalau kolom 'id' tidak bisa di-set manual (policies), redirect ke login
-          console.error('[JEJAK] Cannot create profile:', createResult.error.message);
-          toast('⚠️ User ID tidak valid. Login ulang otomatis...');
-          setTimeout(function() {
-            localStorage.removeItem('user_id');
-            localStorage.removeItem('jejak_logged_in');
-            localStorage.removeItem('jejak_username');
-            location.href = 'index.html';
-          }, 2500);
-          return false;
-        }
-        console.log('[JEJAK] Profile auto-created for:', username);
+        // Profile tidak ada — session stale, harus login ulang
+        console.error('[JEJAK] Profile tidak ditemukan untuk user_id:', userId);
+        localStorage.removeItem('user_id');
+        localStorage.removeItem('jejak_logged_in');
+        localStorage.removeItem('jejak_username');
+        location.href = 'index.html';
+        return false;
       } else {
         console.log('%c[JEJAK] Profile valid:', 'color:#39FF14', profileCheck.data[0]);
       }
     } catch(profileErr) {
-      console.warn('[JEJAK] Profile validation skipped (network?):', profileErr.message);
-      // Non-fatal — lanjutkan, lebih baik coba daripada block
+      console.warn('[JEJAK] Profile check skipped:', profileErr.message);
     }
   }
 
@@ -1020,21 +1002,43 @@ async function confirmUpload() {
     var i = selFilesArray[idx];
     var item = pendingFiles[i];
     var file = item.file;
-    var ext = (file.name.split('.').pop()) || 'jpg';
+    // FIX: normalize extension to lowercase, fallback to jpg
+    var rawExt = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
+    var ext = ['jpg','jpeg','png','webp','gif'].includes(rawExt) ? rawExt : 'jpg';
+    // FIX: normalize contentType, fallback if empty
+    var mimeType = file.type || ('image/' + ext);
     var timestamp = Date.now();
-    var storagePath = S.userId + '/' + timestamp + '_' + i + '.' + ext;
+    // FIX: simpler path — no subfolder (some Supabase configs don't allow subfolders for anon)
+    var storagePath = timestamp + '_' + i + '_' + S.userId.substring(0,8) + '.' + ext;
+
+    console.log('[ARTEFACT] Attempting upload:', {
+      path: storagePath,
+      type: mimeType,
+      size: file.size,
+      userId: S.userId
+    });
 
     if (window.supabaseClient) {
       try {
         var uploadResult = await window.supabaseClient
           .storage
           .from('artefacts')
-          .upload(storagePath, file, { contentType: file.type, upsert: false });
+          .upload(storagePath, file, { contentType: mimeType, upsert: true });
 
-        if (uploadResult.error) { console.error('Upload error:', uploadResult.error); continue; }
+        if (uploadResult.error) {
+          console.error('[ARTEFACT] Storage upload error:', {
+            message: uploadResult.error.message,
+            statusCode: uploadResult.error.statusCode,
+            error: uploadResult.error,
+            path: storagePath
+          });
+          toast('❌ Upload gagal: ' + uploadResult.error.message);
+          continue;
+        }
 
         var urlResult = window.supabaseClient.storage.from('artefacts').getPublicUrl(storagePath);
         var publicUrl = urlResult.data.publicUrl;
+        console.log('[ARTEFACT] Upload OK, URL:', publicUrl);
 
         var insertResult = await window.supabaseClient
           .from('artefacts')
@@ -1045,15 +1049,19 @@ async function confirmUpload() {
             has_face: item.hasFace,
             faces: null,
             theme: theme.filter
-            // created_at di-generate otomatis oleh DB (DEFAULT now())
           })
           .select();
 
         if (insertResult.error) {
-          console.error('Insert artefact error:', insertResult.error);
-          toast('Gagal simpan artefak: ' + insertResult.error.message);
+          console.error('[ARTEFACT] DB insert error:', {
+            message: insertResult.error.message,
+            code: insertResult.error.code,
+            details: insertResult.error.details
+          });
+          toast('❌ Gagal simpan: ' + insertResult.error.message);
           continue;
         }
+        console.log('[ARTEFACT] DB insert OK:', insertResult.data);
 
         var newId = (insertResult.data && insertResult.data[0]) ? insertResult.data[0].id : ('local_' + timestamp + '_' + i);
 
@@ -1067,7 +1075,8 @@ async function confirmUpload() {
           isDummy: false
         });
       } catch (uploadErr) {
-        console.error('Upload failed:', uploadErr);
+        console.error('[ARTEFACT] Unexpected upload exception:', uploadErr);
+        toast('❌ Error: ' + (uploadErr.message || JSON.stringify(uploadErr)));
         continue;
       }
     } else {
