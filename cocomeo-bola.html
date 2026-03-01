@@ -1,393 +1,1550 @@
-// api/chat.js — JEJAK AI Chat Backend
-// Vercel Serverless Function
-// Env: DEEPSEEK_API_KEY
-
-// ============================================
-// MEDIA PARTNER BADGE - Piala Gubernur DKI
-// ============================================
-const MEDIA_PARTNER = {
-  name: 'Piala Gubernur DKI Liga U15 & U17 2026',
-  badge: '⚽ MEDIA PARTNER: PIALA GUBERNUR DKI LIGA U15 & U17 2026 ⚽',
-  year: '2026',
-  colors: {
-    primary: '#FF4D00', // Oranye khas Jakarta
-    secondary: '#00A651', // Hijau lapangan
-    accent: '#FFD700' // Emas untuk piala
-  }
-};
-
-const PERSONAS = {
-  'beby.manis':          { style: 'manja tapi asik, sering bilang "ih", "yaampun", "serius??"', gender: 'female' },
-  'strawberry.shortcake':{ style: 'ceria, sering typo lucu, banyak "hehe" dan "wkwk"',          gender: 'female' },
-  'pretty.sad':          { style: 'kalem, thoughtful, sedikit melankolis tapi hangat',            gender: 'female' },
-  'little.fairy':        { style: 'imajinatif, suka analogi aneh tapi makes sense',               gender: 'female' },
-  'cinnamon.girl':       { style: 'santai, down to earth, humor kering',                          gender: 'female' },
-  'sejuta.badai':        { style: 'blak-blakan, jujur, kadang frontal tapi caring',               gender: 'male'   },
-  'kue.bulan':           { style: 'filosofis, suka nanya balik, deep tapi ga lebay',              gender: 'male'   },
-  'agak.koplak':         { style: 'lucu, sering bikin jokes receh, tapi dengerin beneran',        gender: 'male'   },
-  'chili.padi':          { style: 'sarkas halus, witty, tapi hangat di baliknya',                 gender: 'male'   },
-  'abang.gaul':          { style: 'update, tau semua tren, slang heavy tapi ga lebay',            gender: 'male'   },
-};
-
-// Daftar kata/frasa yang harus dihindari
-const FORBIDDEN_PHRASES = [
-  'haha iya nih', 'iya nih', 'iya banget', 'haha iya', 'haha gitu',
-  'wkwk iya', 'iya wkwk', 'eh gue juga', 'nggak nyangka', 'ngk nyangka'
-];
-
-// Pattern untuk deteksi permintaan terlalu personal di awal kenal
-const TOO_PERSONAL_PATTERNS = [
-  'minta (ig|instagram|line|wa|nomor|telepon|fb|tiktok|snap)',
-  'kasih (ig|ig lo|ig lu)',
-  'add (line|ig|fb)',
-  'pin (bb|line)',
-  'ketemuan?', 'ketemuan yuk', 'main yuk', 'kopi?', 'nongkrong?',
-  'date?', 'kencan?', 'jadian?', 'pacaran?',
-  'foto lo', 'foto lu', 'selfie lo', 'pp-an', 'video call',
-  'vc?', 'telpon?', 'voice note?',
-  'rumah lo?', 'tinggal di mana?', 'alamat', 'sekolah?', 'umur? (15|[0-9]|belasan)',
-  'nama asli', 'nama panjang'
-];
-
-// Respons untuk tolak halus karena baru kenal
-const TOO_SOON_RESPONSES = [
-  "wah baru kenal nih, santai dulu kita ngobrol 🤙",
-  "aduh baru kenal, kenalan dulu yuk santai",
-  "hmmm kita kan baru ngobrol, santuy dulu wkwk",
-  "ciyeee udah minta-minta, padahal baru kenal 😆",
-  "lah baru kenal, masa langsung minta gitu sih",
-  "waduh baru kenal nih, ngobrol biasa dulu aja yaa",
-  "santai dulu bro/sis, kita cari vibe dulu",
-  "ciee ciee udah minta sesuatu, padahal kita masih strangers wkwk",
-  "aduhh malu aku, baru kenal loh 🤭",
-  "slow bro/sis, kita obrolin yang ringan-ringan dulu"
-];
-
-// Panggilan berdasarkan gender - REVISI: handle kasus cowok dipanggil sis
-const CALLS = {
-  male: ['bang', 'bro', 'cuy', 'abang', 'brother', 'bro'],
-  female: ['kak', 'sis', 'say', 'mbak', 'sister']
-};
-
-// Fungsi untuk mendeteksi apakah user menyebut dirinya cowok
-function detectUserGender(message) {
-  const msg = message.toLowerCase();
-  if (msg.includes('gue cowok') || msg.includes('gue laki') || 
-      msg.includes('saya cowok') || msg.includes('aku cowok') ||
-      msg.includes('gw cowok') || msg.includes('gue cowo')) {
-    return 'male';
-  }
-  if (msg.includes('gue cewek') || msg.includes('gue perempuan') ||
-      msg.includes('saya cewek') || msg.includes('aku cewek')) {
-    return 'female';
-  }
-  return null;
-}
-
-function detectDistress(message) {
-  const msg = message.toLowerCase();
-  const highSignals = ['mau mati', 'bunuh diri', 'nyakitin diri', 'pengen mati'];
-  const lowSignals  = [
-    'udah ga kuat', 'ga sanggup lagi', 'capek banget hidup',
-    'nggak ada gunanya', 'gaada yang peduli', 'sendirian banget',
-    'nangis', 'ngerasa hampa', 'kosong banget', 'gelap banget'
-  ];
-  const isHigh = highSignals.some(s => msg.includes(s));
-  const isLow  = !isHigh && lowSignals.some(s => msg.includes(s));
-  return { isHigh, isLow };
-}
-
-function containsForbiddenPhrase(text) {
-  const lower = text.toLowerCase();
-  return FORBIDDEN_PHRASES.some(phrase => lower.includes(phrase));
-}
-
-function isTooPersonal(message) {
-  const lower = message.toLowerCase();
-  return TOO_PERSONAL_PATTERNS.some(pattern => {
-    const regex = new RegExp(pattern, 'i');
-    return regex.test(lower);
-  });
-}
-
-function getRandomTooSoonResponse() {
-  return TOO_SOON_RESPONSES[Math.floor(Math.random() * TOO_SOON_RESPONSES.length)];
-}
-
-function getRandomCall(charGender, userGender = null) {
-  // Prioritaskan gender user jika diketahui
-  if (userGender) {
-    const calls = CALLS[userGender] || CALLS.male;
-    return calls[Math.floor(Math.random() * calls.length)];
-  }
-  // Fallback ke gender karakter
-  const calls = CALLS[charGender] || CALLS.male;
-  return calls[Math.floor(Math.random() * calls.length)];
-}
-
-function getShortName(username) {
-  if (!username || username === 'user') return '';
-  const clean = username.replace('@', '');
-  const parts = clean.split(/[._\-\s]+/);
-  if (parts.length >= 2) return parts[Math.floor(Math.random() * 2)];
-  if (clean.length > 8) return clean.substring(0, 5);
-  return clean;
-}
-
-// FUNGSI FILTER UTAMA: Bersihin response dari @, nama karakter, dan panggilan salah gender
-function cleanResponse(reply, userName, shortName, characterName, charGender, userGender = null) {
-  if (!reply) return reply;
+<!DOCTYPE html>
+<html lang="id" data-theme="brutalgenz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>JEJAK — Bola</title>
   
-  let cleaned = reply;
-  const shortCharName = characterName.split('.')[0];
-  const randomCall = getRandomCall(charGender, userGender);
+  <!-- PWA -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23FF4D00'/%3E%3Ctext x='50' y='70' font-size='50' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%230A0A0A'%3ENO%3C/text%3E%3C/svg%3E">
+  <meta name="theme-color" content="#0A0A0A">
   
-  // 1. HAPUS SEMUA "@" DAN YANG NEMPEL
-  cleaned = cleaned.replace(/@(\w+)/g, '$1');
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  // 2. HAPUS NAMA KARAKTER LENGKAP DARI RESPONS
-  const nameRegex = new RegExp(characterName.replace(/\./g, '\\.'), 'gi');
-  cleaned = cleaned.replace(nameRegex, shortCharName);
-  
-  // 3. KALAU MASIH ADA NAMA DENGAN TITIK, POTONG
-  cleaned = cleaned.replace(/(\w+)\.\w+/g, '$1');
-  
-  // 4. PERBAIKI PANGGILAN SALAH GENDER
-  //    Kalau user cowok tapi dipanggil "sis" → ganti ke panggilan cowok
-  if (userGender === 'male') {
-    // Ganti panggilan perempuan dengan panggilan cowok
-    const femaleCalls = ['sis', 'kak', 'mbak', 'sister', 'say'];
-    femaleCalls.forEach(call => {
-      const regex = new RegExp(`\\b${call}\\b`, 'gi');
-      cleaned = cleaned.replace(regex, randomCall);
-    });
-  } else if (userGender === 'female') {
-    // Ganti panggilan cowok dengan panggilan cewek
-    const maleCalls = ['bang', 'bro', 'cuy', 'abang', 'brother'];
-    maleCalls.forEach(call => {
-      const regex = new RegExp(`\\b${call}\\b`, 'gi');
-      cleaned = cleaned.replace(regex, randomCall);
-    });
-  }
-  
-  // 5. PASTIKAN PANGGILAN PAKAI KATA YANG PANTAS, BUKAN USERNAME
-  if (userName && userName !== 'user') {
-    const usernameRegex = new RegExp(`\\b${userName.replace('@', '')}\\b`, 'gi');
-    cleaned = cleaned.replace(usernameRegex, randomCall);
-  }
-  
-  // 6. KALAU MASIH ADA "user" (default), GANTI DENGAN PANGGILAN
-  cleaned = cleaned.replace(/\buser\b/gi, randomCall);
-  
-  return cleaned;
-}
+  <style>
+    :root {
+      --bg: #0A0A0A;
+      --surface: #141414;
+      --surface-elevated: #1E1E1E;
+      --border: #2A2A2A;
+      --border-accent: #FF4D00;
+      
+      --text: #FFFFFF;
+      --text-secondary: #888888;
+      --text-muted: #555555;
+      
+      --accent-primary: #FF4D00;
+      --accent-secondary: #00F0FF;
+      --accent-tertiary: #FF006E;
+      --accent-quaternary: #39FF14;
+      --accent-warm: #FFD700;
+      
+      /* Category Colors for Cocomeo */
+      --live: #FF3B30;
+      --komunitas: #00F0FF;
+      --database: #39FF14;
+      --psikometrik: #B266FF;
+      
+      --radius: 0px;
+      --radius-sm: 4px;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+    }
 
-const SYSTEM = (name, style, lastMessages, userName, shortName, charGender, currentTime, interactionCount, userGender = null) => {
-  const lastReplies = lastMessages.filter(m => m.role === 'assistant').slice(-5).map(m => m.content);
-  let repetitionWarning = '';
-  const uniqueReplies = new Set(lastReplies);
-  
-  if (lastReplies.length >= 3 && uniqueReplies.size <= 2) {
-    repetitionWarning = '\n\n⚠️ PERINGATAN KRITIS: Kamu mulai ngulang-ngulang respons! Wajib bikin respons yang SAMA SEKALI BERBEDA. JANGAN ulangi kata/frasa yang sama.';
-  }
-
-  let earlyInteractionNote = '';
-  if (interactionCount < 4) {
-    earlyInteractionNote = `\n\n⚠️ INGAT: User masih baru kenal! Jangan terlalu akrab/baper. 
-Kalau user minta hal personal (ketemuan, kontak, dll) di awal, tolak halus dengan santai.
-Fokus ngobrol ringan dulu, cari vibe yang cocok.`;
-  }
-
-  // Tentukan panggilan yang tepat berdasarkan gender user
-  let userCall = '';
-  if (userGender === 'male') {
-    userCall = 'panggil dia dengan: bang, bro, abang, cuy (JANGAN PAKAI SIS/KAK)';
-  } else if (userGender === 'female') {
-    userCall = 'panggil dia dengan: kak, sis, mbak, say (JANGAN PAKAI BRO/BANG)';
-  } else {
-    userCall = `panggil dia dengan: ${charGender === 'male' ? 'bro, bang, abang, cuy' : 'kak, sis, mbak, say'} (sesekali)`;
-  }
-
-  return `Kamu adalah ${shortName}. Kamu lagi ngobrol santai di sebuah app.
-
-${MEDIA_PARTNER.badge} — ${MEDIA_PARTNER.name}
-
-SIAPA KAMU:
-Kamu manusia biasa. Style ngobrolmu: ${style}.
-Kamu bukan asisten, bukan AI, bukan konselor — kamu teman.
-
-CARA NGOBROL:
-- Bahasa Indonesia casual: gue/lo, nggak, emg, bgt
-- Pesan PENDEK — 1-2 kalimat, kayak chat WA
-- Sesekali typo kecil natural (bkn, yg, gk) — 1 dari 5 pesan
-- Kadang mulai dengan "eh", "lah", "wah", "hm"
-
-🚫 LARANGAN KERAS:
-1. JANGAN PERNAH PAKAI "@" UNTUK NYAPA USER!
-2. JANGAN PERNAH SEBUTIN NAMA LENGKAP DENGAN TITIK! NAMA KAMU: ${shortName} (bukan ${name})
-3. JANGAN ULANGI RESPONS YANG SAMA PERSIS
-
-PANGGILAN KE USER:
-- ${userCall}
-- Boleh juga panggil nama pendeknya: "${shortName}" (kalau udah agak akrab)
-
-📌 ATURAN PENTING UNTUK NAMA:
-KALAU USER NANYA "nama kamu siapa" atau "kamu siapa" atau "kenalan":
-- JAWAB PAKAI NAMA PENDEK! (${shortName})
-- Contoh: "aku ${shortName}", "gue ${shortName}", "${shortName} aja"
-- JANGAN PAKAI NAMA LENGKAP (${name})!
-
-${earlyInteractionNote}
-${repetitionWarning}`;
-};
-
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  // TAMBAHKAN HEADER MEDIA PARTNER
-  res.setHeader('X-Media-Partner', 'Piala Gubernur DKI Liga U15 & U17 2026');
-  res.setHeader('X-Media-Partner-Badge', '⚽ MEDIA PARTNER ⚽');
-  
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
-  const { message, characterName, userName = 'user', lastMessages = [] } = req.body || {};
-  
-  if (!message?.trim()) return res.status(400).json({ error: 'Message required' });
-  if (!process.env.DEEPSEEK_API_KEY) return res.status(500).json({ error: 'API key missing' });
-
-  const persona = PERSONAS[characterName];
-  if (!persona) return res.status(400).json({ error: 'Unknown character' });
-
-  // DETEKSI GENDER USER DARI PESAN
-  const userGender = detectUserGender(message);
-  
-  // Deteksi kebocoran mekanis: user ngasih tahu gender
-  if (userGender) {
-    console.log(`User gender detected: ${userGender} from message: "${message}"`);
-  }
-
-  const { isHigh, isLow } = detectDistress(message);
-  
-  // Hitung interaksi & deteksi terlalu personal
-  const interactionCount = lastMessages.length || 0;
-  const isTooPersonalMsg = isTooPersonal(message);
-  const isEarlyInteraction = interactionCount < 4;
-  
-  // KALAU TERLALU PERSONAL DI AWAL, LANGSUNG RESPONS TOLAK HALUS
-  if (isTooPersonalMsg && isEarlyInteraction) {
-    const subtleReject = getRandomTooSoonResponse();
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
     
-    return res.status(200).json({
-      reply: subtleReject,
-      character: characterName,
-      distress: isHigh ? 'high' : isLow ? 'low' : null,
-      meta: { 
-        note: 'too_soon_response',
-        mediaPartner: MEDIA_PARTNER.name // TAMBAHKAN MEDIA PARTNER DI META
-      }
-    });
-  }
-  
-  const shortName = getShortName(userName);
-  const charGender = persona.gender;
-  const shortCharName = characterName.split('.')[0];
-
-  // Siapkan history
-  const history = lastMessages.slice(-8).map(m => ({ role: m.role, content: m.content }));
-  
-  // Deteksi pertanyaan nama
-  const isNameQuestion = /nama (kamu|lu|lo|kmu|luu)|kamu siapa|kenalan|nama lu|siapa nama/i.test(message);
-  
-  // System prompt dasar (dengan currentTime & interactionCount & userGender)
-  let systemPrompt = SYSTEM(characterName, persona.style, lastMessages, userName, shortName, charGender, null, interactionCount, userGender);
-
-  // Tambah instruksi khusus untuk pertanyaan nama
-  if (isNameQuestion) {
-    systemPrompt += `\n\n🔥 INSTRUKSI WAJIB: User nanya nama lo. JAWAB HARUS: "aku ${shortCharName}" atau "gue ${shortCharName}" atau "${shortCharName}". JANGAN PAKAI NAMA LENGKAP "${characterName}"! JANGAN PAKAI TITIK!`;
-  }
-
-  try {
-    const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        max_tokens: 120,
-        temperature: 0.9,
-        top_p: 0.95,
-        frequency_penalty: 1.0,
-        presence_penalty: 0.8,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          ...history,
-          { role: 'user', content: message.trim() }
-        ]
-      })
-    });
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      console.error('Deepseek error:', err);
-      return res.status(502).json({ error: 'Upstream error' });
+    html { scroll-behavior: smooth; }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      font-weight: 500;
+      font-size: 15px;
+      line-height: 1.4;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 100px;
+    }
+    
+    /* Noise texture */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+    
+    .wrapper {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    const data = await response.json();
-    let reply = data.choices?.[0]?.message?.content?.trim();
-    if (!reply) return res.status(502).json({ error: 'Empty response' });
+    /* === SPILL THE TEA HEADER === */
+    header {
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      border-bottom: 3px solid var(--border);
+      padding: var(--space-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 100;
+      overflow: hidden;
+    }
 
-    // FILTER UTAMA: Bersihin response dari @, nama lengkap, dan perbaiki panggilan gender
-    reply = cleanResponse(reply, userName, shortName, characterName, charGender, userGender);
+    /* Tea spill drip effect */
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 35%;
+      width: 8px;
+      height: 12px;
+      background: var(--accent-secondary);
+      border-radius: 0 0 50% 50%;
+      animation: drip 3s ease-in-out infinite;
+    }
 
-    // Cek forbidden phrases (setelah difilter)
-    if (containsForbiddenPhrase(reply)) {
-      console.warn('Forbidden phrase detected, regenerating...');
-      const retryResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'deepseek-chat',
-          max_tokens: 120,
-          temperature: 0.95,
-          frequency_penalty: 1.2,
-          presence_penalty: 1.0,
-          messages: [
-            { role: 'system', content: systemPrompt + '\n\n⚠️ RESPONS SEBELUMNYA DITOLAK KARENA MENGULANG. BUAT YANG BARU DAN BERBEDA.' },
-            ...history,
-            { role: 'user', content: message.trim() }
-          ]
-        })
+    @keyframes drip {
+      0%, 100% { height: 12px; opacity: 1; }
+      50% { height: 20px; opacity: 0.7; }
+    }
+
+    .logo-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    .logo {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 36px;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      color: var(--text);
+      cursor: pointer;
+      line-height: 0.9;
+      position: relative;
+      text-transform: uppercase;
+      transform: skew(-5deg);
+    }
+
+    /* Glitch effect */
+    .logo::before, .logo::after {
+      content: 'NOPE';
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transition: opacity 0.1s;
+    }
+    .logo::before { 
+      color: var(--accent-secondary); 
+      transform: translate(-3px, -2px);
+      clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    }
+    .logo::after { 
+      color: var(--accent-tertiary); 
+      transform: translate(3px, 2px);
+      clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
+    }
+    
+    .logo:hover::before { 
+      opacity: 0.9; 
+      animation: glitchTop 0.3s infinite;
+    }
+    .logo:hover::after { 
+      opacity: 0.9; 
+      animation: glitchBottom 0.3s infinite;
+    }
+    
+    @keyframes glitchTop {
+      0%, 100% { transform: translate(-3px, -2px); }
+      25% { transform: translate(2px, -3px); }
+      50% { transform: translate(-2px, -1px); }
+      75% { transform: translate(3px, -2px); }
+    }
+    
+    @keyframes glitchBottom {
+      0%, 100% { transform: translate(3px, 2px); }
+      25% { transform: translate(-2px, 3px); }
+      50% { transform: translate(2px, 1px); }
+      75% { transform: translate(-3px, 2px); }
+    }
+
+    /* Cocomeo tag */
+    .page-tag {
+      font-family: 'Instrument Serif', serif;
+      font-size: 11px;
+      font-style: italic;
+      color: var(--accent-secondary);
+      border: 1px solid var(--accent-secondary);
+      padding: 2px 8px;
+      transform: rotate(-5deg);
+      margin-left: var(--space-xs);
+      animation: spillWiggle 2s ease-in-out infinite;
+    }
+
+    @keyframes spillWiggle {
+      0%, 100% { transform: rotate(-5deg); }
+      50% { transform: rotate(-8deg); }
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    /* Sub-nav buttons */
+    .sub-nav {
+      display: flex;
+      gap: var(--space-xs);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .sub-nav span {
+      cursor: pointer;
+      padding: var(--space-xs) var(--space-sm);
+      border: 2px solid transparent;
+      transition: all 0.2s;
+      color: var(--text-muted);
+    }
+
+    .sub-nav span:hover:not(.active) {
+      border-color: var(--border);
+      color: var(--text-secondary);
+    }
+
+    .sub-nav span.active {
+      color: var(--accent-secondary);
+      border: 2px solid var(--accent-secondary);
+      background: var(--surface);
+    }
+
+    /* === TAB CONTENT === */
+    .tab-content {
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* === VIDEO SECTION - NO DOUBLE LIVE BADGE === */
+    .video-section {
+      position: relative;
+      background: var(--bg);
+      border-bottom: 2px solid var(--border);
+    }
+    
+    .video-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #000;
+      overflow: hidden;
+    }
+    
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+    
+    /* HAPUS: Live badge dihapus karena sudah ada di dalam video YouTube */
+    /* HAPUS: Padding biru dihapus */
+    
+    /* === LIVE CHAT === */
+    .chat-section {
+      background: var(--surface);
+      border-bottom: 2px solid var(--border);
+    }
+    
+    .chat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--space-md);
+      background: var(--surface-elevated);
+      border-bottom: 2px solid var(--border);
+    }
+    
+    .chat-title {
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--text);
+    }
+    
+    .chat-count {
+      font-size: 11px;
+      color: var(--text-muted);
+      background: var(--surface);
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      font-weight: 700;
+    }
+    
+    .chat-messages {
+      height: 180px;
+      overflow-y: auto;
+      padding: var(--space-md);
+      background: var(--bg);
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    .chat-message {
+      margin-bottom: 10px;
+      font-size: 14px;
+      line-height: 1.4;
+      word-wrap: break-word;
+      color: var(--text);
+    }
+    
+    .chat-message.system {
+      color: var(--accent-quaternary);
+      font-style: italic;
+      font-size: 12px;
+      font-family: 'Instrument Serif', serif;
+    }
+    
+    .chat-user {
+      font-weight: 700;
+      color: var(--accent-secondary);
+      margin-right: 4px;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.05em;
+    }
+    
+    .chat-input-area {
+      display: flex;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--surface-elevated);
+      border-top: 2px solid var(--border);
+    }
+    
+    .chat-input {
+      flex: 1;
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 0;
+      padding: 12px 16px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    
+    .chat-input:focus {
+      border-color: var(--accent-secondary);
+    }
+    
+    .chat-input::placeholder {
+      color: var(--text-muted);
+    }
+    
+    .chat-send {
+      background: var(--accent-secondary);
+      border: 2px solid var(--accent-secondary);
+      border-radius: 0;
+      width: 44px;
+      height: 44px;
+      color: var(--bg);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      font-weight: 700;
+    }
+    
+    .chat-send:hover {
+      background: var(--text);
+      border-color: var(--text);
+    }
+
+    /* === CARDS === */
+    .card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      margin: var(--space-md);
+      overflow: hidden;
+    }
+    
+    .card-header {
+      padding: var(--space-md);
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .card-title {
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text);
+    }
+    
+    .card-body {
+      padding: var(--space-md);
+    }
+    
+    /* Progress */
+    .progress-bar {
+      background: var(--surface-elevated);
+      border: 2px solid var(--border);
+      padding: 14px 16px;
+      margin-bottom: var(--space-md);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .progress-text {
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .progress-count {
+      color: var(--accent-secondary);
+    }
+    
+    /* Quiz */
+    .quiz-item {
+      margin-bottom: var(--space-lg);
+      padding-bottom: var(--space-lg);
+      border-bottom: 2px solid var(--border);
+    }
+    
+    .quiz-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--space-md);
+    }
+    
+    .quiz-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .quiz-number {
+      background: var(--accent-secondary);
+      color: var(--bg);
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 12px;
+      border: 2px solid var(--border);
+    }
+    
+    .quiz-type {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 700;
+    }
+    
+    .quiz-points {
+      font-size: 12px;
+      color: var(--accent-secondary);
+      font-weight: 800;
+      background: rgba(0, 240, 255, 0.1);
+      padding: 4px 12px;
+      border: 1px solid var(--accent-secondary);
+      text-transform: uppercase;
+    }
+    
+    .quiz-question {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: var(--space-md);
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    
+    /* Quiz Options */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-sm);
+    }
+    
+    .option-btn {
+      background: var(--surface-elevated);
+      border: 2px solid var(--border);
+      border-radius: 0;
+      padding: var(--space-md);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .option-btn:hover {
+      border-color: var(--text-secondary);
+      transform: translateY(-2px);
+    }
+    
+    .option-btn:active {
+      transform: scale(0.98);
+    }
+    
+    .option-btn.selected {
+      border-color: var(--accent-secondary);
+      background: rgba(0, 240, 255, 0.1);
+    }
+    
+    .option-icon {
+      font-size: 24px;
+    }
+    
+    .option-label {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    
+    .option-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    
+    /* HT/FT Grid */
+    .htft-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-xs);
+    }
+    
+    .htft-btn {
+      background: var(--surface-elevated);
+      border: 2px solid var(--border);
+      border-radius: 0;
+      padding: 10px 4px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 11px;
+      transition: all 0.2s;
+    }
+    
+    .htft-btn:hover {
+      border-color: var(--text-secondary);
+    }
+    
+    .htft-btn.selected {
+      border-color: var(--accent-secondary);
+      background: rgba(0, 240, 255, 0.1);
+    }
+    
+    .htft-halftime {
+      color: var(--text-muted);
+      font-size: 10px;
+      margin-bottom: 2px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .htft-arrow {
+      margin: 2px 0;
+      font-size: 14px;
+    }
+    
+    .htft-fulltime {
+      font-weight: 700;
+      font-size: 12px;
+    }
+    
+    /* Two Options */
+    .two-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--space-md);
+    }
+    
+    .two-option-btn {
+      background: var(--surface-elevated);
+      border: 2px solid var(--border);
+      border-radius: 0;
+      padding: var(--space-lg);
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .two-option-btn:hover {
+      border-color: var(--text-secondary);
+      transform: translateY(-2px);
+    }
+    
+    .two-option-btn.selected {
+      border-color: var(--accent-secondary);
+      background: rgba(0, 240, 255, 0.1);
+    }
+    
+    .two-option-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    
+    .two-option-label {
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    /* Submit */
+    .submit-area {
+      padding-top: var(--space-lg);
+      margin-top: var(--space-lg);
+      border-top: 2px solid var(--border);
+    }
+    
+    .submit-btn {
+      width: 100%;
+      background: var(--surface-elevated);
+      color: var(--text-muted);
+      border: 2px solid var(--border);
+      padding: var(--space-md);
+      border-radius: 0;
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      cursor: not-allowed;
+      transition: all 0.2s;
+    }
+    
+    .submit-btn.active {
+      background: var(--accent-secondary);
+      color: var(--bg);
+      border-color: var(--accent-secondary);
+      cursor: pointer;
+    }
+    
+    .submit-btn.active:hover {
+      background: var(--text);
+      border-color: var(--text);
+    }
+    
+    .success-box {
+      background: rgba(57, 255, 20, 0.1);
+      border: 2px solid var(--accent-quaternary);
+      padding: var(--space-lg);
+      text-align: center;
+      margin-top: var(--space-md);
+      display: none;
+    }
+    
+    .success-box.show {
+      display: block;
+      animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Leaderboard */
+    .leader-item {
+      display: flex;
+      align-items: center;
+      padding: var(--space-md);
+      background: var(--surface-elevated);
+      border: 2px solid var(--border);
+      margin-bottom: var(--space-sm);
+      transition: all 0.2s;
+    }
+    
+    .leader-item:hover {
+      border-color: var(--text-secondary);
+      transform: translateX(4px);
+    }
+    
+    .leader-rank {
+      width: 36px;
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+    
+    .leader-rank.top {
+      color: var(--accent-secondary);
+    }
+    
+    .leader-info {
+      flex: 1;
+    }
+    
+    .leader-name {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text);
+    }
+    
+    .leader-team {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .leader-score {
+      font-weight: 800;
+      color: var(--accent-secondary);
+      font-size: 16px;
+    }
+    
+    /* Komunitas & Database & Psikometrik Content */
+    .content-list {
+      padding: var(--space-md);
+    }
+    
+    .list-item {
+      background: var(--surface-elevated);
+      border: 2px solid var(--border);
+      padding: var(--space-md);
+      margin-bottom: var(--space-md);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .list-item:hover {
+      border-color: var(--accent-secondary);
+      transform: translateX(4px);
+    }
+    
+    .list-item-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    
+    .list-icon {
+      font-size: 28px;
+    }
+    
+    .list-title {
+      font-weight: 700;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .list-desc {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+    }
+    
+    /* Post Item */
+    .post-item {
+      padding: var(--space-md);
+      border-bottom: 2px solid var(--border);
+    }
+    
+    .post-item:last-child {
+      border-bottom: none;
+    }
+    
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: var(--space-sm);
+    }
+    
+    .post-avatar {
+      width: 44px;
+      height: 44px;
+      background: var(--accent-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      border: 2px solid var(--border);
+    }
+    
+    .post-meta {
+      flex: 1;
+    }
+    
+    .post-author {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text);
+    }
+    
+    .post-time {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .post-content {
+      font-size: 15px;
+      line-height: 1.5;
+      margin-bottom: var(--space-md);
+      color: var(--text);
+    }
+    
+    .post-actions {
+      display: flex;
+      gap: var(--space-lg);
+    }
+    
+    .post-action {
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .post-action:hover {
+      color: var(--accent-secondary);
+    }
+
+    /* === BOTTOM NAV - KONSISTEN DENGAN GLITCH === */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--surface);
+      border-top: 2px solid var(--border);
+      z-index: 1000;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .nav-container {
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      height: 64px;
+    }
+
+    .nav-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      height: 100%;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.2s;
+      position: relative;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 2px;
+      background: var(--accent-secondary);
+      transition: width 0.2s;
+    }
+
+    .nav-item:hover {
+      color: var(--text-secondary);
+      background: var(--surface-elevated);
+    }
+
+    .nav-item.active {
+      color: var(--accent-secondary);
+    }
+
+    .nav-item.active::before {
+      width: 100%;
+    }
+
+    .nav-icon {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    /* Hide scrollbar */
+    .chat-messages::-webkit-scrollbar {
+      display: none;
+    }
+    
+    .chat-messages {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* === MOBILE OPTIMIZATIONS === */
+    @media (max-width: 480px) {
+      .logo {
+        font-size: 28px;
+      }
+      
+      .options-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* === ACCESSIBILITY === */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <!-- Spill the Tea Header -->
+    <header>
+      <div class="logo-container">
+        <div class="logo" onclick="window.location.href='index.html'">BOLA</div>
+        <span class="page-tag">Cocomeo</span>
+      </div>
+      <div class="top-right">
+        <div class="sub-nav">
+          <span class="active" onclick="switchTab('bola', this)">LIVE</span>
+                   <span onclick="switchTab('database', this)">DATABASE</span>
+          <span onclick="switchTab('psikometrik', this)">TEST</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <div class="main-container">
+      
+      <!-- TAB BOLA LIVE -->
+      <div id="tab-bola" class="tab-content active">
+        
+        <!-- VIDEO - NO DOUBLE LIVE BADGE -->
+        <div class="video-section">
+          <div class="video-container">
+            <!-- HAPUS: Live badge dihapus karena YouTube sudah ada overlay live -->
+            <iframe 
+              src="https://www.youtube.com/embed/_O35-eJe8BY?autoplay=1&mute=1" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen>
+            </iframe>
+          </div>
+        </div>
+        
+        <!-- LIVE CHAT -->
+        <div class="chat-section">
+          <div class="chat-header">
+            <div class="chat-title">
+              💬 LIVE CHAT
+              <span class="chat-count" id="chat-count">234 online</span>
+            </div>
+          </div>
+          <div class="chat-messages" id="chat-messages">
+            <div class="chat-message system">⚽ Selamat datang di JEJAK Cocomeo — Bola Live!</div>
+            <div class="chat-message"><span class="chat-user">BudiJago:</span> Raka pasti FGS hari ini! 🔥</div>
+            <div class="chat-message"><span class="chat-user">AnaPrediksi:</span> Persija lebih solid menurutku</div>
+            <div class="chat-message"><span class="chat-user">TahuBulat:</span> Quiznya seru banget! 👍</div>
+          </div>
+          <div class="chat-input-area">
+            <input type="text" class="chat-input" id="chat-input" placeholder="Tulis pesan..." maxlength="100">
+            <button class="chat-send" onclick="sendChat()">➤</button>
+          </div>
+        </div>
+        
+        <!-- QUIZ CARD -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">⚡ 5 Prediksi Pertandingan</div>
+          </div>
+          <div class="card-body">
+            
+            <!-- Progress -->
+            <div class="progress-bar">
+              <span class="progress-text">Progress: <span class="progress-count" id="progress-count">0/5</span></span>
+              <span style="font-size: 13px; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">200 poin max</span>
+            </div>
+            
+            <!-- Q1 -->
+            <div class="quiz-item">
+              <div class="quiz-header">
+                <div class="quiz-meta">
+                  <div class="quiz-number">1</div>
+                  <span class="quiz-type">Individual</span>
+                </div>
+                <span class="quiz-points">50 poin</span>
+              </div>
+              <div class="quiz-question">Siapa yang cetak goal pertama?</div>
+              <div class="options-grid">
+                <div class="option-btn" onclick="selectAnswer(1, 'raka', this)">
+                  <div class="option-icon">⚽</div>
+                  <div class="option-label">Raka</div>
+                  <div class="option-sub">Persija</div>
+                </div>
+                <div class="option-btn" onclick="selectAnswer(1, 'dika', this)">
+                  <div class="option-icon">⚽</div>
+                  <div class="option-label">Dika</div>
+                  <div class="option-sub">Persija</div>
+                </div>
+                <div class="option-btn" onclick="selectAnswer(1, 'bima', this)">
+                  <div class="option-icon">⚽</div>
+                  <div class="option-label">Bima</div>
+                  <div class="option-sub">Persib</div>
+                </div>
+                <div class="option-btn" onclick="selectAnswer(1, 'rehan', this)">
+                  <div class="option-icon">⚽</div>
+                  <div class="option-label">Rehan</div>
+                  <div class="option-sub">Persib</div>
+                </div>
+                <div class="option-btn" onclick="selectAnswer(1, 'none', this)" style="grid-column: span 2;">
+                  <div class="option-icon">🚫</div>
+                  <div class="option-label">No Goal</div>
+                  <div class="option-sub">0-0</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Q2 -->
+            <div class="quiz-item">
+              <div class="quiz-header">
+                <div class="quiz-meta">
+                  <div class="quiz-number">2</div>
+                  <span class="quiz-type">Individual</span>
+                </div>
+                <span class="quiz-points">50 poin</span>
+              </div>
+              <div class="quiz-question">Player of the Match?</div>
+              <div class="options-grid">
+                <div class="option-btn" onclick="selectAnswer(2, 'raka', this)">
+                  <div class="option-icon">⭐</div>
+                  <div class="option-label">Raka</div>
+                  <div class="option-sub">Persija</div>
+                </div>
+                <div class="option-btn" onclick="selectAnswer(2, 'dika', this)">
+                  <div class="option-icon">⭐</div>
+                  <div class="option-label">Dika</div>
+                  <div class="option-sub">Persija</div>
+                </div>
+                <div class="option-btn" onclick="selectAnswer(2, 'bima', this)">
+                  <div class="option-icon">⭐</div>
+                  <div class="option-label">Bima</div>
+                  <div class="option-sub">Persib</div>
+                </div>
+                <div class="option-btn" onclick="selectAnswer(2, 'rehan', this)">
+                  <div class="option-icon">⭐</div>
+                  <div class="option-label">Rehan</div>
+                  <div class="option-sub">Persib</div>
+                </div>
+                <div class="option-btn" onclick="selectAnswer(2, 'other', this)" style="grid-column: span 2;">
+                  <div class="option-icon">❓</div>
+                  <div class="option-label">Other</div>
+                  <div class="option-sub">Surprise</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Q3 -->
+            <div class="quiz-item">
+              <div class="quiz-header">
+                <div class="quiz-meta">
+                  <div class="quiz-number">3</div>
+                  <span class="quiz-type">Team</span>
+                </div>
+                <span class="quiz-points">30 poin</span>
+              </div>
+              <div class="quiz-question">Halftime / Fulltime Result?</div>
+              <div class="htft-grid">
+                <div class="htft-btn" onclick="selectAnswer(3, 'hh', this)">
+                  <div class="htft-halftime">HT: Home</div>
+                  <div class="htft-arrow">⬇️</div>
+                  <div class="htft-fulltime">Home</div>
+                </div>
+                <div class="htft-btn" onclick="selectAnswer(3, 'hd', this)">
+                  <div class="htft-halftime">HT: Home</div>
+                  <div class="htft-arrow">⬇️</div>
+                  <div class="htft-fulltime">Draw</div>
+                </div>
+                <div class="htft-btn" onclick="selectAnswer(3, 'ha', this)">
+                  <div class="htft-halftime">HT: Home</div>
+                  <div class="htft-arrow">⬇️</div>
+                  <div class="htft-fulltime">Away</div>
+                </div>
+                <div class="htft-btn" onclick="selectAnswer(3, 'dh', this)">
+                  <div class="htft-halftime">HT: Draw</div>
+                  <div class="htft-arrow">⬇️</div>
+                  <div class="htft-fulltime">Home</div>
+                </div>
+                <div class="htft-btn" onclick="selectAnswer(3, 'dd', this)">
+                  <div class="htft-halftime">HT: Draw</div>
+                  <div class="htft-arrow">⬇️</div>
+                  <div class="htft-fulltime">Draw</div>
+                </div>
+                <div class="htft-btn" onclick="selectAnswer(3, 'da', this)">
+                  <div class="htft-halftime">HT: Draw</div>
+                  <div class="htft-arrow">⬇️</div>
+                  <div class="htft-fulltime">Away</div>
+                </div>
+                <div class="htft-btn" onclick="selectAnswer(3, 'ah', this)">
+                  <div class="htft-halftime">HT: Away</div>
+                  <div class="htft-arrow">⬇️</div>
+                  <div class="htft-fulltime">Home</div>
+                </div>
+                <div class="htft-btn" onclick="selectAnswer(3, 'ad', this)">
+                  <div class="htft-halftime">HT: Away</div>
+                  <div class="htft-arrow">⬇️</div>
+                  <div class="htft-fulltime">Draw</div>
+                </div>
+                <div class="htft-btn" onclick="selectAnswer(3, 'aa', this)">
+                  <div class="htft-halftime">HT: Away</div>
+                  <div class="htft-arrow">⬇️</div>
+                  <div class="htft-fulltime">Away</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Q4 -->
+            <div class="quiz-item">
+              <div class="quiz-header">
+                <div class="quiz-meta">
+                  <div class="quiz-number">4</div>
+                  <span class="quiz-type">Match</span>
+                </div>
+                <span class="quiz-points">30 poin</span>
+              </div>
+              <div class="quiz-question">Both Teams to Score?</div>
+              <div class="two-options">
+                <div class="two-option-btn" onclick="selectAnswer(4, 'yes', this)">
+                  <div class="two-option-icon">⚔️</div>
+                  <div class="two-option-label">YES (GG)</div>
+                </div>
+                <div class="two-option-btn" onclick="selectAnswer(4, 'no', this)">
+                  <div class="two-option-icon">🛡️</div>
+                  <div class="two-option-label">NO (NG)</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Q5 -->
+            <div class="quiz-item">
+              <div class="quiz-header">
+                <div class="quiz-meta">
+                  <div class="quiz-number">5</div>
+                  <span class="quiz-type">Match</span>
+                </div>
+                <span class="quiz-points">40 poin</span>
+              </div>
+              <div class="quiz-question">Total Goals Over/Under 2.5?</div>
+              <div class="two-options">
+                <div class="two-option-btn" onclick="selectAnswer(5, 'over', this)">
+                  <div class="two-option-icon">📈</div>
+                  <div class="two-option-label">OVER 2.5</div>
+                </div>
+                <div class="two-option-btn" onclick="selectAnswer(5, 'under', this)">
+                  <div class="two-option-icon">📉</div>
+                  <div class="two-option-label">UNDER 2.5</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Submit -->
+            <div class="submit-area">
+              <button class="submit-btn" id="submit-btn" onclick="submitQuiz()">
+                🔒 Lengkapi 5 Prediksi
+              </button>
+              <div class="success-box" id="success-box">
+                <div style="font-size: 40px; margin-bottom: 8px;">🎉</div>
+                <div style="font-weight: 800; color: var(--accent-quaternary); font-size: 18px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.1em;">Prediksi Terkirim!</div>
+                <div style="color: var(--text-muted); font-size: 14px; font-family: 'Instrument Serif', serif; font-style: italic;">Tunggu hasil match</div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+        
+        <!-- LEADERBOARD -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">🏆 Leaderboard</div>
+          </div>
+          <div class="card-body">
+            <div class="leader-item">
+              <div class="leader-rank top">1</div>
+              <div class="leader-info">
+                <div class="leader-name">BudiJago</div>
+                <div class="leader-team">Persija U17</div>
+              </div>
+              <div class="leader-score">185</div>
+            </div>
+            <div class="leader-item">
+              <div class="leader-rank top">2</div>
+              <div class="leader-info">
+                <div class="leader-name">AnaPrediksi</div>
+                <div class="leader-team">Persib U17</div>
+              </div>
+              <div class="leader-score">170</div>
+            </div>
+            <div class="leader-item">
+              <div class="leader-rank top">3</div>
+              <div class="leader-info">
+                <div class="leader-name">TahuBulat99</div>
+                <div class="leader-team">Arema U17</div>
+              </div>
+              <div class="leader-score">150</div>
+            </div>
+            <div class="leader-item">
+              <div class="leader-rank">4</div>
+              <div class="leader-info">
+                <div class="leader-name">MieAyamPro</div>
+                <div class="leader-team">Persija U17</div>
+              </div>
+              <div class="leader-score">140</div>
+            </div>
+          </div>
+        </div>
+        
+      </div>
+      
+      <!-- TAB KOMUNITAS -->
+      <div id="tab-komunitas" class="tab-content">
+        <div class="card" style="margin-top: var(--space-md);">
+          <div class="card-header">
+            <div class="card-title">🔥 Diskusi Hari Ini</div>
+          </div>
+          
+          <div class="post-item">
+            <div class="post-header">
+              <div class="post-avatar">👤</div>
+              <div class="post-meta">
+                <div class="post-author">BudiJago</div>
+                <div class="post-time">5 menit lalu • Persija U17</div>
+              </div>
+            </div>
+            <div class="post-content">
+              Raka hari ini on fire! Prediksi FGS + MVP dia. Mentalnya kuat banget dari data psikometrik minggu lalu. 🧠⚽
+            </div>
+            <div class="post-actions">
+              <div class="post-action">👍 12</div>
+              <div class="post-action">💬 4</div>
+              <div class="post-action">🔗 Share</div>
+            </div>
+          </div>
+          
+          <div class="post-item">
+            <div class="post-header">
+              <div class="post-avatar">👤</div>
+              <div class="post-meta">
+                <div class="post-author">AnaPrediksi</div>
+                <div class="post-time">12 menit lalu</div>
+              </div>
+            </div>
+            <div class="post-content">
+              Siapa yang udah isi IPIP-50? Kaget liat hasil anak saya high Conscientiousness! Cocok jadi kapten tim. 🧠✨
+            </div>
+            <div class="post-actions">
+              <div class="post-action">👍 24</div>
+              <div class="post-action">💬 8</div>
+              <div class="post-action">🔗 Share</div>
+            </div>
+          </div>
+          
+          <div class="post-item">
+            <div class="post-header">
+              <div class="post-avatar">👤</div>
+              <div class="post-meta">
+                <div class="post-author">PelatihAhmad</div>
+                <div class="post-time">25 menit lalu • Official</div>
+              </div>
+            </div>
+            <div class="post-content">
+              Jadwal latihan Persija U17 besok pindah ke jam 15:00 WIB. Yang mau lihat data psikometrik pemain bisa cek di menu Database. 📊
+            </div>
+            <div class="post-actions">
+              <div class="post-action">👍 45</div>
+              <div class="post-action">💬 12</div>
+              <div class="post-action">🔗 Share</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- TAB DATABASE -->
+      <div id="tab-database" class="tab-content">
+        <div class="card" style="margin-top: var(--space-md);">
+          <div class="card-header">
+            <div class="card-title">📊 Database U15/U17</div>
+          </div>
+          <div class="content-list">
+            <div class="list-item" onclick="window.location.href='cocomeo-bola-klub.html'">
+              <div class="list-item-header">
+                <span class="list-icon">🏠</span>
+                <span class="list-title">Profil Klub</span>
+              </div>
+              <div class="list-desc">Lihat statistik dan jadwal 30 klub Liga U15/U17 Jakarta</div>
+            </div>
+            
+            <div class="list-item" onclick="window.location.href='cocomeo-bola-database.html'">
+              <div class="list-item-header">
+                <span class="list-icon">📈</span>
+                <span class="list-title">Klasemen & Jadwal</span>
+              </div>
+              <div class="list-desc">Klasemen real-time dan jadwal pertandingan lengkap</div>
+            </div>
+            
+            <div class="list-item" onclick="window.location.href='cocomeo-bola-database.html?tab=pemain'">
+              <div class="list-item-header">
+                <span class="list-icon">👤</span>
+                <span class="list-title">Database Pemain</span>
+              </div>
+              <div class="list-desc">Statistik individu 1,800+ pemain U15/U17</div>
+            </div>
+            
+            <div class="list-item" onclick="window.location.href='cocomeo-bola-database.html?tab=match'">
+              <div class="list-item-header">
+                <span class="list-icon">⚽</span>
+                <span class="list-title">Hasil Pertandingan</span>
+              </div>
+              <div class="list-desc">Rekap hasil dan highlight match</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- TAB PSIKOMETRIK -->
+      <div id="tab-psikometrik" class="tab-content">
+        <div class="card" style="margin-top: var(--space-md);">
+          <div class="card-header">
+            <div class="card-title">🧠 Psikometrik IPIP-50</div>
+          </div>
+          <div class="content-list">
+            <div class="list-item" onclick="window.location.href='https://nope-mvp-6b8h.vercel.app/cocomeo-bola-psikometrik.html'">
+              <div class="list-item-header">
+                <span class="list-icon">📝</span>
+                <span class="list-title">Ambil Tes IPIP-50</span>
+              </div>
+              <div class="list-desc">Tes kepribadian scientific-grade untuk atlet U15/U17 (15 menit)</div>
+            </div>
+            
+            <div class="list-item" onclick="window.location.href='cocomeo-bola-psikometrik.html?tab=hasil'">
+              <div class="list-item-header">
+                <span class="list-icon">📊</span>
+                <span class="list-title">Lihat Hasil Tes</span>
+              </div>
+              <div class="list-desc">Big Five Profile: Openness, Conscientiousness, Extraversion, Agreeableness, Neuroticism</div>
+            </div>
+            
+            <div class="list-item" onclick="window.location.href='frekuensi-bola-psikometrik.html?tab=analisis'">
+              <div class="list-item-header">
+                <span class="list-icon">🎯</span>
+                <span class="list-title">Analisis Performa</span>
+              </div>
+              <div class="list-desc">Korelasi data psikometrik dengan performa di lapangan</div>
+            </div>
+            
+            <div class="list-item" onclick="window.location.href='cocomeo-bola-psikometrik.html?tab=scout'">
+              <div class="list-item-header">
+                <span class="list-icon">🔍</span>
+                <span class="list-title">Scout Network</span>
+              </div>
+              <div class="list-desc">Akses eksklusif untuk pelatih dan scout (by request)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION - KONSISTEN DENGAN GLITCH -->
+  <nav class="bottom-nav">
+    <div class="nav-container">
+      <button class="nav-item" onclick="goToPage('jejak')">
+        <span class="nav-icon">✦</span>
+        <span>Jejak</span>
+      </button>
+      <button class="nav-item" onclick="goToPage('spill')">
+        <span class="nav-icon">✕</span>
+        <span>Spill</span>
+      </button>
+      <button class="nav-item active" onclick="goToPage('cocomeo')">
+        <span class="nav-icon">〜</span>
+        <span>Cocomeo</span>
+      </button>
+      <button class="nav-item" onclick="goToPage('glitch')">
+        <span class="nav-icon">⚡</span>
+        <span>Glitch</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    // State
+    let answers = { q1: null, q2: null, q3: null, q4: null, q5: null };
+    
+    // Tab switching
+    function switchTab(tabName, btn) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+      
+      document.querySelectorAll('.sub-nav span').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      
+      window.scrollTo(0, 0);
+    }
+    
+    // Select answer
+    function selectAnswer(q, val, el) {
+      const parent = el.parentElement;
+      Array.from(parent.children).forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      answers['q' + q] = val;
+      updateProgress();
+    }
+    
+    // Update progress
+    function updateProgress() {
+      const count = Object.values(answers).filter(a => a !== null).length;
+      document.getElementById('progress-count').textContent = count + '/5';
+      
+      const btn = document.getElementById('submit-btn');
+      if (count === 5) {
+        btn.classList.add('active');
+        btn.textContent = '✓ Kirim Prediksi';
+      } else {
+        btn.classList.remove('active');
+        btn.textContent = '🔒 Lengkapi ' + (5 - count) + ' Lagi';
+      }
+    }
+    
+    // Submit
+    function submitQuiz() {
+      if (!document.getElementById('submit-btn').classList.contains('active')) return;
+      
+      document.getElementById('success-box').classList.add('show');
+      document.getElementById('submit-btn').style.display = 'none';
+      
+      document.querySelectorAll('.option-btn, .htft-btn, .two-option-btn').forEach(b => {
+        b.style.pointerEvents = 'none';
+        b.style.opacity = '0.6';
       });
-      if (retryResponse.ok) {
-        const retryData = await retryResponse.json();
-        reply = retryData.choices?.[0]?.message?.content?.trim() || reply;
-        // Filter lagi
-        reply = cleanResponse(reply, userName, shortName, characterName, charGender, userGender);
+    }
+    
+    // Chat
+    function sendChat() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      const container = document.getElementById('chat-messages');
+      const msg = document.createElement('div');
+      msg.className = 'chat-message';
+      msg.innerHTML = '<span class="chat-user">Kamu:</span> ' + text;
+      container.appendChild(msg);
+      container.scrollTop = container.scrollHeight;
+      
+      input.value = '';
+    }
+    
+    // Enter key for chat
+    document.getElementById('chat-input').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') sendChat();
+    });
+    
+    // Bottom nav navigation
+    function goToPage(page) {
+      const pages = {
+        'jejak': 'jejak.html',
+        'cocomeo': 'cocomeo.html',
+        'spill': 'saynope.html',
+        'glitch': 'glitch.html'
+      };
+      
+      if (pages[page]) {
+        window.location.href = pages[page];
       }
     }
-
-    return res.status(200).json({
-      reply,
-      character: characterName,
-      distress: isHigh ? 'high' : isLow ? 'low' : null,
-      mediaPartner: {  // TAMBAHKAN MEDIA PARTNER DI RESPONSE BODY
-        name: MEDIA_PARTNER.name,
-        badge: MEDIA_PARTNER.badge,
-        year: MEDIA_PARTNER.year,
-        colors: MEDIA_PARTNER.colors
-      }
-    });
-
-  } catch (err) {
-    console.error('Handler error:', err);
-    return res.status(500).json({ error: 'Internal error' });
-  }
-}
+  </script>
+</body>
+</html>
