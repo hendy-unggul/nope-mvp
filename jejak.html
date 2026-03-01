@@ -561,13 +561,23 @@ function renderEntries() {
     var dummyLabel = e.isDummy ? '<span class="fifo-i">Contoh</span>' : '';
 
     var reactionsHtml = '';
-    var reactions = { skull: '💀', cry: '😭', fire: '🔥', upside: '🙃' };
-    for (var key in reactions) {
+    var reactionDefs = { skull: '💀', cry: '😭', fire: '🔥', upside: '🙃' };
+    for (var key in reactionDefs) {
       var count = e.reactions && e.reactions[key] ? e.reactions[key] : 0;
-      reactionsHtml += '<button class="reaction-btn" disabled><span class="remoji">' + reactions[key] + '</span><span class="rcount">' + count + '</span></button>';
+      if (e.isDummy) {
+        // Dummy: disabled, hanya tampil counter
+        reactionsHtml += '<button class="reaction-btn" disabled><span class="remoji">' + reactionDefs[key] + '</span><span class="rcount">' + count + '</span></button>';
+      } else {
+        // Real entry: aktif, bisa diklik, simpan ke DB
+        var isActive = e.userReacted === key ? ' act' : '';
+        reactionsHtml += '<button class="reaction-btn' + isActive + '" data-entry-id="' + e.id + '" data-key="' + key + '" id="jr-' + e.id + '-' + key + '">' +
+          '<span class="remoji">' + reactionDefs[key] + '</span>' +
+          '<span class="rcount" id="jrc-' + e.id + '-' + key + '">' + count + '</span>' +
+        '</button>';
+      }
     }
 
-    html += '<article class="entry' + dummyClass + '">' +
+    html += '<article class="entry' + dummyClass + '" data-id="' + e.id + '">' +
       '<div class="ehdr">' +
         '<div class="emeta">' +
           '<span class="etime">' + ta + '</span>' +
@@ -580,6 +590,8 @@ function renderEntries() {
   }
 
   con.innerHTML = html;
+  // Bind reaction buttons setelah render
+  bindReactionButtons();
 }
 
 function renderTray() {
@@ -884,6 +896,84 @@ async function saveEntry() {
   } finally {
     hideProc();
   }
+}
+
+// ============================================
+// REACTIONS — update counter di DB, tampil di jejak
+// ============================================
+async function reactEntry(entryId, key) {
+  if (!S.userId || !window.supabaseClient) return;
+
+  // Cari entry di state
+  var entry = null;
+  for (var i = 0; i < S.entries.length; i++) {
+    if (S.entries[i].id === entryId) { entry = S.entries[i]; break; }
+  }
+  if (!entry) return;
+
+  var wasActive = entry.userReacted === key;
+
+  // Update lokal dulu (optimistic UI)
+  if (wasActive) {
+    entry.reactions[key] = Math.max(0, (entry.reactions[key] || 0) - 1);
+    entry.userReacted = null;
+  } else {
+    // Kurangi reaksi lama jika ada
+    if (entry.userReacted) {
+      entry.reactions[entry.userReacted] = Math.max(0, (entry.reactions[entry.userReacted] || 0) - 1);
+      var oldKey = entry.userReacted;
+      var oldBtn = document.getElementById('jr-' + entryId + '-' + oldKey);
+      var oldCount = document.getElementById('jrc-' + entryId + '-' + oldKey);
+      if (oldBtn) oldBtn.classList.remove('act');
+      if (oldCount) oldCount.textContent = entry.reactions[oldKey];
+    }
+    entry.reactions[key] = (entry.reactions[key] || 0) + 1;
+    entry.userReacted = key;
+  }
+
+  // Update UI counter
+  var btn = document.getElementById('jr-' + entryId + '-' + key);
+  var countEl = document.getElementById('jrc-' + entryId + '-' + key);
+  if (btn) btn.classList.toggle('act', !wasActive);
+  if (countEl) countEl.textContent = entry.reactions[key];
+
+  // Simpan ke DB — update kolom reactions
+  try {
+    var updateResult = await window.supabaseClient
+      .from('entries')
+      .update({ reactions: entry.reactions })
+      .eq('id', entryId);
+
+    if (updateResult.error) {
+      console.error('[REACT] DB update error:', updateResult.error.message);
+      // Rollback UI kalau gagal
+      if (wasActive) {
+        entry.reactions[key]++;
+        entry.userReacted = key;
+      } else {
+        entry.reactions[key]--;
+        entry.userReacted = null;
+      }
+      if (btn) btn.classList.toggle('act', wasActive);
+      if (countEl) countEl.textContent = entry.reactions[key];
+      toast('Gagal simpan reaksi');
+    }
+  } catch (err) {
+    console.error('[REACT] Exception:', err.message);
+  }
+}
+
+// Event delegation untuk reaction buttons di entries list
+function bindReactionButtons() {
+  var econ = $('econ');
+  if (!econ) return;
+  econ.addEventListener('click', function(e) {
+    var btn = e.target.closest('.reaction-btn[data-entry-id]');
+    if (!btn) return;
+    var entryId = btn.getAttribute('data-entry-id');
+    var key = btn.getAttribute('data-key');
+    if (entryId && key) reactEntry(entryId, key);
+  });
 }
 
 // ============================================
@@ -1273,11 +1363,38 @@ document.addEventListener('DOMContentLoaded', function() {
       renderEntries();
       renderTray();
     } else {
-      // Tidak login → redirect ke index
       console.warn('[JEJAK] Not authenticated, redirecting to index...');
       location.href = 'index.html';
     }
   });
+
+  // ─── AUTO-REFRESH REACTIONS ───
+  // Poll DB setiap 15 detik agar counter emoji yang di-klik
+  // user lain di spill.html langsung muncul di jejak ini
+  setInterval(function() {
+    if (!S.userId || !window.supabaseClient) return;
+    window.supabaseClient
+      .from('entries')
+      .select('id,reactions')
+      .eq('user_id', S.userId)
+      .then(function(result) {
+        if (result.error || !result.data) return;
+        result.data.forEach(function(row) {
+          // Update state
+          for (var i = 0; i < S.entries.length; i++) {
+            if (S.entries[i].id === row.id) {
+              S.entries[i].reactions = row.reactions || S.entries[i].reactions;
+              // Update DOM counter langsung — tanpa re-render full
+              ['skull','cry','fire','upside'].forEach(function(k) {
+                var el = document.getElementById('jrc-' + row.id + '-' + k);
+                if (el) el.textContent = row.reactions[k] || 0;
+              });
+              break;
+            }
+          }
+        });
+      });
+  }, 15000);
 });
 </script>
 </body>
