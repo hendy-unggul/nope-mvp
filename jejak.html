@@ -541,8 +541,15 @@ function renderEntries() {
   var con = $('econ');
   if (!con) return;
 
-  var hasRealEntries = S.entries && S.entries.length > 0;
-  var displayEntries = hasRealEntries ? S.entries : DUMMY_ENTRIES;
+  var realCount = S.entries ? S.entries.length : 0;
+
+  // FIFO visual: real entries di depan, dummy mengisi sisa slot sampai 3
+  // Misal: 1 real → tampil 1 real + 2 dummy. 2 real → 2 real + 1 dummy. 3+ real → semua real
+  var displayEntries = [];
+  for (var r = 0; r < realCount; r++) displayEntries.push(S.entries[r]);
+
+  var dummyNeeded = Math.max(0, 3 - realCount);
+  for (var d = 0; d < dummyNeeded; d++) displayEntries.push(DUMMY_ENTRIES[d]);
 
   var html = '';
   for (var i = 0; i < displayEntries.length; i++) {
@@ -579,13 +586,19 @@ function renderTray() {
   var con = $('tgrid');
   if (!con) return;
 
-  var hasRealArtefacts = S.artefacts && S.artefacts.length > 0;
-  var displayArtefacts = hasRealArtefacts ? S.artefacts : DUMMY_ARTEFACTS;
+  var realCount = S.artefacts ? S.artefacts.length : 0;
+
+  // FIFO visual: real artefacts di depan, dummy mengisi sisa slot sampai 6
+  // Misal: 2 real → 2 real + 4 dummy. 4 real → 4 real + 2 dummy. 6 real → semua real
+  var displayArtefacts = [];
+  for (var r = 0; r < Math.min(realCount, 6); r++) displayArtefacts.push(S.artefacts[r]);
+
+  var dummyNeeded = Math.max(0, 6 - realCount);
+  for (var d = 0; d < dummyNeeded; d++) displayArtefacts.push(DUMMY_ARTEFACTS[d]);
 
   var html = '';
-  for (var i = 0; i < Math.min(displayArtefacts.length, 6); i++) {
+  for (var i = 0; i < displayArtefacts.length; i++) {
     var a = displayArtefacts[i];
-    // FIX: use data-id attribute instead of embedding quotes in onclick string
     if (a.hasFace) {
       html += '<div class="ti" data-id="' + a.id + '" style="position:relative">' +
         '<img src="' + a.url + '" class="' + a.theme + '" alt="' + esc(a.note) + '">' +
@@ -598,9 +611,8 @@ function renderTray() {
     }
   }
 
-  for (var j = displayArtefacts.length; j < 6; j++) {
-    html += '<div class="ti empty" data-action="upload">+</div>';
-  }
+  // Slot kosong (upload placeholder) — hanya jika total < 6 dan tidak terisi dummy
+  // Tidak perlu karena dummy sudah mengisi semua slot
 
   con.innerHTML = html;
 
