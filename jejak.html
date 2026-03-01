@@ -990,17 +990,25 @@ async function confirmUpload() {
   var kbtn = $('konfirmbtn');
   if (kbtn) kbtn.disabled = true;
 
+  // FIX: snapshot semua data SEBELUM closeGallery() mengosongkan pendingFiles & selFiles
+  var theme = THEMES[currentTheme];
+  var note = currentNote || 'memory';
+  var selFilesArray = Array.from(selFiles);
+  var snapshotFiles = pendingFiles.slice(); // copy array, bukan reference
+
+  // Baru tutup gallery — setelah data di-snapshot
   closeGallery();
   showProc('Mengupload foto...<br><small>Mohon tunggu</small>');
 
-  var theme = THEMES[currentTheme];
-  var note = currentNote || 'memory';
   var uploadedCount = 0;
-  var selFilesArray = Array.from(selFiles);
 
   for (var idx = 0; idx < selFilesArray.length; idx++) {
     var i = selFilesArray[idx];
-    var item = pendingFiles[i];
+    var item = snapshotFiles[i]; // FIX: pakai snapshot, bukan pendingFiles yang sudah dikosongkan
+    if (!item || !item.file) {
+      console.error('[ARTEFACT] Item tidak ada di index', i, '— snapshot length:', snapshotFiles.length);
+      continue;
+    }
     var file = item.file;
     // FIX: normalize extension to lowercase, fallback to jpg
     var rawExt = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
