@@ -32,6 +32,11 @@
       --accent-quaternary: #39FF14;
       --accent-warm: #FFD700;
       
+      /* Media Partner Colors - Piala Gubernur DKI */
+      --jakarta-orange: #FF4D00;
+      --lapangan-green: #00A651;
+      --piala-gold: #FFD700;
+      
       /* Category Colors for Cocomeo */
       --live: #FF3B30;
       --komunitas: #00F0FF;
@@ -208,6 +213,68 @@
       display: flex;
       align-items: center;
       gap: var(--space-sm);
+    }
+
+    /* ============================================ */
+    /* MEDIA PARTNER BADGE - PIALA GUBERNUR DKI    */
+    /* ============================================ */
+    .media-partner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, rgba(255,77,0,0.1) 0%, rgba(0,166,81,0.1) 100%);
+      border: 2px solid;
+      border-image: linear-gradient(45deg, var(--jakarta-orange), var(--lapangan-green), var(--piala-gold)) 1;
+      padding: 6px 12px;
+      margin-left: var(--space-sm);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+      animation: badgePulse 3s ease-in-out infinite;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .media-partner-badge::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transform: translateX(-100%);
+      animation: shine 4s infinite;
+    }
+
+    @keyframes shine {
+      0% { transform: translateX(-100%); }
+      20% { transform: translateX(100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .media-partner-badge .badge-icon {
+      font-size: 14px;
+      filter: drop-shadow(0 0 4px var(--piala-gold));
+    }
+
+    .media-partner-badge .badge-text {
+      background: linear-gradient(45deg, var(--jakarta-orange), var(--piala-gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 800;
+    }
+
+    .media-partner-badge .badge-year {
+      color: var(--lapangan-green);
+      font-family: 'Instrument Serif', serif;
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    @keyframes badgePulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,77,0,0.3); }
+      50% { box-shadow: 0 0 10px 2px rgba(255,77,0,0.5); }
     }
 
     /* Sub-nav buttons */
@@ -968,6 +1035,16 @@
       .options-grid {
         grid-template-columns: repeat(2, 1fr);
       }
+      
+      .media-partner-badge {
+        font-size: 8px;
+        padding: 4px 8px;
+        gap: 4px;
+      }
+      
+      .media-partner-badge .badge-icon {
+        font-size: 12px;
+      }
     }
 
     /* === ACCESSIBILITY === */
@@ -986,11 +1063,19 @@
       <div class="logo-container">
         <div class="logo" onclick="window.location.href='index.html'">BOLA</div>
         <span class="page-tag">Cocomeo</span>
+        <!-- ============================================ -->
+        <!-- MEDIA PARTNER BADGE - TAMBAHAN -->
+        <!-- ============================================ -->
+        <div class="media-partner-badge" title="Media Partner Resmi Piala Gubernur DKI 2026">
+          <span class="badge-icon">🏆</span>
+          <span class="badge-text">PIALA GUBERNUR DKI</span>
+          <span class="badge-year">'26</span>
+        </div>
       </div>
       <div class="top-right">
         <div class="sub-nav">
           <span class="active" onclick="switchTab('bola', this)">LIVE</span>
-                   <span onclick="switchTab('database', this)">DATABASE</span>
+          <span onclick="switchTab('database', this)">DATABASE</span>
           <span onclick="switchTab('psikometrik', this)">TEST</span>
         </div>
       </div>
@@ -1545,6 +1630,11 @@
         window.location.href = pages[page];
       }
     }
+
+    // Media Partner Badge click (opsional - bisa redirect ke info turnamen)
+    document.querySelector('.media-partner-badge')?.addEventListener('click', function() {
+      window.open('https://pialagubernur.com', '_blank');
+    });
   </script>
 </body>
 </html>
