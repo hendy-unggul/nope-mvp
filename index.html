@@ -687,6 +687,17 @@ $el('frm').addEventListener('submit', async function(e){
 // AUTO LOGIN CHECK
 // ============================================
 async function checkAutoLogin(){
+  // Kalau dari invite link (?ref= atau ?from= atau ?invite=) → JANGAN auto-login
+  // Teman yang buka link harus masuk pakai akun sendiri
+  var params = new URLSearchParams(window.location.search);
+  if(params.has('ref') || params.has('from') || params.has('invite') || params.has('i')){
+    console.log('[JEJAK] Invite link detected — skipping auto-login');
+    $el('loading').classList.add('hidden');
+    // Bersihkan session supaya ga redirect ke spill
+    clearSession('opened via invite link — fresh login required');
+    return;
+  }
+
   var username = localStorage.getItem(SK.u);
   var userId = localStorage.getItem(SK.uid);
   var loggedIn = localStorage.getItem(SK.l) === 'true';
