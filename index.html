@@ -426,6 +426,7 @@ body::before{
 </div></div><!-- /phone-shell -->
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
 <script>
 // ============================================
 // SUPABASE CONFIG — sama persis dengan jejak.html
@@ -505,16 +506,45 @@ function validate(raw){
 }
 
 // ============================================
-// DEVICE SIGNATURE
+// DEVICE FINGERPRINT — FingerprintJS v4
 // ============================================
-function getDeviceSignature(){
+var _fpPromise = null;
+var _deviceFp  = null;
+
+// Init FingerprintJS sekali saja saat halaman load
+function initFingerprint(){
+  if(!window.FingerprintJS) return Promise.resolve(null);
+  if(_fpPromise) return _fpPromise;
+  _fpPromise = FingerprintJS.load()
+    .then(function(fp){ return fp.get(); })
+    .then(function(result){
+      _deviceFp = result.visitorId; // hash 32-char unik per device
+      console.log('[JEJAK] Device fingerprint:', _deviceFp.substring(0,8)+'...');
+      return _deviceFp;
+    })
+    .catch(function(e){
+      console.warn('[JEJAK] Fingerprint gagal, fallback ke localStorage sig:', e);
+      _deviceFp = getLocalSig();
+      return _deviceFp;
+    });
+  return _fpPromise;
+}
+
+// Fallback kalau FingerprintJS tidak load
+function getLocalSig(){
   var sig = localStorage.getItem(SK.s);
   if(!sig){
-    var rawString = navigator.userAgent + (window.screen.width||'?') + 'x' + (window.screen.height||'?') + Date.now() + Math.random().toString(36).substring(2, 15);
-    sig = btoa(unescape(encodeURIComponent(rawString))).substring(0, 32).replace(/[^a-zA-Z0-9]/g, '');
+    var raw = navigator.userAgent + screen.width + 'x' + screen.height
+            + (navigator.language||'') + (new Date().getTimezoneOffset())
+            + Date.now() + Math.random().toString(36).slice(2);
+    sig = btoa(unescape(encodeURIComponent(raw))).slice(0,32).replace(/[^a-zA-Z0-9]/g,'');
     localStorage.setItem(SK.s, sig);
   }
   return sig;
+}
+
+function getDeviceSignature(){
+  return _deviceFp || getLocalSig();
 }
 
 // ============================================
@@ -626,7 +656,7 @@ document.querySelectorAll('.vibe-btn').forEach(function(btn){
 });
 
 // ============================================
-// FORM SUBMIT — LOGIKA AUTH UTAMA
+// FORM SUBMIT — AUTH + FINGERPRINT LOCK
 // ============================================
 $el('frm').addEventListener('submit', async function(e){
   e.preventDefault();
@@ -641,53 +671,112 @@ $el('frm').addEventListener('submit', async function(e){
   try{
     if(!db) throw new Error('Database tidak terhubung');
 
-    // STEP 1: Cek apakah username sudah ada
-    var existingResult = await db.from('profiles').select('id, username').eq('username', username).limit(1);
+    // ── Ambil fingerprint device ──────────────────────────────────────────
+    btn.textContent = 'VERIFIKASI DEVICE...';
+    var fp = await initFingerprint();
+    // Simpan fp ke localStorage sebagai session sig juga
+    if(fp) localStorage.setItem(SK.s, fp);
+
+    // ── STEP 1: Cek username di DB ────────────────────────────────────────
+    btn.textContent = 'NGECEK USERNAME...';
+    var existingResult = await db.from('profiles')
+      .select('id, username, device_fp')
+      .eq('username', username)
+      .limit(1);
     if(existingResult.error) throw existingResult.error;
 
     var userId = null;
     var isNewUser = !existingResult.data || existingResult.data.length === 0;
 
     if(isNewUser){
-      // STEP 2A: Buat profile baru
-      var insertResult = await db.from('profiles').insert({ username }).select('id, username');
+      // ── STEP 2A: Username belum ada — cek apakah device ini sudah punya username lain ──
+      if(fp){
+        var deviceCheck = await db.from('profiles')
+          .select('id, username')
+          .eq('device_fp', fp)
+          .limit(1);
+
+        if(!deviceCheck.error && deviceCheck.data && deviceCheck.data.length > 0){
+          // Device ini sudah punya akun dengan username lain
+          var existingUsername = deviceCheck.data[0].username;
+          var existingId = deviceCheck.data[0].id;
+
+          // Auto-login ke akun yang sudah ada, bukan buat baru
+          setFb('success', '↩ Device ini sudah terdaftar sebagai @' + existingUsername + ' — masuk otomatis!');
+          saveSession(existingUsername, existingId);
+          $u().value = existingUsername;
+          setTimeout(function(){ window.location.href = 'spill.html'; }, 1200);
+          return;
+        }
+      }
+
+      // ── Device bersih — buat akun baru ───────────────────────────────
+      btn.textContent = 'BIKIN AKUN...';
+      var insertData = { username: username };
+      if(fp) insertData.device_fp = fp;
+
+      var insertResult = await db.from('profiles')
+        .insert(insertData)
+        .select('id, username');
+
       if(insertResult.error){
         if(insertResult.error.code === '23505'){
           // Race condition — fetch ulang
-          var retryResult = await db.from('profiles').select('id, username').eq('username', username).limit(1);
-          if(!retryResult.error && retryResult.data && retryResult.data.length > 0) userId = retryResult.data[0].id;
-          else throw insertResult.error;
+          var retryResult = await db.from('profiles')
+            .select('id, username')
+            .eq('username', username)
+            .limit(1);
+          if(!retryResult.error && retryResult.data && retryResult.data.length > 0){
+            userId = retryResult.data[0].id;
+          } else {
+            throw insertResult.error;
+          }
         } else {
           throw insertResult.error;
         }
       } else {
         if(!insertResult.data || insertResult.data.length === 0 || !insertResult.data[0].id)
-          throw new Error('Profile dibuat tapi id tidak ada di response — cek RLS policy tabel profiles');
+          throw new Error('Profile dibuat tapi id tidak ada — cek RLS policy tabel profiles');
         userId = insertResult.data[0].id;
-        setFb('success', '🎉 Akun dibuat! Welcome, @' + username + '!');
+        setFb('success', '🎉 Welcome, @' + username + '! Akun baru dibuat ✓');
       }
+
     } else {
-      // STEP 2B: Login user yang sudah ada
+      // ── STEP 2B: Username sudah ada — verifikasi device ──────────────
+      var storedFp = existingResult.data[0].device_fp;
       userId = existingResult.data[0].id;
-      try{
-        await db.from('profiles').update({ updated_at: new Date().toISOString() }).eq('id', userId);
-      } catch(updateErr){
-        console.warn('[JEJAK] Update profile gagal (non-fatal):', updateErr);
+
+      if(storedFp && fp && storedFp !== fp){
+        // Username ini milik device lain — TOLAK
+        setFb('error', '🔒 @' + username + ' sudah dipakai device lain — coba username berbeda');
+        btn.disabled = false;
+        btn.textContent = 'GASKEUN →';
+        return;
       }
+
+      // Device cocok atau belum ada fp tersimpan — update fp kalau belum ada
+      if(!storedFp && fp){
+        try{
+          await db.from('profiles')
+            .update({ device_fp: fp, updated_at: new Date().toISOString() })
+            .eq('id', userId);
+        } catch(upErr){ console.warn('[JEJAK] Update fp non-fatal:', upErr); }
+      }
+
       setFb('success', '✓ Welcome back, @' + username + '!');
     }
 
-    // STEP 3: Simpan session
+    // ── STEP 3: Simpan session ────────────────────────────────────────────
     saveSession(username, userId);
 
-    // STEP 4: Redirect
+    // ── STEP 4: Redirect ──────────────────────────────────────────────────
     setTimeout(function(){ window.location.href = 'spill.html'; }, 700);
 
   } catch(err){
     console.error('[JEJAK] Submit error:', err);
     setFb('error', '❌ ' + (err.message || JSON.stringify(err)));
     btn.disabled = false;
-    btn.innerHTML = '⬡ GASKEUN →';
+    btn.textContent = 'GASKEUN →';
   }
 });
 
@@ -748,6 +837,8 @@ function updateOnline(){
 document.addEventListener('DOMContentLoaded', function(){
   if(!initDb()) setFb('error', '❌ Gagal koneksi ke database. Refresh halaman.');
   setVibe(localStorage.getItem(SK.v) || 'cyber');
+  // Init fingerprint di background — sudah siap saat user submit
+  initFingerprint();
   checkAutoLogin();
   updateOnline();
   setInterval(updateOnline, 30000);
