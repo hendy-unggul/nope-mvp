@@ -1,1136 +1,906 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="brutalgenz">
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
   <title>GLITCH — Fast Forward · Slow Code · Aksi</title>
-  
-  <!-- PWA -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23FF4D00'/%3E%3Ctext x='50' y='70' font-size='50' font-weight='bold' font-family='system-ui' text-anchor='middle' fill='%230A0A0A'%3EGL%3C/text%3E%3C/svg%3E">
-  <meta name="theme-color" content="#0A0A0A">
-  
-  <!-- Fonts -->
+  <meta name="theme-color" content="#080808">
+
+  <!-- FONTS: align dengan spill.html & jejak.html -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
   <style>
-    :root {
-      --bg: #0A0A0A;
-      --surface: #141414;
-      --surface-elevated: #1E1E1E;
-      --border: #2A2A2A;
-      --border-accent: #FF4D00;
-      
-      --text: #FFFFFF;
-      --text-secondary: #888888;
-      --text-muted: #555555;
-      
-      --accent-primary: #FF4D00;
-      --accent-secondary: #00F0FF;
-      --accent-tertiary: #FF006E;
-      --accent-quaternary: #39FF14;
-      --accent-warm: #FFD700;
-      
-      --fastforward: #FF006E;
-      --slowcode: #8B5CF6;
-      --aksi: #FF4D00;
-      
-      --radius: 0px;
-      --radius-sm: 4px;
-      --space-xs: 4px;
-      --space-sm: 8px;
-      --space-md: 16px;
-      --space-lg: 24px;
-      --space-xl: 32px;
-    }
+  /* ── DESIGN TOKENS: 1:1 dengan spill.html ────────────────── */
+  :root {
+    --bg:   #080808;
+    --sf:   #0f0f0f;
+    --sfe:  #141414;
+    --bd:   #222;
+    --bd2:  #2e2e2e;
+    --tx:   #f0ece6;
+    --txs:  #777;
+    --txm:  #444;
+    --ap:   #ff2d55;
+    --as:   #00e5ff;
+    --aq:   #bfff00;
+    --at:   #FF006E;
+    --gold: #ffd60a;
+    /* glitch-specific accent (beda dari halaman lain — identitas unik) */
+    --gx:   #bf5af2;   /* purple — Slow Code */
+    --gf:   #ff2d55;   /* red    — Fast Forward */
+    --ga:   #ff9f0a;   /* orange — Aksi */
+    --sb:   env(safe-area-inset-bottom);
+    --st:   env(safe-area-inset-top);
+  }
 
-    * { 
-      box-sizing: border-box; 
-      margin: 0; 
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-    
-    html { scroll-behavior: smooth; }
-    
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-      font-weight: 500;
-      font-size: 15px;
-      line-height: 1.4;
-      min-height: 100vh;
-      overflow-x: hidden;
-      padding-bottom: 100px;
-    }
-    
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 9999;
-      opacity: 0.4;
-    }
-    
-    .wrapper {
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 0;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+  html,body{height:100%;overflow:hidden}
+  body{
+    background:var(--bg);color:var(--tx);
+    font-family:'Syne',-apple-system,sans-serif;
+    font-size:14px;line-height:1.4;
+    position:fixed;width:100%;overscroll-behavior:none;
+  }
+  body::after{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.028;
+    background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/200px 200px;
+  }
 
-    /* === HEADER === */
-    header {
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      border-bottom: 3px solid var(--border);
-      padding: var(--space-md);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 100;
-      overflow: hidden;
-    }
+  /* ── APP SHELL ───────────────────────────────────────────── */
+  .app{height:100%;display:flex;flex-direction:column;overflow:hidden;max-width:480px;margin:0 auto}
 
-    header::after {
-      content: '';
-      position: absolute;
-      bottom: -3px;
-      left: 20%;
-      width: 8px;
-      height: 12px;
-      background: var(--accent-primary);
-      border-radius: 0 0 50% 50%;
-      animation: drip 3s ease-in-out infinite;
-    }
+  /* ── HEADER: align spill.html ────────────────────────────── */
+  .header{
+    padding:14px 18px;
+    padding-top:calc(14px + var(--st));
+    display:flex;justify-content:space-between;align-items:center;
+    border-bottom:2px solid var(--bd);background:var(--bg);
+    flex-shrink:0;position:relative;
+  }
+  .header::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,var(--ap),var(--as),var(--aq));
+  }
 
-    @keyframes drip {
-      0%, 100% { height: 12px; opacity: 1; }
-      50% { height: 20px; opacity: 0.7; }
-    }
+  /* ── LOGO: GL⚡TCH — ⚡ beranimasi seperti SP✕LL ────────── */
+  .logo{
+    font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:2px;line-height:1;
+    cursor:pointer;position:relative;display:inline-flex;align-items:center;
+  }
+  .logo-x{
+    color:var(--ap);display:inline-block;
+    animation:glitch-x 3.5s ease-in-out infinite;
+  }
+  @keyframes glitch-x{
+    0%,80%,100%{transform:rotate(0) scale(1) skew(0deg);color:var(--ap);text-shadow:none}
+    82%{transform:translate(-3px,0) skew(-5deg);color:var(--as);text-shadow:2px 0 var(--ap)}
+    84%{transform:translate(3px,0) skew(5deg);color:var(--at);text-shadow:-2px 0 var(--as)}
+    86%{transform:translate(-2px,0) skew(-3deg);color:var(--aq);text-shadow:2px 0 var(--at)}
+    88%{transform:translate(0,0) scale(1.25);color:var(--ap);text-shadow:0 0 20px var(--ap)}
+    92%{transform:scale(1);color:var(--ap);text-shadow:none}
+  }
+  .logo-tag{
+    font-family:'Instrument Serif',serif;font-size:11px;font-style:italic;
+    color:var(--ap);border:1px solid var(--ap);padding:2px 8px;
+    transform:rotate(-4deg);margin-left:8px;
+    animation:tag-wiggle 2.5s ease-in-out infinite;display:inline-block;
+    white-space:nowrap;
+  }
+  @keyframes tag-wiggle{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(-7deg)}}
 
-    .logo-container {
-      position: relative;
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-    }
+  /* ── TOP RIGHT: online pill (align spill) ────────────────── */
+  .top-right{display:flex;align-items:center;gap:8px}
+  .user-pill{
+    font-family:'DM Mono',monospace;font-size:10px;color:#000;
+    background:var(--aq);padding:5px 12px;
+    border:2px solid #000;box-shadow:3px 3px 0 #000;
+    letter-spacing:.5px;max-width:110px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .logout-btn{
+    background:var(--sf);border:2px solid var(--bd2);
+    color:var(--txm);font-size:14px;cursor:pointer;
+    width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+    transition:all .15s;font-family:'DM Mono',monospace;
+  }
+  .logout-btn:active{background:var(--ap);color:#fff;border-color:var(--ap)}
 
-    .logo {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 36px;
-      font-weight: 900;
-      letter-spacing: -0.05em;
-      color: var(--text);
-      cursor: pointer;
-      line-height: 0.9;
-      position: relative;
-      text-transform: uppercase;
-      transform: skew(-5deg);
-    }
+  /* ── TAB BAR ─────────────────────────────────────────────── */
+  .tab-bar{
+    background:var(--bg);border-bottom:2px solid var(--bd);
+    flex-shrink:0;
+  }
+  .tab-container{display:flex;gap:0;padding:0}
+  .tab{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+    padding:12px 6px;background:transparent;
+    border:none;border-right:2px solid var(--bd);
+    color:var(--txm);
+    font-family:'DM Mono',monospace;font-size:9px;font-weight:500;
+    text-transform:uppercase;letter-spacing:1.5px;
+    cursor:pointer;transition:all .12s;white-space:nowrap;position:relative;
+    height:44px;
+  }
+  .tab:last-child{border-right:none}
+  .tab:active{background:var(--sf)}
+  .tab.active{color:var(--tx);background:var(--sfe)}
+  .tab.active::after{
+    content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+    background:currentColor;
+  }
+  .tab[data-tab="fastforward"].active{color:var(--gf)}
+  .tab[data-tab="slowcode"].active{color:var(--gx)}
+  .tab[data-tab="aksi"].active{color:var(--ga)}
+  .tab-icon{font-size:14px;line-height:1}
 
-    .logo::before, .logo::after {
-      content: 'GLITCH';
-      position: absolute;
-      top: 0; left: 0;
-      opacity: 0;
-      transition: opacity 0.1s;
-    }
-    .logo::before { 
-      color: var(--accent-secondary); 
-      transform: translate(-3px, -2px);
-      clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
-    }
-    .logo::after { 
-      color: var(--accent-tertiary); 
-      transform: translate(3px, 2px);
-      clip-path: polygon(0 60%, 100% 60%, 100% 100%, 0 100%);
-    }
-    .logo:hover::before { opacity: 0.9; animation: glitchTop 0.3s infinite; }
-    .logo:hover::after { opacity: 0.9; animation: glitchBottom 0.3s infinite; }
-    
-    @keyframes glitchTop {
-      0%, 100% { transform: translate(-3px, -2px); }
-      25% { transform: translate(2px, -3px); }
-      50% { transform: translate(-2px, -1px); }
-      75% { transform: translate(3px, -2px); }
-    }
-    @keyframes glitchBottom {
-      0%, 100% { transform: translate(3px, 2px); }
-      25% { transform: translate(-2px, 3px); }
-      50% { transform: translate(2px, 1px); }
-      75% { transform: translate(-3px, 2px); }
-    }
+  /* ── SCROLL AREA ─────────────────────────────────────────── */
+  .scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+  .scroll::-webkit-scrollbar{display:none}
 
-    .tea-tag {
-      font-family: 'Instrument Serif', serif;
-      font-size: 11px;
-      font-style: italic;
-      color: var(--accent-primary);
-      border: 1px solid var(--accent-primary);
-      padding: 2px 8px;
-      transform: rotate(-5deg);
-      margin-left: var(--space-xs);
-      animation: spillWiggle 2s ease-in-out infinite;
-    }
+  /* ── TAB PANELS ──────────────────────────────────────────── */
+  .tab-panel{display:none;padding:18px;padding-bottom:calc(90px + var(--sb));animation:si .25s ease}
+  .tab-panel.active{display:block}
+  @keyframes si{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
-    @keyframes spillWiggle {
-      0%, 100% { transform: rotate(-5deg); }
-      50% { transform: rotate(-8deg); }
-    }
+  /* ── SECTION HEADER ──────────────────────────────────────── */
+  .sect-hdr{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:16px}
+  .sect-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;line-height:1}
+  .sect-badge{font-family:'DM Mono',monospace;font-size:9px;color:var(--txm);letter-spacing:2px;text-transform:uppercase}
 
-    .top-right {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-    }
+  /* ── FEATURED CARD ───────────────────────────────────────── */
+  .featured-card{
+    background:var(--sf);border:2px solid var(--bd2);
+    overflow:hidden;margin-bottom:14px;
+    cursor:pointer;transition:transform .08s,box-shadow .08s;
+    box-shadow:4px 4px 0 #000;
+  }
+  .featured-card:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
+  .featured-img{
+    width:100%;aspect-ratio:16/9;object-fit:cover;
+    filter:contrast(1.1) saturate(.85) grayscale(.15);
+    transition:filter .3s;display:block;
+  }
+  .featured-card:hover .featured-img{filter:none}
+  .featured-body{padding:16px;border-top:2px solid var(--bd)}
+  .featured-badge{
+    display:inline-block;padding:4px 10px;
+    font-family:'DM Mono',monospace;font-size:9px;font-weight:500;
+    text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;
+    border:2px solid;
+  }
+  .badge-ff{color:var(--gf);border-color:var(--gf);background:rgba(255,45,85,.07)}
+  .badge-sc{color:var(--gx);border-color:var(--gx);background:rgba(191,90,242,.07)}
+  .badge-ak{color:var(--ga);border-color:var(--ga);background:rgba(255,159,10,.07)}
+  .featured-title{
+    font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;
+    line-height:1.1;margin-bottom:8px;color:var(--tx);
+  }
+  .featured-excerpt{
+    font-family:'Instrument Serif',serif;font-size:14px;font-style:italic;
+    color:var(--txs);line-height:1.55;margin-bottom:14px;
+  }
 
-    .settings-btn {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      color: var(--text-muted);
-      font-size: 16px;
-      cursor: pointer;
-      padding: var(--space-xs);
-      width: 40px; height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-    .settings-btn:hover {
-      border-color: var(--accent-primary);
-      color: var(--accent-primary);
-      transform: rotate(90deg);
-    }
+  /* Card meta (author + reactions) */
+  .card-meta{
+    display:flex;align-items:center;justify-content:space-between;
+    padding-top:12px;border-top:2px solid var(--bd);
+  }
+  .card-author{
+    display:flex;align-items:center;gap:8px;
+    font-family:'DM Mono',monospace;font-size:10px;color:var(--txm);
+    text-transform:uppercase;letter-spacing:.5px;
+  }
+  .author-avatar{
+    width:28px;height:28px;background:var(--ap);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Bebas Neue',sans-serif;font-size:11px;color:#000;
+    border:2px solid var(--bd);flex-shrink:0;
+  }
+  .card-reactions{display:flex;gap:0}
+  .react-btn{
+    display:flex;align-items:center;justify-content:center;gap:4px;
+    padding:8px 10px;background:transparent;
+    border:none;border-left:2px solid var(--bd);
+    font-size:14px;color:var(--txs);cursor:pointer;
+    touch-action:manipulation;transition:all .1s;
+    font-family:'DM Mono',monospace;
+  }
+  .react-btn:first-child{border-left:none}
+  .react-btn:active{background:var(--ap);color:#fff}
+  .react-count{font-family:'DM Mono',monospace;font-size:11px}
 
-    /* === TAB BAR (3 tabs rata) === */
-    .tab-bar {
-      position: sticky;
-      top: 73px;
-      background: var(--bg);
-      border-bottom: 2px solid var(--border);
-      z-index: 99;
-    }
+  /* ── ARTICLE CARD ────────────────────────────────────────── */
+  .article-card{
+    background:var(--sf);border:2px solid var(--bd2);
+    padding:14px 16px;margin-bottom:10px;
+    cursor:pointer;transition:transform .08s,box-shadow .08s;
+    box-shadow:3px 3px 0 #000;
+    position:relative;overflow:hidden;
+  }
+  .article-card::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;
+    width:3px;background:var(--bd2);transition:background .15s;
+  }
+  .article-card[data-cat="fastforward"]::before{background:var(--gf)}
+  .article-card[data-cat="slowcode"]::before{background:var(--gx)}
+  .article-card[data-cat="aksi"]::before{background:var(--ga)}
+  .article-card:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
+  .article-tag{
+    display:inline-block;padding:3px 8px;
+    font-family:'DM Mono',monospace;font-size:9px;font-weight:500;
+    text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;
+    border:1px solid currentColor;
+  }
+  .tag-ff{color:var(--gf)}
+  .tag-sc{color:var(--gx)}
+  .tag-ak{color:var(--ga)}
+  .article-title{
+    font-size:15px;font-weight:700;line-height:1.3;
+    margin-bottom:6px;color:var(--tx);letter-spacing:-.01em;
+  }
+  .article-excerpt{font-size:13px;color:var(--txs);line-height:1.5;margin-bottom:8px}
+  .article-footer{
+    display:flex;align-items:center;justify-content:space-between;
+    font-family:'DM Mono',monospace;font-size:9px;color:var(--txm);
+    text-transform:uppercase;letter-spacing:1px;
+    padding-top:8px;border-top:1px solid var(--bd);
+  }
 
-    .tab-container {
-      display: flex;
-      gap: var(--space-xs);
-      padding: var(--space-sm);
-    }
+  /* ── AKSI HERO ───────────────────────────────────────────── */
+  .aksi-hero{
+    background:var(--sf);border:2px solid var(--bd2);
+    padding:20px;margin-bottom:14px;
+    position:relative;overflow:hidden;
+    box-shadow:4px 4px 0 #000;
+  }
+  .aksi-hero::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,var(--ga),var(--ap),var(--ga));
+    background-size:200% 100%;animation:grad-move 3s linear infinite;
+  }
+  @keyframes grad-move{0%{background-position:0%}100%{background-position:200%}}
+  .aksi-eyebrow{
+    font-family:'DM Mono',monospace;font-size:9px;color:var(--txm);
+    letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;
+  }
+  .aksi-title{
+    font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;
+    line-height:1.1;margin-bottom:8px;color:var(--tx);
+  }
+  .aksi-subtitle{
+    font-family:'Instrument Serif',serif;font-size:14px;font-style:italic;
+    color:var(--txs);line-height:1.55;margin-bottom:20px;
+  }
 
-    .tab {
-      flex: 1; /* MEMBUAT LEBAR SAMA RATA */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: var(--space-xs);
-      padding: 12px 8px;
-      background: transparent;
-      border: 2px solid var(--border);
-      color: var(--text-muted);
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-      position: relative;
-      text-decoration: none;
-      text-align: center;
-    }
-    .tab:hover:not(.active) {
-      background: var(--surface);
-      color: var(--text-secondary);
-      border-color: var(--text-secondary);
-    }
-    .tab.active {
-      background: var(--surface-elevated);
-      color: var(--text);
-      border-color: var(--text);
-    }
-    .tab.active::after {
-      content: '';
-      position: absolute;
-      bottom: -2px; left: 0;
-      width: 100%; height: 2px;
-      background: currentColor;
-    }
-    .tab-icon { font-size: 18px; }
+  /* Flow steps */
+  .flow-steps{display:flex;flex-direction:column;gap:4px;margin-bottom:18px}
+  .flow-step{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 14px;background:var(--sfe);
+    border:1px solid var(--bd);font-size:13px;
+    transition:all .15s;
+  }
+  .step-num{
+    font-family:'Instrument Serif',serif;font-size:18px;
+    font-style:italic;color:var(--ga);width:20px;flex-shrink:0;
+  }
+  .step-text{color:var(--txs);font-size:13px}
+  .step-arrow{margin-left:auto;color:var(--txm);font-size:12px}
+  .flow-step.active{border-color:var(--ga);background:rgba(255,159,10,.06)}
+  .flow-step.active .step-text{color:var(--tx)}
+  .flow-step.active .step-arrow{color:var(--ga)}
 
-    .tab[data-tab="fastforward"].active { color: var(--fastforward); border-color: var(--fastforward); box-shadow: 0 0 10px rgba(255,0,110,0.3); }
-    .tab[data-tab="fastforward"].active::after { background: var(--fastforward); }
-    .tab[data-tab="slowcode"].active { color: var(--slowcode); border-color: var(--slowcode); box-shadow: 0 0 10px rgba(139,92,246,0.3); }
-    .tab[data-tab="slowcode"].active::after { background: var(--slowcode); }
-    .tab[data-tab="aksi"].active { color: var(--aksi); border-color: var(--aksi); box-shadow: 0 0 10px rgba(255,77,0,0.3); }
-    .tab[data-tab="aksi"].active::after { background: var(--aksi); }
+  /* Stats bar */
+  .aksi-stats{
+    display:flex;gap:1px;background:var(--bd);
+    margin-bottom:18px;border:1px solid var(--bd);
+  }
+  .aksi-stat{flex:1;background:var(--sfe);padding:14px 10px;text-align:center}
+  .aksi-stat-num{
+    font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;
+    color:var(--ga);display:block;line-height:1;margin-bottom:4px;
+  }
+  .aksi-stat-label{
+    font-family:'DM Mono',monospace;font-size:9px;color:var(--txm);
+    text-transform:uppercase;letter-spacing:1px;line-height:1.3;
+  }
 
-    /* === CONTENT === */
-    .content-area {
-      flex: 1;
-      overflow-y: auto;
-      position: relative;
-    }
+  /* Main CTA */
+  .aksi-cta{
+    width:100%;background:var(--ga);color:#000;border:none;
+    padding:16px 20px;
+    font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;
+    cursor:pointer;transition:transform .08s,box-shadow .08s;
+    display:flex;align-items:center;justify-content:space-between;
+    box-shadow:4px 4px 0 #000;
+  }
+  .aksi-cta:active{transform:translate(3px,3px);box-shadow:1px 1px 0 #000}
+  .cta-sub{
+    font-family:'Instrument Serif',serif;font-size:10px;font-style:italic;
+    font-weight:400;opacity:.8;letter-spacing:0;display:block;margin-top:2px;
+  }
 
-    .tab-panel {
-      display: none;
-      animation: slideIn 0.3s ease;
-      padding: var(--space-md);
-    }
-    .tab-panel.active { display: block; }
+  /* Nav cards */
+  .nav-cards{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+  .nav-card{
+    background:var(--bg);border:2px solid var(--bd2);border-left:3px solid transparent;
+    padding:14px 16px;cursor:pointer;transition:transform .08s,box-shadow .08s;
+    display:flex;align-items:center;gap:14px;text-decoration:none;
+    box-shadow:3px 3px 0 #000;
+  }
+  .nav-card:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
+  .nav-card.c-orange{border-left-color:var(--ga)}
+  .nav-card.c-cyan{border-left-color:var(--as)}
+  .nav-card.c-lime{border-left-color:var(--aq)}
+  .nav-card-icon{font-size:22px;flex-shrink:0;width:36px;text-align:center}
+  .nav-card-body{flex:1}
+  .nav-card-title{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:4px}
+  .nav-card-desc{font-size:12px;color:var(--txs);line-height:1.45}
+  .nav-card-dest{
+    font-family:'DM Mono',monospace;font-size:9px;color:var(--txm);
+    margin-top:5px;letter-spacing:.5px;
+  }
+  .nav-card.c-orange .nav-card-dest{color:var(--ga)}
+  .nav-card.c-cyan .nav-card-dest{color:var(--as)}
+  .nav-card.c-lime .nav-card-dest{color:var(--aq)}
+  .nav-card-arrow{color:var(--txm);font-size:16px;flex-shrink:0}
 
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+  /* ── EMPTY STATE ─────────────────────────────────────────── */
+  .empty-state{text-align:center;padding:60px 20px}
+  .empty-icon{font-size:48px;margin-bottom:16px;opacity:.4;display:block}
+  .empty-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;color:var(--txs);margin-bottom:6px}
+  .empty-text{font-family:'DM Mono',monospace;font-size:11px;color:var(--txm)}
 
-    /* === SECTION HEADER === */
-    .section-header {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      margin-bottom: var(--space-md);
-      padding-bottom: var(--space-sm);
-      border-bottom: 2px solid var(--border);
-      position: relative;
-    }
-    .section-header::after {
-      content: '';
-      position: absolute;
-      bottom: -2px; left: 0;
-      width: 40px; height: 2px;
-      background: var(--accent-primary);
-    }
-    .section-icon { font-size: 20px; }
-    .section-title { font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text); }
-    .section-badge { margin-left: auto; padding: 4px 10px; background: var(--surface); border: 1px solid var(--border); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); }
+  /* ── ZONE FOOTER ─────────────────────────────────────────── */
+  .zone-footer{
+    text-align:center;font-family:'DM Mono',monospace;
+    font-size:9px;color:var(--txm);padding:24px 18px;
+    border-top:2px solid var(--bd);text-transform:uppercase;letter-spacing:.2em;
+  }
 
-    /* === AKSI PANEL === */
-    .aksi-hero {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      padding: var(--space-lg);
-      margin-bottom: var(--space-md);
-      position: relative;
-      overflow: hidden;
-    }
+  /* ── MODAL ───────────────────────────────────────────────── */
+  .modal{
+    display:none;position:fixed;inset:0;z-index:200;
+    background:rgba(0,0,0,.96);overflow:hidden;
+  }
+  .modal.on{display:flex;flex-direction:column;animation:si .2s ease}
+  .modal-hdr{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:14px 18px;padding-top:calc(14px + var(--st));
+    border-bottom:2px solid var(--bd);background:var(--bg);
+    flex-shrink:0;
+  }
+  .modal-nav{display:flex;align-items:center;gap:12px}
+  .back-btn{
+    background:none;border:2px solid var(--bd2);color:var(--tx);
+    font-size:18px;cursor:pointer;padding:8px;
+    width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+    transition:all .15s;font-weight:700;box-shadow:3px 3px 0 #000;
+  }
+  .back-btn:active{background:var(--ap);border-color:var(--ap);color:#000;transform:translate(2px,2px);box-shadow:none}
+  .modal-cat-label{
+    font-family:'DM Mono',monospace;font-size:9px;font-weight:500;
+    text-transform:uppercase;letter-spacing:2px;
+  }
+  .modal-actions{display:flex;gap:8px}
+  .modal-act-btn{
+    background:none;border:2px solid var(--bd2);color:var(--txs);
+    font-size:16px;cursor:pointer;padding:8px;
+    width:40px;height:40px;display:flex;align-items:center;justify-content:center;
+    transition:all .15s;
+  }
+  .modal-act-btn:active{border-color:var(--aq);color:var(--aq)}
+  .modal-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .modal-hero-img{
+    width:100%;max-height:280px;object-fit:cover;
+    filter:contrast(1.1) grayscale(.2);
+    border-bottom:2px solid var(--bd);display:block;
+  }
+  .modal-text{padding:20px 18px}
+  .modal-cat-badge{
+    display:inline-block;padding:4px 12px;
+    font-family:'DM Mono',monospace;font-size:9px;font-weight:500;
+    text-transform:uppercase;letter-spacing:1.5px;
+    margin-bottom:16px;border:2px solid currentColor;
+  }
+  .modal-headline{
+    font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;
+    line-height:1.05;margin-bottom:8px;color:var(--tx);
+  }
+  .modal-meta{
+    font-family:'Instrument Serif',serif;font-size:15px;font-style:italic;
+    color:var(--txs);margin-bottom:20px;padding-bottom:16px;
+    border-bottom:2px solid var(--bd);
+  }
+  .modal-content{font-size:15px;line-height:1.7;color:var(--tx)}
+  .modal-content p{margin-bottom:16px}
+  .modal-content strong{color:var(--ap);font-weight:700}
+  .modal-content em{color:var(--txs);font-family:'Instrument Serif',serif}
+  .modal-quote{
+    background:var(--sf);border-left:4px solid var(--ap);
+    padding:16px;margin:20px 0;
+    font-family:'Instrument Serif',serif;font-size:15px;font-style:italic;
+    line-height:1.6;color:var(--txs);
+    box-shadow:3px 3px 0 #000;
+  }
+  .modal-sig{
+    margin-top:24px;padding-top:16px;border-top:2px solid var(--bd);
+    font-family:'DM Mono',monospace;font-size:10px;color:var(--txm);
+    letter-spacing:.5px;
+  }
 
-    .aksi-hero::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--aksi), var(--accent-tertiary), var(--aksi));
-      background-size: 200% 100%;
-      animation: gradientMove 3s linear infinite;
-    }
+  /* ── BOTTOM NAV: align spill.html 1:1 ───────────────────── */
+  .bottom-nav{
+    position:fixed;bottom:0;left:0;right:0;
+    background:var(--bg);border-top:2px solid var(--bd);
+    padding-bottom:env(safe-area-inset-bottom);z-index:100;
+  }
+  .nav-container{
+    max-width:480px;margin:0 auto;
+    display:flex;justify-content:space-around;align-items:stretch;height:62px;
+  }
+  .nav-item{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:4px;color:var(--txm);text-decoration:none;
+    font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;
+    text-transform:uppercase;position:relative;cursor:pointer;
+    border-right:2px solid var(--bd);transition:all .12s;
+  }
+  .nav-item:last-child{border-right:none}
+  .nav-item.active{color:var(--ap);background:rgba(255,45,85,.06)}
+  .nav-item.active::after{
+    content:'';position:absolute;bottom:0;left:0;right:0;
+    height:3px;background:var(--ap);
+  }
+  .nav-item:active{background:var(--sf)}
+  .nav-icon{font-size:20px;line-height:1}
 
-    @keyframes gradientMove {
-      0% { background-position: 0% 50%; }
-      100% { background-position: 200% 50%; }
-    }
-
-    .aksi-eyebrow {
-      font-family: 'Instrument Serif', serif;
-      font-size: 11px;
-      font-style: italic;
-      color: var(--text-muted);
-      margin-bottom: var(--space-sm);
-      letter-spacing: 0.05em;
-    }
-
-    .aksi-title {
-      font-size: 26px;
-      font-weight: 800;
-      color: var(--text);
-      margin-bottom: var(--space-xs);
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-    }
-
-    .aksi-subtitle {
-      font-family: 'Instrument Serif', serif;
-      font-size: 15px;
-      font-style: italic;
-      color: var(--text-secondary);
-      margin-bottom: var(--space-lg);
-      line-height: 1.5;
-    }
-
-    /* Flow steps */
-    .flow-steps {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-xs);
-      margin-bottom: var(--space-lg);
-    }
-
-    .flow-step {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      padding: 10px 14px;
-      background: var(--surface-elevated);
-      border: 1px solid var(--border);
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.15s;
-      cursor: default;
-    }
-
-    .flow-step .step-num {
-      font-family: 'Instrument Serif', serif;
-      font-size: 18px;
-      font-style: italic;
-      color: var(--aksi);
-      width: 24px;
-      flex-shrink: 0;
-    }
-
-    .flow-step .step-text { color: var(--text-secondary); }
-    .flow-step .step-arrow { margin-left: auto; color: var(--text-muted); font-size: 12px; }
-
-    .flow-step.active-step {
-      border-color: var(--aksi);
-      background: rgba(255,77,0,0.06);
-    }
-    .flow-step.active-step .step-text { color: var(--text); }
-    .flow-step.active-step .step-arrow { color: var(--aksi); }
-
-    /* Stats bar */
-    .aksi-stats {
-      display: flex;
-      gap: 1px;
-      background: var(--border);
-      margin-bottom: var(--space-lg);
-      border: 1px solid var(--border);
-    }
-
-    .aksi-stat {
-      flex: 1;
-      background: var(--surface-elevated);
-      padding: 14px 12px;
-      text-align: center;
-    }
-
-    .aksi-stat-num {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--aksi);
-      display: block;
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-
-    .aksi-stat-label {
-      font-size: 9px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      line-height: 1.3;
-    }
-
-    /* Main CTA */
-    .aksi-cta-main {
-      width: 100%;
-      background: var(--aksi);
-      color: var(--bg);
-      border: none;
-      padding: 18px 24px;
-      font-size: 15px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .aksi-cta-main::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
-      transform: translateX(-100%);
-      transition: transform 0.5s;
-    }
-
-    .aksi-cta-main:hover::before { transform: translateX(100%); }
-    .aksi-cta-main:hover { background: #ff6a1f; transform: translateY(-1px); }
-
-    .cta-label-main { font-size: 15px; }
-    .cta-sub { font-size: 10px; font-weight: 500; opacity: 0.7; letter-spacing: 0.05em; text-transform: none; font-family: 'Instrument Serif', serif; font-style: italic; }
-    .cta-arrow { font-size: 20px; }
-
-    /* Navigator cards */
-    .nav-cards {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-sm);
-      margin-top: var(--space-md);
-    }
-
-    .nav-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-left: 3px solid transparent;
-      padding: var(--space-md);
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: var(--space-md);
-      text-decoration: none;
-    }
-
-    .nav-card:hover {
-      background: var(--surface-elevated);
-      transform: translateX(4px);
-    }
-
-    .nav-card.aksi-color { border-left-color: var(--aksi); }
-    .nav-card.cyan-color { border-left-color: var(--accent-secondary); }
-    .nav-card.green-color { border-left-color: var(--accent-quaternary); }
-
-    .nav-card-icon {
-      font-size: 24px;
-      flex-shrink: 0;
-      width: 40px;
-      text-align: center;
-    }
-
-    .nav-card-body { flex: 1; }
-
-    .nav-card-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text);
-      margin-bottom: 4px;
-    }
-
-    .nav-card-desc {
-      font-size: 12px;
-      color: var(--text-secondary);
-      line-height: 1.5;
-    }
-
-    .nav-card-dest {
-      font-family: 'Instrument Serif', serif;
-      font-size: 11px;
-      font-style: italic;
-      margin-top: 6px;
-    }
-
-    .nav-card.aksi-color .nav-card-dest { color: var(--aksi); }
-    .nav-card.cyan-color .nav-card-dest { color: var(--accent-secondary); }
-    .nav-card.green-color .nav-card-dest { color: var(--accent-quaternary); }
-
-    .nav-card-arrow { color: var(--text-muted); font-size: 16px; flex-shrink: 0; transition: transform 0.2s; }
-    .nav-card:hover .nav-card-arrow { transform: translateX(4px); }
-
-    /* Featured cards */
-    .featured-card {
-      background: var(--surface);
-      border: 2px solid var(--border);
-      overflow: hidden;
-      margin-bottom: var(--space-md);
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative;
-    }
-    .featured-card:hover {
-      transform: translateY(-4px);
-      border-color: var(--accent-primary);
-      box-shadow: 4px 4px 0 var(--accent-primary);
-    }
-    .featured-image {
-      width: 100%;
-      aspect-ratio: 16/9;
-      object-fit: cover;
-      filter: contrast(1.1) saturate(0.9) grayscale(0.2);
-      transition: all 0.3s;
-    }
-    .featured-card:hover .featured-image { filter: none; }
-    .featured-content { padding: var(--space-md); }
-    .featured-badge {
-      display: inline-block;
-      padding: 4px 10px;
-      font-size: 10px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      margin-bottom: var(--space-sm);
-      border: 1px solid currentColor;
-    }
-    .featured-badge.trending { color: var(--accent-primary); background: rgba(255,77,0,0.1); }
-    .featured-badge.new { color: var(--accent-quaternary); background: rgba(57,255,20,0.1); }
-    .featured-title { font-size: 20px; font-weight: 700; line-height: 1.2; margin-bottom: var(--space-sm); color: var(--text); letter-spacing: -0.02em; }
-    .featured-excerpt { font-family: 'Instrument Serif', serif; font-size: 15px; font-style: italic; color: var(--text-secondary); line-height: 1.5; margin-bottom: var(--space-md); }
-    .card-meta { display: flex; align-items: center; justify-content: space-between; padding-top: var(--space-sm); border-top: 1px solid var(--border); }
-    .card-author { display: flex; align-items: center; gap: var(--space-sm); font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-    .author-avatar { width: 28px; height: 28px; background: var(--accent-primary); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: var(--bg); border: 2px solid var(--border); }
-    .card-reactions { display: flex; gap: var(--space-xs); }
-    .reaction-btn { background: var(--surface-elevated); border: 1px solid var(--border); font-size: 14px; cursor: pointer; padding: 6px 10px; transition: all 0.2s; display: flex; align-items: center; gap: 4px; color: var(--text-secondary); }
-    .reaction-btn:hover { background: var(--surface); border-color: var(--text-secondary); color: var(--text); transform: translateY(-2px); }
-    .reaction-btn span { font-size: 11px; font-weight: 700; font-family: 'Plus Jakarta Sans', sans-serif; }
-
-    /* Article cards */
-    .article-card { background: var(--surface); border: 2px solid var(--border); padding: var(--space-md); margin-bottom: var(--space-sm); cursor: pointer; transition: all 0.2s; position: relative; }
-    .article-card:hover { transform: translateX(4px); border-left-width: 4px; }
-    .article-card[data-category="fastforward"]:hover { border-left-color: var(--fastforward); }
-    .article-card[data-category="slowcode"]:hover { border-left-color: var(--slowcode); }
-    .article-card[data-category="aksi"]:hover { border-left-color: var(--aksi); }
-    .article-tag { display: inline-block; padding: 3px 8px; background: var(--surface-elevated); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--space-sm); border: 1px solid currentColor; }
-    .article-tag.fastforward { color: var(--fastforward); }
-    .article-tag.slowcode { color: var(--slowcode); }
-    .article-tag.aksi { color: var(--aksi); }
-    .article-title { font-size: 16px; font-weight: 700; line-height: 1.3; margin-bottom: var(--space-xs); color: var(--text); letter-spacing: -0.01em; }
-    .article-excerpt { font-size: 14px; color: var(--text-secondary); line-height: 1.5; margin-bottom: var(--space-sm); }
-    .article-footer { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-
-    /* Empty state */
-    .empty-state { text-align: center; padding: var(--space-xl) var(--space-md); color: var(--text-muted); border: 2px dashed var(--border); }
-    .empty-icon { font-size: 48px; margin-bottom: var(--space-md); opacity: 0.5; animation: float 3s ease-in-out infinite; }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-    .empty-text { font-size: 16px; font-weight: 700; margin-bottom: var(--space-xs); text-transform: uppercase; letter-spacing: 0.05em; }
-    .empty-subtext { font-family: 'Instrument Serif', serif; font-size: 14px; font-style: italic; opacity: 0.7; }
-
-    .zone-footer { text-align: center; font-family: 'Instrument Serif', serif; font-size: 14px; font-style: italic; color: var(--text-muted); padding: var(--space-xl) 0; margin-bottom: 80px; border-top: 2px solid var(--border); }
-
-    /* === MODAL === */
-    .article-modal { position: fixed; inset: 0; z-index: 200; display: none; opacity: 0; transition: opacity 0.3s; }
-    .article-modal.active { display: block; opacity: 1; }
-    .modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(8px); }
-    .modal-content { position: relative; max-width: 680px; margin: 0 auto; background: var(--bg); height: 100%; overflow-y: auto; border-left: 2px solid var(--border); border-right: 2px solid var(--border); }
-    .modal-header { position: sticky; top: 0; background: var(--bg); padding: var(--space-md); display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); z-index: 10; }
-    .modal-nav { display: flex; align-items: center; gap: var(--space-md); }
-    .back-btn { background: none; border: 2px solid var(--border); color: var(--text); font-size: 18px; cursor: pointer; padding: var(--space-sm); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-weight: 700; }
-    .back-btn:hover { background: var(--accent-primary); border-color: var(--accent-primary); color: var(--bg); }
-    .modal-title-nav { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; }
-    .modal-actions { display: flex; gap: var(--space-xs); }
-    .modal-action-btn { background: none; border: 2px solid var(--border); color: var(--text-muted); font-size: 16px; cursor: pointer; padding: var(--space-sm); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-    .modal-action-btn:hover { border-color: var(--text-secondary); color: var(--text); }
-    .modal-body { padding: 0; }
-    .modal-hero-image { width: 100%; max-height: 300px; object-fit: cover; filter: contrast(1.1) grayscale(0.3); border-bottom: 2px solid var(--border); }
-    .modal-text-content { padding: var(--space-md); }
-    .modal-category { display: inline-block; padding: 4px 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: var(--space-md); border: 2px solid currentColor; background: transparent; }
-    .modal-headline { font-size: 28px; font-weight: 800; line-height: 1.1; margin-bottom: var(--space-sm); color: var(--text); letter-spacing: -0.03em; }
-    .modal-meta { font-family: 'Instrument Serif', serif; font-size: 16px; font-style: italic; color: var(--text-secondary); margin-bottom: var(--space-lg); padding-bottom: var(--space-md); border-bottom: 2px solid var(--border); }
-    .modal-body-text { font-size: 15px; line-height: 1.7; color: var(--text); }
-    .modal-body-text p { margin-bottom: var(--space-md); }
-    .modal-body-text strong { color: var(--accent-primary); font-weight: 700; }
-    .modal-body-text em { color: var(--text-secondary); font-family: 'Instrument Serif', serif; }
-    .modal-quote { background: var(--surface); border-left: 4px solid var(--accent-primary); padding: var(--space-md); margin: var(--space-lg) 0; font-family: 'Instrument Serif', serif; font-size: 16px; font-style: italic; line-height: 1.6; color: var(--text-secondary); position: relative; }
-    .modal-quote::before { content: '"'; position: absolute; top: -10px; left: 10px; font-size: 40px; color: var(--accent-primary); opacity: 0.3; font-family: 'Plus Jakarta Sans', sans-serif; }
-    .modal-signature { margin-top: var(--space-xl); padding-top: var(--space-md); border-top: 2px solid var(--border); font-family: 'Instrument Serif', serif; font-style: italic; color: var(--text-muted); font-size: 14px; }
-
-    /* === BOTTOM NAV === */
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 2px solid var(--border); z-index: 1000; padding-bottom: env(safe-area-inset-bottom); }
-    .nav-container { max-width: 480px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center; height: 64px; }
-    .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 100%; color: var(--text-muted); text-decoration: none; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.2s; position: relative; cursor: pointer; }
-    .nav-item::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 0; height: 2px; background: var(--accent-primary); transition: width 0.2s; }
-    .nav-item:hover { color: var(--text-secondary); background: var(--surface-elevated); }
-    .nav-item.active { color: var(--accent-primary); }
-    .nav-item.active::before { width: 100%; }
-    .nav-icon { font-size: 20px; line-height: 1; }
-
-    /* === NOTIFICATION === */
-    .notification { position: fixed; top: var(--space-md); left: 50%; transform: translateX(-50%) translateY(-100px); background: var(--text); color: var(--bg); padding: 12px 24px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; z-index: 10000; opacity: 0; transition: all 0.3s; border: 2px solid var(--bg); box-shadow: 4px 4px 0 var(--accent-primary); }
-    .notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-    .swipe-hint { display: none; text-align: center; padding: var(--space-xs); font-size: 10px; color: var(--text-muted); background: var(--surface); border-bottom: 2px solid var(--border); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
-    @media (hover: none) { .swipe-hint { display: block; } }
-
-    @media (max-width: 480px) {
-      .tab { padding: 10px 4px; font-size: 12px; }
-      .tab-icon { font-size: 16px; }
-      .featured-title { font-size: 18px; }
-      .modal-headline { font-size: 24px; }
-      .logo { font-size: 28px; }
-      .aksi-title { font-size: 22px; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-    }
+  /* ── TOAST ───────────────────────────────────────────────── */
+  .toast{
+    position:fixed;bottom:90px;left:50%;
+    transform:translateX(-50%) translateY(100px);
+    background:var(--tx);color:var(--bg);padding:12px 22px;
+    font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.5px;
+    z-index:600;opacity:0;transition:all .25s cubic-bezier(.175,.885,.32,1.275);
+    pointer-events:none;white-space:nowrap;
+    border:2px solid #000;box-shadow:4px 4px 0 #000;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   </style>
 </head>
 <body>
-  <div class="wrapper">
 
-    <header>
-      <div class="logo-container">
-        <div class="logo" onclick="window.location.href='index.html'">GLITCH</div>
-        <span class="tea-tag">no Cap just VIBE</span>
-      </div>
-      <div class="top-right">
-        <button class="settings-btn" id="settings-btn">⚙️</button>
-      </div>
-    </header>
+<!-- AUTH GUARD -->
+<script src="/shared-constants.js"></script>
+<script>
+if (!JEJAK.isLoggedIn()) {
+  console.warn('[GLITCH] Tidak ada session — redirect ke index');
+  window.location.replace('/index.html');
+}
+</script>
 
-    <div class="swipe-hint">👆 Swipe left/right to switch tabs</div>
+<div class="app">
 
-    <div class="tab-bar">
-      <div class="tab-container">
-        <button class="tab active" data-tab="fastforward" onclick="switchTab('fastforward')">
-          <span class="tab-icon">⚡</span>
-          <span>Fast Forward</span>
-        </button>
-        <button class="tab" data-tab="slowcode" onclick="switchTab('slowcode')">
-          <span class="tab-icon">💭</span>
-          <span>Slow Code</span>
-        </button>
-        <button class="tab" data-tab="aksi" onclick="switchTab('aksi')">
-          <span class="tab-icon">🔥</span>
-          <span>Aksi</span>
-        </button>
-      </div>
+  <!-- HEADER -->
+  <div class="header">
+    <div style="display:flex;align-items:center;gap:0">
+      <div class="logo" onclick="location.reload()">GL<span class="logo-x">⚡</span>TCH</div>
+      <span class="logo-tag">no Cap just VIBE</span>
     </div>
-
-    <div class="content-area">
-
-      <!-- ═══ FAST FORWARD ═══ -->
-      <div class="tab-panel active" id="panel-fastforward">
-        <div class="section-header">
-          <span class="section-icon">⚡</span>
-          <span class="section-title">Fast Forward</span>
-          <span class="section-badge">Film & Musik</span>
-        </div>
-        
-        <div class="featured-card" onclick="openArticle('reza')">
-          <img src="https://raw.githubusercontent.com/hendy-unggul/nope-mvp/main/reza%20rahadian.jpg" alt="Reza Rahadian" class="featured-image">
-          <div class="featured-content">
-            <span class="featured-badge trending">🎬 Film</span>
-            <h3 class="featured-title">Reza Rahadian dan Ilusi Kesempurnaan</h3>
-            <p class="featured-excerpt">untuk yang lelah berakting jadi kuat — "Kita memuji senyumnya, tapi lupa bertanya: Di mana dia menangis?"</p>
-            <div class="card-meta">
-              <div class="card-author">
-                <div class="author-avatar">HD</div>
-                <span>@HD</span>
-              </div>
-              <div class="card-reactions">
-                <button class="reaction-btn" onclick="event.stopPropagation(); react('reza','🤠',this)">🤠 <span>3</span></button>
-                <button class="reaction-btn" onclick="event.stopPropagation(); react('reza','😢',this)">😢 <span>5</span></button>
-                <button class="reaction-btn" onclick="event.stopPropagation(); react('reza','🔥',this)">🔥 <span>7</span></button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="article-card" data-category="fastforward" onclick="openArticle('film2')">
-          <span class="article-tag fastforward">Film</span>
-          <h4 class="article-title">Review: "Istirahatlah Kata-Kata" — Karya yang Berani Rapuh</h4>
-          <p class="article-excerpt">Laura Basuki menunjukkan bagaimana akting seharusnya: bergetar, menciut, dan nyata.</p>
-          <div class="article-footer">
-            <span>5 Feb 2026</span>
-            <span>👁️ 1.2k views</span>
-          </div>
-        </div>
-
-        <div class="featured-card" onclick="openArticle('hindia')">
-          <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&q=80" alt="Hindia" class="featured-image">
-          <div class="featured-content">
-            <span class="featured-badge new">🎵 Musik</span>
-            <h3 class="featured-title">Hindia: Lagu untuk yang Lelah Menunggu</h3>
-            <p class="featured-excerpt">untuk yang janji "nanti" tapi hidupnya mandek — "Kita terlalu sibuk mengejar 'besok' sampai lupa hidup hari ini."</p>
-            <div class="card-meta">
-              <div class="card-author">
-                <div class="author-avatar">HD</div>
-                <span>@HD</span>
-              </div>
-              <div class="card-reactions">
-                <button class="reaction-btn" onclick="event.stopPropagation(); react('hindia','😢',this)">😢 <span>8</span></button>
-                <button class="reaction-btn" onclick="event.stopPropagation(); react('hindia','🔥',this)">🔥 <span>6</span></button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="article-card" data-category="fastforward" onclick="openArticle('musik2')">
-          <span class="article-tag fastforward">Musik</span>
-          <h4 class="article-title">Playlist: Lagu untuk Nangis di Kamar Mandi</h4>
-          <p class="article-excerpt">Kurasi 10 lagu yang mengerti tanpa perlu ditanya.</p>
-          <div class="article-footer">
-            <span>4 Feb 2026</span>
-            <span>🎧 3.4k plays</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══ SLOW CODE ═══ -->
-      <div class="tab-panel" id="panel-slowcode">
-        <div class="section-header">
-          <span class="section-icon">💭</span>
-          <span class="section-title">Slow Code</span>
-          <span class="section-badge">Buku & Interview</span>
-        </div>
-
-        <div class="featured-card" onclick="openArticle('madilog')">
-          <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=600&q=80" alt="Madilog" class="featured-image">
-          <div class="featured-content">
-            <span class="featured-badge trending">📚 Buku</span>
-            <h3 class="featured-title">Madilog: Senjata untuk yang Takut Berpikir</h3>
-            <p class="featured-excerpt">untuk yang lelah dikasih tahu "ikut aja" — "Di era algoritma, berani berpikir sendiri adalah bentuk perlawanan."</p>
-            <div class="card-meta">
-              <div class="card-author">
-                <div class="author-avatar">HD</div>
-                <span>@HD</span>
-              </div>
-              <div class="card-reactions">
-                <button class="reaction-btn" onclick="event.stopPropagation(); react('madilog','🤠',this)">🤠 <span>5</span></button>
-                <button class="reaction-btn" onclick="event.stopPropagation(); react('madilog','🔥',this)">🔥 <span>9</span></button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="article-card" data-category="slowcode" onclick="openArticle('buku2')">
-          <span class="article-tag slowcode">Buku</span>
-          <h4 class="article-title">5 Buku yang Wajib Dibaca Sebelum Usia 25</h4>
-          <p class="article-excerpt">Dari filsuf jalanan hingga manual bertahan hidup.</p>
-          <div class="article-footer">
-            <span>3 Feb 2026</span>
-            <span>📖 892 reads</span>
-          </div>
-        </div>
-
-        <div class="featured-card" onclick="openArticle('interview')">
-          <div class="featured-content" style="padding-top:20px;">
-            <span class="featured-badge new">🎙️ Interview</span>
-            <h3 class="featured-title">Wawancara: @HD — "Aku Memilih Berani Gagal"</h3>
-            <p class="featured-excerpt">untuk yang takut disebut tidak cukup — "Orang sukses punya roadmap. Aku punya peta kuburan mimpi."</p>
-            <div class="card-meta">
-              <div class="card-author">
-                <div class="author-avatar">HD</div>
-                <span>@HD</span>
-              </div>
-              <div class="card-reactions">
-                <button class="reaction-btn" onclick="event.stopPropagation(); react('interview','😢',this)">😢 <span>12</span></button>
-                <button class="reaction-btn" onclick="event.stopPropagation(); react('interview','🔥',this)">🔥 <span>4</span></button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="article-card" data-category="slowcode" onclick="openArticle('interview2')">
-          <span class="article-tag slowcode">Interview</span>
-          <h4 class="article-title">Founder Startup Gagal: "Kami Bangkrut, Tapi Tidak Rusak"</h4>
-          <p class="article-excerpt">Cerita dari sisi lain kesuksesan yang jarang diceritakan.</p>
-          <div class="article-footer">
-            <span>2 Feb 2026</span>
-            <span>🎧 45 min</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ═══ AKSI ═══ -->
-      <div class="tab-panel" id="panel-aksi">
-        <div class="section-header">
-          <span class="section-icon">🔥</span>
-          <span class="section-title">Aksi</span>
-          <span class="section-badge">Isu & Gerakan</span>
-        </div>
-
-        <!-- HERO ISU -->
-        <div class="aksi-hero">
-          <div class="aksi-eyebrow">ISU AKTIF · Kebijakan Pangan 2025</div>
-          <h2 class="aksi-title">Makan Bergizi Gratis: Bedah Dulu, Baru Bersuara</h2>
-          <p class="aksi-subtitle">Jejak nyajiin data — lo yang mikir. Bukan agitasi, bukan framing. Fakta kontras buat ngerti isu dari akarnya.</p>
-
-          <!-- FLOW STEPS -->
-          <div class="flow-steps">
-            <div class="flow-step active-step">
-              <span class="step-num">1</span>
-              <span class="step-text">Bedah data &amp; infografis kontras</span>
-              <span class="step-arrow">→</span>
-            </div>
-            <div class="flow-step">
-              <span class="step-num">2</span>
-              <span class="step-text">Diskusi di ruang aman komunitas</span>
-              <span class="step-arrow">→</span>
-            </div>
-            <div class="flow-step">
-              <span class="step-num">3</span>
-              <span class="step-text">Bersuara lewat petisi bersama</span>
-              <span class="step-arrow">→</span>
-            </div>
-          </div>
-
-          <!-- STATS -->
-          <div class="aksi-stats">
-            <div class="aksi-stat">
-              <span class="aksi-stat-num">27Jt</span>
-              <span class="aksi-stat-label">Siswa<br>penerima</span>
-            </div>
-            <div class="aksi-stat">
-              <span class="aksi-stat-num">Rp71T</span>
-              <span class="aksi-stat-label">Anggaran<br>APBN</span>
-            </div>
-            <div class="aksi-stat">
-              <span class="aksi-stat-num">43%</span>
-              <span class="aksi-stat-label">Yang sampai<br>ke piring</span>
-            </div>
-          </div>
-
-          <!-- MAIN CTA -->
-          <button class="aksi-cta-main" onclick="window.location.href='glitch-issue.html'">
-            <div>
-              <div class="cta-label-main">Bedah Data Sekarang</div>
-              <div class="cta-sub">baca dulu, bersuara kemudian</div>
-            </div>
-            <span class="cta-arrow">→</span>
-          </button>
-
-          <!-- NAVIGATOR CARDS -->
-          <div class="nav-cards">
-            <div class="nav-card aksi-color" onclick="window.location.href='glitch-issue.html#pertanyaan'">
-              <div class="nav-card-icon">❓</div>
-              <div class="nav-card-body">
-                <div class="nav-card-title">5 Pertanyaan Pemantik</div>
-                <div class="nav-card-desc">Lahir dari data — buat lo dan komunitas mulai dari titik yang sama.</div>
-                <div class="nav-card-dest">→ glitch-issue.html</div>
-              </div>
-              <div class="nav-card-arrow">›</div>
-            </div>
-
-            <div class="nav-card cyan-color" onclick="window.location.href='glitch-ruangaman.html'">
-              <div class="nav-card-icon">🔒</div>
-              <div class="nav-card-body">
-                <div class="nav-card-title">Ruang Aman Universitasmu</div>
-                <div class="nav-card-desc">UI · UGM · ITS · IPB. PIN-gated, ephemeral, otonom. Deliberasi sebelum aksi.</div>
-                <div class="nav-card-dest">→ glitch-ruangaman.html</div>
-              </div>
-              <div class="nav-card-arrow">›</div>
-            </div>
-
-            <div class="nav-card green-color" onclick="window.location.href='glitch-petisi.html'">
-              <div class="nav-card-icon">✊</div>
-              <div class="nav-card-body">
-                <div class="nav-card-title">Petisi Kolektif</div>
-                <div class="nav-card-desc">Output dari deliberasi komunitas. Tanda tangan yang bermakna, bukan impulsif.</div>
-                <div class="nav-card-dest">→ glitch-petisi.html</div>
-              </div>
-              <div class="nav-card-arrow">›</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- AKSI LAINNYA -->
-        <div style="margin-top:var(--space-xl);">
-          <div class="section-header">
-            <span class="section-icon">📢</span>
-            <span class="section-title">Aksi Lainnya</span>
-          </div>
-
-          <div class="article-card" data-category="aksi" onclick="openArticle('aksi2')">
-            <span class="article-tag aksi">Aksi</span>
-            <h4 class="article-title">Viral: Mahasiswa Unjuk Rasa Pakai Kostum Dinosaurus</h4>
-            <p class="article-excerpt">"Kami serius soal isu, tapi tidak mau serius sendiri." Cara Gen Z melawan dengan humor.</p>
-            <div class="article-footer">
-              <span>8 Feb 2026</span>
-              <span>📢 12k shares</span>
-            </div>
-          </div>
-
-          <div class="article-card" data-category="aksi" onclick="openArticle('aksi3')">
-            <span class="article-tag aksi">Aksi</span>
-            <h4 class="article-title">Tutorial: Cara Aman Ikut Demo untuk Pemula</h4>
-            <p class="article-excerpt">Dari apa yang harus dibawa sampai nomor hotline bantuan hukum. Wajib baca sebelum turun ke jalan.</p>
-            <div class="article-footer">
-              <span>7 Feb 2026</span>
-              <span>📋 5.6k saves</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="empty-state" style="margin-top:var(--space-lg); background:rgba(255,77,0,0.05);">
-          <div class="empty-icon" style="color:var(--aksi);">✊</div>
-          <div class="empty-text" style="color:var(--text);">Kamu ga aneh.</div>
-          <div class="empty-subtext">Sistemnya yang broken!<br><strong>— GLITCH GENERATION</strong></div>
-        </div>
-      </div>
-
-    </div><!-- end content-area -->
-
-    <div class="zone-footer">Nyambat · Aksi · Solusi</div>
-  </div><!-- end wrapper -->
-
-  <!-- MODAL -->
-  <div class="article-modal" id="articleModal">
-    <div class="modal-overlay" onclick="closeArticle()"></div>
-    <div class="modal-content">
-      <div class="modal-header">
-        <div class="modal-nav">
-          <button class="back-btn" onclick="closeArticle()">←</button>
-          <span class="modal-title-nav" id="modal-nav-title">GLITCH</span>
-        </div>
-        <div class="modal-actions">
-          <button class="modal-action-btn" onclick="shareArticle()">↗️</button>
-          <button class="modal-action-btn" onclick="bookmarkArticle()">🔖</button>
-        </div>
-      </div>
-      <div class="modal-body" id="modalBody"></div>
+    <div class="top-right">
+      <div class="user-pill" id="user-pill">@anon</div>
+      <button class="logout-btn" id="logout-btn" title="Logout">⏏</button>
     </div>
   </div>
 
-  <!-- BOTTOM NAV -->
-  <nav class="bottom-nav">
-    <div class="nav-container">
-      <a href="spill.html" class="nav-item">
-        <span class="nav-icon">✕</span>
-        <span>Spill</span>
-      </a>
-      <a href="jejak.html" class="nav-item">
-        <span class="nav-icon">✦</span>
-        <span>Jejak</span>
-      </a>
-      <a href="glitch.html" class="nav-item active">
-        <span class="nav-icon">⚡</span>
-        <span>Glitch</span>
-      </a>
-      <a href="cocomeo.html" class="nav-item">
-        <span class="nav-icon">〜</span>
-        <span>Cocomeo</span>
-      </a>
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <div class="tab-container">
+      <button class="tab active" data-tab="fastforward" onclick="switchTab('fastforward')">
+        <span class="tab-icon">⚡</span><span>Fast Fwd</span>
+      </button>
+      <button class="tab" data-tab="slowcode" onclick="switchTab('slowcode')">
+        <span class="tab-icon">💭</span><span>Slow Code</span>
+      </button>
+      <button class="tab" data-tab="aksi" onclick="switchTab('aksi')">
+        <span class="tab-icon">🔥</span><span>Aksi</span>
+      </button>
     </div>
-  </nav>
+  </div>
 
-  <script>
-    var articles = {
-      reza: {
-        category:'fastforward', categoryLabel:'Fast Forward', categoryColor:'var(--fastforward)',
-        title:'Reza Rahadian dan Ilusi Kesempurnaan',
-        meta:'untuk yang lelah berakting jadi kuat',
-        image:'https://raw.githubusercontent.com/hendy-unggul/nope-mvp/main/reza%20rahadian.jpg',
-        content:'<p>"Kita memuji senyumnya — tapi lupa bertanya:<br>Di mana dia menangis?"</p><p>Reza Rahadian bukan aktor. Ia <strong>cermin zaman yang takut retak</strong>.<br>Setiap perannya disajikan dengan senyum yang terlalu sempurna.</p><p>Padahal, akting yang hidup lahir dari kegagalan — bukan dari skenario yang rapi.</p><p>Lihat <strong>Laura Basuki yang begitu ciamik di "Istirahatlah Kata-Kata"</strong>: Matanya bergetar sebelum bicara. Tubuhnya menciut di sudut ruang. Ia tidak <em>berakting sedih</em> — ia <strong>menjadi sedih</strong>.</p><div class="modal-quote">Ini bukan kritik pada Reza — ini teriakan untuk diri kita sendiri:<br>Kapan terakhir kali kita berani tampil rapuh?</div><p><strong>Kesempurnaan itu bukan kekuatan — itu penjara.</strong></p><div class="modal-signature">— @HD, 1% petani 99% failure...</div>'
-      },
-      hindia: {
-        category:'fastforward', categoryLabel:'Fast Forward', categoryColor:'var(--fastforward)',
-        title:'Hindia: Lagu untuk yang Lelah Menunggu',
-        meta:'untuk yang janji "nanti" tapi hidupnya mandek',
-        image:'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&q=80',
-        content:'<p>"Kita terlalu sibuk mengejar \'besok\' sampai lupa hidup hari ini."</p><div class="modal-quote">ini lagu untuk yang pernah bilang:<br>"gue nungguin dia berubah."<br>tapi yang berubah justru gue — jadi lebih kosong.</div><p>Karena kadang, kebahagiaan itu bukan sesuatu yang bisa diarsip — tapi sesuatu yang <strong>hilang begitu kamu coba foto</strong>.</p><div class="modal-signature">— @HD, 1% petani 99% failure...</div>'
-      },
-      madilog: {
-        category:'slowcode', categoryLabel:'Slow Code', categoryColor:'var(--slowcode)',
-        title:'Madilog: Senjata untuk yang Takut Berpikir',
-        meta:'untuk yang lelah dikasih tahu "ikut aja"',
-        image:'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=600&q=80',
-        content:'<p>"Di era algoritma, berani berpikir sendiri adalah bentuk perlawanan."</p><div class="modal-quote">"seorang pejuang harus berani sendiri.<br>karena kebenaran seringkali lahir di tempat yang sepi."</div><p>Dan Tan Malaka bukan penulis — ia <strong>pelatih berpikir</strong>.</p><div class="modal-signature">— @HD, 1% petani 99% failure...</div>'
-      },
-      interview: {
-        category:'slowcode', categoryLabel:'Slow Code', categoryColor:'var(--slowcode)',
-        title:'Wawancara: @HD — "Aku Memilih Berani Gagal"',
-        meta:'untuk yang takut disebut tidak cukup',
-        image:null,
-        content:'<p>"Orang sukses punya roadmap. Aku punya peta kuburan mimpi."</p><p>Di atas 500 hektar tanah sitaan BLBI, ditemani ubi rebus yang ditanam sendiri aku terus berjudi dengan hanya 1% kemungkinan menang.</p><p>"Saya bukan gagal karena tidak mencoba. Soichiro Honda bilang 99% of success is failure and so true saya masih berburu 1%."</p><div class="modal-quote">Sistem ini tidak minta kita berhasil. Sistem ini minta kita berhenti bertanya.</div><p>Maka, tak ada kegagalan dan tak ada hukuman — dunia ini seperti training ground, hopefully to make me a better man.</p><div class="modal-signature">— @HD, 1% petani 99% failure...</div>'
-      }
-    };
+  <!-- SCROLL -->
+  <div class="scroll" id="scroll">
 
-    var tabs = ['fastforward','slowcode','aksi'];
+    <!-- ══ FAST FORWARD ══ -->
+    <div class="tab-panel active" id="panel-fastforward">
+      <div class="sect-hdr">
+        <span class="sect-title" style="color:var(--gf)">Fast Forward</span>
+        <span class="sect-badge">Film & Musik</span>
+      </div>
 
-    function switchTab(tabName) {
-      document.querySelectorAll('.tab').forEach(function(tab) {
-        tab.classList.remove('active');
-        if (tab.dataset.tab === tabName) tab.classList.add('active');
-      });
-      document.querySelectorAll('.tab-panel').forEach(function(panel) {
-        panel.classList.remove('active');
-      });
-      var panel = document.getElementById('panel-' + tabName);
-      if (panel) panel.classList.add('active');
-      document.querySelector('.content-area').scrollTop = 0;
-    }
+      <div class="featured-card" onclick="openArticle('reza')">
+        <img src="https://raw.githubusercontent.com/hendy-unggul/nope-mvp/main/reza%20rahadian.jpg" alt="Reza Rahadian" class="featured-img">
+        <div class="featured-body">
+          <span class="featured-badge badge-ff">🎬 Film</span>
+          <h3 class="featured-title">Reza Rahadian dan Ilusi Kesempurnaan</h3>
+          <p class="featured-excerpt">untuk yang lelah berakting jadi kuat — "Kita memuji senyumnya, tapi lupa bertanya: Di mana dia menangis?"</p>
+          <div class="card-meta">
+            <div class="card-author"><div class="author-avatar">HD</div><span>@HD</span></div>
+            <div class="card-reactions">
+              <button class="react-btn" onclick="event.stopPropagation();react('reza','🤠',this)">🤠<span class="react-count">3</span></button>
+              <button class="react-btn" onclick="event.stopPropagation();react('reza','😢',this)">😢<span class="react-count">5</span></button>
+              <button class="react-btn" onclick="event.stopPropagation();react('reza','🔥',this)">🔥<span class="react-count">7</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    // Swipe support
-    var touchStartX = 0;
-    document.addEventListener('touchstart', function(e) { touchStartX = e.changedTouches[0].screenX; });
-    document.addEventListener('touchend', function(e) {
-      var diff = touchStartX - e.changedTouches[0].screenX;
-      if (Math.abs(diff) < 50) return;
-      var currentTab = document.querySelector('.tab.active');
-      if (!currentTab) return;
-      var idx = tabs.indexOf(currentTab.dataset.tab);
-      if (diff > 0 && idx < tabs.length - 1) switchTab(tabs[idx + 1]);
-      else if (diff < 0 && idx > 0) switchTab(tabs[idx - 1]);
-    });
+      <div class="article-card" data-cat="fastforward" onclick="openArticle('film2')">
+        <span class="article-tag tag-ff">Film</span>
+        <h4 class="article-title">Review: "Istirahatlah Kata-Kata" — Karya yang Berani Rapuh</h4>
+        <p class="article-excerpt">Laura Basuki menunjukkan bagaimana akting seharusnya: bergetar, menciut, dan nyata.</p>
+        <div class="article-footer"><span>5 Feb 2026</span><span>👁️ 1.2k views</span></div>
+      </div>
 
-    function openArticle(id) {
-      var article = articles[id];
-      if (!article) { showNotification('Artikel lengkap segera hadir 📚'); return; }
+      <div class="featured-card" onclick="openArticle('hindia')">
+        <img src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&q=80" alt="Hindia" class="featured-img">
+        <div class="featured-body">
+          <span class="featured-badge badge-ff">🎵 Musik</span>
+          <h3 class="featured-title">Hindia: Lagu untuk yang Lelah Menunggu</h3>
+          <p class="featured-excerpt">untuk yang janji "nanti" tapi hidupnya mandek — "Kita terlalu sibuk mengejar 'besok' sampai lupa hidup hari ini."</p>
+          <div class="card-meta">
+            <div class="card-author"><div class="author-avatar">HD</div><span>@HD</span></div>
+            <div class="card-reactions">
+              <button class="react-btn" onclick="event.stopPropagation();react('hindia','😢',this)">😢<span class="react-count">8</span></button>
+              <button class="react-btn" onclick="event.stopPropagation();react('hindia','🔥',this)">🔥<span class="react-count">6</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      var modal = document.getElementById('articleModal');
-      var body = document.getElementById('modalBody');
-      var navTitle = document.getElementById('modal-nav-title');
+      <div class="article-card" data-cat="fastforward" onclick="openArticle('musik2')">
+        <span class="article-tag tag-ff">Musik</span>
+        <h4 class="article-title">Playlist: Lagu untuk Nangis di Kamar Mandi</h4>
+        <p class="article-excerpt">Kurasi 10 lagu yang mengerti tanpa perlu ditanya.</p>
+        <div class="article-footer"><span>4 Feb 2026</span><span>🎧 3.4k plays</span></div>
+      </div>
+    </div>
 
-      navTitle.textContent = article.categoryLabel;
-      navTitle.style.color = article.categoryColor;
+    <!-- ══ SLOW CODE ══ -->
+    <div class="tab-panel" id="panel-slowcode">
+      <div class="sect-hdr">
+        <span class="sect-title" style="color:var(--gx)">Slow Code</span>
+        <span class="sect-badge">Buku & Interview</span>
+      </div>
 
-      var imageHtml = article.image ? '<img src="' + article.image + '" alt="' + article.title + '" class="modal-hero-image">' : '';
-      body.innerHTML = imageHtml + '<div class="modal-text-content"><span class="modal-category" style="color:' + article.categoryColor + ';border-color:' + article.categoryColor + ';">' + article.categoryLabel + '</span><h1 class="modal-headline">' + article.title + '</h1><div class="modal-meta">' + article.meta + '</div><div class="modal-body-text">' + article.content + '</div></div>';
+      <div class="featured-card" onclick="openArticle('madilog')">
+        <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=600&q=80" alt="Madilog" class="featured-img">
+        <div class="featured-body">
+          <span class="featured-badge badge-sc">📚 Buku</span>
+          <h3 class="featured-title">Madilog: Senjata untuk yang Takut Berpikir</h3>
+          <p class="featured-excerpt">untuk yang lelah dikasih tahu "ikut aja" — "Di era algoritma, berani berpikir sendiri adalah bentuk perlawanan."</p>
+          <div class="card-meta">
+            <div class="card-author"><div class="author-avatar">HD</div><span>@HD</span></div>
+            <div class="card-reactions">
+              <button class="react-btn" onclick="event.stopPropagation();react('madilog','🤠',this)">🤠<span class="react-count">5</span></button>
+              <button class="react-btn" onclick="event.stopPropagation();react('madilog','🔥',this)">🔥<span class="react-count">9</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      modal.classList.add('active');
-      document.body.style.overflow = 'hidden';
-    }
+      <div class="article-card" data-cat="slowcode" onclick="openArticle('buku2')">
+        <span class="article-tag tag-sc">Buku</span>
+        <h4 class="article-title">5 Buku yang Wajib Dibaca Sebelum Usia 25</h4>
+        <p class="article-excerpt">Dari filsuf jalanan hingga manual bertahan hidup.</p>
+        <div class="article-footer"><span>3 Feb 2026</span><span>📖 892 reads</span></div>
+      </div>
 
-    function closeArticle() {
-      document.getElementById('articleModal').classList.remove('active');
-      document.body.style.overflow = '';
-    }
+      <div class="featured-card" onclick="openArticle('interview')">
+        <div class="featured-body" style="padding-top:20px">
+          <span class="featured-badge badge-sc">🎙️ Interview</span>
+          <h3 class="featured-title">Wawancara: @HD — "Aku Memilih Berani Gagal"</h3>
+          <p class="featured-excerpt">untuk yang takut disebut tidak cukup — "Orang sukses punya roadmap. Aku punya peta kuburan mimpi."</p>
+          <div class="card-meta">
+            <div class="card-author"><div class="author-avatar">HD</div><span>@HD</span></div>
+            <div class="card-reactions">
+              <button class="react-btn" onclick="event.stopPropagation();react('interview','😢',this)">😢<span class="react-count">12</span></button>
+              <button class="react-btn" onclick="event.stopPropagation();react('interview','🔥',this)">🔥<span class="react-count">4</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    function react(id, emoji, btn) {
-      var span = btn.querySelector('span');
-      span.textContent = parseInt(span.textContent) + 1;
-      btn.style.transform = 'scale(1.2)';
-      setTimeout(function() { btn.style.transform = ''; }, 200);
-    }
+      <div class="article-card" data-cat="slowcode" onclick="openArticle('interview2')">
+        <span class="article-tag tag-sc">Interview</span>
+        <h4 class="article-title">Founder Startup Gagal: "Kami Bangkrut, Tapi Tidak Rusak"</h4>
+        <p class="article-excerpt">Cerita dari sisi lain kesuksesan yang jarang diceritakan.</p>
+        <div class="article-footer"><span>2 Feb 2026</span><span>🎧 45 min</span></div>
+      </div>
+    </div>
 
-    function shareArticle() { showNotification('Link copied! 📋'); }
-    function bookmarkArticle() { showNotification('Disimpan ke reading list 🔖'); }
+    <!-- ══ AKSI ══ -->
+    <div class="tab-panel" id="panel-aksi">
+      <div class="sect-hdr">
+        <span class="sect-title" style="color:var(--ga)">Aksi</span>
+        <span class="sect-badge">Isu & Gerakan</span>
+      </div>
 
-    function showNotification(message) {
-      var existing = document.querySelector('.notification');
-      if (existing) existing.remove();
-      var notif = document.createElement('div');
-      notif.className = 'notification';
-      notif.textContent = message;
-      document.body.appendChild(notif);
-      setTimeout(function() { notif.classList.add('show'); }, 10);
-      setTimeout(function() { notif.classList.remove('show'); setTimeout(function() { notif.remove(); }, 300); }, 2500);
-    }
+      <div class="aksi-hero">
+        <div class="aksi-eyebrow">ISU AKTIF · Kebijakan Pangan 2025</div>
+        <h2 class="aksi-title">Makan Bergizi Gratis: Bedah Dulu, Baru Bersuara</h2>
+        <p class="aksi-subtitle">Jejak nyajiin data — lo yang mikir. Bukan agitasi, bukan framing. Fakta kontras buat ngerti isu dari akarnya.</p>
 
-    document.getElementById('settings-btn').onclick = function() {
-      if (confirm('Keluar dari akun?')) {
-        localStorage.removeItem('nope_username');
-        window.location.href = 'index.html';
-      }
-    };
+        <div class="flow-steps">
+          <div class="flow-step active">
+            <span class="step-num">1</span>
+            <span class="step-text">Bedah data &amp; infografis kontras</span>
+            <span class="step-arrow">→</span>
+          </div>
+          <div class="flow-step">
+            <span class="step-num">2</span>
+            <span class="step-text">Diskusi di ruang aman komunitas</span>
+            <span class="step-arrow">→</span>
+          </div>
+          <div class="flow-step">
+            <span class="step-num">3</span>
+            <span class="step-text">Bersuara lewat petisi bersama</span>
+            <span class="step-arrow">→</span>
+          </div>
+        </div>
 
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeArticle();
-      var currentTab = document.querySelector('.tab.active');
-      if (!currentTab) return;
-      var idx = tabs.indexOf(currentTab.dataset.tab);
-      if (e.key === 'ArrowRight' && idx < tabs.length - 1) switchTab(tabs[idx + 1]);
-      else if (e.key === 'ArrowLeft' && idx > 0) switchTab(tabs[idx - 1]);
-    });
+        <div class="aksi-stats">
+          <div class="aksi-stat"><span class="aksi-stat-num">27Jt</span><span class="aksi-stat-label">Siswa<br>penerima</span></div>
+          <div class="aksi-stat"><span class="aksi-stat-num">Rp71T</span><span class="aksi-stat-label">Anggaran<br>APBN</span></div>
+          <div class="aksi-stat"><span class="aksi-stat-num">43%</span><span class="aksi-stat-label">Yang sampai<br>ke piring</span></div>
+        </div>
 
-    // Set default tab
-    switchTab('fastforward');
-  </script>
+        <button class="aksi-cta" onclick="window.location.href='/glitch-issue.html'">
+          <div>
+            <div>Bedah Data Sekarang</div>
+            <span class="cta-sub">baca dulu, bersuara kemudian</span>
+          </div>
+          <span>→</span>
+        </button>
+
+        <div class="nav-cards">
+          <div class="nav-card c-orange" onclick="window.location.href='/glitch-issue.html#pertanyaan'">
+            <div class="nav-card-icon">❓</div>
+            <div class="nav-card-body">
+              <div class="nav-card-title">5 Pertanyaan Pemantik</div>
+              <div class="nav-card-desc">Lahir dari data — buat lo dan komunitas mulai dari titik yang sama.</div>
+              <div class="nav-card-dest">→ glitch-issue.html</div>
+            </div>
+            <div class="nav-card-arrow">›</div>
+          </div>
+          <div class="nav-card c-cyan" onclick="window.location.href='/glitch-ruangaman.html'">
+            <div class="nav-card-icon">🔒</div>
+            <div class="nav-card-body">
+              <div class="nav-card-title">Ruang Aman Universitasmu</div>
+              <div class="nav-card-desc">UI · UGM · ITS · IPB. PIN-gated, ephemeral, otonom.</div>
+              <div class="nav-card-dest">→ glitch-ruangaman.html</div>
+            </div>
+            <div class="nav-card-arrow">›</div>
+          </div>
+          <div class="nav-card c-lime" onclick="window.location.href='/glitch-petisi.html'">
+            <div class="nav-card-icon">✊</div>
+            <div class="nav-card-body">
+              <div class="nav-card-title">Petisi Kolektif</div>
+              <div class="nav-card-desc">Output dari deliberasi komunitas. Tanda tangan yang bermakna.</div>
+              <div class="nav-card-dest">→ glitch-petisi.html</div>
+            </div>
+            <div class="nav-card-arrow">›</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sect-hdr" style="margin-top:24px">
+        <span class="sect-title" style="color:var(--ga)">Aksi Lainnya</span>
+      </div>
+
+      <div class="article-card" data-cat="aksi" onclick="openArticle('aksi2')">
+        <span class="article-tag tag-ak">Aksi</span>
+        <h4 class="article-title">Viral: Mahasiswa Unjuk Rasa Pakai Kostum Dinosaurus</h4>
+        <p class="article-excerpt">"Kami serius soal isu, tapi tidak mau serius sendiri." Cara Gen Z melawan dengan humor.</p>
+        <div class="article-footer"><span>8 Feb 2026</span><span>📢 12k shares</span></div>
+      </div>
+
+      <div class="article-card" data-cat="aksi" onclick="openArticle('aksi3')">
+        <span class="article-tag tag-ak">Aksi</span>
+        <h4 class="article-title">Tutorial: Cara Aman Ikut Demo untuk Pemula</h4>
+        <p class="article-excerpt">Dari apa yang harus dibawa sampai nomor hotline bantuan hukum.</p>
+        <div class="article-footer"><span>7 Feb 2026</span><span>📋 5.6k saves</span></div>
+      </div>
+
+      <div class="empty-state" style="margin-top:20px;background:rgba(255,159,10,.05);border:2px dashed var(--bd2)">
+        <div class="empty-icon" style="opacity:.5">✊</div>
+        <div class="empty-title" style="color:var(--ga)">Kamu ga aneh.</div>
+        <div class="empty-text">Sistemnya yang broken! — GLITCH GENERATION</div>
+      </div>
+    </div>
+
+    <div class="zone-footer">Nyambat · Aksi · Solusi</div>
+  </div><!-- end scroll -->
+
+</div><!-- end app -->
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="modal-hdr">
+    <div class="modal-nav">
+      <button class="back-btn" onclick="closeArticle()">←</button>
+      <span class="modal-cat-label" id="modal-cat-label">GLITCH</span>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-act-btn" onclick="shareArticle()">↗️</button>
+      <button class="modal-act-btn" onclick="bookmarkArticle()">🔖</button>
+    </div>
+  </div>
+  <div class="modal-body" id="modal-body"></div>
+</div>
+
+<!-- FIX #6: absolute paths -->
+<nav class="bottom-nav">
+  <div class="nav-container">
+    <a href="/spill.html" class="nav-item"><span class="nav-icon">✕</span><span>Spill</span></a>
+    <a href="/jejak.html" class="nav-item"><span class="nav-icon">✦</span><span>Jejak</span></a>
+    <a href="/glitch.html" class="nav-item active"><span class="nav-icon">⚡</span><span>Glitch</span></a>
+    <a href="/cocomeo.html" class="nav-item"><span class="nav-icon">〜</span><span>Cocomeo</span></a>
+  </div>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── ARTICLE DATA ──────────────────────────────────────────────
+var ARTICLES = {
+  reza:{
+    cat:'fastforward',catLabel:'FAST FORWARD',catColor:'var(--gf)',
+    title:'Reza Rahadian dan Ilusi Kesempurnaan',
+    meta:'untuk yang lelah berakting jadi kuat',
+    img:'https://raw.githubusercontent.com/hendy-unggul/nope-mvp/main/reza%20rahadian.jpg',
+    body:'<p>"Kita memuji senyumnya — tapi lupa bertanya:<br>Di mana dia menangis?"</p><p>Reza Rahadian bukan aktor. Ia <strong>cermin zaman yang takut retak</strong>.<br>Setiap perannya disajikan dengan senyum yang terlalu sempurna.</p><p>Padahal, akting yang hidup lahir dari kegagalan — bukan dari skenario yang rapi.</p><p>Lihat <strong>Laura Basuki yang begitu ciamik di "Istirahatlah Kata-Kata"</strong>: Matanya bergetar sebelum bicara. Tubuhnya menciut di sudut ruang. Ia tidak <em>berakting sedih</em> — ia <strong>menjadi sedih</strong>.</p><div class="modal-quote">Ini bukan kritik pada Reza — ini teriakan untuk diri kita sendiri:<br>Kapan terakhir kali kita berani tampil rapuh?</div><p><strong>Kesempurnaan itu bukan kekuatan — itu penjara.</strong></p><div class="modal-sig">— @HD, 1% petani 99% failure...</div>'
+  },
+  hindia:{
+    cat:'fastforward',catLabel:'FAST FORWARD',catColor:'var(--gf)',
+    title:'Hindia: Lagu untuk yang Lelah Menunggu',
+    meta:'untuk yang janji "nanti" tapi hidupnya mandek',
+    img:'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&q=80',
+    body:'<p>"Kita terlalu sibuk mengejar \'besok\' sampai lupa hidup hari ini."</p><div class="modal-quote">ini lagu untuk yang pernah bilang:<br>"gue nungguin dia berubah."<br>tapi yang berubah justru gue — jadi lebih kosong.</div><p>Karena kadang, kebahagiaan itu bukan sesuatu yang bisa diarsip — tapi sesuatu yang <strong>hilang begitu kamu coba foto</strong>.</p><div class="modal-sig">— @HD, 1% petani 99% failure...</div>'
+  },
+  madilog:{
+    cat:'slowcode',catLabel:'SLOW CODE',catColor:'var(--gx)',
+    title:'Madilog: Senjata untuk yang Takut Berpikir',
+    meta:'untuk yang lelah dikasih tahu "ikut aja"',
+    img:'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=600&q=80',
+    body:'<p>"Di era algoritma, berani berpikir sendiri adalah bentuk perlawanan."</p><div class="modal-quote">"seorang pejuang harus berani sendiri.<br>karena kebenaran seringkali lahir di tempat yang sepi."</div><p>Dan Tan Malaka bukan penulis — ia <strong>pelatih berpikir</strong>.</p><div class="modal-sig">— @HD, 1% petani 99% failure...</div>'
+  },
+  interview:{
+    cat:'slowcode',catLabel:'SLOW CODE',catColor:'var(--gx)',
+    title:'Wawancara: @HD — "Aku Memilih Berani Gagal"',
+    meta:'untuk yang takut disebut tidak cukup',
+    img:null,
+    body:'<p>"Orang sukses punya roadmap. Aku punya peta kuburan mimpi."</p><p>Di atas 500 hektar tanah sitaan BLBI, ditemani ubi rebus yang ditanam sendiri aku terus berjudi dengan hanya 1% kemungkinan menang.</p><div class="modal-quote">Sistem ini tidak minta kita berhasil. Sistem ini minta kita berhenti bertanya.</div><p>Maka, tak ada kegagalan dan tak ada hukuman — dunia ini seperti training ground, hopefully to make me a better man.</p><div class="modal-sig">— @HD, 1% petani 99% failure...</div>'
+  }
+};
+
+// ── STATE ────────────────────────────────────────────────────
+var TABS = ['fastforward','slowcode','aksi'];
+
+// ── INIT: read session ───────────────────────────────────────
+(function(){
+  var sess = JEJAK.getSession();
+  var pill = document.getElementById('user-pill');
+  if (pill && sess.username) pill.textContent = '@' + sess.username;
+})();
+
+// ── LOGOUT ───────────────────────────────────────────────────
+document.getElementById('logout-btn').addEventListener('click', function(){
+  if (!confirm('Yakin logout?')) return;
+  JEJAK.clearSession('glitch logout');
+  sessionStorage.clear();
+  window.location.replace('/index.html');
+});
+
+// ── TABS ─────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(function(t){
+    t.classList.toggle('active', t.dataset.tab === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(function(p){
+    p.classList.toggle('active', p.id === 'panel-' + name);
+  });
+  document.getElementById('scroll').scrollTop = 0;
+}
+
+// Swipe support
+var tsX = 0;
+document.addEventListener('touchstart', function(e){ tsX = e.changedTouches[0].screenX; }, {passive:true});
+document.addEventListener('touchend', function(e){
+  var diff = tsX - e.changedTouches[0].screenX;
+  if (Math.abs(diff) < 50) return;
+  var active = document.querySelector('.tab.active');
+  if (!active) return;
+  var idx = TABS.indexOf(active.dataset.tab);
+  if (diff > 0 && idx < TABS.length-1) switchTab(TABS[idx+1]);
+  else if (diff < 0 && idx > 0) switchTab(TABS[idx-1]);
+}, {passive:true});
+
+// Keyboard nav
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape') closeArticle();
+  var active = document.querySelector('.tab.active');
+  if (!active) return;
+  var idx = TABS.indexOf(active.dataset.tab);
+  if (e.key === 'ArrowRight' && idx < TABS.length-1) switchTab(TABS[idx+1]);
+  else if (e.key === 'ArrowLeft' && idx > 0) switchTab(TABS[idx-1]);
+});
+
+// ── ARTICLE MODAL ────────────────────────────────────────────
+function openArticle(id) {
+  var a = ARTICLES[id];
+  if (!a) { showToast('Artikel lengkap segera hadir 📚'); return; }
+
+  var modal = document.getElementById('modal');
+  var body  = document.getElementById('modal-body');
+  var label = document.getElementById('modal-cat-label');
+
+  label.textContent = a.catLabel;
+  label.style.color = a.catColor;
+
+  var imgHtml = a.img
+    ? '<img src="' + a.img + '" alt="' + esc(a.title) + '" class="modal-hero-img">'
+    : '';
+
+  body.innerHTML = imgHtml +
+    '<div class="modal-text">' +
+      '<span class="modal-cat-badge" style="color:' + a.catColor + ';border-color:' + a.catColor + '">' + a.catLabel + '</span>' +
+      '<h1 class="modal-headline">' + esc(a.title) + '</h1>' +
+      '<div class="modal-meta">' + esc(a.meta) + '</div>' +
+      '<div class="modal-content">' + a.body + '</div>' +
+    '</div>';
+
+  modal.classList.add('on');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeArticle() {
+  document.getElementById('modal').classList.remove('on');
+  document.body.style.overflow = '';
+}
+
+// ── REACTIONS ────────────────────────────────────────────────
+function react(id, emoji, btn) {
+  var span = btn.querySelector('.react-count');
+  span.textContent = parseInt(span.textContent) + 1;
+  btn.style.transform = 'scale(1.25)';
+  setTimeout(function(){ btn.style.transform = ''; }, 200);
+}
+
+// ── SHARE / BOOKMARK ─────────────────────────────────────────
+function shareArticle()    { showToast('Link copied! 📋'); }
+function bookmarkArticle() { showToast('Disimpan ke reading list 🔖'); }
+
+// ── TOAST ────────────────────────────────────────────────────
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2500);
+}
+
+// ── UTILS ────────────────────────────────────────────────────
+function esc(str) {
+  var d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+// Init default tab
+switchTab('fastforward');
+</script>
+
 </body>
 </html>
