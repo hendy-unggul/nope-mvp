@@ -419,24 +419,14 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 <input type="file" id="finput" accept="image/*" multiple style="display:none">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/shared-constants.js"></script>
 <script>
-// ============================================
-// ✅ FIX: AUTH GUARD — hanya cek localStorage, TIDAK redirect jika ada session valid
-// Bug sebelumnya: guard terlalu agresif, redirect ke index.html padahal session valid
-// ============================================
-(function() {
-  var loggedIn = localStorage.getItem('jejak_logged_in') === 'true';
-  var username = localStorage.getItem('jejak_username');
-  var userId   = localStorage.getItem('user_id');
-
-  // Hanya redirect jika BENAR-BENAR tidak ada session sama sekali
-  if (!loggedIn || !username || !userId || userId === 'undefined' || userId === 'null') {
-    // Simpan halaman tujuan agar index.html TIDAK redirect balik ke sini
-    // ✅ FIX: set flag bahwa kita dari jejak.html bukan dari redirect loop
-    sessionStorage.setItem('jejak_redirect_from', 'jejak');
-    window.location.replace('index.html');
-  }
-})();
+// ✅ AUTH GUARD — pakai JEJAK.requireAuth() dari shared-constants.js
+// Ini sama persis dengan pola di spill.html agar konsisten
+if (!JEJAK.isLoggedIn()) {
+  console.warn('[JEJAK] Auth guard — redirect ke index');
+  window.location.replace('/index.html');
+}
 </script>
 <script>
 // ============================================
@@ -498,9 +488,9 @@ function toggleMenu() {
 
 function logoutUser() {
   if (!confirm('Yakin logout? Semua data lokal akan dihapus.')) return;
-  localStorage.clear();
+  JEJAK.clearSession('manual logout');
   sessionStorage.clear();
-  location.href = 'index.html';
+  location.href = '/index.html';
 }
 
 function selMood(mood) {
@@ -649,14 +639,14 @@ function setHero(id) {
 }
 
 // ============================================
-// SUPABASE INIT
+// SUPABASE INIT — pakai JEJAK.SUPABASE_URL & KEY dari shared-constants
 // ============================================
 function initSupabase() {
   try {
     if (window.supabase && window.supabase.createClient) {
       window.supabaseClient = window.supabase.createClient(
-        'https://fuovfrdicdhnlymnacpz.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0'
+        JEJAK.SUPABASE_URL,
+        JEJAK.SUPABASE_KEY
       );
       return true;
     }
@@ -667,66 +657,34 @@ function initSupabase() {
 }
 
 // ============================================
-// ✅ FIX: AUTH — profile check TIDAK redirect jika session localStorage valid
-// Bug sebelumnya: network error / profile not found → redirect ke index.html
-// → index.html deteksi sudah login → redirect balik ke jejak.html → LOOP
+// AUTH — baca session via JEJAK.getSession() (key: jejak_uid, bukan user_id)
 // ============================================
 async function checkAuth() {
-  var username = localStorage.getItem('jejak_username');
-  var userId = localStorage.getItem('user_id');
-  var loggedIn = localStorage.getItem('jejak_logged_in') === 'true';
+  // ✅ Pakai JEJAK.getSession() — baca dari key yang BENAR (jejak_uid)
+  var sess = JEJAK.getSession();
+  var userId = sess.uid;
+  var username = sess.username;
 
-  if (!loggedIn || !username || !userId || userId === 'undefined' || userId === 'null' || userId.length < 10) {
-    console.warn('[JEJAK] Session tidak valid, redirect ke login');
-    localStorage.removeItem('jejak_logged_in');
-    localStorage.removeItem('jejak_username');
-    localStorage.removeItem('user_id');
-    sessionStorage.setItem('jejak_force_login', '1');
-    location.replace('index.html');
+  if (!sess.loggedIn || !userId || !username) {
+    console.warn('[JEJAK] Session tidak valid');
+    JEJAK.clearSession('invalid session in jejak.html');
+    window.location.replace('/index.html');
     return false;
   }
 
-  // Set state dari localStorage — TIDAK perlu tunggu DB
+  // Set state
   S.userId = userId;
   S.user = username;
-  S.isPremium = false;
+  S.isPremium = JEJAK.checkSub();
 
   var huser = $('huser');
   var odot = $('odot');
   if (huser) huser.textContent = '@' + S.user;
   if (odot) odot.classList.remove('off');
 
-  // ✅ FIX: Profile check hanya untuk logging/warning, BUKAN untuk redirect
-  // Redirect hanya jika localStorage sudah clear (di atas)
-  if (window.supabaseClient) {
-    try {
-      var profileCheck = await window.supabaseClient
-        .from('profiles')
-        .select('id, username')
-        .eq('id', userId)
-        .limit(1);
+  console.log('%c[JEJAK] Auth OK', 'color:#bfff00;font-weight:bold', { username, uid: userId.substring(0,8)+'...' });
 
-      if (profileCheck.error) {
-        // Network error atau RLS error — JANGAN redirect, cukup log warning
-        console.warn('[JEJAK] Profile check error (non-fatal, session tetap valid):', profileCheck.error.message);
-      } else if (!profileCheck.data || profileCheck.data.length === 0) {
-        // ✅ FIX: Profile tidak ditemukan di DB — ini bisa terjadi karena:
-        // 1. RLS policy memblokir SELECT
-        // 2. Profile belum dibuat (race condition saat register)
-        // JANGAN redirect otomatis — tampilkan warning saja
-        console.warn('[JEJAK] Profile tidak ditemukan di DB untuk userId:', userId, '— tetap lanjut (mungkin RLS issue)');
-        // Hanya redirect jika sessionStorage flag eksplisit dari login
-        // TIDAK redirect otomatis untuk menghindari bounce loop
-      } else {
-        console.log('%c[JEJAK] Profile valid:', 'color:#39FF14', profileCheck.data[0]);
-      }
-    } catch(profileErr) {
-      // Exception — JANGAN redirect
-      console.warn('[JEJAK] Profile check exception (non-fatal):', profileErr.message);
-    }
-  }
-
-  // Load data setelah auth berhasil
+  // Load data
   await loadEntries();
   await loadArtefacts();
   return true;
@@ -764,7 +722,6 @@ async function loadEntries() {
     renderEntries();
   } catch (err) {
     console.error('Load entries error:', err);
-    toast('Gagal load entries: ' + (err.message || err));
   }
 }
 
@@ -1155,20 +1112,15 @@ function sendVoidMessage() { toast('Fitur ini memerlukan Premium'); }
 // ============================================
 // DEBUG HELPERS
 // ============================================
-window.debugSession = async function() {
-  var info = {
-    'jejak_username':   localStorage.getItem('jejak_username'),
-    'user_id':          localStorage.getItem('user_id'),
-    'jejak_logged_in':  localStorage.getItem('jejak_logged_in')
-  };
-  console.table(info);
+window.debugSession = function() {
+  var sess = JEJAK.getSession();
+  console.table(sess);
+  console.log('[JEJAK] isLoggedIn:', JEJAK.isLoggedIn());
 };
 
 window.fixSession = function() {
-  localStorage.removeItem('user_id');
-  localStorage.removeItem('jejak_logged_in');
-  localStorage.removeItem('jejak_username');
-  setTimeout(function() { location.href = 'index.html'; }, 500);
+  JEJAK.clearSession('manual fix');
+  setTimeout(function() { location.href = '/index.html'; }, 500);
 };
 
 // ============================================
@@ -1236,31 +1188,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
   initUpload();
 
-  // ✅ FIX: Init Supabase dulu, baru checkAuth — mencegah race condition
-  var sbReady = initSupabase();
-  if (!sbReady) {
-    console.warn('[JEJAK] Supabase not ready, loading from localStorage only');
-    // Tetap set state dari localStorage meski Supabase gagal
-    var userId = localStorage.getItem('user_id');
-    var username = localStorage.getItem('jejak_username');
-    if (userId && username) {
-      S.userId = userId;
-      S.user = username;
-      var huser = $('huser');
-      if (huser) huser.textContent = '@' + username;
-      var odot = $('odot');
-      if (odot) odot.classList.remove('off');
-    }
-    return;
-  }
-
+  // Init Supabase & auth
+  initSupabase();
   checkAuth().then(function(authed) {
     if (authed) {
-      console.log('%c[JEJAK] Auth OK, data loaded', 'color:#39FF14');
+      console.log('%c[JEJAK] Ready', 'color:#bfff00;font-weight:bold');
     }
-    // ✅ FIX: TIDAK redirect jika authed === false dari checkAuth
-    // karena checkAuth sudah handle redirect internal jika session benar-benar invalid
-    // Menghilangkan else-branch yang menyebabkan double redirect / bounce loop
   });
 
   // Auto-refresh reactions setiap 15 detik
