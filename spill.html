@@ -402,7 +402,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
     <span class="modal-tag">VIP ACCESS</span><div class="modal-h">PILIH PAKET</div>
     <div class="modal-sub">tinggal pilih, bayar via Midtrans, langsung aktif</div>
     <div class="price-card" onclick="selectPlan(this,'weekly')"><div><div class="price-main">Rp 10K</div><div class="price-sub">7 hari</div></div><div class="price-right"><span class="price-tag">BASIC</span><div class="price-note">✅ chat tanpa batas</div></div></div>
-    <div class="price-card" onclick="selectPlan(this,'monthly')"><div><div class="price-main">Rp 20K</div><div class="price-sub">30 hari</div></div><div class="price-right"><span class="price-tag">✨ PREMIUM</span><div class="price-note">✅ chat tanpa batas + WHISPERER ✦</div></div></div>
+    <div class="price-card" onclick="selectPlan(this,'monthly')"><div><div class="price-main">Rp 50K</div><div class="price-sub">30 hari</div></div><div class="price-right"><span class="price-tag">✨ PREMIUM</span><div class="price-note">✅ chat tanpa batas + WHISPERER ✦</div></div></div>
     <div style="background:var(--sf);border:2px solid var(--bd2);padding:16px;margin:20px 0;box-shadow:3px 3px 0 #000"><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="color:var(--as);font-size:18px">✦</span><span style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px">WHISPERER (PREMIUM 50K)</span></div><div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--txs);line-height:1.9">• ✦ pesan rahasia terenkripsi<br>• ⏳ hilang dalam 5 detik setelah dibaca<br>• 🔒 tidak ada log, tidak ada jejak<br>• 💬 chat tanpa batas</div></div>
     <div class="timer-big"><div class="num">24:00:00</div><div class="label">OFFER BERAKHIR</div></div>
     <button class="modal-action-btn" onclick="processUpgrade()">UPGRADE SEKARANG</button>
@@ -502,7 +502,7 @@ let whispers=[
   {id:'w2',from:'sejuta.badai',to:userName,content:'salam kenal, boleh ngobrol?',timestamp:Date.now()-360000,read:true,thread:[]}
 ];
 const REACT_EMO={skull:'💀',cry:'😭',fire:'🔥',upside:'🙃'};
-const TERMS=`Dengan melanjutkan pembayaran, kamu setuju bahwa:\n\n1. 🔄 Subscription digital untuk fitur premium SPILL.\n2. ⏰ Paket 7 hari (10K): chat tanpa batas | Paket 30 hari (20K): chat + WHISPERER\n3. 💳 Pembayaran via Midtrans\n4. 🚫 Tidak ada refund (kecuali error sistem)\n5. 🔒 SPILL tidak menyimpan data kartu\n6. ⏳ Tidak ada auto-renewal\n7. ❓ Hubungi unggul@outlook.com`;
+const TERMS=`Dengan melanjutkan pembayaran, kamu setuju bahwa:\n\n1. 🔄 Subscription digital untuk fitur premium SPILL.\n2. ⏰ Paket 7 hari (10K): chat tanpa batas | Paket 30 hari (50K): chat + WHISPERER\n3. 💳 Pembayaran via Midtrans\n4. 🚫 Tidak ada refund (kecuali error sistem)\n5. 🔒 SPILL tidak menyimpan data kartu\n6. ⏳ Tidak ada auto-renewal\n7. ❓ Hubungi @spill.support`;
 
 // ─── UTILS ───
 const $=id=>document.getElementById(id);
@@ -561,54 +561,29 @@ function initSpillSupabase(){
   }catch(e){console.warn('[SPILL] Supabase init failed:',e);}
 }
 
-// ─── LOAD REAL ENTRIES — FIXED: profiles JOIN + 3-level fallback ─────────────
+// ─── LOAD REAL ENTRIES ────────────────────────────────────────────────────────
 async function loadRealEntries(){
   if(!sbClient){renderSpills();return;}
   try{
-    // ── Attempt 1: JOIN ke profiles (new schema) ──────────────────────────
+    // Query minimalis — hanya kolom yang pasti ada di tabel entries
+    // profiles JOIN di-skip karena kolom display_name/anon_name tidak exist di schema ini
     let result=await sbClient
       .from('entries')
-      .select('id,user_id,content,mood,reactions,created_at,profiles(username,display_name,anon_name)')
+      .select('id,user_id,content,mood,reactions,created_at')
       .order('created_at',{ascending:false})
       .limit(20);
 
-    // ── Attempt 2: kalau JOIN gagal → coba username column langsung di entries ──
     if(result.error){
-      console.warn('[SPILL] JOIN failed:',result.error.message);
-      result=await sbClient
-        .from('entries')
-        .select('id,user_id,username,content,mood,reactions,created_at')
-        .order('created_at',{ascending:false})
-        .limit(20);
-    }
-
-    // ── Attempt 3: bare minimum tanpa username ────────────────────────────
-    if(result.error){
-      console.warn('[SPILL] username col failed:',result.error.message);
-      result=await sbClient
-        .from('entries')
-        .select('id,user_id,content,mood,reactions,created_at')
-        .order('created_at',{ascending:false})
-        .limit(20);
-    }
-
-    if(result.error){
-      console.warn('[SPILL] All queries failed:',result.error.message);
-      const meta=$('feedMeta');if(meta)meta.textContent='DB ERROR';
+      console.warn('[SPILL] Query failed:',result.error.message);
       renderSpills();return;
     }
 
     realEntries=(result.data||[]).map(e=>{
-      // ── Resolusi username: profiles JOIN → direct col → anon fallback ──
-      let resolvedName=null;
-      if(e.profiles) resolvedName=e.profiles.display_name||e.profiles.anon_name||e.profiles.username||null;
-      if(!resolvedName&&e.username) resolvedName=e.username;
-
-      const isMe=!!(myUserId&&e.user_id===myUserId);
+      const isMe=!!(myUserId&&e.user_id&&e.user_id===myUserId);
+      // Username: kalau milik sendiri pakai myUsername, kalau orang lain anon fallback
       const author=isMe
-        ?(myUsername||resolvedName||'kamu')
-        :(resolvedName||'anon.'+(e.user_id||'??????').substring(0,6));
-
+        ?(myUsername||'kamu')
+        :('anon.'+(e.user_id||'??????').substring(0,6));
       return{
         id:e.id,dbId:e.id,author,isMe,isAI:false,
         mood:e.mood||'chaotic',content:e.content||'',
@@ -616,12 +591,12 @@ async function loadRealEntries(){
         userReacted:null,isReal:true
       };
     });
-    console.log('[SPILL] Loaded',realEntries.length,'entries. Sample author:',realEntries[0]?.author||'none');
+    console.log('[SPILL] Loaded',realEntries.length,'entries. Author sample:',realEntries[0]?.author||'none');
     const meta=$('feedMeta');
     if(meta)meta.textContent=realEntries.length>0?realEntries.length+' REAL':'FILLER';
     renderSpills();
   }catch(err){
-    console.warn('[SPILL] loadRealEntries exception:',err.message);
+    console.warn('[SPILL] loadRealEntries error:',err.message);
     renderSpills();
   }
 }
