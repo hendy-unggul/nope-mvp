@@ -341,6 +341,14 @@ body::before{
   }
 }
 </style>
+
+<link rel="manifest" id="jejak-manifest" href="#">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JEJAK">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#080808">
 </head>
 <body>
 <div class="loading" id="loading">
@@ -744,6 +752,34 @@ document.addEventListener('DOMContentLoaded', function(){
   updateOnline();
   setInterval(updateOnline, 30000);
 });
+</script>
+
+<script>
+// PWA: Service Worker + Manifest
+(function(){
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('/sw.js').catch(function(e){
+        console.warn('[JEJAK] SW:', e);
+      });
+    });
+  }
+  var manifest = {
+    name: 'JEJAK', short_name: 'JEJAK',
+    start_url: 'https://jejak.space/index.html',
+    scope: 'https://jejak.space/',
+    display: 'standalone', orientation: 'portrait',
+    background_color: '#080808', theme_color: '#080808',
+    icons: [
+      { src: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+      { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+    ]
+  };
+  var blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
+  var link = document.getElementById('jejak-manifest');
+  if(link) link.href = URL.createObjectURL(blob);
+})();
 </script>
 </body>
 </html>
