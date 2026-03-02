@@ -473,12 +473,20 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/shared-constants.js"></script>
 <script>
 // ─── VERSION STAMP ───
-console.log('[SPILL] ✅ v3 loaded — radar: sweep-needle + trail + dotGlow');
-// ─── SUPABASE CONFIG ───
-const SUPABASE_URL='https://fuovfrdicdhnlymnacpz.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+console.log('[SPILL] ✅ v4 loaded — shared-constants + auth guard');
+
+// ─── AUTH GUARD — redirect ke index kalau belum login ───
+if(!JEJAK.isLoggedIn()){
+  console.warn('[SPILL] Tidak ada session — redirect ke index');
+  window.location.replace('/index.html');
+}
+
+// ─── SUPABASE CONFIG — dari shared-constants ───
+const SUPABASE_URL=JEJAK.SUPABASE_URL;
+const SUPABASE_KEY=JEJAK.SUPABASE_KEY;
 let sbClient=null,realEntries=[],fillerEntries=[],myUserId=null,myUsername=null;
 
 // ─── STATE ───
@@ -515,47 +523,37 @@ function toast(msg,err=false){const t=$('toast');t.textContent=msg;t.className='
 const closeModal=id=>$(id).classList.remove('on');
 const updateVibePct=v=>$('vibePct').textContent=v+'%';
 function filterMood(btn){document.querySelectorAll('.mood-chip').forEach(b=>b.classList.remove('active'));btn.classList.add('active');activeMood=btn.dataset.mood;renderSpills();}
-function loadSub(){try{const s=JSON.parse(localStorage.getItem('userSub')||'null');if(s&&new Date(s.expiresAt)>new Date())userSub=s;else localStorage.removeItem('userSub');}catch(e){}}
+function loadSub(){
+  const s=JEJAK.getSub();
+  if(s) userSub=s;
+}
 
-// ─── SUPABASE INIT — FIX #1: multi-key LS + session + auth token fallback ─────────
+// ─── SUPABASE INIT — pakai shared-constants ───────────────────────────────
 function initSpillSupabase(){
   try{
     if(window.supabase&&window.supabase.createClient){
       sbClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-      // FIX #1: support semua kemungkinan key dari berbagai versi index.html
-      const lsIdKeys=['user_id','jejak_user_id','uid','sb_user_id','supabase_uid'];
-      const lsUnKeys=['jejak_username','username','user_name','uname','display_name','anon_name'];
-      for(const k of lsIdKeys){const v=localStorage.getItem(k);if(v){myUserId=v;break;}}
-      for(const k of lsUnKeys){const v=localStorage.getItem(k);if(v){myUsername=v;break;}}
+      // Baca session dari key standar JEJAK
+      const sess=JEJAK.getSession();
+      myUserId=sess.uid;
+      myUsername=sess.username;
 
-      // Fallback ke sessionStorage
+      // Fallback ke key lama kalau migrasi belum complete
       if(!myUserId){
-        for(const k of lsIdKeys){const v=sessionStorage.getItem(k);if(v){myUserId=v;break;}}
-        for(const k of lsUnKeys){const v=sessionStorage.getItem(k);if(v){myUsername=v;break;}}
-        if(myUserId)console.log('[SPILL] user dari sessionStorage');
+        const oldKeys=['user_id','jejak_user_id','uid'];
+        for(const k of oldKeys){const v=localStorage.getItem(k);if(v){myUserId=v;break;}}
+      }
+      if(!myUsername){
+        const oldUnKeys=['jejak_username','username'];
+        for(const k of oldUnKeys){const v=localStorage.getItem(k);if(v){myUsername=v;break;}}
       }
 
-      // Fallback: baca Supabase auth token langsung dari localStorage
-      if(!myUserId){
-        try{
-          const tk=Object.keys(localStorage).find(k=>k.includes('auth-token')||k.includes('supabase.auth'));
-          if(tk){
-            const sess=JSON.parse(localStorage.getItem(tk)||'{}');
-            myUserId=sess?.user?.id||null;
-            myUsername=sess?.user?.user_metadata?.username
-                      ||sess?.user?.user_metadata?.display_name
-                      ||sess?.user?.email?.split('@')[0]||null;
-            if(myUserId)console.log('[SPILL] user dari Supabase auth token key:',tk);
-          }
-        }catch(ex){}
-      }
-
-      // Debug
       if(myUserId){
         console.log('[SPILL] ✓ user:',myUsername||'anon','uid:',myUserId.substring(0,8)+'...');
       }else{
-        console.warn('[SPILL] ⚠️ user_id tidak ditemukan! LS keys:',Object.keys(localStorage).filter(k=>k.length<40).join(','));
+        console.warn('[SPILL] ⚠️ user_id tidak ditemukan — redirect ke index');
+        window.location.replace('/index.html');
       }
     }
   }catch(e){console.warn('[SPILL] Supabase init failed:',e);}
