@@ -427,23 +427,24 @@ body::before{
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
+<script src="/shared-constants.js"></script>
 <script>
 // ============================================
-// SUPABASE CONFIG — sama persis dengan jejak.html
+// SUPABASE CONFIG
 // ============================================
-var SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
-var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+var SUPABASE_URL = JEJAK.SUPABASE_URL;
+var SUPABASE_KEY = JEJAK.SUPABASE_KEY;
 var db = null;
 
 // ============================================
-// LOCALSTORAGE KEYS — sinkron dengan jejak.html
+// SESSION KEYS — dari shared-constants.js
 // ============================================
 var SK = {
-  u:   'jejak_username',
-  s:   'jejak_session_id',
-  l:   'jejak_logged_in',
-  v:   'jejak_vibe',
-  uid: 'user_id'
+  u:   JEJAK.SK.username,
+  s:   JEJAK.SK.sessionId,
+  l:   JEJAK.SK.loggedIn,
+  v:   JEJAK.SK.vibe,
+  uid: JEJAK.SK.uid,        // 'jejak_uid' — standar baru
 };
 
 // ============================================
@@ -551,10 +552,7 @@ function getDeviceSignature(){
 // CLEAR SESSION
 // ============================================
 function clearSession(reason){
-  console.warn('[JEJAK] Clearing session:', reason);
-  localStorage.removeItem(SK.u);
-  localStorage.removeItem(SK.uid);
-  localStorage.removeItem(SK.l);
+  JEJAK.clearSession(reason);
   if(reason){
     var banner = $el('debug-banner');
     if(banner){ banner.textContent = '⚠️ Session direset: ' + reason + ' — silakan login ulang'; banner.classList.add('show'); }
@@ -564,12 +562,12 @@ function clearSession(reason){
 // ============================================
 // SAVE SESSION
 // ============================================
-function saveSession(username, userId){
-  if(!userId || typeof userId !== 'string' || userId.length < 10) throw new Error('userId tidak valid: ' + userId);
-  localStorage.setItem(SK.u, username);
+function saveSession(username, userId, fingerprint){
+  JEJAK.saveSession(username, userId, fingerprint);
+  // alias lokal supaya kode lama tetap jalan
+  localStorage.setItem(SK.u,   username);
   localStorage.setItem(SK.uid, userId);
-  localStorage.setItem(SK.l, 'true');
-  console.log('%c[JEJAK] Session saved:', 'color:#bfff00;font-weight:bold', { username, user_id: userId, key_used: SK.uid });
+  localStorage.setItem(SK.l,   'true');
 }
 
 // ============================================
@@ -767,7 +765,7 @@ $el('frm').addEventListener('submit', async function(e){
     }
 
     // ── STEP 3: Simpan session ────────────────────────────────────────────
-    saveSession(username, userId);
+    saveSession(username, userId, fp);
 
     // ── STEP 4: Redirect ──────────────────────────────────────────────────
     setTimeout(function(){ window.location.href = 'spill.html'; }, 700);
