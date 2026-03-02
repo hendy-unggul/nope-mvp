@@ -3,15 +3,44 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
-<title>JEJAK — Spill Your Truth</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+<title>JEJAK — Jejak & Memori</title>
+
+<!-- FIX #3 #9: shared.css sudah include @import Google Fonts (Bebas Neue + DM Mono + Syne) -->
+<!-- TIDAK perlu <link rel="preconnect"> atau font link terpisah lagi -->
+<link rel="stylesheet" href="/shared.css">
+
+<!-- FIX #3: Instrument Serif untuk elemen dekoratif (tagline, caption, void timer) -->
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
 <style>
-:root{--bg:#0A0A0A;--sf:#141414;--sfe:#1E1E1E;--bd:#2A2A2A;--tx:#FFF;--txs:#888;--txm:#555;--ap:#FF4D00;--as:#00F0FF;--at:#FF006E;--aq:#39FF14;--aw:#FFD700;--ms:#FF9500;--mt:#39FF14;--mc:#00F0FF;--md:#8B5CF6;--rd:#FF3333;--void:#050505}
+/* ── JEJAK-SPECIFIC DESIGN TOKENS ───────────────────────────
+   FIX #9: token warna ALIGN dengan index.html & spill.html
+   ────────────────────────────────────────────────────────── */
+:root {
+  --bg:   #0A0A0A;
+  --sf:   #141414;
+  --sfe:  #1E1E1E;
+  --bd:   #2A2A2A;
+  --bd2:  #333;
+  --tx:   #FFF;
+  --txs:  #888;
+  --txm:  #555;
+  --ap:   #ff2d55;
+  --as:   #00e5ff;
+  --at:   #FF006E;
+  --aq:   #bfff00;
+  --aw:   #FFD700;
+  --ms:   #FF9500;
+  --mt:   #bfff00;
+  --mc:   #00e5ff;
+  --md:   #8B5CF6;
+  --rd:   #FF3333;
+  --void: #050505;
+}
+
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--tx);font-family:'Plus Jakarta Sans',system-ui,sans-serif;font-weight:500;font-size:15px;line-height:1.4;min-height:100vh;overflow-x:hidden;padding-bottom:100px}
+body{background:var(--bg);color:var(--tx);font-family:var(--font-body);font-weight:500;font-size:15px;line-height:1.4;min-height:100vh;overflow-x:hidden;padding-bottom:100px}
 body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.4}
 .w{max-width:480px;margin:0 auto;padding:0 16px}
 header{padding:24px 0 16px;display:flex;justify-content:space-between;align-items:flex-start}
@@ -33,7 +62,8 @@ header{padding:24px 0 16px;display:flex;justify-content:space-between;align-item
 .mtrig:hover span{background:var(--ap)}
 .mdd{position:absolute;top:100%;right:0;margin-top:8px;background:var(--sf);border:2px solid var(--bd);min-width:120px;display:none;z-index:100}
 .mdd.on{display:block}
-.mi{width:100%;padding:8px 16px;background:transparent;border:none;color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;text-align:left;cursor:pointer;transition:all .2s}
+/* FIX #2: font-family pakai var(--font-body), bukan Plus Jakarta Sans */
+.mi{width:100%;padding:8px 16px;background:transparent;border:none;color:var(--tx);font-family:var(--font-body);font-size:12px;font-weight:600;text-align:left;cursor:pointer;transition:all .2s}
 .mi:hover{background:var(--sfe);color:var(--ap)}
 .bnav{position:fixed;bottom:0;left:0;right:0;background:var(--sf);border-top:2px solid var(--bd);z-index:1000;padding-bottom:env(safe-area-inset-bottom)}
 .bnav-c{max-width:480px;margin:0 auto;display:flex;justify-content:space-around;align-items:center;height:64px}
@@ -61,7 +91,8 @@ header{padding:24px 0 16px;display:flex;justify-content:space-between;align-item
 .ihdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
 .ilbl{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--txs)}
 .ccount{font-size:12px;color:var(--txm);font-variant-numeric:tabular-nums}
-.ri{width:100%;background:var(--sf);border:2px solid var(--bd);padding:16px;color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;font-size:16px;line-height:1.5;resize:none;min-height:120px;transition:all .2s}
+/* FIX #2: font-family pakai var(--font-body) */
+.ri{width:100%;background:var(--sf);border:2px solid var(--bd);padding:16px;color:var(--tx);font-family:var(--font-body);font-size:16px;line-height:1.5;resize:none;min-height:120px;transition:all .2s}
 .ri:focus{outline:none;border-color:var(--ap);background:var(--sfe)}
 .ri::placeholder{color:var(--txm)}
 .msec{margin:16px 0}
@@ -129,6 +160,12 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 .pspin{width:48px;height:48px;border:3px solid var(--bd);border-top-color:var(--ap);border-radius:50%;animation:sp 1s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 .ptxt{font-size:14px;color:var(--txs);text-align:center}
+/* FIX #8: Upload progress bar */
+.upload-progress-wrap{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:16px;right:16px;max-width:448px;margin:0 auto;background:var(--sf);border:2px solid var(--bd2);padding:12px 16px;z-index:500;box-shadow:4px 4px 0 #000;display:none}
+.upload-progress-wrap.show{display:block}
+.upload-progress-label{font-family:var(--font-mono);font-size:10px;color:var(--txs);letter-spacing:1px;margin-bottom:8px;display:flex;justify-content:space-between}
+.upload-progress-bar{height:4px;background:var(--bd2);position:relative;overflow:hidden}
+.upload-progress-fill{height:100%;background:var(--ap);transition:width .3s ease;width:0%}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:10001;padding:16px;overflow-y:auto}
 .modal.on{display:block}
 .mc2{max-width:480px;margin:0 auto;background:var(--sf);border:2px solid var(--bd);padding:24px}
@@ -151,7 +188,8 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 .notsec{margin:16px 0;padding:16px;background:var(--sfe);border:2px solid var(--bd)}
 .notlbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--txs);margin-bottom:8px;display:flex;justify-content:space-between}
 .notcnt{font-size:10px;color:var(--txm)}
-.noti{width:100%;background:var(--sf);border:2px solid var(--bd);padding:8px;color:var(--tx);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;transition:all .2s}
+/* FIX #2: font-family pakai var(--font-body) */
+.noti{width:100%;background:var(--sf);border:2px solid var(--bd);padding:8px;color:var(--tx);font-family:var(--font-body);font-size:14px;transition:all .2s}
 .noti:focus{outline:none;border-color:var(--ap);background:var(--sfe)}
 .noti::placeholder{color:var(--txm);font-size:12px}
 .gwarn{background:var(--at);color:var(--tx);padding:16px;margin-bottom:16px;font-size:13px;font-weight:700;text-align:center;text-transform:uppercase;letter-spacing:.05em;border:2px solid var(--at);animation:pw 2s infinite}
@@ -174,43 +212,43 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 .fmo{filter:brightness(.8) contrast(1.2) saturate(.7)!important}
 .fg{filter:sepia(40%) hue-rotate(-15deg) saturate(1.3) contrast(1.1)!important}
 .sensored-overlay{position:absolute;inset:0;background:#000;display:flex;align-items:center;justify-content:center;color:#FF0000;font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:2px;border:2px solid #FF0000;animation:pulse-sensor 2s infinite;z-index:25}
-@keyframes pulse-sensor{0%,100%{opacity:0.9}50%{opacity:1;box-shadow:inset 0 0 30px #FF0000}}
-.sensored-text{transform:rotate(-5deg);border:2px solid #FF0000;padding:4px 8px;background:rgba(0,0,0,0.8)}
+@keyframes pulse-sensor{0%,100%{opacity:.9}50%{opacity:1;box-shadow:inset 0 0 30px #FF0000}}
+.sensored-text{transform:rotate(-5deg);border:2px solid #FF0000;padding:4px 8px;background:rgba(0,0,0,.8)}
 .premium-badge{display:inline-block;background:linear-gradient(135deg,var(--ap),var(--at));color:var(--tx);font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:8px;text-transform:uppercase}
-.void-node{position:fixed;bottom:100px;right:20px;width:24px;height:24px;background:var(--void);border:1px solid #1a1a1a;cursor:pointer;z-index:9998;transition:all 0.3s;opacity:0.6}
+.void-node{position:fixed;bottom:100px;right:20px;width:24px;height:24px;background:var(--void);border:1px solid #1a1a1a;cursor:pointer;z-index:9998;transition:all .3s;opacity:.6}
 .void-node:hover{opacity:1;border-color:#333}
-.void-node.active{animation:void-pulse 2s infinite;border-color:#ff006e;box-shadow:0 0 10px rgba(255,0,110,0.3)}
-@keyframes void-pulse{0%,100%{box-shadow:0 0 5px rgba(255,0,110,0.2)}50%{box-shadow:0 0 20px rgba(255,0,110,0.6)}}
-.void-node::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:4px;height:4px;background:#333;border-radius:50%;transition:all 0.3s}
+.void-node.active{animation:void-pulse 2s infinite;border-color:#ff006e;box-shadow:0 0 10px rgba(255,0,110,.3)}
+@keyframes void-pulse{0%,100%{box-shadow:0 0 5px rgba(255,0,110,.2)}50%{box-shadow:0 0 20px rgba(255,0,110,.6)}}
+.void-node::after{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:4px;height:4px;background:#333;border-radius:50%;transition:all .3s}
 .void-node.active::after{background:#ff006e;width:6px;height:6px}
-.void-portal{position:fixed;inset:0;background:rgba(5,5,5,0.98);z-index:10005;display:none;flex-direction:column;padding:0}
-.void-portal.on{display:flex;animation:void-fade 0.3s ease}
+.void-portal{position:fixed;inset:0;background:rgba(5,5,5,.98);z-index:10005;display:none;flex-direction:column;padding:0}
+.void-portal.on{display:flex;animation:void-fade .3s ease}
 @keyframes void-fade{from{opacity:0}to{opacity:1}}
 .void-header{padding:20px;border-bottom:1px solid #1a1a1a;display:flex;justify-content:space-between;align-items:center}
-.void-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.2em;color:#444}
-.void-close{width:32px;height:32px;background:transparent;border:1px solid #333;color:#666;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;font-size:18px}
+.void-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.2em;color:#444}
+.void-close{width:32px;height:32px;background:transparent;border:1px solid #333;color:#666;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-size:18px}
 .void-close:hover{border-color:#ff006e;color:#ff006e}
 .void-content{flex:1;overflow-y:auto;padding:20px}
 .void-requests{margin-bottom:32px}
-.void-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:#555;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.void-section-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:#555;margin-bottom:16px;display:flex;align-items:center;gap:8px}
 .void-section-title::before,.void-section-title::after{content:'';flex:1;height:1px;background:#1a1a1a}
-.void-request{display:flex;align-items:center;gap:12px;padding:16px;background:#0d0d0d;border:1px solid #1a1a1a;margin-bottom:8px;transition:all 0.2s}
+.void-request{display:flex;align-items:center;gap:12px;padding:16px;background:#0d0d0d;border:1px solid #1a1a1a;margin-bottom:8px;transition:all .2s}
 .void-request:hover{border-color:#333}
 .void-request-avatar{width:40px;height:40px;background:#141414;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-size:16px}
 .void-request-info{flex:1}
 .void-request-from{font-size:13px;font-weight:600;color:#888}
 .void-request-meta{font-size:10px;color:#444;margin-top:2px}
 .void-request-actions{display:flex;gap:8px}
-.void-btn{padding:8px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;border:1px solid #333;background:transparent;color:#666;cursor:pointer;transition:all 0.2s}
+.void-btn{padding:8px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;border:1px solid #333;background:transparent;color:#666;cursor:pointer;transition:all .2s}
 .void-btn:hover{border-color:#555;color:#888}
 .void-btn.accept{border-color:#39ff14;color:#39ff14}
-.void-btn.accept:hover{background:rgba(57,255,20,0.1)}
+.void-btn.accept:hover{background:rgba(57,255,20,.1)}
 .void-btn.deny{border-color:#ff3333;color:#ff3333}
-.void-btn.deny:hover{background:rgba(255,51,51,0.1)}
+.void-btn.deny:hover{background:rgba(255,51,51,.1)}
 .void-contacts{margin-bottom:32px}
-.void-contact{display:flex;align-items:center;gap:12px;padding:16px;background:#0d0d0d;border:1px solid #1a1a1a;margin-bottom:8px;cursor:pointer;transition:all 0.2s;position:relative}
-.void-contact:hover{border-color:#ff006e;background:rgba(255,0,110,0.05)}
-.void-contact::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:#ff006e;opacity:0;transition:opacity 0.2s}
+.void-contact{display:flex;align-items:center;gap:12px;padding:16px;background:#0d0d0d;border:1px solid #1a1a1a;margin-bottom:8px;cursor:pointer;transition:all .2s;position:relative}
+.void-contact:hover{border-color:#ff006e;background:rgba(255,0,110,.05)}
+.void-contact::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:#ff006e;opacity:0;transition:opacity .2s}
 .void-contact:hover::before{opacity:1}
 .void-contact-avatar{width:40px;height:40px;background:#141414;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;font-size:16px}
 .void-contact-info{flex:1}
@@ -219,46 +257,54 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 .void-contact-status.online{color:#39ff14}
 .void-contact-unread{min-width:20px;height:20px;background:#ff006e;color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;border-radius:50%;animation:void-pulse 2s infinite}
 .void-add{display:flex;gap:8px;margin-bottom:32px}
-.void-input{flex:1;background:#0d0d0d;border:1px solid #1a1a1a;padding:12px;color:#888;font-family:inherit;font-size:13px;transition:all 0.2s}
+.void-input{flex:1;background:#0d0d0d;border:1px solid #1a1a1a;padding:12px;color:#888;font-family:inherit;font-size:13px;transition:all .2s}
 .void-input:focus{outline:none;border-color:#333;color:#aaa}
 .void-input::placeholder{color:#444}
-.void-add-btn{padding:12px 24px;background:#141414;border:1px solid #2a2a2a;color:#666;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;transition:all 0.2s}
+.void-add-btn{padding:12px 24px;background:#141414;border:1px solid #2a2a2a;color:#666;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;transition:all .2s}
 .void-add-btn:hover{border-color:#ff006e;color:#ff006e}
+.void-empty{text-align:center;padding:48px 20px;color:#444;font-size:12px}
+.void-empty-icon{font-size:32px;margin-bottom:12px;display:block;opacity:.3}
 .void-chat{position:fixed;inset:0;background:var(--void);z-index:10006;display:none;flex-direction:column}
-.void-chat.on{display:flex;animation:void-fade 0.2s ease}
+.void-chat.on{display:flex;animation:void-fade .2s ease}
 .void-chat-header{padding:16px 20px;border-bottom:1px solid #1a1a1a;display:flex;align-items:center;gap:12px}
-.void-chat-back{width:32px;height:32px;background:transparent;border:1px solid #333;color:#666;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s}
+.void-chat-back{width:32px;height:32px;background:transparent;border:1px solid #333;color:#666;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
 .void-chat-back:hover{border-color:#ff006e;color:#ff006e}
 .void-chat-info{flex:1}
 .void-chat-name{font-size:14px;font-weight:600;color:#888}
 .void-chat-status{font-size:10px;color:#444;margin-top:2px}
 .void-chat-timer{font-size:18px;font-weight:700;color:#ff006e;font-family:'Instrument Serif',serif}
 .void-chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px}
-.void-message{max-width:80%;padding:16px;font-size:13px;line-height:1.5;position:relative;animation:message-fade 0.3s ease}
+.void-message{max-width:80%;padding:16px;font-size:13px;line-height:1.5;position:relative;animation:message-fade .3s ease}
 @keyframes message-fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 .void-message.sent{align-self:flex-end;background:#1a0a0f;border:1px solid #2a1a1f;color:#aaa}
 .void-message.received{align-self:flex-start;background:#0d0d0d;border:1px solid #1a1a1a;color:#888}
-.void-message-time{font-size:9px;color:#444;margin-top:8px;text-transform:uppercase;letter-spacing:0.05em}
+.void-message-time{font-size:9px;color:#444;margin-top:8px;text-transform:uppercase;letter-spacing:.05em}
 .void-chat-input{padding:20px;border-top:1px solid #1a1a1a;display:flex;gap:8px}
-.void-chat-textarea{flex:1;background:#0d0d0d;border:1px solid #1a1a1a;padding:12px;color:#aaa;font-family:inherit;font-size:13px;resize:none;height:60px;transition:all 0.2s}
+.void-chat-textarea{flex:1;background:#0d0d0d;border:1px solid #1a1a1a;padding:12px;color:#aaa;font-family:inherit;font-size:13px;resize:none;height:60px;transition:all .2s}
 .void-chat-textarea:focus{outline:none;border-color:#ff006e}
-.void-chat-send{padding:12px 24px;background:#ff006e;border:none;color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;transition:all 0.2s}
-.void-chat-send:hover{background:#ff1a7a;box-shadow:0 0 20px rgba(255,0,110,0.4)}
-.void-chat-send:disabled{opacity:0.3;cursor:not-allowed;box-shadow:none}
-.void-burn{position:fixed;inset:0;background:var(--void);z-index:10007;display:none;flex-direction:column;align-items:center;justify-content:center;animation:burn-fade 0.5s ease}
+.void-chat-send{padding:12px 24px;background:#ff006e;border:none;color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.void-chat-send:hover{background:#ff1a7a;box-shadow:0 0 20px rgba(255,0,110,.4)}
+.void-chat-send:disabled{opacity:.3;cursor:not-allowed;box-shadow:none}
+.void-burn{position:fixed;inset:0;background:var(--void);z-index:10007;display:none;flex-direction:column;align-items:center;justify-content:center;animation:burn-fade .5s ease}
 .void-burn.on{display:flex}
 @keyframes burn-fade{from{opacity:0}to{opacity:1}}
 .void-burn-icon{font-size:80px;margin-bottom:24px;animation:burn-anim 1s ease forwards}
 @keyframes burn-anim{0%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.3);filter:brightness(3) blur(2px)}100%{transform:scale(0);opacity:0;filter:brightness(5) blur(10px)}}
-.void-burn-text{font-size:14px;font-weight:700;color:#ff006e;text-transform:uppercase;letter-spacing:0.2em}
-.void-empty{text-align:center;padding:48px 20px;color:#444;font-size:12px}
-.void-empty-icon{font-size:32px;margin-bottom:12px;display:block;opacity:0.3}
+.void-burn-text{font-size:14px;font-weight:700;color:#ff006e;text-transform:uppercase;letter-spacing:.2em}
 .void-locked{position:fixed;inset:0;background:var(--void);z-index:10005;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center}
 .void-locked.on{display:flex}
-.void-locked-icon{font-size:48px;margin-bottom:16px;opacity:0.3}
+.void-locked-icon{font-size:48px;margin-bottom:16px;opacity:.3}
 .void-locked-text{font-size:14px;font-weight:700;color:#444;margin-bottom:8px}
 .void-locked-sub{font-size:11px;color:#333;line-height:1.6}
 </style>
+
+<link rel="manifest" id="jejak-manifest" href="#">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JEJAK">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#080808">
 </head>
 <body>
 <div class="w">
@@ -323,9 +369,7 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
   <div class="tgrid" id="tgrid"></div>
 </section>
 
-<footer>
-  <p class="ftxt">Nyambat • Aksi • Solusi</p>
-</footer>
+<footer><p class="ftxt">Nyambat • Aksi • Solusi</p></footer>
 </div>
 
 <div class="void-node" id="void-node"></div>
@@ -346,10 +390,7 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
     <div class="void-contacts" id="void-contacts">
       <div class="void-section-title">Established Contacts</div>
       <div id="void-contacts-list">
-        <div class="void-empty">
-          <span class="void-empty-icon">◼</span>
-          <div>No active contacts</div>
-        </div>
+        <div class="void-empty"><span class="void-empty-icon">◼</span><div>No active contacts</div></div>
       </div>
     </div>
   </div>
@@ -379,12 +420,13 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
   <div class="void-locked-sub">Upgrade to Premium to access<br>end-to-end encrypted ephemeral messaging</div>
 </div>
 
+<!-- FIX #6: absolute path di semua nav links -->
 <nav class="bnav">
   <div class="bnav-c">
-    <a href="spill.html" class="ni"><span class="nico">✕</span><span>Spill</span></a>
-    <a href="jejak.html" class="ni act"><span class="nico">✦</span><span>Jejak</span></a>
-    <a href="glitch.html" class="ni"><span class="nico">⚡</span><span>Glitch</span></a>
-    <a href="cocomeo.html" class="ni"><span class="nico">〜</span><span>Cocomeo</span></a>
+    <a href="/spill.html" class="ni"><span class="nico">✕</span><span>Spill</span></a>
+    <a href="/jejak.html" class="ni act"><span class="nico">✦</span><span>Jejak</span></a>
+    <a href="/glitch.html" class="ni"><span class="nico">⚡</span><span>Glitch</span></a>
+    <a href="/cocomeo.html" class="ni"><span class="nico">〜</span><span>Cocomeo</span></a>
   </div>
 </nav>
 
@@ -415,29 +457,35 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
   </div>
 </div>
 
+<!-- FIX #8: Upload progress bar -->
+<div class="upload-progress-wrap" id="upload-progress-wrap">
+  <div class="upload-progress-label">
+    <span>MENGUPLOAD</span>
+    <span id="upload-progress-label-text">0/0 foto</span>
+  </div>
+  <div class="upload-progress-bar">
+    <div class="upload-progress-fill" id="upload-progress-fill"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <input type="file" id="finput" accept="image/*" multiple style="display:none">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/shared-constants.js"></script>
+<script src="/shared-utils.js"></script>
 <script>
-// ✅ AUTH GUARD — pakai JEJAK.requireAuth() dari shared-constants.js
-// Ini sama persis dengan pola di spill.html agar konsisten
 if (!JEJAK.isLoggedIn()) {
   console.warn('[JEJAK] Auth guard — redirect ke index');
   window.location.replace('/index.html');
 }
 </script>
 <script>
-// ============================================
-// DUMMY DATA
-// ============================================
 var DUMMY_ENTRIES = [
   {id:'d1',content:'Hari ini gue nangis di angkot gegara liat kucing dipukul orang. Mental gue udah kayak kerupuk kena hujan.',mood:'surviving',timestamp:Date.now()-3600000,reactions:{skull:42,cry:89,fire:12,upside:7},isDummy:true},
   {id:'d2',content:'akhirnya bisa tidur nyenyak semalaman setelah 3 minggu insomnia. thanks buat chat tadi malam.',mood:'thriving',timestamp:Date.now()-7200000,reactions:{skull:23,cry:15,fire:67,upside:31},isDummy:true},
   {id:'d3',content:'hari ini chaos abis! dari bangun tidur udah salah ambil kaki, sampe kantor lupa bawa laptop.',mood:'chaotic',timestamp:Date.now()-10800000,reactions:{skull:89,cry:23,fire:45,upside:78},isDummy:true}
 ];
-
 var DUMMY_ARTEFACTS = [
   {id:'a1',url:'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&q=80',note:'jeda',hasFace:false,isDummy:true,theme:'fm'},
   {id:'a2',url:'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=400&q=80',note:'hijau',hasFace:false,isDummy:true,theme:'fg'},
@@ -447,779 +495,441 @@ var DUMMY_ARTEFACTS = [
   {id:'a6',url:'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&q=80',note:'love',hasFace:false,isDummy:true,theme:'fc'}
 ];
 
-// ============================================
-// STATE
-// ============================================
-var S = {
-  user: null,
-  userId: null,
-  isPremium: false,
-  entries: [],
-  artefacts: [],
-  voidContacts: [],
-  voidRequests: [],
-  voidMessages: [],
-  currentChat: null,
-  destroyTimer: null
-};
+var S = { user:null, userId:null, isPremium:false, entries:[], artefacts:[], currentChat:null };
 
-// ============================================
-// HELPERS
-// ============================================
-function $(id) { return document.getElementById(id); }
+function $(id){ return document.getElementById(id); }
 
-function toast(msg, dur) {
-  dur = dur || 3000;
-  var t = $('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(function() { t.classList.remove('show'); }, dur);
+function toast(msg,dur){
+  dur=dur||3000;
+  var t=$('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); },dur);
 }
 
-function esc(t) {
-  var d = document.createElement('div');
-  d.textContent = t;
-  return d.innerHTML;
+// FIX #7: esc() proxy ke JEJAKSanitize.escape()
+function esc(t){
+  if(window.JEJAKSanitize) return JEJAKSanitize.escape(t);
+  var d=document.createElement('div'); d.textContent=t; return d.innerHTML;
 }
 
-function toggleMenu() {
-  $('mdd').classList.toggle('on');
-}
+function toggleMenu(){ $('mdd').classList.toggle('on'); }
 
-function logoutUser() {
-  if (!confirm('Yakin logout? Semua data lokal akan dihapus.')) return;
+function logoutUser(){
+  if(!confirm('Yakin logout?')) return;
   JEJAK.clearSession('manual logout');
   sessionStorage.clear();
-  location.href = '/index.html';
+  location.href='/index.html';
 }
 
-function selMood(mood) {
-  var cards = document.querySelectorAll('.mc');
-  for (var i = 0; i < cards.length; i++) {
-    cards[i].classList.toggle('act', cards[i].dataset.mood === mood);
-  }
+function selMood(mood){
+  document.querySelectorAll('.mc').forEach(function(c){ c.classList.toggle('act',c.dataset.mood===mood); });
 }
 
-function showProc(msg) {
-  msg = msg || 'Mengupload...';
-  $('proctxt').innerHTML = msg;
-  $('proc').classList.add('on');
+function showProc(msg){ $('proctxt').innerHTML=msg||'Mengupload...'; $('proc').classList.add('on'); }
+function hideProc(){ $('proc').classList.remove('on'); }
+
+function timeAgo(ts){
+  var s=Math.floor((Date.now()-ts)/1000);
+  if(s<60) return 'baru saja';
+  var m=Math.floor(s/60); if(m<60) return m+'m lalu';
+  var h=Math.floor(m/60); if(h<24) return h+'j lalu';
+  return Math.floor(h/24)+'h lalu';
 }
 
-function hideProc() {
-  $('proc').classList.remove('on');
-}
+function updateCharCount(){ $('ccount').textContent=$('ri').value.length+'/500'; }
 
-function timeAgo(timestamp) {
-  var seconds = Math.floor((Date.now() - timestamp) / 1000);
-  if (seconds < 60) return 'baru saja';
-  var minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return minutes + 'm lalu';
-  var hours = Math.floor(minutes / 60);
-  if (hours < 24) return hours + 'j lalu';
-  return Math.floor(hours / 24) + 'h lalu';
-}
+function renderEntries(){
+  var con=$('econ'); if(!con) return;
+  var real=S.entries?S.entries.length:0;
+  var list=S.entries.slice();
+  for(var d=0;d<Math.max(0,3-real);d++) list.push(DUMMY_ENTRIES[d]);
 
-function updateCharCount() {
-  var val = $('ri').value.length;
-  $('ccount').textContent = val + '/500';
-}
+  var html='';
+  var rdefs={skull:'💀',cry:'😭',fire:'🔥',upside:'🙃'};
+  var emojis={surviving:'😮‍💨',thriving:'✨',chaotic:'🌀',doom:'🛌'};
 
-// ============================================
-// RENDER FUNCTIONS
-// ============================================
-function renderEntries() {
-  var con = $('econ');
-  if (!con) return;
-
-  var realCount = S.entries ? S.entries.length : 0;
-  var displayEntries = [];
-  for (var r = 0; r < realCount; r++) displayEntries.push(S.entries[r]);
-
-  var dummyNeeded = Math.max(0, 3 - realCount);
-  for (var d = 0; d < dummyNeeded; d++) displayEntries.push(DUMMY_ENTRIES[d]);
-
-  var html = '';
-  for (var i = 0; i < displayEntries.length; i++) {
-    var e = displayEntries[i];
-    var ta = e.isDummy ? 'contoh' : timeAgo(e.timestamp);
-    var emojiMap = { surviving: '😮‍💨', thriving: '✨', chaotic: '🌀', doom: '🛌' };
-    var emoji = emojiMap[e.mood] || '';
-    var dummyClass = e.isDummy ? ' entry-dummy' : '';
-    var dummyLabel = e.isDummy ? '<span class="fifo-i">Contoh</span>' : '';
-
-    var reactionsHtml = '';
-    var reactionDefs = { skull: '💀', cry: '😭', fire: '🔥', upside: '🙃' };
-    for (var key in reactionDefs) {
-      var count = e.reactions && e.reactions[key] ? e.reactions[key] : 0;
-      if (e.isDummy) {
-        reactionsHtml += '<button class="reaction-btn" disabled><span class="remoji">' + reactionDefs[key] + '</span><span class="rcount">' + count + '</span></button>';
+  for(var i=0;i<list.length;i++){
+    var e=list[i];
+    var ta=e.isDummy?'contoh':timeAgo(e.timestamp);
+    var rbtn='';
+    for(var k in rdefs){
+      var cnt=e.reactions&&e.reactions[k]?e.reactions[k]:0;
+      if(e.isDummy){
+        rbtn+='<button class="reaction-btn" disabled><span class="remoji">'+rdefs[k]+'</span><span class="rcount">'+cnt+'</span></button>';
       } else {
-        var isActive = e.userReacted === key ? ' act' : '';
-        reactionsHtml += '<button class="reaction-btn' + isActive + '" data-entry-id="' + e.id + '" data-key="' + key + '" id="jr-' + e.id + '-' + key + '">' +
-          '<span class="remoji">' + reactionDefs[key] + '</span>' +
-          '<span class="rcount" id="jrc-' + e.id + '-' + key + '">' + count + '</span>' +
-        '</button>';
+        var act=e.userReacted===k?' act':'';
+        rbtn+='<button class="reaction-btn'+act+'" data-entry-id="'+e.id+'" data-key="'+k+'" id="jr-'+e.id+'-'+k+'">'
+          +'<span class="remoji">'+rdefs[k]+'</span>'
+          +'<span class="rcount" id="jrc-'+e.id+'-'+k+'">'+cnt+'</span>'
+          +'</button>';
       }
     }
-
-    html += '<article class="entry' + dummyClass + '" data-id="' + e.id + '">' +
-      '<div class="ehdr">' +
-        '<div class="emeta">' +
-          '<span class="etime">' + ta + '</span>' +
-          '<span class="emood ' + e.mood + '">' + emoji + ' ' + e.mood + '</span>' +
-        '</div>' + dummyLabel +
-      '</div>' +
-      '<div class="econt">' + esc(e.content) + '</div>' +
-      '<div class="reaction-bar">' + reactionsHtml + '</div>' +
-    '</article>';
+    html+='<article class="entry'+(e.isDummy?' entry-dummy':'')+'" data-id="'+e.id+'">'
+      +'<div class="ehdr"><div class="emeta">'
+        +'<span class="etime">'+ta+'</span>'
+        +'<span class="emood '+e.mood+'">'+(emojis[e.mood]||'')+' '+e.mood+'</span>'
+      +'</div>'+(e.isDummy?'<span class="fifo-i">Contoh</span>':'')+'</div>'
+      +'<div class="econt">'+esc(e.content)+'</div>'
+      +'<div class="reaction-bar">'+rbtn+'</div>'
+      +'</article>';
   }
-
-  con.innerHTML = html;
+  con.innerHTML=html;
   bindReactionButtons();
 }
 
-function renderTray() {
-  var con = $('tgrid');
-  if (!con) return;
-
-  var realCount = S.artefacts ? S.artefacts.length : 0;
-  var displayArtefacts = [];
-  for (var r = 0; r < Math.min(realCount, 6); r++) displayArtefacts.push(S.artefacts[r]);
-
-  var dummyNeeded = Math.max(0, 6 - realCount);
-  for (var d = 0; d < dummyNeeded; d++) displayArtefacts.push(DUMMY_ARTEFACTS[d]);
-
-  var html = '';
-  for (var i = 0; i < displayArtefacts.length; i++) {
-    var a = displayArtefacts[i];
-    if (a.hasFace) {
-      html += '<div class="ti" data-id="' + a.id + '" style="position:relative">' +
-        '<img src="' + a.url + '" class="' + a.theme + '" alt="' + esc(a.note) + '">' +
-        '<div class="sensored-overlay"><span class="sensored-text">SENSORED</span></div>' +
-      '</div>';
+function renderTray(){
+  var con=$('tgrid'); if(!con) return;
+  var list=S.artefacts.slice(0,6);
+  for(var d=0;d<Math.max(0,6-list.length);d++) list.push(DUMMY_ARTEFACTS[d]);
+  var html='';
+  for(var i=0;i<list.length;i++){
+    var a=list[i];
+    if(a.hasFace){
+      html+='<div class="ti" data-id="'+a.id+'" style="position:relative">'
+        +'<img src="'+a.url+'" class="'+a.theme+'" alt="'+esc(a.note)+'">'
+        +'<div class="sensored-overlay"><span class="sensored-text">SENSORED</span></div>'
+        +'</div>';
     } else {
-      html += '<div class="ti" data-id="' + a.id + '">' +
-        '<img src="' + a.url + '" class="' + a.theme + '" alt="' + esc(a.note) + '">' +
-      '</div>';
+      html+='<div class="ti" data-id="'+a.id+'"><img src="'+a.url+'" class="'+a.theme+'" alt="'+esc(a.note)+'"></div>';
     }
   }
+  con.innerHTML=html;
+  con.querySelectorAll('.ti[data-id]').forEach(function(t){
+    t.addEventListener('click',function(){ setHero(this.getAttribute('data-id')); });
+  });
+}
 
-  con.innerHTML = html;
-
-  var tiles = con.querySelectorAll('.ti[data-id]');
-  for (var k = 0; k < tiles.length; k++) {
-    tiles[k].addEventListener('click', function() {
-      setHero(this.getAttribute('data-id'));
-    });
+function setHero(id){
+  var a=S.artefacts.find(function(x){ return x.id===id; })||DUMMY_ARTEFACTS.find(function(x){ return x.id===id; });
+  if(!a) return;
+  var img=$('himg'),note=$('hnote');
+  if(img){ img.src=a.url; img.className=a.theme; }
+  if(note) note.textContent='"'+a.note+'"';
+  if(!a.isDummy&&S.userId){
+    try{ localStorage.setItem('jejak_hero_'+S.userId,JSON.stringify({id:a.id,url:a.url,note:a.note,theme:a.theme})); }catch(e){}
   }
 }
 
-function setHero(id) {
-  var a = null;
-  for (var i = 0; i < S.artefacts.length; i++) {
-    if (S.artefacts[i].id === id) { a = S.artefacts[i]; break; }
-  }
-  if (!a) {
-    for (var j = 0; j < DUMMY_ARTEFACTS.length; j++) {
-      if (DUMMY_ARTEFACTS[j].id === id) { a = DUMMY_ARTEFACTS[j]; break; }
-    }
-  }
-  if (!a) return;
-
-  var img = $('himg'), note = $('hnote');
-  if (img) { img.src = a.url; img.className = a.theme; }
-  if (note) note.textContent = '"' + a.note + '"';
-
-  if (!a.isDummy && S.userId) {
-    try {
-      localStorage.setItem('jejak_hero_' + S.userId, JSON.stringify({ id: a.id, url: a.url, note: a.note, theme: a.theme }));
-    } catch(e) {}
-  }
-}
-
-// ============================================
-// SUPABASE INIT — pakai JEJAK.SUPABASE_URL & KEY dari shared-constants
-// ============================================
-function initSupabase() {
-  try {
-    if (window.supabase && window.supabase.createClient) {
-      window.supabaseClient = window.supabase.createClient(
-        JEJAK.SUPABASE_URL,
-        JEJAK.SUPABASE_KEY
-      );
+function initSupabase(){
+  try{
+    if(window.supabase&&window.supabase.createClient){
+      window.supabaseClient=window.supabase.createClient(JEJAK.SUPABASE_URL,JEJAK.SUPABASE_KEY);
       return true;
     }
-  } catch (e) {
-    console.error('[JEJAK] Supabase init failed:', e);
-  }
+  }catch(e){ console.error('[JEJAK] Supabase init failed:',e); }
   return false;
 }
 
-// ============================================
-// AUTH — baca session via JEJAK.getSession() (key: jejak_uid, bukan user_id)
-// ============================================
-async function checkAuth() {
-  // ✅ Pakai JEJAK.getSession() — baca dari key yang BENAR (jejak_uid)
-  var sess = JEJAK.getSession();
-  var userId = sess.uid;
-  var username = sess.username;
-
-  if (!sess.loggedIn || !userId || !username) {
-    console.warn('[JEJAK] Session tidak valid');
-    JEJAK.clearSession('invalid session in jejak.html');
+async function checkAuth(){
+  var sess=JEJAK.getSession();
+  if(!sess.loggedIn||!sess.uid||!sess.username){
+    JEJAK.clearSession('invalid session');
     window.location.replace('/index.html');
     return false;
   }
-
-  // Set state
-  S.userId = userId;
-  S.user = username;
-  S.isPremium = JEJAK.checkSub();
-
-  var huser = $('huser');
-  var odot = $('odot');
-  if (huser) huser.textContent = '@' + S.user;
-  if (odot) odot.classList.remove('off');
-
-  console.log('%c[JEJAK] Auth OK', 'color:#bfff00;font-weight:bold', { username, uid: userId.substring(0,8)+'...' });
-
-  // Load data
+  S.userId=sess.uid;
+  S.user=sess.username;
+  S.isPremium=JEJAK.checkSub();
+  var hu=$('huser'),od=$('odot');
+  if(hu) hu.textContent='@'+S.user;
+  if(od) od.classList.remove('off');
+  console.log('%c[JEJAK] Auth OK','color:#bfff00;font-weight:bold',{username:sess.username,uid:sess.uid.substring(0,8)+'...'});
   await loadEntries();
   await loadArtefacts();
   return true;
 }
 
-// ============================================
-// LOAD DATA
-// ============================================
-async function loadEntries() {
-  if (!S.userId || !window.supabaseClient) return;
-  try {
-    var result = await window.supabaseClient
-      .from('entries')
-      .select('*')
-      .eq('user_id', S.userId)
-      .order('created_at', { ascending: false })
-      .limit(6);
-
-    if (result.error) throw result.error;
-
-    S.entries = [];
-    if (result.data && result.data.length > 0) {
-      for (var i = 0; i < result.data.length; i++) {
-        var e = result.data[i];
-        S.entries.push({
-          id: e.id,
-          content: e.content,
-          mood: e.mood,
-          timestamp: e.created_at ? new Date(e.created_at).getTime() : Date.now(),
-          reactions: e.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 },
-          isDummy: false
-        });
-      }
+async function loadEntries(){
+  if(!S.userId||!window.supabaseClient) return;
+  try{
+    var r=await window.supabaseClient.from('entries').select('*').eq('user_id',S.userId).order('created_at',{ascending:false}).limit(6);
+    if(r.error) throw r.error;
+    S.entries=[];
+    if(r.data&&r.data.length){
+      S.entries=r.data.map(function(e){
+        return {id:e.id,content:e.content,mood:e.mood,timestamp:e.created_at?new Date(e.created_at).getTime():Date.now(),reactions:e.reactions||{skull:0,cry:0,fire:0,upside:0},isDummy:false};
+      });
     }
+    // FIX #1: restore per-user reaction state
+    if(window.JEJAKReactions) S.entries=JEJAKReactions.restoreAll(S.entries);
     renderEntries();
-  } catch (err) {
-    console.error('Load entries error:', err);
+  }catch(err){
+    console.error('Load entries error:',err);
+    toast(window.JEJAKError?JEJAKError.handleSupabaseError(err,'LOAD_ENTRIES'):'Gagal load entries');
   }
 }
 
-async function loadArtefacts() {
-  if (!S.userId || !window.supabaseClient) return;
-  try {
-    var result = await window.supabaseClient
-      .from('artefacts')
-      .select('*')
-      .eq('user_id', S.userId)
-      .order('created_at', { ascending: false })
-      .limit(6);
-
-    if (result.error) throw result.error;
-
-    S.artefacts = [];
-    if (result.data && result.data.length > 0) {
-      for (var i = 0; i < result.data.length; i++) {
-        var a = result.data[i];
-        S.artefacts.push({
-          id: a.id,
-          url: a.url,
-          note: a.note || 'memory',
-          hasFace: a.has_face || false,
-          theme: a.theme || 'fm',
-          timestamp: a.created_at ? new Date(a.created_at).getTime() : Date.now(),
-          isDummy: false
-        });
-      }
+async function loadArtefacts(){
+  if(!S.userId||!window.supabaseClient) return;
+  try{
+    var r=await window.supabaseClient.from('artefacts').select('*').eq('user_id',S.userId).order('created_at',{ascending:false}).limit(6);
+    if(r.error) throw r.error;
+    S.artefacts=[];
+    if(r.data&&r.data.length){
+      S.artefacts=r.data.map(function(a){
+        return {id:a.id,url:a.url,note:a.note||'memory',hasFace:a.has_face||false,theme:a.theme||'fm',timestamp:a.created_at?new Date(a.created_at).getTime():Date.now(),isDummy:false};
+      });
     }
     renderTray();
-
-    if (S.artefacts.length > 0) {
-      var savedHero = null;
-      try {
-        var saved = localStorage.getItem('jejak_hero_' + S.userId);
-        if (saved) savedHero = JSON.parse(saved);
-      } catch(e) {}
-      if (savedHero) {
-        setHero(savedHero.id);
-      } else {
-        setHero(S.artefacts[0].id);
-      }
+    if(S.artefacts.length>0){
+      var savedHero=null;
+      try{ var sv=localStorage.getItem('jejak_hero_'+S.userId); if(sv) savedHero=JSON.parse(sv); }catch(e){}
+      setHero(savedHero?savedHero.id:S.artefacts[0].id);
     }
-  } catch (err) {
-    console.error('Load artefacts error:', err);
+  }catch(err){
+    console.error('Load artefacts error:',err);
+    toast(window.JEJAKError?JEJAKError.handleSupabaseError(err,'LOAD_ARTEFACTS'):'Gagal load artefak');
   }
 }
 
-// ============================================
-// SAVE SPILL
-// ============================================
-async function saveEntry() {
-  var content = $('ri').value.trim();
-  if (!content) { toast('Tulis dulu spill-nya'); return; }
-
-  var activeMoodEl = document.querySelector('.mc.act');
-  var activeMood = activeMoodEl ? activeMoodEl.dataset.mood : 'surviving';
-
-  if (!S.userId) {
-    toast('Login dulu untuk spill');
-    setTimeout(function() { location.href = 'index.html'; }, 1500);
-    return;
-  }
-
+async function saveEntry(){
+  // FIX #4: rate limit
+  if(window.JEJAKRate){ var rl=JEJAKRate.checkPreset('spill'); if(!rl.allowed){ toast(rl.message); return; } }
+  var content=$('ri').value.trim();
+  if(!content){ toast('Tulis dulu spill-nya'); return; }
+  var moodEl=document.querySelector('.mc.act');
+  if(!S.userId){ toast('Login dulu'); setTimeout(function(){ location.href='/index.html'; },1500); return; }
   showProc('Menyimpan spill...');
-  try {
-    var insertData = {
-      user_id: S.userId,
-      content: content,
-      mood: activeMood
+  try{
+    var r=await window.supabaseClient.from('entries').insert({user_id:S.userId,content:content,mood:moodEl?moodEl.dataset.mood:'surviving'}).select();
+    if(r.error) throw r.error;
+    $('ri').value=''; $('ccount').textContent='0/500';
+    await loadEntries(); toast('✓ Spill terkirim!');
+  }catch(err){
+    toast(window.JEJAKError?JEJAKError.handleSupabaseError(err,'SAVE_ENTRY'):'Gagal menyimpan');
+  }finally{ hideProc(); }
+}
+
+async function reactEntry(entryId,key){
+  // FIX #4: rate limit
+  if(window.JEJAKRate){ var rl=JEJAKRate.checkPreset('react'); if(!rl.allowed){ toast(rl.message); return; } }
+  if(!S.userId||!window.supabaseClient) return;
+  var entry=S.entries.find(function(e){ return e.id===entryId; });
+  if(!entry) return;
+
+  // FIX #1: pakai JEJAKReactions
+  var reaction=window.JEJAKReactions?JEJAKReactions.set(entryId,key):null;
+  var wasActive=reaction?(reaction.key===null):(entry.userReacted===key);
+
+  if(reaction&&reaction.prevKey&&reaction.prevKey!==key){
+    entry.reactions[reaction.prevKey]=Math.max(0,(entry.reactions[reaction.prevKey]||0)-1);
+    var ob=document.getElementById('jr-'+entryId+'-'+reaction.prevKey);
+    var oc=document.getElementById('jrc-'+entryId+'-'+reaction.prevKey);
+    if(ob) ob.classList.remove('act');
+    if(oc) oc.textContent=entry.reactions[reaction.prevKey];
+    entry.userReacted=null;
+  }
+
+  if(wasActive){ entry.reactions[key]=Math.max(0,(entry.reactions[key]||0)-1); entry.userReacted=null; }
+  else{ entry.reactions[key]=(entry.reactions[key]||0)+1; entry.userReacted=key; }
+
+  var btn=document.getElementById('jr-'+entryId+'-'+key);
+  var cnt=document.getElementById('jrc-'+entryId+'-'+key);
+  if(btn) btn.classList.toggle('act',!wasActive);
+  if(cnt) cnt.textContent=entry.reactions[key];
+
+  try{
+    var updateFn=function(){
+      return window.supabaseClient.from('entries').update({reactions:entry.reactions}).eq('id',entryId).then(function(r){ if(r.error) throw r.error; return r; });
     };
-
-    var result = await window.supabaseClient
-      .from('entries')
-      .insert(insertData)
-      .select();
-
-    if (result.error) throw result.error;
-
-    $('ri').value = '';
-    $('ccount').textContent = '0/500';
-    await loadEntries();
-    toast('✓ Spill terkirim!');
-  } catch (err) {
-    console.error('Save error:', err);
-    toast('Gagal menyimpan: ' + (err.message || JSON.stringify(err)));
-  } finally {
-    hideProc();
+    if(window.JEJAKError){ await JEJAKError.withRetry(updateFn,{maxRetries:2,delay:500}); }
+    else { await updateFn(); }
+  }catch(err){
+    console.error('[REACT] DB error:',err.message);
+    if(wasActive){ entry.reactions[key]++; entry.userReacted=key; }
+    else{ entry.reactions[key]--; entry.userReacted=null; }
+    if(btn) btn.classList.toggle('act',wasActive);
+    if(cnt) cnt.textContent=entry.reactions[key];
+    toast('Gagal simpan reaksi');
   }
 }
 
-// ============================================
-// REACTIONS
-// ============================================
-async function reactEntry(entryId, key) {
-  if (!S.userId || !window.supabaseClient) return;
-
-  var entry = null;
-  for (var i = 0; i < S.entries.length; i++) {
-    if (S.entries[i].id === entryId) { entry = S.entries[i]; break; }
-  }
-  if (!entry) return;
-
-  var wasActive = entry.userReacted === key;
-
-  if (wasActive) {
-    entry.reactions[key] = Math.max(0, (entry.reactions[key] || 0) - 1);
-    entry.userReacted = null;
-  } else {
-    if (entry.userReacted) {
-      entry.reactions[entry.userReacted] = Math.max(0, (entry.reactions[entry.userReacted] || 0) - 1);
-      var oldKey = entry.userReacted;
-      var oldBtn = document.getElementById('jr-' + entryId + '-' + oldKey);
-      var oldCount = document.getElementById('jrc-' + entryId + '-' + oldKey);
-      if (oldBtn) oldBtn.classList.remove('act');
-      if (oldCount) oldCount.textContent = entry.reactions[oldKey];
-    }
-    entry.reactions[key] = (entry.reactions[key] || 0) + 1;
-    entry.userReacted = key;
-  }
-
-  var btn = document.getElementById('jr-' + entryId + '-' + key);
-  var countEl = document.getElementById('jrc-' + entryId + '-' + key);
-  if (btn) btn.classList.toggle('act', !wasActive);
-  if (countEl) countEl.textContent = entry.reactions[key];
-
-  try {
-    var updateResult = await window.supabaseClient
-      .from('entries')
-      .update({ reactions: entry.reactions })
-      .eq('id', entryId);
-
-    if (updateResult.error) {
-      console.error('[REACT] DB update error:', updateResult.error.message);
-      if (wasActive) {
-        entry.reactions[key]++;
-        entry.userReacted = key;
-      } else {
-        entry.reactions[key]--;
-        entry.userReacted = null;
-      }
-      if (btn) btn.classList.toggle('act', wasActive);
-      if (countEl) countEl.textContent = entry.reactions[key];
-      toast('Gagal simpan reaksi');
-    }
-  } catch (err) {
-    console.error('[REACT] Exception:', err.message);
-  }
-}
-
-function bindReactionButtons() {
-  var econ = $('econ');
-  if (!econ) return;
-  // Remove old listener to prevent duplicate bindings
-  var newEcon = econ.cloneNode(true);
-  econ.parentNode.replaceChild(newEcon, econ);
-  newEcon.addEventListener('click', function(e) {
-    var btn = e.target.closest('.reaction-btn[data-entry-id]');
-    if (!btn) return;
-    var entryId = btn.getAttribute('data-entry-id');
-    var key = btn.getAttribute('data-key');
-    if (entryId && key) reactEntry(entryId, key);
+function bindReactionButtons(){
+  var econ=$('econ'); if(!econ) return;
+  var neo=econ.cloneNode(true);
+  econ.parentNode.replaceChild(neo,econ);
+  neo.addEventListener('click',function(e){
+    var b=e.target.closest('.reaction-btn[data-entry-id]');
+    if(b) reactEntry(b.getAttribute('data-entry-id'),b.getAttribute('data-key'));
   });
 }
 
-// ============================================
-// UPLOAD
-// ============================================
-var pendingFiles = [];
-var selFiles = new Set();
-var currentTheme = 0;
-var currentNote = '';
-
-var THEMES = [
-  { name: 'MONOCHROME', filter: 'fm' }, { name: 'NOIR', filter: 'fn' },
-  { name: 'SEPIA', filter: 'fsp' }, { name: 'WARM', filter: 'fw' },
-  { name: 'GOLDEN', filter: 'fg' }, { name: 'LOMO', filter: 'fl' },
-  { name: 'DREAM', filter: 'fd' }, { name: 'COLD', filter: 'fco' },
-  { name: 'CYBER', filter: 'fc' }, { name: 'VIGNETTE', filter: 'fv' },
-  { name: 'CRISP', filter: 'fcr' }, { name: 'MOODY', filter: 'fmo' }
+var pendingFiles=[],selFiles=new Set(),currentTheme=0,currentNote='';
+var THEMES=[
+  {name:'MONOCHROME',filter:'fm'},{name:'NOIR',filter:'fn'},
+  {name:'SEPIA',filter:'fsp'},{name:'WARM',filter:'fw'},
+  {name:'GOLDEN',filter:'fg'},{name:'LOMO',filter:'fl'},
+  {name:'DREAM',filter:'fd'},{name:'COLD',filter:'fco'},
+  {name:'CYBER',filter:'fc'},{name:'VIGNETTE',filter:'fv'},
+  {name:'CRISP',filter:'fcr'},{name:'MOODY',filter:'fmo'}
 ];
 
-function initUpload() {
-  var btn = $('upbtn'), fi = $('finput');
-  if (!btn || !fi) return;
-  btn.onclick = function() { fi.value = ''; fi.click(); };
-  fi.onchange = handleFiles;
+function initUpload(){
+  var btn=$('upbtn'),fi=$('finput');
+  if(!btn||!fi) return;
+  btn.onclick=function(){ fi.value=''; fi.click(); };
+  fi.onchange=handleFiles;
 }
 
-async function handleFiles(e) {
-  var files = Array.from(e.target.files).slice(0, 6);
-  if (!files.length) return;
-
-  if (!S.userId) {
-    toast('Login dulu untuk upload');
-    setTimeout(function() { location.href = 'index.html'; }, 1500);
-    return;
-  }
-
-  var pf = [];
-  for (var i = 0; i < files.length; i++) {
-    pf.push({ file: files[i], hasFace: false, preview: URL.createObjectURL(files[i]) });
-  }
-  openGallery(pf);
+async function handleFiles(e){
+  var files=Array.from(e.target.files).slice(0,6);
+  if(!files.length) return;
+  if(!S.userId){ toast('Login dulu'); setTimeout(function(){ location.href='/index.html'; },1500); return; }
+  openGallery(files.map(function(f){ return {file:f,hasFace:false,preview:URL.createObjectURL(f)}; }));
 }
 
-function openGallery(files) {
-  selFiles = new Set();
-  for (var i = 0; i < files.length; i++) selFiles.add(i);
-  currentTheme = 0;
-  currentNote = '';
-
-  var grid = $('ggrid');
-  if (!grid) return;
-
-  grid.innerHTML = '';
-  for (var j = 0; j < files.length; j++) {
-    var item = files[j];
-    var d = document.createElement('div');
-    d.className = 'gi sel';
-    d.innerHTML = '<img src="' + item.preview + '" class="fm" id="pv' + j + '">';
-    (function(idx) {
-      d.addEventListener('click', function() { toggleSel(idx, d); });
-    })(j);
+function openGallery(files){
+  selFiles=new Set(); for(var i=0;i<files.length;i++) selFiles.add(i);
+  currentTheme=0; currentNote='';
+  var grid=$('ggrid'); if(!grid) return;
+  grid.innerHTML='';
+  for(var j=0;j<files.length;j++){
+    var d=document.createElement('div');
+    d.className='gi sel';
+    d.innerHTML='<img src="'+files[j].preview+'" class="fm" id="pv'+j+'">';
+    (function(idx){ d.addEventListener('click',function(){ toggleSel(idx,d); }); })(j);
     grid.appendChild(d);
   }
-
-  $('tmsl').value = 0;
-  $('tmnm').textContent = 'MONOCHROME';
-  $('noti').value = '';
-  $('notcnt').textContent = '0/4';
-  updSelCnt();
-  $('gmodal').classList.add('on');
-  pendingFiles = files;
+  $('tmsl').value=0; $('tmnm').textContent='MONOCHROME'; $('noti').value=''; $('notcnt').textContent='0/4';
+  updSelCnt(); $('gmodal').classList.add('on'); pendingFiles=files;
 }
 
-function toggleSel(i, el) {
-  if (selFiles.has(i)) selFiles.delete(i);
-  else selFiles.add(i);
-  el.classList.toggle('sel');
-  updSelCnt();
+function toggleSel(i,el){ if(selFiles.has(i)) selFiles.delete(i); else selFiles.add(i); el.classList.toggle('sel'); updSelCnt(); }
+function updSelCnt(){ $('selcnt').textContent=selFiles.size; }
+function updTheme(v){
+  currentTheme=parseInt(v);
+  var th=THEMES[currentTheme]; $('tmnm').textContent=th.name;
+  for(var i=0;i<pendingFiles.length;i++){ var img=$('pv'+i); if(img) img.className=th.filter; }
 }
-
-function updSelCnt() {
-  $('selcnt').textContent = selFiles.size;
+function valNote(inp){
+  var words=inp.value.trim().split(/\s+/).filter(function(x){ return x.length>0; });
+  $('notcnt').textContent=Math.min(words.length,4)+'/4';
+  if(words.length>4) inp.value=words.slice(0,4).join(' ');
+  currentNote=inp.value.trim();
 }
+function closeGallery(){ $('gmodal').classList.remove('on'); pendingFiles=[]; selFiles.clear(); }
 
-function updTheme(v) {
-  currentTheme = parseInt(v);
-  var th = THEMES[currentTheme];
-  $('tmnm').textContent = th.name;
-  for (var i = 0; i < pendingFiles.length; i++) {
-    var img = $('pv' + i);
-    if (img) img.className = th.filter;
-  }
-}
-
-function valNote(inp) {
-  var val = inp.value.trim();
-  var words = val.split(/\s+/).filter(function(x) { return x.length > 0; });
-  $('notcnt').textContent = Math.min(words.length, 4) + '/4';
-  if (words.length > 4) {
-    inp.value = words.slice(0, 4).join(' ');
-  }
-  currentNote = inp.value.trim();
-}
-
-function closeGallery() {
-  $('gmodal').classList.remove('on');
-  pendingFiles = [];
-  selFiles.clear();
-}
-
-async function confirmUpload() {
-  if (selFiles.size === 0) { toast('Pilih minimal 1'); return; }
-
-  var kbtn = $('konfirmbtn');
-  if (kbtn) kbtn.disabled = true;
-
-  var theme = THEMES[currentTheme];
-  var note = currentNote || 'memory';
-  var selFilesArray = Array.from(selFiles);
-  var snapshotFiles = pendingFiles.slice();
-
+async function confirmUpload(){
+  if(selFiles.size===0){ toast('Pilih minimal 1'); return; }
+  // FIX #4: rate limit
+  if(window.JEJAKRate){ var rl=JEJAKRate.checkPreset('upload'); if(!rl.allowed){ toast(rl.message); return; } }
+  var kbtn=$('konfirmbtn'); if(kbtn) kbtn.disabled=true;
+  var theme=THEMES[currentTheme],note=currentNote||'memory';
+  var items=Array.from(selFiles).map(function(i){ return pendingFiles[i]; }).filter(function(x){ return x&&x.file; })
+    .map(function(x){ return {file:x.file,note:note,hasFace:x.hasFace||false,theme:theme.filter}; });
   closeGallery();
-  showProc('Mengupload foto...<br><small>Mohon tunggu</small>');
 
-  var uploadedCount = 0;
+  var pw=$('upload-progress-wrap'),pf=$('upload-progress-fill'),pl=$('upload-progress-label-text');
+  if(pw) pw.classList.add('show');
 
-  for (var idx = 0; idx < selFilesArray.length; idx++) {
-    var i = selFilesArray[idx];
-    var item = snapshotFiles[i];
-    if (!item || !item.file) { continue; }
-    var file = item.file;
-    var rawExt = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
-    var ext = ['jpg','jpeg','png','webp','gif'].includes(rawExt) ? rawExt : 'jpg';
-    var mimeType = file.type || ('image/' + ext);
-    var timestamp = Date.now();
-    var storagePath = timestamp + '_' + i + '_' + S.userId.substring(0,8) + '.' + ext;
+  var uploadedCount=0,newArts=[];
 
-    if (window.supabaseClient) {
-      try {
-        var uploadResult = await window.supabaseClient
-          .storage
-          .from('artefacts')
-          .upload(storagePath, file, { contentType: mimeType, upsert: true });
-
-        if (uploadResult.error) {
-          toast('❌ Upload gagal: ' + uploadResult.error.message);
-          continue;
+  if(window.supabaseClient&&window.JEJAKUpload){
+    // FIX #8: parallel upload
+    await JEJAKUpload.uploadParallel(items,window.supabaseClient,S.userId,{
+      bucket:'artefacts',batchSize:3,
+      onProgress:function(pct,cur,total){
+        if(pf) pf.style.width=pct+'%';
+        if(pl) pl.textContent=cur+'/'+total+' foto';
+      },
+      onFileSuccess:async function(result){
+        var ins=await window.supabaseClient.from('artefacts').insert({user_id:S.userId,url:result.url,note:result.note,has_face:result.hasFace,theme:result.theme}).select();
+        if(!ins.error&&ins.data&&ins.data[0]){
+          newArts.push({id:ins.data[0].id,url:result.url,note:result.note,hasFace:result.hasFace,theme:result.theme,timestamp:Date.now(),isDummy:false});
+          uploadedCount++;
         }
-
-        var urlResult = window.supabaseClient.storage.from('artefacts').getPublicUrl(storagePath);
-        var publicUrl = urlResult.data.publicUrl;
-
-        var insertResult = await window.supabaseClient
-          .from('artefacts')
-          .insert({
-            user_id: S.userId,
-            url: publicUrl,
-            note: note,
-            has_face: item.hasFace,
-            faces: null,
-            theme: theme.filter
-          })
-          .select();
-
-        if (insertResult.error) {
-          toast('❌ Gagal simpan: ' + insertResult.error.message);
-          continue;
+      },
+      onFileError:function(err){ console.error('[UPLOAD]',window.JEJAKError?JEJAKError.handleSupabaseError(err,'UPLOAD'):err.message); }
+    });
+  } else {
+    // Fallback sequential
+    for(var idx=0;idx<items.length;idx++){
+      var item=items[idx],file=item.file;
+      var ext=(['jpg','jpeg','png','webp','gif'].includes((file.name.split('.').pop()||'').toLowerCase()))?(file.name.split('.').pop().toLowerCase()):'jpg';
+      var path=Date.now()+'_'+idx+'_'+S.userId.substring(0,8)+'.'+ext;
+      try{
+        var ur=await window.supabaseClient.storage.from('artefacts').upload(path,file,{contentType:file.type||('image/'+ext),upsert:true});
+        if(ur.error){ toast('Upload gagal: '+ur.error.message); continue; }
+        var url=window.supabaseClient.storage.from('artefacts').getPublicUrl(path).data.publicUrl;
+        var ins=await window.supabaseClient.from('artefacts').insert({user_id:S.userId,url:url,note:item.note,has_face:item.hasFace,theme:item.theme}).select();
+        if(!ins.error&&ins.data&&ins.data[0]){
+          newArts.push({id:ins.data[0].id,url:url,note:item.note,hasFace:item.hasFace,theme:item.theme,timestamp:Date.now(),isDummy:false});
+          uploadedCount++;
         }
-
-        var newId = (insertResult.data && insertResult.data[0]) ? insertResult.data[0].id : ('local_' + timestamp + '_' + i);
-
-        S.artefacts.unshift({
-          id: newId,
-          url: publicUrl,
-          note: note,
-          hasFace: item.hasFace,
-          theme: theme.filter,
-          timestamp: timestamp,
-          isDummy: false
-        });
-      } catch (uploadErr) {
-        toast('❌ Error: ' + (uploadErr.message || JSON.stringify(uploadErr)));
-        continue;
-      }
-    } else {
-      S.artefacts.unshift({
-        id: 'local_' + timestamp + '_' + i,
-        url: item.preview,
-        note: note,
-        hasFace: item.hasFace,
-        theme: theme.filter,
-        timestamp: timestamp,
-        isDummy: false
-      });
+        if(pf) pf.style.width=Math.round(((idx+1)/items.length)*100)+'%';
+        if(pl) pl.textContent=(idx+1)+'/'+items.length+' foto';
+      }catch(err){ toast('Error: '+(err.message||'')); }
     }
-    uploadedCount++;
   }
 
-  if (S.artefacts.length > 6) S.artefacts = S.artefacts.slice(0, 6);
-
+  if(pw) pw.classList.remove('show');
+  if(pf) pf.style.width='0%';
+  S.artefacts=[...newArts,...S.artefacts].slice(0,6);
   await loadArtefacts();
-
-  if (S.artefacts.length > 0) setHero(S.artefacts[0].id);
-
-  hideProc();
-  if (kbtn) kbtn.disabled = false;
-  toast('✓ ' + uploadedCount + ' foto diupload');
+  if(S.artefacts.length>0) setHero(S.artefacts[0].id);
+  if(kbtn) kbtn.disabled=false;
+  toast(uploadedCount>0?'✓ '+uploadedCount+' foto diupload':'⚠ Upload gagal, coba lagi');
 }
 
-// ============================================
-// THE VOID
-// ============================================
-function openVoid() {
-  if (!S.isPremium) { $('void-locked').classList.add('on'); return; }
-  $('void-portal').classList.add('on');
-}
+function openVoid(){ if(!S.isPremium){ $('void-locked').classList.add('on'); return; } $('void-portal').classList.add('on'); }
+function closeVoid(){ $('void-portal').classList.remove('on'); }
+function closeVoidLocked(){ $('void-locked').classList.remove('on'); }
+function closeVoidChat(){ $('void-chat').classList.remove('on'); }
+function sendContactRequest(){ toast('Fitur ini memerlukan Premium'); }
+function sendVoidMessage(){ toast('Fitur ini memerlukan Premium'); }
 
-function closeVoid() { $('void-portal').classList.remove('on'); }
-function closeVoidLocked() { $('void-locked').classList.remove('on'); }
-function closeVoidChat() { $('void-chat').classList.remove('on'); }
-function sendContactRequest() { toast('Fitur ini memerlukan Premium'); }
-function sendVoidMessage() { toast('Fitur ini memerlukan Premium'); }
+window.debugSession=function(){ var s=JEJAK.getSession(); console.table(s); console.log('[JEJAK] isLoggedIn:',JEJAK.isLoggedIn()); };
+window.fixSession=function(){ JEJAK.clearSession('manual fix'); setTimeout(function(){ location.href='/index.html'; },500); };
 
-// ============================================
-// DEBUG HELPERS
-// ============================================
-window.debugSession = function() {
-  var sess = JEJAK.getSession();
-  console.table(sess);
-  console.log('[JEJAK] isLoggedIn:', JEJAK.isLoggedIn());
-};
+document.addEventListener('DOMContentLoaded',function(){
+  var ri=$('ri'); if(ri) ri.addEventListener('input',updateCharCount);
+  document.querySelectorAll('.mc').forEach(function(c){ c.addEventListener('click',function(){ selMood(c.dataset.mood); }); });
+  var sb=$('sbtn'); if(sb) sb.addEventListener('click',saveEntry);
+  var ts=$('tmsl'); if(ts) ts.addEventListener('input',function(){ updTheme(this.value); });
+  var ni=$('noti'); if(ni) ni.addEventListener('input',function(){ valNote(this); });
+  var gc=$('gallery-close-btn'); if(gc) gc.addEventListener('click',closeGallery);
+  var cu=$('cancel-upload-btn'); if(cu) cu.addEventListener('click',closeGallery);
+  var kb=$('konfirmbtn'); if(kb) kb.addEventListener('click',confirmUpload);
+  var vn=$('void-node'); if(vn) vn.addEventListener('click',openVoid);
+  var vc=$('void-close-btn'); if(vc) vc.addEventListener('click',closeVoid);
+  var vl=$('void-locked'); if(vl) vl.addEventListener('click',function(e){ if(e.target===vl) closeVoidLocked(); });
+  var vb=$('void-chat-back'); if(vb) vb.addEventListener('click',closeVoidChat);
+  var vs=$('void-send-btn'); if(vs) vs.addEventListener('click',sendVoidMessage);
+  var va=$('void-add-btn'); if(va) va.addEventListener('click',sendContactRequest);
+  document.addEventListener('click',function(e){ if(!e.target.closest('.smenu')){ var m=$('mdd'); if(m) m.classList.remove('on'); } });
 
-window.fixSession = function() {
-  JEJAK.clearSession('manual fix');
-  setTimeout(function() { location.href = '/index.html'; }, 500);
-};
-
-// ============================================
-// INIT
-// ============================================
-document.addEventListener('DOMContentLoaded', function() {
-
-  var riEl = $('ri');
-  if (riEl) riEl.addEventListener('input', updateCharCount);
-
-  var moodCards = document.querySelectorAll('.mc');
-  for (var i = 0; i < moodCards.length; i++) {
-    moodCards[i].addEventListener('click', (function(card) {
-      return function() { selMood(card.dataset.mood); };
-    })(moodCards[i]));
-  }
-
-  var sbtnEl = $('sbtn');
-  if (sbtnEl) sbtnEl.addEventListener('click', saveEntry);
-
-  var tmslEl = $('tmsl');
-  if (tmslEl) tmslEl.addEventListener('input', function() { updTheme(this.value); });
-
-  var notiEl = $('noti');
-  if (notiEl) notiEl.addEventListener('input', function() { valNote(this); });
-
-  var galCloseBtn = $('gallery-close-btn');
-  if (galCloseBtn) galCloseBtn.addEventListener('click', closeGallery);
-  var cancelUpBtn = $('cancel-upload-btn');
-  if (cancelUpBtn) cancelUpBtn.addEventListener('click', closeGallery);
-
-  var konfirmBtn = $('konfirmbtn');
-  if (konfirmBtn) konfirmBtn.addEventListener('click', confirmUpload);
-
-  var voidNode = $('void-node');
-  if (voidNode) voidNode.addEventListener('click', openVoid);
-
-  var voidCloseBtn = $('void-close-btn');
-  if (voidCloseBtn) voidCloseBtn.addEventListener('click', closeVoid);
-
-  var voidLocked = $('void-locked');
-  if (voidLocked) voidLocked.addEventListener('click', function(e) {
-    if (e.target === voidLocked) closeVoidLocked();
-  });
-
-  var voidChatBack = $('void-chat-back');
-  if (voidChatBack) voidChatBack.addEventListener('click', closeVoidChat);
-
-  var voidSendBtn = $('void-send-btn');
-  if (voidSendBtn) voidSendBtn.addEventListener('click', sendVoidMessage);
-
-  var voidAddBtn = $('void-add-btn');
-  if (voidAddBtn) voidAddBtn.addEventListener('click', sendContactRequest);
-
-  document.addEventListener('click', function(e) {
-    if (!e.target.closest('.smenu')) {
-      var mdd = $('mdd');
-      if (mdd) mdd.classList.remove('on');
-    }
-  });
-
-  // Render awal dengan dummy data
-  renderEntries();
-  renderTray();
-
-  initUpload();
-
-  // Init Supabase & auth
+  renderEntries(); renderTray(); initUpload();
   initSupabase();
-  checkAuth().then(function(authed) {
-    if (authed) {
-      console.log('%c[JEJAK] Ready', 'color:#bfff00;font-weight:bold');
-    }
-  });
+  checkAuth().then(function(ok){ if(ok) console.log('%c[JEJAK] Ready','color:#bfff00;font-weight:bold'); });
 
-  // Auto-refresh reactions setiap 15 detik
-  setInterval(function() {
-    if (!S.userId || !window.supabaseClient) return;
-    window.supabaseClient
-      .from('entries')
-      .select('id,reactions')
-      .eq('user_id', S.userId)
-      .then(function(result) {
-        if (result.error || !result.data) return;
-        result.data.forEach(function(row) {
-          for (var i = 0; i < S.entries.length; i++) {
-            if (S.entries[i].id === row.id) {
-              S.entries[i].reactions = row.reactions || S.entries[i].reactions;
-              ['skull','cry','fire','upside'].forEach(function(k) {
-                var el = document.getElementById('jrc-' + row.id + '-' + k);
-                if (el) el.textContent = row.reactions[k] || 0;
-              });
-              break;
-            }
-          }
+  setInterval(function(){
+    if(!S.userId||!window.supabaseClient) return;
+    window.supabaseClient.from('entries').select('id,reactions').eq('user_id',S.userId).then(function(r){
+      if(r.error||!r.data) return;
+      r.data.forEach(function(row){
+        var e=S.entries.find(function(x){ return x.id===row.id; });
+        if(!e) return;
+        e.reactions=row.reactions||e.reactions;
+        ['skull','cry','fire','upside'].forEach(function(k){
+          var el=document.getElementById('jrc-'+row.id+'-'+k);
+          if(el) el.textContent=row.reactions[k]||0;
         });
       });
-  }, 15000);
+    });
+  },15000);
 });
+</script>
+
+<script>
+(function(){
+  if('serviceWorker' in navigator){
+    window.addEventListener('load',function(){
+      navigator.serviceWorker.register('/sw.js').catch(function(e){ console.warn('[JEJAK] SW:',e); });
+    });
+  }
+  var m={name:'JEJAK',short_name:'JEJAK',start_url:'https://jejak.space/index.html',scope:'https://jejak.space/',display:'standalone',orientation:'portrait',background_color:'#080808',theme_color:'#080808',icons:[{src:'/apple-touch-icon.png',sizes:'180x180',type:'image/png'},{src:'/icon-192.png',sizes:'192x192',type:'image/png',purpose:'any maskable'},{src:'/icon-512.png',sizes:'512x512',type:'image/png',purpose:'any maskable'}]};
+  var b=new Blob([JSON.stringify(m)],{type:'application/manifest+json'});
+  var l=document.getElementById('jejak-manifest'); if(l) l.href=URL.createObjectURL(b);
+})();
 </script>
 </body>
 </html>
