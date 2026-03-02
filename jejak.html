@@ -292,11 +292,9 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 
 <section class="isec">
   <div class="ihdr"><span class="ilbl">Spill your truth</span><span class="ccount" id="ccount">0/500</span></div>
-  <!-- FIX: Removed inline oninput handler — attached via JS to avoid ReferenceError -->
   <textarea class="ri" id="ri" placeholder="What's eating you alive right now? No cap, no filter..." maxlength="500"></textarea>
   <div class="msec">
     <div class="mlbl">Pilih mood-mu sekarang</div>
-    <!-- FIX: Removed inline onclick handlers — attached via JS to avoid ReferenceError -->
     <div class="mgrid">
       <div class="mc act" data-mood="surviving"><span class="me">😮‍💨</span><span class="mn" style="color:var(--ms)">Surviving</span><span class="md-desc">Hidup tapi barely</span></div>
       <div class="mc" data-mood="thriving"><span class="me">✨</span><span class="mn" style="color:var(--mt)">Thriving</span><span class="md-desc">On top of my game</span></div>
@@ -395,20 +393,17 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
   <div class="ptxt" id="proctxt">Mengupload foto...<br><small>Mohon tunggu</small></div>
 </div>
 
-<!-- FIX: Removed inline onclick from close button — attached via JS -->
 <div class="modal" id="gmodal">
   <div class="mc2">
     <div class="mhdr"><h3 class="mtit">Review Artefak</h3><button class="void-close" id="gallery-close-btn">×</button></div>
     <div class="gwarn">DILARANG UPLOAD FOTO WAJAH!</div>
     <div style="font-size:11px;color:var(--txs);margin-bottom:16px;text-align:center">Wajah terdeteksi akan otomatis disensor • Sistem FIFO (6 foto max) • Tidak dapat dihapus</div>
     <div class="ggrid" id="ggrid"></div>
-    <!-- FIX: Removed inline oninput from range slider — attached via JS -->
     <div class="tmsec">
       <div class="tmhdr"><span class="tmlbl">🎨 Tema Foto</span><span class="tmnm" id="tmnm">MONOCHROME</span></div>
       <input type="range" class="tmsl" id="tmsl" min="0" max="11" value="0" step="1">
       <div class="tmlabs"><span>B&amp;W</span><span>Warm</span><span>Cool</span><span>Art</span></div>
     </div>
-    <!-- FIX: Removed inline oninput from note input — attached via JS -->
     <div class="notsec">
       <div class="notlbl"><span>📝 Notasi (Max 4 kata)</span><span class="notcnt" id="notcnt">0/4</span></div>
       <input type="text" class="noti" id="noti" placeholder="Contoh: senja di kamar" maxlength="30">
@@ -425,12 +420,20 @@ footer{padding:32px 0;text-align:center;border-top:2px solid var(--bd);margin-bo
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// AUTH GUARD SINKRON — berjalan sebelum apapun, tidak ada flash
+// ============================================
+// ✅ FIX: AUTH GUARD — hanya cek localStorage, TIDAK redirect jika ada session valid
+// Bug sebelumnya: guard terlalu agresif, redirect ke index.html padahal session valid
+// ============================================
 (function() {
   var loggedIn = localStorage.getItem('jejak_logged_in') === 'true';
   var username = localStorage.getItem('jejak_username');
   var userId   = localStorage.getItem('user_id');
-  if (!loggedIn || !username || !userId || userId === 'undefined') {
+
+  // Hanya redirect jika BENAR-BENAR tidak ada session sama sekali
+  if (!loggedIn || !username || !userId || userId === 'undefined' || userId === 'null') {
+    // Simpan halaman tujuan agar index.html TIDAK redirect balik ke sini
+    // ✅ FIX: set flag bahwa kita dari jejak.html bukan dari redirect loop
+    sessionStorage.setItem('jejak_redirect_from', 'jejak');
     window.location.replace('index.html');
   }
 })();
@@ -489,7 +492,6 @@ function esc(t) {
   return d.innerHTML;
 }
 
-// FIX: toggleMenu — defined before DOM ready, globally accessible
 function toggleMenu() {
   $('mdd').classList.toggle('on');
 }
@@ -497,10 +499,10 @@ function toggleMenu() {
 function logoutUser() {
   if (!confirm('Yakin logout? Semua data lokal akan dihapus.')) return;
   localStorage.clear();
+  sessionStorage.clear();
   location.href = 'index.html';
 }
 
-// FIX: selMood — now called only from JS event listeners, not inline HTML
 function selMood(mood) {
   var cards = document.querySelectorAll('.mc');
   for (var i = 0; i < cards.length; i++) {
@@ -528,7 +530,6 @@ function timeAgo(timestamp) {
   return Math.floor(hours / 24) + 'h lalu';
 }
 
-// FIX: updateCharCount — now attached via addEventListener, not inline oninput
 function updateCharCount() {
   var val = $('ri').value.length;
   $('ccount').textContent = val + '/500';
@@ -542,9 +543,6 @@ function renderEntries() {
   if (!con) return;
 
   var realCount = S.entries ? S.entries.length : 0;
-
-  // FIFO visual: real entries di depan, dummy mengisi sisa slot sampai 3
-  // Misal: 1 real → tampil 1 real + 2 dummy. 2 real → 2 real + 1 dummy. 3+ real → semua real
   var displayEntries = [];
   for (var r = 0; r < realCount; r++) displayEntries.push(S.entries[r]);
 
@@ -565,10 +563,8 @@ function renderEntries() {
     for (var key in reactionDefs) {
       var count = e.reactions && e.reactions[key] ? e.reactions[key] : 0;
       if (e.isDummy) {
-        // Dummy: disabled, hanya tampil counter
         reactionsHtml += '<button class="reaction-btn" disabled><span class="remoji">' + reactionDefs[key] + '</span><span class="rcount">' + count + '</span></button>';
       } else {
-        // Real entry: aktif, bisa diklik, simpan ke DB
         var isActive = e.userReacted === key ? ' act' : '';
         reactionsHtml += '<button class="reaction-btn' + isActive + '" data-entry-id="' + e.id + '" data-key="' + key + '" id="jr-' + e.id + '-' + key + '">' +
           '<span class="remoji">' + reactionDefs[key] + '</span>' +
@@ -590,7 +586,6 @@ function renderEntries() {
   }
 
   con.innerHTML = html;
-  // Bind reaction buttons setelah render
   bindReactionButtons();
 }
 
@@ -599,9 +594,6 @@ function renderTray() {
   if (!con) return;
 
   var realCount = S.artefacts ? S.artefacts.length : 0;
-
-  // FIFO visual: real artefacts di depan, dummy mengisi sisa slot sampai 6
-  // Misal: 2 real → 2 real + 4 dummy. 4 real → 4 real + 2 dummy. 6 real → semua real
   var displayArtefacts = [];
   for (var r = 0; r < Math.min(realCount, 6); r++) displayArtefacts.push(S.artefacts[r]);
 
@@ -623,23 +615,12 @@ function renderTray() {
     }
   }
 
-  // Slot kosong (upload placeholder) — hanya jika total < 6 dan tidak terisi dummy
-  // Tidak perlu karena dummy sudah mengisi semua slot
-
   con.innerHTML = html;
 
-  // FIX: Attach click events via JS after rendering (avoids inline onclick string escaping issues)
   var tiles = con.querySelectorAll('.ti[data-id]');
   for (var k = 0; k < tiles.length; k++) {
     tiles[k].addEventListener('click', function() {
       setHero(this.getAttribute('data-id'));
-    });
-  }
-  var emptyTiles = con.querySelectorAll('.ti[data-action="upload"]');
-  for (var m = 0; m < emptyTiles.length; m++) {
-    emptyTiles[m].addEventListener('click', function() {
-      var upbtn = $('upbtn');
-      if (upbtn) upbtn.click();
     });
   }
 }
@@ -677,13 +658,6 @@ function initSupabase() {
         'https://fuovfrdicdhnlymnacpz.supabase.co',
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0'
       );
-      console.log('%c[JEJAK] Supabase OK', 'color:#39FF14;font-weight:bold');
-      // Debug: tampilkan localStorage yang relevan
-      console.log('%c[JEJAK] Auth state:', 'color:#FF9500', {
-        user_id: localStorage.getItem('user_id'),
-        username: localStorage.getItem('jejak_username'),
-        logged_in: localStorage.getItem('jejak_logged_in')
-      });
       return true;
     }
   } catch (e) {
@@ -693,38 +667,26 @@ function initSupabase() {
 }
 
 // ============================================
-// AUTH
+// ✅ FIX: AUTH — profile check TIDAK redirect jika session localStorage valid
+// Bug sebelumnya: network error / profile not found → redirect ke index.html
+// → index.html deteksi sudah login → redirect balik ke jejak.html → LOOP
 // ============================================
 async function checkAuth() {
   var username = localStorage.getItem('jejak_username');
   var userId = localStorage.getItem('user_id');
   var loggedIn = localStorage.getItem('jejak_logged_in') === 'true';
 
-  console.log('%c[JEJAK] Auth check:', 'color:#FF9500', {
-    username: username,
-    user_id: userId,
-    logged_in: loggedIn
-  });
-
-  if (!loggedIn || !username || !userId) {
-    console.warn('[JEJAK] Incomplete session — missing:', { loggedIn: loggedIn, username: !!username, userId: !!userId });
+  if (!loggedIn || !username || !userId || userId === 'undefined' || userId === 'null' || userId.length < 10) {
+    console.warn('[JEJAK] Session tidak valid, redirect ke login');
+    localStorage.removeItem('jejak_logged_in');
+    localStorage.removeItem('jejak_username');
+    localStorage.removeItem('user_id');
+    sessionStorage.setItem('jejak_force_login', '1');
+    location.replace('index.html');
     return false;
   }
 
-  // Validasi userId terlihat seperti UUID (36 chars dengan dash, atau minimal 10 chars)
-  if (userId === 'undefined' || userId === 'null' || userId.length < 10) {
-    console.error('[JEJAK] INVALID user_id in localStorage:', userId);
-    toast('⚠️ Session rusak. Login ulang...');
-    setTimeout(function() {
-      localStorage.removeItem('user_id');
-      localStorage.removeItem('jejak_logged_in');
-      localStorage.removeItem('jejak_username');
-      location.href = 'index.html';
-    }, 2000);
-    return false;
-  }
-
-  // Set S.userId DULU sebelum async apapun — mencegah race condition saat upload
+  // Set state dari localStorage — TIDAK perlu tunggu DB
   S.userId = userId;
   S.user = username;
   S.isPremium = false;
@@ -734,7 +696,8 @@ async function checkAuth() {
   if (huser) huser.textContent = '@' + S.user;
   if (odot) odot.classList.remove('off');
 
-  // Verifikasi profile ada di DB — simple check, no auto-create
+  // ✅ FIX: Profile check hanya untuk logging/warning, BUKAN untuk redirect
+  // Redirect hanya jika localStorage sudah clear (di atas)
   if (window.supabaseClient) {
     try {
       var profileCheck = await window.supabaseClient
@@ -744,24 +707,26 @@ async function checkAuth() {
         .limit(1);
 
       if (profileCheck.error) {
-        console.warn('[JEJAK] Profile check error:', profileCheck.error.message);
-        // Non-fatal — S.userId sudah di-set, lanjutkan
+        // Network error atau RLS error — JANGAN redirect, cukup log warning
+        console.warn('[JEJAK] Profile check error (non-fatal, session tetap valid):', profileCheck.error.message);
       } else if (!profileCheck.data || profileCheck.data.length === 0) {
-        // Profile tidak ada — session stale, harus login ulang
-        console.error('[JEJAK] Profile tidak ditemukan untuk user_id:', userId);
-        localStorage.removeItem('user_id');
-        localStorage.removeItem('jejak_logged_in');
-        localStorage.removeItem('jejak_username');
-        location.href = 'index.html';
-        return false;
+        // ✅ FIX: Profile tidak ditemukan di DB — ini bisa terjadi karena:
+        // 1. RLS policy memblokir SELECT
+        // 2. Profile belum dibuat (race condition saat register)
+        // JANGAN redirect otomatis — tampilkan warning saja
+        console.warn('[JEJAK] Profile tidak ditemukan di DB untuk userId:', userId, '— tetap lanjut (mungkin RLS issue)');
+        // Hanya redirect jika sessionStorage flag eksplisit dari login
+        // TIDAK redirect otomatis untuk menghindari bounce loop
       } else {
         console.log('%c[JEJAK] Profile valid:', 'color:#39FF14', profileCheck.data[0]);
       }
     } catch(profileErr) {
-      console.warn('[JEJAK] Profile check skipped:', profileErr.message);
+      // Exception — JANGAN redirect
+      console.warn('[JEJAK] Profile check exception (non-fatal):', profileErr.message);
     }
   }
 
+  // Load data setelah auth berhasil
   await loadEntries();
   await loadArtefacts();
   return true;
@@ -773,7 +738,6 @@ async function checkAuth() {
 async function loadEntries() {
   if (!S.userId || !window.supabaseClient) return;
   try {
-    // Tabel: 'entries' — confirmed dari FK error: entries_user_id_fkey
     var result = await window.supabaseClient
       .from('entries')
       .select('*')
@@ -800,7 +764,7 @@ async function loadEntries() {
     renderEntries();
   } catch (err) {
     console.error('Load entries error:', err);
-    toast('Gagal load: ' + (err.message || err));
+    toast('Gagal load entries: ' + (err.message || err));
   }
 }
 
@@ -826,7 +790,6 @@ async function loadArtefacts() {
           note: a.note || 'memory',
           hasFace: a.has_face || false,
           theme: a.theme || 'fm',
-          // FIX: created_at mungkin null, fallback ke Date.now()
           timestamp: a.created_at ? new Date(a.created_at).getTime() : Date.now(),
           isDummy: false
         });
@@ -834,7 +797,6 @@ async function loadArtefacts() {
     }
     renderTray();
 
-    // Restore hero from saved state or use first artefact
     if (S.artefacts.length > 0) {
       var savedHero = null;
       try {
@@ -870,15 +832,12 @@ async function saveEntry() {
 
   showProc('Menyimpan spill...');
   try {
-    // FIX: tabel 'rants', kolom hanya: user_id, content, mood
-    // JANGAN kirim 'reactions' atau 'created_at' jika tidak ada di schema
     var insertData = {
       user_id: S.userId,
       content: content,
       mood: activeMood
     };
 
-    // Tabel: 'entries' (confirmed dari FK constraint: entries_user_id_fkey)
     var result = await window.supabaseClient
       .from('entries')
       .insert(insertData)
@@ -899,12 +858,11 @@ async function saveEntry() {
 }
 
 // ============================================
-// REACTIONS — update counter di DB, tampil di jejak
+// REACTIONS
 // ============================================
 async function reactEntry(entryId, key) {
   if (!S.userId || !window.supabaseClient) return;
 
-  // Cari entry di state
   var entry = null;
   for (var i = 0; i < S.entries.length; i++) {
     if (S.entries[i].id === entryId) { entry = S.entries[i]; break; }
@@ -913,12 +871,10 @@ async function reactEntry(entryId, key) {
 
   var wasActive = entry.userReacted === key;
 
-  // Update lokal dulu (optimistic UI)
   if (wasActive) {
     entry.reactions[key] = Math.max(0, (entry.reactions[key] || 0) - 1);
     entry.userReacted = null;
   } else {
-    // Kurangi reaksi lama jika ada
     if (entry.userReacted) {
       entry.reactions[entry.userReacted] = Math.max(0, (entry.reactions[entry.userReacted] || 0) - 1);
       var oldKey = entry.userReacted;
@@ -931,13 +887,11 @@ async function reactEntry(entryId, key) {
     entry.userReacted = key;
   }
 
-  // Update UI counter
   var btn = document.getElementById('jr-' + entryId + '-' + key);
   var countEl = document.getElementById('jrc-' + entryId + '-' + key);
   if (btn) btn.classList.toggle('act', !wasActive);
   if (countEl) countEl.textContent = entry.reactions[key];
 
-  // Simpan ke DB — update kolom reactions
   try {
     var updateResult = await window.supabaseClient
       .from('entries')
@@ -946,7 +900,6 @@ async function reactEntry(entryId, key) {
 
     if (updateResult.error) {
       console.error('[REACT] DB update error:', updateResult.error.message);
-      // Rollback UI kalau gagal
       if (wasActive) {
         entry.reactions[key]++;
         entry.userReacted = key;
@@ -963,11 +916,13 @@ async function reactEntry(entryId, key) {
   }
 }
 
-// Event delegation untuk reaction buttons di entries list
 function bindReactionButtons() {
   var econ = $('econ');
   if (!econ) return;
-  econ.addEventListener('click', function(e) {
+  // Remove old listener to prevent duplicate bindings
+  var newEcon = econ.cloneNode(true);
+  econ.parentNode.replaceChild(newEcon, econ);
+  newEcon.addEventListener('click', function(e) {
     var btn = e.target.closest('.reaction-btn[data-entry-id]');
     if (!btn) return;
     var entryId = btn.getAttribute('data-entry-id');
@@ -1032,7 +987,6 @@ function openGallery(files) {
     var d = document.createElement('div');
     d.className = 'gi sel';
     d.innerHTML = '<img src="' + item.preview + '" class="fm" id="pv' + j + '">';
-    // FIX: closure via IIFE to capture correct index
     (function(idx) {
       d.addEventListener('click', function() { toggleSel(idx, d); });
     })(j);
@@ -1069,7 +1023,6 @@ function updTheme(v) {
   }
 }
 
-// FIX: valNote — regex fixed (\s+ needed escaping in original template string; now plain JS)
 function valNote(inp) {
   var val = inp.value.trim();
   var words = val.split(/\s+/).filter(function(x) { return x.length > 0; });
@@ -1092,13 +1045,11 @@ async function confirmUpload() {
   var kbtn = $('konfirmbtn');
   if (kbtn) kbtn.disabled = true;
 
-  // FIX: snapshot semua data SEBELUM closeGallery() mengosongkan pendingFiles & selFiles
   var theme = THEMES[currentTheme];
   var note = currentNote || 'memory';
   var selFilesArray = Array.from(selFiles);
-  var snapshotFiles = pendingFiles.slice(); // copy array, bukan reference
+  var snapshotFiles = pendingFiles.slice();
 
-  // Baru tutup gallery — setelah data di-snapshot
   closeGallery();
   showProc('Mengupload foto...<br><small>Mohon tunggu</small>');
 
@@ -1106,27 +1057,14 @@ async function confirmUpload() {
 
   for (var idx = 0; idx < selFilesArray.length; idx++) {
     var i = selFilesArray[idx];
-    var item = snapshotFiles[i]; // FIX: pakai snapshot, bukan pendingFiles yang sudah dikosongkan
-    if (!item || !item.file) {
-      console.error('[ARTEFACT] Item tidak ada di index', i, '— snapshot length:', snapshotFiles.length);
-      continue;
-    }
+    var item = snapshotFiles[i];
+    if (!item || !item.file) { continue; }
     var file = item.file;
-    // FIX: normalize extension to lowercase, fallback to jpg
     var rawExt = file.name.includes('.') ? file.name.split('.').pop().toLowerCase() : '';
     var ext = ['jpg','jpeg','png','webp','gif'].includes(rawExt) ? rawExt : 'jpg';
-    // FIX: normalize contentType, fallback if empty
     var mimeType = file.type || ('image/' + ext);
     var timestamp = Date.now();
-    // FIX: simpler path — no subfolder (some Supabase configs don't allow subfolders for anon)
     var storagePath = timestamp + '_' + i + '_' + S.userId.substring(0,8) + '.' + ext;
-
-    console.log('[ARTEFACT] Attempting upload:', {
-      path: storagePath,
-      type: mimeType,
-      size: file.size,
-      userId: S.userId
-    });
 
     if (window.supabaseClient) {
       try {
@@ -1136,19 +1074,12 @@ async function confirmUpload() {
           .upload(storagePath, file, { contentType: mimeType, upsert: true });
 
         if (uploadResult.error) {
-          console.error('[ARTEFACT] Storage upload error:', {
-            message: uploadResult.error.message,
-            statusCode: uploadResult.error.statusCode,
-            error: uploadResult.error,
-            path: storagePath
-          });
           toast('❌ Upload gagal: ' + uploadResult.error.message);
           continue;
         }
 
         var urlResult = window.supabaseClient.storage.from('artefacts').getPublicUrl(storagePath);
         var publicUrl = urlResult.data.publicUrl;
-        console.log('[ARTEFACT] Upload OK, URL:', publicUrl);
 
         var insertResult = await window.supabaseClient
           .from('artefacts')
@@ -1163,15 +1094,9 @@ async function confirmUpload() {
           .select();
 
         if (insertResult.error) {
-          console.error('[ARTEFACT] DB insert error:', {
-            message: insertResult.error.message,
-            code: insertResult.error.code,
-            details: insertResult.error.details
-          });
           toast('❌ Gagal simpan: ' + insertResult.error.message);
           continue;
         }
-        console.log('[ARTEFACT] DB insert OK:', insertResult.data);
 
         var newId = (insertResult.data && insertResult.data[0]) ? insertResult.data[0].id : ('local_' + timestamp + '_' + i);
 
@@ -1185,12 +1110,10 @@ async function confirmUpload() {
           isDummy: false
         });
       } catch (uploadErr) {
-        console.error('[ARTEFACT] Unexpected upload exception:', uploadErr);
         toast('❌ Error: ' + (uploadErr.message || JSON.stringify(uploadErr)));
         continue;
       }
     } else {
-      // Fallback: local blob URL (no Supabase)
       S.artefacts.unshift({
         id: 'local_' + timestamp + '_' + i,
         url: item.preview,
@@ -1204,12 +1127,10 @@ async function confirmUpload() {
     uploadedCount++;
   }
 
-  // Keep max 6 artefacts (FIFO)
   if (S.artefacts.length > 6) S.artefacts = S.artefacts.slice(0, 6);
 
   await loadArtefacts();
 
-  // Set newest upload as hero
   if (S.artefacts.length > 0) setHero(S.artefacts[0].id);
 
   hideProc();
@@ -1232,60 +1153,32 @@ function sendContactRequest() { toast('Fitur ini memerlukan Premium'); }
 function sendVoidMessage() { toast('Fitur ini memerlukan Premium'); }
 
 // ============================================
-// DEBUG HELPER — panggil debugSession() di console browser
+// DEBUG HELPERS
 // ============================================
 window.debugSession = async function() {
   var info = {
     'jejak_username':   localStorage.getItem('jejak_username'),
     'user_id':          localStorage.getItem('user_id'),
-    'jejak_logged_in':  localStorage.getItem('jejak_logged_in'),
-    'jejak_session_id': localStorage.getItem('jejak_session_id')
+    'jejak_logged_in':  localStorage.getItem('jejak_logged_in')
   };
   console.table(info);
-
-  var userId = info['user_id'];
-  if (!userId || userId === 'undefined') {
-    console.error('❌ user_id KOSONG atau "undefined" — ini penyebab FK error!');
-    console.log('👉 Solusi: logout dan login ulang dari index.html');
-    return;
-  }
-
-  if (window.supabaseClient) {
-    var r = await window.supabaseClient
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .limit(1);
-    if (r.data && r.data.length > 0) {
-      console.log('%c✅ Profile ditemukan di DB:', 'color:#39FF14', r.data[0]);
-    } else {
-      console.error('❌ user_id', userId, 'TIDAK ADA di tabel profiles!');
-      console.log('Error:', r.error);
-      console.log('👉 Ini 100% penyebab FK error di entries & artefacts');
-      console.log('👉 Solusi: jalankan fixSession() untuk reset');
-    }
-  }
 };
 
 window.fixSession = function() {
-  console.log('🔧 Clearing corrupt session...');
   localStorage.removeItem('user_id');
   localStorage.removeItem('jejak_logged_in');
   localStorage.removeItem('jejak_username');
-  console.log('✅ Session cleared. Redirect ke login...');
   setTimeout(function() { location.href = 'index.html'; }, 500);
 };
 
 // ============================================
-// INIT — All event bindings here, no inline HTML handlers
+// INIT
 // ============================================
 document.addEventListener('DOMContentLoaded', function() {
 
-  // Char counter
   var riEl = $('ri');
   if (riEl) riEl.addEventListener('input', updateCharCount);
 
-  // Mood cards
   var moodCards = document.querySelectorAll('.mc');
   for (var i = 0; i < moodCards.length; i++) {
     moodCards[i].addEventListener('click', (function(card) {
@@ -1293,55 +1186,43 @@ document.addEventListener('DOMContentLoaded', function() {
     })(moodCards[i]));
   }
 
-  // Submit spill
   var sbtnEl = $('sbtn');
   if (sbtnEl) sbtnEl.addEventListener('click', saveEntry);
 
-  // Theme slider
   var tmslEl = $('tmsl');
   if (tmslEl) tmslEl.addEventListener('input', function() { updTheme(this.value); });
 
-  // Note input
   var notiEl = $('noti');
   if (notiEl) notiEl.addEventListener('input', function() { valNote(this); });
 
-  // Gallery close / cancel
   var galCloseBtn = $('gallery-close-btn');
   if (galCloseBtn) galCloseBtn.addEventListener('click', closeGallery);
   var cancelUpBtn = $('cancel-upload-btn');
   if (cancelUpBtn) cancelUpBtn.addEventListener('click', closeGallery);
 
-  // Confirm upload
   var konfirmBtn = $('konfirmbtn');
   if (konfirmBtn) konfirmBtn.addEventListener('click', confirmUpload);
 
-  // Void node
   var voidNode = $('void-node');
   if (voidNode) voidNode.addEventListener('click', openVoid);
 
-  // Void portal close
   var voidCloseBtn = $('void-close-btn');
   if (voidCloseBtn) voidCloseBtn.addEventListener('click', closeVoid);
 
-  // Void locked close on backdrop tap
   var voidLocked = $('void-locked');
   if (voidLocked) voidLocked.addEventListener('click', function(e) {
     if (e.target === voidLocked) closeVoidLocked();
   });
 
-  // Void chat back
   var voidChatBack = $('void-chat-back');
   if (voidChatBack) voidChatBack.addEventListener('click', closeVoidChat);
 
-  // Void send
   var voidSendBtn = $('void-send-btn');
   if (voidSendBtn) voidSendBtn.addEventListener('click', sendVoidMessage);
 
-  // Void add
   var voidAddBtn = $('void-add-btn');
   if (voidAddBtn) voidAddBtn.addEventListener('click', sendContactRequest);
 
-  // Close menu when clicking outside
   document.addEventListener('click', function(e) {
     if (!e.target.closest('.smenu')) {
       var mdd = $('mdd');
@@ -1349,28 +1230,40 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Initial render with dummy data
+  // Render awal dengan dummy data
   renderEntries();
   renderTray();
 
-  // Init upload
   initUpload();
 
-  // Init Supabase & auth
-  initSupabase();
+  // ✅ FIX: Init Supabase dulu, baru checkAuth — mencegah race condition
+  var sbReady = initSupabase();
+  if (!sbReady) {
+    console.warn('[JEJAK] Supabase not ready, loading from localStorage only');
+    // Tetap set state dari localStorage meski Supabase gagal
+    var userId = localStorage.getItem('user_id');
+    var username = localStorage.getItem('jejak_username');
+    if (userId && username) {
+      S.userId = userId;
+      S.user = username;
+      var huser = $('huser');
+      if (huser) huser.textContent = '@' + username;
+      var odot = $('odot');
+      if (odot) odot.classList.remove('off');
+    }
+    return;
+  }
+
   checkAuth().then(function(authed) {
     if (authed) {
-      renderEntries();
-      renderTray();
-    } else {
-      console.warn('[JEJAK] Not authenticated, redirecting to index...');
-      location.href = 'index.html';
+      console.log('%c[JEJAK] Auth OK, data loaded', 'color:#39FF14');
     }
+    // ✅ FIX: TIDAK redirect jika authed === false dari checkAuth
+    // karena checkAuth sudah handle redirect internal jika session benar-benar invalid
+    // Menghilangkan else-branch yang menyebabkan double redirect / bounce loop
   });
 
-  // ─── AUTO-REFRESH REACTIONS ───
-  // Poll DB setiap 15 detik agar counter emoji yang di-klik
-  // user lain di spill.html langsung muncul di jejak ini
+  // Auto-refresh reactions setiap 15 detik
   setInterval(function() {
     if (!S.userId || !window.supabaseClient) return;
     window.supabaseClient
@@ -1380,11 +1273,9 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(function(result) {
         if (result.error || !result.data) return;
         result.data.forEach(function(row) {
-          // Update state
           for (var i = 0; i < S.entries.length; i++) {
             if (S.entries[i].id === row.id) {
               S.entries[i].reactions = row.reactions || S.entries[i].reactions;
-              // Update DOM counter langsung — tanpa re-render full
               ['skull','cry','fire','upside'].forEach(function(k) {
                 var el = document.getElementById('jrc-' + row.id + '-' + k);
                 if (el) el.textContent = row.reactions[k] || 0;
