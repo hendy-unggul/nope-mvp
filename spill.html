@@ -400,7 +400,6 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
     <button class="chat-close" onclick="closeChat()">✕</button>
   </div>
   <div class="distress" id="distressMsg">⚠️ partner terdeteksi toxic — tim sedang investigasi</div>
-  <!-- Status bar untuk info koneksi -->
   <div class="chat-status-bar" id="chatStatusBar"></div>
   <div class="chat-messages" id="chatMessages"></div>
   <div class="chat-input-wrap">
@@ -497,8 +496,6 @@ const REACT_EMO={skull:'💀',cry:'😭',fire:'🔥',upside:'🙃'};
 const TERMS=`Dengan melanjutkan pembayaran, kamu setuju bahwa:\n\n1. 🔄 Subscription digital untuk fitur premium SPILL.\n2. ⏰ Paket 7 hari (10K): chat tanpa batas | Paket 30 hari (20K): chat + WHISPERER\n3. 💳 Pembayaran via Midtrans\n4. 🚫 Tidak ada refund (kecuali error sistem)\n5. 🔒 SPILL tidak menyimpan data kartu\n6. ⏳ Tidak ada auto-renewal\n7. ❓ Hubungi admin@jejak.space`;
 
 // ─── OFFLINE AI FALLBACK RESPONSES ───────────────────────────────────────────
-// Dipakai saat API tidak bisa dijangkau — chat tetap berjalan lancar
-// Sekarang membaca konteks pesan terakhir agar lebih natural
 const OFFLINE_RESPONSES = {
   default: [
     'hehe iya bener banget, gue juga ngerasain hal yang sama',
@@ -540,86 +537,53 @@ const OFFLINE_RESPONSES = {
     'iya gue setuju',
     'bener banget',
     'nah gitu dong'
+  ],
+  askingAboutAI: [
+    'lagi santai dengerin musik',
+    'lagi ngopi sambil scroll timeline',
+    'lagi rebahan sambil mikir random',
+    'lagi dengerin playlist galau',
+    'lagi baca chat lo, hehe'
   ]
 };
 
- function getOfflineReply(userMsg, lastMessages) {
+function getOfflineReply(userMsg, lastMessages) {
   const msg = (userMsg || '').toLowerCase();
-  const lastHistory = (lastMessages || []).map(m => m.content || '').join(' ').toLowerCase();
   
   // Deteksi konteks percakapan
   const isGreeting = msg.includes('halo') || msg.includes('hai') || msg.includes('hey') || msg.includes('hi');
   const isQuestion = msg.includes('?') || msg.endsWith('?') || msg.includes('gimana') || msg.includes('apa');
-  const isFollowUp = msg.includes('terus') || msg.includes('lalu') || msg.includes('abis itu') || msg.includes('terus?');
-  const isAgreement = msg.includes('iya') || msg.includes('setuju') || msg.includes('bener') || msg.includes('iyaa');
-  const isPersonal = msg.includes('lo') || msg.includes('kamu') || msg.includes('lu') || msg.includes('loe');
+  const isFollowUp = msg.includes('terus') || msg.includes('lalu') || msg.includes('abis itu');
+  const isAgreement = msg.includes('iya') || msg.includes('setuju') || msg.includes('bener');
   
   // Cek apakah user bertanya tentang keadaan AI
   const isAskingAboutAI = msg.includes('lagi apa') || msg.includes('lagi ngapain') || msg.includes('lagi dimana');
   
-  // Kalau user bertanya "lagi apa" / "lagi mana"
   if (isAskingAboutAI) {
-    const activities = [
-      'lagi santai dengerin musik',
-      'lagi ngopi sambil scroll timeline',
-      'lagi rebahan sambil mikir random',
-      'lagi dengerin playlist galau',
-      'lagi baca chat lo, hehe'
-    ];
-    return activities[Math.floor(Math.random() * activities.length)];
+    return OFFLINE_RESPONSES.askingAboutAI[Math.floor(Math.random() * OFFLINE_RESPONSES.askingAboutAI.length)];
   }
   
-  // Kalau ini follow-up question
   if (isFollowUp) {
-    return 'hmm, gue dengerin. terus cerita lagi dong';
+    return OFFLINE_RESPONSES.followup[Math.floor(Math.random() * OFFLINE_RESPONSES.followup.length)];
   }
   
-  // Kalau user nanya sesuatu
   if (isQuestion) {
-    const responses = [
-      'pertanyaan bagus... gue juga kadang mikir gitu',
-      'hmm, gue rasa tergantung situasi sih',
-      'nah itu dia, gue juga masih cari jawabannya',
-      'menurut gue pribadi, lo harus lihat dari sisi lain dulu'
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
+    return OFFLINE_RESPONSES.question[Math.floor(Math.random() * OFFLINE_RESPONSES.question.length)];
   }
   
-  // Kalau user cerita panjang, kasih empati
-  if (msg.length > 50 || lastHistory.length > 100) {
-    const empathetic = [
-      'wah, gue ngerti perasaan lo. pasti berat ya',
-      'aduuh, gue turut sedih denger cerita lo',
-      'hmm, gue bisa bayangin gimana situasinya',
-      'damn, that must be tough. lo kuat banget ceritain ini'
-    ];
-    return empathetic[Math.floor(Math.random() * empathetic.length)];
+  if (msg.length > 50) {
+    return 'wah, gue ngerti perasaan lo. pasti berat ya';
   }
   
-  // Kalau user setuju sama AI
   if (isAgreement) {
-    return 'nah iyaa, kita sepakat berarti 😄';
+    return OFFLINE_RESPONSES.agreement[Math.floor(Math.random() * OFFLINE_RESPONSES.agreement.length)];
   }
   
-  // Kalau user nyapa duluan
   if (isGreeting) {
-    return 'hai juga! lagi ngapain?';
+    return OFFLINE_RESPONSES.greeting[Math.floor(Math.random() * OFFLINE_RESPONSES.greeting.length)];
   }
   
-  // Default response tapi tetap kontekstual
-  const defaultResponses = [
-    'hehe iya, gue juga ngerasain hal yang sama',
-    'wkwk bener banget sih',
-    'iya ya, kadang hidup emang gitu',
-    'setuju banget!',
-    'nah itu dia titik terangnya',
-    'serius? cerita lebih lanjut dong'
-  ];
-  
-  return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
-} 
-  // Default random response
-  return OFFLINE_RESPONSES.default[Math.floor(Math.random()*OFFLINE_RESPONSES.default.length)];
+  return OFFLINE_RESPONSES.default[Math.floor(Math.random() * OFFLINE_RESPONSES.default.length)];
 }
 
 // ─── UTILS ───
@@ -650,7 +614,6 @@ function loadSub(){
   if(s) userSub=s;
 }
 
-// ─── STATUS BAR HELPER ────────────────────────────────────────────────────────
 function setChatStatus(msg, type='error', duration=0) {
   const bar = $('chatStatusBar');
   if (!bar) return;
@@ -678,7 +641,6 @@ function initSpillSupabase(){
       }
       if(myUserId){
         console.log('[SPILL] ✓ user:',myUsername||'anon');
-        // Tampilkan username di header
         const nameEl=$('userNameDisplay');
         if(nameEl) nameEl.textContent = '@' + (myUsername || 'anonymous');
       }else{
@@ -1145,12 +1107,6 @@ const showVtUpgradeNudge=()=>{$('vtUpgradeNudge').classList.add('show');setTimeo
 const showUpgradeModal=()=>$('upgradeModal').classList.add('on');
 
 // ─── CHAT API — FIXED ─────────────────────────────────────────────────────────
-// Perbaikan:
-// 1. Kecepatan typing diturunkan 50% (delay lebih santai)
-// 2. AI membaca konteks pesan terakhir
-// 3. Tidak ada blokir jika API offline
-// 4. Status bar halus untuk info mode offline
-
 async function typeMessage(element, finalText) {
   return new Promise(resolve => {
     let index = 0;
@@ -1170,11 +1126,10 @@ async function typeMessage(element, finalText) {
         return;
       }
       currentText += chars[index]; element.textContent = currentText; index++;
-      // Kecepatan diturunkan 50%: delay 40-80ms -> jadi 60-120ms
       let delay = 60 + Math.random() * 60;
-      if (chars[index-1]==='.'||chars[index-1]==='?'||chars[index-1]==='!') delay = 300 + Math.random() * 200; // dari 200 -> 300
-      else if (chars[index-1]===','||chars[index-1]===';') delay = 180 + Math.random() * 120; // dari 120 -> 180
-      else if (chars[index-1]===' ') delay = 120 + Math.random() * 80; // dari 80 -> 120
+      if (chars[index-1]==='.'||chars[index-1]==='?'||chars[index-1]==='!') delay = 300 + Math.random() * 200;
+      else if (chars[index-1]===','||chars[index-1]===';') delay = 180 + Math.random() * 120;
+      else if (chars[index-1]===' ') delay = 120 + Math.random() * 80;
       setTimeout(typeNext, delay);
     }
     typeNext();
@@ -1191,7 +1146,6 @@ async function callChatAPI(userMsg, isFirst = false) {
   if (sb) sb.classList.add('disabled');
   if (inp) inp.disabled = true;
 
-  // Tampilkan typing indicator
   const td = mk('div', 'chat-msg other');
   td.innerHTML = '<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
   const msgs = $('chatMessages');
@@ -1201,12 +1155,10 @@ async function callChatAPI(userMsg, isFirst = false) {
   let useOffline = false;
 
   try {
-    // Coba panggil API dulu
     const charName = chatPartner.name || 'agak.koplak';
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 detik timeout
-
-    // Ambil konteks pesan terakhir (maks 3 pesan)
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    
     const lastMessages = chatHistory.slice(-6).map(m => m.content).join('\n');
     
     const res = await fetch(API_URL, {
@@ -1226,8 +1178,7 @@ async function callChatAPI(userMsg, isFirst = false) {
       const data = await res.json();
       if (data.reply) {
         reply = data.reply;
-        apiRetryCount = 0; // reset counter kalau berhasil
-        // Sembunyikan status bar kalau sebelumnya ada pesan error
+        apiRetryCount = 0;
         setChatStatus('');
         if (data.distress) {
           const dEl = $('distressMsg');
@@ -1236,6 +1187,8 @@ async function callChatAPI(userMsg, isFirst = false) {
             dEl.textContent = data.distress === 'high' ? '⚠️ Partner menunjukkan tanda distress serius' : '⚠️ Partner terlihat sedih, respons dengan empati';
           }
         }
+      } else {
+        useOffline = true;
       }
     } else {
       console.warn('[CHAT] API HTTP error:', res.status);
@@ -1246,26 +1199,27 @@ async function callChatAPI(userMsg, isFirst = false) {
     useOffline = true;
   }
 
-  // Kalau API gagal, pakai offline fallback dengan konteks
   if (useOffline) {
     apiRetryCount++;
     if (isFirst) {
-  // Untuk greeting pertama — PAKAI NAMA KARAKTER, JANGAN PAKAI NAMA USER
-  const firstName = (chatPartner.name || 'stranger').split('.')[0];
-  
-  // Pilih random greeting yang natural
-  const greetings = [
-    `halo! gue ${firstName}. seneng bisa ngobrol sama lo 😊`,
-    `hai hai, gue ${firstName}. lagi ngapain?`,
-    `eh halo, akhirnya ada yang nyapa 😄 gue ${firstName}`,
-    `heyy, welcome! gue lagi dengerin musik, lo? gue ${firstName}`
-  ];
-  reply = greetings[Math.floor(Math.random() * greetings.length)];
-}
+      const firstName = (chatPartner.name || 'stranger').split('.')[0];
+      const greetings = [
+        `halo! gue ${firstName}. seneng bisa ngobrol sama lo 😊`,
+        `hai hai, gue ${firstName}. lagi ngapain?`,
+        `eh halo, akhirnya ada yang nyapa 😄 gue ${firstName}`,
+        `heyy, welcome! gue lagi dengerin musik, lo? gue ${firstName}`
+      ];
+      reply = greetings[Math.floor(Math.random() * greetings.length)];
+    } else {
+      reply = getOfflineReply(userMsg, chatHistory);
+    }
+    if (apiRetryCount >= 2) {
+      setChatStatus('⚡ mode offline aktif', 'info', 4000);
+    }
+  }
 
-  // Hapus typing indicator dan render pesan
   if (td && td.parentNode) td.remove();
-  await sleep(400 + Math.random() * 500); // jeda lebih natural
+  await sleep(400 + Math.random() * 500);
 
   const msgDiv = mk('div', 'chat-msg other');
   const bubble = mk('div', 'chat-bubble');
@@ -1283,7 +1237,6 @@ async function callChatAPI(userMsg, isFirst = false) {
 
   chatReady = true;
 
-  // Pastikan selalu unlock di akhir
   isTyping = false;
   if (sb) sb.classList.remove('disabled');
   if (inp) inp.disabled = false;
