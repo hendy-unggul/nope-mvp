@@ -302,7 +302,10 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 <div class="app">
   <div class="header">
     <div class="logo">SP<span class="x">✕</span>LL</div>
-    <span class="online-pill" id="onlineCount">21 ONLINE</span>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span class="online-pill" id="onlineCount">21 ONLINE</span>
+      <span id="userNameDisplay" style="font-family:'DM Mono',monospace; font-size:12px; color:var(--as); border:2px solid var(--bd); padding:4px 8px; background:#000;">@loading...</span>
+    </div>
   </div>
   <div class="scroll">
     <div class="radar-sect">
@@ -456,7 +459,7 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/shared-constants.js"></script>
 <script>
-console.log('[SPILL] ✅ v5 loaded — chat fix + status bar');
+console.log('[SPILL] ✅ v5 loaded — chat fix + status bar + user.name di header');
 
 // ─── AUTH GUARD ───
 if(!JEJAK.isLoggedIn()){
@@ -495,6 +498,7 @@ const TERMS=`Dengan melanjutkan pembayaran, kamu setuju bahwa:\n\n1. 🔄 Subscr
 
 // ─── OFFLINE AI FALLBACK RESPONSES ───────────────────────────────────────────
 // Dipakai saat API tidak bisa dijangkau — chat tetap berjalan lancar
+// Sekarang membaca konteks pesan terakhir agar lebih natural
 const OFFLINE_RESPONSES = {
   default: [
     'hehe iya bener banget, gue juga ngerasain hal yang sama',
@@ -524,18 +528,41 @@ const OFFLINE_RESPONSES = {
     'hmm susah juga ya jawabnya...',
     'nah itu dia, gue belum nemuin jawaban yang pas',
     'mungkin tergantung situasinya sih, lo lebih tahu konteksnya'
+  ],
+  followup: [
+    'terus gimana ceritanya?',
+    'terus? gue dengerin',
+    'terus lo ngapain?',
+    'terus?'
+  ],
+  agreement: [
+    'setuju banget sih!',
+    'iya gue setuju',
+    'bener banget',
+    'nah gitu dong'
   ]
 };
 
-function getOfflineReply(userMsg) {
+function getOfflineReply(userMsg, lastMessages) {
   const msg = (userMsg||'').toLowerCase();
   if (!msg || msg.length < 3) return OFFLINE_RESPONSES.greeting[Math.floor(Math.random()*OFFLINE_RESPONSES.greeting.length)];
-  if (msg.includes('halo')||msg.includes('hai')||msg.includes('hey')||msg.includes('hi ')) {
-    return OFFLINE_RESPONSES.greeting[Math.floor(Math.random()*OFFLINE_RESPONSES.greeting.length)];
-  }
-  if (msg.endsWith('?')) {
+  
+  // Cek apakah ini pertanyaan
+  if (msg.includes('?') || msg.endsWith('?')) {
     return OFFLINE_RESPONSES.question[Math.floor(Math.random()*OFFLINE_RESPONSES.question.length)];
   }
+  
+  // Cek apakah ada kata kunci yang butuh follow-up
+  if (msg.includes('terus') || msg.includes('lalu') || msg.includes('abis itu')) {
+    return OFFLINE_RESPONSES.followup[Math.floor(Math.random()*OFFLINE_RESPONSES.followup.length)];
+  }
+  
+  // Cek apakah ada persetujuan
+  if (msg.includes('setuju') || msg.includes('bener') || msg.includes('iya')) {
+    return OFFLINE_RESPONSES.agreement[Math.floor(Math.random()*OFFLINE_RESPONSES.agreement.length)];
+  }
+  
+  // Default random response
   return OFFLINE_RESPONSES.default[Math.floor(Math.random()*OFFLINE_RESPONSES.default.length)];
 }
 
@@ -595,6 +622,9 @@ function initSpillSupabase(){
       }
       if(myUserId){
         console.log('[SPILL] ✓ user:',myUsername||'anon');
+        // Tampilkan username di header
+        const nameEl=$('userNameDisplay');
+        if(nameEl) nameEl.textContent = '@' + (myUsername || 'anonymous');
       }else{
         console.warn('[SPILL] ⚠️ user_id tidak ditemukan');
         window.location.replace('/index.html');
@@ -1059,12 +1089,11 @@ const showVtUpgradeNudge=()=>{$('vtUpgradeNudge').classList.add('show');setTimeo
 const showUpgradeModal=()=>$('upgradeModal').classList.add('on');
 
 // ─── CHAT API — FIXED ─────────────────────────────────────────────────────────
-// Perbaikan utama:
-// 1. Tidak ada apiOffline global flag — setiap call mencoba sendiri dengan retry
-// 2. Fallback otomatis ke offline response kalau API gagal, tanpa memblokir chat
-// 3. isTyping selalu di-reset di finally block
-// 4. chatReady flag mencegah double-call saat init
-// 5. Tidak ada toast error yang memblokir alur chat
+// Perbaikan:
+// 1. Kecepatan typing diturunkan 50% (delay lebih santai)
+// 2. AI membaca konteks pesan terakhir
+// 3. Tidak ada blokir jika API offline
+// 4. Status bar halus untuk info mode offline
 
 async function typeMessage(element, finalText) {
   return new Promise(resolve => {
@@ -1081,14 +1110,15 @@ async function typeMessage(element, finalText) {
       if (index >= chars.length) { resolve(); return; }
       if (makeMistake && index === mistakeIndex) {
         currentText += mistakeChar; element.textContent = currentText; index++;
-        setTimeout(() => { currentText = currentText.slice(0, -1); element.textContent = currentText; setTimeout(typeNext, 100); }, 200);
+        setTimeout(() => { currentText = currentText.slice(0, -1); element.textContent = currentText; setTimeout(typeNext, 200); }, 400);
         return;
       }
       currentText += chars[index]; element.textContent = currentText; index++;
-      let delay = 40 + Math.random() * 40;
-      if (chars[index-1]==='.'||chars[index-1]==='?'||chars[index-1]==='!') delay = 200 + Math.random() * 150;
-      else if (chars[index-1]===','||chars[index-1]===';') delay = 120 + Math.random() * 80;
-      else if (chars[index-1]===' ') delay = 80 + Math.random() * 40;
+      // Kecepatan diturunkan 50%: delay 40-80ms -> jadi 60-120ms
+      let delay = 60 + Math.random() * 60;
+      if (chars[index-1]==='.'||chars[index-1]==='?'||chars[index-1]==='!') delay = 300 + Math.random() * 200; // dari 200 -> 300
+      else if (chars[index-1]===','||chars[index-1]===';') delay = 180 + Math.random() * 120; // dari 120 -> 180
+      else if (chars[index-1]===' ') delay = 120 + Math.random() * 80; // dari 80 -> 120
       setTimeout(typeNext, delay);
     }
     typeNext();
@@ -1112,6 +1142,7 @@ async function callChatAPI(userMsg, isFirst = false) {
   if (msgs) { msgs.appendChild(td); td.scrollIntoView({ behavior: 'smooth' }); }
 
   let reply = null;
+  let useOffline = false;
 
   try {
     // Coba panggil API dulu
@@ -1119,6 +1150,9 @@ async function callChatAPI(userMsg, isFirst = false) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 detik timeout
 
+    // Ambil konteks pesan terakhir (maks 3 pesan)
+    const lastMessages = chatHistory.slice(-6).map(m => m.content).join('\n');
+    
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1126,7 +1160,7 @@ async function callChatAPI(userMsg, isFirst = false) {
         message: isFirst ? 'halo' : userMsg,
         characterName: charName,
         userName: myUsername || userName,
-        lastMessages: chatHistory.slice(-8)
+        lastMessages: lastMessages
       }),
       signal: controller.signal
     });
@@ -1149,30 +1183,35 @@ async function callChatAPI(userMsg, isFirst = false) {
       }
     } else {
       console.warn('[CHAT] API HTTP error:', res.status);
+      useOffline = true;
     }
   } catch (e) {
     console.warn('[CHAT] API gagal:', e.message);
+    useOffline = true;
   }
 
-  // Kalau API gagal, pakai offline fallback — TANPA memblokir chat
-  if (!reply) {
+  // Kalau API gagal, pakai offline fallback dengan konteks
+  if (useOffline) {
     apiRetryCount++;
     if (isFirst) {
       // Untuk greeting pertama — pakai nama karakter
       const firstName = (chatPartner.name || 'stranger').split('.')[0];
       reply = `halo! gue ${firstName}. seneng bisa ngobrol sama lo 😊`;
     } else {
-      reply = getOfflineReply(userMsg);
+      // Gunakan konteks untuk respons yang lebih relevan
+      const lastUserMsg = userMsg || '';
+      const lastHistory = chatHistory.slice(-2).map(m => m.content).join(' ');
+      reply = getOfflineReply(lastUserMsg + ' ' + lastHistory, chatHistory);
     }
     // Tampilkan info halus di status bar, bukan toast error
     if (apiRetryCount >= 2) {
-      setChatStatus('⚡ mode offline aktif', 'info', 4000);
+      setChatStatus('⚡ mode offline aktif (respons generik)', 'info', 4000);
     }
   }
 
   // Hapus typing indicator dan render pesan
   if (td && td.parentNode) td.remove();
-  await sleep(300 + Math.random() * 400);
+  await sleep(400 + Math.random() * 500); // jeda lebih natural
 
   const msgDiv = mk('div', 'chat-msg other');
   const bubble = mk('div', 'chat-bubble');
