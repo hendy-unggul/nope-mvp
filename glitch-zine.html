@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GLITCH — Zine Edisi 001 · Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Serif+Display:ital@0;1&family=Bricolage+Grotesque:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink:#0D0C0A;
+    --paper:#F2EFE8;
+    --paper2:#E8E3D8;
+    --accent:#FF3300;
+    --accent2:#00C8FF;
+    --yellow:#FFE500;
+    --green:#1AFF6B;
+    --purple:#B94FFF;
+    --serif:'DM Serif Display',serif;
+    --mono:'Space Mono',monospace;
+    --sans:'Bricolage Grotesque',sans-serif;
+    --display:'Bebas Neue',sans-serif;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+  
+  body {
+    background: #1a1a1a;
+    font-family: var(--sans);
+    padding: 40px 20px;
+    min-height: 100vh;
+  }
+
+  /* ── VIEWER UI ── */
+  .viewer-header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .viewer-title {
+    font-family: var(--display);
+    font-size: 48px;
+    letter-spacing: .12em;
+    color: var(--accent);
+    text-shadow: 3px 3px 0 #ff330044;
+  }
+  .viewer-sub {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #666;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+
+  /* ── SPREAD LAYOUT ── */
+  .spread-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .spread-btn {
+    background: none;
+    border: 1px solid #444;
+    color: #888;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .spread-btn:hover, .spread-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── ZINE SPREAD ── */
+  .zine-spread {
+    display: none;
+    max-width: 1100px;
+    margin: 0 auto;
+    gap: 4px;
+    filter: drop-shadow(0 20px 60px rgba(0,0,0,.7));
+  }
+  .zine-spread.visible { display: flex; }
+  .zine-spread.single { justify-content: center; }
+
+  /* ── PAGE BASE ── */
+  .page {
+    width: 520px;
+    min-height: 720px;
+    background: var(--paper);
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  /* ── PAGE TEXTURE ── */
+  .page::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 50;
+    mix-blend-mode: multiply;
+  }
+
+  /* ═══════════════════════════════════════
+     HALAMAN 1 — COVER
+  ═══════════════════════════════════════ */
+  .cover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .cover-scan-lines {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(255,255,255,.012) 3px,
+      rgba(255,255,255,.012) 4px
+    );
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .cover-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,51,0,.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,51,0,.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 1;
+  }
+
+  .cover-noise {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 8px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--accent) 0px, var(--accent) 4px,
+      var(--ink) 4px, var(--ink) 8px,
+      var(--accent2) 8px, var(--accent2) 10px,
+      var(--ink) 10px, var(--ink) 16px
+    );
+    z-index: 10;
+  }
+
+  .cover-inner {
+    position: relative;
+    z-index: 5;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cover-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+  .cover-mag-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .25em;
+    color: rgba(255,255,255,.4);
+    text-transform: uppercase;
+  }
+  .cover-issue-badge {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .15em;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 3px 8px;
+  }
+
+  .cover-hero-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 20px 20px 0;
+    position: relative;
+  }
+
+  .cover-big-g {
+    position: absolute;
+    top: -30px;
+    right: -20px;
+    font-family: var(--display);
+    font-size: 360px;
+    line-height: 1;
+    color: rgba(255,51,0,.07);
+    pointer-events: none;
+    z-index: 1;
+    letter-spacing: -.02em;
+  }
+
+  .cover-glitch-stack {
+    position: relative;
+    z-index: 3;
+  }
+
+  .cover-eyebrow {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .3em;
+    color: rgba(255,255,255,.35);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cover-eyebrow::before {
+    content: '';
+    width: 20px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .cover-title {
+    font-family: var(--display);
+    font-size: 148px;
+    line-height: .88;
+    letter-spacing: .02em;
+    color: var(--paper);
+    position: relative;
+  }
+  .cover-title::before {
+    content: 'GLITCH';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    color: var(--accent);
+    z-index: -1;
+    opacity: .7;
+  }
+  .cover-title::after {
+    content: 'GLITCH';
+    position: absolute;
+    top: -3px;
+    left: -2px;
+    color: var(--accent2);
+    z-index: -1;
+    opacity: .4;
+  }
+
+  .cover-edition-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    margin-top: 12px;
+  }
+  .cover-edition-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .2em;
+    color: rgba(255,255,255,.5);
+  }
+  .cover-edition-slash {
+    width: 40px;
+    height: 1px;
+    background: rgba(255,255,255,.2);
+  }
+  .cover-edition-text {
+    font-family: var(--serif);
+    font-size: 13px;
+    font-style: italic;
+    color: rgba(255,255,255,.4);
+  }
+
+  .cover-tagline-block {
+    padding: 18px 20px;
+    border-top: 1px solid rgba(255,255,255,.06);
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .cover-tagline-accent {
+    width: 4px;
+    height: 48px;
+    background: linear-gradient(180deg, var(--accent), var(--accent2));
+    flex-shrink: 0;
+  }
+  .cover-tagline {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-style: italic;
+    color: rgba(255,255,255,.65);
+    line-height: 1.5;
+  }
+  .cover-tagline strong {
+    color: var(--paper);
+    font-style: normal;
+  }
+
+  .cover-strips {
+    display: flex;
+    height: 5px;
+  }
+  .cover-strip {
+    flex: 1;
+  }
+
+  .cover-bottom-bar {
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,.07);
+  }
+  .cover-bottom-left {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .cover-zine-label {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .2em;
+    color: rgba(255,255,255,.25);
+    text-transform: uppercase;
+  }
+  .cover-topics {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .cover-topic-pill {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .1em;
+    color: var(--accent);
+    border: 1px solid rgba(255,51,0,.3);
+    padding: 2px 6px;
+    text-transform: uppercase;
+  }
+  .cover-price {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(255,255,255,.3);
+    letter-spacing: .1em;
+  }
+
+  /* ═══════════════════════════════════════
+     HALAMAN 2-3 — ART KOLASE
+  ═══════════════════════════════════════ */
+  .art-page {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .art-header {
+    padding: 16px 20px 12px;
+    border-bottom: 2px solid var(--ink);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .art-page-num {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .2em;
+    color: #888;
+  }
+  .art-section-title {
+    font-family: var(--display);
+    font-size: 16px;
+    letter-spacing: .15em;
+    color: var(--ink);
+  }
+
+  /* Collage elements */
+  .collage-area {
+    position: relative;
+    padding: 20px;
+    min-height: 600px;
+  }
+
+  .collage-img {
+    position: absolute;
+    background: var(--ink);
+    overflow: hidden;
+  }
+
+  /* Photo placeholders */
+  .photo-block {
+    background: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,.2);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .photo-block svg {
+    opacity: .3;
+  }
+
+  /* Torn paper effect */
+  .torn-block {
+    background: var(--paper2);
+    position: absolute;
+    clip-path: polygon(0 0, 100% 0, 100% 85%, 94% 100%, 88% 88%, 80% 100%, 72% 89%, 65% 100%, 55% 87%, 45% 100%, 35% 90%, 25% 100%, 15% 88%, 5% 100%, 0 90%);
+  }
+
+  .handwriting {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--ink);
+    line-height: 1.4;
+    transform: rotate(-2deg);
+    display: inline-block;
+  }
+
+  .stamp {
+    border: 3px solid var(--accent);
+    display: inline-block;
+    padding: 8px 14px;
+    transform: rotate(4deg);
+    font-family: var(--display);
+    letter-spacing: .1em;
+    color: var(--accent);
+    font-size: 18px;
+  }
+
+  .tape-strip {
+    background: rgba(255,229,0,.6);
+    height: 22px;
+    position: absolute;
+    transform: rotate(-1.5deg);
+    z-index: 10;
+  }
+
+  .scribble-text {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .05em;
+    color: #333;
+    transform: rotate(90deg);
+    transform-origin: center;
+    white-space: nowrap;
+  }
+
+  /* Art page 2 layout */
+  .art2-main-photo {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    width: 230px;
+    height: 170px;
+  }
+  .art2-side-photo {
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    width: 180px;
+    height: 130px;
+    transform: rotate(2deg);
+  }
+  .art2-caption {
+    position: absolute;
+    top: 210px;
+    left: 24px;
+    max-width: 220px;
+  }
+  .art2-middle-photo {
+    position: absolute;
+    top: 260px;
+    right: 24px;
+    width: 160px;
+    height: 200px;
+    transform: rotate(-1.5deg);
+  }
+  .art2-torn {
+    position: absolute;
+    bottom: 80px;
+    left: 20px;
+    width: 240px;
+    height: 90px;
+    background: var(--yellow);
+    clip-path: polygon(0 0, 100% 0, 100% 75%, 96% 88%, 90% 78%, 83% 90%, 75% 80%, 65% 95%, 55% 82%, 45% 95%, 35% 81%, 25% 94%, 15% 82%, 5% 93%, 0 82%);
+    display: flex;
+    align-items: flex-start;
+    padding: 14px;
+    z-index: 6;
+  }
+  .art2-bottom-photo {
+    position: absolute;
+    bottom: 30px;
+    right: 20px;
+    width: 200px;
+    height: 120px;
+    z-index: 5;
+  }
+
+  /* Art page 3 */
+  .art3-big-text {
+    position: absolute;
+    top: 24px;
+    left: 20px;
+    right: 20px;
+  }
+  .big-editorial {
+    font-family: var(--display);
+    font-size: 80px;
+    line-height: .85;
+    letter-spacing: .02em;
+    color: var(--ink);
+  }
+  .big-editorial .red { color: var(--accent); }
+  .big-editorial .ghost {
+    color: transparent;
+    -webkit-text-stroke: 1.5px var(--ink);
+  }
+  .art3-photo1 {
+    position: absolute;
+    top: 150px;
+    left: 24px;
+    width: 140px;
+    height: 190px;
+    transform: rotate(1.5deg);
+    z-index: 5;
+  }
+  .art3-photo2 {
+    position: absolute;
+    top: 130px;
+    right: 20px;
+    width: 220px;
+    height: 160px;
+    z-index: 5;
+  }
+  .art3-tape {
+    background: rgba(255,229,0,.65);
+    height: 20px;
+    position: absolute;
+    width: 80px;
+    transform: rotate(-3deg);
+    z-index: 12;
+  }
+  .art3-sticker {
+    position: absolute;
+    z-index: 10;
+    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--paper);
+    font-family: var(--display);
+    font-size: 11px;
+    letter-spacing: .1em;
+    text-align: center;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+  .art3-handwriting-block {
+    position: absolute;
+    bottom: 100px;
+    left: 20px;
+    right: 20px;
+  }
+  .art3-photo3 {
+    position: absolute;
+    bottom: 28px;
+    right: 20px;
+    width: 160px;
+    height: 120px;
+    transform: rotate(-2deg);
+    z-index: 5;
+  }
+
+  /* ═══════════════════════════════════════
+     HALAMAN 4 — ART (continued)
+  ═══════════════════════════════════════ */
+
+  /* ═══════════════════════════════════════
+     HALAMAN 5-6 — LOCAL PRIDE REPORTASE
+  ═══════════════════════════════════════ */
+  .reportase-page {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .rep-header {
+    padding: 16px 20px 14px;
+    border-bottom: 3px solid var(--ink);
+  }
+  .rep-section-flag {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    display: inline-block;
+    margin-bottom: 8px;
+  }
+  .rep-section-flag.green { background: var(--green); color: var(--ink); }
+  .rep-headline {
+    font-family: var(--display);
+    font-size: 44px;
+    line-height: .9;
+    letter-spacing: .03em;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+  .rep-headline em {
+    color: var(--accent);
+    font-style: normal;
+  }
+  .rep-subhead {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: #555;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  .rep-body {
+    padding: 18px 20px;
+  }
+
+  .rep-lead-photo {
+    width: 100%;
+    height: 180px;
+    margin-bottom: 14px;
+  }
+
+  .rep-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .rep-column-single {
+    margin-bottom: 14px;
+  }
+
+  .rep-text {
+    font-family: var(--sans);
+    font-size: 11.5px;
+    line-height: 1.65;
+    color: #333;
+  }
+
+  .rep-pull-quote {
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    margin: 14px 0;
+    background: rgba(255,51,0,.04);
+  }
+  .rep-pull-quote p {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-style: italic;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .rep-pull-quote cite {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .1em;
+    color: var(--accent);
+    text-transform: uppercase;
+    display: block;
+    margin-top: 6px;
+  }
+
+  .rep-photo-caption {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .08em;
+    color: #888;
+    margin-top: 4px;
+    text-transform: uppercase;
+  }
+
+  .rep-photo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin: 12px 0;
+  }
+  .rep-photo-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .rep-byline {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .12em;
+    color: #999;
+    text-transform: uppercase;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .rep-byline span { color: var(--ink); font-weight: 700; }
+
+  .rep-dropcap::first-letter {
+    font-family: var(--display);
+    font-size: 52px;
+    float: left;
+    line-height: .8;
+    margin-right: 6px;
+    color: var(--ink);
+    padding-top: 4px;
+  }
+
+  .rep-sidebar {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px;
+    margin-top: 14px;
+  }
+  .rep-sidebar-title {
+    font-family: var(--display);
+    font-size: 18px;
+    letter-spacing: .08em;
+    color: var(--yellow);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .rep-sidebar-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+    align-items: flex-start;
+  }
+  .rep-sidebar-num {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    flex-shrink: 0;
+    line-height: 1.2;
+  }
+  .rep-sidebar-text {
+    font-size: 10px;
+    line-height: 1.5;
+    color: rgba(255,255,255,.75);
+  }
+
+  .rep-footer {
+    padding: 10px 20px;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* ═══════════════════════════════════════
+     HALAMAN 7-8 — PETISI MBG
+  ═══════════════════════════════════════ */
+  .petisi-page {
+    background: var(--ink);
+    color: var(--paper);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .petisi-bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,51,0,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,51,0,.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+    z-index: 0;
+  }
+
+  .petisi-scanlines {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 3px,
+      rgba(255,255,255,.01) 3px,
+      rgba(255,255,255,.01) 4px
+    );
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .petisi-inner {
+    position: relative;
+    z-index: 5;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .petisi-header {
+    padding: 14px 20px 12px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .petisi-logo {
+    font-family: var(--display);
+    font-size: 22px;
+    color: var(--paper);
+    letter-spacing: .08em;
+  }
+  .petisi-logo span { color: var(--accent); }
+  .petisi-header-badge {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border: 1px solid rgba(255,0,110,.5);
+    color: #ff006e;
+  }
+
+  .petisi-ticker-strip {
+    background: var(--accent);
+    overflow: hidden;
+    padding: 6px 0;
+  }
+  .petisi-ticker-inner {
+    white-space: nowrap;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #000;
+    animation: tick 18s linear infinite;
+    display: inline-block;
+  }
+  @keyframes tick { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+  .petisi-hero {
+    padding: 20px 20px 0;
+  }
+  .petisi-eyebrow {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .petisi-title {
+    font-family: var(--display);
+    font-size: 72px;
+    line-height: .85;
+    letter-spacing: .03em;
+    color: var(--paper);
+    text-shadow: 3px 3px 0 rgba(255,51,0,.3);
+  }
+  .petisi-title .red { color: var(--accent); }
+  .petisi-subtitle {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 13px;
+    color: rgba(255,255,255,.55);
+    line-height: 1.5;
+    margin-top: 10px;
+    max-width: 320px;
+  }
+
+  .petisi-counter-row {
+    margin: 16px 20px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.1);
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .petisi-count-num {
+    font-family: var(--display);
+    font-size: 44px;
+    line-height: 1;
+    color: var(--paper);
+    letter-spacing: -.02em;
+  }
+  .petisi-count-num .acc { color: var(--accent); }
+  .petisi-count-info {
+    flex: 1;
+  }
+  .petisi-count-label {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .15em;
+    color: rgba(255,255,255,.35);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .petisi-progress {
+    height: 3px;
+    background: rgba(255,255,255,.1);
+    overflow: hidden;
+  }
+  .petisi-progress-fill {
+    height: 100%;
+    width: 12.5%;
+    background: linear-gradient(90deg, var(--accent), #ff6a1f);
+  }
+  .petisi-progress-label {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .1em;
+    color: rgba(255,255,255,.3);
+    margin-top: 4px;
+    display: flex;
+    justify-content: space-between;
+    text-transform: uppercase;
+  }
+
+  .petisi-demands {
+    margin: 0 20px 14px;
+    border-left: 3px solid var(--accent);
+    padding-left: 14px;
+  }
+  .petisi-demands-title {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .demand-item {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+    align-items: flex-start;
+  }
+  .demand-num {
+    font-family: var(--display);
+    font-size: 20px;
+    color: var(--accent);
+    line-height: 1;
+    flex-shrink: 0;
+    min-width: 22px;
+  }
+  .demand-text-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--paper);
+    margin-bottom: 2px;
+    line-height: 1.3;
+  }
+  .demand-text-sub {
+    font-size: 9.5px;
+    color: rgba(255,255,255,.45);
+    line-height: 1.5;
+  }
+
+  .petisi-sign-block {
+    margin: 0 20px;
+    border: 1px solid rgba(255,51,0,.4);
+    background: rgba(255,51,0,.06);
+    padding: 14px;
+  }
+  .petisi-sign-title {
+    font-family: var(--display);
+    font-size: 16px;
+    letter-spacing: .1em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .petisi-sign-stances {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+  }
+  .petisi-stance {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    padding: 6px 8px;
+    border: 1px solid rgba(255,255,255,.08);
+  }
+  .petisi-stance-dot {
+    width: 12px;
+    height: 12px;
+    border: 1.5px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .petisi-stance-text {
+    font-size: 10px;
+    color: rgba(255,255,255,.6);
+    line-height: 1.4;
+  }
+  .petisi-stance-text b { color: var(--paper); }
+
+  .petisi-btn-mockup {
+    background: var(--accent);
+    color: #000;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--display);
+    font-size: 16px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  .petisi-sigs {
+    margin: 12px 20px 0;
+  }
+  .petisi-sigs-label {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .15em;
+    color: rgba(255,255,255,.3);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .petisi-sigs-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,.1);
+  }
+
+  .sig-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .sig-chip {
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+    padding: 3px 8px;
+    font-family: var(--mono);
+    font-size: 8px;
+    color: rgba(255,255,255,.4);
+    letter-spacing: .08em;
+  }
+  .sig-chip.accent { border-color: rgba(255,51,0,.3); color: var(--accent); }
+  .sig-chip.cyan { border-color: rgba(0,200,255,.3); color: var(--accent2); }
+
+  .petisi-footer {
+    margin-top: auto;
+    padding: 10px 20px;
+    border-top: 1px solid rgba(255,255,255,.07);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .petisi-dest-list {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .08em;
+    color: rgba(255,255,255,.3);
+    text-transform: uppercase;
+    line-height: 1.8;
+  }
+  .petisi-dest-list span { color: rgba(255,255,255,.5); }
+
+  /* ── Photo Placeholder Styles ── */
+  .photo-ph {
+    background: #2a2a2a;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: rgba(255,255,255,.18);
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+
+  /* ── Page number ── */
+  .page-num-stamp {
+    position: absolute;
+    bottom: 10px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .1em;
+    color: #aaa;
+  }
+  .page-num-stamp.left { left: 20px; }
+  .page-num-stamp.right { right: 20px; }
+
+  /* ── SPREAD LABELS ── */
+  .spread-label {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .15em;
+    color: #555;
+    text-transform: uppercase;
+    margin-top: 14px;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media(max-width: 1120px) {
+    .zine-spread { flex-direction: column; align-items: center; }
+    .page { width: 100%; max-width: 520px; }
+  }
+
+  @media(max-width: 600px) {
+    .page { width: 100%; min-height: auto; }
+    .viewer-title { font-size: 36px; }
+  }
+
+  /* ── LEGEND ── */
+  .legend {
+    max-width: 1100px;
+    margin: 32px auto 0;
+    padding: 20px;
+    background: #111;
+    border: 1px solid #2a2a2a;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .legend-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+  .legend-num {
+    font-family: var(--display);
+    font-size: 28px;
+    color: var(--accent);
+    line-height: 1;
+    flex-shrink: 0;
+    min-width: 30px;
+  }
+  .legend-info {}
+  .legend-title {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 700;
+    color: #ddd;
+    margin-bottom: 3px;
+  }
+  .legend-desc {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: .06em;
+    color: #555;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── VIEWER HEADER ── -->
+<div class="viewer-header">
+  <div class="viewer-title">GLITCH</div>
+  <div class="viewer-sub">Zine Edisi 001 · Mockup Visual · 8 Halaman</div>
+</div>
+
+<!-- ── NAVIGATION ── -->
+<div class="spread-nav">
+  <button class="spread-btn active" onclick="showSpread(0, this)">Cover (Hal. 1)</button>
+  <button class="spread-btn" onclick="showSpread(1, this)">Art Kolase (Hal. 2–3)</button>
+  <button class="spread-btn" onclick="showSpread(2, this)">Art Kolase (Hal. 4)</button>
+  <button class="spread-btn" onclick="showSpread(3, this)">Local Pride (Hal. 5–6)</button>
+  <button class="spread-btn" onclick="showSpread(4, this)">Petisi MBG (Hal. 7–8)</button>
+</div>
+
+<!-- ═══════════════════════════════════
+     SPREAD 0: COVER
+═══════════════════════════════════ -->
+<div class="zine-spread single visible" id="spread0">
+  <div class="page cover" style="width:520px; min-height:740px;">
+    <div class="cover-noise"></div>
+    <div class="cover-scan-lines"></div>
+    <div class="cover-grid-bg"></div>
+
+    <div class="cover-inner">
+      <!-- Top bar -->
+      <div class="cover-top-bar">
+        <span class="cover-mag-label">Zine Independen · Jakarta</span>
+        <span class="cover-issue-badge">EDISI 001</span>
+      </div>
+
+      <!-- Hero area -->
+      <div class="cover-hero-area">
+        <div class="cover-big-g" aria-hidden="true">G</div>
+
+        <div class="cover-glitch-stack">
+          <div class="cover-eyebrow">Edisi perdana · 2025</div>
+          <div class="cover-title">GLITCH</div>
+          <div class="cover-edition-row">
+            <span class="cover-edition-num">001</span>
+            <div class="cover-edition-slash"></div>
+            <span class="cover-edition-text">Budaya yang pecah, suara yang nyata</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tagline -->
+      <div class="cover-tagline-block">
+        <div class="cover-tagline-accent"></div>
+        <p class="cover-tagline">
+          Zine untuk lo yang <strong>lelah diam</strong> —<br>
+          tentang seni, kota, dan sistem yang perlu diperiksa.
+        </p>
+      </div>
+
+      <!-- Color strips -->
+      <div class="cover-strips">
+        <div class="cover-strip" style="background:var(--accent)"></div>
+        <div class="cover-strip" style="background:var(--yellow)"></div>
+        <div class="cover-strip" style="background:var(--accent2)"></div>
+        <div class="cover-strip" style="background:var(--green)"></div>
+        <div class="cover-strip" style="background:var(--purple)"></div>
+        <div class="cover-strip" style="background:rgba(255,255,255,.15)"></div>
+      </div>
+
+      <!-- Bottom bar -->
+      <div class="cover-bottom-bar">
+        <div class="cover-bottom-left">
+          <span class="cover-zine-label">Dalam Edisi Ini</span>
+          <div class="cover-topics">
+            <span class="cover-topic-pill">Art Kolase</span>
+            <span class="cover-topic-pill">Local Pride</span>
+            <span class="cover-topic-pill">Petisi MBG</span>
+          </div>
+        </div>
+        <span class="cover-price">FREE · ZINE</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SPREAD 1: ART KOLASE Hal 2-3
+═══════════════════════════════════ -->
+<div class="zine-spread" id="spread1">
+
+  <!-- PAGE 2 -->
+  <div class="page art-page" style="min-height:740px;">
+    <div class="art-header">
+      <span class="art-page-num">02</span>
+      <span class="art-section-title">KOLASE & FOTO</span>
+      <span class="art-page-num">Glitch Zine — Edisi 001</span>
+    </div>
+
+    <div class="collage-area" style="min-height:650px;">
+
+      <!-- Main photo top-left -->
+      <div class="art2-main-photo photo-block" style="position:absolute;top:24px;left:24px;width:230px;height:170px;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>foto · urban scene</span>
+      </div>
+
+      <!-- Side photo rotated -->
+      <div style="position:absolute;top:56px;right:20px;width:180px;height:135px;transform:rotate(2.5deg);z-index:6;" class="photo-block">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>foto · potret</span>
+      </div>
+
+      <!-- Yellow tape across first photo -->
+      <div style="position:absolute;top:90px;left:10px;width:180px;height:18px;background:rgba(255,229,0,.65);transform:rotate(-1.8deg);z-index:12;"></div>
+
+      <!-- Caption handwriting style -->
+      <div style="position:absolute;top:208px;left:24px;max-width:220px;z-index:7;">
+        <p style="font-family:var(--serif);font-style:italic;font-size:12px;color:#333;line-height:1.5;transform:rotate(-1deg);">
+          "Kota ini bergerak lebih cepat dari kita bisa mengikutinya — dan itulah masalahnya."
+        </p>
+        <span style="font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:#888;text-transform:uppercase;margin-top:6px;display:block;">— anonim, Jakarta Selatan</span>
+      </div>
+
+      <!-- Middle right photo -->
+      <div style="position:absolute;top:210px;right:20px;width:165px;height:195px;transform:rotate(-1.5deg);z-index:5;" class="photo-block">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>foto · komunitas</span>
+      </div>
+
+      <!-- Yellow torn note -->
+      <div style="position:absolute;bottom:80px;left:20px;width:240px;background:var(--yellow);clip-path:polygon(0 0,100% 0,100% 78%,96% 90%,88% 80%,78% 93%,65% 80%,52% 95%,38% 80%,25% 94%,12% 82%,4% 94%,0 82%);padding:14px 14px 28px;z-index:6;">
+        <p style="font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#000;line-height:1.6;font-weight:700;">
+          TULISAN TANGAN · CATATAN DARI LAPANGAN<br><br>
+          <span style="font-family:var(--serif);font-style:italic;font-size:13px;font-weight:400;letter-spacing:0;text-transform:none;">Tembok yang dicat bukan vandalisme — itu percakapan yang tidak bisa dibungkam.</span>
+        </p>
+      </div>
+
+      <!-- Bottom right photo -->
+      <div style="position:absolute;bottom:28px;right:20px;width:200px;height:118px;z-index:5;" class="photo-block">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>foto · mural/street art</span>
+      </div>
+
+      <!-- Vertical scribble text -->
+      <div style="position:absolute;top:50%;left:6px;transform:translateY(-50%) rotate(-90deg);font-family:var(--mono);font-size:8px;letter-spacing:.15em;color:#bbb;white-space:nowrap;text-transform:uppercase;">
+        GLITCH ZINE — EDISI 001 — KOLASE
+      </div>
+
+    </div>
+
+    <div class="page-num-stamp left">02</div>
+  </div>
+
+  <!-- PAGE 3 -->
+  <div class="page art-page" style="min-height:740px; border-left:2px solid #ccc;">
+    <div class="art-header">
+      <span class="art-page-num">03</span>
+      <span class="art-section-title">EKSPRESI BEBAS</span>
+      <span class="art-page-num"></span>
+    </div>
+
+    <div class="collage-area" style="min-height:650px;">
+
+      <!-- Big editorial type -->
+      <div style="position:absolute;top:20px;left:20px;right:20px;z-index:3;">
+        <div style="font-family:var(--display);font-size:84px;line-height:.82;letter-spacing:.02em;color:var(--ink);">
+          <span>SUARA</span><br>
+          <span style="color:var(--accent);">YANG</span><br>
+          <span style="-webkit-text-stroke:1.5px var(--ink);color:transparent;">NYATA</span>
+        </div>
+      </div>
+
+      <!-- Photo left, rotated -->
+      <div style="position:absolute;top:148px;left:20px;width:145px;height:190px;transform:rotate(1.5deg);z-index:5;" class="photo-block">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>foto · aksi/demo</span>
+      </div>
+
+      <!-- Tape on left photo -->
+      <div style="position:absolute;top:140px;left:8px;width:90px;height:18px;background:rgba(255,229,0,.65);transform:rotate(-3deg);z-index:12;"></div>
+
+      <!-- Photo right -->
+      <div style="position:absolute;top:130px;right:18px;width:220px;height:162px;z-index:5;" class="photo-block">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>foto · komunitas lokal</span>
+      </div>
+
+      <!-- Circle sticker -->
+      <div style="position:absolute;top:280px;left:12px;width:72px;height:72px;background:var(--ink);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--paper);font-family:var(--display);font-size:10px;letter-spacing:.1em;text-align:center;line-height:1.2;text-transform:uppercase;z-index:12;">
+        BACA<br>PIKIR<br>AKSI
+      </div>
+
+      <!-- Handwriting block middle -->
+      <div style="position:absolute;bottom:190px;left:20px;right:20px;z-index:7;">
+        <div style="border-left:3px solid var(--accent);padding-left:12px;">
+          <p style="font-family:var(--serif);font-style:italic;font-size:16px;color:#222;line-height:1.5;transform:rotate(-.5deg);">
+            Seni bukan dekorasi —<br>
+            <strong style="font-style:normal;">seni adalah argumen</strong><br>
+            yang tidak bisa dibungkam.
+          </p>
+          <span style="font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:#888;text-transform:uppercase;margin-top:6px;display:block;">Kurasi: Glitch Kolektif, 2025</span>
+        </div>
+      </div>
+
+      <!-- Photo bottom right -->
+      <div style="position:absolute;bottom:28px;right:18px;width:165px;height:118px;transform:rotate(-2deg);z-index:5;" class="photo-block">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>foto · karya seni lokal</span>
+      </div>
+
+      <!-- Bottom left stamp -->
+      <div style="position:absolute;bottom:38px;left:20px;z-index:7;">
+        <div style="border:3px solid var(--accent);padding:8px 14px;transform:rotate(3deg);display:inline-block;">
+          <span style="font-family:var(--display);font-size:18px;letter-spacing:.1em;color:var(--accent);">KOLASE</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="page-num-stamp right">03</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SPREAD 2: ART Hal 4
+═══════════════════════════════════ -->
+<div class="zine-spread single" id="spread2">
+  <div class="page art-page" style="min-height:740px;">
+    <div class="art-header">
+      <span class="art-page-num">04</span>
+      <span class="art-section-title">FOTOGRAFI & TEKS</span>
+      <span class="art-page-num">Glitch Zine — Edisi 001</span>
+    </div>
+
+    <div style="padding:20px;position:relative;min-height:660px;">
+
+      <!-- Full-bleed style photo top -->
+      <div style="width:100%;height:220px;margin-bottom:14px;" class="photo-block">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>foto panorama · kota/komunitas</span>
+      </div>
+
+      <!-- Caption bar -->
+      <div style="background:var(--ink);color:var(--paper);padding:8px 12px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-family:var(--serif);font-style:italic;font-size:12px;color:rgba(255,255,255,.7);">Jakarta, 2025 — kita ada di sini</span>
+        <span style="font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:rgba(255,255,255,.35);text-transform:uppercase;">© Glitch</span>
+      </div>
+
+      <!-- Two column layout -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+        <div>
+          <div style="width:100%;height:150px;margin-bottom:8px;" class="photo-block">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span>foto</span>
+          </div>
+          <p style="font-family:var(--sans);font-size:10px;color:#444;line-height:1.5;">
+            Dari sudut gang sempit hingga mural megah — ekspresi visual kolektif anak muda kota.
+          </p>
+        </div>
+        <div>
+          <div style="background:var(--yellow);padding:14px;height:150px;margin-bottom:8px;display:flex;flex-direction:column;justify-content:center;">
+            <p style="font-family:var(--serif);font-style:italic;font-size:14px;color:#000;line-height:1.5;">
+              "Kami tidak merusak — kami <em>memulihkan</em> ingatan."
+            </p>
+            <span style="font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:#555;text-transform:uppercase;margin-top:8px;">— perupa komunitas, Bandung</span>
+          </div>
+          <p style="font-family:var(--sans);font-size:10px;color:#444;line-height:1.5;">
+            Kolektif seni dari 6 kota berbagi karya dan manifesto lewat halaman-halaman ini.
+          </p>
+        </div>
+      </div>
+
+      <!-- Handwritten rule -->
+      <div style="border-top:2px dashed #ccc;padding-top:12px;">
+        <p style="font-family:var(--serif);font-style:italic;font-size:14px;color:#333;line-height:1.5;transform:rotate(-.3deg);">
+          Kirim karya lo ke zine ini → <strong style="font-style:normal;">kolektif.glitch@jejak.id</strong>
+        </p>
+      </div>
+
+    </div>
+
+    <div class="page-num-stamp right">04</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SPREAD 3: LOCAL PRIDE Hal 5-6
+═══════════════════════════════════ -->
+<div class="zine-spread" id="spread3">
+
+  <!-- PAGE 5 -->
+  <div class="page reportase-page" style="min-height:740px;">
+    <div class="rep-header">
+      <div class="rep-section-flag green">Reportase · Local Pride</div>
+      <div class="rep-headline">
+        BANGGA<br>DARI<br><em>SINI</em>
+      </div>
+      <p class="rep-subhead">Menelusuri identitas lokal yang tumbuh di celah-celah kota — antara warisan, resistensi, dan kebanggaan yang baru tumbuh.</p>
+    </div>
+
+    <div class="rep-body">
+
+      <div class="rep-byline">
+        <span>Oleh <span>Redaksi Glitch</span></span>
+        <span>Jakarta</span>
+        <span>Mei 2025</span>
+        <span>Foto: <span>Arsip Komunitas</span></span>
+      </div>
+
+      <!-- Lead photo placeholder -->
+      <div class="rep-lead-photo photo-block" style="background:#1a1a1a;">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>foto utama · scene lokal</span>
+      </div>
+      <p class="rep-photo-caption">↑ Komunitas lokal berkumpul di ruang yang mereka ciptakan sendiri, Jakarta 2025.</p>
+
+      <div style="margin-top:12px;">
+        <p class="rep-text rep-dropcap">
+          Ada yang berubah di kota ini — bukan karena rencana tata kota, tapi karena anak-anak mudanya memutuskan untuk tidak pindah. Mereka yang dulu dibilang ketinggalan zaman kini justru membangun ekosistem budaya yang paling hidup: komunitas mural, koperasi kreatif, pasar rakyat yang tidak butuh investor asing.
+        </p>
+      </div>
+
+      <div class="rep-pull-quote">
+        <p>"Bangga lokal bukan nostalgia — itu strategi. Kita yang tahu medan, kita yang seharusnya tentukan arahnya."</p>
+        <cite>— Dani, penggiat komunitas kreatif, Yogyakarta</cite>
+      </div>
+
+      <p class="rep-text">
+        Dari 17 komunitas yang ditemui tim Glitch, hampir semuanya lahir dari frustrasi yang sama: ketidakhadiran ruang aman untuk berkarya tanpa agenda korporat. Yang mengejutkan, bukannya mati — mereka justru berkembang pesat.
+      </p>
+
+    </div>
+
+    <div class="page-num-stamp left">05</div>
+  </div>
+
+  <!-- PAGE 6 -->
+  <div class="page reportase-page" style="min-height:740px; border-left:2px solid #ccc;">
+    <div style="padding:16px 20px;">
+
+      <!-- Photo grid -->
+      <div class="rep-photo-grid">
+        <div class="rep-photo-item">
+          <div style="height:130px;" class="photo-block" style="background:#1a1a1a;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span>foto komunitas</span>
+          </div>
+          <p class="rep-photo-caption">Pasar rakyat alternatif, Bandung</p>
+        </div>
+        <div class="rep-photo-item">
+          <div style="height:130px;" class="photo-block" style="background:#1a1a1a;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span>foto mural</span>
+          </div>
+          <p class="rep-photo-caption">Mural "Tanah Kami", Makassar</p>
+        </div>
+      </div>
+
+      <p class="rep-text" style="margin:12px 0;">
+        Model yang mereka bangun bukan sekadar "nongkrong" — ada struktur, ada akuntabilitas, ada transfer pengetahuan antar generasi. Kolektif mural di Makassar misalnya, kini melatih 40-an pelajar SMA tiap semester. Koperasi kreatif di Solo sudah mampu menggaji 12 anggotanya penuh waktu.
+      </p>
+
+      <div class="rep-pull-quote">
+        <p>"Yang paling berbahaya dari kota yang berubah cepat adalah ketika penduduk aslinya jadi penonton di kotanya sendiri."</p>
+        <cite>— Ira, peneliti urban, Universitas Gadjah Mada</cite>
+      </div>
+
+      <p class="rep-text" style="margin-bottom:14px;">
+        Tapi pertanyaan besar tetap menggantung: seberapa lama ekosistem ini bisa bertahan tanpa dukungan struktural? Sewa ruang terus naik. Sponsor korporat datang dengan syarat. Generasi berikutnya direkrut lebih dulu oleh platform digital besar.
+      </p>
+
+      <!-- Sidebar data box -->
+      <div class="rep-sidebar">
+        <div class="rep-sidebar-title">Local Pride — Angka</div>
+        <div class="rep-sidebar-item">
+          <span class="rep-sidebar-num">17</span>
+          <span class="rep-sidebar-text">komunitas lokal dikunjungi tim Glitch dalam 3 bulan reportase</span>
+        </div>
+        <div class="rep-sidebar-item">
+          <span class="rep-sidebar-num">6</span>
+          <span class="rep-sidebar-text">kota: Jakarta, Bandung, Yogyakarta, Solo, Makassar, Medan</span>
+        </div>
+        <div class="rep-sidebar-item">
+          <span class="rep-sidebar-num">94%</span>
+          <span class="rep-sidebar-text">berdiri tanpa hibah pemerintah atau sponsor korporat besar</span>
+        </div>
+        <div class="rep-sidebar-item">
+          <span class="rep-sidebar-num">↑</span>
+          <span class="rep-sidebar-text">semua komunitas melaporkan pertumbuhan anggota dalam 2 tahun terakhir</span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="page-num-stamp right">06</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     SPREAD 4: PETISI MBG Hal 7-8
+═══════════════════════════════════ -->
+<div class="zine-spread" id="spread4">
+
+  <!-- PAGE 7 -->
+  <div class="page petisi-page" style="min-height:740px;">
+    <div class="petisi-bg-grid"></div>
+    <div class="petisi-scanlines"></div>
+
+    <div class="petisi-inner">
+      <div class="petisi-header">
+        <div class="petisi-logo">GL<span>I</span>TCH</div>
+        <div class="petisi-header-badge">PETISI AKTIF</div>
+      </div>
+
+      <div class="petisi-ticker-strip">
+        <div class="petisi-ticker-inner">
+          ✊ PETISI MBG &nbsp;·&nbsp; Bedah data dulu, baru bersuara &nbsp;·&nbsp; Rp71T anggaran publik &nbsp;·&nbsp; 27 juta siswa penerima &nbsp;·&nbsp; 43% yang sampai ke piring &nbsp;·&nbsp; Evaluasi Q2 2025 harus transparan &nbsp;·&nbsp; ✊ PETISI MBG &nbsp;·&nbsp; Bedah data dulu, baru bersuara &nbsp;·&nbsp; Rp71T anggaran publik &nbsp;·&nbsp; 27 juta siswa penerima &nbsp;·&nbsp;
+        </div>
+      </div>
+
+      <div class="petisi-hero">
+        <div class="petisi-eyebrow">Petisi Kolektif · MBG 2025</div>
+        <div class="petisi-title">
+          KAMI<br>MINTA<br><span class="red">TRANSPARAN</span><br>SI
+        </div>
+        <p class="petisi-subtitle">
+          Rp71T anggaran publik berhak dipertanggungjawabkan. Program niatnya baik — tapi rakyat butuh data.
+        </p>
+      </div>
+
+      <div class="petisi-counter-row">
+        <div class="petisi-count-num">1<span class="acc">.</span>247</div>
+        <div class="petisi-count-info">
+          <div class="petisi-count-label">Total Penandatangan</div>
+          <div class="petisi-progress">
+            <div class="petisi-progress-fill"></div>
+          </div>
+          <div class="petisi-progress-label">
+            <span>12.47%</span>
+            <span>Target: 10.000</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="petisi-demands">
+        <div class="petisi-demands-title">Tiga Tuntutan Kami</div>
+        <div class="demand-item">
+          <span class="demand-num">01</span>
+          <div>
+            <div class="demand-text-title">Publikasi rincian anggaran per komponen</div>
+            <div class="demand-text-sub">Breakdown logistik, bahan pangan, tenaga, dan overhead dibuka ke publik.</div>
+          </div>
+        </div>
+        <div class="demand-item">
+          <span class="demand-num">02</span>
+          <div>
+            <div class="demand-text-title">Audit independen Q2 2025 dengan indikator gizi</div>
+            <div class="demand-text-sub">Evaluasi harus mencakup angka stunting — bukan hanya laporan distribusi porsi.</div>
+          </div>
+        </div>
+        <div class="demand-item">
+          <span class="demand-num">03</span>
+          <div>
+            <div class="demand-text-title">Mekanisme pengaduan terbuka bagi orang tua & guru</div>
+            <div class="demand-text-sub">Kanal laporan kualitas makanan yang bisa diakses dan direspons terukur.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="petisi-footer">
+        <div class="petisi-dest-list">
+          Dikirim ke:<br>
+          <span>Badan Gizi Nasional</span> · <span>Komisi X DPR RI</span> · <span>BPK RI</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:rgba(255,255,255,.25);text-transform:uppercase;">Hal. 07</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE 8 -->
+  <div class="page petisi-page" style="min-height:740px; border-left:1px solid rgba(255,255,255,.08);">
+    <div class="petisi-bg-grid"></div>
+    <div class="petisi-scanlines"></div>
+
+    <div class="petisi-inner">
+      <div style="padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.08);">
+        <div style="font-family:var(--mono);font-size:8px;letter-spacing:.2em;color:rgba(255,255,255,.3);text-transform:uppercase;margin-bottom:4px;">Fase 02 — Deliberasi + Tanda Tangan</div>
+        <div style="font-family:var(--display);font-size:22px;letter-spacing:.08em;color:var(--paper);">PILIH POSISIMU</div>
+      </div>
+
+      <div style="padding:14px 20px;">
+
+        <!-- Stance options -->
+        <div class="petisi-sign-block" style="margin:0 0 14px 0;">
+          <div class="petisi-sign-title">Posisi Penandatangan</div>
+          <div class="petisi-sign-stances">
+            <div class="petisi-stance" style="background:rgba(255,51,0,.1);border-color:rgba(255,51,0,.3);">
+              <div class="petisi-stance-dot" style="border-color:var(--accent);background:var(--accent);"></div>
+              <div class="petisi-stance-text"><b>Dukung program, tuntut transparansi</b><br>Rp71T butuh akuntabilitas penuh.</div>
+            </div>
+            <div class="petisi-stance">
+              <div class="petisi-stance-dot"></div>
+              <div class="petisi-stance-text"><b>Dukung program, tuntut reformasi skema</b><br>Distribusi harus dirombak untuk daerah 3T.</div>
+            </div>
+            <div class="petisi-stance">
+              <div class="petisi-stance-dot"></div>
+              <div class="petisi-stance-text"><b>Minta moratorium hingga audit selesai</b><br>Lebih baik lambat tapi tepat sasaran.</div>
+            </div>
+            <div class="petisi-stance">
+              <div class="petisi-stance-dot"></div>
+              <div class="petisi-stance-text"><b>Posisi lain</b> — tuliskan sendiri.</div>
+            </div>
+          </div>
+
+          <!-- Deliberation checks -->
+          <div style="margin-top:12px;border-top:1px solid rgba(255,255,255,.07);padding-top:10px;">
+            <div style="font-family:var(--mono);font-size:8px;letter-spacing:.15em;color:rgba(0,200,255,.7);text-transform:uppercase;margin-bottom:8px;">↳ Konfirmasi Deliberasi</div>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <div style="display:flex;gap:8px;align-items:center;">
+                <div style="width:14px;height:14px;border:1px solid rgba(255,255,255,.2);flex-shrink:0;"></div>
+                <span style="font-size:9.5px;color:rgba(255,255,255,.5);">Sudah membaca infografis data MBG</span>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <div style="width:14px;height:14px;border:1px solid rgba(255,255,255,.2);flex-shrink:0;"></div>
+                <span style="font-size:9.5px;color:rgba(255,255,255,.5);">Memahami posisi saya — bukan ikut tren</span>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <div style="width:14px;height:14px;border:1px solid rgba(255,255,255,.2);flex-shrink:0;"></div>
+                <span style="font-size:9.5px;color:rgba(255,255,255,.5);">Siap mempertanggungjawabkan posisi ini</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mock sign button -->
+          <div class="petisi-btn-mockup" style="margin-top:12px;">
+            <span>Tanda Tangani Sekarang</span>
+            <span>✊</span>
+          </div>
+          <p style="font-family:var(--mono);font-size:8px;letter-spacing:.06em;color:rgba(255,255,255,.25);text-align:center;margin-top:6px;line-height:1.5;">
+            Suara lo akan tercatat. Petisi dikirim ke BGN · Komisi X DPR · BPK RI
+          </p>
+        </div>
+
+        <!-- Recent signatures -->
+        <div class="petisi-sigs">
+          <div class="petisi-sigs-label">Tanda Tangan Terbaru</div>
+          <div class="sig-chips">
+            <span class="sig-chip accent">embun.pagi · transparansi</span>
+            <span class="sig-chip cyan">siska.ipb · reformasi</span>
+            <span class="sig-chip">nalar.bebas · transparansi</span>
+            <span class="sig-chip">bara.api · reformasi</span>
+            <span class="sig-chip accent">kota.kita · transparansi</span>
+            <span class="sig-chip">langit.sore · moratorium</span>
+            <span class="sig-chip cyan">angin.timur · reformasi</span>
+          </div>
+        </div>
+
+        <!-- Data highlight -->
+        <div style="margin-top:14px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);padding:12px;">
+          <div style="font-family:var(--mono);font-size:8px;letter-spacing:.15em;color:rgba(255,229,0,.6);text-transform:uppercase;margin-bottom:8px;">Data Kunci MBG</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div>
+              <div style="font-family:var(--display);font-size:28px;color:var(--accent);line-height:1;">Rp71T</div>
+              <div style="font-size:9px;color:rgba(255,255,255,.4);line-height:1.4;">anggaran total program</div>
+            </div>
+            <div>
+              <div style="font-family:var(--display);font-size:28px;color:var(--accent2);line-height:1;">43%</div>
+              <div style="font-size:9px;color:rgba(255,255,255,.4);line-height:1.4;">yang benar-benar sampai ke piring</div>
+            </div>
+            <div>
+              <div style="font-family:var(--display);font-size:28px;color:var(--green);line-height:1;">27jt</div>
+              <div style="font-size:9px;color:rgba(255,255,255,.4);line-height:1.4;">siswa penerima program</div>
+            </div>
+            <div>
+              <div style="font-family:var(--display);font-size:28px;color:var(--yellow);line-height:1;">3–4×</div>
+              <div style="font-size:9px;color:rgba(255,255,255,.4);line-height:1.4;">biaya logistik daerah 3T vs rata-rata</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="petisi-footer">
+        <div style="font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:rgba(255,255,255,.2);text-transform:uppercase;line-height:1.8;">
+          glitch-petisi.html · jejak.id<br>
+          <span style="color:rgba(255,255,255,.4);">Tanda tangan: jejak.id/petisi/mbg</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;color:rgba(255,255,255,.25);text-transform:uppercase;">Hal. 08</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── LEGEND ── -->
+<div class="legend">
+  <div class="legend-item">
+    <span class="legend-num">01</span>
+    <div class="legend-info">
+      <div class="legend-title">Cover — Hal. 1</div>
+      <div class="legend-desc">Desain cover zine dengan judul glitch effect, color strips, dan detail editorial.</div>
+    </div>
+  </div>
+  <div class="legend-item">
+    <span class="legend-num">02–03</span>
+    <div class="legend-info">
+      <div class="legend-title">Art Kolase — Hal. 2–3</div>
+      <div class="legend-desc">Spread kolase: foto placeholder, teks tangan, tape efek, torn paper, stiker bundar.</div>
+    </div>
+  </div>
+  <div class="legend-item">
+    <span class="legend-num">04</span>
+    <div class="legend-info">
+      <div class="legend-title">Art & Foto — Hal. 4</div>
+      <div class="legend-desc">Layout editorial foto panorama + dua kolom teks + kutipan.</div>
+    </div>
+  </div>
+  <div class="legend-item">
+    <span class="legend-num">05–06</span>
+    <div class="legend-info">
+      <div class="legend-title">Local Pride Reportase — Hal. 5–6</div>
+      <div class="legend-desc">Artikel jurnalistik: dropcap, foto, pull quote, sidebar data angka.</div>
+    </div>
+  </div>
+  <div class="legend-item">
+    <span class="legend-num">07–08</span>
+    <div class="legend-info">
+      <div class="legend-title">Petisi MBG — Hal. 7–8</div>
+      <div class="legend-desc">Versi zine dari glitch-petisi.html: counter, tuntutan, stance selector, data key.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showSpread(idx, btn) {
+    document.querySelectorAll('.zine-spread').forEach((s,i) => {
+      s.classList.toggle('visible', i === idx);
+    });
+    document.querySelectorAll('.spread-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    window.scrollTo({top: 200, behavior: 'smooth'});
+  }
+</script>
+</body>
+</html>
