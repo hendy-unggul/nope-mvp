@@ -6,100 +6,842 @@
 <title>SPILL — vibe radar</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700&family=DM+Mono&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#080808;--sf:#0f0f0f;--sfe:#141414;--bd:#222;--bd2:#2e2e2e;--tx:#f0ece6;--txs:#777;--ap:#ff2d55;--as:#00e5ff;--aq:#bfff00;--purple:#bf5af2;--sb:env(safe-area-inset-bottom);--st:env(safe-area-inset-top)}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--tx);font-family:'Syne',sans-serif;font-size:14px;position:fixed;width:100%}
-.app{height:100%;display:flex;flex-direction:column;overflow:hidden}
-.header{padding:14px 18px;padding-top:calc(14px + var(--st));display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--bd);background:var(--bg)}
-.logo{font-family:'Bebas Neue',sans-serif;font-size:34px}
-.logo .x{color:var(--ap);display:inline-block;animation:spin 4s ease-in-out infinite}
-@keyframes spin{0%,90%,100%{transform:rotate(0)}95%{transform:rotate(180deg)}}
-.online-pill{font-family:'DM Mono',monospace;font-size:10px;color:#000;background:var(--aq);padding:5px 12px;border:2px solid #000;box-shadow:3px 3px 0 #000}
-.scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
-.radar-sect{background:var(--sf);border-bottom:2px solid var(--bd);padding:16px 18px}
-.radar-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--as);letter-spacing:3px;margin-bottom:12px}
-.radar-cont{position:relative;width:100%;aspect-ratio:1/1;background:#020a02;border:2px solid var(--bd2);box-shadow:6px 6px 0 #000}
-.radar-grid{position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(0,229,255,.04)0px,transparent 1px,transparent 28px),repeating-linear-gradient(90deg,rgba(0,229,255,.04)0px,transparent 1px,transparent 28px)}
-.radar-ring{position:absolute;inset:8%;border:1px solid rgba(0,229,255,.08);border-radius:50%}
-.radar-ring::before{content:'';position:absolute;border-radius:50%;border:1px solid rgba(0,229,255,.05);inset:28%}
-.radar-cross{position:absolute;inset:0;background:linear-gradient(90deg,transparent calc(50% - .5px),rgba(0,229,255,.06) calc(50% - .5px),rgba(0,229,255,.06) calc(50% + .5px),transparent calc(50% + .5px)),linear-gradient(0deg,transparent calc(50% - .5px),rgba(0,229,255,.06) calc(50% - .5px),rgba(0,229,255,.06) calc(50% + .5px),transparent calc(50% + .5px))}
-.btn-vibe-check{width:100%;background:var(--ap);border:2px solid #000;padding:18px;font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff;cursor:pointer;box-shadow:5px 5px 0 #000;display:flex;align-items:center;justify-content:center;gap:12px;margin-top:16px}
-.btn-whisper{width:100%;background:transparent;border:2px dashed var(--bd2);padding:14px;font-family:'Syne',sans-serif;font-size:13px;color:var(--txs);cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin-top:10px}
-.filter-sect{padding:18px;border-bottom:2px solid var(--bd)}
-.filter-title{font-family:'DM Mono',monospace;font-size:9px;color:var(--txs);margin-bottom:14px}
-.match-pct{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--ap)}
-.mood-scroll{display:flex;gap:8px;overflow-x:auto;margin:16px -18px 0;padding:0 18px}
-.mood-chip{padding:8px 16px;background:var(--bg);border:2px solid var(--bd2);font-family:'DM Mono',monospace;font-size:11px;color:var(--txs);white-space:nowrap;cursor:pointer}
-.mood-chip.active{background:var(--ap);border-color:#000;color:#fff}
-.spills-sect{padding:18px;padding-bottom:calc(90px + var(--sb))}
-.sect-title{font-family:'Bebas Neue',sans-serif;font-size:28px}
-.spill-card{background:var(--sf);border:2px solid var(--bd2);margin-bottom:14px;box-shadow:4px 4px 0 #000}
-.spill-card.is-mine{border-color:var(--as)}
-.spill-head{display:flex;justify-content:space-between;padding:12px 16px;border-bottom:2px solid var(--bd);background:var(--bg)}
-.spill-user{font-family:'DM Mono',monospace;font-size:11px;color:var(--txs)}
-.spill-user.mine{color:var(--as)}
-.spill-mood{font-family:'DM Mono',monospace;font-size:9px;padding:5px 10px;border:2px solid}
-.spill-body{padding:16px;font-size:15px}
-.spill-actions{display:flex;border-top:2px solid var(--bd);background:var(--bg)}
-.react-btn{flex:1;padding:12px;background:transparent;border:none;border-right:2px solid var(--bd);font-size:16px;color:var(--txs);cursor:pointer}
-.react-btn.active{background:var(--ap);color:#fff}
-.refresh-btn{width:100%;padding:16px;background:transparent;border:2px dashed var(--bd2);color:var(--txs);display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px;cursor:pointer}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:2px solid var(--bd);padding-bottom:var(--sb)}
-.nav-container{display:flex;height:62px}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--txm);text-decoration:none;font-family:'DM Mono',monospace;font-size:9px;border-right:2px solid var(--bd)}
-.nav-item.active{color:var(--ap);background:rgba(255,45,85,.06)}
-.nav-item.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--ap)}
-.chat-room{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column}
-.chat-room.on{display:flex}
-.chat-head{padding:12px 18px;padding-top:calc(12px + var(--st));border-bottom:2px solid var(--bd);background:var(--sf);display:flex;justify-content:space-between}
-.chat-timer{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--aq);background:var(--bg);padding:8px 14px;border:2px solid var(--bd)}
-.chat-timer.warn{color:var(--ap);border-color:var(--ap)}
-.chat-messages{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px}
-.chat-bubble{max-width:85%;padding:12px 16px;font-size:15px;border:2px solid}
-.own .chat-bubble{background:var(--ap);color:#fff;border-color:#000;align-self:flex-end}
-.other .chat-bubble{background:var(--sf);border-color:var(--bd2)}
-.system-msg{align-self:center!important;max-width:90%!important}
-.system-msg .chat-bubble{background:transparent!important;border:2px dashed var(--bd)!important;color:var(--txs)!important}
-.typing{display:flex;gap:5px;padding:14px 18px;background:var(--sf);border:2px solid var(--bd2);width:fit-content}
-.typing-dot{width:7px;height:7px;background:var(--as);transform:rotate(45deg);animation:typi 1.4s infinite}
-@keyframes typi{0%,60%,100%{transform:rotate(45deg) translateY(0)}30%{transform:rotate(45deg) translateY(-5px)}}
-.chat-input-wrap{padding:12px 18px;padding-bottom:calc(12px + var(--sb));border-top:2px solid var(--bd);background:var(--sf);display:flex;gap:10px}
-.chat-input{flex:1;background:var(--bg);border:2px solid var(--bd2);padding:13px 16px;font-size:15px;color:var(--tx);outline:none;font-family:'Syne',sans-serif}
-.chat-send{width:48px;height:48px;background:var(--ap);border:2px solid #000;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;cursor:pointer}
-.modal{display:none;position:fixed;inset:0;background:var(--bg);z-index:200;flex-direction:column}
-.modal.on{display:flex}
-.modal-header{padding:16px 18px;padding-top:calc(16px + var(--st));border-bottom:2px solid var(--bd);display:flex;justify-content:space-between}
-.modal-close{width:38px;height:38px;background:var(--sf);border:2px solid var(--bd2);color:var(--txs);cursor:pointer}
-.modal-body{flex:1;overflow-y:auto;padding:24px 18px}
-.gender-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:24px 0}
-.gender-card{background:var(--sf);border:2px solid var(--bd2);padding:28px 16px;text-align:center;cursor:pointer;box-shadow:4px 4px 0 #000}
-.gender-card.selected{border-color:var(--ap);background:rgba(255,45,85,.08)}
-.modal-action-btn{width:100%;padding:18px;background:var(--ap);color:#fff;border:2px solid #000;font-family:'Bebas Neue',sans-serif;font-size:20px;cursor:pointer;box-shadow:4px 4px 0 #000}
-.modal-action-btn:disabled{opacity:.3;cursor:not-allowed}
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--tx);color:var(--bg);padding:12px 22px;z-index:600;opacity:0;transition:.25s;border:2px solid #000;box-shadow:4px 4px 0 #000}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+:root {
+  --bg: #080808;
+  --sf: #0f0f0f;
+  --sfe: #141414;
+  --bd: #222;
+  --bd2: #2e2e2e;
+  --tx: #f0ece6;
+  --txs: #777;
+  --ap: #ff2d55;
+  --as: #00e5ff;
+  --aq: #bfff00;
+  --purple: #bf5af2;
+  --sb: env(safe-area-inset-bottom);
+  --st: env(safe-area-inset-top);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background: var(--bg);
+  color: var(--tx);
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  position: fixed;
+  width: 100%;
+}
+
+.app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* HEADER */
+.header {
+  padding: 14px 18px;
+  padding-top: calc(14px + var(--st));
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--bd);
+  background: var(--bg);
+  position: relative;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--ap), var(--as), var(--aq));
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 34px;
+}
+
+.logo .x {
+  color: var(--ap);
+  display: inline-block;
+  animation: spin 4s ease-in-out infinite;
+}
+
+@keyframes spin {
+  0%, 90%, 100% { transform: rotate(0); }
+  95% { transform: rotate(180deg); }
+}
+
+.online-pill {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: #000;
+  background: var(--aq);
+  padding: 5px 12px;
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0 #000;
+}
+
+/* SCROLL AREA */
+.scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* RADAR SECTION */
+.radar-sect {
+  background: var(--sf);
+  border-bottom: 2px solid var(--bd);
+  padding: 16px 18px;
+}
+
+.radar-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--as);
+  letter-spacing: 3px;
+  margin-bottom: 12px;
+}
+
+.radar-cont {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1/1;
+  background: #020a02;
+  border: 2px solid var(--bd2);
+  box-shadow: 6px 6px 0 #000;
+  overflow: hidden;
+}
+
+.radar-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    repeating-linear-gradient(0deg, rgba(0,229,255,.04) 0px, transparent 1px, transparent 28px),
+    repeating-linear-gradient(90deg, rgba(0,229,255,.04) 0px, transparent 1px, transparent 28px);
+}
+
+.radar-ring {
+  position: absolute;
+  inset: 8%;
+  border: 1px solid rgba(0,229,255,.08);
+  border-radius: 50%;
+}
+
+.radar-ring::before {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(0,229,255,.05);
+  inset: 28%;
+}
+
+.radar-cross {
+  position: absolute;
+  inset: 0;
+  background: 
+    linear-gradient(90deg, transparent calc(50% - .5px), rgba(0,229,255,.06) calc(50% - .5px), rgba(0,229,255,.06) calc(50% + .5px), transparent calc(50% + .5px)),
+    linear-gradient(0deg, transparent calc(50% - .5px), rgba(0,229,255,.06) calc(50% - .5px), rgba(0,229,255,.06) calc(50% + .5px), transparent calc(50% + .5px));
+}
+
+.radar-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+}
+
+/* BUTTONS */
+.btn-vibe-check {
+  width: 100%;
+  background: var(--ap);
+  border: 2px solid #000;
+  padding: 18px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 5px 5px 0 #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 16px 18px;
+  width: calc(100% - 36px);
+  transition: transform .08s, box-shadow .08s;
+}
+
+.btn-vibe-check:active {
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.btn-whisper {
+  width: calc(100% - 36px);
+  margin: 0 18px 16px;
+  background: transparent;
+  border: 2px dashed var(--bd2);
+  padding: 14px;
+  font-family: 'Syne', sans-serif;
+  font-size: 13px;
+  color: var(--txs);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* FILTER SECTION */
+.filter-sect {
+  padding: 18px;
+  border-bottom: 2px solid var(--bd);
+}
+
+.filter-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--txs);
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.match-pct {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  color: var(--ap);
+}
+
+.mood-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: 16px -18px 0;
+  padding: 0 18px 4px;
+  scrollbar-width: none;
+}
+
+.mood-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.mood-chip {
+  padding: 8px 16px;
+  background: var(--bg);
+  border: 2px solid var(--bd2);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--txs);
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 #000;
+  transition: all .08s;
+}
+
+.mood-chip.active {
+  background: var(--ap);
+  border-color: #000;
+  color: #fff;
+}
+
+.mood-chip:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #000;
+}
+
+/* SPILLS SECTION */
+.spills-sect {
+  padding: 18px;
+  padding-bottom: calc(90px + var(--sb));
+}
+
+.sect-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+
+.spill-card {
+  background: var(--sf);
+  border: 2px solid var(--bd2);
+  margin-bottom: 14px;
+  box-shadow: 4px 4px 0 #000;
+  transition: transform .08s, box-shadow .08s;
+}
+
+.spill-card.is-mine {
+  border-color: var(--as);
+  box-shadow: 4px 4px 0 rgba(0,229,255,.3);
+}
+
+.spill-card:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.spill-head {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 2px solid var(--bd);
+  background: var(--bg);
+}
+
+.spill-user {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--txs);
+}
+
+.spill-user.mine {
+  color: var(--as);
+}
+
+.spill-mood {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 5px 10px;
+  border: 2px solid;
+  text-transform: uppercase;
+}
+
+.spill-mood.surviving { color: #ff9f0a; border-color: #ff9f0a; }
+.spill-mood.thriving { color: #bfff00; border-color: #bfff00; }
+.spill-mood.chaotic { color: #00e5ff; border-color: #00e5ff; }
+.spill-mood.doom { color: #bf5af2; border-color: #bf5af2; }
+
+.spill-body {
+  padding: 16px;
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.spill-actions {
+  display: flex;
+  border-top: 2px solid var(--bd);
+  background: var(--bg);
+  overflow-x: auto;
+}
+
+.react-btn {
+  flex: 1;
+  min-width: 60px;
+  padding: 12px;
+  background: transparent;
+  border: none;
+  border-right: 2px solid var(--bd);
+  font-size: 16px;
+  color: var(--txs);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: 'DM Mono', monospace;
+}
+
+.react-btn:last-child {
+  border-right: none;
+}
+
+.react-btn.active {
+  background: var(--ap);
+  color: #fff;
+}
+
+.react-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+}
+
+.refresh-btn {
+  width: 100%;
+  padding: 16px;
+  background: transparent;
+  border: 2px dashed var(--bd2);
+  color: var(--txs);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: all .15s;
+}
+
+.refresh-btn:active {
+  background: var(--sf);
+  border-color: var(--aq);
+  color: var(--aq);
+}
+
+/* BOTTOM NAV */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg);
+  border-top: 2px solid var(--bd);
+  padding-bottom: var(--sb);
+  z-index: 100;
+}
+
+.nav-container {
+  display: flex;
+  height: 62px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--txm);
+  text-decoration: none;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  text-transform: uppercase;
+  border-right: 2px solid var(--bd);
+  position: relative;
+}
+
+.nav-item:last-child {
+  border-right: none;
+}
+
+.nav-item.active {
+  color: var(--ap);
+  background: rgba(255,45,85,.06);
+}
+
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--ap);
+}
+
+.nav-icon {
+  font-size: 20px;
+}
+
+/* CHAT ROOM */
+.chat-room {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 300;
+  flex-direction: column;
+}
+
+.chat-room.on {
+  display: flex;
+}
+
+.chat-head {
+  padding: 12px 18px;
+  padding-top: calc(12px + var(--st));
+  border-bottom: 2px solid var(--bd);
+  background: var(--sf);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-timer {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  color: var(--aq);
+  background: var(--bg);
+  padding: 8px 14px;
+  border: 2px solid var(--bd);
+  box-shadow: 3px 3px 0 #000;
+}
+
+.chat-timer.warn {
+  color: var(--ap);
+  border-color: var(--ap);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.chat-bubble {
+  max-width: 85%;
+  padding: 12px 16px;
+  font-size: 15px;
+  border: 2px solid;
+  word-wrap: break-word;
+  line-height: 1.55;
+}
+
+.own {
+  align-self: flex-end;
+}
+
+.own .chat-bubble {
+  background: var(--ap);
+  color: #fff;
+  border-color: #000;
+  box-shadow: 3px 3px 0 #000;
+}
+
+.other {
+  align-self: flex-start;
+}
+
+.other .chat-bubble {
+  background: var(--sf);
+  border-color: var(--bd2);
+  box-shadow: 3px 3px 0 rgba(0,0,0,.5);
+}
+
+.system-msg {
+  align-self: center !important;
+  max-width: 90% !important;
+}
+
+.system-msg .chat-bubble {
+  background: transparent !important;
+  border: 2px dashed var(--bd) !important;
+  color: var(--txs) !important;
+  font-style: italic;
+}
+
+/* TYPING INDICATOR */
+.typing {
+  display: flex;
+  gap: 5px;
+  padding: 14px 18px;
+  background: var(--sf);
+  border: 2px solid var(--bd2);
+  width: fit-content;
+  box-shadow: 3px 3px 0 rgba(0,0,0,.5);
+}
+
+.typing-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--as);
+  transform: rotate(45deg);
+  animation: typing 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: .2s; }
+.typing-dot:nth-child(3) { animation-delay: .4s; }
+
+@keyframes typing {
+  0%, 60%, 100% { transform: rotate(45deg) translateY(0); }
+  30% { transform: rotate(45deg) translateY(-5px); }
+}
+
+/* CHAT INPUT */
+.chat-input-wrap {
+  padding: 12px 18px;
+  padding-bottom: calc(12px + var(--sb));
+  border-top: 2px solid var(--bd);
+  background: var(--sf);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.chat-input {
+  flex: 1;
+  background: var(--bg);
+  border: 2px solid var(--bd2);
+  padding: 13px 16px;
+  font-size: 15px;
+  color: var(--tx);
+  outline: none;
+  font-family: 'Syne', sans-serif;
+}
+
+.chat-input:focus {
+  border-color: var(--ap);
+}
+
+.chat-input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.chat-send {
+  width: 48px;
+  height: 48px;
+  background: var(--ap);
+  border: 2px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 #000;
+  transition: all .08s;
+}
+
+.chat-send:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #000;
+}
+
+.chat-send.disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* MODAL */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: 200;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal.on {
+  display: flex;
+}
+
+.modal-header {
+  padding: 16px 18px;
+  padding-top: calc(16px + var(--st));
+  border-bottom: 2px solid var(--bd);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+}
+
+.modal-close {
+  width: 38px;
+  height: 38px;
+  background: var(--sf);
+  border: 2px solid var(--bd2);
+  color: var(--txs);
+  cursor: pointer;
+  box-shadow: 3px 3px 0 #000;
+  transition: all .08s;
+}
+
+.modal-close:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 #000;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 18px;
+}
+
+.gender-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.gender-card {
+  background: var(--sf);
+  border: 2px solid var(--bd2);
+  padding: 28px 16px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #000;
+  transition: all .08s;
+}
+
+.gender-card.selected {
+  border-color: var(--ap);
+  background: rgba(255,45,85,.08);
+  box-shadow: 4px 4px 0 var(--ap);
+}
+
+.gender-card:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+.gender-icon {
+  font-size: 36px;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.gender-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+}
+
+.modal-action-btn {
+  width: 100%;
+  padding: 18px;
+  background: var(--ap);
+  color: #fff;
+  border: 2px solid #000;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #000;
+  transition: all .08s;
+  text-transform: uppercase;
+}
+
+.modal-action-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.modal-action-btn:not(:disabled):active {
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 #000;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--tx);
+  color: var(--bg);
+  padding: 12px 22px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  z-index: 600;
+  opacity: 0;
+  transition: all .25s;
+  border: 2px solid #000;
+  box-shadow: 4px 4px 0 #000;
+  white-space: nowrap;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast.error {
+  background: var(--ap);
+  color: #fff;
+}
+
+/* EMPTY STATE */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.4;
+}
+
+.empty-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  color: var(--txs);
+  margin-bottom: 6px;
+}
+
+.empty-text {
+  font-size: 13px;
+  color: var(--txm);
+}
 </style>
 </head>
 <body>
 <div class="app">
+  <!-- HEADER -->
   <div class="header">
     <div class="logo">SP<span class="x">✕</span>LL</div>
-    <span class="online-pill" id="onlineCount">21 ONLINE</span>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span class="online-pill" id="onlineCount">21 ONLINE</span>
+      <span id="userNameDisplay" style="font-family:'DM Mono',monospace; font-size:12px; color:var(--as); border:2px solid var(--bd); padding:4px 8px; background:#000;">@loading...</span>
+    </div>
   </div>
+
+  <!-- SCROLL AREA -->
   <div class="scroll">
+    <!-- RADAR -->
     <div class="radar-sect">
       <div class="radar-label">VIBE RADAR</div>
       <div class="radar-cont">
-        <div class="radar-grid"></div><div class="radar-ring"></div><div class="radar-cross"></div>
-        <canvas class="radar-canvas" id="radarCanvas" style="position:absolute;inset:0;width:100%;height:100%"></canvas>
+        <div class="radar-grid"></div>
+        <div class="radar-ring"></div>
+        <div class="radar-cross"></div>
+        <canvas class="radar-canvas" id="radarCanvas"></canvas>
       </div>
     </div>
-    <button class="btn-vibe-check" onclick="startVibeCheck()"><span>VIBE CHECK</span></button>
-    <button class="btn-whisper" onclick="toast('Whisperer (premium)')">WHISPERER ✦</button>
+
+    <!-- MAIN BUTTONS -->
+    <button class="btn-vibe-check" onclick="startVibeCheck()">
+      <span>VIBE CHECK</span>
+    </button>
     
+    <button class="btn-whisper" onclick="toast('Whisperer (premium)')">
+      <span>WHISPERER ✦</span>
+    </button>
+
+    <!-- FILTER -->
     <div class="filter-sect">
-      <div class="filter-title">KESELARASAN <span class="match-pct" id="vibePct">87%</span></div>
+      <div class="filter-title">
+        KESELARASAN 
+        <span class="match-pct" id="vibePct">87%</span>
+      </div>
       <div class="mood-scroll" id="moodFilter">
         <button class="mood-chip active" data-mood="all">SEMUA</button>
         <button class="mood-chip" data-mood="surviving">😮‍💨 SURVIVING</button>
@@ -108,33 +850,66 @@ body{background:var(--bg);color:var(--tx);font-family:'Syne',sans-serif;font-siz
         <button class="mood-chip" data-mood="doom">🛌 DOOM</button>
       </div>
     </div>
-    
+
+    <!-- SPILLS -->
     <div class="spills-sect">
       <div class="sect-title">SPILL TERKINI</div>
-      <div id="spillsList"></div>
-      <button class="refresh-btn" onclick="refreshSpills()">↻ SEDUH TEH BARU</button>
+      <div id="spillsList">
+        <div class="empty-state">
+          <span class="empty-icon">🍃</span>
+          <div class="empty-title">MEMUAT SPILL...</div>
+        </div>
+      </div>
+      <button class="refresh-btn" onclick="refreshSpills()">
+        <span>↻</span>
+        <span>SEDUH TEH BARU</span>
+      </button>
     </div>
   </div>
-  
+
+  <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <div class="nav-container">
-      <a href="#" class="nav-item active"><span>✕</span><span>SPILL</span></a>
-      <a href="#" class="nav-item"><span>✦</span><span>JEJAK</span></a>
-      <a href="#" class="nav-item"><span>⚡</span><span>GLITCH</span></a>
-      <a href="#" class="nav-item"><span>〜</span><span>COCOMEO</span></a>
+      <a href="#" class="nav-item active">
+        <span class="nav-icon">✕</span>
+        <span>SPILL</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">✦</span>
+        <span>JEJAK</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">⚡</span>
+        <span>GLITCH</span>
+      </a>
+      <a href="#" class="nav-item">
+        <span class="nav-icon">〜</span>
+        <span>COCOMEO</span>
+      </a>
     </div>
   </nav>
 </div>
 
 <!-- MODAL GENDER -->
 <div class="modal" id="genderModal">
-  <div class="modal-header"><div class="modal-title">PILIH GENDER</div><button class="modal-close" onclick="closeModal('genderModal')">✕</button></div>
+  <div class="modal-header">
+    <div class="modal-title">PILIH GENDER</div>
+    <button class="modal-close" onclick="closeModal('genderModal')">✕</button>
+  </div>
   <div class="modal-body">
     <div class="gender-grid">
-      <div class="gender-card" onclick="selectGender(this,'female')"><span>♀️</span><span>CEWEK</span></div>
-      <div class="gender-card" onclick="selectGender(this,'male')"><span>♂️</span><span>COWOK</span></div>
+      <div class="gender-card" onclick="selectGender(this, 'female')">
+        <span class="gender-icon">♀️</span>
+        <span class="gender-label">CEWEK</span>
+      </div>
+      <div class="gender-card" onclick="selectGender(this, 'male')">
+        <span class="gender-icon">♂️</span>
+        <span class="gender-label">COWOK</span>
+      </div>
     </div>
-    <button class="modal-action-btn" id="confirmGenderBtn" onclick="confirmGender()" disabled>GASKEUN →</button>
+    <button class="modal-action-btn" id="confirmGenderBtn" onclick="confirmGender()" disabled>
+      GASKEUN →
+    </button>
   </div>
 </div>
 
@@ -152,53 +927,78 @@ body{background:var(--bg);color:var(--tx);font-family:'Syne',sans-serif;font-siz
   </div>
 </div>
 
+<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/shared-constants.js"></script>
+
 <script>
 // ==================== KONFIGURASI ====================
 const $ = id => document.getElementById(id);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const rnd = n => Math.floor(Math.random() * n);
-const API_URL = 'https://jejak.space/api/chat';
 
-if (!JEJAK.isLoggedIn()) window.location.replace('/index.html');
+// GANTI URL INI SESUAI DOMAIN VERCEL LO!
+const API_URL = '/api/chat';  // atau 'https://namaproject.vercel.app/api/chat'
 
-let sbClient = null, myUserId = null, myUsername = null, realEntries = [], fillerEntries = [];
-let currentGender = null, chatPartner = null, timerInterval = null, chatTimeLeft = 900;
-let chatHistory = [], isTyping = false, fallbackTimer = null, apiRetry = 0, activeMood = 'all';
+if (!JEJAK.isLoggedIn()) {
+  window.location.replace('/index.html');
+}
+
+let sbClient = null;
+let myUserId = null;
+let myUsername = null;
+let realEntries = [];
+let fillerEntries = [];
+let currentGender = null;
+let chatPartner = null;
+let timerInterval = null;
+let chatTimeLeft = 900;
+let chatHistory = [];
+let isTyping = false;
+let fallbackTimer = null;
+let apiRetry = 0;
+let activeMood = 'all';
 let userSub = { isActive: false };
 
+// KARAKTER AI
 const AI_CHARS = {
-  female: ['beby.manis', 'strawberry.shortcake', 'pretty.sad', 'little.fairy'],
-  male: ['sejuta.badai', 'kue.bulan', 'agak.koplak', 'chili.padi']
+  female: ['beby.manis', 'strawberry.shortcake', 'pretty.sad', 'little.fairy', 'cinnamon.girl'],
+  male: ['sejuta.badai', 'kue.bulan', 'agak.koplak', 'chili.padi', 'abang.gaul']
 };
-const REACT_EMO = { skull: '💀', cry: '😭', fire: '🔥', upside: '🙃' };
+
+// REAKSI EMOJI
+const REACT_EMO = {
+  skull: '💀',
+  cry: '😭',
+  fire: '🔥',
+  upside: '🙃'
+};
+
+// SPILLS DUMMY
 const SPILLS = [
-  'hari ini gue liat mantan sama cewek baru 😭',
-  'cape bener jadi cewek, tiap bulan sakit perut',
-  'kenapa cowok kalo ditanya "lagi apa" pasti jawab "lagi main"?',
-  'gue lagi fase pengen dimengerti tanpa jelasin panjang lebar',
-  'bete banget skincare gue habis, padahal baru beli kemarin',
+  'hari ini gue liat mantan sama cewek baru, dan tau gak? rambutnya lebih bagus dari rambut gue 😭',
+  'cape bener jadi cewek, setiap bulan harus nahan sakit perut sambil tetep senyum di depan client',
+  'kenapa sih cowok kalo ditanya "lagi apa" pasti jawabnya "lagi main"? ga ada variasi lain?',
+  'gue lagi fase pengen dimengerti tanpa harus jelasin panjang lebar',
+  'bete banget skincare gue habis, padahal baru kemarin beli. ada yang ngutil?',
   'stress skripsi tapi yang keluar peluh dan air mata doang'
 ];
-const MOODS = ['surviving', 'thriving', 'chaotic', 'doom'];
 
-// ==================== AI PINTAR (DETEKSI KONTEKS) ====================
+const MOODS = ['surviving', 'thriving', 'chaotic', 'doom'];
+const NON_AI_NAMES = ['anon.kucing', 'sleepy.head', 'chaos.queen', 'quiet.one'];
+
+// ==================== OFFLINE RESPONSES (FALLBACK) ====================
 function getOfflineReply(msg) {
   msg = (msg || '').toLowerCase().trim();
   
-  if (msg.includes('lagi apa') || msg.includes('lagi mana') || 
-      msg.includes('lagi ngapain') || msg === 'lagi' ||
-      msg.includes('lagi dimana')) {
+  if (msg.includes('lagi apa') || msg.includes('lagi mana') || msg.includes('lagi ngapain')) {
     const aktivitas = [
       'lagi santai dengerin musik nih',
       'lagi ngopi sambil scroll timeline',
       'lagi rebahan sambil mikir random',
-      'lagi dengerin playlist galau',
-      'lagi baca chat lo, hehe',
-      'lagi gabut, lo?'
+      'lagi dengerin playlist galau'
     ];
     return aktivitas[rnd(aktivitas.length)];
   }
@@ -207,22 +1007,8 @@ function getOfflineReply(msg) {
     return 'baik-baik aja nih, lo gimana?';
   }
   
-  if (msg.includes('sibuk') || (msg.includes('lagi') && msg.includes('ngapain'))) {
-    return 'lagi santai aja, nggak sibuk kok. lo?';
-  }
-  
-  if (msg.includes('lo gimana') || msg === 'lo?' || msg === 'kamu?') {
-    return 'gue? biasa aja sih. lo yang cerita dong';
-  }
-  
-  if (msg.includes('menurut lo') || msg.includes('versi lo') || msg.includes('kata lo')) {
-    return 'hmm menurut gue pribadi sih... tergantung situasinya ya';
-  }
-  
   if (msg.includes('?') || msg.endsWith('?')) {
-    if (!msg.includes('lagi')) {
-      return 'hmm, gue juga masih mikirin itu. lo sendiri gimana?';
-    }
+    return 'hmm, gue juga masih mikirin itu. lo sendiri gimana?';
   }
   
   if (msg.length > 40) {
@@ -233,137 +1019,555 @@ function getOfflineReply(msg) {
     return 'hai juga! lagi ngapain?';
   }
   
-  if (msg.includes('iya') || msg.includes('setuju') || msg.includes('bener')) {
-    return 'nah iyaa, kita sepakat berarti 😄';
-  }
-  
-  if (msg === 'terus' || msg === 'terus?' || msg.includes('lalu')) {
-    return 'terus gue dengerin cerita lo';
-  }
-  
-  if (msg.length < 10) {
-    const gaJelas = [
-      'hmm maksudnya?',
-      'lo nanya apa? gue kurang paham',
-      'eh? gimana?',
-      'maaf, gue kurang ngerti. bisa dijelasin lagi?'
-    ];
-    return gaJelas[rnd(gaJelas.length)];
-  }
-  
   const defaultResp = [
     'hehe iya, gue juga ngerasain',
     'wah serius? cerita dong',
     'relate banget sih',
-    'iya ya, hidup emang gitu',
-    'gue ngerti banget perasaan lo'
+    'iya ya, hidup emang gitu'
   ];
   return defaultResp[rnd(defaultResp.length)];
 }
 
-// ==================== TYPING EFFECT (SLOW) ====================
+// ==================== TYPING EFFECT ====================
 async function typeMessage(element, finalText) {
   return new Promise(resolve => {
-    let i = 0, chars = finalText.split('');
+    let i = 0;
+    const chars = finalText.split('');
+    
     const next = () => {
       if (i >= chars.length) return resolve();
+      
       element.textContent += chars[i++];
+      
       let delay = 60 + Math.random() * 60;
       if (chars[i-1].match(/[.!?]/)) delay = 300 + Math.random() * 200;
       else if (chars[i-1].match(/[,;]/)) delay = 180 + Math.random() * 120;
       else if (chars[i-1] === ' ') delay = 120 + Math.random() * 80;
+      
       setTimeout(next, delay);
     };
+    
     element.textContent = '';
     next();
   });
 }
 
 // ==================== UTILITY ====================
-function toast(msg) {
+function toast(msg, isError = false) {
   const t = $('toast');
   t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
-const closeModal = id => $(id).classList.remove('on');
-const updateVibePct = v => $('vibePct').textContent = v + '%';
-const checkSub = () => userSub.isActive;
 
-function initSupabase() {
-  try {
-    sbClient = supabase.createClient(JEJAK.SUPABASE_URL, JEJAK.SUPABASE_KEY);
-    const sess = JEJAK.getSession();
-    myUserId = sess.uid;
-    myUsername = sess.username;
-    const sub = JEJAK.getSub();
-    if (sub) userSub = sub;
-  } catch (e) { console.warn(e); }
+const closeModal = id => $(id).classList.remove('on');
+
+function updateVibePct(val) {
+  $('vibePct').textContent = val + '%';
 }
 
-// ==================== SPILLS ====================
+function filterMood(btn) {
+  document.querySelectorAll('.mood-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeMood = btn.dataset.mood;
+  renderSpills();
+}
+
+function loadSub() {
+  const s = JEJAK.getSub();
+  if (s) userSub = s;
+}
+
+function checkSub() {
+  return userSub.isActive && userSub.expiresAt && new Date(userSub.expiresAt) > new Date();
+}
+
+// ==================== SUPABASE INIT ====================
+function initSupabase() {
+  try {
+    if (window.supabase && window.supabase.createClient) {
+      sbClient = window.supabase.createClient(JEJAK.SUPABASE_URL, JEJAK.SUPABASE_KEY);
+      const sess = JEJAK.getSession();
+      myUserId = sess.uid;
+      myUsername = sess.username;
+      
+      if (!myUserId) {
+        const oldKeys = ['user_id', 'jejak_user_id', 'uid'];
+        for (const k of oldKeys) {
+          const v = localStorage.getItem(k);
+          if (v) { myUserId = v; break; }
+        }
+      }
+      
+      if (!myUsername) {
+        const oldUnKeys = ['jejak_username', 'username'];
+        for (const k of oldUnKeys) {
+          const v = localStorage.getItem(k);
+          if (v) { myUsername = v; break; }
+        }
+      }
+      
+      if (myUserId) {
+        const nameEl = $('userNameDisplay');
+        if (nameEl) nameEl.textContent = '@' + (myUsername || 'anonymous');
+      } else {
+        window.location.replace('/index.html');
+      }
+    }
+  } catch (e) {
+    console.warn('Supabase init failed:', e);
+  }
+}
+
+// ==================== LOAD REAL ENTRIES ====================
+async function loadRealEntries() {
+  if (!sbClient) {
+    renderSpills();
+    return;
+  }
+  
+  try {
+    const result = await sbClient
+      .from('entries')
+      .select('id,user_id,content,mood,reactions,created_at')
+      .order('created_at', { ascending: false })
+      .limit(20);
+    
+    if (result.error) {
+      console.warn('Query failed:', result.error.message);
+      renderSpills();
+      return;
+    }
+    
+    realEntries = (result.data || []).map(e => {
+      const isMe = !!(myUserId && e.user_id && e.user_id === myUserId);
+      const author = isMe ? (myUsername || 'kamu') : ('anon.' + (e.user_id || '??????').substring(0, 6));
+      
+      return {
+        id: e.id,
+        dbId: e.id,
+        author,
+        isMe,
+        isAI: false,
+        mood: e.mood || 'chaotic',
+        content: e.content || '',
+        reactions: e.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 },
+        userReacted: null,
+        isReal: true
+      };
+    });
+    
+    renderSpills();
+  } catch (err) {
+    console.warn('loadRealEntries error:', err.message);
+    renderSpills();
+  }
+}
+
+// ==================== REACTIONS ====================
+function reactLocal(id, key) {
+  const entry = fillerEntries.find(e => e.id === id);
+  if (!entry) return;
+  
+  const wasActive = entry.userReacted === key;
+  
+  if (wasActive) {
+    entry.reactions[key] = Math.max(0, (entry.reactions[key] || 0) - 1);
+    entry.userReacted = null;
+  } else {
+    if (entry.userReacted) {
+      const oldKey = entry.userReacted;
+      entry.reactions[oldKey] = Math.max(0, (entry.reactions[oldKey] || 0) - 1);
+    }
+    entry.reactions[key] = (entry.reactions[key] || 0) + 1;
+    entry.userReacted = key;
+  }
+  
+  renderSpills();
+}
+
+async function reactDB(dbId, key) {
+  if (!sbClient) {
+    toast('Koneksi belum siap', true);
+    return;
+  }
+  
+  const entry = realEntries.find(e => e.dbId === dbId);
+  if (!entry) return;
+  
+  const wasActive = entry.userReacted === key;
+  
+  if (wasActive) {
+    entry.reactions[key] = Math.max(0, (entry.reactions[key] || 0) - 1);
+    entry.userReacted = null;
+  } else {
+    if (entry.userReacted) {
+      const oldKey = entry.userReacted;
+      entry.reactions[oldKey] = Math.max(0, (entry.reactions[oldKey] || 0) - 1);
+    }
+    entry.reactions[key] = (entry.reactions[key] || 0) + 1;
+    entry.userReacted = key;
+  }
+  
+  renderSpills();
+  
+  try {
+    await sbClient.from('entries').update({ reactions: entry.reactions }).eq('id', dbId);
+  } catch (e) {
+    console.error('React error:', e);
+    toast('Gagal simpan reaksi', true);
+  }
+}
+
+// ==================== SPILL GENERATOR ====================
 function genSpills(n = 6) {
-  let out = [];
+  const allAINames = [...AI_CHARS.female, ...AI_CHARS.male];
+  const out = [];
+  
   for (let i = 0; i < n; i++) {
+    const useAI = Math.random() < 0.4;
+    const author = useAI ? allAINames[rnd(allAINames.length)] : NON_AI_NAMES[rnd(NON_AI_NAMES.length)];
+    const isAI = allAINames.includes(author);
+    
     out.push({
       id: 'gen_' + Date.now() + '_' + i,
-      author: 'anon.' + Math.random().toString(36).substring(7),
+      author,
+      isAI,
       mood: MOODS[rnd(4)],
       content: SPILLS[rnd(SPILLS.length)],
-      reactions: { skull: rnd(30), cry: rnd(30), fire: rnd(30), upside: rnd(30) },
-      userReacted: null
+      reactions: {
+        skull: rnd(50),
+        cry: rnd(100),
+        fire: rnd(40),
+        upside: rnd(30)
+      },
+      userReacted: null,
+      isReal: false
     });
   }
+  
   return out;
 }
 
 function renderSpills() {
   const list = $('spillsList');
   if (!list) return;
-  let all = [...realEntries, ...fillerEntries.slice(0, Math.max(0, 6 - realEntries.length))];
+  
+  let all = [...realEntries];
+  const fillerNeeded = Math.max(0, 8 - all.length);
+  
+  if (fillerNeeded > 0) {
+    while (fillerEntries.length < fillerNeeded) {
+      fillerEntries.push(...genSpills(Math.max(4, fillerNeeded - fillerEntries.length)));
+    }
+    all = [...all, ...fillerEntries.slice(0, fillerNeeded)];
+  }
+  
   let filtered = activeMood === 'all' ? all : all.filter(s => s.mood === activeMood);
   
-  list.innerHTML = filtered.map(s => `
-    <div class="spill-card ${s.userId === myUserId ? 'is-mine' : ''}">
-      <div class="spill-head">
-        <span class="spill-user ${s.userId === myUserId ? 'mine' : ''}">@${s.author}</span>
-        <span class="spill-mood ${s.mood}">${s.mood.toUpperCase()}</span>
+  if (!filtered.length) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-icon">🍃</span>
+        <div class="empty-title">BELUM ADA SPILL</div>
+        <div class="empty-text">Coba filter lain</div>
       </div>
-      <div class="spill-body">${s.content}</div>
-      <div class="spill-actions">
-        ${Object.entries(REACT_EMO).map(([k, em]) => `
-          <button class="react-btn ${s.userReacted === k ? 'active' : ''}" 
-                  onclick="react('${s.id}','${k}')">${em} ${s.reactions[k] || 0}</button>
-        `).join('')}
+    `;
+    return;
+  }
+  
+  list.innerHTML = filtered.map(s => {
+    const isMineClass = s.isMe ? ' is-mine' : '';
+    const userClass = s.isMe ? ' class="spill-user mine"' : ' class="spill-user"';
+    const mineLabel = s.isMe ? ' <span style="font-family:\'DM Mono\',monospace;font-size:9px;color:var(--as);padding:2px 6px;border:1px solid var(--as);margin-left:6px">KAMU</span>' : '';
+    const aiLabel = s.isAI && !s.isReal ? ' 🤖' : '';
+    
+    const reactHtml = Object.entries(REACT_EMO).map(([k, em]) => {
+      const isAct = s.userReacted === k ? ' active' : '';
+      if (s.isReal) {
+        return `
+          <button class="react-btn${isAct}" data-db-id="${s.dbId}" data-key="${k}" onclick="reactDB('${s.dbId}','${k}')">
+            ${em}<span class="react-count" id="rc-db-${s.dbId}-${k}">${s.reactions[k] || 0}</span>
+          </button>
+        `;
+      } else {
+        return `
+          <button class="react-btn${isAct}" data-filler-id="${s.id}" data-key="${k}" onclick="reactLocal('${s.id}','${k}')">
+            ${em}<span class="react-count" id="rc-fl-${s.id}-${k}">${s.reactions[k] || 0}</span>
+          </button>
+        `;
+      }
+    }).join('');
+    
+    return `
+      <div class="spill-card${isMineClass}">
+        <div class="spill-head">
+          <span${userClass}>@${escapeHtml(s.author)}${aiLabel}${mineLabel}</span>
+          <span class="spill-mood ${s.mood}">${s.mood.toUpperCase()}</span>
+        </div>
+        <div class="spill-body">${escapeHtml(s.content)}</div>
+        <div class="spill-actions">${reactHtml}</div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
-function react(id, key) {
-  let entry = [...realEntries, ...fillerEntries].find(e => e.id === id);
-  if (!entry) return;
-  if (entry.userReacted === key) {
-    entry.reactions[key]--;
-    entry.userReacted = null;
-  } else {
-    if (entry.userReacted) entry.reactions[entry.userReacted]--;
-    entry.reactions[key] = (entry.reactions[key] || 0) + 1;
-    entry.userReacted = key;
-  }
-  renderSpills();
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
 }
 
 async function refreshSpills() {
-  toast('Memuat spill terbaru...');
-  fillerEntries = genSpills(6);
-  renderSpills();
+  toast('Memuat spill terbaru ☕');
+  fillerEntries = [];
+  await loadRealEntries();
+}
+
+// ==================== RADAR ====================
+let radarRAF = null;
+let needleA = 0;
+let needleO = 0;
+let phA = Math.random() * Math.PI * 2;
+let phB = Math.random() * Math.PI * 2;
+let phC = Math.random() * Math.PI * 2;
+const BASE_OM = (60 / 4 * Math.PI * 2) / (60 * 60);
+const TRAIL_CAP = 120;
+const trail = new Float32Array(TRAIL_CAP);
+let trailPtr = 0;
+const dotGlow = new Map();
+let rdots = [];
+
+function initRadar() {
+  const cv = $('radarCanvas');
+  const ct = cv.parentElement;
+  if (!cv || !ct) return;
+  
+  const resize = () => {
+    const r = ct.getBoundingClientRect();
+    cv.width = r.width;
+    cv.height = r.height;
+  };
+  
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+  
+  spawnDots();
+  
+  setInterval(() => {
+    rdots.forEach(d => {
+      d.vx = d.vx * 0.88 + (Math.random() - 0.5) * 0.3;
+      d.vy = d.vy * 0.88 + (Math.random() - 0.5) * 0.3;
+      d.x = Math.max(9, Math.min(91, d.x + d.vx));
+      d.y = Math.max(9, Math.min(91, d.y + d.vy));
+      if (d.el) {
+        d.el.style.left = d.x + '%';
+        d.el.style.top = d.y + '%';
+      }
+    });
+  }, 100);
+  
+  needleA = Math.random() * Math.PI * 2;
+  trail.fill(needleA);
+  radarLoop(cv);
+}
+
+function spawnDots() {
+  const c = document.querySelector('.radar-cont');
+  if (!c) return;
+  
+  let dotsContainer = $('radarDots');
+  if (!dotsContainer) {
+    dotsContainer = document.createElement('div');
+    dotsContainer.className = 'radar-dots';
+    dotsContainer.id = 'radarDots';
+    c.appendChild(dotsContainer);
+  }
+  
+  dotsContainer.innerHTML = '';
+  rdots = [];
+  
+  const types = ['ai', 'purple', 'red', 'lime'];
+  const n = 5 + rnd(5);
+  
+  for (let i = 0; i < n + 2; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const d = 12 + Math.random() * 70;
+    const x = 50 + Math.cos(a) * d / 2;
+    const y = 50 + Math.sin(a) * d / 2;
+    
+    const dot = document.createElement('div');
+    const type = types[rnd(types.length)];
+    dot.className = 'radar-dot ' + type;
+    dot.style.left = x + '%';
+    dot.style.top = y + '%';
+    
+    dotsContainer.appendChild(dot);
+    
+    rdots.push({
+      el: dot,
+      x, y,
+      vx: 0, vy: 0,
+      type,
+      id: i
+    });
+  }
+}
+
+function radarLoop(cv) {
+  const ctx = cv.getContext('2d');
+  
+  function draw() {
+    const W = cv.width;
+    const H = cv.height;
+    const cx = W / 2;
+    const cy = H / 2;
+    const R = Math.min(cx, cy) * 0.88;
+    
+    if (!W || !H) {
+      radarRAF = requestAnimationFrame(draw);
+      return;
+    }
+    
+    phA += 0.007;
+    phB += 0.013;
+    phC += 0.041;
+    
+    needleO += (BASE_OM * (1 + Math.sin(phA) * 0.35 + Math.sin(phB) * 0.18 + Math.sin(phC) * 0.04) - needleO) * 0.028;
+    needleA = (needleA + needleO) % (Math.PI * 2);
+    
+    trail[trailPtr] = needleA;
+    trailPtr = (trailPtr + 1) % TRAIL_CAP;
+    
+    ctx.fillStyle = 'rgba(2,10,2,0.18)';
+    ctx.fillRect(0, 0, W, H);
+    
+    for (let i = 0; i < TRAIL_CAP - 1; i++) {
+      const nw = (trailPtr - 1 - i + TRAIL_CAP) % TRAIL_CAP;
+      const ol = (trailPtr - 2 - i + TRAIL_CAP) % TRAIL_CAP;
+      const alpha = Math.pow(1 - i / TRAIL_CAP, 2.2) * 0.12;
+      
+      if (alpha < 0.002) break;
+      
+      let s = trail[ol];
+      let e = trail[nw];
+      let diff = e - s;
+      
+      if (diff > Math.PI) diff -= Math.PI * 2;
+      if (diff < -Math.PI) diff += Math.PI * 2;
+      if (Math.abs(diff) < 0.0001) continue;
+      
+      s = needleA - (i + 1) * needleO;
+      e = needleA - i * needleO;
+      if (s > e) { const tmp = s; s = e; e = tmp; }
+      
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, R, s, e, false);
+      ctx.closePath();
+      ctx.fillStyle = `rgba(0,229,255,${alpha})`;
+      ctx.fill();
+      ctx.restore();
+    }
+    
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(needleA);
+    ctx.shadowColor = 'rgba(0,229,255,0.95)';
+    ctx.shadowBlur = 12;
+    
+    const lg = ctx.createLinearGradient(0, 0, R, 0);
+    lg.addColorStop(0, 'rgba(0,229,255,1)');
+    lg.addColorStop(0.5, 'rgba(0,229,255,0.85)');
+    lg.addColorStop(0.8, 'rgba(0,229,255,0.4)');
+    lg.addColorStop(1, 'rgba(0,229,255,0)');
+    
+    ctx.beginPath();
+    ctx.moveTo(3, 0);
+    ctx.lineTo(R, 0);
+    ctx.strokeStyle = lg;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    ctx.shadowBlur = 20;
+    ctx.beginPath();
+    ctx.rect(-4, -4, 8, 8);
+    ctx.fillStyle = '#00e5ff';
+    ctx.fill();
+    ctx.restore();
+    
+    rdots.forEach((d, di) => {
+      const px = d.x / 100 * W;
+      const py = d.y / 100 * H;
+      
+      let da = Math.atan2(py - cy, px - cx);
+      if (da < 0) da += Math.PI * 2;
+      
+      let diff = needleA - da;
+      if (diff < 0) diff += Math.PI * 2;
+      
+      const age = dotGlow.get(di) ?? 999;
+      
+      if (diff < 0.18 && age > 30) {
+        dotGlow.set(di, 0);
+        if (d.el) {
+          d.el.classList.add('active');
+          setTimeout(() => {
+            if (d.el) d.el.classList.remove('active');
+          }, 800);
+        }
+      } else {
+        dotGlow.set(di, age + 1);
+      }
+      
+      if (age < 55) {
+        const t = age / 55;
+        const ga = (1 - t) * (1 - t) * 0.9;
+        if (ga < 0.01) return;
+        
+        let col;
+        if (d.type === 'purple') col = '191,90,242';
+        else if (d.type === 'red') col = '255,45,85';
+        else if (d.type === 'lime') col = '191,255,0';
+        else col = '0,229,255';
+        
+        const gr = ctx.createRadialGradient(px, py, 0, px, py, 16 * (1 - t) + 3);
+        gr.addColorStop(0, `rgba(${col},${ga})`);
+        gr.addColorStop(1, `rgba(${col},0)`);
+        
+        ctx.beginPath();
+        ctx.arc(px, py, 16 * (1 - t) + 3, 0, Math.PI * 2);
+        ctx.fillStyle = gr;
+        ctx.fill();
+      }
+    });
+    
+    radarRAF = requestAnimationFrame(draw);
+  }
+  
+  radarRAF = requestAnimationFrame(draw);
+}
+
+// ==================== ONLINE COUNT ====================
+function updateOnlineCount() {
+  const el = $('onlineCount');
+  if (el) {
+    el.textContent = (Math.floor(Math.random() * 25) + 18) + ' ONLINE';
+  }
 }
 
 // ==================== VIBE CHECK ====================
 function startVibeCheck() {
-  chatPartner = null; chatTimeLeft = 900; chatHistory = []; apiRetry = 0;
+  chatPartner = null;
+  chatTimeLeft = 900;
+  chatHistory = [];
+  apiRetry = 0;
+  
   if (fallbackTimer) clearTimeout(fallbackTimer);
+  
   $('genderModal').classList.add('on');
 }
 
@@ -381,13 +1585,14 @@ function updateSysMsg(text, emoji) {
   
   const d = document.createElement('div');
   d.className = 'chat-msg system-msg';
-  d.innerHTML = `<div class="chat-bubble" style="background:var(--sfe);padding:10px 16px">${emoji} ${text}</div>`;
+  d.innerHTML = `<div class="chat-bubble">${emoji} ${text}</div>`;
   msgs.appendChild(d);
   d.scrollIntoView({ behavior: 'smooth' });
 }
 
 function confirmGender() {
   if (!currentGender) return;
+  
   closeModal('genderModal');
   $('chatRoom').classList.add('on');
   $('partnerLabel').textContent = 'MENCARI...';
@@ -395,9 +1600,9 @@ function confirmGender() {
   $('chatTimer').classList.remove('warn');
   
   const msgs = $('chatMessages');
-  msgs.innerHTML = `<div class="chat-msg system-msg" style="align-self:center">⚡ mengaktifkan radar pencarian...</div>`;
+  msgs.innerHTML = `<div class="chat-msg system-msg">⚡ mengaktifkan radar pencarian...</div>`;
   
-  // TIMER 15 DETIK REAL USER
+  // TIMER 15 DETIK CARI USER
   let detik = 0;
   const cariUser = setInterval(() => {
     detik += 3;
@@ -410,10 +1615,16 @@ function confirmGender() {
   // FALLBACK KE AI KARAKTER
   fallbackTimer = setTimeout(() => {
     clearInterval(cariUser);
+    
     if (!chatPartner) {
       msgs.innerHTML = '';
+      
       const chars = AI_CHARS[currentGender];
-      chatPartner = { name: chars[rnd(chars.length)], isAI: true };
+      chatPartner = {
+        name: chars[rnd(chars.length)],
+        isAI: true
+      };
+      
       $('partnerLabel').textContent = '@' + chatPartner.name;
       
       const d = document.createElement('div');
@@ -432,26 +1643,75 @@ function confirmGender() {
 
 function startTimer() {
   clearInterval(timerInterval);
+  
   timerInterval = setInterval(() => {
-    if (--chatTimeLeft < 0) return closeChat();
+    if (chatTimeLeft <= 0) {
+      endChat();
+      return;
+    }
+    
+    chatTimeLeft--;
+    
     const m = Math.floor(chatTimeLeft / 60);
     const s = chatTimeLeft % 60;
     $('chatTimer').textContent = `${m}:${s.toString().padStart(2, '0')}`;
-    if (chatTimeLeft === 60) $('chatTimer').classList.add('warn');
+    
+    if (chatTimeLeft === 60) {
+      $('chatTimer').classList.add('warn');
+    }
   }, 1000);
 }
 
+function endChat() {
+  clearInterval(timerInterval);
+  
+  if (checkSub()) {
+    chatTimeLeft = 900;
+    $('chatTimer').textContent = '15:00';
+    $('chatTimer').classList.remove('warn');
+    return;
+  }
+  
+  const d = document.createElement('div');
+  d.className = 'chat-msg system-msg';
+  d.innerHTML = `
+    <div class="chat-bubble" style="background:var(--sfe);padding:20px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;margin-bottom:12px">WAKTU ABIS ⏰</div>
+      <div style="margin-bottom:16px">mau lanjut ngobrol? subscribe dulu yuk~</div>
+      <button onclick="closeChat()" style="width:100%;padding:14px;background:var(--ap);color:#fff;border:2px solid #000;cursor:pointer">TUTUP</button>
+    </div>
+  `;
+  $('chatMessages').appendChild(d);
+  d.scrollIntoView({ behavior: 'smooth' });
+}
+
+function closeChat() {
+  $('chatRoom').classList.remove('on');
+  clearInterval(timerInterval);
+  clearTimeout(fallbackTimer);
+  isTyping = false;
+  apiRetry = 0;
+  
+  const sb = $('sendButton');
+  const inp = $('chatInput');
+  if (sb) sb.classList.remove('disabled');
+  if (inp) inp.disabled = false;
+}
+
 // ==================== CHAT API ====================
-async function callChatAPI(userMsg, isFirst) {
+async function callChatAPI(userMsg, isFirst = false) {
   if (!chatPartner || !chatPartner.isAI || isTyping) return;
   
   isTyping = true;
+  
   const sb = $('sendButton');
   const inp = $('chatInput');
   if (sb) sb.classList.add('disabled');
   if (inp) inp.disabled = true;
   
   const msgs = $('chatMessages');
+  
+  // TYPING INDICATOR
   const td = document.createElement('div');
   td.className = 'chat-msg other';
   td.innerHTML = '<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
@@ -461,6 +1721,11 @@ async function callChatAPI(userMsg, isFirst) {
   let reply = null;
   
   try {
+    const lastMessages = chatHistory.slice(-6).map(m => ({
+      role: m.role,
+      content: m.content
+    }));
+    
     const res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -468,16 +1733,25 @@ async function callChatAPI(userMsg, isFirst) {
         message: isFirst ? 'halo' : userMsg,
         characterName: chatPartner.name,
         userName: myUsername || 'user',
-        lastMessages: chatHistory.slice(-4).map(m => m.content).join('\n')
+        lastMessages: lastMessages
       })
     });
+    
     if (res.ok) {
       const data = await res.json();
       reply = data.reply;
+      apiRetry = 0;
+    } else {
+      console.warn('API error:', res.status);
     }
-  } catch (e) { console.warn('API error:', e); }
+  } catch (e) {
+    console.warn('API fetch error:', e);
+  }
   
+  // FALLBACK OFFLINE
   if (!reply) {
+    apiRetry++;
+    
     if (isFirst) {
       const firstName = chatPartner.name.split('.')[0];
       const greetings = [
@@ -489,122 +1763,87 @@ async function callChatAPI(userMsg, isFirst) {
     } else {
       reply = getOfflineReply(userMsg);
     }
-    if (++apiRetry >= 2) toast('⚡ mode offline');
+    
+    if (apiRetry >= 2) {
+      toast('⚡ mode offline', true);
+    }
   }
   
+  // HAPUS TYPING INDICATOR
   td.remove();
   await sleep(400 + Math.random() * 500);
   
+  // TAMPILKAN RESPONS
   const msgDiv = document.createElement('div');
   msgDiv.className = 'chat-msg other';
+  
   const bubble = document.createElement('div');
   bubble.className = 'chat-bubble';
+  bubble.textContent = '';
+  
   msgDiv.appendChild(bubble);
   msgs.appendChild(msgDiv);
   
   await typeMessage(bubble, reply);
   
-  if (!isFirst) chatHistory.push({ role: 'user', content: userMsg });
+  // SIMPAN KE HISTORY
+  if (!isFirst) {
+    chatHistory.push({ role: 'user', content: userMsg });
+  }
   chatHistory.push({ role: 'assistant', content: reply });
   
+  // RESET STATE
   isTyping = false;
   if (sb) sb.classList.remove('disabled');
-  if (inp) inp.disabled = false;
-  if (inp) inp.focus();
+  if (inp) {
+    inp.disabled = false;
+    inp.focus();
+  }
 }
 
 function sendMsg() {
-  if (isTyping || !chatPartner) return;
+  if (isTyping) {
+    toast('Tunggu partner selesai ngetik...', true);
+    return;
+  }
+  
+  if (!chatPartner) {
+    toast('Partner belum ditemukan', true);
+    return;
+  }
   
   const inp = $('chatInput');
   const text = inp.value.trim();
+  
   if (!text) return;
   
   const msgs = $('chatMessages');
+  
+  // TAMPILKAN PESAN USER
   const d = document.createElement('div');
   d.className = 'chat-msg own';
-  d.innerHTML = `<div class="chat-bubble">${text}</div>`;
+  d.innerHTML = `<div class="chat-bubble">${escapeHtml(text)}</div>`;
   msgs.appendChild(d);
   d.scrollIntoView({ behavior: 'smooth' });
+  
   inp.value = '';
   
   chatHistory.push({ role: 'user', content: text });
-  if (chatPartner.isAI) callChatAPI(text, false);
-}
-
-function closeChat() {
-  $('chatRoom').classList.remove('on');
-  clearInterval(timerInterval);
-  clearTimeout(fallbackTimer);
-  isTyping = false;
-}
-
-// ==================== RADAR ====================
-let radarRAF = null, needleA = 0, needleO = 0;
-let phA = Math.random() * Math.PI * 2;
-const BASE_OM = (60/4 * Math.PI * 2) / (60 * 60);
-
-function initRadar() {
-  const cv = $('radarCanvas');
-  const ct = cv.parentElement;
-  if (!cv || !ct) return;
   
-  const resize = () => {
-    const r = ct.getBoundingClientRect();
-    cv.width = r.width;
-    cv.height = r.height;
-  };
-  resize();
-  window.addEventListener('resize', resize);
-  
-  function draw() {
-    const ctx = cv.getContext('2d');
-    const W = cv.width, H = cv.height;
-    const cx = W/2, cy = H/2, R = Math.min(cx, cy) * 0.88;
-    
-    phA += 0.007;
-    needleO += (BASE_OM * (1 + Math.sin(phA) * 0.35) - needleO) * 0.028;
-    needleA = (needleA + needleO) % (Math.PI * 2);
-    
-    ctx.fillStyle = 'rgba(2,10,2,0.18)';
-    ctx.fillRect(0, 0, W, H);
-    
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(needleA);
-    ctx.shadowColor = 'rgba(0,229,255,0.95)';
-    ctx.shadowBlur = 12;
-    
-    const lg = ctx.createLinearGradient(0, 0, R, 0);
-    lg.addColorStop(0, 'rgba(0,229,255,1)');
-    lg.addColorStop(0.8, 'rgba(0,229,255,0.4)');
-    lg.addColorStop(1, 'rgba(0,229,255,0)');
-    
-    ctx.beginPath();
-    ctx.moveTo(3, 0);
-    ctx.lineTo(R, 0);
-    ctx.strokeStyle = lg;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    
-    ctx.shadowBlur = 20;
-    ctx.beginPath();
-    ctx.rect(-4, -4, 8, 8);
-    ctx.fillStyle = '#00e5ff';
-    ctx.fill();
-    ctx.restore();
-    
-    radarRAF = requestAnimationFrame(draw);
+  if (chatPartner.isAI) {
+    callChatAPI(text, false);
   }
-  radarRAF = requestAnimationFrame(draw);
 }
 
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', () => {
+  loadSub();
   initSupabase();
   initRadar();
   refreshSpills();
+  updateOnlineCount();
   
+  // FILTER MOOD
   document.querySelectorAll('.mood-chip').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.mood-chip').forEach(b => b.classList.remove('active'));
@@ -614,6 +1853,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
   
+  // CHAT INPUT ENTER
   $('chatInput')?.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -621,9 +1861,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
+  // UPDATE ONLINE COUNT
+  setInterval(updateOnlineCount, 30000);
+  
+  // REFRESH SPILLS
   setInterval(() => {
-    $('onlineCount').textContent = (Math.floor(Math.random() * 25) + 18) + ' ONLINE';
+    if (realEntries.length > 0) loadRealEntries();
   }, 30000);
+  
+  // CLEANUP ON UNLOAD
+  window.addEventListener('beforeunload', () => {
+    if (radarRAF) cancelAnimationFrame(radarRAF);
+    clearInterval(timerInterval);
+    clearTimeout(fallbackTimer);
+  });
 });
 </script>
 </body>
