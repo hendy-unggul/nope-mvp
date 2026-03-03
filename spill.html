@@ -1194,20 +1194,18 @@ async function callChatAPI(userMsg, isFirst = false) {
   if (useOffline) {
     apiRetryCount++;
     if (isFirst) {
-      // Untuk greeting pertama — pakai nama karakter
-      const firstName = (chatPartner.name || 'stranger').split('.')[0];
-      reply = `halo! gue ${firstName}. seneng bisa ngobrol sama lo 😊`;
-    } else {
-      // Gunakan konteks untuk respons yang lebih relevan
-      const lastUserMsg = userMsg || '';
-      const lastHistory = chatHistory.slice(-2).map(m => m.content).join(' ');
-      reply = getOfflineReply(lastUserMsg + ' ' + lastHistory, chatHistory);
-    }
-    // Tampilkan info halus di status bar, bukan toast error
-    if (apiRetryCount >= 2) {
-      setChatStatus('⚡ mode offline aktif (respons generik)', 'info', 4000);
-    }
-  }
+  // Untuk greeting pertama — PAKAI NAMA KARAKTER, JANGAN PAKAI NAMA USER
+  const firstName = (chatPartner.name || 'stranger').split('.')[0];
+  
+  // Pilih random greeting yang natural
+  const greetings = [
+    `halo! gue ${firstName}. seneng bisa ngobrol sama lo 😊`,
+    `hai hai, gue ${firstName}. lagi ngapain?`,
+    `eh halo, akhirnya ada yang nyapa 😄 gue ${firstName}`,
+    `heyy, welcome! gue lagi dengerin musik, lo? gue ${firstName}`
+  ];
+  reply = greetings[Math.floor(Math.random() * greetings.length)];
+}
 
   // Hapus typing indicator dan render pesan
   if (td && td.parentNode) td.remove();
