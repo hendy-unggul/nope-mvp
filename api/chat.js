@@ -455,79 +455,130 @@ export default async function handler(req, res) {
   }
   
   // ========== DETEKSI KHUSUS ==========
-  
-  // 1. DETEKSI MINTA CERITA
-  const isAskingStory = (
-    message.toLowerCase().includes('cerita dong') ||
-    message.toLowerCase().includes('ceritain') ||
-    message.toLowerCase().includes('kamu cerita') ||
-    message.toLowerCase().includes('lo cerita') ||
-    (lastMessages.length > 0 && 
-     lastMessages[lastMessages.length-1].role === 'assistant' &&
-     lastMessages[lastMessages.length-1].content.toLowerCase().includes('lo yang cerita'))
-  );
+const msgLower = message.toLowerCase();
+const shortName = characterName.split('.')[0]; // "cinnamon" dari "cinnamon.girl"
 
-  if (isAskingStory) {
-    const story = getRandomBackstory(characterName, 'cerita');
-    if (story) {
-      const storyReplies = [
-        `oke gue cerita. ${story}`,
-        `jadi gini, ${story}`,
-        `nah lo minta cerita. ${story}`,
-        `siap, gue cerita. ${story}`
-      ];
-      return res.status(200).json({
-        reply: storyReplies[Math.floor(Math.random() * storyReplies.length)],
-        character: characterName,
-        distress: isHigh ? 'high' : isLow ? 'low' : null,
-        meta: { note: 'story_response' }
-      });
-    }
-  }
-  
-  // 2. DETEKSI TANYA AKTIVITAS
-  const isAskingActivity = (
-    message.toLowerCase().includes('lagi apa') ||
-    message.toLowerCase().includes('lagi ngapain') ||
-    message.toLowerCase().includes('kegiatan') ||
-    message.toLowerCase().includes('lagi sibuk') ||
-    message.toLowerCase().includes('lagi dimana') ||
-    message.toLowerCase().includes('lagi ngapain?')
-  );
+// 0. DETEKSI PANGGILAN NAMA + PERTANYAAN
+const userPanggilNama = msgLower.includes(shortName) || msgLower.includes(shortName.toLowerCase());
 
-  if (isAskingActivity) {
-    if (persona.aktivitas && persona.aktivitas.length > 0) {
-      const aktivitas = persona.aktivitas[Math.floor(Math.random() * persona.aktivitas.length)];
-      const activityReplies = [
-        `${aktivitas}. lo?`,
-        `lagi ${aktivitas}. lo sibuk apa?`,
-        `ini lagi ${aktivitas}. lo gimana kabarnya?`
+// 1. DETEKSI MINTA CERITA
+const isAskingStory = (
+  msgLower.includes('cerita dong') ||
+  msgLower.includes('ceritain') ||
+  msgLower.includes('kamu cerita') ||
+  msgLower.includes('lo cerita') ||
+  (lastMessages.length > 0 && 
+   lastMessages[lastMessages.length-1].role === 'assistant' &&
+   lastMessages[lastMessages.length-1].content.toLowerCase().includes('lo yang cerita'))
+);
+
+// 2. DETEKSI TANYA AKTIVITAS / LOKASI (DIPERBAIKI!)
+const isAskingActivity = (
+  msgLower.includes('lagi apa') ||
+  msgLower.includes('lagi ngapain') ||
+  msgLower.includes('kegiatan') ||
+  msgLower.includes('lagi sibuk') ||
+  msgLower.includes('lagi dimana') ||
+  msgLower.includes('lagi di mana') ||
+  msgLower.includes('lagi mana') ||
+  msgLower === 'lagi' ||
+  msgLower.includes('lagi?') ||
+  msgLower.includes('lg apa') ||
+  msgLower.includes('lg ngapain') ||
+  msgLower.includes('lg dimana')
+);
+
+// PRIORITAS: KALAU USER PANGGIL NAMA + TANYA "DIMANA"
+if (userPanggilNama && (msgLower.includes('dimana') || msgLower.includes('di mana'))) {
+  const lokasi = [
+    'di rumah, lagi santai',
+    'di kos, lagi boboan',
+    'di kafe, lagi ngopi',
+    'di kamar, lagi scroll tiktok',
+    'di perpus, lagi baca buku',
+    'di kantor, lagi istirahat'
+  ];
+  return res.status(200).json({
+    reply: `${lokasi[Math.floor(Math.random() * lokasi.length)]}. lo dimana?`,
+    character: characterName,
+    distress: isHigh ? 'high' : isLow ? 'low' : null,
+    meta: { note: 'location_response' }
+  });
+}
+
+// 3. DETEKSI TANYA AKTIVITAS (UMUM)
+if (isAskingActivity) {
+  if (persona.aktivitas && persona.aktivitas.length > 0) {
+    const tipeJawaban = Math.random();
+    let jawaban;
+    
+    if (tipeJawaban < 0.6) {
+      // 60% jawab aktivitas
+      jawaban = persona.aktivitas[Math.floor(Math.random() * persona.aktivitas.length)];
+    } else {
+      // 40% jawab lokasi
+      const lokasi = persona.lokasi || [
+        'di rumah',
+        'di kos',
+        'di kafe langganan',
+        'di perpus kampus',
+        'di kantor',
+        'di kamar'
       ];
-      return res.status(200).json({
-        reply: activityReplies[Math.floor(Math.random() * activityReplies.length)],
-        character: characterName,
-        distress: isHigh ? 'high' : isLow ? 'low' : null,
-        meta: { note: 'activity_response' }
-      });
+      jawaban = lokasi[Math.floor(Math.random() * lokasi.length)];
     }
-  }
-  
-  // 3. DETEKSI CURHAT PANJANG
-  const isLongMessage = message.length > 50;
-  if (isLongMessage) {
-    const empatiReplies = [
-      "wah, gue dengerin cerita lo. pasti berat ya ngalamin itu.",
-      "aduuh, gue turut sedih denger cerita lo. lo kuat banget ceritain ini.",
-      "hmm, gue bisa bayangin gimana perasaan lo. kalau lo butuh temen cerita, gue di sini kok.",
-      "gue ngerti banget perasaan lo. lo mau cerita lebih lanjut atau butuh saran?"
+    
+    const activityReplies = [
+      `${jawaban}. lo?`,
+      `lagi ${jawaban}. lo sibuk apa?`,
+      `ini lagi ${jawaban}. lo gimana kabarnya?`,
+      `${jawaban} nih, lo dimana?`
     ];
+    
     return res.status(200).json({
-      reply: empatiReplies[Math.floor(Math.random() * empatiReplies.length)],
+      reply: activityReplies[Math.floor(Math.random() * activityReplies.length)],
       character: characterName,
       distress: isHigh ? 'high' : isLow ? 'low' : null,
-      meta: { note: 'empathy_response' }
+      meta: { note: 'activity_response' }
     });
   }
+}
+
+// 4. DETEKSI CURHAT PANJANG
+const isLongMessage = message.length > 50;
+if (isLongMessage && !isAskingStory && !isAskingActivity) {
+  const empatiReplies = [
+    "wah, gue dengerin cerita lo. pasti berat ya ngalamin itu.",
+    "aduah, gue turut sedih denger cerita lo. lo kuat banget ceritain ini.",
+    "hmm, gue bisa bayangin gimana perasaan lo. kalau lo butuh temen cerita, gue di sini kok.",
+    "gue ngerti banget perasaan lo. lo mau cerita lebih lanjut atau butuh saran?"
+  ];
+  return res.status(200).json({
+    reply: empatiReplies[Math.floor(Math.random() * empatiReplies.length)],
+    character: characterName,
+    distress: isHigh ? 'high' : isLow ? 'low' : null,
+    meta: { note: 'empathy_response' }
+  });
+}
+
+// 5. DETEKSI MINTA CERITA (TARO DI BAWAH, JANGAN DIDAHULUIN)
+if (isAskingStory) {
+  const story = getRandomBackstory(characterName, 'cerita');
+  if (story) {
+    const storyReplies = [
+      `oke gue cerita. ${story}`,
+      `jadi gini, ${story}`,
+      `nah lo minta cerita. ${story}`,
+      `siap, gue cerita. ${story}`
+    ];
+    return res.status(200).json({
+      reply: storyReplies[Math.floor(Math.random() * storyReplies.length)],
+      character: characterName,
+      distress: isHigh ? 'high' : isLow ? 'low' : null,
+      meta: { note: 'story_response' }
+    });
+  }
+}
   
   // ========== LANJUT KE API DEEPSEEK ==========
   
