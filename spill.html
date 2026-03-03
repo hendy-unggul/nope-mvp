@@ -59,6 +59,8 @@ body{background:var(--bg);color:var(--tx);font-family:'Syne',sans-serif;font-siz
 .chat-bubble{max-width:85%;padding:12px 16px;font-size:15px;border:2px solid}
 .own .chat-bubble{background:var(--ap);color:#fff;border-color:#000;align-self:flex-end}
 .other .chat-bubble{background:var(--sf);border-color:var(--bd2)}
+.system-msg{align-self:center!important;max-width:90%!important}
+.system-msg .chat-bubble{background:transparent!important;border:2px dashed var(--bd)!important;color:var(--txs)!important}
 .typing{display:flex;gap:5px;padding:14px 18px;background:var(--sf);border:2px solid var(--bd2);width:fit-content}
 .typing-dot{width:7px;height:7px;background:var(--as);transform:rotate(45deg);animation:typi 1.4s infinite}
 @keyframes typi{0%,60%,100%{transform:rotate(45deg) translateY(0)}30%{transform:rotate(45deg) translateY(-5px)}}
@@ -187,7 +189,6 @@ const MOODS = ['surviving', 'thriving', 'chaotic', 'doom'];
 function getOfflineReply(msg) {
   msg = (msg || '').toLowerCase().trim();
   
-  // PRIORITAS 1: DETEKSI PERTANYAAN SPESIFIK
   if (msg.includes('lagi apa') || msg.includes('lagi mana') || 
       msg.includes('lagi ngapain') || msg === 'lagi' ||
       msg.includes('lagi dimana')) {
@@ -210,7 +211,6 @@ function getOfflineReply(msg) {
     return 'lagi santai aja, nggak sibuk kok. lo?';
   }
   
-  // PRIORITAS 2: POLA PERCAKAPAN
   if (msg.includes('lo gimana') || msg === 'lo?' || msg === 'kamu?') {
     return 'gue? biasa aja sih. lo yang cerita dong';
   }
@@ -219,7 +219,6 @@ function getOfflineReply(msg) {
     return 'hmm menurut gue pribadi sih... tergantung situasinya ya';
   }
   
-  // PRIORITAS 3: DETEKSI JENIS PESAN
   if (msg.includes('?') || msg.endsWith('?')) {
     if (!msg.includes('lagi')) {
       return 'hmm, gue juga masih mikirin itu. lo sendiri gimana?';
@@ -242,7 +241,6 @@ function getOfflineReply(msg) {
     return 'terus gue dengerin cerita lo';
   }
   
-  // PRIORITAS 4: FALLBACK PINTAR
   if (msg.length < 10) {
     const gaJelas = [
       'hmm maksudnya?',
@@ -376,21 +374,60 @@ function selectGender(el, g) {
   $('confirmGenderBtn').disabled = false;
 }
 
+function updateSysMsg(text, emoji) {
+  const msgs = $('chatMessages');
+  const last = msgs.lastElementChild;
+  if (last && last.classList.contains('system-msg')) last.remove();
+  
+  const d = document.createElement('div');
+  d.className = 'chat-msg system-msg';
+  d.innerHTML = `<div class="chat-bubble" style="background:var(--sfe);padding:10px 16px">${emoji} ${text}</div>`;
+  msgs.appendChild(d);
+  d.scrollIntoView({ behavior: 'smooth' });
+}
+
 function confirmGender() {
   if (!currentGender) return;
   closeModal('genderModal');
   $('chatRoom').classList.add('on');
   $('partnerLabel').textContent = 'MENCARI...';
-  $('chatMessages').innerHTML = '<div class="chat-msg system-msg">⚡ mencari partner...</div>';
+  $('chatTimer').textContent = '15:00';
+  $('chatTimer').classList.remove('warn');
   
-  fallbackTimer = setTimeout(() => {
-    const chars = AI_CHARS[currentGender];
-    chatPartner = { name: chars[rnd(chars.length)], isAI: true };
-    $('partnerLabel').textContent = '@' + chatPartner.name;
-    $('chatMessages').innerHTML = '';
-    callChatAPI('', true);
-    startTimer();
+  const msgs = $('chatMessages');
+  msgs.innerHTML = `<div class="chat-msg system-msg" style="align-self:center">⚡ mengaktifkan radar pencarian...</div>`;
+  
+  // TIMER 15 DETIK REAL USER
+  let detik = 0;
+  const cariUser = setInterval(() => {
+    detik += 3;
+    if (detik === 3) updateSysMsg("masih memindai...", "👀");
+    if (detik === 6) updateSysMsg("lingkungan sepi, radar melebar", "📡");
+    if (detik === 9) updateSysMsg("menjangkau radius 2km", "🌐");
+    if (detik === 12) updateSysMsg("hampir selesai...", "⏳");
   }, 3000);
+  
+  // FALLBACK KE AI KARAKTER
+  fallbackTimer = setTimeout(() => {
+    clearInterval(cariUser);
+    if (!chatPartner) {
+      msgs.innerHTML = '';
+      const chars = AI_CHARS[currentGender];
+      chatPartner = { name: chars[rnd(chars.length)], isAI: true };
+      $('partnerLabel').textContent = '@' + chatPartner.name;
+      
+      const d = document.createElement('div');
+      d.className = 'chat-msg system-msg';
+      d.innerHTML = '<div class="chat-bubble" style="background:rgba(0,229,255,.08);border:2px solid var(--as)">👤 seseorang ditemukan!</div>';
+      msgs.appendChild(d);
+      
+      setTimeout(() => {
+        msgs.innerHTML = '';
+        callChatAPI('', true);
+        startTimer();
+      }, 1000);
+    }
+  }, 15000);
 }
 
 function startTimer() {
@@ -568,7 +605,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initRadar();
   refreshSpills();
   
-  // Filter mood
   document.querySelectorAll('.mood-chip').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.mood-chip').forEach(b => b.classList.remove('active'));
