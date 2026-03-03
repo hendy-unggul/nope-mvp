@@ -543,25 +543,81 @@ const OFFLINE_RESPONSES = {
   ]
 };
 
-function getOfflineReply(userMsg, lastMessages) {
-  const msg = (userMsg||'').toLowerCase();
-  if (!msg || msg.length < 3) return OFFLINE_RESPONSES.greeting[Math.floor(Math.random()*OFFLINE_RESPONSES.greeting.length)];
+ function getOfflineReply(userMsg, lastMessages) {
+  const msg = (userMsg || '').toLowerCase();
+  const lastHistory = (lastMessages || []).map(m => m.content || '').join(' ').toLowerCase();
   
-  // Cek apakah ini pertanyaan
-  if (msg.includes('?') || msg.endsWith('?')) {
-    return OFFLINE_RESPONSES.question[Math.floor(Math.random()*OFFLINE_RESPONSES.question.length)];
+  // Deteksi konteks percakapan
+  const isGreeting = msg.includes('halo') || msg.includes('hai') || msg.includes('hey') || msg.includes('hi');
+  const isQuestion = msg.includes('?') || msg.endsWith('?') || msg.includes('gimana') || msg.includes('apa');
+  const isFollowUp = msg.includes('terus') || msg.includes('lalu') || msg.includes('abis itu') || msg.includes('terus?');
+  const isAgreement = msg.includes('iya') || msg.includes('setuju') || msg.includes('bener') || msg.includes('iyaa');
+  const isPersonal = msg.includes('lo') || msg.includes('kamu') || msg.includes('lu') || msg.includes('loe');
+  
+  // Cek apakah user bertanya tentang keadaan AI
+  const isAskingAboutAI = msg.includes('lagi apa') || msg.includes('lagi ngapain') || msg.includes('lagi dimana');
+  
+  // Kalau user bertanya "lagi apa" / "lagi mana"
+  if (isAskingAboutAI) {
+    const activities = [
+      'lagi santai dengerin musik',
+      'lagi ngopi sambil scroll timeline',
+      'lagi rebahan sambil mikir random',
+      'lagi dengerin playlist galau',
+      'lagi baca chat lo, hehe'
+    ];
+    return activities[Math.floor(Math.random() * activities.length)];
   }
   
-  // Cek apakah ada kata kunci yang butuh follow-up
-  if (msg.includes('terus') || msg.includes('lalu') || msg.includes('abis itu')) {
-    return OFFLINE_RESPONSES.followup[Math.floor(Math.random()*OFFLINE_RESPONSES.followup.length)];
+  // Kalau ini follow-up question
+  if (isFollowUp) {
+    return 'hmm, gue dengerin. terus cerita lagi dong';
   }
   
-  // Cek apakah ada persetujuan
-  if (msg.includes('setuju') || msg.includes('bener') || msg.includes('iya')) {
-    return OFFLINE_RESPONSES.agreement[Math.floor(Math.random()*OFFLINE_RESPONSES.agreement.length)];
+  // Kalau user nanya sesuatu
+  if (isQuestion) {
+    const responses = [
+      'pertanyaan bagus... gue juga kadang mikir gitu',
+      'hmm, gue rasa tergantung situasi sih',
+      'nah itu dia, gue juga masih cari jawabannya',
+      'menurut gue pribadi, lo harus lihat dari sisi lain dulu'
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
   }
   
+  // Kalau user cerita panjang, kasih empati
+  if (msg.length > 50 || lastHistory.length > 100) {
+    const empathetic = [
+      'wah, gue ngerti perasaan lo. pasti berat ya',
+      'aduuh, gue turut sedih denger cerita lo',
+      'hmm, gue bisa bayangin gimana situasinya',
+      'damn, that must be tough. lo kuat banget ceritain ini'
+    ];
+    return empathetic[Math.floor(Math.random() * empathetic.length)];
+  }
+  
+  // Kalau user setuju sama AI
+  if (isAgreement) {
+    return 'nah iyaa, kita sepakat berarti 😄';
+  }
+  
+  // Kalau user nyapa duluan
+  if (isGreeting) {
+    return 'hai juga! lagi ngapain?';
+  }
+  
+  // Default response tapi tetap kontekstual
+  const defaultResponses = [
+    'hehe iya, gue juga ngerasain hal yang sama',
+    'wkwk bener banget sih',
+    'iya ya, kadang hidup emang gitu',
+    'setuju banget!',
+    'nah itu dia titik terangnya',
+    'serius? cerita lebih lanjut dong'
+  ];
+  
+  return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+} 
   // Default random response
   return OFFLINE_RESPONSES.default[Math.floor(Math.random()*OFFLINE_RESPONSES.default.length)];
 }
