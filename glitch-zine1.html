@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>GLITCH V.001</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500;600;700&family=Special+Elite&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400&family=Barlow:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --k:#0D0A09;
+  --k2:#1A1410;
+  --w:#F2EDE3;
+  --w2:#E8E0D0;
+  --r:#CC1A0A;
+  --rb:#A80E00;
+  --y:#F5C518;
+  --ant:'Anton',sans-serif;
+  --osw:'Oswald',sans-serif;
+  --bc:'Barlow Condensed',sans-serif;
+  --bar:'Barlow',sans-serif;
+  --spe:'Special Elite',cursive;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var(--bar);}
+
+/* ── GRAIN ── */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9997;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.09'/%3E%3C/svg%3E");
+  mix-blend-mode:multiply;
+}
+
+/* ── BOOK ── */
+#book{
+  position:fixed;inset:0;bottom:54px;
+  display:flex;
+  transition:transform .46s cubic-bezier(.86,0,.07,1);
+  will-change:transform;cursor:grab;
+}
+#book:active{cursor:grabbing;}
+
+/* ── PAGE ── */
+.pg{
+  width:100vw;height:100%;
+  flex-shrink:0;position:relative;overflow:hidden;user-select:none;
+}
+
+/* ── TORN EDGE (top) ── */
+.torn-top{
+  position:absolute;top:0;left:0;right:0;height:22px;z-index:20;
+  background:var(--w);
+  clip-path:polygon(0 0,2% 100%,5% 20%,9% 90%,13% 15%,17% 80%,21% 10%,26% 85%,30% 5%,35% 75%,39% 0%,44% 70%,48% 5%,53% 88%,57% 12%,62% 82%,66% 8%,71% 78%,75% 15%,80% 85%,84% 5%,88% 72%,93% 18%,97% 80%,100% 10%,100% 0);
+}
+.torn-bottom{
+  position:absolute;bottom:0;left:0;right:0;height:22px;z-index:20;
+  background:var(--w);
+  clip-path:polygon(0 100%,2% 0%,6% 80%,10% 5%,14% 85%,18% 10%,23% 90%,27% 15%,32% 80%,36% 5%,41% 75%,45% 0%,50% 80%,54% 10%,59% 90%,63% 8%,68% 82%,72% 12%,77% 85%,81% 5%,86% 75%,90% 20%,95% 85%,99% 10%,100% 100%);
+}
+.torn-top-dk{background:var(--k);}
+.torn-bottom-dk{background:var(--k);}
+
+/* ── SCAN LINES ── */
+.scanlines{
+  position:absolute;inset:0;pointer-events:none;z-index:18;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.12) 3px,rgba(0,0,0,.12) 4px);
+}
+
+/* ── PHOTO PLACEHOLDER ── */
+.ph{
+  width:100%;height:100%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+}
+.ph-dk{background:#1A1410;}
+.ph-md{background:#6B5E52;}
+.ph-lt{background:#A89A8A;}
+.ph svg{opacity:.22;}
+.ph-dk svg{stroke:rgba(255,255,255,.35);}
+.ph-lbl{font-family:var(--bc);font-size:9px;letter-spacing:.18em;text-transform:uppercase;}
+.ph-dk .ph-lbl{color:rgba(255,255,255,.2);}
+.ph-md .ph-lbl,.ph-lt .ph-lbl{color:rgba(0,0,0,.2);}
+
+/* ── BARCODE SVG ── */
+.barcode{display:flex;gap:1px;align-items:flex-end;}
+.barcode span{background:currentColor;display:inline-block;}
+
+/* ── RED PAINT BRUSH STROKE ── */
+.brush{
+  position:absolute;
+  background:var(--r);
+  border-radius:2px 60% 2px 60% / 4px 40% 4px 40%;
+  opacity:.85;
+  transform-origin:center;
+}
+
+/* ════════════════════════════════════
+   PAGE 1 — COVER: GLITCH V.001
+════════════════════════════════════ */
+#p1{background:var(--k);}
+.p1-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+
+/* background texture — dark red smear */
+.p1-smear{
+  position:absolute;top:30%;left:-10%;right:-10%;
+  height:45%;z-index:1;
+  background:var(--rb);
+  opacity:.55;
+  transform:rotate(-2deg) skewY(-1deg);
+  filter:blur(2px);
+}
+.p1-smear2{
+  position:absolute;top:35%;left:-5%;right:-5%;
+  height:35%;z-index:1;
+  background:#8B0000;
+  opacity:.4;
+  transform:rotate(1deg);
+  filter:blur(4px);
+}
+
+.p1-content{position:relative;z-index:5;height:100%;padding:clamp(20px,5vw,40px);display:flex;flex-direction:column;}
+
+.p1-title{
+  font-family:var(--ant);
+  font-size:clamp(80px,22vw,180px);
+  font-weight:900;line-height:.85;letter-spacing:.01em;
+  color:var(--w);
+  text-shadow:3px 3px 0 rgba(0,0,0,.5),-1px -1px 0 rgba(255,255,255,.05);
+  position:relative;
+  text-transform:uppercase;
+}
+/* glitch offset */
+.p1-title::before{
+  content:'GLITCH';position:absolute;inset:0;
+  font-family:var(--ant);font-size:inherit;line-height:.85;letter-spacing:.01em;
+  color:var(--r);
+  clip-path:polygon(0 28%,100% 26%,100% 36%,0 38%);
+  transform:translateX(6px);
+  animation:cg1 4s infinite;
+}
+@keyframes cg1{0%,88%,100%{transform:translateX(6px)}91%{transform:translateX(14px)}94%{transform:translateX(-4px)}97%{transform:translateX(8px)}}
+
+.p1-vnum{
+  font-family:var(--ant);
+  font-size:clamp(40px,11vw,90px);
+  font-weight:900;line-height:.9;
+  color:var(--r);
+  letter-spacing:.05em;
+  margin-top:4px;
+}
+
+.p1-mid{margin-top:auto;margin-bottom:auto;}
+
+.p1-tagline{
+  background:var(--w);
+  padding:8px 14px;
+  display:inline-block;
+  margin-bottom:10px;
+}
+.p1-tagline span{
+  font-family:var(--ant);
+  font-size:clamp(14px,4vw,22px);
+  font-weight:900;letter-spacing:.06em;
+  color:var(--k);text-transform:uppercase;
+}
+
+.p1-sub{
+  font-family:var(--bc);font-size:clamp(12px,3vw,16px);font-weight:600;
+  letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.5);
+  margin-top:4px;
+}
+
+.p1-bottom{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  padding-top:16px;margin-top:auto;
+}
+.p1-barcode-wrap{display:flex;flex-direction:column;gap:4px;}
+.p1-barcode-num{font-family:var(--bc);font-size:8px;letter-spacing:.1em;color:rgba(255,255,255,.2);}
+.p1-error{
+  background:var(--r);
+  padding:6px 12px;transform:rotate(-2deg);
+  display:inline-block;
+}
+.p1-error span{
+  font-family:var(--ant);font-size:clamp(14px,4vw,20px);
+  letter-spacing:.06em;color:#fff;line-height:1.1;text-transform:uppercase;
+  display:block;text-align:center;
+}
+
+/* ════════════════════════════════════
+   PAGE 2 — BEBAS ITU BISING.
+════════════════════════════════════ */
+#p2{background:var(--w);}
+.p2-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+
+.p2-photo{position:absolute;top:0;left:0;right:0;height:55%;overflow:hidden;}
+.p2-photo .ph-lt{background:#9A8A7A;}
+
+/* torn white edge over photo */
+.p2-torn-mid{
+  position:absolute;top:50%;left:0;right:0;height:30px;z-index:10;
+  background:var(--w);
+  clip-path:polygon(0 100%,2% 20%,5% 90%,9% 10%,13% 80%,17% 5%,21% 85%,25% 15%,30% 90%,34% 8%,38% 80%,43% 15%,47% 85%,51% 5%,56% 75%,60% 0%,65% 80%,69% 10%,73% 90%,78% 5%,82% 82%,86% 12%,91% 85%,95% 8%,99% 78%,100% 100%);
+}
+
+.p2-content{
+  position:absolute;top:52%;left:0;right:0;bottom:0;
+  padding:clamp(14px,4vw,28px);display:flex;flex-direction:column;justify-content:center;
+  z-index:5;
+}
+
+.p2-headline{
+  font-family:var(--ant);
+  font-size:clamp(40px,11vw,82px);
+  font-weight:900;line-height:.85;letter-spacing:.01em;
+  color:var(--k);text-transform:uppercase;
+  margin-bottom:14px;
+}
+.p2-headline em{color:var(--r);font-style:normal;}
+
+.p2-body{
+  font-family:var(--bar);font-size:clamp(12px,2.8vw,16px);
+  font-weight:400;color:#2A2218;line-height:1.65;
+}
+.p2-body p{margin-bottom:4px;}
+
+/* ════════════════════════════════════
+   PAGE 3 — ART FOTO + BULLET
+════════════════════════════════════ */
+#p3{background:var(--w2);}
+.p3-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+
+.p3-photo{position:absolute;top:0;left:0;right:0;height:58%;overflow:hidden;}
+/* red overlay on photo */
+.p3-photo-overlay{
+  position:absolute;inset:0;z-index:2;
+  background:rgba(180,15,5,.35);
+  mix-blend-mode:multiply;
+}
+
+.p3-bullets{
+  position:absolute;top:10%;left:clamp(16px,5vw,32px);right:clamp(16px,5vw,32px);
+  z-index:10;
+}
+.p3-bullet{
+  font-family:var(--bc);font-size:clamp(14px,4vw,22px);font-weight:700;
+  letter-spacing:.04em;color:var(--w);text-transform:uppercase;
+  margin-bottom:6px;display:flex;align-items:center;gap:10px;
+}
+.p3-bullet::before{content:'•';color:var(--r);font-size:1.4em;line-height:1;}
+
+.p3-torn-mid{
+  position:absolute;top:55%;left:0;right:0;height:28px;z-index:10;
+  background:var(--w2);
+  clip-path:polygon(0 100%,3% 15%,7% 85%,11% 8%,15% 78%,19% 12%,24% 88%,28% 5%,32% 80%,37% 18%,41% 82%,45% 6%,50% 78%,54% 14%,58% 88%,62% 8%,67% 80%,71% 5%,75% 85%,80% 12%,84% 78%,88% 8%,93% 82%,97% 12%,100% 100%);
+}
+
+.p3-quote{
+  position:absolute;bottom:clamp(16px,4vh,32px);left:clamp(16px,5vw,32px);right:clamp(16px,5vw,32px);
+  z-index:5;
+}
+.p3-quote-text{
+  font-family:var(--spe);font-size:clamp(16px,4.5vw,28px);
+  color:var(--k);line-height:1.45;font-style:italic;
+}
+
+/* ════════════════════════════════════
+   PAGE 4 — DIY ZINE CULTURE
+════════════════════════════════════ */
+#p4{background:var(--w);}
+.p4-inner{height:100%;display:flex;flex-direction:column;padding:clamp(18px,5vw,36px);position:relative;}
+
+.p4-header{
+  background:var(--k);
+  padding:10px 16px;
+  margin-bottom:16px;
+  flex-shrink:0;
+}
+.p4-header-title{
+  font-family:var(--ant);font-size:clamp(32px,9vw,64px);
+  font-weight:900;line-height:.85;letter-spacing:.02em;
+  color:var(--w);text-transform:uppercase;
+}
+
+.p4-photos{
+  display:grid;grid-template-columns:1fr 1fr;gap:6px;
+  flex:0 0 clamp(140px,28vh,220px);margin-bottom:14px;
+}
+.p4-photo-cell{position:relative;overflow:hidden;background:#8A7A6A;}
+
+.p4-handwriting{
+  font-family:var(--spe);font-size:clamp(14px,3.5vw,20px);
+  color:var(--k);line-height:1.5;margin-bottom:14px;transform:rotate(-1deg);
+}
+
+.p4-cta-block{
+  background:var(--k);padding:12px 16px;margin-bottom:12px;
+}
+.p4-cta-title{
+  font-family:var(--ant);font-size:clamp(20px,5.5vw,36px);
+  font-weight:900;letter-spacing:.04em;color:var(--w);text-transform:uppercase;
+  line-height:1;
+}
+.p4-cta-sub{
+  font-family:var(--ant);font-size:clamp(16px,4.5vw,28px);
+  font-weight:900;letter-spacing:.04em;color:var(--r);text-transform:uppercase;
+  line-height:1;margin-top:2px;
+}
+
+.p4-diy-items{
+  font-family:var(--bc);font-size:clamp(13px,3.5vw,18px);font-weight:600;
+  letter-spacing:.05em;color:#2A2218;line-height:1.7;
+}
+
+.p4-qr{
+  position:absolute;bottom:clamp(18px,4vw,32px);right:clamp(18px,5vw,36px);
+  width:clamp(60px,14vw,90px);height:clamp(60px,14vw,90px);
+  background:var(--k);display:flex;align-items:center;justify-content:center;
+}
+.p4-qr span{font-family:var(--bc);font-size:8px;letter-spacing:.1em;color:rgba(255,255,255,.4);text-transform:uppercase;text-align:center;}
+
+/* ════════════════════════════════════
+   PAGE 5 — BERTAHAN DI TENGAH GEMPURAN
+════════════════════════════════════ */
+#p5{background:var(--w);}
+.p5-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+
+.p5-photo{position:absolute;right:0;top:0;bottom:0;width:55%;overflow:hidden;}
+.p5-photo .ph-md{background:#6A5A4A;}
+
+.p5-content{
+  position:absolute;top:0;left:0;width:55%;bottom:0;
+  padding:clamp(16px,4vw,28px);z:5;
+  display:flex;flex-direction:column;justify-content:flex-start;
+  background:var(--w);
+}
+
+.p5-headline{
+  font-family:var(--ant);font-size:clamp(28px,8vw,58px);
+  font-weight:900;line-height:.88;letter-spacing:.01em;
+  color:var(--k);text-transform:uppercase;
+  margin-bottom:14px;
+}
+
+.p5-brush-accent{
+  width:100%;height:5px;background:var(--r);margin-bottom:14px;
+  transform:rotate(-.5deg);
+}
+
+.p5-list{
+  display:flex;flex-direction:column;gap:6px;
+  font-family:var(--bc);font-size:clamp(12px,3vw,16px);font-weight:600;
+  letter-spacing:.04em;color:#2A2218;
+}
+.p5-list-item{display:flex;align-items:flex-start;gap:8px;}
+.p5-list-item::before{content:'•';color:var(--r);font-size:1.2em;line-height:1.1;flex-shrink:0;}
+
+/* ════════════════════════════════════
+   PAGE 6 — CERITA KOTA
+════════════════════════════════════ */
+#p6{background:var(--w);}
+.p6-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+
+.p6-header-flag{
+  position:absolute;top:0;left:0;right:0;z-index:10;
+  background:var(--r);padding:10px clamp(16px,5vw,28px);
+}
+.p6-header-flag span{
+  font-family:var(--ant);font-size:clamp(28px,8vw,56px);
+  font-weight:900;color:#fff;letter-spacing:.02em;text-transform:uppercase;line-height:1;
+}
+
+.p6-photo{position:absolute;top:0;left:0;right:0;height:55%;overflow:hidden;}
+.p6-photo .ph-md{background:#5A4E44;}
+
+.p6-torn-mid{
+  position:absolute;top:52%;left:0;right:0;height:28px;z-index:10;
+  background:var(--w);
+  clip-path:polygon(0 100%,3% 10%,6% 85%,10% 8%,14% 82%,18% 5%,22% 80%,27% 15%,31% 88%,35% 5%,39% 78%,43% 18%,48% 85%,52% 8%,56% 80%,60% 5%,65% 82%,69% 10%,73% 85%,77% 8%,82% 80%,86% 15%,90% 85%,94% 8%,98% 80%,100% 100%);
+}
+
+.p6-content{
+  position:absolute;top:55%;left:0;right:0;bottom:0;
+  padding:clamp(16px,4vw,24px);z-index:5;
+  display:flex;flex-direction:column;justify-content:center;
+}
+.p6-topics{
+  display:flex;flex-direction:column;gap:6px;
+}
+.p6-topic{
+  font-family:var(--spe);font-size:clamp(18px,5vw,34px);
+  color:var(--k);line-height:1.2;
+}
+
+/* ════════════════════════════════════
+   PAGE 7 — DENYUT JALAN
+════════════════════════════════════ */
+#p7{background:var(--k);}
+.p7-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+
+.p7-photo-top{flex:0 0 55%;position:relative;overflow:hidden;}
+.p7-photo-top .ph-dk{background:#1E1814;}
+
+/* red horizontal bar */
+.p7-red-bar{
+  position:absolute;bottom:0;left:0;right:0;height:5px;background:var(--r);z-index:5;
+}
+
+.p7-content{
+  flex:1;padding:clamp(18px,4vw,28px);display:flex;flex-direction:column;justify-content:center;
+}
+.p7-topics{display:flex;flex-direction:column;gap:8px;}
+.p7-topic{
+  font-family:var(--spe);font-size:clamp(20px,5.5vw,38px);
+  color:var(--w);line-height:1.15;
+}
+
+/* ════════════════════════════════════
+   PAGE 8 — SUARA TANPA AKSI = ECHO.
+════════════════════════════════════ */
+#p8{background:var(--w);}
+.p8-inner{height:100%;display:flex;flex-direction:column;padding:clamp(18px,5vw,30px);position:relative;overflow:hidden;}
+
+.p8-header{flex-shrink:0;margin-bottom:14px;}
+.p8-hl1{
+  font-family:var(--ant);font-size:clamp(36px,10vw,72px);
+  font-weight:900;line-height:.85;letter-spacing:.01em;
+  color:var(--k);text-transform:uppercase;
+}
+.p8-hl2{
+  font-family:var(--ant);font-size:clamp(26px,7.5vw,58px);
+  font-weight:900;line-height:.85;letter-spacing:.01em;
+  color:var(--k);text-transform:uppercase;
+  display:flex;align-items:center;gap:10px;
+}
+.p8-hl2::before{content:'';width:100%;max-width:60px;height:4px;background:var(--r);}
+.p8-hl2 span{color:var(--r);}
+
+.p8-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  grid-template-rows:1fr 1fr;gap:6px;
+  flex:1;margin-bottom:12px;
+}
+.p8-cell{position:relative;overflow:hidden;background:#8A7A68;}
+.p8-cell-label{
+  position:absolute;bottom:8px;left:10px;right:10px;z-index:5;
+  font-family:var(--bc);font-size:clamp(10px,2.5vw,13px);font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--w);
+  display:flex;align-items:center;gap:6px;
+}
+.p8-cell-label::before{content:'•';color:var(--r);}
+
+/* ════════════════════════════════════
+   PAGE 9 — KERJABAKTI & AKSI
+════════════════════════════════════ */
+#p9{background:var(--w2);}
+.p9-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+
+.p9-photo{position:absolute;top:0;left:0;right:0;height:52%;overflow:hidden;}
+.p9-photo .ph-md{background:#5E5248;}
+
+.p9-torn{
+  position:absolute;top:50%;left:0;right:0;height:28px;z-index:10;
+  background:var(--w2);
+  clip-path:polygon(0 100%,2% 15%,6% 88%,10% 8%,14% 80%,18% 12%,22% 85%,27% 5%,31% 82%,35% 18%,40% 80%,44% 8%,48% 85%,52% 12%,57% 80%,61% 5%,65% 78%,70% 18%,74% 85%,78% 8%,83% 82%,87% 10%,91% 80%,95% 15%,99% 85%,100% 100%);
+}
+
+.p9-content{
+  position:absolute;top:53%;left:0;right:0;bottom:0;
+  padding:clamp(14px,4vw,22px);z-index:5;
+  display:flex;flex-direction:column;gap:10px;
+}
+
+.p9-section-title{
+  font-family:var(--bc);font-size:clamp(12px,3vw,15px);font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--r);
+  display:flex;align-items:center;gap:8px;
+}
+.p9-section-title::before{content:'—';color:var(--r);}
+
+.p9-list{display:flex;flex-direction:column;gap:5px;}
+.p9-li{
+  font-family:var(--bc);font-size:clamp(12px,3vw,16px);font-weight:600;
+  letter-spacing:.04em;color:var(--k);
+  display:flex;align-items:flex-start;gap:8px;
+}
+.p9-li::before{content:'•';color:var(--r);flex-shrink:0;}
+
+.p9-cta-row{
+  display:flex;gap:8px;margin-top:auto;flex-wrap:wrap;
+}
+.p9-cta{
+  border:2px solid var(--k);padding:7px 16px;
+  font-family:var(--ant);font-size:clamp(16px,4vw,22px);
+  font-weight:900;letter-spacing:.06em;color:var(--k);text-transform:uppercase;
+  position:relative;
+}
+.p9-cta.red{background:var(--r);border-color:var(--r);color:#fff;}
+.p9-qr-hint{
+  font-family:var(--bc);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(0,0,0,.35);margin-top:4px;
+}
+
+/* ════════════════════════════════════
+   PAGE 10 — KAMI MENCATAT. BERGERAK.
+════════════════════════════════════ */
+#p10{background:var(--k);}
+.p10-inner{height:100%;display:flex;flex-direction:column;padding:clamp(24px,6vw,48px);position:relative;overflow:hidden;}
+
+/* scan lines */
+.p10-inner::before{
+  content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.008) 2px,rgba(255,255,255,.008) 3px);
+}
+
+.p10-lines{
+  position:relative;z-index:2;flex:1;
+  display:flex;flex-direction:column;justify-content:center;gap:clamp(4px,1.5vh,12px);
+}
+
+.p10-line{
+  font-family:var(--ant);
+  font-size:clamp(44px,13vw,100px);
+  font-weight:900;line-height:.84;letter-spacing:-.01em;
+  color:var(--w);text-transform:uppercase;
+}
+.p10-line.red{color:var(--r);}
+/* glitch animation on MENCATAT */
+.p10-line.glitch{position:relative;}
+.p10-line.glitch::before{
+  content:attr(data-t);position:absolute;inset:0;
+  font-family:var(--ant);font-size:inherit;line-height:.84;letter-spacing:-.01em;font-weight:900;
+  color:var(--r);
+  clip-path:polygon(0 35%,100% 33%,100% 43%,0 45%);
+  transform:translateX(5px);
+  animation:lg 5s infinite 0.5s;
+}
+@keyframes lg{0%,88%,100%{transform:translateX(5px);opacity:1}91%{transform:translateX(12px);opacity:.8}94%{transform:translateX(-3px)}97%{transform:translateX(8px);opacity:.6}}
+
+.p10-footer{position:relative;z-index:2;padding-top:16px;border-top:1px solid rgba(255,255,255,.08);}
+.p10-footer-title{
+  font-family:var(--ant);font-size:clamp(18px,5vw,34px);
+  font-weight:900;color:var(--w);letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px;
+}
+.p10-footer-sub{
+  font-family:var(--bc);font-size:clamp(11px,2.8vw,15px);font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3);
+}
+
+/* ─── BOTTOM NAV ─── */
+#nav{
+  position:fixed;bottom:0;left:0;right:0;height:54px;
+  background:var(--k);border-top:2px solid rgba(255,255,255,.06);
+  display:flex;align-items:stretch;z-index:200;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.nv{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:4px;cursor:pointer;border:none;background:none;
+  position:relative;transition:background .15s;padding:0 2px;
+}
+.nv::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--r);transform:scaleX(0);
+  transition:transform .25s cubic-bezier(.77,0,.175,1);
+}
+.nv.a::after{transform:scaleX(1);}
+.nv:hover{background:rgba(255,255,255,.04);}
+.nv-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.15);transition:background .2s,transform .2s;}
+.nv.a .nv-dot{background:var(--r);transform:scale(1.3);}
+.nv-lbl{font-family:var(--bc);font-size:7.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.22);transition:color .2s;white-space:nowrap;}
+.nv.a .nv-lbl{color:var(--w);}
+.nv-sep{width:1px;background:rgba(255,255,255,.05);margin:10px 0;flex-shrink:0;}
+
+/* ─── PAGE INDICATOR ─── */
+#ind{
+  position:fixed;right:12px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:5px;z-index:150;
+}
+.id{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.18);transition:all .3s;cursor:pointer;}
+.id.a{background:var(--r);height:16px;border-radius:2px;}
+
+/* ─── SWIPE HINT ─── */
+#hint{
+  position:fixed;bottom:66px;left:50%;transform:translateX(-50%);
+  font-family:var(--bc);font-size:9px;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(255,255,255,.22);display:flex;align-items:center;gap:7px;
+  animation:hf 5s ease forwards;pointer-events:none;z-index:150;white-space:nowrap;
+}
+@keyframes hf{0%{opacity:0}15%{opacity:1}80%{opacity:1}100%{opacity:0}}
+.ha{animation:ha 1.2s ease-in-out infinite;}
+@keyframes ha{0%,100%{transform:translateX(0)}50%{transform:translateX(7px)}}
+
+/* ─── SHARED UTILS ─── */
+.ph-icon-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;}
+</style>
+</head>
+<body>
+
+<div id="book">
+
+<!-- ══════════════════════════════════
+     P1 — COVER: GLITCH V.001
+══════════════════════════════════ -->
+<div class="pg" id="p1">
+  <div class="scanlines"></div>
+  <div class="p1-smear"></div>
+  <div class="p1-smear2"></div>
+  <div class="p1-content">
+    <div style="flex-shrink:0;">
+      <div class="p1-title">GLITCH</div>
+      <div class="p1-vnum">V.001</div>
+    </div>
+
+    <div class="p1-mid">
+      <div class="p1-tagline"><span>ERROR IS A SIGNAL</span></div>
+      <div class="p1-sub">Art / Reportase / Aksi Nyata</div>
+    </div>
+
+    <div class="p1-bottom">
+      <div class="p1-barcode-wrap">
+        <!-- barcode visual -->
+        <div style="display:flex;gap:1.5px;height:32px;align-items:flex-end;">
+          <div style="width:2px;height:100%;background:rgba(255,255,255,.3)"></div>
+          <div style="width:1px;height:80%;background:rgba(255,255,255,.3)"></div>
+          <div style="width:3px;height:100%;background:rgba(255,255,255,.3)"></div>
+          <div style="width:1px;height:70%;background:rgba(255,255,255,.3)"></div>
+          <div style="width:2px;height:100%;background:rgba(255,255,255,.3)"></div>
+          <div style="width:1px;height:85%;background:rgba(255,255,255,.3)"></div>
+          <div style="width:3px;height:100%;background:rgba(255,255,255,.3)"></div>
+          <div style="width:1px;height:60%;background:rgba(255,255,255,.3)"></div>
+          <div style="width:2px;height:100%;background:rgba(255,255,255,.3)"></div>
+          <div style="width:1px;height:90%;background:rgba(255,255,255,.3)"></div>
+          <div style="width:2px;height:75%;background:rgba(255,255,255,.3)"></div>
+          <div style="width:1px;height:100%;background:rgba(255,255,255,.3)"></div>
+          <div style="width:3px;height:80%;background:rgba(255,255,255,.3)"></div>
+          <div style="width:1px;height:100%;background:rgba(255,255,255,.3)"></div>
+          <div style="width:2px;height:65%;background:rgba(255,255,255,.3)"></div>
+        </div>
+        <div class="p1-barcode-num">00000 090099</div>
+      </div>
+      <div class="p1-error">
+        <span>SYSTEM</span>
+        <span>ERROR</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     P2 — BEBAS ITU BISING.
+══════════════════════════════════ -->
+<div class="pg" id="p2">
+  <div class="p2-inner">
+    <div class="p2-photo">
+      <div class="ph ph-lt" style="height:100%;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span class="ph-lbl">Foto · Art kolase abstrak</span>
+      </div>
+    </div>
+    <div class="p2-torn-mid"></div>
+    <div class="p2-content">
+      <div class="p2-headline">BEBAS<br>ITU <em>BISING.</em></div>
+      <div class="p2-body">
+        <p>Seni bukan untuk menyenangkan.</p>
+        <p>Seni bukan untuk approval.</p>
+        <p>Seni adalah redasi.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     P3 — ART FOTO + BULLET QUESTIONS
+══════════════════════════════════ -->
+<div class="pg" id="p3">
+  <div class="p3-inner">
+    <div class="p3-photo">
+      <div class="ph ph-md" style="height:100%;background:#5E4A3A;">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span class="ph-lbl" style="color:rgba(255,255,255,.2);">Foto · Potret seniman</span>
+      </div>
+      <div class="p3-photo-overlay"></div>
+    </div>
+
+    <div class="p3-bullets">
+      <div class="p3-bullet">KENAP KAMU BIKIN KARYA?</div>
+      <div class="p3-bullet">APA YANG KAMU LAWAN</div>
+      <div class="p3-bullet">APA YANG KAMU TAKUTKAN.</div>
+    </div>
+
+    <div class="p3-torn-mid"></div>
+
+    <div class="p3-quote">
+      <div class="p3-quote-text">"Aku bikin karya<br>supaya nggak meledak."</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     P4 — DIY ZINE CULTURE
+══════════════════════════════════ -->
+<div class="pg" id="p4">
+  <div class="p4-inner">
+    <div class="p4-header">
+      <div class="p4-header-title">DIY ZINE<br>CULTURE</div>
+    </div>
+
+    <div class="p4-photos">
+      <div class="p4-photo-cell">
+        <div class="ph" style="height:100%;background:#7A6A5A;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span class="ph-lbl">foto zine</span>
+        </div>
+      </div>
+      <div class="p4-photo-cell">
+        <div class="ph" style="height:100%;background:#6A5A4A;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span class="ph-lbl">foto kolase</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="p4-handwriting">Beran kan keuu!! <em style="font-size:.8em;opacity:.7;">Zianauha</em></div>
+
+    <div style="font-family:var(--bc);font-size:clamp(13px,3.5vw,18px);font-weight:600;letter-spacing:.06em;color:#2A2218;margin-bottom:12px;">
+      Bikin Zine Lo Sendiri!<br>Fotokopi, Potong,<br>Tempel, Copy.
+    </div>
+
+    <div class="p4-cta-block">
+      <div class="p4-cta-title">BERANI KREATIF</div>
+      <div class="p4-cta-sub">BERANI BEBAS!</div>
+    </div>
+
+    <div class="p4-qr">
+      <span>QR<br>CODE</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     P5 — BERTAHAN DI TENGAH GEMPURAN
+══════════════════════════════════ -->
+<div class="pg" id="p5">
+  <div class="p5-inner">
+    <div class="p5-photo">
+      <div class="ph ph-md" style="height:100%;background:#5A4E40;">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span class="ph-lbl">foto · founder / wawancara</span>
+      </div>
+    </div>
+    <div class="p5-content">
+      <div class="p5-headline">BERTAHAN<br>DI TENGAH<br>GEMPURAN<br>"BRAND<br>BESAR."</div>
+      <div class="p5-brush-accent"></div>
+      <div class="p5-list">
+        <div class="p5-list-item">Tantangan Bahan Baku</div>
+        <div class="p5-list-item">Persaingan Pasar</div>
+        <div class="p5-list-item">Q&amp;A</div>
+        <div class="p5-list-item">Bersama Founder</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     P6 — CERITA KOTA
+══════════════════════════════════ -->
+<div class="pg" id="p6">
+  <div class="p6-inner">
+    <div class="p6-photo">
+      <div class="ph ph-md" style="height:100%;background:#4A4038;">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span class="ph-lbl">foto · pasar malam / kota</span>
+      </div>
+    </div>
+    <div class="p6-header-flag"><span>CERITA KOTA</span></div>
+    <div class="p6-torn-mid"></div>
+    <div class="p6-content">
+      <div class="p6-topics">
+        <div class="p6-topic">Denyut Jal<span style="text-decoration:line-through;opacity:.4;">g</span>nan</div>
+        <div class="p6-topic">Ekonomi Mikro</div>
+        <div class="p6-topic">Suara Warga</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     P7 — DENYUT JALAN (night photo)
+══════════════════════════════════ -->
+<div class="pg" id="p7">
+  <div class="p7-inner">
+    <div class="p7-photo-top">
+      <div class="ph ph-dk" style="height:100%;background:#161210;">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span class="ph-lbl">foto · suasana malam kota</span>
+      </div>
+      <div class="p7-red-bar"></div>
+    </div>
+    <div class="p7-content">
+      <div class="p7-topics">
+        <div class="p7-topic">Denyut Jal<span style="text-decoration:line-through;opacity:.35;">g</span>nan</div>
+        <div class="p7-topic">Ekonomi Mikro</div>
+        <div class="p7-topic">Suara Warga</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     P8 — SUARA TANPA AKSI = ECHO.
+══════════════════════════════════ -->
+<div class="pg" id="p8">
+  <div class="p8-inner">
+    <div class="p8-header">
+      <div class="p8-hl1">SUARA</div>
+      <div class="p8-hl2">TANPA AKSI <span>= ECHO.</span></div>
+    </div>
+    <div class="p8-grid">
+      <div class="p8-cell">
+        <div class="ph" style="height:100%;background:#7A6A58;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <div class="p8-cell-label">Worshop Kreatif</div>
+      </div>
+      <div class="p8-cell">
+        <div class="ph" style="height:100%;background:#6A5A48;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <div class="p8-cell-label">Skate Sesi</div>
+      </div>
+      <div class="p8-cell">
+        <div class="ph" style="height:100%;background:#5A4E3C;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <div class="p8-cell-label">Gig Indie</div>
+      </div>
+      <div class="p8-cell">
+        <div class="ph" style="height:100%;background:#706050;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </div>
+        <div class="p8-cell-label">Aksi Social</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     P9 — KERJABAKTI & DONASI
+══════════════════════════════════ -->
+<div class="pg" id="p9">
+  <div class="p9-inner">
+    <div class="p9-photo">
+      <div class="ph ph-md" style="height:100%;background:#4A4038;">
+        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span class="ph-lbl">foto · aksi komunitas</span>
+      </div>
+    </div>
+    <div class="p9-torn"></div>
+    <div class="p9-content">
+      <div class="p9-section-title">KERJABAKTI</div>
+      <div class="p9-list">
+        <div class="p9-li">Aksi Berish Lingkungan</div>
+        <div class="p9-li">Dukung UMKM Lokal</div>
+        <div class="p9-li">Bantu Sambil Jelas</div>
+      </div>
+      <div class="p9-cta-row">
+        <div>
+          <div class="p9-cta red">DONASI</div>
+          <div class="p9-qr-hint">Scan QR &amp; Gabung</div>
+        </div>
+        <div>
+          <div class="p9-cta">PETISI</div>
+          <div class="p9-qr-hint" style="visibility:hidden;">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     P10 — KAMI MENCATAT. BERGERAK.
+══════════════════════════════════ -->
+<div class="pg" id="p10">
+  <div class="p10-inner">
+    <div class="p10-lines">
+      <div class="p10-line">KAMI</div>
+      <div class="p10-line red glitch" data-t="MENCATAT.">MENCATAT.</div>
+      <div class="p10-line" style="height:3px;background:rgba(255,255,255,.08);margin:4px 0;font-size:0;">&nbsp;</div>
+      <div class="p10-line">KAMI</div>
+      <div class="p10-line red">MELAPORKAN.</div>
+      <div class="p10-line" style="height:3px;background:rgba(255,255,255,.08);margin:4px 0;font-size:0;">&nbsp;</div>
+      <div class="p10-line">KAMI</div>
+      <div class="p10-line red">BERGERAK.</div>
+    </div>
+    <div class="p10-footer">
+      <div class="p10-footer-title">GLITCH V.001</div>
+      <div class="p10-footer-sub">DARI BEBAS → LAPOR → BERGERAK.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /book -->
+
+<!-- INDICATOR -->
+<div id="ind"></div>
+
+<!-- HINT -->
+<div id="hint">Geser <span class="ha">→</span></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <button class="nv a" onclick="goTo(0)"><div class="nv-dot"></div><span class="nv-lbl">Cover</span></button>
+  <div class="nv-sep"></div>
+  <button class="nv" onclick="goTo(1)"><div class="nv-dot"></div><span class="nv-lbl">Bebas</span></button>
+  <div class="nv-sep"></div>
+  <button class="nv" onclick="goTo(3)"><div class="nv-dot"></div><span class="nv-lbl">DIY</span></button>
+  <div class="nv-sep"></div>
+  <button class="nv" onclick="goTo(5)"><div class="nv-dot"></div><span class="nv-lbl">Kota</span></button>
+  <div class="nv-sep"></div>
+  <button class="nv" onclick="goTo(7)"><div class="nv-dot"></div><span class="nv-lbl">Suara</span></button>
+  <div class="nv-sep"></div>
+  <button class="nv" onclick="goTo(9)"><div class="nv-dot"></div><span class="nv-lbl">Gerak</span></button>
+</nav>
+
+<script>
+const N=10, BOOK=document.getElementById('book');
+let cur=0,sx=0,sy=0,drag=false,mv=false;
+
+// Build indicator
+const ind=document.getElementById('ind');
+for(let i=0;i<N;i++){
+  const d=document.createElement('div');
+  d.className='id';
+  d.onclick=()=>goTo(i);
+  ind.appendChild(d);
+}
+
+function goTo(n){
+  cur=Math.max(0,Math.min(N-1,n));
+  BOOK.style.transform=`translateX(-${cur*100}vw)`;
+  ui();
+}
+
+function ui(){
+  ind.querySelectorAll('.id').forEach((d,i)=>d.className='id'+(i===cur?' a':''));
+  // nav section map: Cover=0, Bebas=1-2, DIY=3-4, Kota=5-6, Suara=7-8, Gerak=9
+  const sec=[0,1,1,2,2,3,3,4,4,5];
+  document.querySelectorAll('.nv').forEach((b,i)=>b.classList.toggle('a',i===sec[cur]));
+}
+
+// Touch
+BOOK.addEventListener('touchstart',e=>{
+  sx=e.touches[0].clientX;sy=e.touches[0].clientY;
+  drag=true;mv=false;BOOK.style.transition='none';
+},{passive:true});
+
+BOOK.addEventListener('touchmove',e=>{
+  if(!drag)return;
+  const dx=e.touches[0].clientX-sx,dy=e.touches[0].clientY-sy;
+  if(!mv&&Math.abs(dy)>Math.abs(dx)){drag=false;return;}
+  mv=true;
+  BOOK.style.transform=`translateX(${-cur*window.innerWidth+dx}px)`;
+},{passive:true});
+
+BOOK.addEventListener('touchend',e=>{
+  if(!drag||!mv)return;
+  drag=false;BOOK.style.transition='';
+  const dx=e.changedTouches[0].clientX-sx;
+  if(dx<-50&&cur<N-1)cur++;
+  else if(dx>50&&cur>0)cur--;
+  BOOK.style.transform=`translateX(-${cur*100}vw)`;
+  ui();
+});
+
+// Mouse drag
+BOOK.addEventListener('mousedown',e=>{sx=e.clientX;drag=true;mv=false;BOOK.style.transition='none';});
+window.addEventListener('mousemove',e=>{
+  if(!drag)return;mv=true;
+  BOOK.style.transform=`translateX(${-cur*window.innerWidth+e.clientX-sx}px)`;
+});
+window.addEventListener('mouseup',e=>{
+  if(!drag)return;drag=false;BOOK.style.transition='';
+  const dx=e.clientX-sx;
+  if(dx<-60&&cur<N-1)cur++;
+  else if(dx>60&&cur>0)cur--;
+  BOOK.style.transform=`translateX(-${cur*100}vw)`;
+  ui();
+});
+
+// Keyboard
+window.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'&&cur<N-1)goTo(cur+1);
+  if(e.key==='ArrowLeft'&&cur>0)goTo(cur-1);
+});
+
+ui();
+</script>
+</body>
+</html>
