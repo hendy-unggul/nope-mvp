@@ -383,7 +383,6 @@ body {
 /* SPILLS SECTION */
 .spills-sect {
   padding: 18px;
-  /* Dikurangi padding-bottom karena bottom-nav fixed */
   padding-bottom: 20px;
 }
 
@@ -1163,12 +1162,46 @@ const SPILLS = [
 const MOODS = ['surviving', 'thriving', 'chaotic', 'doom'];
 const NON_AI_NAMES = ['anon.kucing', 'sleepy.head', 'chaos.queen', 'quiet.one', 'anon.gelap', 'anon.kabur'];
 
-// ==================== NAVIGASI ====================
+// ==================== NAVIGASI - FIXED VERSION ====================
 function navigateTo(page, event) {
-  if (event) event.preventDefault();
-  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-  event.target.closest('.nav-item').classList.add('active');
-  setTimeout(() => { window.location.href = page + '.html'; }, 200);
+  if (event) {
+    event.preventDefault();
+  }
+  
+  // Hapus active class dari semua nav item
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  
+  // Tambah active class ke yang diklik
+  if (event && event.target) {
+    const clickedItem = event.target.closest('.nav-item');
+    if (clickedItem) {
+      clickedItem.classList.add('active');
+    }
+  }
+  
+  // Redirect ke halaman yang sesuai
+  // Pastikan page adalah string yang valid
+  if (page && typeof page === 'string') {
+    // Mapping halaman
+    const pageMap = {
+      'spill': 'spill.html',
+      'jejak': 'jejak.html',
+      'glitch': 'glitch.html',
+      'cocomeo': 'cocomeo.html'
+    };
+    
+    const targetPage = pageMap[page] || page + '.html';
+    console.log('Navigating to:', targetPage);
+    
+    // Redirect setelah sedikit delay biar active state kelihatan
+    setTimeout(() => {
+      window.location.href = targetPage;
+    }, 150);
+  } else {
+    console.error('Invalid page parameter:', page);
+  }
 }
 
 // ==================== OFFLINE RESPONSES ====================
