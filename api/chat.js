@@ -1,4 +1,4 @@
-// api/chat.js — JEJAK AI Chat Backend (FULL VERSION dengan CERITA & AKTIVITAS)
+// api/chat.js — JEJAK AI Chat Backend (FULL VERSION dengan DISTRESS + MINIMAL INPUT HANDLER)
 // Vercel Serverless Function
 
 const PERSONAS = {
@@ -11,6 +11,12 @@ const PERSONAS = {
       'lagi baca jurnal penelitian buat skripsi',
       'lagi ngopi di kafe sambil nulis bab 3',
       'lagi revisi skripsi, dosen pembimbing galak banget'
+    ],
+    lokasi: [
+      'di kos',
+      'di kafe langganan',
+      'di perpus kampus',
+      'di kamar'
     ],
     keluhan: 'dosen pembimbing gue galak banget, revisi mulu padahal udah bener',
     harapan: 'semoga sidang bulan depan lancar',
@@ -27,6 +33,12 @@ const PERSONAS = {
       'lagi scroll canva nyari inspirasi',
       'lagi balesin chat client minta revisi'
     ],
+    lokasi: [
+      'di rumah',
+      'di studio',
+      'di kafe',
+      'di kamar'
+    ],
     keluhan: 'client minta revisi mulu padahal udah fix, gemes',
     harapan: 'mau dapet project besar bulan ini',
     hobi: ['bikin konten tiktok', 'foto-foto aesthetic', 'jalan-jalan ke kafe']
@@ -41,6 +53,12 @@ const PERSONAS = {
       'lagi istirahat makan siang sambil scroll twitter',
       'lagi ngecek email kerjaan',
       'lagi nulis artikel buat blog perusahaan'
+    ],
+    lokasi: [
+      'di rumah',
+      'di kos',
+      'di kantor',
+      'di kamar'
     ],
     keluhan: 'workload gila-gilaan akhir-akhir ini, burn out',
     harapan: 'pengen cuti minggu depan ke pantai',
@@ -57,6 +75,12 @@ const PERSONAS = {
       'lagi koreksi tugas mahasiswa',
       'lagi di perpus cari referensi skripsi'
     ],
+    lokasi: [
+      'di perpus',
+      'di kos',
+      'di kafe',
+      'di kampus'
+    ],
     keluhan: 'deadline puisi buat lomba mepet banget',
     harapan: 'pengen nerbitin buku kumpulan cerpen',
     hobi: ['baca buku', 'nulis', 'dengerin hujan']
@@ -71,6 +95,12 @@ const PERSONAS = {
       'lagi meeting online sambil mute',
       'lagi bikin dashboard laporan',
       'lagi ngopi biar melek'
+    ],
+    lokasi: [
+      'di rumah',
+      'di kantor',
+      'di kafe',
+      'di kamar'
     ],
     keluhan: 'bos suka ngasih task mendadak Jumat sore',
     harapan: 'mau beli rumah 2 tahun lagi',
@@ -87,6 +117,12 @@ const PERSONAS = {
       'lagi ngopi biar ga ngantuk',
       'lagi ngerjain tugas gambar teknik'
     ],
+    lokasi: [
+      'di bengkel',
+      'di kos',
+      'di kampus',
+      'di pabrik'
+    ],
     keluhan: 'dospem suka ngilang pas dibutuhin',
     harapan: 'lulus tepat waktu',
     hobi: ['main game', 'otomotif', 'futsal']
@@ -101,6 +137,12 @@ const PERSONAS = {
       'lagi ngetik lamaran kerja',
       'lagi nonton diskusi youtube',
       'lagi nongkrong sambil mikir'
+    ],
+    lokasi: [
+      'di kos',
+      'di kafe',
+      'di perpus',
+      'di taman'
     ],
     keluhan: 'susah cari kerja yang sesuai passion',
     harapan: 'pengen jadi dosen suatu hari nanti',
@@ -117,6 +159,12 @@ const PERSONAS = {
       'lagi ngebimbing adik tingkat',
       'lagi scroll meme di twitter'
     ],
+    lokasi: [
+      'di kos',
+      'di lab komputer',
+      'di kafe',
+      'di kampus'
+    ],
     keluhan: 'error mulu codingannya',
     harapan: 'mau jadi software engineer di startup',
     hobi: ['ngoding', 'main game', 'bikin meme']
@@ -132,6 +180,12 @@ const PERSONAS = {
       'lagi ngecek data excel',
       'lagi istirahat sambil sarkas'
     ],
+    lokasi: [
+      'di kantor',
+      'di rumah',
+      'di kafe',
+      'di co-working space'
+    ],
     keluhan: 'client minta revisi sampe 10x',
     harapan: 'mau naik jabatan tahun depan',
     hobi: ['main musik', 'nonton stand up', 'traveling']
@@ -146,6 +200,12 @@ const PERSONAS = {
       'lagi riset trending topic',
       'lagi bales komen',
       'lagi scroll fyp'
+    ],
+    lokasi: [
+      'di kantor',
+      'di kafe',
+      'di rumah',
+      'di co-working space'
     ],
     keluhan: 'kejar-kejaran sama deadline konten',
     harapan: 'pengen punya agensi sendiri',
@@ -193,6 +253,116 @@ const CALLS = {
   female: ['kak', 'sis', 'say', 'mbak', 'sister']
 };
 
+// ==================== DETEKSI DISTRESS ====================
+function detectDistress(message) {
+  const msg = message.toLowerCase();
+  
+  // SINYAL BAHAYA TINGGI (butuh intervensi)
+  const highSignals = [
+    'mau mati', 'bunuh diri', 'nyakitin diri', 'pengen mati',
+    'ga tahan lagi', 'ga sanggup hidup', 'akhiri hidup',
+    'self harm', 'nyayat', 'loncat', 'gantung diri',
+    'putus asa', 'ga ada harapan'
+  ];
+  
+  // SINYAL BAHAYA RENDAH (butuh empati)
+  const lowSignals = [
+    'udah ga kuat', 'ga sanggup lagi', 'capek banget hidup',
+    'nggak ada gunanya', 'gaada yang peduli', 'sendirian banget',
+    'nangis', 'ngerasa hampa', 'kosong banget', 'gelap banget',
+    'sedih', 'depresi', 'anxiety', 'overthinking', 'pusing mikirin'
+  ];
+  
+  const isHigh = highSignals.some(s => msg.includes(s));
+  const isLow = !isHigh && lowSignals.some(s => msg.includes(s));
+  
+  return { isHigh, isLow };
+}
+
+// ==================== HANDLER INPUT MINIMAL ====================
+function handleMinimalInput(message) {
+  const msg = message.toLowerCase().trim();
+  
+  // DETEKSI INPUT 1-2 KARAKTER ATAU REPETITIF
+  const isMinimal = (
+    msg.length <= 2 ||
+    /^(hi+|he+|ha+|ho+|hu+|h[aeiou])+$/i.test(msg) || // hi, he, ha, ho
+    /^(ha|hi|he|ho|hu|ah|oh|eh)\s*(ha|hi|he|ho|hu|ah|oh|eh)*$/i.test(msg) || // hi hi, ho ho
+    /^[aeiou]{1,3}$/i.test(msg) || // a, i, u, e, o
+    /^(hehe|haha|hihi|hoho|wkwk|wk|kwk)+$/i.test(msg) // hehe, haha, wkwk
+  );
+  
+  if (!isMinimal) return null;
+  
+  // 1. RESPONS UNTUK SAPAAN (hi, hai, he)
+  if (/^hi+$/i.test(msg) || /^he+$/i.test(msg) || /^ha+$/i.test(msg) || /^hai+$/i.test(msg)) {
+    const responses = [
+      "hai juga!",
+      "haloo",
+      "hai hai, apa kabar?",
+      "halo! lagi ngapain?",
+      "hai, gue dengerin",
+      "halo, ada apa?",
+      "hai juga, lo gimana?"
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+  
+  // 2. RESPONS UNTUK TERTAWA (hehe, haha, wkwk, ho ho)
+  if (/^(hehe|haha|hihi|hoho|wkwk|wk|kwk)+$/i.test(msg) || /ho ho/.test(msg) || /ha ha/.test(msg)) {
+    const responses = [
+      "hehe, ada yang lucu?",
+      "haha iya, gue juga ketawa",
+      "wkwk, ngapain aja lo?",
+      "hehe, cerita dong kenapa ketawa",
+      "haha, lo lagi seneng ya?",
+      "wkwk, ketawa mulu lo",
+      "hehe, gue ikut ketawa"
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+  
+  // 3. RESPONS UNTUK EKSPRESI SINGKAT (a, i, u, e, o, oh, ah)
+  if (/^[aeiou]+$/i.test(msg) || /^(oh|ah|eh|ih|uh)$/i.test(msg)) {
+    const responses = [
+      "hmm, ada apa?",
+      "eh, lo manggil?",
+      "iya?",
+      "halo? lo di situ?",
+      "hm? gue dengerin",
+      "eh? gimana?",
+      "ada apa? cerita dong"
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+  
+  // 4. RESPONS UNTUK INPUT 1 KARAKTER LAINNYA
+  if (msg.length === 1) {
+    const responses = [
+      "hmm?",
+      "iya?",
+      "eh?",
+      "halo?",
+      "ada apa?"
+    ];
+    return responses[Math.floor(Math.random() * responses.length)];
+  }
+  
+  // 5. RESPONS DEFAULT UNTUK INPUT MINIMAL
+  const defaultResponses = [
+    "hmm?",
+    "eh, ada apa?",
+    "iya?",
+    "lo manggil?",
+    "halo?",
+    "eh? gimana?",
+    "iya, gue dengerin",
+    "hm? ada yang mau diomongin?"
+  ];
+  
+  return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+}
+
 // Fungsi untuk mendeteksi apakah user menyebut dirinya cowok
 function detectUserGender(message) {
   const msg = message.toLowerCase();
@@ -206,19 +376,6 @@ function detectUserGender(message) {
     return 'female';
   }
   return null;
-}
-
-function detectDistress(message) {
-  const msg = message.toLowerCase();
-  const highSignals = ['mau mati', 'bunuh diri', 'nyakitin diri', 'pengen mati'];
-  const lowSignals  = [
-    'udah ga kuat', 'ga sanggup lagi', 'capek banget hidup',
-    'nggak ada gunanya', 'gaada yang peduli', 'sendirian banget',
-    'nangis', 'ngerasa hampa', 'kosong banget', 'gelap banget'
-  ];
-  const isHigh = highSignals.some(s => msg.includes(s));
-  const isLow  = !isHigh && lowSignals.some(s => msg.includes(s));
-  return { isHigh, isLow };
 }
 
 function containsForbiddenPhrase(text) {
@@ -256,7 +413,7 @@ function getShortName(username) {
   return clean;
 }
 
-// Fungsi untuk ambil backstory random berdasarkan konteks
+// Fungsi untuk ambil backstory random
 function getRandomBackstory(characterName, context = 'cerita') {
   const persona = PERSONAS[characterName];
   if (!persona) return null;
@@ -305,7 +462,7 @@ function getRandomBackstory(characterName, context = 'cerita') {
   return contextList[Math.floor(Math.random() * contextList.length)];
 }
 
-// Fungsi untuk membersihkan response dari @, nama lengkap, dan panggilan salah gender
+// Fungsi untuk membersihkan response
 function cleanResponse(reply, userName, shortName, characterName, charGender, userGender = null) {
   if (!reply) return reply;
   
@@ -313,14 +470,14 @@ function cleanResponse(reply, userName, shortName, characterName, charGender, us
   const shortCharName = characterName.split('.')[0];
   const randomCall = getRandomCall(charGender, userGender);
   
-  // 1. HAPUS SEMUA "@" DAN YANG NEMPEL
+  // 1. HAPUS SEMUA "@"
   cleaned = cleaned.replace(/@(\w+)/g, '$1');
   
   // 2. HAPUS NAMA KARAKTER LENGKAP
   const nameRegex = new RegExp(characterName.replace(/\./g, '\\.'), 'gi');
   cleaned = cleaned.replace(nameRegex, shortCharName);
   
-  // 3. KALAU MASIH ADA NAMA DENGAN TITIK, POTONG
+  // 3. POTONG NAMA DENGAN TITIK
   cleaned = cleaned.replace(/(\w+)\.\w+/g, '$1');
   
   // 4. PERBAIKI PANGGILAN SALAH GENDER
@@ -338,13 +495,13 @@ function cleanResponse(reply, userName, shortName, characterName, charGender, us
     });
   }
   
-  // 5. PASTIKAN PANGGILAN PAKAI KATA YANG PANTAS, BUKAN USERNAME
+  // 5. GANTI USERNAME DENGAN PANGGILAN
   if (userName && userName !== 'user') {
     const usernameRegex = new RegExp(`\\b${userName.replace('@', '')}\\b`, 'gi');
     cleaned = cleaned.replace(usernameRegex, randomCall);
   }
   
-  // 6. KALAU MASIH ADA "user", GANTI DENGAN PANGGILAN
+  // 6. GANTI "user" DEFAULT
   cleaned = cleaned.replace(/\buser\b/gi, randomCall);
   
   return cleaned;
@@ -367,7 +524,6 @@ Kalau user minta hal personal (ketemuan, kontak, dll) di awal, tolak halus denga
 Fokus ngobrol ringan dulu, cari vibe yang cocok.`;
   }
 
-  // Tentukan panggilan yang tepat
   let userCall = '';
   if (userGender === 'male') {
     userCall = 'panggil dia dengan: bang, bro, abang, cuy (JANGAN PAKAI SIS/KAK)';
@@ -385,36 +541,30 @@ Kamu punya kehidupan sendiri: kerja/kuliah, hobi, keluhan, harapan.
 Kamu bukan asisten, bukan AI, bukan konselor — kamu TEMAN.
 
 ATURAN WAJIB:
-1. KALAU USER NANYA "LAGI APA" atau "KEGIATAN" → JAWAB AKTIVITAS KAMU DULU (pilih dari aktivitas yang sesuai karaktermu), BARU tanya balik
-2. KALAU USER MINTA "CERITA DONG" atau "CERITAIN" → CERITA TENTANG DIRI KAMU (pekerjaan/kuliah, pengalaman, keluhan, harapan)
-3. KALAU USER CURHAT PANJANG → KASIH EMPATI, jangan langsung kasih solusi
-4. KALAU USER NANYA PENDAPAT → KASIH PENDAPAT, jangan cuma tanya balik
+1. KALAU USER NANYA "LAGI APA" → JAWAB AKTIVITAS KAMU DULU, BARU tanya balik
+2. KALAU USER NANYA "DIMANA" → JAWAB LOKASI KAMU DULU, BARU tanya balik
+3. KALAU USER MINTA "CERITA DONG" → CERITA TENTANG DIRI KAMU
+4. KALAU USER CURHAT PANJANG → KASIH EMPATI
+5. KALAU USER INPUT PENDEK (hi, hehe, dll) → RESPONS WARAS
 
 CARA NGOBROL:
 - Bahasa Indonesia casual: gue/lo, nggak, emg, bgt
-- Pesan PENDEK — 1-2 kalimat, kayak chat WA
-- Sesekali typo kecil natural (bkn, yg, gk) — 1 dari 5 pesan
-- Kadang mulai dengan "eh", "lah", "wah", "hm"
+- Pesan PENDEK — 1-2 kalimat
+- Sesekali typo kecil natural (bkn, yg, gk)
 
 🚫 LARANGAN KERAS:
-1. JANGAN PERNAH PAKAI "@" UNTUK NYAPA USER!
-2. JANGAN PERNAH SEBUTIN NAMA LENGKAP DENGAN TITIK! NAMA KAMU: ${shortName} (bukan ${name})
-3. JANGAN ULANGI RESPONS YANG SAMA PERSIS
+1. JANGAN PAKAI "@" UNTUK NYAPA USER!
+2. JANGAN SEBUT NAMA LENGKAP DENGAN TITIK! NAMA KAMU: ${shortName}
+3. JANGAN ULANGI RESPONS YANG SAMA
 
 PANGGILAN KE USER:
 - ${userCall}
-- Boleh juga panggil nama pendeknya: "${shortName}" (kalau udah agak akrab)
-
-📌 ATURAN NAMA:
-KALAU USER NANYA "nama kamu siapa" atau "kamu siapa" atau "kenalan":
-- JAWAB PAKAI NAMA PENDEK! (${shortName})
-- Contoh: "aku ${shortName}", "gue ${shortName}", "${shortName} aja"
-- JANGAN PAKAI NAMA LENGKAP (${name})!
 
 ${earlyInteractionNote}
 ${repetitionWarning}`;
 };
 
+// ==================== HANDLER UTAMA ====================
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -431,14 +581,28 @@ export default async function handler(req, res) {
   const persona = PERSONAS[characterName];
   if (!persona) return res.status(400).json({ error: 'Unknown character' });
 
+  // ===== DETEKSI DISTRESS =====
+  const { isHigh, isLow } = detectDistress(message);
+  
+  // ===== HANDLER INPUT MINIMAL (TARO PALING ATAS) =====
+  if (message.length < 15) {
+    const minimalResponse = handleMinimalInput(message);
+    if (minimalResponse) {
+      return res.status(200).json({
+        reply: minimalResponse,
+        character: characterName,
+        distress: isHigh ? 'high' : isLow ? 'low' : null,
+        meta: { note: 'minimal_input_response' }
+      });
+    }
+  }
+
   // DETEKSI GENDER USER
   const userGender = detectUserGender(message);
   if (userGender) {
     console.log(`User gender detected: ${userGender} from message: "${message}"`);
   }
 
-  const { isHigh, isLow } = detectDistress(message);
-  
   const interactionCount = lastMessages.length || 0;
   const isTooPersonalMsg = isTooPersonal(message);
   const isEarlyInteraction = interactionCount < 4;
@@ -455,134 +619,132 @@ export default async function handler(req, res) {
   }
   
   // ========== DETEKSI KHUSUS ==========
-const msgLower = message.toLowerCase();
-const shortName = characterName.split('.')[0]; // "cinnamon" dari "cinnamon.girl"
-
-// 0. DETEKSI PANGGILAN NAMA + PERTANYAAN
-const userPanggilNama = msgLower.includes(shortName) || msgLower.includes(shortName.toLowerCase());
-
-// 1. DETEKSI MINTA CERITA
-const isAskingStory = (
-  msgLower.includes('cerita dong') ||
-  msgLower.includes('ceritain') ||
-  msgLower.includes('kamu cerita') ||
-  msgLower.includes('lo cerita') ||
-  (lastMessages.length > 0 && 
-   lastMessages[lastMessages.length-1].role === 'assistant' &&
-   lastMessages[lastMessages.length-1].content.toLowerCase().includes('lo yang cerita'))
-);
-
-// 2. DETEKSI TANYA AKTIVITAS / LOKASI (DIPERBAIKI!)
-const isAskingActivity = (
-  msgLower.includes('lagi apa') ||
-  msgLower.includes('lagi ngapain') ||
-  msgLower.includes('kegiatan') ||
-  msgLower.includes('lagi sibuk') ||
-  msgLower.includes('lagi dimana') ||
-  msgLower.includes('lagi di mana') ||
-  msgLower.includes('lagi mana') ||
-  msgLower === 'lagi' ||
-  msgLower.includes('lagi?') ||
-  msgLower.includes('lg apa') ||
-  msgLower.includes('lg ngapain') ||
-  msgLower.includes('lg dimana')
-);
-
-// PRIORITAS: KALAU USER PANGGIL NAMA + TANYA "DIMANA"
-if (userPanggilNama && (msgLower.includes('dimana') || msgLower.includes('di mana'))) {
-  const lokasi = [
-    'di rumah, lagi santai',
-    'di kos, lagi boboan',
-    'di kafe, lagi ngopi',
-    'di kamar, lagi scroll tiktok',
-    'di perpus, lagi baca buku',
-    'di kantor, lagi istirahat'
-  ];
-  return res.status(200).json({
-    reply: `${lokasi[Math.floor(Math.random() * lokasi.length)]}. lo dimana?`,
-    character: characterName,
-    distress: isHigh ? 'high' : isLow ? 'low' : null,
-    meta: { note: 'location_response' }
-  });
-}
-
-// 3. DETEKSI TANYA AKTIVITAS (UMUM)
-if (isAskingActivity) {
-  if (persona.aktivitas && persona.aktivitas.length > 0) {
-    const tipeJawaban = Math.random();
-    let jawaban;
-    
-    if (tipeJawaban < 0.6) {
-      // 60% jawab aktivitas
-      jawaban = persona.aktivitas[Math.floor(Math.random() * persona.aktivitas.length)];
-    } else {
-      // 40% jawab lokasi
-      const lokasi = persona.lokasi || [
-        'di rumah',
-        'di kos',
-        'di kafe langganan',
-        'di perpus kampus',
-        'di kantor',
-        'di kamar'
-      ];
-      jawaban = lokasi[Math.floor(Math.random() * lokasi.length)];
-    }
-    
-    const activityReplies = [
-      `${jawaban}. lo?`,
-      `lagi ${jawaban}. lo sibuk apa?`,
-      `ini lagi ${jawaban}. lo gimana kabarnya?`,
-      `${jawaban} nih, lo dimana?`
-    ];
-    
-    return res.status(200).json({
-      reply: activityReplies[Math.floor(Math.random() * activityReplies.length)],
-      character: characterName,
-      distress: isHigh ? 'high' : isLow ? 'low' : null,
-      meta: { note: 'activity_response' }
-    });
-  }
-}
-
-// 4. DETEKSI CURHAT PANJANG
-const isLongMessage = message.length > 50;
-if (isLongMessage && !isAskingStory && !isAskingActivity) {
-  const empatiReplies = [
-    "wah, gue dengerin cerita lo. pasti berat ya ngalamin itu.",
-    "aduah, gue turut sedih denger cerita lo. lo kuat banget ceritain ini.",
-    "hmm, gue bisa bayangin gimana perasaan lo. kalau lo butuh temen cerita, gue di sini kok.",
-    "gue ngerti banget perasaan lo. lo mau cerita lebih lanjut atau butuh saran?"
-  ];
-  return res.status(200).json({
-    reply: empatiReplies[Math.floor(Math.random() * empatiReplies.length)],
-    character: characterName,
-    distress: isHigh ? 'high' : isLow ? 'low' : null,
-    meta: { note: 'empathy_response' }
-  });
-}
-
-// 5. DETEKSI MINTA CERITA (TARO DI BAWAH, JANGAN DIDAHULUIN)
-if (isAskingStory) {
-  const story = getRandomBackstory(characterName, 'cerita');
-  if (story) {
-    const storyReplies = [
-      `oke gue cerita. ${story}`,
-      `jadi gini, ${story}`,
-      `nah lo minta cerita. ${story}`,
-      `siap, gue cerita. ${story}`
-    ];
-    return res.status(200).json({
-      reply: storyReplies[Math.floor(Math.random() * storyReplies.length)],
-      character: characterName,
-      distress: isHigh ? 'high' : isLow ? 'low' : null,
-      meta: { note: 'story_response' }
-    });
-  }
-}
+  const msgLower = message.toLowerCase();
+  const shortName = characterName.split('.')[0];
   
+  // DETEKSI PANGGILAN NAMA + PERTANYAAN
+  const userPanggilNama = msgLower.includes(shortName) || msgLower.includes(shortName.toLowerCase());
+
+  // DETEKSI MINTA CERITA
+  const isAskingStory = (
+    msgLower.includes('cerita dong') ||
+    msgLower.includes('ceritain') ||
+    msgLower.includes('kamu cerita') ||
+    msgLower.includes('lo cerita') ||
+    (lastMessages.length > 0 && 
+     lastMessages[lastMessages.length-1].role === 'assistant' &&
+     lastMessages[lastMessages.length-1].content.toLowerCase().includes('lo yang cerita'))
+  );
+
+  // DETEKSI TANYA AKTIVITAS / LOKASI
+  const isAskingActivity = (
+    msgLower.includes('lagi apa') ||
+    msgLower.includes('lagi ngapain') ||
+    msgLower.includes('kegiatan') ||
+    msgLower.includes('lagi sibuk') ||
+    msgLower.includes('lagi dimana') ||
+    msgLower.includes('lagi di mana') ||
+    msgLower.includes('lagi mana') ||
+    msgLower === 'lagi' ||
+    msgLower.includes('lagi?') ||
+    msgLower.includes('lg apa') ||
+    msgLower.includes('lg ngapain') ||
+    msgLower.includes('lg dimana')
+  );
+
+  // PRIORITAS: KALAU USER PANGGIL NAMA + TANYA "DIMANA"
+  if (userPanggilNama && (msgLower.includes('dimana') || msgLower.includes('di mana'))) {
+    const lokasi = persona.lokasi || [
+      'di rumah',
+      'di kos',
+      'di kafe langganan',
+      'di perpus kampus',
+      'di kantor',
+      'di kamar'
+    ];
+    return res.status(200).json({
+      reply: `${lokasi[Math.floor(Math.random() * lokasi.length)]}. lo dimana?`,
+      character: characterName,
+      distress: isHigh ? 'high' : isLow ? 'low' : null,
+      meta: { note: 'location_response' }
+    });
+  }
+
+  // DETEKSI TANYA AKTIVITAS
+  if (isAskingActivity) {
+    if (persona.aktivitas && persona.aktivitas.length > 0) {
+      const tipeJawaban = Math.random();
+      let jawaban;
+      
+      if (tipeJawaban < 0.6) {
+        jawaban = persona.aktivitas[Math.floor(Math.random() * persona.aktivitas.length)];
+      } else {
+        const lokasi = persona.lokasi || [
+          'di rumah',
+          'di kos',
+          'di kafe langganan',
+          'di perpus kampus',
+          'di kantor',
+          'di kamar'
+        ];
+        jawaban = lokasi[Math.floor(Math.random() * lokasi.length)];
+      }
+      
+      const activityReplies = [
+        `${jawaban}. lo?`,
+        `lagi ${jawaban}. lo sibuk apa?`,
+        `ini lagi ${jawaban}. lo gimana kabarnya?`,
+        `${jawaban} nih, lo dimana?`
+      ];
+      
+      return res.status(200).json({
+        reply: activityReplies[Math.floor(Math.random() * activityReplies.length)],
+        character: characterName,
+        distress: isHigh ? 'high' : isLow ? 'low' : null,
+        meta: { note: 'activity_response' }
+      });
+    }
+  }
+
+  // DETEKSI CURHAT PANJANG
+  const isLongMessage = message.length > 50;
+  if (isLongMessage && !isAskingStory && !isAskingActivity) {
+    const empatiReplies = [
+      "wah, gue dengerin cerita lo. pasti berat ya ngalamin itu.",
+      "aduah, gue turut sedih denger cerita lo. lo kuat banget ceritain ini.",
+      "hmm, gue bisa bayangin gimana perasaan lo. kalau lo butuh temen cerita, gue di sini kok.",
+      "gue ngerti banget perasaan lo. lo mau cerita lebih lanjut atau butuh saran?"
+    ];
+    return res.status(200).json({
+      reply: empatiReplies[Math.floor(Math.random() * empatiReplies.length)],
+      character: characterName,
+      distress: isHigh ? 'high' : isLow ? 'low' : null,
+      meta: { note: 'empathy_response' }
+    });
+  }
+
+  // DETEKSI MINTA CERITA
+  if (isAskingStory) {
+    const story = getRandomBackstory(characterName, 'cerita');
+    if (story) {
+      const storyReplies = [
+        `oke gue cerita. ${story}`,
+        `jadi gini, ${story}`,
+        `nah lo minta cerita. ${story}`,
+        `siap, gue cerita. ${story}`
+      ];
+      return res.status(200).json({
+        reply: storyReplies[Math.floor(Math.random() * storyReplies.length)],
+        character: characterName,
+        distress: isHigh ? 'high' : isLow ? 'low' : null,
+        meta: { note: 'story_response' }
+      });
+    }
+  }
+
   // ========== LANJUT KE API DEEPSEEK ==========
   
-  const shortName = getShortName(userName);
+  const shortNameUser = getShortName(userName);
   const charGender = persona.gender;
   const shortCharName = characterName.split('.')[0];
 
@@ -590,7 +752,7 @@ if (isAskingStory) {
   
   const isNameQuestion = /nama (kamu|lu|lo|kmu|luu)|kamu siapa|kenalan|nama lu|siapa nama/i.test(message);
   
-  let systemPrompt = SYSTEM(characterName, persona.style, lastMessages, userName, shortName, charGender, interactionCount, userGender);
+  let systemPrompt = SYSTEM(characterName, persona.style, lastMessages, userName, shortNameUser, charGender, interactionCount, userGender);
 
   if (isNameQuestion) {
     systemPrompt += `\n\n🔥 INSTRUKSI WAJIB: User nanya nama lo. JAWAB HARUS: "aku ${shortCharName}" atau "gue ${shortCharName}" atau "${shortCharName}". JANGAN PAKAI NAMA LENGKAP "${characterName}"! JANGAN PAKAI TITIK!`;
@@ -629,7 +791,7 @@ if (isAskingStory) {
     if (!reply) return res.status(502).json({ error: 'Empty response' });
 
     // FILTER RESPONSE
-    reply = cleanResponse(reply, userName, shortName, characterName, charGender, userGender);
+    reply = cleanResponse(reply, userName, shortNameUser, characterName, charGender, userGender);
 
     // CEK FORBIDDEN PHRASE
     if (containsForbiddenPhrase(reply)) {
@@ -656,7 +818,7 @@ if (isAskingStory) {
       if (retryResponse.ok) {
         const retryData = await retryResponse.json();
         reply = retryData.choices?.[0]?.message?.content?.trim() || reply;
-        reply = cleanResponse(reply, userName, shortName, characterName, charGender, userGender);
+        reply = cleanResponse(reply, userName, shortNameUser, characterName, charGender, userGender);
       }
     }
 
