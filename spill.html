@@ -172,7 +172,8 @@ body {
 
 /* BUTTONS */
 .btn-vibe-check {
-  width: 100%;
+  width: calc(100% - 36px);
+  margin: 16px 18px;
   background: var(--ap);
   border: 2px solid #000;
   padding: 18px;
@@ -185,8 +186,6 @@ body {
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin: 16px 18px;
-  width: calc(100% - 36px);
   transition: transform .08s, box-shadow .08s;
 }
 
@@ -288,11 +287,6 @@ body {
   transition: transform .08s, box-shadow .08s;
 }
 
-.spill-card.is-mine {
-  border-color: var(--as);
-  box-shadow: 4px 4px 0 rgba(0,229,255,.3);
-}
-
 .spill-card:active {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 #000;
@@ -310,10 +304,6 @@ body {
   font-family: 'DM Mono', monospace;
   font-size: 11px;
   color: var(--txs);
-}
-
-.spill-user.mine {
-  color: var(--as);
 }
 
 .spill-mood {
@@ -940,7 +930,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 const rnd = n => Math.floor(Math.random() * n);
 
 // GANTI URL INI SESUAI DOMAIN VERCEL LO!
-const API_URL = '/api/chat';  // atau 'https://namaproject.vercel.app/api/chat'
+const API_URL = '/api/chat';
 
 if (!JEJAK.isLoggedIn()) {
   window.location.replace('/index.html');
@@ -949,8 +939,8 @@ if (!JEJAK.isLoggedIn()) {
 let sbClient = null;
 let myUserId = null;
 let myUsername = null;
-let realEntries = [];
-let fillerEntries = [];
+let realEntries = [];        // dari database (user lain)
+let fillerEntries = [];      // dari generator (karakter + anon)
 let currentGender = null;
 let chatPartner = null;
 let timerInterval = null;
@@ -983,11 +973,15 @@ const SPILLS = [
   'kenapa sih cowok kalo ditanya "lagi apa" pasti jawabnya "lagi main"? ga ada variasi lain?',
   'gue lagi fase pengen dimengerti tanpa harus jelasin panjang lebar',
   'bete banget skincare gue habis, padahal baru kemarin beli. ada yang ngutil?',
-  'stress skripsi tapi yang keluar peluh dan air mata doang'
+  'stress skripsi tapi yang keluar peluh dan air mata doang',
+  'hari ini gue nangis karena ga bisa buka toples. lemah?',
+  'kenapa orangtua selalu curiga kalo kita lagi seneng?',
+  'gue lagi diet, tapi tiap liat roti, rotinya yang liat gue duluan',
+  'hari ini gue salah kirim chat ke grup keluarga. isinya "sayang udah mandi belom?" 😭'
 ];
 
 const MOODS = ['surviving', 'thriving', 'chaotic', 'doom'];
-const NON_AI_NAMES = ['anon.kucing', 'sleepy.head', 'chaos.queen', 'quiet.one'];
+const NON_AI_NAMES = ['anon.kucing', 'sleepy.head', 'chaos.queen', 'quiet.one', 'anon.gelap', 'anon.kabur'];
 
 // ==================== OFFLINE RESPONSES (FALLBACK) ====================
 function getOfflineReply(msg) {
@@ -1120,7 +1114,58 @@ function initSupabase() {
   }
 }
 
-// ==================== LOAD REAL ENTRIES ====================
+// ==================== SPILL GENERATOR DENGAN JADWAL ====================
+function getSpillFrequency() {
+  const jam = new Date().getHours();
+  
+  // Pagi (05:00 - 11:59): 5 spill
+  if (jam >= 5 && jam < 12) return 5;
+  
+  // Sore (12:00 - 17:59): 5 spill
+  if (jam >= 12 && jam < 18) return 5;
+  
+  // Malam (18:00 - 04:59): 2 spill
+  return 2;
+}
+
+function generateCharacterSpills(count) {
+  const allAINames = [...AI_CHARS.female, ...AI_CHARS.male];
+  const spills = [];
+  const now = Date.now();
+  
+  for (let i = 0; i < count; i++) {
+    // 70% karakter AI, 30% anon (bukan user)
+    const useAI = Math.random() < 0.7;
+    const author = useAI 
+      ? allAINames[Math.floor(Math.random() * allAINames.length)]
+      : NON_AI_NAMES[Math.floor(Math.random() * NON_AI_NAMES.length)];
+    
+    // BUAT TIMESTAMP ACAK (1-60 menit yang lalu)
+    const minutesAgo = Math.floor(Math.random() * 60) + 1;
+    const timestamp = now - (minutesAgo * 60 * 1000);
+    
+    spills.push({
+      id: 'spill_' + Date.now() + '_' + i + '_' + Math.random(),
+      author,
+      isAI: useAI,
+      isMe: false,
+      mood: MOODS[Math.floor(Math.random() * MOODS.length)],
+      content: SPILLS[Math.floor(Math.random() * SPILLS.length)],
+      reactions: {
+        skull: Math.floor(Math.random() * 30),
+        cry: Math.floor(Math.random() * 50),
+        fire: Math.floor(Math.random() * 25),
+        upside: Math.floor(Math.random() * 20)
+      },
+      userReacted: null,
+      timestamp: timestamp
+    });
+  }
+  
+  return spills;
+}
+
+// ==================== LOAD REAL ENTRIES (HANYA USER LAIN) ====================
 async function loadRealEntries() {
   if (!sbClient) {
     renderSpills();
@@ -1140,23 +1185,26 @@ async function loadRealEntries() {
       return;
     }
     
-    realEntries = (result.data || []).map(e => {
-      const isMe = !!(myUserId && e.user_id && e.user_id === myUserId);
-      const author = isMe ? (myUsername || 'kamu') : ('anon.' + (e.user_id || '??????').substring(0, 6));
-      
-      return {
-        id: e.id,
-        dbId: e.id,
-        author,
-        isMe,
-        isAI: false,
-        mood: e.mood || 'chaotic',
-        content: e.content || '',
-        reactions: e.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 },
-        userReacted: null,
-        isReal: true
-      };
-    });
+    // FILTER: HANYA AMBIL ENTRIES DARI USER LAIN (BUKAN USER SENDIRI)
+    realEntries = (result.data || [])
+      .filter(e => !myUserId || e.user_id !== myUserId)
+      .map(e => {
+        const author = 'anon.' + (e.user_id || '??????').substring(0, 6);
+        
+        return {
+          id: e.id,
+          dbId: e.id,
+          author,
+          isMe: false,
+          isAI: false,
+          mood: e.mood || 'chaotic',
+          content: e.content || '',
+          reactions: e.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 },
+          userReacted: null,
+          isReal: true,
+          timestamp: new Date(e.created_at).getTime()
+        };
+      });
     
     renderSpills();
   } catch (err) {
@@ -1166,34 +1214,15 @@ async function loadRealEntries() {
 }
 
 // ==================== REACTIONS ====================
-function reactLocal(id, key) {
-  const entry = fillerEntries.find(e => e.id === id);
-  if (!entry) return;
+function react(id, key) {
+  // CARI DI REAL ENTRIES
+  let entry = realEntries.find(e => e.id === id);
   
-  const wasActive = entry.userReacted === key;
-  
-  if (wasActive) {
-    entry.reactions[key] = Math.max(0, (entry.reactions[key] || 0) - 1);
-    entry.userReacted = null;
-  } else {
-    if (entry.userReacted) {
-      const oldKey = entry.userReacted;
-      entry.reactions[oldKey] = Math.max(0, (entry.reactions[oldKey] || 0) - 1);
-    }
-    entry.reactions[key] = (entry.reactions[key] || 0) + 1;
-    entry.userReacted = key;
+  // KALAU GA ADA, CARI DI FILLER ENTRIES
+  if (!entry) {
+    entry = fillerEntries.find(e => e.id === id);
   }
   
-  renderSpills();
-}
-
-async function reactDB(dbId, key) {
-  if (!sbClient) {
-    toast('Koneksi belum siap', true);
-    return;
-  }
-  
-  const entry = realEntries.find(e => e.dbId === dbId);
   if (!entry) return;
   
   const wasActive = entry.userReacted === key;
@@ -1212,59 +1241,49 @@ async function reactDB(dbId, key) {
   
   renderSpills();
   
-  try {
-    await sbClient.from('entries').update({ reactions: entry.reactions }).eq('id', dbId);
-  } catch (e) {
-    console.error('React error:', e);
-    toast('Gagal simpan reaksi', true);
+  // KALAU REAL ENTRIES, SIMPAN KE DATABASE
+  if (entry.isReal && sbClient) {
+    sbClient.from('entries').update({ reactions: entry.reactions }).eq('id', entry.dbId)
+      .catch(e => console.error('React error:', e));
   }
 }
 
-// ==================== SPILL GENERATOR ====================
-function genSpills(n = 6) {
-  const allAINames = [...AI_CHARS.female, ...AI_CHARS.male];
-  const out = [];
-  
-  for (let i = 0; i < n; i++) {
-    const useAI = Math.random() < 0.4;
-    const author = useAI ? allAINames[rnd(allAINames.length)] : NON_AI_NAMES[rnd(NON_AI_NAMES.length)];
-    const isAI = allAINames.includes(author);
-    
-    out.push({
-      id: 'gen_' + Date.now() + '_' + i,
-      author,
-      isAI,
-      mood: MOODS[rnd(4)],
-      content: SPILLS[rnd(SPILLS.length)],
-      reactions: {
-        skull: rnd(50),
-        cry: rnd(100),
-        fire: rnd(40),
-        upside: rnd(30)
-      },
-      userReacted: null,
-      isReal: false
-    });
-  }
-  
-  return out;
-}
-
+// ==================== RENDER SPILLS (FIFO - TERBARU DI ATAS) ====================
 function renderSpills() {
   const list = $('spillsList');
   if (!list) return;
   
-  let all = [...realEntries];
-  const fillerNeeded = Math.max(0, 8 - all.length);
+  // 1. AMBIL REAL ENTRIES (USER LAIN)
+  let allSpills = [...realEntries];
   
-  if (fillerNeeded > 0) {
-    while (fillerEntries.length < fillerNeeded) {
-      fillerEntries.push(...genSpills(Math.max(4, fillerNeeded - fillerEntries.length)));
-    }
-    all = [...all, ...fillerEntries.slice(0, fillerNeeded)];
+  // 2. HITUNG KEBUTUHAN SPILL BERDASARKAN WAKTU
+  const targetCount = getSpillFrequency();
+  const currentCount = allSpills.length;
+  const neededCount = Math.max(0, targetCount - currentCount);
+  
+  // 3. GENERATE SPILL KARAKTER SESUAI KEBUTUHAN
+  if (neededCount > 0) {
+    const newCharSpills = generateCharacterSpills(neededCount);
+    
+    // GABUNGKAN DENGAN YANG LAMA
+    fillerEntries = [...newCharSpills, ...fillerEntries].slice(0, 20);
+    allSpills = [...allSpills, ...fillerEntries];
   }
   
-  let filtered = activeMood === 'all' ? all : all.filter(s => s.mood === activeMood);
+  // 4. URUTKAN BERDASARKAN TIMESTAMP (TERBARU DI ATAS - FIFO)
+  allSpills.sort((a, b) => {
+    const timeA = a.timestamp || 0;
+    const timeB = b.timestamp || 0;
+    return timeB - timeA;
+  });
+  
+  // 5. FILTER BERDASARKAN MOOD
+  let filtered = activeMood === 'all' 
+    ? allSpills 
+    : allSpills.filter(s => s.mood === activeMood);
+  
+  // 6. BATASI JUMLAH YANG DITAMPILKAN
+  filtered = filtered.slice(0, 8);
   
   if (!filtered.length) {
     list.innerHTML = `
@@ -1277,33 +1296,24 @@ function renderSpills() {
     return;
   }
   
+  // 7. RENDER DENGAN FORMAT YANG BENAR
   list.innerHTML = filtered.map(s => {
-    const isMineClass = s.isMe ? ' is-mine' : '';
-    const userClass = s.isMe ? ' class="spill-user mine"' : ' class="spill-user"';
-    const mineLabel = s.isMe ? ' <span style="font-family:\'DM Mono\',monospace;font-size:9px;color:var(--as);padding:2px 6px;border:1px solid var(--as);margin-left:6px">KAMU</span>' : '';
-    const aiLabel = s.isAI && !s.isReal ? ' 🤖' : '';
+    const aiLabel = s.isAI ? ' 🤖' : '';
     
     const reactHtml = Object.entries(REACT_EMO).map(([k, em]) => {
       const isAct = s.userReacted === k ? ' active' : '';
-      if (s.isReal) {
-        return `
-          <button class="react-btn${isAct}" data-db-id="${s.dbId}" data-key="${k}" onclick="reactDB('${s.dbId}','${k}')">
-            ${em}<span class="react-count" id="rc-db-${s.dbId}-${k}">${s.reactions[k] || 0}</span>
-          </button>
-        `;
-      } else {
-        return `
-          <button class="react-btn${isAct}" data-filler-id="${s.id}" data-key="${k}" onclick="reactLocal('${s.id}','${k}')">
-            ${em}<span class="react-count" id="rc-fl-${s.id}-${k}">${s.reactions[k] || 0}</span>
-          </button>
-        `;
-      }
+      return `
+        <button class="react-btn${isAct}" 
+                onclick="react('${s.id}','${k}')">
+          ${em}<span class="react-count">${s.reactions[k] || 0}</span>
+        </button>
+      `;
     }).join('');
     
     return `
-      <div class="spill-card${isMineClass}">
+      <div class="spill-card">
         <div class="spill-head">
-          <span${userClass}>@${escapeHtml(s.author)}${aiLabel}${mineLabel}</span>
+          <span class="spill-user">@${escapeHtml(s.author)}${aiLabel}</span>
           <span class="spill-mood ${s.mood}">${s.mood.toUpperCase()}</span>
         </div>
         <div class="spill-body">${escapeHtml(s.content)}</div>
@@ -1319,9 +1329,14 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+// ==================== REFRESH SPILLS ====================
 async function refreshSpills() {
   toast('Memuat spill terbaru ☕');
+  
+  // RESET FILLER ENTRIES
   fillerEntries = [];
+  
+  // RELOAD DARI DATABASE
   await loadRealEntries();
 }
 
@@ -1377,7 +1392,7 @@ function spawnDots() {
   const c = document.querySelector('.radar-cont');
   if (!c) return;
   
-  let dotsContainer = $('radarDots');
+  let dotsContainer = document.getElementById('radarDots');
   if (!dotsContainer) {
     dotsContainer = document.createElement('div');
     dotsContainer.className = 'radar-dots';
@@ -1864,10 +1879,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // UPDATE ONLINE COUNT
   setInterval(updateOnlineCount, 30000);
   
-  // REFRESH SPILLS
+  // REFRESH REAL ENTRIES
   setInterval(() => {
     if (realEntries.length > 0) loadRealEntries();
   }, 30000);
+  
+  // GENERATE SPILL KARAKTER BARU SETIAP 5 MENIT
+  setInterval(() => {
+    const targetCount = getSpillFrequency();
+    const newSpills = generateCharacterSpills(2);
+    fillerEntries = [...newSpills, ...fillerEntries].slice(0, 20);
+    renderSpills();
+  }, 300000);
   
   // CLEANUP ON UNLOAD
   window.addEventListener('beforeunload', () => {
