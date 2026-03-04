@@ -32,22 +32,45 @@
 html, body {
   height: 100%;
   overflow: hidden;
+  background: var(--bg);
 }
 
 body {
-  background: var(--bg);
   color: var(--tx);
   font-family: 'Syne', sans-serif;
   font-size: 14px;
-  position: fixed;
-  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
+/* ===== CONTAINER UTAMA ===== */
 .app {
-  height: 100%;
+  width: 100%;
+  max-width: 420px;  /* SELEBAR HP (iPhone 12/13 size) */
+  height: 100vh;
+  max-height: 900px; /* Biar ga kepanjangan di laptop */
+  background: var(--bg);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border-left: 2px solid var(--bd2);
+  border-right: 2px solid var(--bd2);
+  box-shadow: 0 0 30px rgba(0,0,0,0.8);
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Untuk layar lebih besar, kasih border biar keliatan frame HP */
+@media (min-width: 768px) {
+  .app {
+    border: 2px solid var(--bd2);
+    border-radius: 40px;  /* Bikin rounded kayak HP */
+    height: 90vh;
+    margin: 20px auto;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+  }
 }
 
 /* HEADER */
@@ -60,6 +83,7 @@ body {
   border-bottom: 2px solid var(--bd);
   background: var(--bg);
   position: relative;
+  flex-shrink: 0;
 }
 
 .header::before {
@@ -96,6 +120,20 @@ body {
   padding: 5px 12px;
   border: 2px solid #000;
   box-shadow: 3px 3px 0 #000;
+  white-space: nowrap;
+}
+
+.user-name-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  color: var(--as);
+  border: 2px solid var(--bd);
+  padding: 4px 8px;
+  background: #000;
+  white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* SCROLL AREA */
@@ -104,6 +142,11 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.scroll::-webkit-scrollbar {
+  display: none;
 }
 
 /* RADAR SECTION */
@@ -129,6 +172,7 @@ body {
   border: 2px solid var(--bd2);
   box-shadow: 6px 6px 0 #000;
   overflow: hidden;
+  border-radius: 0; /* Tetap kotak sesuai desain */
 }
 
 .radar-grid {
@@ -170,6 +214,32 @@ body {
   z-index: 5;
 }
 
+.radar-dots {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+}
+
+.radar-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  opacity: 0.3;
+  transition: opacity .1s;
+}
+
+.radar-dot.active {
+  opacity: 1;
+  transform: translate(-50%, -50%) rotate(45deg) scale(2.5);
+  filter: brightness(2) drop-shadow(0 0 6px currentColor);
+}
+
+.radar-dot.purple { background: var(--purple); box-shadow: 0 0 6px var(--purple); }
+.radar-dot.red { background: var(--ap); box-shadow: 0 0 6px var(--ap); }
+.radar-dot.ai { background: var(--as); box-shadow: 0 0 6px var(--as); }
+.radar-dot.lime { background: var(--aq); box-shadow: 0 0 6px var(--aq); }
+
 /* BUTTONS */
 .btn-vibe-check {
   width: calc(100% - 36px);
@@ -207,9 +277,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  transition: all .15s;
 }
 
-/* FILTER SECTION - DENGAN SLIDER */
+.btn-whisper:hover, .btn-whisper:active {
+  border-color: var(--as);
+  color: var(--as);
+}
+
+/* FILTER SECTION */
 .filter-sect {
   padding: 18px;
   border-bottom: 2px solid var(--bd);
@@ -295,17 +371,20 @@ body {
   border: 2px solid var(--bd2);
   font-family: 'DM Mono', monospace;
   font-size: 11px;
+  font-weight: 500;
   color: var(--txs);
   white-space: nowrap;
   cursor: pointer;
   box-shadow: 3px 3px 0 #000;
   transition: all .08s;
+  letter-spacing: .5px;
 }
 
 .mood-chip.active {
   background: var(--ap);
   border-color: #000;
   color: #fff;
+  box-shadow: 3px 3px 0 rgba(0,0,0,.5);
 }
 
 .mood-chip:active {
@@ -344,6 +423,7 @@ body {
   background: var(--sf);
   border: 2px solid var(--bd2);
   margin-bottom: 14px;
+  overflow: hidden;
   box-shadow: 4px 4px 0 #000;
   transition: transform .08s, box-shadow .08s;
 }
@@ -356,6 +436,7 @@ body {
 .spill-head {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   padding: 12px 16px;
   border-bottom: 2px solid var(--bd);
   background: var(--bg);
@@ -365,6 +446,7 @@ body {
   font-family: 'DM Mono', monospace;
   font-size: 11px;
   color: var(--txs);
+  letter-spacing: .5px;
 }
 
 .spill-mood {
@@ -373,12 +455,13 @@ body {
   padding: 5px 10px;
   border: 2px solid;
   text-transform: uppercase;
+  letter-spacing: 1.5px;
 }
 
-.spill-mood.surviving { color: #ff9f0a; border-color: #ff9f0a; }
-.spill-mood.thriving { color: #bfff00; border-color: #bfff00; }
-.spill-mood.chaotic { color: #00e5ff; border-color: #00e5ff; }
-.spill-mood.doom { color: #bf5af2; border-color: #bf5af2; }
+.spill-mood.surviving { color: #ff9f0a; border-color: #ff9f0a; background: rgba(255,159,10,.08); }
+.spill-mood.thriving { color: #bfff00; border-color: #bfff00; background: rgba(191,255,0,.08); }
+.spill-mood.chaotic { color: #00e5ff; border-color: #00e5ff; background: rgba(0,229,255,.08); }
+.spill-mood.doom { color: #bf5af2; border-color: #bf5af2; background: rgba(191,90,242,.08); }
 
 .spill-body {
   padding: 16px;
@@ -389,25 +472,31 @@ body {
 .spill-actions {
   display: flex;
   border-top: 2px solid var(--bd);
-  background: var(--bg);
   overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--bg);
+}
+
+.spill-actions::-webkit-scrollbar {
+  display: none;
 }
 
 .react-btn {
   flex: 1;
   min-width: 60px;
-  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
   background: transparent;
   border: none;
   border-right: 2px solid var(--bd);
   font-size: 16px;
   color: var(--txs);
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
   font-family: 'DM Mono', monospace;
+  transition: all .1s;
 }
 
 .react-btn:last-child {
@@ -417,6 +506,10 @@ body {
 .react-btn.active {
   background: var(--ap);
   color: #fff;
+}
+
+.react-btn:active {
+  background: var(--bd2);
 }
 
 .react-count {
@@ -432,6 +525,8 @@ body {
   color: var(--txs);
   font-family: 'DM Mono', monospace;
   font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -447,9 +542,9 @@ body {
   color: var(--aq);
 }
 
-/* BOTTOM NAV - DIPERBAIKI */
+/* BOTTOM NAV */
 .bottom-nav {
-  position: fixed;
+  position: sticky;
   bottom: 0;
   left: 0;
   right: 0;
@@ -457,10 +552,13 @@ body {
   border-top: 2px solid var(--bd);
   padding-bottom: var(--sb);
   z-index: 100;
+  flex-shrink: 0;
 }
 
 .nav-container {
   display: flex;
+  justify-content: space-around;
+  align-items: stretch;
   height: 62px;
   max-width: 480px;
   margin: 0 auto;
@@ -477,10 +575,11 @@ body {
   text-decoration: none;
   font-family: 'DM Mono', monospace;
   font-size: 9px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  border-right: 2px solid var(--bd);
   position: relative;
   cursor: pointer;
+  border-right: 2px solid var(--bd);
   transition: all .12s;
 }
 
@@ -503,18 +602,15 @@ body {
   background: var(--ap);
 }
 
-.nav-item:active {
-  background: rgba(255,45,85,.1);
-}
-
 .nav-icon {
   font-size: 20px;
+  line-height: 1;
 }
 
 /* CHAT ROOM */
 .chat-room {
   display: none;
-  position: fixed;
+  position: absolute;
   inset: 0;
   background: var(--bg);
   z-index: 300;
@@ -526,13 +622,14 @@ body {
 }
 
 .chat-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   padding: 12px 18px;
   padding-top: calc(12px + var(--st));
   border-bottom: 2px solid var(--bd);
   background: var(--sf);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-shrink: 0;
 }
 
 .chat-timer {
@@ -570,9 +667,9 @@ body {
   max-width: 85%;
   padding: 12px 16px;
   font-size: 15px;
-  border: 2px solid;
-  word-wrap: break-word;
   line-height: 1.55;
+  word-wrap: break-word;
+  border: 2px solid;
 }
 
 .own {
@@ -584,6 +681,7 @@ body {
   color: #fff;
   border-color: #000;
   box-shadow: 3px 3px 0 #000;
+  font-weight: 600;
 }
 
 .other {
@@ -615,6 +713,7 @@ body {
   padding: 14px 18px;
   background: var(--sf);
   border: 2px solid var(--bd2);
+  align-self: flex-start;
   width: fit-content;
   box-shadow: 3px 3px 0 rgba(0,0,0,.5);
 }
@@ -644,6 +743,7 @@ body {
   display: flex;
   gap: 10px;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .chat-input {
@@ -676,6 +776,7 @@ body {
   justify-content: center;
   color: #fff;
   font-size: 20px;
+  flex-shrink: 0;
   cursor: pointer;
   box-shadow: 3px 3px 0 #000;
   transition: all .08s;
@@ -694,7 +795,7 @@ body {
 /* MODAL */
 .modal {
   display: none;
-  position: fixed;
+  position: absolute;
   inset: 0;
   background: var(--bg);
   z-index: 200;
@@ -707,25 +808,31 @@ body {
 }
 
 .modal-header {
-  padding: 16px 18px;
-  padding-top: calc(16px + var(--st));
-  border-bottom: 2px solid var(--bd);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 16px 18px;
+  padding-top: calc(16px + var(--st));
+  border-bottom: 2px solid var(--bd);
+  flex-shrink: 0;
 }
 
 .modal-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px;
+  letter-spacing: 2px;
 }
 
 .modal-close {
   width: 38px;
   height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: var(--sf);
   border: 2px solid var(--bd2);
   color: var(--txs);
+  font-size: 16px;
   cursor: pointer;
   box-shadow: 3px 3px 0 #000;
   transition: all .08s;
@@ -739,14 +846,15 @@ body {
 .modal-body {
   flex: 1;
   overflow-y: auto;
-  padding: 24px 18px;
+  padding: 24px 18px calc(24px + var(--sb));
+  -webkit-overflow-scrolling: touch;
 }
 
 .gender-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  margin: 24px 0;
+  margin-bottom: 24px;
 }
 
 .gender-card {
@@ -779,6 +887,8 @@ body {
 .gender-label {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 18px;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
 }
 
 .modal-action-btn {
@@ -789,10 +899,12 @@ body {
   border: 2px solid #000;
   font-family: 'Bebas Neue', sans-serif;
   font-size: 20px;
+  letter-spacing: 3px;
   cursor: pointer;
   box-shadow: 4px 4px 0 #000;
   transition: all .08s;
   text-transform: uppercase;
+  margin-bottom: 16px;
 }
 
 .modal-action-btn:disabled {
@@ -808,7 +920,7 @@ body {
 
 /* TOAST */
 .toast {
-  position: fixed;
+  position: absolute;
   bottom: 90px;
   left: 50%;
   transform: translateX(-50%) translateY(100px);
@@ -823,6 +935,7 @@ body {
   border: 2px solid #000;
   box-shadow: 4px 4px 0 #000;
   white-space: nowrap;
+  pointer-events: none;
 }
 
 .toast.show {
@@ -845,11 +958,13 @@ body {
   font-size: 48px;
   margin-bottom: 16px;
   opacity: 0.4;
+  display: block;
 }
 
 .empty-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 24px;
+  letter-spacing: 1px;
   color: var(--txs);
   margin-bottom: 6px;
 }
@@ -867,7 +982,7 @@ body {
     <div class="logo">SP<span class="x">✕</span>LL</div>
     <div style="display: flex; align-items: center; gap: 12px;">
       <span class="online-pill" id="onlineCount">21 ONLINE</span>
-      <span id="userNameDisplay" style="font-family:'DM Mono',monospace; font-size:12px; color:var(--as); border:2px solid var(--bd); padding:4px 8px; background:#000;">@loading...</span>
+      <span class="user-name-badge" id="userNameDisplay">@loading...</span>
     </div>
   </div>
 
@@ -881,6 +996,7 @@ body {
         <div class="radar-ring"></div>
         <div class="radar-cross"></div>
         <canvas class="radar-canvas" id="radarCanvas"></canvas>
+        <div class="radar-dots" id="radarDots"></div>
       </div>
     </div>
 
@@ -905,7 +1021,7 @@ body {
         <span>SEMI</span>
         <span>ALL</span>
       </div>
-      <div class="mood-scroll">
+      <div class="mood-scroll" id="moodFilter">
         <button class="mood-chip active" data-mood="all" onclick="filterMood(this)">SEMUA</button>
         <button class="mood-chip" data-mood="surviving" onclick="filterMood(this)">😮‍💨 SURVIVING</button>
         <button class="mood-chip" data-mood="thriving" onclick="filterMood(this)">✨ THRIVING</button>
@@ -933,7 +1049,7 @@ body {
     </div>
   </div>
 
-  <!-- BOTTOM NAV - DENGAN FUNGSI -->
+  <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <div class="nav-container">
       <a href="#" class="nav-item active" onclick="navigateTo('spill', event)">
@@ -1015,8 +1131,8 @@ if (!JEJAK.isLoggedIn()) {
 let sbClient = null;
 let myUserId = null;
 let myUsername = null;
-let realEntries = [];        // dari database (user lain)
-let fillerEntries = [];      // dari generator (karakter + anon)
+let realEntries = [];
+let fillerEntries = [];
 let currentGender = null;
 let chatPartner = null;
 let timerInterval = null;
@@ -1028,21 +1144,13 @@ let apiRetry = 0;
 let activeMood = 'all';
 let userSub = { isActive: false };
 
-// KARAKTER AI
 const AI_CHARS = {
   female: ['beby.manis', 'strawberry.shortcake', 'pretty.sad', 'little.fairy', 'cinnamon.girl'],
   male: ['sejuta.badai', 'kue.bulan', 'agak.koplak', 'chili.padi', 'abang.gaul']
 };
 
-// REAKSI EMOJI
-const REACT_EMO = {
-  skull: '💀',
-  cry: '😭',
-  fire: '🔥',
-  upside: '🙃'
-};
+const REACT_EMO = { skull: '💀', cry: '😭', fire: '🔥', upside: '🙃' };
 
-// SPILLS DUMMY
 const SPILLS = [
   'hari ini gue liat mantan sama cewek baru, dan tau gak? rambutnya lebih bagus dari rambut gue 😭',
   'cape bener jadi cewek, setiap bulan harus nahan sakit perut sambil tetep senyum di depan client',
@@ -1062,79 +1170,39 @@ const NON_AI_NAMES = ['anon.kucing', 'sleepy.head', 'chaos.queen', 'quiet.one', 
 // ==================== NAVIGASI ====================
 function navigateTo(page, event) {
   if (event) event.preventDefault();
-  
-  // HAPUS ACTIVE DARI SEMUA NAV ITEM
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.classList.remove('active');
-  });
-  
-  // TAMBAH ACTIVE KE YANG DI KLIK
+  document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
   event.target.closest('.nav-item').classList.add('active');
-  
-  // SIMULASI NAVIGASI (GANTI URL)
-  setTimeout(() => {
-    window.location.href = page + '.html';
-  }, 200);
+  setTimeout(() => { window.location.href = page + '.html'; }, 200);
 }
 
 // ==================== OFFLINE RESPONSES ====================
 function getOfflineReply(msg) {
   msg = (msg || '').toLowerCase().trim();
-  
   if (msg.includes('lagi apa') || msg.includes('lagi mana') || msg.includes('lagi ngapain')) {
-    const aktivitas = [
-      'lagi santai dengerin musik nih',
-      'lagi ngopi sambil scroll timeline',
-      'lagi rebahan sambil mikir random',
-      'lagi dengerin playlist galau'
-    ];
+    const aktivitas = ['lagi santai dengerin musik nih', 'lagi ngopi sambil scroll timeline', 'lagi rebahan sambil mikir random', 'lagi dengerin playlist galau'];
     return aktivitas[rnd(aktivitas.length)];
   }
-  
-  if (msg.includes('kabar') || (msg.includes('gimana') && msg.includes('kabar'))) {
-    return 'baik-baik aja nih, lo gimana?';
-  }
-  
-  if (msg.includes('?') || msg.endsWith('?')) {
-    return 'hmm, gue juga masih mikirin itu. lo sendiri gimana?';
-  }
-  
-  if (msg.length > 40) {
-    return 'wah, gue ngerti perasaan lo. cerita lebih lanjut dong';
-  }
-  
-  if (msg.includes('halo') || msg.includes('hai') || msg.includes('hey')) {
-    return 'hai juga! lagi ngapain?';
-  }
-  
-  const defaultResp = [
-    'hehe iya, gue juga ngerasain',
-    'wah serius? cerita dong',
-    'relate banget sih',
-    'iya ya, hidup emang gitu'
-  ];
+  if (msg.includes('kabar') || (msg.includes('gimana') && msg.includes('kabar'))) return 'baik-baik aja nih, lo gimana?';
+  if (msg.includes('?') || msg.endsWith('?')) return 'hmm, gue juga masih mikirin itu. lo sendiri gimana?';
+  if (msg.length > 40) return 'wah, gue ngerti perasaan lo. cerita lebih lanjut dong';
+  if (msg.includes('halo') || msg.includes('hai') || msg.includes('hey')) return 'hai juga! lagi ngapain?';
+  const defaultResp = ['hehe iya, gue juga ngerasain', 'wah serius? cerita dong', 'relate banget sih', 'iya ya, hidup emang gitu'];
   return defaultResp[rnd(defaultResp.length)];
 }
 
 // ==================== TYPING EFFECT ====================
 async function typeMessage(element, finalText) {
   return new Promise(resolve => {
-    let i = 0;
-    const chars = finalText.split('');
-    
+    let i = 0, chars = finalText.split('');
     const next = () => {
       if (i >= chars.length) return resolve();
-      
       element.textContent += chars[i++];
-      
       let delay = 60 + Math.random() * 60;
       if (chars[i-1].match(/[.!?]/)) delay = 300 + Math.random() * 200;
       else if (chars[i-1].match(/[,;]/)) delay = 180 + Math.random() * 120;
       else if (chars[i-1] === ' ') delay = 120 + Math.random() * 80;
-      
       setTimeout(next, delay);
     };
-    
     element.textContent = '';
     next();
   });
@@ -1150,10 +1218,7 @@ function toast(msg, isError = false) {
 }
 
 const closeModal = id => $(id).classList.remove('on');
-
-function updateVibePct(val) {
-  $('vibePct').textContent = val + '%';
-}
+const updateVibePct = val => $('vibePct').textContent = val + '%';
 
 function filterMood(btn) {
   document.querySelectorAll('.mood-chip').forEach(b => b.classList.remove('active'));
@@ -1162,14 +1227,8 @@ function filterMood(btn) {
   renderSpills();
 }
 
-function loadSub() {
-  const s = JEJAK.getSub();
-  if (s) userSub = s;
-}
-
-function checkSub() {
-  return userSub.isActive && userSub.expiresAt && new Date(userSub.expiresAt) > new Date();
-}
+function loadSub() { const s = JEJAK.getSub(); if (s) userSub = s; }
+function checkSub() { return userSub.isActive && userSub.expiresAt && new Date(userSub.expiresAt) > new Date(); }
 
 // ==================== SUPABASE INIT ====================
 function initSupabase() {
@@ -1179,46 +1238,27 @@ function initSupabase() {
       const sess = JEJAK.getSession();
       myUserId = sess.uid;
       myUsername = sess.username;
-      
       if (!myUserId) {
         const oldKeys = ['user_id', 'jejak_user_id', 'uid'];
-        for (const k of oldKeys) {
-          const v = localStorage.getItem(k);
-          if (v) { myUserId = v; break; }
-        }
+        for (const k of oldKeys) { const v = localStorage.getItem(k); if (v) { myUserId = v; break; } }
       }
-      
       if (!myUsername) {
         const oldUnKeys = ['jejak_username', 'username'];
-        for (const k of oldUnKeys) {
-          const v = localStorage.getItem(k);
-          if (v) { myUsername = v; break; }
-        }
+        for (const k of oldUnKeys) { const v = localStorage.getItem(k); if (v) { myUsername = v; break; } }
       }
-      
       if (myUserId) {
         const nameEl = $('userNameDisplay');
         if (nameEl) nameEl.textContent = '@' + (myUsername || 'anonymous');
-      } else {
-        window.location.replace('/index.html');
-      }
+      } else window.location.replace('/index.html');
     }
-  } catch (e) {
-    console.warn('Supabase init failed:', e);
-  }
+  } catch (e) { console.warn('Supabase init failed:', e); }
 }
 
-// ==================== SPILL GENERATOR DENGAN JADWAL ====================
+// ==================== SPILL GENERATOR ====================
 function getSpillFrequency() {
   const jam = new Date().getHours();
-  
-  // Pagi (05:00 - 11:59): 5 spill
   if (jam >= 5 && jam < 12) return 5;
-  
-  // Sore (12:00 - 17:59): 5 spill
   if (jam >= 12 && jam < 18) return 5;
-  
-  // Malam (18:00 - 04:59): 2 spill
   return 2;
 }
 
@@ -1226,553 +1266,208 @@ function generateCharacterSpills(count) {
   const allAINames = [...AI_CHARS.female, ...AI_CHARS.male];
   const spills = [];
   const now = Date.now();
-  
   for (let i = 0; i < count; i++) {
     const useAI = Math.random() < 0.7;
-    const author = useAI 
-      ? allAINames[Math.floor(Math.random() * allAINames.length)]
-      : NON_AI_NAMES[Math.floor(Math.random() * NON_AI_NAMES.length)];
-    
+    const author = useAI ? allAINames[rnd(allAINames.length)] : NON_AI_NAMES[rnd(NON_AI_NAMES.length)];
     const minutesAgo = Math.floor(Math.random() * 60) + 1;
     const timestamp = now - (minutesAgo * 60 * 1000);
-    
     spills.push({
       id: 'spill_' + Date.now() + '_' + i + '_' + Math.random(),
-      author,
-      isAI: useAI,
-      isMe: false,
-      mood: MOODS[Math.floor(Math.random() * MOODS.length)],
-      content: SPILLS[Math.floor(Math.random() * SPILLS.length)],
-      reactions: {
-        skull: Math.floor(Math.random() * 30),
-        cry: Math.floor(Math.random() * 50),
-        fire: Math.floor(Math.random() * 25),
-        upside: Math.floor(Math.random() * 20)
-      },
-      userReacted: null,
-      timestamp: timestamp
+      author, isAI: useAI, isMe: false,
+      mood: MOODS[rnd(4)],
+      content: SPILLS[rnd(SPILLS.length)],
+      reactions: { skull: rnd(30), cry: rnd(50), fire: rnd(25), upside: rnd(20) },
+      userReacted: null, timestamp
     });
   }
-  
   return spills;
 }
 
 // ==================== LOAD REAL ENTRIES ====================
 async function loadRealEntries() {
-  if (!sbClient) {
-    renderSpills();
-    return;
-  }
-  
+  if (!sbClient) { renderSpills(); return; }
   try {
-    const result = await sbClient
-      .from('entries')
-      .select('id,user_id,content,mood,reactions,created_at')
-      .order('created_at', { ascending: false })
-      .limit(20);
-    
-    if (result.error) {
-      console.warn('Query failed:', result.error.message);
-      renderSpills();
-      return;
-    }
-    
-    realEntries = (result.data || [])
-      .filter(e => !myUserId || e.user_id !== myUserId)
-      .map(e => {
-        const author = 'anon.' + (e.user_id || '??????').substring(0, 6);
-        
-        return {
-          id: e.id,
-          dbId: e.id,
-          author,
-          isMe: false,
-          isAI: false,
-          mood: e.mood || 'chaotic',
-          content: e.content || '',
-          reactions: e.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 },
-          userReacted: null,
-          isReal: true,
-          timestamp: new Date(e.created_at).getTime()
-        };
-      });
-    
+    const result = await sbClient.from('entries').select('id,user_id,content,mood,reactions,created_at').order('created_at', { ascending: false }).limit(20);
+    if (result.error) { console.warn('Query failed:', result.error.message); renderSpills(); return; }
+    realEntries = (result.data || []).filter(e => !myUserId || e.user_id !== myUserId).map(e => ({
+      id: e.id, dbId: e.id,
+      author: 'anon.' + (e.user_id || '??????').substring(0, 6),
+      isMe: false, isAI: false,
+      mood: e.mood || 'chaotic',
+      content: e.content || '',
+      reactions: e.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 },
+      userReacted: null, isReal: true,
+      timestamp: new Date(e.created_at).getTime()
+    }));
     $('feedMeta').textContent = realEntries.length + ' REAL';
     renderSpills();
-  } catch (err) {
-    console.warn('loadRealEntries error:', err.message);
-    renderSpills();
-  }
+  } catch (err) { console.warn('loadRealEntries error:', err.message); renderSpills(); }
 }
 
 // ==================== REACTIONS ====================
 function react(id, key) {
-  let entry = realEntries.find(e => e.id === id);
-  if (!entry) entry = fillerEntries.find(e => e.id === id);
+  let entry = realEntries.find(e => e.id === id) || fillerEntries.find(e => e.id === id);
   if (!entry) return;
-  
   const wasActive = entry.userReacted === key;
-  
   if (wasActive) {
     entry.reactions[key] = Math.max(0, (entry.reactions[key] || 0) - 1);
     entry.userReacted = null;
   } else {
-    if (entry.userReacted) {
-      const oldKey = entry.userReacted;
-      entry.reactions[oldKey] = Math.max(0, (entry.reactions[oldKey] || 0) - 1);
-    }
+    if (entry.userReacted) entry.reactions[entry.userReacted] = Math.max(0, (entry.reactions[entry.userReacted] || 0) - 1);
     entry.reactions[key] = (entry.reactions[key] || 0) + 1;
     entry.userReacted = key;
   }
-  
   renderSpills();
-  
-  if (entry.isReal && sbClient) {
-    sbClient.from('entries').update({ reactions: entry.reactions }).eq('id', entry.dbId)
-      .catch(e => console.error('React error:', e));
-  }
+  if (entry.isReal && sbClient) sbClient.from('entries').update({ reactions: entry.reactions }).eq('id', entry.dbId).catch(e => console.error('React error:', e));
 }
 
 // ==================== RENDER SPILLS ====================
 function renderSpills() {
   const list = $('spillsList');
   if (!list) return;
-  
   let allSpills = [...realEntries];
   const targetCount = getSpillFrequency();
-  const currentCount = allSpills.length;
-  const neededCount = Math.max(0, targetCount - currentCount);
-  
+  const neededCount = Math.max(0, targetCount - allSpills.length);
   if (neededCount > 0) {
     const newCharSpills = generateCharacterSpills(neededCount);
     fillerEntries = [...newCharSpills, ...fillerEntries].slice(0, 20);
     allSpills = [...allSpills, ...fillerEntries];
   }
-  
   allSpills.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-  
-  let filtered = activeMood === 'all' 
-    ? allSpills 
-    : allSpills.filter(s => s.mood === activeMood);
-  
+  let filtered = activeMood === 'all' ? allSpills : allSpills.filter(s => s.mood === activeMood);
   filtered = filtered.slice(0, 8);
-  
   if (!filtered.length) {
-    list.innerHTML = `
-      <div class="empty-state">
-        <span class="empty-icon">🍃</span>
-        <div class="empty-title">BELUM ADA SPILL</div>
-        <div class="empty-text">Coba filter lain</div>
-      </div>
-    `;
+    list.innerHTML = `<div class="empty-state"><span class="empty-icon">🍃</span><div class="empty-title">BELUM ADA SPILL</div><div class="empty-text">Coba filter lain</div></div>`;
     return;
   }
-  
   list.innerHTML = filtered.map(s => {
     const aiLabel = s.isAI ? ' 🤖' : '';
-    
-    const reactHtml = Object.entries(REACT_EMO).map(([k, em]) => {
-      const isAct = s.userReacted === k ? ' active' : '';
-      return `
-        <button class="react-btn${isAct}" onclick="react('${s.id}','${k}')">
-          ${em}<span class="react-count">${s.reactions[k] || 0}</span>
-        </button>
-      `;
-    }).join('');
-    
-    return `
-      <div class="spill-card">
-        <div class="spill-head">
-          <span class="spill-user">@${escapeHtml(s.author)}${aiLabel}</span>
-          <span class="spill-mood ${s.mood}">${s.mood.toUpperCase()}</span>
-        </div>
-        <div class="spill-body">${escapeHtml(s.content)}</div>
-        <div class="spill-actions">${reactHtml}</div>
-      </div>
-    `;
+    const reactHtml = Object.entries(REACT_EMO).map(([k, em]) => `<button class="react-btn${s.userReacted === k ? ' active' : ''}" onclick="react('${s.id}','${k}')">${em}<span class="react-count">${s.reactions[k] || 0}</span></button>`).join('');
+    return `<div class="spill-card"><div class="spill-head"><span class="spill-user">@${escapeHtml(s.author)}${aiLabel}</span><span class="spill-mood ${s.mood}">${s.mood.toUpperCase()}</span></div><div class="spill-body">${escapeHtml(s.content)}</div><div class="spill-actions">${reactHtml}</div></div>`;
   }).join('');
 }
 
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-// ==================== REFRESH SPILLS ====================
-async function refreshSpills() {
-  toast('Memuat spill terbaru ☕');
-  fillerEntries = [];
-  await loadRealEntries();
-}
+function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+async function refreshSpills() { toast('Memuat spill terbaru ☕'); fillerEntries = []; await loadRealEntries(); }
 
 // ==================== RADAR ====================
-let radarRAF = null;
-let needleA = 0;
-let needleO = 0;
-let phA = Math.random() * Math.PI * 2;
-let phB = Math.random() * Math.PI * 2;
-let phC = Math.random() * Math.PI * 2;
-const BASE_OM = (60 / 4 * Math.PI * 2) / (60 * 60);
-const TRAIL_CAP = 120;
+let radarRAF = null, needleA = 0, needleO = 0, phA = Math.random() * Math.PI * 2;
+const BASE_OM = (60 / 4 * Math.PI * 2) / (60 * 60), TRAIL_CAP = 120;
 const trail = new Float32Array(TRAIL_CAP);
-let trailPtr = 0;
-const dotGlow = new Map();
-let rdots = [];
+let trailPtr = 0, rdots = [];
 
 function initRadar() {
-  const cv = $('radarCanvas');
-  const ct = cv.parentElement;
+  const cv = $('radarCanvas'), ct = cv.parentElement;
   if (!cv || !ct) return;
-  
-  const resize = () => {
-    const r = ct.getBoundingClientRect();
-    cv.width = r.width;
-    cv.height = r.height;
-  };
-  
-  resize();
-  window.addEventListener('resize', resize, { passive: true });
-  
+  const resize = () => { const r = ct.getBoundingClientRect(); cv.width = r.width; cv.height = r.height; };
+  resize(); window.addEventListener('resize', resize, { passive: true });
   spawnDots();
-  
   setInterval(() => {
-    rdots.forEach(d => {
-      d.vx = d.vx * 0.88 + (Math.random() - 0.5) * 0.3;
-      d.vy = d.vy * 0.88 + (Math.random() - 0.5) * 0.3;
-      d.x = Math.max(9, Math.min(91, d.x + d.vx));
-      d.y = Math.max(9, Math.min(91, d.y + d.vy));
-      if (d.el) {
-        d.el.style.left = d.x + '%';
-        d.el.style.top = d.y + '%';
-      }
-    });
+    rdots.forEach(d => { d.vx = d.vx * 0.88 + (Math.random() - 0.5) * 0.3; d.vy = d.vy * 0.88 + (Math.random() - 0.5) * 0.3; d.x = Math.max(9, Math.min(91, d.x + d.vx)); d.y = Math.max(9, Math.min(91, d.y + d.vy)); if (d.el) { d.el.style.left = d.x + '%'; d.el.style.top = d.y + '%'; } });
   }, 100);
-  
   needleA = Math.random() * Math.PI * 2;
   trail.fill(needleA);
   radarLoop(cv);
 }
 
 function spawnDots() {
-  const c = document.querySelector('.radar-cont');
-  if (!c) return;
-  
-  let dotsContainer = document.getElementById('radarDots');
-  if (!dotsContainer) {
-    dotsContainer = document.createElement('div');
-    dotsContainer.className = 'radar-dots';
-    dotsContainer.id = 'radarDots';
-    c.appendChild(dotsContainer);
-  }
-  
-  dotsContainer.innerHTML = '';
-  rdots = [];
-  
-  const types = ['ai', 'purple', 'red', 'lime'];
-  const n = 5 + rnd(5);
-  
+  const c = document.querySelector('.radar-cont'); if (!c) return;
+  let dotsContainer = $('radarDots'); if (!dotsContainer) { dotsContainer = document.createElement('div'); dotsContainer.className = 'radar-dots'; dotsContainer.id = 'radarDots'; c.appendChild(dotsContainer); }
+  dotsContainer.innerHTML = ''; rdots = [];
+  const types = ['ai', 'purple', 'red', 'lime'], n = 5 + rnd(5);
   for (let i = 0; i < n + 2; i++) {
-    const a = Math.random() * Math.PI * 2;
-    const d = 12 + Math.random() * 70;
-    const x = 50 + Math.cos(a) * d / 2;
-    const y = 50 + Math.sin(a) * d / 2;
-    
-    const dot = document.createElement('div');
-    const type = types[rnd(types.length)];
+    const a = Math.random() * Math.PI * 2, d = 12 + Math.random() * 70, x = 50 + Math.cos(a) * d / 2, y = 50 + Math.sin(a) * d / 2;
+    const dot = document.createElement('div'), type = types[rnd(types.length)];
     dot.className = 'radar-dot ' + type;
-    dot.style.left = x + '%';
-    dot.style.top = y + '%';
-    
+    dot.style.left = x + '%'; dot.style.top = y + '%';
     dotsContainer.appendChild(dot);
-    
-    rdots.push({
-      el: dot,
-      x, y,
-      vx: 0, vy: 0,
-      type,
-      id: i
-    });
+    rdots.push({ el: dot, x, y, vx: 0, vy: 0, type, id: i });
   }
 }
 
 function radarLoop(cv) {
   const ctx = cv.getContext('2d');
-  
   function draw() {
-    const W = cv.width;
-    const H = cv.height;
-    const cx = W / 2;
-    const cy = H / 2;
-    const R = Math.min(cx, cy) * 0.88;
-    
-    if (!W || !H) {
-      radarRAF = requestAnimationFrame(draw);
-      return;
-    }
-    
+    const W = cv.width, H = cv.height, cx = W / 2, cy = H / 2, R = Math.min(cx, cy) * 0.88;
+    if (!W || !H) { radarRAF = requestAnimationFrame(draw); return; }
     phA += 0.007;
-    phB += 0.013;
-    phC += 0.041;
-    
-    needleO += (BASE_OM * (1 + Math.sin(phA) * 0.35 + Math.sin(phB) * 0.18 + Math.sin(phC) * 0.04) - needleO) * 0.028;
+    needleO += (BASE_OM * (1 + Math.sin(phA) * 0.35) - needleO) * 0.028;
     needleA = (needleA + needleO) % (Math.PI * 2);
-    
-    trail[trailPtr] = needleA;
-    trailPtr = (trailPtr + 1) % TRAIL_CAP;
-    
-    ctx.fillStyle = 'rgba(2,10,2,0.18)';
-    ctx.fillRect(0, 0, W, H);
-    
+    trail[trailPtr] = needleA; trailPtr = (trailPtr + 1) % TRAIL_CAP;
+    ctx.fillStyle = 'rgba(2,10,2,0.18)'; ctx.fillRect(0, 0, W, H);
     for (let i = 0; i < TRAIL_CAP - 1; i++) {
-      const nw = (trailPtr - 1 - i + TRAIL_CAP) % TRAIL_CAP;
-      const ol = (trailPtr - 2 - i + TRAIL_CAP) % TRAIL_CAP;
-      const alpha = Math.pow(1 - i / TRAIL_CAP, 2.2) * 0.12;
-      
-      if (alpha < 0.002) break;
-      
-      let s = trail[ol];
-      let e = trail[nw];
-      let diff = e - s;
-      
-      if (diff > Math.PI) diff -= Math.PI * 2;
-      if (diff < -Math.PI) diff += Math.PI * 2;
-      if (Math.abs(diff) < 0.0001) continue;
-      
-      s = needleA - (i + 1) * needleO;
-      e = needleA - i * needleO;
-      if (s > e) { const tmp = s; s = e; e = tmp; }
-      
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.arc(0, 0, R, s, e, false);
-      ctx.closePath();
-      ctx.fillStyle = `rgba(0,229,255,${alpha})`;
-      ctx.fill();
-      ctx.restore();
+      const nw = (trailPtr - 1 - i + TRAIL_CAP) % TRAIL_CAP, ol = (trailPtr - 2 - i + TRAIL_CAP) % TRAIL_CAP;
+      const alpha = Math.pow(1 - i / TRAIL_CAP, 2.2) * 0.12; if (alpha < 0.002) break;
+      let s = trail[ol], e = trail[nw]; let diff = e - s;
+      if (diff > Math.PI) diff -= Math.PI * 2; if (diff < -Math.PI) diff += Math.PI * 2; if (Math.abs(diff) < 0.0001) continue;
+      s = needleA - (i + 1) * needleO; e = needleA - i * needleO; if (s > e) { const tmp = s; s = e; e = tmp; }
+      ctx.save(); ctx.translate(cx, cy); ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, R, s, e, false); ctx.closePath(); ctx.fillStyle = `rgba(0,229,255,${alpha})`; ctx.fill(); ctx.restore();
     }
-    
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(needleA);
-    ctx.shadowColor = 'rgba(0,229,255,0.95)';
-    ctx.shadowBlur = 12;
-    
-    const lg = ctx.createLinearGradient(0, 0, R, 0);
-    lg.addColorStop(0, 'rgba(0,229,255,1)');
-    lg.addColorStop(0.5, 'rgba(0,229,255,0.85)');
-    lg.addColorStop(0.8, 'rgba(0,229,255,0.4)');
-    lg.addColorStop(1, 'rgba(0,229,255,0)');
-    
-    ctx.beginPath();
-    ctx.moveTo(3, 0);
-    ctx.lineTo(R, 0);
-    ctx.strokeStyle = lg;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-    
-    ctx.shadowBlur = 20;
-    ctx.beginPath();
-    ctx.rect(-4, -4, 8, 8);
-    ctx.fillStyle = '#00e5ff';
-    ctx.fill();
-    ctx.restore();
-    
-    rdots.forEach((d, di) => {
-      const px = d.x / 100 * W;
-      const py = d.y / 100 * H;
-      
-      let da = Math.atan2(py - cy, px - cx);
-      if (da < 0) da += Math.PI * 2;
-      
-      let diff = needleA - da;
-      if (diff < 0) diff += Math.PI * 2;
-      
-      const age = dotGlow.get(di) ?? 999;
-      
-      if (diff < 0.18 && age > 30) {
-        dotGlow.set(di, 0);
-        if (d.el) {
-          d.el.classList.add('active');
-          setTimeout(() => {
-            if (d.el) d.el.classList.remove('active');
-          }, 800);
-        }
-      } else {
-        dotGlow.set(di, age + 1);
-      }
-      
-      if (age < 55) {
-        const t = age / 55;
-        const ga = (1 - t) * (1 - t) * 0.9;
-        if (ga < 0.01) return;
-        
-        let col;
-        if (d.type === 'purple') col = '191,90,242';
-        else if (d.type === 'red') col = '255,45,85';
-        else if (d.type === 'lime') col = '191,255,0';
-        else col = '0,229,255';
-        
-        const gr = ctx.createRadialGradient(px, py, 0, px, py, 16 * (1 - t) + 3);
-        gr.addColorStop(0, `rgba(${col},${ga})`);
-        gr.addColorStop(1, `rgba(${col},0)`);
-        
-        ctx.beginPath();
-        ctx.arc(px, py, 16 * (1 - t) + 3, 0, Math.PI * 2);
-        ctx.fillStyle = gr;
-        ctx.fill();
-      }
-    });
-    
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(needleA); ctx.shadowColor = 'rgba(0,229,255,0.95)'; ctx.shadowBlur = 12;
+    const lg = ctx.createLinearGradient(0, 0, R, 0); lg.addColorStop(0, 'rgba(0,229,255,1)'); lg.addColorStop(0.8, 'rgba(0,229,255,0.4)'); lg.addColorStop(1, 'rgba(0,229,255,0)');
+    ctx.beginPath(); ctx.moveTo(3, 0); ctx.lineTo(R, 0); ctx.strokeStyle = lg; ctx.lineWidth = 2; ctx.stroke();
+    ctx.shadowBlur = 20; ctx.beginPath(); ctx.rect(-4, -4, 8, 8); ctx.fillStyle = '#00e5ff'; ctx.fill(); ctx.restore();
     radarRAF = requestAnimationFrame(draw);
   }
-  
   radarRAF = requestAnimationFrame(draw);
 }
 
 // ==================== ONLINE COUNT ====================
-function updateOnlineCount() {
-  const el = $('onlineCount');
-  if (el) {
-    el.textContent = (Math.floor(Math.random() * 25) + 18) + ' ONLINE';
-  }
-}
+function updateOnlineCount() { const el = $('onlineCount'); if (el) el.textContent = (Math.floor(Math.random() * 25) + 18) + ' ONLINE'; }
 
 // ==================== VIBE CHECK ====================
-function startVibeCheck() {
-  chatPartner = null;
-  chatTimeLeft = 900;
-  chatHistory = [];
-  apiRetry = 0;
-  
-  if (fallbackTimer) clearTimeout(fallbackTimer);
-  
-  $('genderModal').classList.add('on');
-}
-
-function selectGender(el, g) {
-  document.querySelectorAll('.gender-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  currentGender = g;
-  $('confirmGenderBtn').disabled = false;
-}
-
-function updateSysMsg(text, emoji) {
-  const msgs = $('chatMessages');
-  const last = msgs.lastElementChild;
-  if (last && last.classList.contains('system-msg')) last.remove();
-  
-  const d = document.createElement('div');
-  d.className = 'chat-msg system-msg';
-  d.innerHTML = `<div class="chat-bubble">${emoji} ${text}</div>`;
-  msgs.appendChild(d);
-  d.scrollIntoView({ behavior: 'smooth' });
-}
+function startVibeCheck() { chatPartner = null; chatTimeLeft = 900; chatHistory = []; apiRetry = 0; if (fallbackTimer) clearTimeout(fallbackTimer); $('genderModal').classList.add('on'); }
+function selectGender(el, g) { document.querySelectorAll('.gender-card').forEach(c => c.classList.remove('selected')); el.classList.add('selected'); currentGender = g; $('confirmGenderBtn').disabled = false; }
+function updateSysMsg(text, emoji) { const msgs = $('chatMessages'); const last = msgs.lastElementChild; if (last && last.classList.contains('system-msg')) last.remove(); const d = document.createElement('div'); d.className = 'chat-msg system-msg'; d.innerHTML = `<div class="chat-bubble">${emoji} ${text}</div>`; msgs.appendChild(d); d.scrollIntoView({ behavior: 'smooth' }); }
 
 function confirmGender() {
   if (!currentGender) return;
-  
   closeModal('genderModal');
   $('chatRoom').classList.add('on');
   $('partnerLabel').textContent = 'MENCARI...';
   $('chatTimer').textContent = '15:00';
   $('chatTimer').classList.remove('warn');
-  
   const msgs = $('chatMessages');
   msgs.innerHTML = `<div class="chat-msg system-msg">⚡ mengaktifkan radar pencarian...</div>`;
-  
   let detik = 0;
-  const cariUser = setInterval(() => {
-    detik += 3;
-    if (detik === 3) updateSysMsg("masih memindai...", "👀");
-    if (detik === 6) updateSysMsg("lingkungan sepi, radar melebar", "📡");
-    if (detik === 9) updateSysMsg("menjangkau radius 2km", "🌐");
-    if (detik === 12) updateSysMsg("hampir selesai...", "⏳");
-  }, 3000);
-  
+  const cariUser = setInterval(() => { detik += 3; if (detik === 3) updateSysMsg("masih memindai...", "👀"); if (detik === 6) updateSysMsg("lingkungan sepi, radar melebar", "📡"); if (detik === 9) updateSysMsg("menjangkau radius 2km", "🌐"); if (detik === 12) updateSysMsg("hampir selesai...", "⏳"); }, 3000);
   fallbackTimer = setTimeout(() => {
     clearInterval(cariUser);
-    
     if (!chatPartner) {
       msgs.innerHTML = '';
-      
       const chars = AI_CHARS[currentGender];
-      chatPartner = {
-        name: chars[rnd(chars.length)],
-        isAI: true
-      };
-      
+      chatPartner = { name: chars[rnd(chars.length)], isAI: true };
       $('partnerLabel').textContent = '@' + chatPartner.name;
-      
-      const d = document.createElement('div');
-      d.className = 'chat-msg system-msg';
-      d.innerHTML = '<div class="chat-bubble" style="background:rgba(0,229,255,.08);border:2px solid var(--as)">👤 seseorang ditemukan!</div>';
-      msgs.appendChild(d);
-      
-      setTimeout(() => {
-        msgs.innerHTML = '';
-        callChatAPI('', true);
-        startTimer();
-      }, 1000);
+      const d = document.createElement('div'); d.className = 'chat-msg system-msg'; d.innerHTML = '<div class="chat-bubble" style="background:rgba(0,229,255,.08);border:2px solid var(--as)">👤 seseorang ditemukan!</div>'; msgs.appendChild(d);
+      setTimeout(() => { msgs.innerHTML = ''; callChatAPI('', true); startTimer(); }, 1000);
     }
   }, 15000);
 }
 
 function startTimer() {
   clearInterval(timerInterval);
-  
   timerInterval = setInterval(() => {
-    if (chatTimeLeft <= 0) {
-      endChat();
-      return;
-    }
-    
+    if (chatTimeLeft <= 0) { endChat(); return; }
     chatTimeLeft--;
-    
-    const m = Math.floor(chatTimeLeft / 60);
-    const s = chatTimeLeft % 60;
+    const m = Math.floor(chatTimeLeft / 60), s = chatTimeLeft % 60;
     $('chatTimer').textContent = `${m}:${s.toString().padStart(2, '0')}`;
-    
-    if (chatTimeLeft === 60) {
-      $('chatTimer').classList.add('warn');
-    }
+    if (chatTimeLeft === 60) $('chatTimer').classList.add('warn');
   }, 1000);
 }
 
 function endChat() {
   clearInterval(timerInterval);
-  
-  if (checkSub()) {
-    chatTimeLeft = 900;
-    $('chatTimer').textContent = '15:00';
-    $('chatTimer').classList.remove('warn');
-    return;
-  }
-  
-  const d = document.createElement('div');
-  d.className = 'chat-msg system-msg';
-  d.innerHTML = `
-    <div class="chat-bubble" style="background:var(--sfe);padding:20px">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;margin-bottom:12px">WAKTU ABIS ⏰</div>
-      <div style="margin-bottom:16px">mau lanjut ngobrol? subscribe dulu yuk~</div>
-      <button onclick="closeChat()" style="width:100%;padding:14px;background:var(--ap);color:#fff;border:2px solid #000;cursor:pointer">TUTUP</button>
-    </div>
-  `;
-  $('chatMessages').appendChild(d);
-  d.scrollIntoView({ behavior: 'smooth' });
+  if (checkSub()) { chatTimeLeft = 900; $('chatTimer').textContent = '15:00'; $('chatTimer').classList.remove('warn'); return; }
+  const d = document.createElement('div'); d.className = 'chat-msg system-msg';
+  d.innerHTML = `<div class="chat-bubble" style="background:var(--sfe);padding:20px"><div style="font-family:\'Bebas Neue\',sans-serif;font-size:28px;margin-bottom:12px">WAKTU ABIS ⏰</div><div style="margin-bottom:16px">mau lanjut ngobrol? subscribe dulu yuk~</div><button onclick="closeChat()" style="width:100%;padding:14px;background:var(--ap);color:#fff;border:2px solid #000;cursor:pointer">TUTUP</button></div>`;
+  $('chatMessages').appendChild(d); d.scrollIntoView({ behavior: 'smooth' });
 }
 
 function closeChat() {
   $('chatRoom').classList.remove('on');
-  clearInterval(timerInterval);
-  clearTimeout(fallbackTimer);
-  isTyping = false;
-  apiRetry = 0;
-  
-  const sb = $('sendButton');
-  const inp = $('chatInput');
+  clearInterval(timerInterval); clearTimeout(fallbackTimer);
+  isTyping = false; apiRetry = 0;
+  const sb = $('sendButton'), inp = $('chatInput');
   if (sb) sb.classList.remove('disabled');
   if (inp) inp.disabled = false;
 }
@@ -1780,186 +1475,63 @@ function closeChat() {
 // ==================== CHAT API ====================
 async function callChatAPI(userMsg, isFirst = false) {
   if (!chatPartner || !chatPartner.isAI || isTyping) return;
-  
   isTyping = true;
-  
-  const sb = $('sendButton');
-  const inp = $('chatInput');
+  const sb = $('sendButton'), inp = $('chatInput');
   if (sb) sb.classList.add('disabled');
   if (inp) inp.disabled = true;
-  
   const msgs = $('chatMessages');
-  
-  const td = document.createElement('div');
-  td.className = 'chat-msg other';
-  td.innerHTML = '<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-  msgs.appendChild(td);
-  td.scrollIntoView({ behavior: 'smooth' });
-  
+  const td = document.createElement('div'); td.className = 'chat-msg other'; td.innerHTML = '<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+  msgs.appendChild(td); td.scrollIntoView({ behavior: 'smooth' });
   let reply = null;
-  
   try {
-    const lastMessages = chatHistory.slice(-6).map(m => ({
-      role: m.role,
-      content: m.content
-    }));
-    
+    const lastMessages = chatHistory.slice(-6).map(m => ({ role: m.role, content: m.content }));
     const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: isFirst ? 'halo' : userMsg,
-        characterName: chatPartner.name,
-        userName: myUsername || 'user',
-        lastMessages: lastMessages
-      })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: isFirst ? 'halo' : userMsg, characterName: chatPartner.name, userName: myUsername || 'user', lastMessages })
     });
-    
-    if (res.ok) {
-      const data = await res.json();
-      reply = data.reply;
-      apiRetry = 0;
-    } else {
-      console.warn('API error:', res.status);
-    }
-  } catch (e) {
-    console.warn('API fetch error:', e);
-  }
-  
+    if (res.ok) { const data = await res.json(); reply = data.reply; apiRetry = 0; }
+  } catch (e) { console.warn('API fetch error:', e); }
   if (!reply) {
     apiRetry++;
-    
-    if (isFirst) {
-      const firstName = chatPartner.name.split('.')[0];
-      const greetings = [
-        `halo! gue ${firstName}. seneng bisa ngobrol sama lo 😊`,
-        `hai hai, gue ${firstName}. lagi ngapain?`,
-        `eh halo, akhirnya ada yang nyapa 😄 gue ${firstName}`
-      ];
-      reply = greetings[rnd(greetings.length)];
-    } else {
-      reply = getOfflineReply(userMsg);
-    }
-    
-    if (apiRetry >= 2) {
-      toast('⚡ mode offline', true);
-    }
+    if (isFirst) { const firstName = chatPartner.name.split('.')[0]; const greetings = [`halo! gue ${firstName}. seneng bisa ngobrol sama lo 😊`, `hai hai, gue ${firstName}. lagi ngapain?`, `eh halo, akhirnya ada yang nyapa 😄 gue ${firstName}`]; reply = greetings[rnd(greetings.length)]; }
+    else reply = getOfflineReply(userMsg);
+    if (apiRetry >= 2) toast('⚡ mode offline', true);
   }
-  
-  td.remove();
-  await sleep(400 + Math.random() * 500);
-  
-  const msgDiv = document.createElement('div');
-  msgDiv.className = 'chat-msg other';
-  
-  const bubble = document.createElement('div');
-  bubble.className = 'chat-bubble';
-  bubble.textContent = '';
-  
-  msgDiv.appendChild(bubble);
-  msgs.appendChild(msgDiv);
-  
+  td.remove(); await sleep(400 + Math.random() * 500);
+  const msgDiv = document.createElement('div'); msgDiv.className = 'chat-msg other';
+  const bubble = document.createElement('div'); bubble.className = 'chat-bubble'; bubble.textContent = '';
+  msgDiv.appendChild(bubble); msgs.appendChild(msgDiv);
   await typeMessage(bubble, reply);
-  
-  if (!isFirst) {
-    chatHistory.push({ role: 'user', content: userMsg });
-  }
+  if (!isFirst) chatHistory.push({ role: 'user', content: userMsg });
   chatHistory.push({ role: 'assistant', content: reply });
-  
   isTyping = false;
   if (sb) sb.classList.remove('disabled');
-  if (inp) {
-    inp.disabled = false;
-    inp.focus();
-  }
+  if (inp) { inp.disabled = false; inp.focus(); }
 }
 
 function sendMsg() {
-  if (isTyping) {
-    toast('Tunggu partner selesai ngetik...', true);
-    return;
-  }
-  
-  if (!chatPartner) {
-    toast('Partner belum ditemukan', true);
-    return;
-  }
-  
-  const inp = $('chatInput');
-  const text = inp.value.trim();
-  
+  if (isTyping) { toast('Tunggu partner selesai ngetik...', true); return; }
+  if (!chatPartner) { toast('Partner belum ditemukan', true); return; }
+  const inp = $('chatInput'), text = inp.value.trim();
   if (!text) return;
-  
   const msgs = $('chatMessages');
-  
-  const d = document.createElement('div');
-  d.className = 'chat-msg own';
-  d.innerHTML = `<div class="chat-bubble">${escapeHtml(text)}</div>`;
-  msgs.appendChild(d);
-  d.scrollIntoView({ behavior: 'smooth' });
-  
+  const d = document.createElement('div'); d.className = 'chat-msg own'; d.innerHTML = `<div class="chat-bubble">${escapeHtml(text)}</div>`;
+  msgs.appendChild(d); d.scrollIntoView({ behavior: 'smooth' });
   inp.value = '';
-  
   chatHistory.push({ role: 'user', content: text });
-  
-  if (chatPartner.isAI) {
-    callChatAPI(text, false);
-  }
+  if (chatPartner.isAI) callChatAPI(text, false);
 }
 
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', () => {
-  loadSub();
-  initSupabase();
-  initRadar();
-  refreshSpills();
-  updateOnlineCount();
-  
-  // SETUP VIBE SLIDER
-  const slider = $('vibeSlider');
-  if (slider) {
-    slider.addEventListener('input', (e) => updateVibePct(e.target.value));
-  }
-  
-  // FILTER MOOD
-  document.querySelectorAll('.mood-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.mood-chip').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      activeMood = btn.dataset.mood;
-      renderSpills();
-    });
-  });
-  
-  // CHAT INPUT ENTER
-  $('chatInput')?.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMsg();
-    }
-  });
-  
-  // UPDATE ONLINE COUNT
+  loadSub(); initSupabase(); initRadar(); refreshSpills(); updateOnlineCount();
+  const slider = $('vibeSlider'); if (slider) slider.addEventListener('input', (e) => updateVibePct(e.target.value));
+  document.querySelectorAll('.mood-chip').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.mood-chip').forEach(b => b.classList.remove('active')); btn.classList.add('active'); activeMood = btn.dataset.mood; renderSpills(); }));
+  $('chatInput')?.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); } });
   setInterval(updateOnlineCount, 30000);
-  
-  // REFRESH REAL ENTRIES
-  setInterval(() => {
-    if (realEntries.length > 0) loadRealEntries();
-  }, 30000);
-  
-  // GENERATE SPILL KARAKTER BARU
-  setInterval(() => {
-    const newSpills = generateCharacterSpills(2);
-    fillerEntries = [...newSpills, ...fillerEntries].slice(0, 20);
-    renderSpills();
-  }, 300000);
-  
-  // CLEANUP
-  window.addEventListener('beforeunload', () => {
-    if (radarRAF) cancelAnimationFrame(radarRAF);
-    clearInterval(timerInterval);
-    clearTimeout(fallbackTimer);
-  });
+  setInterval(() => { if (realEntries.length > 0) loadRealEntries(); }, 30000);
+  setInterval(() => { const newSpills = generateCharacterSpills(2); fillerEntries = [...newSpills, ...fillerEntries].slice(0, 20); renderSpills(); }, 300000);
+  window.addEventListener('beforeunload', () => { if (radarRAF) cancelAnimationFrame(radarRAF); clearInterval(timerInterval); clearTimeout(fallbackTimer); });
 });
 </script>
 </body>
