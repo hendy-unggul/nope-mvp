@@ -40,66 +40,6 @@ body::after{
 }
 
 /* ════════════════════
-   HEADER (glitch.html style)
-════════════════════ */
-#hdr{
-  position:fixed;top:0;left:0;right:0;z-index:600;
-  background:var(--k);height:52px;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 clamp(12px,4vw,24px);
-  border-bottom:3px solid var(--brd);
-  overflow:visible;
-}
-/* rainbow top stripe */
-#hdr::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,#CC1A0A 0%,#F5C518 25%,#1AFF5E 50%,#00C8FF 75%,#BC8CFF 100%);
-}
-/* drip */
-#hdr::after{
-  content:'';position:absolute;bottom:-10px;left:23%;
-  width:6px;height:10px;background:var(--r);border-radius:0 0 50% 50%;
-  animation:drip 3.5s ease-in-out infinite;z-index:601;
-}
-@keyframes drip{0%,100%{height:10px;opacity:1}50%{height:18px;opacity:.7}}
-
-.hdr-logo{display:flex;align-items:center;gap:6px;text-decoration:none;}
-.hdr-logo-txt{
-  font-family:var(--ant);font-size:clamp(20px,5vw,28px);font-weight:900;
-  letter-spacing:.04em;color:var(--w);text-transform:uppercase;
-  display:flex;align-items:center;
-}
-.hdr-bolt{color:var(--y);}
-.hdr-tag{
-  background:var(--r);padding:2px 7px;
-  font-family:var(--bc);font-size:8px;font-weight:800;
-  letter-spacing:.1em;color:#fff;text-transform:uppercase;
-  transform:rotate(-2deg);white-space:nowrap;
-}
-.hdr-right{display:flex;align-items:center;gap:8px;}
-.hdr-pill{
-  background:var(--y);color:#000;border:none;
-  font-family:var(--bc);font-size:10px;font-weight:800;
-  letter-spacing:.08em;text-transform:uppercase;
-  padding:4px 11px;cursor:pointer;
-}
-.hdr-icon{
-  width:30px;height:30px;background:var(--k2);border:1px solid var(--brd);
-  display:flex;align-items:center;justify-content:center;
-  font-size:12px;color:var(--w);cursor:pointer;
-}
-
-/* page indicator strip below header */
-#pgstrip{
-  position:fixed;top:52px;left:0;right:0;z-index:599;
-  height:3px;background:var(--brd2);
-}
-#pgstrip-fill{
-  height:100%;background:var(--r);
-  transition:width .46s cubic-bezier(.86,0,.07,1);
-}
-
-/* ════════════════════
    BOTTOM NAV (glitch.html style)
 ════════════════════ */
 #botnav{
@@ -123,30 +63,12 @@ body::after{
 .bn.act::before{width:50%;}
 .bn-icon{font-size:16px;line-height:1;}
 
-/* tab nav between header and book */
-#tabs{
-  position:fixed;top:55px;left:0;right:0;z-index:598;
-  background:var(--k);border-bottom:2px solid var(--brd);
-  display:flex;height:42px;
-}
-.tb{
-  flex:1;display:flex;align-items:center;justify-content:center;gap:5px;
-  font-family:var(--bc);font-size:clamp(10px,2.5vw,12px);font-weight:800;
-  letter-spacing:.1em;text-transform:uppercase;
-  color:#3C3830;border:none;background:none;cursor:pointer;
-  border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;
-}
-.tb:hover{color:#7A7268;}
-.tb.act{color:var(--w);border-bottom-color:var(--r);}
-.tb.act:nth-child(2){border-bottom-color:var(--c);}
-.tb.act:nth-child(3){border-bottom-color:var(--g);}
-
 /* ════════════════════
    BOOK / SWIPE
 ════════════════════ */
 #book{
   position:fixed;
-  top:97px;   /* header 52 + tabs 42 + pgstrip 3 */
+  top:0;
   bottom:56px;
   left:0;right:0;
   display:flex;
@@ -746,31 +668,11 @@ body::after{
 </head>
 <body>
 
-<!-- ════════════════════
-     HEADER
-════════════════════ -->
-<header id="hdr">
-  <a class="hdr-logo" href="#">
-    <div class="hdr-logo-txt">GL<span class="hdr-bolt">⚡</span>TCH</div>
-    <div class="hdr-tag">No Cap Just Vibes</div>
-  </a>
-  <div class="hdr-right">
-    <button class="hdr-pill">@over.joyed</button>
-    <div class="hdr-icon">▲</div>
-  </div>
-</header>
 
-<!-- page progress strip -->
-<div id="pgstrip"><div id="pgstrip-fill"></div></div>
 
-<!-- ════════════════════
-     TAB NAV
-════════════════════ -->
-<div id="tabs">
-  <button class="tb act" onclick="goSection(0)"><span>⚡</span> FAST FWD</button>
-  <button class="tb" onclick="goSection(1)"><span>💬</span> SLOW CODE</button>
-  <button class="tb" onclick="goSection(2)"><span>🔥</span> AKSI</button>
 </div>
+
+
 
 <!-- ════════════════════
      BOOK
@@ -1108,17 +1010,9 @@ function ui(){
   ind.querySelectorAll('.id-dot').forEach((d,i)=>{
     d.className='id-dot'+(i===cur?' a':'');
   });
-  /* tabs */
-  const s=SEC[cur];
-  document.querySelectorAll('.tb').forEach((b,i)=>b.classList.toggle('act',i===s));
-  /* progress strip */
-  document.getElementById('pgstrip-fill').style.width=((cur/(N-1))*100)+'%';
+
 }
 
-/* ── TAB NAV ── */
-function goSection(n){
-  goTo(TAB_PAGE[n]);
-}
 
 /* ── TOUCH ── */
 BOOK.addEventListener('touchstart',e=>{
