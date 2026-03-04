@@ -209,32 +209,77 @@ body {
   justify-content: space-between;
 }
 
-/* FILTER SECTION */
+/* FILTER SECTION - DENGAN SLIDER */
 .filter-sect {
   padding: 18px;
   border-bottom: 2px solid var(--bd);
+}
+
+.filter-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
 }
 
 .filter-title {
   font-family: 'DM Mono', monospace;
   font-size: 9px;
   color: var(--txs);
-  margin-bottom: 14px;
-  display: flex;
-  justify-content: space-between;
+  letter-spacing: 3px;
+  text-transform: uppercase;
 }
 
 .match-pct {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 26px;
   color: var(--ap);
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.vibe-slider {
+  width: 100%;
+  height: 3px;
+  background: var(--bd2);
+  outline: none;
+  -webkit-appearance: none;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.vibe-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--ap);
+  border: 3px solid var(--bg);
+  border-radius: 0;
+  box-shadow: 0 0 0 2px var(--ap), 3px 3px 0 #000;
+  margin-top: -9px;
+  cursor: pointer;
+}
+
+.vibe-slider::-webkit-slider-runnable-track {
+  height: 3px;
+  background: linear-gradient(90deg, var(--ap) 0%, var(--ap) 87%, var(--bd2) 87%);
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--txm);
+  margin: 6px 0 16px;
+  letter-spacing: 1px;
 }
 
 .mood-scroll {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  margin: 16px -18px 0;
+  margin: 0 -18px;
   padding: 0 18px 4px;
   scrollbar-width: none;
 }
@@ -244,6 +289,7 @@ body {
 }
 
 .mood-chip {
+  flex-shrink: 0;
   padding: 8px 16px;
   background: var(--bg);
   border: 2px solid var(--bd2);
@@ -273,10 +319,25 @@ body {
   padding-bottom: calc(90px + var(--sb));
 }
 
+.sect-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 16px;
+}
+
 .sect-title {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 28px;
-  margin-bottom: 16px;
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+.sect-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--txm);
+  letter-spacing: 2px;
 }
 
 .spill-card {
@@ -386,7 +447,7 @@ body {
   color: var(--aq);
 }
 
-/* BOTTOM NAV */
+/* BOTTOM NAV - DIPERBAIKI */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -419,6 +480,8 @@ body {
   text-transform: uppercase;
   border-right: 2px solid var(--bd);
   position: relative;
+  cursor: pointer;
+  transition: all .12s;
 }
 
 .nav-item:last-child {
@@ -438,6 +501,10 @@ body {
   right: 0;
   height: 3px;
   background: var(--ap);
+}
+
+.nav-item:active {
+  background: rgba(255,45,85,.1);
 }
 
 .nav-icon {
@@ -826,24 +893,33 @@ body {
       <span>WHISPERER ✦</span>
     </button>
 
-    <!-- FILTER -->
+    <!-- FILTER DENGAN SLIDER -->
     <div class="filter-sect">
-      <div class="filter-title">
-        KESELARASAN 
+      <div class="filter-top">
+        <span class="filter-title">KESELARASAN</span>
         <span class="match-pct" id="vibePct">87%</span>
       </div>
-      <div class="mood-scroll" id="moodFilter">
-        <button class="mood-chip active" data-mood="all">SEMUA</button>
-        <button class="mood-chip" data-mood="surviving">😮‍💨 SURVIVING</button>
-        <button class="mood-chip" data-mood="thriving">✨ THRIVING</button>
-        <button class="mood-chip" data-mood="chaotic">🌀 CHAOTIC</button>
-        <button class="mood-chip" data-mood="doom">🛌 DOOM</button>
+      <input type="range" class="vibe-slider" id="vibeSlider" min="0" max="100" value="87" oninput="updateVibePct(this.value)">
+      <div class="slider-labels">
+        <span>HOMIE</span>
+        <span>SEMI</span>
+        <span>ALL</span>
+      </div>
+      <div class="mood-scroll">
+        <button class="mood-chip active" data-mood="all" onclick="filterMood(this)">SEMUA</button>
+        <button class="mood-chip" data-mood="surviving" onclick="filterMood(this)">😮‍💨 SURVIVING</button>
+        <button class="mood-chip" data-mood="thriving" onclick="filterMood(this)">✨ THRIVING</button>
+        <button class="mood-chip" data-mood="chaotic" onclick="filterMood(this)">🌀 CHAOTIC</button>
+        <button class="mood-chip" data-mood="doom" onclick="filterMood(this)">🛌 DOOM</button>
       </div>
     </div>
 
     <!-- SPILLS -->
     <div class="spills-sect">
-      <div class="sect-title">SPILL TERKINI</div>
+      <div class="sect-header">
+        <span class="sect-title">SPILL TERKINI</span>
+        <span class="sect-meta" id="feedMeta">MEMUAT...</span>
+      </div>
       <div id="spillsList">
         <div class="empty-state">
           <span class="empty-icon">🍃</span>
@@ -857,22 +933,22 @@ body {
     </div>
   </div>
 
-  <!-- BOTTOM NAV -->
+  <!-- BOTTOM NAV - DENGAN FUNGSI -->
   <nav class="bottom-nav">
     <div class="nav-container">
-      <a href="#" class="nav-item active">
+      <a href="#" class="nav-item active" onclick="navigateTo('spill', event)">
         <span class="nav-icon">✕</span>
         <span>SPILL</span>
       </a>
-      <a href="#" class="nav-item">
+      <a href="#" class="nav-item" onclick="navigateTo('jejak', event)">
         <span class="nav-icon">✦</span>
         <span>JEJAK</span>
       </a>
-      <a href="#" class="nav-item">
+      <a href="#" class="nav-item" onclick="navigateTo('glitch', event)">
         <span class="nav-icon">⚡</span>
         <span>GLITCH</span>
       </a>
-      <a href="#" class="nav-item">
+      <a href="#" class="nav-item" onclick="navigateTo('cocomeo', event)">
         <span class="nav-icon">〜</span>
         <span>COCOMEO</span>
       </a>
@@ -983,7 +1059,25 @@ const SPILLS = [
 const MOODS = ['surviving', 'thriving', 'chaotic', 'doom'];
 const NON_AI_NAMES = ['anon.kucing', 'sleepy.head', 'chaos.queen', 'quiet.one', 'anon.gelap', 'anon.kabur'];
 
-// ==================== OFFLINE RESPONSES (FALLBACK) ====================
+// ==================== NAVIGASI ====================
+function navigateTo(page, event) {
+  if (event) event.preventDefault();
+  
+  // HAPUS ACTIVE DARI SEMUA NAV ITEM
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  
+  // TAMBAH ACTIVE KE YANG DI KLIK
+  event.target.closest('.nav-item').classList.add('active');
+  
+  // SIMULASI NAVIGASI (GANTI URL)
+  setTimeout(() => {
+    window.location.href = page + '.html';
+  }, 200);
+}
+
+// ==================== OFFLINE RESPONSES ====================
 function getOfflineReply(msg) {
   msg = (msg || '').toLowerCase().trim();
   
@@ -1134,13 +1228,11 @@ function generateCharacterSpills(count) {
   const now = Date.now();
   
   for (let i = 0; i < count; i++) {
-    // 70% karakter AI, 30% anon (bukan user)
     const useAI = Math.random() < 0.7;
     const author = useAI 
       ? allAINames[Math.floor(Math.random() * allAINames.length)]
       : NON_AI_NAMES[Math.floor(Math.random() * NON_AI_NAMES.length)];
     
-    // BUAT TIMESTAMP ACAK (1-60 menit yang lalu)
     const minutesAgo = Math.floor(Math.random() * 60) + 1;
     const timestamp = now - (minutesAgo * 60 * 1000);
     
@@ -1165,7 +1257,7 @@ function generateCharacterSpills(count) {
   return spills;
 }
 
-// ==================== LOAD REAL ENTRIES (HANYA USER LAIN) ====================
+// ==================== LOAD REAL ENTRIES ====================
 async function loadRealEntries() {
   if (!sbClient) {
     renderSpills();
@@ -1185,7 +1277,6 @@ async function loadRealEntries() {
       return;
     }
     
-    // FILTER: HANYA AMBIL ENTRIES DARI USER LAIN (BUKAN USER SENDIRI)
     realEntries = (result.data || [])
       .filter(e => !myUserId || e.user_id !== myUserId)
       .map(e => {
@@ -1206,6 +1297,7 @@ async function loadRealEntries() {
         };
       });
     
+    $('feedMeta').textContent = realEntries.length + ' REAL';
     renderSpills();
   } catch (err) {
     console.warn('loadRealEntries error:', err.message);
@@ -1215,14 +1307,8 @@ async function loadRealEntries() {
 
 // ==================== REACTIONS ====================
 function react(id, key) {
-  // CARI DI REAL ENTRIES
   let entry = realEntries.find(e => e.id === id);
-  
-  // KALAU GA ADA, CARI DI FILLER ENTRIES
-  if (!entry) {
-    entry = fillerEntries.find(e => e.id === id);
-  }
-  
+  if (!entry) entry = fillerEntries.find(e => e.id === id);
   if (!entry) return;
   
   const wasActive = entry.userReacted === key;
@@ -1241,48 +1327,34 @@ function react(id, key) {
   
   renderSpills();
   
-  // KALAU REAL ENTRIES, SIMPAN KE DATABASE
   if (entry.isReal && sbClient) {
     sbClient.from('entries').update({ reactions: entry.reactions }).eq('id', entry.dbId)
       .catch(e => console.error('React error:', e));
   }
 }
 
-// ==================== RENDER SPILLS (FIFO - TERBARU DI ATAS) ====================
+// ==================== RENDER SPILLS ====================
 function renderSpills() {
   const list = $('spillsList');
   if (!list) return;
   
-  // 1. AMBIL REAL ENTRIES (USER LAIN)
   let allSpills = [...realEntries];
-  
-  // 2. HITUNG KEBUTUHAN SPILL BERDASARKAN WAKTU
   const targetCount = getSpillFrequency();
   const currentCount = allSpills.length;
   const neededCount = Math.max(0, targetCount - currentCount);
   
-  // 3. GENERATE SPILL KARAKTER SESUAI KEBUTUHAN
   if (neededCount > 0) {
     const newCharSpills = generateCharacterSpills(neededCount);
-    
-    // GABUNGKAN DENGAN YANG LAMA
     fillerEntries = [...newCharSpills, ...fillerEntries].slice(0, 20);
     allSpills = [...allSpills, ...fillerEntries];
   }
   
-  // 4. URUTKAN BERDASARKAN TIMESTAMP (TERBARU DI ATAS - FIFO)
-  allSpills.sort((a, b) => {
-    const timeA = a.timestamp || 0;
-    const timeB = b.timestamp || 0;
-    return timeB - timeA;
-  });
+  allSpills.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
   
-  // 5. FILTER BERDASARKAN MOOD
   let filtered = activeMood === 'all' 
     ? allSpills 
     : allSpills.filter(s => s.mood === activeMood);
   
-  // 6. BATASI JUMLAH YANG DITAMPILKAN
   filtered = filtered.slice(0, 8);
   
   if (!filtered.length) {
@@ -1296,15 +1368,13 @@ function renderSpills() {
     return;
   }
   
-  // 7. RENDER DENGAN FORMAT YANG BENAR
   list.innerHTML = filtered.map(s => {
     const aiLabel = s.isAI ? ' 🤖' : '';
     
     const reactHtml = Object.entries(REACT_EMO).map(([k, em]) => {
       const isAct = s.userReacted === k ? ' active' : '';
       return `
-        <button class="react-btn${isAct}" 
-                onclick="react('${s.id}','${k}')">
+        <button class="react-btn${isAct}" onclick="react('${s.id}','${k}')">
           ${em}<span class="react-count">${s.reactions[k] || 0}</span>
         </button>
       `;
@@ -1332,11 +1402,7 @@ function escapeHtml(text) {
 // ==================== REFRESH SPILLS ====================
 async function refreshSpills() {
   toast('Memuat spill terbaru ☕');
-  
-  // RESET FILLER ENTRIES
   fillerEntries = [];
-  
-  // RELOAD DARI DATABASE
   await loadRealEntries();
 }
 
@@ -1617,7 +1683,6 @@ function confirmGender() {
   const msgs = $('chatMessages');
   msgs.innerHTML = `<div class="chat-msg system-msg">⚡ mengaktifkan radar pencarian...</div>`;
   
-  // TIMER 15 DETIK CARI USER
   let detik = 0;
   const cariUser = setInterval(() => {
     detik += 3;
@@ -1627,7 +1692,6 @@ function confirmGender() {
     if (detik === 12) updateSysMsg("hampir selesai...", "⏳");
   }, 3000);
   
-  // FALLBACK KE AI KARAKTER
   fallbackTimer = setTimeout(() => {
     clearInterval(cariUser);
     
@@ -1726,7 +1790,6 @@ async function callChatAPI(userMsg, isFirst = false) {
   
   const msgs = $('chatMessages');
   
-  // TYPING INDICATOR
   const td = document.createElement('div');
   td.className = 'chat-msg other';
   td.innerHTML = '<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
@@ -1763,7 +1826,6 @@ async function callChatAPI(userMsg, isFirst = false) {
     console.warn('API fetch error:', e);
   }
   
-  // FALLBACK OFFLINE
   if (!reply) {
     apiRetry++;
     
@@ -1784,11 +1846,9 @@ async function callChatAPI(userMsg, isFirst = false) {
     }
   }
   
-  // HAPUS TYPING INDICATOR
   td.remove();
   await sleep(400 + Math.random() * 500);
   
-  // TAMPILKAN RESPONS
   const msgDiv = document.createElement('div');
   msgDiv.className = 'chat-msg other';
   
@@ -1801,13 +1861,11 @@ async function callChatAPI(userMsg, isFirst = false) {
   
   await typeMessage(bubble, reply);
   
-  // SIMPAN KE HISTORY
   if (!isFirst) {
     chatHistory.push({ role: 'user', content: userMsg });
   }
   chatHistory.push({ role: 'assistant', content: reply });
   
-  // RESET STATE
   isTyping = false;
   if (sb) sb.classList.remove('disabled');
   if (inp) {
@@ -1834,7 +1892,6 @@ function sendMsg() {
   
   const msgs = $('chatMessages');
   
-  // TAMPILKAN PESAN USER
   const d = document.createElement('div');
   d.className = 'chat-msg own';
   d.innerHTML = `<div class="chat-bubble">${escapeHtml(text)}</div>`;
@@ -1857,6 +1914,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initRadar();
   refreshSpills();
   updateOnlineCount();
+  
+  // SETUP VIBE SLIDER
+  const slider = $('vibeSlider');
+  if (slider) {
+    slider.addEventListener('input', (e) => updateVibePct(e.target.value));
+  }
   
   // FILTER MOOD
   document.querySelectorAll('.mood-chip').forEach(btn => {
@@ -1884,15 +1947,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (realEntries.length > 0) loadRealEntries();
   }, 30000);
   
-  // GENERATE SPILL KARAKTER BARU SETIAP 5 MENIT
+  // GENERATE SPILL KARAKTER BARU
   setInterval(() => {
-    const targetCount = getSpillFrequency();
     const newSpills = generateCharacterSpills(2);
     fillerEntries = [...newSpills, ...fillerEntries].slice(0, 20);
     renderSpills();
   }, 300000);
   
-  // CLEANUP ON UNLOAD
+  // CLEANUP
   window.addEventListener('beforeunload', () => {
     if (radarRAF) cancelAnimationFrame(radarRAF);
     clearInterval(timerInterval);
