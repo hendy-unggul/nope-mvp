@@ -3,561 +3,519 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>GLITCH V.001</title>
+<title>GL⚡TCH V.001</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500;600;700&family=Special+Elite&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400&family=Barlow:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;600;700&family=Space+Mono:wght@400;700&family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400&family=Barlow:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Special+Elite&display=swap" rel="stylesheet">
 <style>
+/* ─── RESET ─── */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;}
+
+/* ─── VARS ─── */
 :root{
-  --k:#0D0A09;
-  --k2:#1A1410;
-  --w:#F2EDE3;
+  --k:#0A0806;
+  --k2:#141210;
+  --w:#F0EBE0;
   --w2:#E8E0D0;
   --r:#CC1A0A;
   --rb:#A80E00;
   --y:#F5C518;
+  --g:#1AFF5E;
+  --c:#00C8FF;
+  --brd:#2A2520;
+  --brd2:#1E1C18;
   --ant:'Anton',sans-serif;
   --osw:'Oswald',sans-serif;
   --bc:'Barlow Condensed',sans-serif;
   --bar:'Barlow',sans-serif;
+  --mono:'Space Mono',monospace;
   --spe:'Special Elite',cursive;
 }
-html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var(--bar);}
 
-/* ── GRAIN ── */
+/* ─── GRAIN ─── */
 body::after{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:9997;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.09'/%3E%3C/svg%3E");
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
   mix-blend-mode:multiply;
 }
 
-/* ── BOOK ── */
+/* ════════════════════
+   HEADER (glitch.html style)
+════════════════════ */
+#hdr{
+  position:fixed;top:0;left:0;right:0;z-index:600;
+  background:var(--k);height:52px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 clamp(12px,4vw,24px);
+  border-bottom:3px solid var(--brd);
+  overflow:visible;
+}
+/* rainbow top stripe */
+#hdr::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#CC1A0A 0%,#F5C518 25%,#1AFF5E 50%,#00C8FF 75%,#BC8CFF 100%);
+}
+/* drip */
+#hdr::after{
+  content:'';position:absolute;bottom:-10px;left:23%;
+  width:6px;height:10px;background:var(--r);border-radius:0 0 50% 50%;
+  animation:drip 3.5s ease-in-out infinite;z-index:601;
+}
+@keyframes drip{0%,100%{height:10px;opacity:1}50%{height:18px;opacity:.7}}
+
+.hdr-logo{display:flex;align-items:center;gap:6px;text-decoration:none;}
+.hdr-logo-txt{
+  font-family:var(--ant);font-size:clamp(20px,5vw,28px);font-weight:900;
+  letter-spacing:.04em;color:var(--w);text-transform:uppercase;
+  display:flex;align-items:center;
+}
+.hdr-bolt{color:var(--y);}
+.hdr-tag{
+  background:var(--r);padding:2px 7px;
+  font-family:var(--bc);font-size:8px;font-weight:800;
+  letter-spacing:.1em;color:#fff;text-transform:uppercase;
+  transform:rotate(-2deg);white-space:nowrap;
+}
+.hdr-right{display:flex;align-items:center;gap:8px;}
+.hdr-pill{
+  background:var(--y);color:#000;border:none;
+  font-family:var(--bc);font-size:10px;font-weight:800;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:4px 11px;cursor:pointer;
+}
+.hdr-icon{
+  width:30px;height:30px;background:var(--k2);border:1px solid var(--brd);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:var(--w);cursor:pointer;
+}
+
+/* page indicator strip below header */
+#pgstrip{
+  position:fixed;top:52px;left:0;right:0;z-index:599;
+  height:3px;background:var(--brd2);
+}
+#pgstrip-fill{
+  height:100%;background:var(--r);
+  transition:width .46s cubic-bezier(.86,0,.07,1);
+}
+
+/* ════════════════════
+   BOTTOM NAV (glitch.html style)
+════════════════════ */
+#botnav{
+  position:fixed;bottom:0;left:0;right:0;z-index:600;
+  background:var(--k2);border-top:2px solid var(--brd);
+  display:flex;height:56px;
+}
+.bn{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;cursor:pointer;border:none;background:none;
+  font-family:var(--bc);font-size:9px;font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;color:#3C3830;
+  position:relative;transition:color .2s;text-decoration:none;
+}
+.bn::before{
+  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:0;height:2px;background:var(--y);transition:width .2s;
+}
+.bn:hover{color:#7A7268;}
+.bn.act{color:var(--y);}
+.bn.act::before{width:50%;}
+.bn-icon{font-size:16px;line-height:1;}
+
+/* tab nav between header and book */
+#tabs{
+  position:fixed;top:55px;left:0;right:0;z-index:598;
+  background:var(--k);border-bottom:2px solid var(--brd);
+  display:flex;height:42px;
+}
+.tb{
+  flex:1;display:flex;align-items:center;justify-content:center;gap:5px;
+  font-family:var(--bc);font-size:clamp(10px,2.5vw,12px);font-weight:800;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:#3C3830;border:none;background:none;cursor:pointer;
+  border-bottom:3px solid transparent;margin-bottom:-2px;transition:all .2s;
+}
+.tb:hover{color:#7A7268;}
+.tb.act{color:var(--w);border-bottom-color:var(--r);}
+.tb.act:nth-child(2){border-bottom-color:var(--c);}
+.tb.act:nth-child(3){border-bottom-color:var(--g);}
+
+/* ════════════════════
+   BOOK / SWIPE
+════════════════════ */
 #book{
-  position:fixed;inset:0;bottom:54px;
+  position:fixed;
+  top:97px;   /* header 52 + tabs 42 + pgstrip 3 */
+  bottom:56px;
+  left:0;right:0;
   display:flex;
   transition:transform .46s cubic-bezier(.86,0,.07,1);
   will-change:transform;cursor:grab;
 }
 #book:active{cursor:grabbing;}
 
-/* ── PAGE ── */
+/* ════════════════════
+   PAGE BASE
+════════════════════ */
 .pg{
   width:100vw;height:100%;
   flex-shrink:0;position:relative;overflow:hidden;user-select:none;
 }
 
-/* ── TORN EDGE (top) ── */
-.torn-top{
-  position:absolute;top:0;left:0;right:0;height:22px;z-index:20;
-  background:var(--w);
-  clip-path:polygon(0 0,2% 100%,5% 20%,9% 90%,13% 15%,17% 80%,21% 10%,26% 85%,30% 5%,35% 75%,39% 0%,44% 70%,48% 5%,53% 88%,57% 12%,62% 82%,66% 8%,71% 78%,75% 15%,80% 85%,84% 5%,88% 72%,93% 18%,97% 80%,100% 10%,100% 0);
-}
-.torn-bottom{
-  position:absolute;bottom:0;left:0;right:0;height:22px;z-index:20;
-  background:var(--w);
-  clip-path:polygon(0 100%,2% 0%,6% 80%,10% 5%,14% 85%,18% 10%,23% 90%,27% 15%,32% 80%,36% 5%,41% 75%,45% 0%,50% 80%,54% 10%,59% 90%,63% 8%,68% 82%,72% 12%,77% 85%,81% 5%,86% 75%,90% 20%,95% 85%,99% 10%,100% 100%);
-}
-.torn-top-dk{background:var(--k);}
-.torn-bottom-dk{background:var(--k);}
-
-/* ── SCAN LINES ── */
-.scanlines{
-  position:absolute;inset:0;pointer-events:none;z-index:18;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.12) 3px,rgba(0,0,0,.12) 4px);
-}
-
-/* ── PHOTO PLACEHOLDER ── */
+/* ─── PHOTO PLACEHOLDER ─── */
 .ph{
   width:100%;height:100%;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
 }
-.ph-dk{background:#1A1410;}
-.ph-md{background:#6B5E52;}
-.ph-lt{background:#A89A8A;}
-.ph svg{opacity:.22;}
-.ph-dk svg{stroke:rgba(255,255,255,.35);}
+.ph svg{opacity:.18;}
+.ph-dk{background:#161210;}
+.ph-dk svg{stroke:rgba(255,255,255,.3);}
+.ph-md{background:#3A3028;}
+.ph-md svg{stroke:rgba(255,255,255,.25);}
+.ph-lt{background:#7A6A5A;}
+.ph-lt svg{stroke:rgba(0,0,0,.25);}
 .ph-lbl{font-family:var(--bc);font-size:9px;letter-spacing:.18em;text-transform:uppercase;}
-.ph-dk .ph-lbl{color:rgba(255,255,255,.2);}
+.ph-dk .ph-lbl{color:rgba(255,255,255,.18);}
 .ph-md .ph-lbl,.ph-lt .ph-lbl{color:rgba(0,0,0,.2);}
 
-/* ── BARCODE SVG ── */
-.barcode{display:flex;gap:1px;align-items:flex-end;}
-.barcode span{background:currentColor;display:inline-block;}
+/* ─── TORN EDGE ─── */
+.torn-w{
+  position:absolute;left:0;right:0;height:22px;z-index:20;
+  background:var(--w);
+}
+.torn-w.top{top:0;clip-path:polygon(0 0,2% 100%,5% 20%,9% 90%,13% 15%,17% 80%,21% 10%,26% 85%,30% 5%,35% 75%,39% 0%,44% 70%,48% 5%,53% 88%,57% 12%,62% 82%,66% 8%,71% 78%,75% 15%,80% 85%,84% 5%,88% 72%,93% 18%,97% 80%,100% 10%,100% 0);}
+.torn-w.bot{bottom:0;clip-path:polygon(0 100%,2% 0%,6% 80%,10% 5%,14% 85%,18% 10%,23% 90%,27% 15%,32% 80%,36% 5%,41% 75%,45% 0%,50% 80%,54% 10%,59% 90%,63% 8%,68% 82%,72% 12%,77% 85%,81% 5%,86% 75%,90% 20%,95% 85%,99% 10%,100% 100%);}
+.torn-k{background:var(--k);}
+.torn-k2{background:var(--k2);}
+.torn-w2{background:var(--w2);}
 
-/* ── RED PAINT BRUSH STROKE ── */
-.brush{
-  position:absolute;
-  background:var(--r);
-  border-radius:2px 60% 2px 60% / 4px 40% 4px 40%;
-  opacity:.85;
-  transform-origin:center;
+/* scanlines */
+.scanlines{
+  position:absolute;inset:0;pointer-events:none;z-index:18;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.1) 3px,rgba(0,0,0,.1) 4px);
 }
 
-/* ══════════════════════════════
-   MANIFESTO INSERTS — P1 to P5
-══════════════════════════════ */
-
-/* P1: scrolling manifesto ribbon */
+/* ════════════════════════════════════
+   P1 — COVER
+════════════════════════════════════ */
+#p1{background:var(--k);}
+.p1-smear{
+  position:absolute;top:28%;left:-10%;right:-10%;height:48%;
+  background:var(--rb);opacity:.55;transform:rotate(-2deg);filter:blur(3px);
+}
+.p1-smear2{
+  position:absolute;top:34%;left:-5%;right:-5%;height:36%;
+  background:#6B0000;opacity:.35;transform:rotate(1deg);filter:blur(5px);
+}
+.p1-content{
+  position:relative;z-index:5;height:100%;
+  padding:clamp(16px,4vw,32px);
+  display:flex;flex-direction:column;
+}
+.p1-title{
+  font-family:var(--ant);
+  font-size:clamp(72px,20vw,160px);
+  font-weight:900;line-height:.83;letter-spacing:.01em;
+  color:var(--w);text-transform:uppercase;position:relative;
+}
+.p1-title::before{
+  content:'GLITCH';position:absolute;inset:0;
+  font-family:var(--ant);font-size:inherit;line-height:.83;
+  color:var(--r);
+  clip-path:polygon(0 30%,100% 28%,100% 38%,0 40%);
+  animation:cg1 4s infinite;
+}
+@keyframes cg1{0%,88%,100%{transform:translateX(5px)}91%{transform:translateX(12px)}94%{transform:translateX(-3px)}97%{transform:translateX(7px)}}
+.p1-vnum{
+  font-family:var(--ant);font-size:clamp(36px,10vw,80px);
+  font-weight:900;line-height:.9;color:var(--r);letter-spacing:.05em;margin-top:4px;
+}
+.p1-mid{margin-top:auto;margin-bottom:auto;}
+.p1-tagline{
+  background:var(--w);padding:7px 13px;display:inline-block;margin-bottom:8px;
+}
+.p1-tagline span{
+  font-family:var(--ant);font-size:clamp(12px,3.5vw,20px);
+  font-weight:900;letter-spacing:.06em;color:var(--k);text-transform:uppercase;
+}
+.p1-sub{
+  font-family:var(--bc);font-size:clamp(10px,2.5vw,14px);font-weight:600;
+  letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:4px;
+}
+.p1-bottom{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  padding-top:12px;margin-top:auto;
+}
+.p1-barcode{display:flex;gap:1px;align-items:flex-end;margin-bottom:4px;}
+.p1-barcode span{background:rgba(255,255,255,.2);display:inline-block;}
+.p1-barcode-num{font-family:var(--mono);font-size:7px;color:rgba(255,255,255,.18);}
+.p1-stamp{
+  background:var(--r);padding:5px 10px;transform:rotate(-2deg);display:inline-block;
+}
+.p1-stamp span{
+  font-family:var(--ant);font-size:clamp(12px,3.5vw,18px);
+  letter-spacing:.06em;color:#fff;text-transform:uppercase;display:block;text-align:center;
+}
+/* manifesto ribbon */
 .mani-ribbon{
-  position:absolute;bottom:82px;left:0;right:0;z-index:12;overflow:hidden;
+  position:absolute;bottom:4px;left:0;right:0;z-index:12;overflow:hidden;
   background:rgba(255,255,255,.04);
-  border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07);
-  padding:7px 0;
+  border-top:1px solid rgba(255,255,255,.06);padding:5px 0;
 }
 .mani-ribbon-inner{
   display:inline-block;white-space:nowrap;
-  font-family:var(--spe);font-size:clamp(11px,2.4vw,13px);
-  color:rgba(255,255,255,.4);letter-spacing:.06em;
+  font-family:var(--spe);font-size:clamp(10px,2.2vw,12px);
+  color:rgba(255,255,255,.35);letter-spacing:.06em;
   animation:ribmove 30s linear infinite;
 }
 @keyframes ribmove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-
-/* P1: floating question card */
 .mani-question{
-  position:absolute;top:clamp(120px,25vh,185px);right:clamp(14px,4vw,28px);
-  z-index:12;max-width:clamp(150px,40vw,240px);
-  background:rgba(10,8,6,.78);border:1px solid rgba(204,26,10,.3);
-  padding:11px 13px;transform:rotate(1.8deg);
+  position:absolute;top:clamp(100px,22vh,160px);right:clamp(12px,4vw,24px);
+  z-index:12;max-width:clamp(140px,38vw,220px);
+  background:rgba(10,8,6,.8);border:1px solid rgba(204,26,10,.3);
+  padding:10px 12px;transform:rotate(1.5deg);
 }
 .mani-question p{
-  font-family:var(--spe);font-size:clamp(10px,2.2vw,13px);
-  color:rgba(255,255,255,.6);line-height:1.55;font-style:italic;
+  font-family:var(--spe);font-size:clamp(10px,2vw,12px);
+  color:rgba(255,255,255,.55);line-height:1.55;font-style:italic;
 }
 .mani-question em{
-  display:block;margin-top:7px;font-family:var(--bc);font-size:clamp(9px,2vw,11px);
+  display:block;margin-top:6px;font-family:var(--bc);font-size:clamp(8px,1.8vw,10px);
   font-weight:700;letter-spacing:.14em;text-transform:uppercase;
   color:var(--r);font-style:normal;
 }
 
-/* P2: manifesto italic below body text */
-.mani-body-p2{
-  font-family:var(--spe);font-size:clamp(11px,2.4vw,13px);
-  color:rgba(42,34,24,.55);line-height:1.6;font-style:italic;
-  margin-top:10px;border-top:1px dashed rgba(0,0,0,.15);padding-top:8px;
-}
-
-/* P3: rubber-stamp card */
-.mani-stamp-p3{
-  position:absolute;bottom:clamp(14px,3.5vh,24px);right:clamp(12px,3.5vw,22px);
-  z-index:15;border:2px solid var(--r);padding:8px 11px;
-  transform:rotate(-2.5deg);max-width:clamp(120px,36vw,190px);
-  background:rgba(242,237,227,.92);
-}
-.mani-stamp-p3::before{
-  content:'MANIFESTO';display:block;
-  font-family:var(--ant);font-size:clamp(9px,2vw,12px);
-  color:rgba(204,26,10,.45);letter-spacing:.2em;margin-bottom:4px;
-  border-bottom:1px solid rgba(204,26,10,.2);padding-bottom:3px;
-}
-.mani-stamp-p3 p{
-  font-family:var(--bc);font-size:clamp(9px,1.9vw,11px);font-weight:600;
-  letter-spacing:.05em;color:var(--r);line-height:1.5;text-transform:uppercase;
-}
-
-/* P4: yellow sticky note */
-.mani-note-p4{
-  background:#F5C518;padding:10px 13px;
-  transform:rotate(-.7deg);margin-bottom:10px;
-  box-shadow:2px 3px 8px rgba(0,0,0,.2);
-}
-.mani-note-p4 p{
-  font-family:var(--spe);font-size:clamp(11px,2.4vw,14px);
-  color:#1A1208;line-height:1.5;font-style:italic;
-}
-.mani-note-p4 em{
-  font-family:var(--bc);font-size:clamp(8px,1.8vw,10px);font-weight:700;
-  letter-spacing:.15em;text-transform:uppercase;color:#7A3800;
-  font-style:normal;display:block;margin-top:5px;
-}
-
-/* P5: manifesto footer strip */
-.mani-col-p5{
-  margin-top:10px;border-top:2px solid var(--r);padding-top:9px;
-}
-.mani-col-p5 .mani-label{
-  font-family:var(--bc);font-size:8px;font-weight:700;letter-spacing:.2em;
-  text-transform:uppercase;color:var(--r);margin-bottom:5px;display:block;
-}
-.mani-col-p5 p{
-  font-family:var(--spe);font-size:clamp(10px,2.2vw,12px);
-  color:#2A2218;line-height:1.5;font-style:italic;
-}
-
 /* ════════════════════════════════════
-   PAGE 1 — COVER: GLITCH V.001
-════════════════════════════════════ */
-#p1{background:var(--k);}
-.p1-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
-
-/* background texture — dark red smear */
-.p1-smear{
-  position:absolute;top:30%;left:-10%;right:-10%;
-  height:45%;z-index:1;
-  background:var(--rb);
-  opacity:.55;
-  transform:rotate(-2deg) skewY(-1deg);
-  filter:blur(2px);
-}
-.p1-smear2{
-  position:absolute;top:35%;left:-5%;right:-5%;
-  height:35%;z-index:1;
-  background:#8B0000;
-  opacity:.4;
-  transform:rotate(1deg);
-  filter:blur(4px);
-}
-
-.p1-content{position:relative;z-index:5;height:100%;padding:clamp(20px,5vw,40px);display:flex;flex-direction:column;}
-
-.p1-title{
-  font-family:var(--ant);
-  font-size:clamp(80px,22vw,180px);
-  font-weight:900;line-height:.85;letter-spacing:.01em;
-  color:var(--w);
-  text-shadow:3px 3px 0 rgba(0,0,0,.5),-1px -1px 0 rgba(255,255,255,.05);
-  position:relative;
-  text-transform:uppercase;
-}
-/* glitch offset */
-.p1-title::before{
-  content:'GLITCH';position:absolute;inset:0;
-  font-family:var(--ant);font-size:inherit;line-height:.85;letter-spacing:.01em;
-  color:var(--r);
-  clip-path:polygon(0 28%,100% 26%,100% 36%,0 38%);
-  transform:translateX(6px);
-  animation:cg1 4s infinite;
-}
-@keyframes cg1{0%,88%,100%{transform:translateX(6px)}91%{transform:translateX(14px)}94%{transform:translateX(-4px)}97%{transform:translateX(8px)}}
-
-.p1-vnum{
-  font-family:var(--ant);
-  font-size:clamp(40px,11vw,90px);
-  font-weight:900;line-height:.9;
-  color:var(--r);
-  letter-spacing:.05em;
-  margin-top:4px;
-}
-
-.p1-mid{margin-top:auto;margin-bottom:auto;}
-
-.p1-tagline{
-  background:var(--w);
-  padding:8px 14px;
-  display:inline-block;
-  margin-bottom:10px;
-}
-.p1-tagline span{
-  font-family:var(--ant);
-  font-size:clamp(14px,4vw,22px);
-  font-weight:900;letter-spacing:.06em;
-  color:var(--k);text-transform:uppercase;
-}
-
-.p1-sub{
-  font-family:var(--bc);font-size:clamp(12px,3vw,16px);font-weight:600;
-  letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.5);
-  margin-top:4px;
-}
-
-.p1-bottom{
-  display:flex;justify-content:space-between;align-items:flex-end;
-  padding-top:16px;margin-top:auto;
-}
-.p1-barcode-wrap{display:flex;flex-direction:column;gap:4px;}
-.p1-barcode-num{font-family:var(--bc);font-size:8px;letter-spacing:.1em;color:rgba(255,255,255,.2);}
-.p1-error{
-  background:var(--r);
-  padding:6px 12px;transform:rotate(-2deg);
-  display:inline-block;
-}
-.p1-error span{
-  font-family:var(--ant);font-size:clamp(14px,4vw,20px);
-  letter-spacing:.06em;color:#fff;line-height:1.1;text-transform:uppercase;
-  display:block;text-align:center;
-}
-
-/* ════════════════════════════════════
-   PAGE 2 — BEBAS ITU BISING.
+   P2 — BEBAS ITU BISING
 ════════════════════════════════════ */
 #p2{background:var(--w);}
-.p2-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
-
 .p2-photo{position:absolute;top:0;left:0;right:0;height:55%;overflow:hidden;}
-.p2-photo .ph-lt{background:#9A8A7A;}
-
-/* torn white edge over photo */
 .p2-torn-mid{
-  position:absolute;top:50%;left:0;right:0;height:30px;z-index:10;
+  position:absolute;top:51%;left:0;right:0;height:26px;z-index:10;
   background:var(--w);
   clip-path:polygon(0 100%,2% 20%,5% 90%,9% 10%,13% 80%,17% 5%,21% 85%,25% 15%,30% 90%,34% 8%,38% 80%,43% 15%,47% 85%,51% 5%,56% 75%,60% 0%,65% 80%,69% 10%,73% 90%,78% 5%,82% 82%,86% 12%,91% 85%,95% 8%,99% 78%,100% 100%);
 }
-
 .p2-content{
-  position:absolute;top:52%;left:0;right:0;bottom:0;
-  padding:clamp(14px,4vw,28px);display:flex;flex-direction:column;justify-content:center;
-  z-index:5;
+  position:absolute;top:53%;left:0;right:0;bottom:0;
+  padding:clamp(12px,3.5vw,24px);
+  display:flex;flex-direction:column;justify-content:center;z-index:5;
 }
-
-.p2-headline{
-  font-family:var(--ant);
-  font-size:clamp(40px,11vw,82px);
-  font-weight:900;line-height:.85;letter-spacing:.01em;
-  color:var(--k);text-transform:uppercase;
-  margin-bottom:14px;
+.p2-hl{
+  font-family:var(--ant);font-size:clamp(36px,10vw,72px);
+  font-weight:900;line-height:.85;color:var(--k);text-transform:uppercase;margin-bottom:12px;
 }
-.p2-headline em{color:var(--r);font-style:normal;}
-
-.p2-body{
-  font-family:var(--bar);font-size:clamp(12px,2.8vw,16px);
-  font-weight:400;color:#2A2218;line-height:1.65;
+.p2-hl em{color:var(--r);font-style:normal;}
+.p2-body{font-family:var(--bar);font-size:clamp(11px,2.6vw,15px);color:#2A2218;line-height:1.65;}
+.p2-body p{margin-bottom:3px;}
+.mani-body-p2{
+  font-family:var(--spe);font-size:clamp(10px,2.2vw,12px);
+  color:rgba(42,34,24,.5);line-height:1.6;font-style:italic;
+  margin-top:8px;border-top:1px dashed rgba(0,0,0,.12);padding-top:7px;
 }
-.p2-body p{margin-bottom:4px;}
 
 /* ════════════════════════════════════
-   PAGE 3 — ART FOTO + BULLET
+   P3 — ART FOTO
 ════════════════════════════════════ */
 #p3{background:var(--w2);}
-.p3-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
-
 .p3-photo{position:absolute;top:0;left:0;right:0;height:58%;overflow:hidden;}
-/* red overlay on photo */
-.p3-photo-overlay{
-  position:absolute;inset:0;z-index:2;
-  background:rgba(180,15,5,.35);
-  mix-blend-mode:multiply;
-}
-
+.p3-overlay{position:absolute;inset:0;z-index:2;background:rgba(180,15,5,.3);mix-blend-mode:multiply;}
 .p3-bullets{
-  position:absolute;top:10%;left:clamp(16px,5vw,32px);right:clamp(16px,5vw,32px);
-  z-index:10;
+  position:absolute;top:10%;left:clamp(14px,4vw,28px);right:clamp(14px,4vw,28px);z-index:10;
 }
 .p3-bullet{
-  font-family:var(--bc);font-size:clamp(14px,4vw,22px);font-weight:700;
+  font-family:var(--bc);font-size:clamp(13px,3.5vw,20px);font-weight:700;
   letter-spacing:.04em;color:var(--w);text-transform:uppercase;
-  margin-bottom:6px;display:flex;align-items:center;gap:10px;
+  margin-bottom:5px;display:flex;align-items:center;gap:8px;
 }
-.p3-bullet::before{content:'•';color:var(--r);font-size:1.4em;line-height:1;}
-
-.p3-torn-mid{
-  position:absolute;top:55%;left:0;right:0;height:28px;z-index:10;
+.p3-bullet::before{content:'•';color:var(--y);font-size:1.3em;line-height:1;}
+.p3-torn{
+  position:absolute;top:55%;left:0;right:0;height:26px;z-index:10;
   background:var(--w2);
   clip-path:polygon(0 100%,3% 15%,7% 85%,11% 8%,15% 78%,19% 12%,24% 88%,28% 5%,32% 80%,37% 18%,41% 82%,45% 6%,50% 78%,54% 14%,58% 88%,62% 8%,67% 80%,71% 5%,75% 85%,80% 12%,84% 78%,88% 8%,93% 82%,97% 12%,100% 100%);
 }
-
 .p3-quote{
-  position:absolute;bottom:clamp(16px,4vh,32px);left:clamp(16px,5vw,32px);right:clamp(16px,5vw,32px);
-  z-index:5;
+  position:absolute;bottom:clamp(12px,3.5vh,28px);left:clamp(14px,4vw,28px);right:clamp(14px,4vw,28px);z-index:5;
 }
 .p3-quote-text{
-  font-family:var(--spe);font-size:clamp(16px,4.5vw,28px);
+  font-family:var(--spe);font-size:clamp(14px,4vw,26px);
   color:var(--k);line-height:1.45;font-style:italic;
 }
+.mani-stamp-p3{
+  position:absolute;bottom:clamp(12px,3.5vh,22px);right:clamp(12px,3.5vw,20px);
+  z-index:15;border:2px solid var(--r);padding:7px 10px;
+  transform:rotate(-2.5deg);max-width:clamp(110px,34vw,180px);
+  background:rgba(232,224,208,.93);
+}
+.mani-stamp-p3::before{
+  content:'MANIFESTO';display:block;
+  font-family:var(--ant);font-size:clamp(8px,1.8vw,11px);
+  color:rgba(204,26,10,.4);letter-spacing:.2em;margin-bottom:3px;
+  border-bottom:1px solid rgba(204,26,10,.18);padding-bottom:2px;
+}
+.mani-stamp-p3 p{
+  font-family:var(--bc);font-size:clamp(8px,1.8vw,10px);font-weight:600;
+  letter-spacing:.04em;color:var(--r);line-height:1.5;text-transform:uppercase;
+}
 
 /* ════════════════════════════════════
-   PAGE 4 — DIY ZINE CULTURE
+   P4 — DIY ZINE CULTURE
 ════════════════════════════════════ */
 #p4{background:var(--w);}
-.p4-inner{height:100%;display:flex;flex-direction:column;padding:clamp(18px,5vw,36px);position:relative;}
-
-.p4-header{
-  background:var(--k);
-  padding:10px 16px;
-  margin-bottom:16px;
-  flex-shrink:0;
+.p4-inner{height:100%;display:flex;flex-direction:column;padding:clamp(16px,4vw,30px);position:relative;}
+.p4-hdr{background:var(--k);padding:9px 14px;margin-bottom:14px;flex-shrink:0;}
+.p4-hdr-title{
+  font-family:var(--ant);font-size:clamp(28px,8vw,56px);
+  font-weight:900;line-height:.85;color:var(--w);text-transform:uppercase;
 }
-.p4-header-title{
-  font-family:var(--ant);font-size:clamp(32px,9vw,64px);
-  font-weight:900;line-height:.85;letter-spacing:.02em;
-  color:var(--w);text-transform:uppercase;
-}
-
 .p4-photos{
-  display:grid;grid-template-columns:1fr 1fr;gap:6px;
-  flex:0 0 clamp(140px,28vh,220px);margin-bottom:14px;
+  display:grid;grid-template-columns:1fr 1fr;gap:5px;
+  flex:0 0 clamp(120px,26vh,200px);margin-bottom:12px;
 }
-.p4-photo-cell{position:relative;overflow:hidden;background:#8A7A6A;}
-
+.p4-photo-cell{overflow:hidden;background:#8A7A6A;}
 .p4-handwriting{
-  font-family:var(--spe);font-size:clamp(14px,3.5vw,20px);
-  color:var(--k);line-height:1.5;margin-bottom:14px;transform:rotate(-1deg);
+  font-family:var(--spe);font-size:clamp(13px,3.2vw,18px);
+  color:var(--k);line-height:1.5;margin-bottom:12px;transform:rotate(-1deg);
 }
-
-.p4-cta-block{
-  background:var(--k);padding:12px 16px;margin-bottom:12px;
+.mani-note-p4{
+  background:var(--y);padding:9px 12px;
+  transform:rotate(-.7deg);margin-bottom:10px;
+  box-shadow:2px 3px 8px rgba(0,0,0,.18);
 }
-.p4-cta-title{
-  font-family:var(--ant);font-size:clamp(20px,5.5vw,36px);
-  font-weight:900;letter-spacing:.04em;color:var(--w);text-transform:uppercase;
-  line-height:1;
+.mani-note-p4 p{
+  font-family:var(--spe);font-size:clamp(10px,2.2vw,13px);
+  color:#1A1208;line-height:1.5;font-style:italic;
 }
-.p4-cta-sub{
-  font-family:var(--ant);font-size:clamp(16px,4.5vw,28px);
-  font-weight:900;letter-spacing:.04em;color:var(--r);text-transform:uppercase;
-  line-height:1;margin-top:2px;
+.mani-note-p4 em{
+  font-family:var(--bc);font-size:clamp(8px,1.7vw,10px);font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:#7A3800;
+  font-style:normal;display:block;margin-top:4px;
 }
-
-.p4-diy-items{
-  font-family:var(--bc);font-size:clamp(13px,3.5vw,18px);font-weight:600;
-  letter-spacing:.05em;color:#2A2218;line-height:1.7;
+.p4-diy-text{
+  font-family:var(--bc);font-size:clamp(12px,3vw,17px);font-weight:600;
+  letter-spacing:.05em;color:#2A2218;margin-bottom:10px;
 }
-
+.p4-cta{background:var(--k);padding:10px 14px;margin-bottom:10px;}
+.p4-cta-t{
+  font-family:var(--ant);font-size:clamp(18px,5vw,32px);
+  font-weight:900;letter-spacing:.04em;color:var(--w);text-transform:uppercase;line-height:1;
+}
+.p4-cta-s{
+  font-family:var(--ant);font-size:clamp(14px,4vw,24px);
+  font-weight:900;letter-spacing:.04em;color:var(--r);text-transform:uppercase;line-height:1;margin-top:2px;
+}
 .p4-qr{
-  position:absolute;bottom:clamp(18px,4vw,32px);right:clamp(18px,5vw,36px);
-  width:clamp(60px,14vw,90px);height:clamp(60px,14vw,90px);
+  position:absolute;bottom:clamp(16px,3.5vw,28px);right:clamp(16px,4vw,30px);
+  width:clamp(55px,13vw,80px);height:clamp(55px,13vw,80px);
   background:var(--k);display:flex;align-items:center;justify-content:center;
 }
-.p4-qr span{font-family:var(--bc);font-size:8px;letter-spacing:.1em;color:rgba(255,255,255,.4);text-transform:uppercase;text-align:center;}
+.p4-qr span{font-family:var(--bc);font-size:7px;letter-spacing:.1em;color:rgba(255,255,255,.35);text-transform:uppercase;text-align:center;}
 
 /* ════════════════════════════════════
-   PAGE 5 — BERTAHAN DI TENGAH GEMPURAN
+   P5 — BERTAHAN DI TENGAH GEMPURAN
 ════════════════════════════════════ */
 #p5{background:var(--w);}
-.p5-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
-
-.p5-photo{position:absolute;right:0;top:0;bottom:0;width:55%;overflow:hidden;}
-.p5-photo .ph-md{background:#6A5A4A;}
-
+.p5-photo{position:absolute;right:0;top:0;bottom:0;width:50%;overflow:hidden;}
 .p5-content{
-  position:absolute;top:0;left:0;width:55%;bottom:0;
-  padding:clamp(16px,4vw,28px);z:5;
-  display:flex;flex-direction:column;justify-content:flex-start;
-  background:var(--w);
+  position:absolute;top:0;left:0;width:52%;bottom:0;
+  padding:clamp(14px,3.5vw,24px);z-index:5;
+  display:flex;flex-direction:column;background:var(--w);
 }
-
-.p5-headline{
-  font-family:var(--ant);font-size:clamp(28px,8vw,58px);
-  font-weight:900;line-height:.88;letter-spacing:.01em;
-  color:var(--k);text-transform:uppercase;
-  margin-bottom:14px;
+.p5-hl{
+  font-family:var(--ant);font-size:clamp(22px,6.5vw,48px);
+  font-weight:900;line-height:.88;color:var(--k);text-transform:uppercase;margin-bottom:12px;
 }
-
-.p5-brush-accent{
-  width:100%;height:5px;background:var(--r);margin-bottom:14px;
-  transform:rotate(-.5deg);
+.p5-bar{width:100%;height:4px;background:var(--r);margin-bottom:12px;transform:rotate(-.4deg);}
+.p5-list{display:flex;flex-direction:column;gap:5px;}
+.p5-li{
+  font-family:var(--bc);font-size:clamp(11px,2.6vw,15px);font-weight:600;
+  letter-spacing:.04em;color:#2A2218;display:flex;align-items:flex-start;gap:7px;
 }
-
-.p5-list{
-  display:flex;flex-direction:column;gap:6px;
-  font-family:var(--bc);font-size:clamp(12px,3vw,16px);font-weight:600;
-  letter-spacing:.04em;color:#2A2218;
-}
-.p5-list-item{display:flex;align-items:flex-start;gap:8px;}
-.p5-list-item::before{content:'•';color:var(--r);font-size:1.2em;line-height:1.1;flex-shrink:0;}
+.p5-li::before{content:'•';color:var(--r);font-size:1.1em;line-height:1.1;flex-shrink:0;}
+.mani-col-p5{margin-top:10px;border-top:1.5px solid var(--r);padding-top:8px;}
+.mani-col-p5 .ml{font-family:var(--bc);font-size:7px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--r);margin-bottom:5px;display:block;}
+.mani-col-p5 p{font-family:var(--spe);font-size:clamp(9px,2vw,11px);color:#2A2218;line-height:1.5;font-style:italic;}
 
 /* ════════════════════════════════════
-   PAGE 6 — CERITA KOTA
+   P6 — CERITA KOTA
 ════════════════════════════════════ */
 #p6{background:var(--w);}
-.p6-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
-
-.p6-header-flag{
+.p6-flag{
   position:absolute;top:0;left:0;right:0;z-index:10;
-  background:var(--r);padding:10px clamp(16px,5vw,28px);
+  background:var(--r);padding:9px clamp(14px,4vw,24px);
 }
-.p6-header-flag span{
-  font-family:var(--ant);font-size:clamp(28px,8vw,56px);
+.p6-flag span{
+  font-family:var(--ant);font-size:clamp(24px,7vw,50px);
   font-weight:900;color:#fff;letter-spacing:.02em;text-transform:uppercase;line-height:1;
 }
-
 .p6-photo{position:absolute;top:0;left:0;right:0;height:55%;overflow:hidden;}
-.p6-photo .ph-md{background:#5A4E44;}
-
-.p6-torn-mid{
-  position:absolute;top:52%;left:0;right:0;height:28px;z-index:10;
+.p6-torn{
+  position:absolute;top:52%;left:0;right:0;height:26px;z-index:10;
   background:var(--w);
   clip-path:polygon(0 100%,3% 10%,6% 85%,10% 8%,14% 82%,18% 5%,22% 80%,27% 15%,31% 88%,35% 5%,39% 78%,43% 18%,48% 85%,52% 8%,56% 80%,60% 5%,65% 82%,69% 10%,73% 85%,77% 8%,82% 80%,86% 15%,90% 85%,94% 8%,98% 80%,100% 100%);
 }
-
 .p6-content{
   position:absolute;top:55%;left:0;right:0;bottom:0;
-  padding:clamp(16px,4vw,24px);z-index:5;
+  padding:clamp(14px,3.5vw,22px);z-index:5;
   display:flex;flex-direction:column;justify-content:center;
 }
-.p6-topics{
-  display:flex;flex-direction:column;gap:6px;
-}
-.p6-topic{
-  font-family:var(--spe);font-size:clamp(18px,5vw,34px);
-  color:var(--k);line-height:1.2;
-}
+.p6-topics{display:flex;flex-direction:column;gap:5px;}
+.p6-topic{font-family:var(--spe);font-size:clamp(16px,4.5vw,30px);color:var(--k);line-height:1.2;}
 
 /* ════════════════════════════════════
-   PAGE 7 — PETISI MBG (Hero + Tuntutan)
+   P7 — PETISI MBG (Hero + Tuntutan)
 ════════════════════════════════════ */
 #p7{background:var(--k);}
-.p7-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
-
-/* scanlines */
 #p7::before{
   content:'';position:absolute;inset:0;pointer-events:none;z-index:1;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.006) 2px,rgba(255,255,255,.006) 3px);
-}
-
-/* grid overlay */
-#p7::after{
-  content:'';position:absolute;inset:0;pointer-events:none;z-index:1;
   background-image:
-    linear-gradient(rgba(204,26,10,.05) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(204,26,10,.05) 1px,transparent 1px);
-  background-size:42px 42px;
+    linear-gradient(rgba(204,26,10,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(204,26,10,.04) 1px,transparent 1px);
+  background-size:40px 40px;
 }
-
+.p7-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
 .p7-ticker{
-  background:var(--r);overflow:hidden;padding:7px 0;flex-shrink:0;position:relative;z-index:5;
+  background:var(--r);overflow:hidden;padding:6px 0;flex-shrink:0;position:relative;z-index:5;
 }
 .p7-tick-txt{
   display:inline-block;white-space:nowrap;
-  font-family:var(--bc);font-size:9px;font-weight:700;
-  letter-spacing:.16em;text-transform:uppercase;color:rgba(0,0,0,.85);
-  animation:p7tick 20s linear infinite;
+  font-family:var(--bc);font-size:8px;font-weight:800;
+  letter-spacing:.15em;text-transform:uppercase;color:rgba(0,0,0,.85);
+  animation:p7tick 22s linear infinite;
 }
 @keyframes p7tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-
 .p7-hero{
   position:relative;z-index:5;
-  padding:clamp(16px,4vw,28px) clamp(16px,4vw,28px) 0;
-  flex-shrink:0;
+  padding:clamp(12px,3vw,22px) clamp(14px,3.5vw,24px) 0;flex-shrink:0;
 }
-.p7-eyebrow{
-  display:flex;align-items:center;gap:8px;margin-bottom:8px;
-}
-.p7-eyebrow-line{width:18px;height:2px;background:var(--r);}
-.p7-eyebrow-txt{
-  font-family:var(--bc);font-size:9px;font-weight:700;
-  letter-spacing:.2em;text-transform:uppercase;color:var(--r);
-}
+.p7-eyebrow{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
+.p7-eyebrow-line{width:16px;height:2px;background:var(--r);}
+.p7-eyebrow-txt{font-family:var(--bc);font-size:8px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--r);}
 .p7-hl{
   font-family:var(--ant);
-  font-size:clamp(50px,14vw,100px);
-  font-weight:900;line-height:.82;letter-spacing:-.01em;
-  color:var(--w);text-transform:uppercase;position:relative;
+  font-size:clamp(42px,12vw,88px);
+  font-weight:900;line-height:.82;color:var(--w);text-transform:uppercase;position:relative;
 }
 .p7-hl em{color:var(--r);font-style:normal;}
-/* glitch on TRANSPARANSI */
 .p7-hl::before{
   content:attr(data-t);position:absolute;inset:0;
-  font-family:var(--ant);font-size:inherit;line-height:.82;font-weight:900;letter-spacing:-.01em;
+  font-family:var(--ant);font-size:inherit;line-height:.82;font-weight:900;
   color:var(--r);
-  clip-path:polygon(0 38%,100% 36%,100% 46%,0 48%);
-  animation:p7glitch 5s infinite 1s;
+  clip-path:polygon(0 40%,100% 38%,100% 48%,0 50%);
+  animation:p7g 5s infinite 1.5s;
 }
-@keyframes p7glitch{0%,88%,100%{transform:translateX(0)}91%{transform:translateX(9px)}94%{transform:translateX(-5px)}97%{transform:translateX(4px)}}
-
+@keyframes p7g{0%,85%,100%{transform:translateX(0);opacity:0}88%{transform:translateX(8px);opacity:1}92%{transform:translateX(-4px)}95%{transform:translateX(5px)}98%{opacity:0}}
 .p7-sub{
-  font-family:var(--spe);font-size:clamp(11px,2.4vw,14px);
-  font-style:italic;color:rgba(255,255,255,.38);line-height:1.55;
-  margin-top:8px;max-width:340px;
+  font-family:var(--spe);font-size:clamp(10px,2.2vw,13px);font-style:italic;
+  color:rgba(255,255,255,.35);line-height:1.55;margin-top:7px;max-width:360px;
 }
-.p7-sub strong{color:rgba(255,255,255,.62);font-style:normal;font-weight:700;}
-
-/* counter strip */
+.p7-sub strong{color:rgba(255,255,255,.6);font-style:normal;}
 .p7-counter{
   position:relative;z-index:5;
-  margin:clamp(12px,2.5vh,18px) clamp(16px,4vw,28px);
-  padding:12px 16px;
-  border:1px solid rgba(255,255,255,.07);
-  background:rgba(255,255,255,.02);
-  display:flex;align-items:center;gap:14px;flex-shrink:0;
+  margin:clamp(10px,2vh,16px) clamp(14px,3.5vw,24px);
+  padding:10px 14px;
+  border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.02);
+  display:flex;align-items:center;gap:12px;flex-shrink:0;
 }
 .p7-counter::before{
   content:'';position:absolute;top:0;left:0;right:0;height:2px;
@@ -566,184 +524,127 @@ body::after{
 }
 @keyframes gradmv{0%{background-position:0%}100%{background-position:200%}}
 .p7-cnum{
-  font-family:var(--ant);font-size:clamp(36px,9vw,60px);
+  font-family:var(--ant);font-size:clamp(30px,8vw,52px);
   font-weight:900;color:var(--w);line-height:1;letter-spacing:-.03em;flex-shrink:0;
 }
 .p7-cnum span{color:var(--r);}
-.p7-cinfo{flex:1;display:flex;flex-direction:column;gap:5px;}
-.p7-clbl{
-  font-family:var(--bc);font-size:8px;font-weight:700;
-  letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.2);
-}
-.p7-bar{height:3px;background:rgba(255,255,255,.08);}
+.p7-cinfo{flex:1;}
+.p7-clbl{font-family:var(--bc);font-size:7px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.2);}
+.p7-bar{height:3px;background:rgba(255,255,255,.07);margin-top:5px;}
 .p7-bar-fill{height:100%;width:12.47%;background:linear-gradient(90deg,var(--r),var(--y));}
 .p7-bar-lbl{
   display:flex;justify-content:space-between;
-  font-family:var(--bc);font-size:8px;letter-spacing:.1em;
-  text-transform:uppercase;color:rgba(255,255,255,.2);margin-top:4px;
+  font-family:var(--mono);font-size:7px;letter-spacing:.1em;
+  text-transform:uppercase;color:rgba(255,255,255,.18);margin-top:3px;
 }
-
-/* tuntutan */
 .p7-demands{
   position:relative;z-index:5;
-  padding:0 clamp(16px,4vw,28px);flex:1;overflow:hidden;
+  padding:0 clamp(14px,3.5vw,24px);flex:1;overflow:hidden;
 }
-.p7-demands-lbl{
-  font-family:var(--bc);font-size:8px;font-weight:700;
-  letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.18);
-  padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.05);margin-bottom:10px;
+.p7-dlbl{
+  font-family:var(--bc);font-size:7px;font-weight:700;
+  letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.15);
+  padding-bottom:7px;border-bottom:1px solid rgba(255,255,255,.05);margin-bottom:8px;
 }
-.p7-demand{display:flex;gap:11px;margin-bottom:10px;align-items:flex-start;}
+.p7-demand{display:flex;gap:10px;margin-bottom:9px;align-items:flex-start;}
 .p7-dn{
-  font-family:var(--ant);font-size:clamp(26px,6.5vw,42px);font-weight:900;
-  color:var(--r);line-height:.82;letter-spacing:-.02em;flex-shrink:0;min-width:34px;
+  font-family:var(--ant);font-size:clamp(22px,5.5vw,38px);font-weight:900;
+  color:var(--r);line-height:.82;flex-shrink:0;min-width:30px;
 }
 .p7-dt strong{
-  display:block;font-family:var(--bc);font-size:clamp(11px,2.5vw,13px);
+  display:block;font-family:var(--bc);font-size:clamp(10px,2.3vw,13px);
   font-weight:700;letter-spacing:.04em;color:var(--w);margin-bottom:2px;
 }
 .p7-dt span{
-  font-family:var(--spe);font-size:clamp(10px,2.2vw,12px);font-style:italic;
-  color:rgba(255,255,255,.3);line-height:1.4;
+  font-family:var(--spe);font-size:clamp(9px,2vw,11px);font-style:italic;
+  color:rgba(255,255,255,.28);line-height:1.4;
 }
-
-/* dest footer */
 .p7-footer{
   position:relative;z-index:5;
-  padding:8px clamp(16px,4vw,28px);
+  padding:7px clamp(14px,3.5vw,24px);
   border-top:1px solid rgba(255,255,255,.05);
-  display:flex;gap:10px;align-items:center;flex-shrink:0;
+  display:flex;gap:8px;align-items:center;flex-shrink:0;
 }
-.p7-footer-lbl{
-  font-family:var(--bc);font-size:8px;font-weight:700;
-  letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.18);flex-shrink:0;
-}
-.p7-chips{display:flex;gap:5px;flex-wrap:wrap;}
-.p7-chip{
-  font-family:var(--bc);font-size:8px;letter-spacing:.08em;
-  text-transform:uppercase;color:rgba(255,255,255,.3);
-  border:1px solid rgba(255,255,255,.09);padding:3px 9px;
-}
+.p7-flbl{font-family:var(--bc);font-size:7px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.16);flex-shrink:0;}
+.p7-chips{display:flex;gap:4px;flex-wrap:wrap;}
+.p7-chip{font-family:var(--bc);font-size:7px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.28);border:1px solid rgba(255,255,255,.08);padding:3px 8px;}
 
 /* ════════════════════════════════════
-   PAGE 8 — PETISI MBG (Posisi + TTD)
+   P8 — PETISI MBG (Posisi + TTD)
 ════════════════════════════════════ */
 #p8{background:var(--k);}
-.p8-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
-
 #p8::before{
   content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
   background-image:
-    linear-gradient(rgba(204,26,10,.04) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(204,26,10,.04) 1px,transparent 1px);
-  background-size:38px 38px;
+    linear-gradient(rgba(204,26,10,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(204,26,10,.03) 1px,transparent 1px);
+  background-size:36px 36px;
 }
-
+.p8-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
 .p8-top{
   position:relative;z-index:2;
-  padding:clamp(14px,3.5vw,22px) clamp(16px,4vw,28px) clamp(10px,2.5vw,16px);
-  border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;
+  padding:clamp(12px,3vw,18px) clamp(14px,3.5vw,24px) clamp(8px,2vw,14px);
+  border-bottom:1px solid rgba(255,255,255,.05);flex-shrink:0;
 }
-.p8-top-lbl{
-  font-family:var(--bc);font-size:8px;font-weight:700;
-  letter-spacing:.22em;text-transform:uppercase;color:var(--r);margin-bottom:6px;
-}
-.p8-top-title{
-  font-family:var(--ant);font-size:clamp(20px,5.5vw,32px);
-  font-weight:900;letter-spacing:.02em;color:var(--w);text-transform:uppercase;
-}
-
-/* deliberation checks */
+.p8-top-lbl{font-family:var(--bc);font-size:7px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--r);margin-bottom:5px;}
+.p8-top-title{font-family:var(--ant);font-size:clamp(18px,5vw,28px);font-weight:900;letter-spacing:.02em;color:var(--w);text-transform:uppercase;}
 .p8-delib{
   position:relative;z-index:2;
-  padding:clamp(10px,2.5vh,16px) clamp(16px,4vw,28px);
-  border-bottom:1px solid rgba(255,255,255,.05);flex-shrink:0;
-  border-left:3px solid rgba(0,240,255,.25);
-  background:rgba(0,240,255,.03);
+  padding:clamp(8px,2vh,13px) clamp(14px,3.5vw,24px);
+  border-bottom:1px solid rgba(255,255,255,.04);flex-shrink:0;
+  border-left:3px solid rgba(0,200,255,.25);background:rgba(0,200,255,.03);
 }
-.p8-delib-lbl{
-  font-family:var(--bc);font-size:8px;font-weight:700;
-  letter-spacing:.2em;text-transform:uppercase;color:rgba(0,240,255,.6);margin-bottom:8px;
-}
-.p8-check-row{display:flex;align-items:center;gap:9px;margin-bottom:6px;cursor:pointer;}
-.p8-check-box{
-  width:13px;height:13px;border:1px solid rgba(255,255,255,.14);
+.p8-delib-lbl{font-family:var(--bc);font-size:7px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:rgba(0,200,255,.55);margin-bottom:7px;}
+.p8-cr{display:flex;align-items:center;gap:8px;margin-bottom:5px;cursor:pointer;}
+.p8-cb{
+  width:12px;height:12px;border:1px solid rgba(255,255,255,.14);
   flex-shrink:0;transition:all .2s;position:relative;
 }
-.p8-check-box.ticked{
-  border-color:var(--r);background:rgba(204,26,10,.12);
-}
-.p8-check-box.ticked::after{
+.p8-cb.on{border-color:var(--r);background:rgba(204,26,10,.1);}
+.p8-cb.on::after{
   content:'✓';position:absolute;inset:0;display:flex;align-items:center;
-  justify-content:center;font-size:9px;color:var(--r);line-height:1;
-  text-align:center;font-family:var(--bc);font-weight:700;
+  justify-content:center;font-size:8px;font-weight:700;color:var(--r);
+  font-family:var(--mono);
 }
-.p8-check-txt{
-  font-family:var(--bar);font-size:10px;font-weight:400;
-  color:rgba(255,255,255,.32);line-height:1.4;cursor:pointer;
-}
-
-/* stance */
+.p8-ct{font-family:var(--bar);font-size:10px;font-weight:400;color:rgba(255,255,255,.3);cursor:pointer;}
 .p8-stances{
   position:relative;z-index:2;
-  padding:clamp(10px,2.5vh,14px) clamp(16px,4vw,28px);
-  display:flex;flex-direction:column;gap:4px;flex-shrink:0;
+  padding:clamp(8px,2vh,12px) clamp(14px,3.5vw,24px);
+  display:flex;flex-direction:column;gap:3px;flex-shrink:0;
 }
 .p8-stance{
-  display:flex;align-items:flex-start;gap:10px;padding:9px 12px;
-  border:1px solid rgba(255,255,255,.07);cursor:pointer;
-  transition:border-color .18s,background .18s;
+  display:flex;align-items:flex-start;gap:9px;padding:8px 11px;
+  border:1px solid rgba(255,255,255,.06);cursor:pointer;transition:all .15s;
 }
-.p8-stance:hover{border-color:rgba(255,255,255,.16);}
+.p8-stance:hover{border-color:rgba(255,255,255,.14);}
 .p8-stance.sel{border-color:rgba(204,26,10,.5);background:rgba(204,26,10,.06);}
-.p8-stance-dot{
-  width:12px;height:12px;border:1.5px solid rgba(255,255,255,.22);
-  border-radius:50%;flex-shrink:0;margin-top:2px;position:relative;transition:border-color .18s;
+.sdot{
+  width:11px;height:11px;border:1.5px solid rgba(255,255,255,.2);border-radius:50%;
+  flex-shrink:0;margin-top:2px;position:relative;transition:border-color .15s;
 }
-.p8-stance.sel .p8-stance-dot{border-color:var(--r);}
-.p8-stance.sel .p8-stance-dot::after{
-  content:'';position:absolute;width:5px;height:5px;background:var(--r);
+.p8-stance.sel .sdot{border-color:var(--r);}
+.p8-stance.sel .sdot::after{
+  content:'';position:absolute;width:4px;height:4px;background:var(--r);
   border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);
 }
-.p8-stance-t{
-  font-family:var(--bc);font-size:clamp(10px,2.2vw,12px);font-weight:700;
-  letter-spacing:.04em;color:var(--w);
-}
-.p8-stance-d{
-  font-family:var(--spe);font-size:10px;font-style:italic;
-  color:rgba(255,255,255,.28);line-height:1.4;margin-top:2px;
-}
-.p8-stance.sel .p8-stance-d{color:rgba(255,255,255,.42);}
-
-/* recent sigs */
+.st{font-family:var(--bc);font-size:clamp(10px,2.2vw,12px);font-weight:700;letter-spacing:.03em;color:var(--w);}
+.sd{font-family:var(--spe);font-size:9px;font-style:italic;color:rgba(255,255,255,.25);line-height:1.4;margin-top:2px;}
 .p8-sigs{
   position:relative;z-index:2;
-  padding:clamp(8px,2vh,12px) clamp(16px,4vw,28px);flex-shrink:0;
+  padding:clamp(7px,1.5vh,11px) clamp(14px,3.5vw,24px);flex-shrink:0;
 }
-.p8-sigs-lbl{
-  font-family:var(--bc);font-size:8px;letter-spacing:.18em;
-  text-transform:uppercase;color:rgba(255,255,255,.16);margin-bottom:6px;
-}
-.p8-sigs-row{display:flex;flex-wrap:wrap;gap:4px;}
-.p8-sig{
-  font-family:var(--bc);font-size:8px;letter-spacing:.08em;
-  color:rgba(255,255,255,.25);border:1px solid rgba(255,255,255,.07);padding:3px 8px;
-}
-.p8-sig.r{color:rgba(204,26,10,.7);border-color:rgba(204,26,10,.2);}
-
-/* CTA */
-.p8-cta{
-  margin-top:auto;
-  position:relative;z-index:2;
-  padding:clamp(12px,2.5vw,16px) clamp(16px,4vw,28px);flex-shrink:0;
-}
+.p8-slbl{font-family:var(--bc);font-size:7px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.15);margin-bottom:5px;}
+.p8-srow{display:flex;flex-wrap:wrap;gap:3px;}
+.p8-sc{font-family:var(--mono);font-size:7px;letter-spacing:.06em;color:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.06);padding:2px 7px;}
+.p8-sc.r{color:rgba(204,26,10,.65);border-color:rgba(204,26,10,.15);}
+.p8-cta{margin-top:auto;position:relative;z-index:2;padding:clamp(10px,2.5vw,14px) clamp(14px,3.5vw,24px);flex-shrink:0;}
 .p8-btn{
   width:100%;background:var(--r);color:#000;border:none;
-  padding:clamp(13px,3.5vh,18px) 20px;
-  font-family:var(--ant);font-size:clamp(16px,4.5vw,26px);
+  padding:clamp(12px,3.5vh,16px) 18px;
+  font-family:var(--ant);font-size:clamp(14px,4vw,22px);
   font-weight:900;letter-spacing:.06em;text-transform:uppercase;
   cursor:pointer;display:flex;align-items:center;justify-content:space-between;
-  position:relative;overflow:hidden;transition:background .18s,transform .12s;
+  position:relative;overflow:hidden;transition:background .18s,opacity .2s;
 }
 .p8-btn::before{
   content:'';position:absolute;inset:0;
@@ -751,407 +652,292 @@ body::after{
   transform:translateX(-100%);transition:transform .5s;
 }
 .p8-btn:hover::before{transform:translateX(100%);}
-.p8-btn:hover{background:#b51408;}
-.p8-btn:active{transform:scale(.99);}
-.p8-btn.done{background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);cursor:default;}
+.p8-btn.locked{opacity:.35;pointer-events:none;}
+.p8-btn.done{background:rgba(255,255,255,.05);color:rgba(255,255,255,.35);pointer-events:none;}
 .p8-btn.done::before{display:none;}
-.p8-disc{
-  font-family:var(--bar);font-size:8px;font-weight:400;
-  color:rgba(255,255,255,.14);text-align:center;margin-top:6px;line-height:1.5;
-  letter-spacing:.04em;
-}
+.p8-disc{font-family:var(--bar);font-size:8px;font-weight:300;color:rgba(255,255,255,.12);text-align:center;padding:6px 0 0;line-height:1.5;}
 
 /* ════════════════════════════════════
-   PAGE 9 — KERJABAKTI & AKSI
+   P9 — KERJABAKTI
 ════════════════════════════════════ */
 #p9{background:var(--w2);}
-.p9-inner{height:100%;display:flex;flex-direction:column;position:relative;overflow:hidden;}
-
 .p9-photo{position:absolute;top:0;left:0;right:0;height:52%;overflow:hidden;}
-.p9-photo .ph-md{background:#5E5248;}
-
 .p9-torn{
-  position:absolute;top:50%;left:0;right:0;height:28px;z-index:10;
+  position:absolute;top:50%;left:0;right:0;height:26px;z-index:10;
   background:var(--w2);
   clip-path:polygon(0 100%,2% 15%,6% 88%,10% 8%,14% 80%,18% 12%,22% 85%,27% 5%,31% 82%,35% 18%,40% 80%,44% 8%,48% 85%,52% 12%,57% 80%,61% 5%,65% 78%,70% 18%,74% 85%,78% 8%,83% 82%,87% 10%,91% 80%,95% 15%,99% 85%,100% 100%);
 }
-
 .p9-content{
   position:absolute;top:53%;left:0;right:0;bottom:0;
-  padding:clamp(14px,4vw,22px);z-index:5;
-  display:flex;flex-direction:column;gap:10px;
+  padding:clamp(12px,3.5vw,20px);z-index:5;display:flex;flex-direction:column;gap:8px;
 }
-
-.p9-section-title{
-  font-family:var(--bc);font-size:clamp(12px,3vw,15px);font-weight:700;
-  letter-spacing:.2em;text-transform:uppercase;color:var(--r);
-  display:flex;align-items:center;gap:8px;
+.p9-sec-title{
+  font-family:var(--ant);font-size:clamp(24px,7vw,48px);
+  font-weight:900;color:var(--k);text-transform:uppercase;line-height:.9;
 }
-.p9-section-title::before{content:'—';color:var(--r);}
-
-.p9-list{display:flex;flex-direction:column;gap:5px;}
+.p9-list{display:flex;flex-direction:column;gap:4px;}
 .p9-li{
   font-family:var(--bc);font-size:clamp(12px,3vw,16px);font-weight:600;
-  letter-spacing:.04em;color:var(--k);
-  display:flex;align-items:flex-start;gap:8px;
+  letter-spacing:.04em;color:#2A2218;display:flex;align-items:center;gap:8px;
 }
-.p9-li::before{content:'•';color:var(--r);flex-shrink:0;}
-
-.p9-cta-row{
-  display:flex;gap:8px;margin-top:auto;flex-wrap:wrap;
-}
+.p9-li::before{content:'—';color:var(--r);font-weight:900;}
+.p9-cta-row{display:flex;gap:10px;margin-top:auto;}
 .p9-cta{
-  border:2px solid var(--k);padding:7px 16px;
-  font-family:var(--ant);font-size:clamp(16px,4vw,22px);
-  font-weight:900;letter-spacing:.06em;color:var(--k);text-transform:uppercase;
-  position:relative;
+  font-family:var(--ant);font-size:clamp(18px,5vw,28px);
+  font-weight:900;letter-spacing:.04em;text-transform:uppercase;
+  padding:9px 20px;cursor:pointer;
+  background:var(--k);color:var(--w);
 }
-.p9-cta.red{background:var(--r);border-color:var(--r);color:#fff;}
-.p9-qr-hint{
-  font-family:var(--bc);font-size:9px;letter-spacing:.12em;text-transform:uppercase;
-  color:rgba(0,0,0,.35);margin-top:4px;
-}
+.p9-cta.red{background:var(--r);color:#000;}
+.p9-qr-hint{font-family:var(--mono);font-size:8px;color:rgba(42,34,24,.4);margin-top:4px;letter-spacing:.06em;}
 
 /* ════════════════════════════════════
-   PAGE 10 — KAMI MENCATAT. BERGERAK.
+   P10 — CLOSING
 ════════════════════════════════════ */
 #p10{background:var(--k);}
-.p10-inner{height:100%;display:flex;flex-direction:column;padding:clamp(24px,6vw,48px);position:relative;overflow:hidden;}
-
-/* scan lines */
+.p10-inner{height:100%;display:flex;flex-direction:column;justify-content:center;padding:clamp(20px,5vw,40px);position:relative;overflow:hidden;}
 .p10-inner::before{
-  content:'';position:absolute;inset:0;pointer-events:none;z-index:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.008) 2px,rgba(255,255,255,.008) 3px);
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.004) 3px,rgba(255,255,255,.004) 4px);
+  pointer-events:none;
 }
-
-.p10-lines{
-  position:relative;z-index:2;flex:1;
-  display:flex;flex-direction:column;justify-content:center;gap:clamp(4px,1.5vh,12px);
-}
-
 .p10-line{
   font-family:var(--ant);
-  font-size:clamp(44px,13vw,100px);
-  font-weight:900;line-height:.84;letter-spacing:-.01em;
-  color:var(--w);text-transform:uppercase;
+  font-size:clamp(40px,11vw,90px);
+  font-weight:900;line-height:.82;letter-spacing:.01em;
+  color:var(--w);text-transform:uppercase;position:relative;
 }
-.p10-line.red{color:var(--r);}
-/* glitch animation on MENCATAT */
-.p10-line.glitch{position:relative;}
-.p10-line.glitch::before{
-  content:attr(data-t);position:absolute;inset:0;
-  font-family:var(--ant);font-size:inherit;line-height:.84;letter-spacing:-.01em;font-weight:900;
-  color:var(--r);
-  clip-path:polygon(0 35%,100% 33%,100% 43%,0 45%);
-  transform:translateX(5px);
-  animation:lg 5s infinite 0.5s;
-}
-@keyframes lg{0%,88%,100%{transform:translateX(5px);opacity:1}91%{transform:translateX(12px);opacity:.8}94%{transform:translateX(-3px)}97%{transform:translateX(8px);opacity:.6}}
+.p10-line.r{color:var(--r);}
+.p10-line.glitch{animation:p10g 5s infinite 3s;}
+@keyframes p10g{0%,88%,100%{clip-path:none}91%{clip-path:polygon(0 0,100% 0,100% 35%,0 35%);transform:translateX(5px)}94%{clip-path:polygon(0 50%,100% 50%,100% 100%,0 100%);transform:translateX(-4px)}97%{clip-path:none;transform:none}}
+.p10-sep{height:2px;background:rgba(255,255,255,.06);margin:5px 0;}
+.p10-footer{margin-top:auto;border-top:1px solid rgba(255,255,255,.07);padding-top:12px;}
+.p10-footer-title{font-family:var(--ant);font-size:clamp(14px,4vw,22px);font-weight:900;color:var(--r);letter-spacing:.06em;text-transform:uppercase;}
+.p10-footer-sub{font-family:var(--bc);font-size:clamp(10px,2.5vw,13px);font-weight:600;letter-spacing:.1em;color:rgba(255,255,255,.25);text-transform:uppercase;margin-top:3px;}
 
-.p10-footer{position:relative;z-index:2;padding-top:16px;border-top:1px solid rgba(255,255,255,.08);}
-.p10-footer-title{
-  font-family:var(--ant);font-size:clamp(18px,5vw,34px);
-  font-weight:900;color:var(--w);letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px;
-}
-.p10-footer-sub{
-  font-family:var(--bc);font-size:clamp(11px,2.8vw,15px);font-weight:600;
-  letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.3);
-}
-
-/* ─── BOTTOM NAV ─── */
-#nav{
-  position:fixed;bottom:0;left:0;right:0;height:54px;
-  background:var(--k);border-top:2px solid rgba(255,255,255,.06);
-  display:flex;align-items:stretch;z-index:200;
-  padding-bottom:env(safe-area-inset-bottom);
-}
-.nv{
-  flex:1;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:4px;cursor:pointer;border:none;background:none;
-  position:relative;transition:background .15s;padding:0 2px;
-}
-.nv::after{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:var(--r);transform:scaleX(0);
-  transition:transform .25s cubic-bezier(.77,0,.175,1);
-}
-.nv.a::after{transform:scaleX(1);}
-.nv:hover{background:rgba(255,255,255,.04);}
-.nv-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.15);transition:background .2s,transform .2s;}
-.nv.a .nv-dot{background:var(--r);transform:scale(1.3);}
-.nv-lbl{font-family:var(--bc);font-size:7.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.22);transition:color .2s;white-space:nowrap;}
-.nv.a .nv-lbl{color:var(--w);}
-.nv-sep{width:1px;background:rgba(255,255,255,.05);margin:10px 0;flex-shrink:0;}
-
-/* ─── PAGE INDICATOR ─── */
+/* ════════════════════
+   SIDE INDICATOR
+════════════════════ */
 #ind{
-  position:fixed;right:12px;top:50%;transform:translateY(-50%);
-  display:flex;flex-direction:column;gap:5px;z-index:150;
+  position:fixed;right:10px;top:50%;transform:translateY(-50%);
+  z-index:590;display:flex;flex-direction:column;gap:5px;
 }
-.id{width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,.18);transition:all .3s;cursor:pointer;}
-.id.a{background:var(--r);height:16px;border-radius:2px;}
+.id-dot{
+  width:4px;height:4px;background:rgba(255,255,255,.18);border-radius:2px;
+  transition:all .35s;cursor:pointer;
+}
+.id-dot.a{width:4px;height:14px;background:var(--r);}
 
-/* ─── SWIPE HINT ─── */
+/* ════════════════════
+   SWIPE HINT
+════════════════════ */
 #hint{
-  position:fixed;bottom:66px;left:50%;transform:translateX(-50%);
-  font-family:var(--bc);font-size:9px;letter-spacing:.2em;text-transform:uppercase;
-  color:rgba(255,255,255,.22);display:flex;align-items:center;gap:7px;
-  animation:hf 5s ease forwards;pointer-events:none;z-index:150;white-space:nowrap;
+  position:fixed;bottom:70px;left:50%;transform:translateX(-50%);
+  z-index:590;
+  font-family:var(--bc);font-size:10px;font-weight:800;letter-spacing:.15em;
+  text-transform:uppercase;color:rgba(255,255,255,.3);
+  display:flex;align-items:center;gap:6px;
+  animation:hintfade 3s ease-in-out 1.5s forwards;
 }
-@keyframes hf{0%{opacity:0}15%{opacity:1}80%{opacity:1}100%{opacity:0}}
-.ha{animation:ha 1.2s ease-in-out infinite;}
-@keyframes ha{0%,100%{transform:translateX(0)}50%{transform:translateX(7px)}}
-
-/* ─── SHARED UTILS ─── */
-.ph-icon-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;}
+@keyframes hintfade{0%{opacity:1}80%{opacity:.4}100%{opacity:0;pointer-events:none}}
+.ha{font-size:14px;animation:harrow .8s ease-in-out infinite;}
+@keyframes harrow{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}
 </style>
 </head>
 <body>
 
+<!-- ════════════════════
+     HEADER
+════════════════════ -->
+<header id="hdr">
+  <a class="hdr-logo" href="#">
+    <div class="hdr-logo-txt">GL<span class="hdr-bolt">⚡</span>TCH</div>
+    <div class="hdr-tag">No Cap Just Vibes</div>
+  </a>
+  <div class="hdr-right">
+    <button class="hdr-pill">@over.joyed</button>
+    <div class="hdr-icon">▲</div>
+  </div>
+</header>
+
+<!-- page progress strip -->
+<div id="pgstrip"><div id="pgstrip-fill"></div></div>
+
+<!-- ════════════════════
+     TAB NAV
+════════════════════ -->
+<div id="tabs">
+  <button class="tb act" onclick="goSection(0)"><span>⚡</span> FAST FWD</button>
+  <button class="tb" onclick="goSection(1)"><span>💬</span> SLOW CODE</button>
+  <button class="tb" onclick="goSection(2)"><span>🔥</span> AKSI</button>
+</div>
+
+<!-- ════════════════════
+     BOOK
+════════════════════ -->
 <div id="book">
 
-<!-- ══════════════════════════════════
-     P1 — COVER: GLITCH V.001
-══════════════════════════════════ -->
+<!-- P1 — COVER -->
 <div class="pg" id="p1">
-  <div class="scanlines"></div>
   <div class="p1-smear"></div>
   <div class="p1-smear2"></div>
+  <div class="scanlines"></div>
   <div class="p1-content">
-    <div style="flex-shrink:0;">
-      <div class="p1-title">GLITCH</div>
-      <div class="p1-vnum">V.001</div>
-    </div>
-
+    <div class="p1-title">GLITCH</div>
+    <div class="p1-vnum">V.001</div>
     <div class="p1-mid">
       <div class="p1-tagline"><span>ERROR IS A SIGNAL</span></div>
-      <div class="p1-sub">Art / Reportase / Aksi Nyata</div>
+      <div class="p1-sub">Edisi Pertama · Blank Canvas · Komunitas SMA &amp; Kampus</div>
     </div>
-
-    <!-- MANIFESTO ribbon -->
-    <div class="mani-ribbon">
-      <div class="mani-ribbon-inner">
-        Apakah isi kepalamu lebih smart dari smartphone-mu? &nbsp;·&nbsp; Kreativitas lahir dari keterbatasan &nbsp;·&nbsp; Dari obrolan dengan tukang sampah &nbsp;·&nbsp; Dari hansip yang cerita tentang hujan &nbsp;·&nbsp; Dari sepatu yang lepas solnya &nbsp;·&nbsp; Cacat adalah tanda bahwa ada proses &nbsp;·&nbsp; Ada tangan yang membuat. Ada kepala yang memikirkan &nbsp;·&nbsp; Apakah isi kepalamu lebih smart dari smartphone-mu? &nbsp;·&nbsp; Kreativitas lahir dari keterbatasan &nbsp;·&nbsp; Dari obrolan dengan tukang sampah &nbsp;·&nbsp; Dari hansip yang cerita tentang hujan &nbsp;·&nbsp; Dari sepatu yang lepas solnya &nbsp;·&nbsp; Cacat adalah tanda bahwa ada proses &nbsp;·&nbsp;
-      </div>
-    </div>
-    <!-- MANIFESTO floating question -->
     <div class="mani-question">
       <p>Smartphone di tanganmu hampir punya segalanya. Tapi apakah isi kepalamu lebih smart dari smartphone-mu?</p>
       <em>— Manifesto GLITCH</em>
     </div>
-
     <div class="p1-bottom">
-      <div class="p1-barcode-wrap">
-        <!-- barcode visual -->
-        <div style="display:flex;gap:1.5px;height:32px;align-items:flex-end;">
-          <div style="width:2px;height:100%;background:rgba(255,255,255,.3)"></div>
-          <div style="width:1px;height:80%;background:rgba(255,255,255,.3)"></div>
-          <div style="width:3px;height:100%;background:rgba(255,255,255,.3)"></div>
-          <div style="width:1px;height:70%;background:rgba(255,255,255,.3)"></div>
-          <div style="width:2px;height:100%;background:rgba(255,255,255,.3)"></div>
-          <div style="width:1px;height:85%;background:rgba(255,255,255,.3)"></div>
-          <div style="width:3px;height:100%;background:rgba(255,255,255,.3)"></div>
-          <div style="width:1px;height:60%;background:rgba(255,255,255,.3)"></div>
-          <div style="width:2px;height:100%;background:rgba(255,255,255,.3)"></div>
-          <div style="width:1px;height:90%;background:rgba(255,255,255,.3)"></div>
-          <div style="width:2px;height:75%;background:rgba(255,255,255,.3)"></div>
-          <div style="width:1px;height:100%;background:rgba(255,255,255,.3)"></div>
-          <div style="width:3px;height:80%;background:rgba(255,255,255,.3)"></div>
-          <div style="width:1px;height:100%;background:rgba(255,255,255,.3)"></div>
-          <div style="width:2px;height:65%;background:rgba(255,255,255,.3)"></div>
+      <div>
+        <div class="p1-barcode">
+          <span style="width:1px;height:28px;"></span><span style="width:2px;height:28px;"></span><span style="width:1px;height:22px;"></span><span style="width:3px;height:28px;"></span><span style="width:1px;height:18px;"></span><span style="width:2px;height:28px;"></span><span style="width:1px;height:28px;"></span><span style="width:1px;height:22px;"></span><span style="width:3px;height:28px;"></span><span style="width:1px;height:18px;"></span><span style="width:2px;height:28px;"></span><span style="width:1px;height:28px;"></span>
         </div>
-        <div class="p1-barcode-num">00000 090099</div>
+        <div class="p1-barcode-num">GLITCH-001-2025</div>
       </div>
-      <div class="p1-error">
+      <div class="p1-stamp">
         <span>SYSTEM</span>
         <span>ERROR</span>
       </div>
     </div>
   </div>
+  <div class="mani-ribbon">
+    <div class="mani-ribbon-inner">
+      Apakah isi kepalamu lebih smart dari smartphone-mu? &nbsp;·&nbsp; Kreativitas lahir dari keterbatasan &nbsp;·&nbsp; Dari obrolan dengan tukang sampah &nbsp;·&nbsp; Dari hansip yang cerita tentang hujan &nbsp;·&nbsp; Dari sepatu yang lepas solnya &nbsp;·&nbsp; Cacat adalah tanda bahwa ada proses &nbsp;·&nbsp; Ada tangan yang membuat. Ada kepala yang memikirkan &nbsp;·&nbsp; Apakah isi kepalamu lebih smart dari smartphone-mu? &nbsp;·&nbsp; Kreativitas lahir dari keterbatasan &nbsp;·&nbsp; Dari obrolan dengan tukang sampah &nbsp;·&nbsp; Dari hansip yang cerita tentang hujan &nbsp;·&nbsp; Dari sepatu yang lepas solnya &nbsp;·&nbsp;
+    </div>
+  </div>
 </div>
 
-<!-- ══════════════════════════════════
-     P2 — BEBAS ITU BISING.
-══════════════════════════════════ -->
+<!-- P2 — BEBAS ITU BISING -->
 <div class="pg" id="p2">
-  <div class="p2-inner">
-    <div class="p2-photo">
-      <div class="ph ph-lt" style="height:100%;">
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span class="ph-lbl">Foto · Art kolase abstrak</span>
-      </div>
+  <div class="p2-photo">
+    <div class="ph ph-lt">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      <span class="ph-lbl">Foto · Suasana bebas</span>
     </div>
-    <div class="p2-torn-mid"></div>
-    <div class="p2-content">
-      <div class="p2-headline">BEBAS<br>ITU <em>BISING.</em></div>
-      <div class="p2-body">
-        <p>Seni bukan untuk menyenangkan.</p>
-        <p>Seni bukan untuk approval.</p>
-        <p>Seni adalah redasi.</p>
-      </div>
-      <!-- MANIFESTO fragment P2 -->
-      <div class="mani-body-p2">
-        Kreativitas ciamik tidak lahir dari keluasan pilihan.<br>
-        Ia lahir dari keterbatasan.<br>
-        Dari benda-benda biasa yang tidak pernah disadari orang.
-      </div>
+  </div>
+  <div class="p2-torn-mid"></div>
+  <div class="p2-content">
+    <div class="p2-hl">BEBAS<br>ITU <em>BISING.</em></div>
+    <div class="p2-body">
+      <p>Seni bukan untuk menyenangkan.</p>
+      <p>Seni bukan untuk approval.</p>
+      <p>Seni adalah redaksi.</p>
+    </div>
+    <div class="mani-body-p2">
+      Kreativitas ciamik tidak lahir dari keluasan pilihan.<br>
+      Ia lahir dari keterbatasan.<br>
+      Dari benda-benda biasa yang tidak pernah disadari orang.
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════
-     P3 — ART FOTO + BULLET QUESTIONS
-══════════════════════════════════ -->
+<!-- P3 — ART FOTO -->
 <div class="pg" id="p3">
-  <div class="p3-inner">
-    <div class="p3-photo">
-      <div class="ph ph-md" style="height:100%;background:#5E4A3A;">
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span class="ph-lbl" style="color:rgba(255,255,255,.2);">Foto · Potret seniman</span>
-      </div>
-      <div class="p3-photo-overlay"></div>
+  <div class="p3-photo">
+    <div class="ph ph-md">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      <span class="ph-lbl" style="color:rgba(255,255,255,.18);">Foto · Potret seniman</span>
     </div>
-
-    <div class="p3-bullets">
-      <div class="p3-bullet">KENAP KAMU BIKIN KARYA?</div>
-      <div class="p3-bullet">APA YANG KAMU LAWAN</div>
-      <div class="p3-bullet">APA YANG KAMU TAKUTKAN.</div>
-    </div>
-
-    <div class="p3-torn-mid"></div>
-
-    <div class="p3-quote">
-      <div class="p3-quote-text">"Aku bikin karya<br>supaya nggak meledak."</div>
-    </div>
-
-    <!-- MANIFESTO stamp P3 -->
-    <div class="mani-stamp-p3">
-      <p>Materi harus analog.<br>Harus nyata.<br>Harus bisa dipegang.<br>Harus meninggalkan jejak.</p>
-    </div>
+    <div class="p3-overlay"></div>
+  </div>
+  <div class="p3-bullets">
+    <div class="p3-bullet">KENAP KAMU BIKIN KARYA?</div>
+    <div class="p3-bullet">APA YANG KAMU LAWAN</div>
+    <div class="p3-bullet">APA YANG KAMU TAKUTKAN.</div>
+  </div>
+  <div class="p3-torn"></div>
+  <div class="p3-quote">
+    <div class="p3-quote-text">"Aku bikin karya<br>supaya nggak meledak."</div>
+  </div>
+  <div class="mani-stamp-p3">
+    <p>Materi harus analog.<br>Harus nyata.<br>Harus bisa dipegang.<br>Harus meninggalkan jejak.</p>
   </div>
 </div>
 
-<!-- ══════════════════════════════════
-     P4 — DIY ZINE CULTURE
-══════════════════════════════════ -->
+<!-- P4 — DIY ZINE CULTURE -->
 <div class="pg" id="p4">
   <div class="p4-inner">
-    <div class="p4-header">
-      <div class="p4-header-title">DIY ZINE<br>CULTURE</div>
-    </div>
-
+    <div class="p4-hdr"><div class="p4-hdr-title">DIY ZINE<br>CULTURE</div></div>
     <div class="p4-photos">
-      <div class="p4-photo-cell">
-        <div class="ph" style="height:100%;background:#7A6A5A;">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          <span class="ph-lbl">foto zine</span>
-        </div>
-      </div>
-      <div class="p4-photo-cell">
-        <div class="ph" style="height:100%;background:#6A5A4A;">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          <span class="ph-lbl">foto kolase</span>
-        </div>
-      </div>
+      <div class="p4-photo-cell"><div class="ph" style="height:100%;background:#7A6A5A;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div></div>
+      <div class="p4-photo-cell"><div class="ph" style="height:100%;background:#6A5A4A;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div></div>
     </div>
-
     <div class="p4-handwriting">Beran kan keuu!! <em style="font-size:.8em;opacity:.7;">Zianauha</em></div>
-
-    <!-- MANIFESTO sticky note P4 -->
     <div class="mani-note-p4">
       <p>Cacat adalah tanda bahwa ada proses. Bahwa ada tangan yang membuat. Bahwa ada kepala yang memikirkan.</p>
       <em>Glitch — Blank Canvas untuk Komunitas</em>
     </div>
-
-    <div style="font-family:var(--bc);font-size:clamp(13px,3.5vw,18px);font-weight:600;letter-spacing:.06em;color:#2A2218;margin-bottom:12px;">
-      Bikin Zine Lo Sendiri!<br>Fotokopi, Potong,<br>Tempel, Copy.
+    <div class="p4-diy-text">Bikin Zine Lo Sendiri!<br>Fotokopi, Potong, Tempel, Copy.</div>
+    <div class="p4-cta">
+      <div class="p4-cta-t">BERANI KREATIF</div>
+      <div class="p4-cta-s">BERANI BEBAS!</div>
     </div>
-
-    <div class="p4-cta-block">
-      <div class="p4-cta-title">BERANI KREATIF</div>
-      <div class="p4-cta-sub">BERANI BEBAS!</div>
-    </div>
-
-    <div class="p4-qr">
-      <span>QR<br>CODE</span>
-    </div>
+    <div class="p4-qr"><span>QR<br>CODE</span></div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════
-     P5 — BERTAHAN DI TENGAH GEMPURAN
-══════════════════════════════════ -->
+<!-- P5 — BERTAHAN DI TENGAH GEMPURAN -->
 <div class="pg" id="p5">
-  <div class="p5-inner">
-    <div class="p5-photo">
-      <div class="ph ph-md" style="height:100%;background:#5A4E40;">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span class="ph-lbl">foto · founder / wawancara</span>
-      </div>
+  <div class="p5-photo">
+    <div class="ph ph-md" style="height:100%;">
+      <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      <span class="ph-lbl" style="color:rgba(255,255,255,.18);">Foto · Founder / Wawancara</span>
     </div>
-    <div class="p5-content">
-      <div class="p5-headline">BERTAHAN<br>DI TENGAH<br>GEMPURAN<br>"BRAND<br>BESAR."</div>
-      <div class="p5-brush-accent"></div>
-      <div class="p5-list">
-        <div class="p5-list-item">Tantangan Bahan Baku</div>
-        <div class="p5-list-item">Persaingan Pasar</div>
-        <div class="p5-list-item">Q&amp;A</div>
-        <div class="p5-list-item">Bersama Founder</div>
-      </div>
-
-      <!-- MANIFESTO fragment P5 -->
-      <div class="mani-col-p5">
-        <span class="mani-label">Manifesto GLITCH</span>
-        <p>Setelah itu, silakan diulik gila-gilaan secara digital. Tapi jangan pernah lupa dari mana kita mulai.</p>
-      </div>
+  </div>
+  <div class="p5-content">
+    <div class="p5-hl">BERTAHAN<br>DI TENGAH<br>GEMPURAN<br><span style="font-size:.6em;color:var(--r);">"BRAND BESAR."</span></div>
+    <div class="p5-bar"></div>
+    <div class="p5-list">
+      <div class="p5-li">Tantangan Bahan Baku</div>
+      <div class="p5-li">Persaingan Pasar</div>
+      <div class="p5-li">Q&amp;A</div>
+      <div class="p5-li">Bersama Founder</div>
+    </div>
+    <div class="mani-col-p5">
+      <span class="ml">Manifesto GLITCH</span>
+      <p>Setelah itu, silakan diulik gila-gilaan secara digital. Tapi jangan pernah lupa dari mana kita mulai.</p>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════
-     P6 — CERITA KOTA
-══════════════════════════════════ -->
+<!-- P6 — CERITA KOTA -->
 <div class="pg" id="p6">
-  <div class="p6-inner">
-    <div class="p6-photo">
-      <div class="ph ph-md" style="height:100%;background:#4A4038;">
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span class="ph-lbl">foto · pasar malam / kota</span>
-      </div>
+  <div class="p6-photo">
+    <div class="ph ph-md" style="height:100%;background:#5A4E44;">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      <span class="ph-lbl" style="color:rgba(255,255,255,.18);">Foto · Suasana kota</span>
     </div>
-    <div class="p6-header-flag"><span>CERITA KOTA</span></div>
-    <div class="p6-torn-mid"></div>
-    <div class="p6-content">
-      <div class="p6-topics">
-        <div class="p6-topic">Denyut Jal<span style="text-decoration:line-through;opacity:.4;">g</span>nan</div>
-        <div class="p6-topic">Ekonomi Mikro</div>
-        <div class="p6-topic">Suara Warga</div>
-      </div>
+  </div>
+  <div class="p6-flag"><span>CERITA KOTA</span></div>
+  <div class="p6-torn"></div>
+  <div class="p6-content">
+    <div class="p6-topics">
+      <div class="p6-topic">Denyut Jal<span style="text-decoration:line-through;opacity:.4;">g</span>nan</div>
+      <div class="p6-topic">Ekonomi Mikro</div>
+      <div class="p6-topic">Suara Warga</div>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════
-     P7 — PETISI MBG: Hero + Tuntutan
-══════════════════════════════════ -->
+<!-- P7 — PETISI MBG: Hero + Tuntutan -->
 <div class="pg" id="p7">
   <div class="p7-inner">
-
-    <!-- ticker -->
     <div class="p7-ticker">
       <div class="p7-tick-txt">
-        ✊ PETISI MBG &nbsp;·&nbsp; Bedah data dulu, baru bersuara &nbsp;·&nbsp; <strong>Rp71T anggaran publik</strong> &nbsp;·&nbsp; 27 juta siswa penerima &nbsp;·&nbsp; 43% yang sampai ke piring &nbsp;·&nbsp; Evaluasi Q2 2025 harus transparan &nbsp;·&nbsp; ✊ PETISI MBG &nbsp;·&nbsp; Bedah data dulu, baru bersuara &nbsp;·&nbsp; Rp71T anggaran publik &nbsp;·&nbsp; 27 juta siswa penerima &nbsp;·&nbsp; 43% yang sampai ke piring &nbsp;·&nbsp; Evaluasi Q2 2025 harus transparan &nbsp;·&nbsp;
+        ✊ PETISI MBG &nbsp;·&nbsp; Bedah data dulu, baru bersuara &nbsp;·&nbsp; Rp71T anggaran publik &nbsp;·&nbsp; 27 juta siswa penerima &nbsp;·&nbsp; 43% yang sampai ke piring &nbsp;·&nbsp; Evaluasi Q2 2025 harus transparan &nbsp;·&nbsp; ✊ PETISI MBG &nbsp;·&nbsp; Bedah data dulu, baru bersuara &nbsp;·&nbsp; Rp71T anggaran publik &nbsp;·&nbsp; 27 juta siswa penerima &nbsp;·&nbsp; 43% yang sampai ke piring &nbsp;·&nbsp; Evaluasi Q2 2025 harus transparan &nbsp;·&nbsp;
       </div>
     </div>
-
-    <!-- hero -->
     <div class="p7-hero">
       <div class="p7-eyebrow"><div class="p7-eyebrow-line"></div><span class="p7-eyebrow-txt">Petisi Kolektif · MBG 2025</span></div>
-      <div class="p7-hl" data-t="KAMI MEMINTA TRANSPARANSI">KAMI<br>MEMINTA<br><em>TRANSPARAN</em><br><em>SI</em></div>
+      <div class="p7-hl" data-t="KAMI MEMINTA TRANSPARANSI">KAMI<br>MEMINTA<br><em>TRANSPARAN</em></div>
       <p class="p7-sub">Program makan bergizi gratis untuk 27 juta siswa adalah niat yang kami hormati. <strong>Tapi Rp71T anggaran publik berhak dipertanggungjawabkan secara terbuka.</strong></p>
     </div>
-
-    <!-- counter -->
     <div class="p7-counter">
       <div class="p7-cnum">1<span>.</span>247</div>
       <div class="p7-cinfo">
@@ -1160,174 +946,119 @@ body::after{
         <div class="p7-bar-lbl"><span>12.47%</span><span>Target 10.000</span></div>
       </div>
     </div>
-
-    <!-- tuntutan -->
     <div class="p7-demands">
-      <div class="p7-demands-lbl">Tuntutan Kami</div>
-
+      <div class="p7-dlbl">Tuntutan Kami</div>
       <div class="p7-demand">
         <span class="p7-dn">01</span>
-        <div class="p7-dt">
-          <strong>Publikasi rincian anggaran per komponen</strong>
-          <span>Breakdown logistik, bahan pangan, tenaga, dan overhead dibuka ke publik — bukan hanya total anggaran.</span>
-        </div>
+        <div class="p7-dt"><strong>Publikasi rincian anggaran per komponen</strong><span>Breakdown logistik, bahan pangan, tenaga, dan overhead dibuka ke publik.</span></div>
       </div>
-
       <div class="p7-demand">
         <span class="p7-dn">02</span>
-        <div class="p7-dt">
-          <strong>Audit independen Q2 2025 dengan indikator gizi</strong>
-          <span>Evaluasi harus mencakup angka stunting dan outcome gizi — bukan hanya laporan distribusi porsi.</span>
-        </div>
+        <div class="p7-dt"><strong>Audit independen Q2 2025 dengan indikator gizi</strong><span>Evaluasi harus mencakup angka stunting — bukan hanya laporan distribusi porsi.</span></div>
       </div>
-
       <div class="p7-demand">
         <span class="p7-dn">03</span>
-        <div class="p7-dt">
-          <strong>Mekanisme pengaduan terbuka bagi orang tua &amp; guru</strong>
-          <span>Kanal laporan kualitas makanan yang bisa diakses dan direspons dalam batas waktu terukur.</span>
-        </div>
+        <div class="p7-dt"><strong>Mekanisme pengaduan terbuka bagi orang tua &amp; guru</strong><span>Kanal laporan kualitas makanan yang bisa diakses dalam batas waktu terukur.</span></div>
       </div>
     </div>
-
-    <!-- destination footer -->
     <div class="p7-footer">
-      <span class="p7-footer-lbl">Dikirim ke</span>
+      <span class="p7-flbl">Dikirim ke</span>
       <div class="p7-chips">
         <span class="p7-chip">BGN</span>
         <span class="p7-chip">Komisi X DPR RI</span>
         <span class="p7-chip">BPK RI</span>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- ══════════════════════════════════
-     P8 — PETISI MBG: Posisi + Tanda Tangan
-══════════════════════════════════ -->
+<!-- P8 — PETISI MBG: Posisi + TTD -->
 <div class="pg" id="p8">
   <div class="p8-inner">
-
     <div class="p8-top">
       <div class="p8-top-lbl">Fase 03 — Tanda Tangan</div>
       <div class="p8-top-title">Pilih Posisi Lo</div>
     </div>
-
-    <!-- deliberation gate -->
     <div class="p8-delib">
       <div class="p8-delib-lbl">↳ Konfirmasi Deliberasi</div>
-      <div class="p8-check-row" onclick="p8tick(this,1)">
-        <div class="p8-check-box" id="p8cb1"></div>
-        <span class="p8-check-txt">Sudah membaca infografis data MBG</span>
-      </div>
-      <div class="p8-check-row" onclick="p8tick(this,2)">
-        <div class="p8-check-box" id="p8cb2"></div>
-        <span class="p8-check-txt">Memahami posisi saya — bukan sekedar ikut tren</span>
-      </div>
-      <div class="p8-check-row" onclick="p8tick(this,3)">
-        <div class="p8-check-box" id="p8cb3"></div>
-        <span class="p8-check-txt">Siap mempertanggungjawabkan posisi ini</span>
-      </div>
+      <div class="p8-cr" onclick="p8tick(1)"><div class="p8-cb" id="p8cb1"></div><span class="p8-ct">Sudah membaca infografis data MBG</span></div>
+      <div class="p8-cr" onclick="p8tick(2)"><div class="p8-cb" id="p8cb2"></div><span class="p8-ct">Memahami posisi saya — bukan sekedar ikut tren</span></div>
+      <div class="p8-cr" onclick="p8tick(3)"><div class="p8-cb" id="p8cb3"></div><span class="p8-ct">Siap mempertanggungjawabkan posisi ini</span></div>
     </div>
-
-    <!-- stance selector -->
     <div class="p8-stances">
-      <div class="p8-stance sel" onclick="p8selStance(this)">
-        <div class="p8-stance-dot"></div>
-        <div>
-          <div class="p8-stance-t">Dukung program, tuntut transparansi</div>
-          <div class="p8-stance-d">Rp71T butuh akuntabilitas penuh — bukan kepercayaan buta.</div>
-        </div>
+      <div class="p8-stance sel" onclick="p8sel(this)">
+        <div class="sdot"></div>
+        <div><div class="st">Dukung program, tuntut transparansi</div><div class="sd">Rp71T butuh akuntabilitas penuh — bukan kepercayaan buta.</div></div>
       </div>
-      <div class="p8-stance" onclick="p8selStance(this)">
-        <div class="p8-stance-dot"></div>
-        <div>
-          <div class="p8-stance-t">Dukung program, tuntut reformasi skema</div>
-          <div class="p8-stance-d">Model distribusi dirombak — terutama daerah 3T.</div>
-        </div>
+      <div class="p8-stance" onclick="p8sel(this)">
+        <div class="sdot"></div>
+        <div><div class="st">Dukung program, tuntut reformasi skema</div><div class="sd">Model distribusi dirombak — terutama daerah 3T.</div></div>
       </div>
-      <div class="p8-stance" onclick="p8selStance(this)">
-        <div class="p8-stance-dot"></div>
-        <div>
-          <div class="p8-stance-t">Minta moratorium hingga audit selesai</div>
-          <div class="p8-stance-d">Lebih baik lambat tapi tepat sasaran.</div>
-        </div>
+      <div class="p8-stance" onclick="p8sel(this)">
+        <div class="sdot"></div>
+        <div><div class="st">Minta moratorium hingga audit selesai</div><div class="sd">Lebih baik lambat tapi tepat sasaran.</div></div>
       </div>
     </div>
-
-    <!-- recent sigs -->
     <div class="p8-sigs">
-      <div class="p8-sigs-lbl">Baru menandatangani</div>
-      <div class="p8-sigs-row">
-        <span class="p8-sig r">embun.pagi</span>
-        <span class="p8-sig">siska.ipb</span>
-        <span class="p8-sig r">nalar.bebas</span>
-        <span class="p8-sig">bara.api</span>
-        <span class="p8-sig r">kota.kita</span>
-        <span class="p8-sig">angin.timur</span>
+      <div class="p8-slbl">Baru menandatangani</div>
+      <div class="p8-srow" id="p8srow">
+        <span class="p8-sc r">embun.pagi</span>
+        <span class="p8-sc">siska.ipb</span>
+        <span class="p8-sc r">nalar.bebas</span>
+        <span class="p8-sc">bara.api</span>
+        <span class="p8-sc r">kota.kita</span>
+        <span class="p8-sc">angin.timur</span>
       </div>
     </div>
-
-    <!-- CTA -->
     <div class="p8-cta">
-      <button class="p8-btn" id="p8signBtn" onclick="p8doSign(this)">
-        <span>Tanda Tangani Sekarang</span>
-        <span>✊</span>
+      <button class="p8-btn locked" id="p8btn" onclick="p8sign(this)">
+        <span>Tanda Tangani Sekarang</span><span>✊</span>
       </button>
-      <p class="p8-disc">Suara lo tercatat dan dikirim ke BGN · Komisi X DPR · BPK RI setelah target 10.000 tercapai.</p>
+      <p class="p8-disc">Dikirim ke BGN · Komisi X DPR RI · BPK RI setelah target 10.000 tercapai.</p>
     </div>
-
   </div>
 </div>
 
-<!-- ══════════════════════════════════
-     P9 — KERJABAKTI & DONASI
-══════════════════════════════════ -->
+<!-- P9 — KERJABAKTI -->
 <div class="pg" id="p9">
-  <div class="p9-inner">
-    <div class="p9-photo">
-      <div class="ph ph-md" style="height:100%;background:#4A4038;">
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span class="ph-lbl">foto · aksi komunitas</span>
-      </div>
+  <div class="p9-photo">
+    <div class="ph ph-md" style="height:100%;background:#4A4038;">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      <span class="ph-lbl" style="color:rgba(255,255,255,.18);">Foto · Aksi komunitas</span>
     </div>
-    <div class="p9-torn"></div>
-    <div class="p9-content">
-      <div class="p9-section-title">KERJABAKTI</div>
-      <div class="p9-list">
-        <div class="p9-li">Aksi Berish Lingkungan</div>
-        <div class="p9-li">Dukung UMKM Lokal</div>
-        <div class="p9-li">Bantu Sambil Jelas</div>
+  </div>
+  <div class="p9-torn"></div>
+  <div class="p9-content">
+    <div class="p9-sec-title">KERJABAKTI</div>
+    <div class="p9-list">
+      <div class="p9-li">Aksi Bersih Lingkungan</div>
+      <div class="p9-li">Dukung UMKM Lokal</div>
+      <div class="p9-li">Bantu Sambil Jelas</div>
+    </div>
+    <div class="p9-cta-row">
+      <div>
+        <div class="p9-cta red">DONASI</div>
+        <div class="p9-qr-hint">Scan QR &amp; Gabung</div>
       </div>
-      <div class="p9-cta-row">
-        <div>
-          <div class="p9-cta red">DONASI</div>
-          <div class="p9-qr-hint">Scan QR &amp; Gabung</div>
-        </div>
-        <div>
-          <div class="p9-cta">PETISI</div>
-          <div class="p9-qr-hint" style="visibility:hidden;">—</div>
-        </div>
+      <div>
+        <div class="p9-cta">PETISI</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════
-     P10 — KAMI MENCATAT. BERGERAK.
-══════════════════════════════════ -->
+<!-- P10 — CLOSING -->
 <div class="pg" id="p10">
   <div class="p10-inner">
-    <div class="p10-lines">
+    <div>
       <div class="p10-line">KAMI</div>
-      <div class="p10-line red glitch" data-t="MENCATAT.">MENCATAT.</div>
-      <div class="p10-line" style="height:3px;background:rgba(255,255,255,.08);margin:4px 0;font-size:0;">&nbsp;</div>
+      <div class="p10-line r glitch">MENCATAT.</div>
+      <div class="p10-sep"></div>
       <div class="p10-line">KAMI</div>
-      <div class="p10-line red">MELAPORKAN.</div>
-      <div class="p10-line" style="height:3px;background:rgba(255,255,255,.08);margin:4px 0;font-size:0;">&nbsp;</div>
+      <div class="p10-line r">MELAPORKAN.</div>
+      <div class="p10-sep"></div>
       <div class="p10-line">KAMI</div>
-      <div class="p10-line red">BERGERAK.</div>
+      <div class="p10-line r">BERGERAK.</div>
     </div>
     <div class="p10-footer">
       <div class="p10-footer-title">GLITCH V.001</div>
@@ -1338,36 +1069,34 @@ body::after{
 
 </div><!-- /book -->
 
-<!-- INDICATOR -->
+<!-- SIDE INDICATOR -->
 <div id="ind"></div>
 
-<!-- HINT -->
+<!-- SWIPE HINT -->
 <div id="hint">Geser <span class="ha">→</span></div>
 
-<!-- NAV -->
-<nav id="nav">
-  <button class="nv a" onclick="goTo(0)"><div class="nv-dot"></div><span class="nv-lbl">Cover</span></button>
-  <div class="nv-sep"></div>
-  <button class="nv" onclick="goTo(1)"><div class="nv-dot"></div><span class="nv-lbl">Bebas</span></button>
-  <div class="nv-sep"></div>
-  <button class="nv" onclick="goTo(3)"><div class="nv-dot"></div><span class="nv-lbl">DIY</span></button>
-  <div class="nv-sep"></div>
-  <button class="nv" onclick="goTo(5)"><div class="nv-dot"></div><span class="nv-lbl">Kota</span></button>
-  <div class="nv-sep"></div>
-  <button class="nv" onclick="goTo(7)"><div class="nv-dot"></div><span class="nv-lbl">Suara</span></button>
-  <div class="nv-sep"></div>
-  <button class="nv" onclick="goTo(9)"><div class="nv-dot"></div><span class="nv-lbl">Gerak</span></button>
+<!-- BOTTOM NAV -->
+<nav id="botnav">
+  <a class="bn" href="#"><div class="bn-icon">✕</div><span>Spill</span></a>
+  <a class="bn" href="#"><div class="bn-icon">✦</div><span>Jejak</span></a>
+  <a class="bn act" href="#"><div class="bn-icon">⚡</div><span>Glitch</span></a>
+  <a class="bn" href="#"><div class="bn-icon">〜</div><span>Cocomeo</span></a>
 </nav>
 
 <script>
 const N=10, BOOK=document.getElementById('book');
-let cur=0,sx=0,sy=0,drag=false,mv=false;
+let cur=0, sx=0, sy=0, drag=false, mv=false;
 
-// Build indicator
+/* section map: page → tab index */
+const SEC=[0,0,0,0,0,0,1,1,1,2];
+/* tab → first page */
+const TAB_PAGE=[0,6,8];
+
+/* ── BUILD INDICATOR ── */
 const ind=document.getElementById('ind');
 for(let i=0;i<N;i++){
   const d=document.createElement('div');
-  d.className='id';
+  d.className='id-dot';
   d.onclick=()=>goTo(i);
   ind.appendChild(d);
 }
@@ -1379,26 +1108,34 @@ function goTo(n){
 }
 
 function ui(){
-  ind.querySelectorAll('.id').forEach((d,i)=>d.className='id'+(i===cur?' a':''));
-  // nav section map: Cover=0, Bebas=1-2, DIY=3-4, Kota=5-6, Suara=7-8, Gerak=9
-  const sec=[0,1,1,2,2,3,3,4,4,5];
-  document.querySelectorAll('.nv').forEach((b,i)=>b.classList.toggle('a',i===sec[cur]));
+  /* indicator */
+  ind.querySelectorAll('.id-dot').forEach((d,i)=>{
+    d.className='id-dot'+(i===cur?' a':'');
+  });
+  /* tabs */
+  const s=SEC[cur];
+  document.querySelectorAll('.tb').forEach((b,i)=>b.classList.toggle('act',i===s));
+  /* progress strip */
+  document.getElementById('pgstrip-fill').style.width=((cur/(N-1))*100)+'%';
 }
 
-// Touch
+/* ── TAB NAV ── */
+function goSection(n){
+  goTo(TAB_PAGE[n]);
+}
+
+/* ── TOUCH ── */
 BOOK.addEventListener('touchstart',e=>{
   sx=e.touches[0].clientX;sy=e.touches[0].clientY;
   drag=true;mv=false;BOOK.style.transition='none';
 },{passive:true});
-
 BOOK.addEventListener('touchmove',e=>{
   if(!drag)return;
-  const dx=e.touches[0].clientX-sx,dy=e.touches[0].clientY-sy;
+  const dx=e.touches[0].clientX-sx, dy=e.touches[0].clientY-sy;
   if(!mv&&Math.abs(dy)>Math.abs(dx)){drag=false;return;}
   mv=true;
   BOOK.style.transform=`translateX(${-cur*window.innerWidth+dx}px)`;
 },{passive:true});
-
 BOOK.addEventListener('touchend',e=>{
   if(!drag||!mv)return;
   drag=false;BOOK.style.transition='';
@@ -1409,7 +1146,7 @@ BOOK.addEventListener('touchend',e=>{
   ui();
 });
 
-// Mouse drag
+/* ── MOUSE DRAG ── */
 BOOK.addEventListener('mousedown',e=>{sx=e.clientX;drag=true;mv=false;BOOK.style.transition='none';});
 window.addEventListener('mousemove',e=>{
   if(!drag)return;mv=true;
@@ -1424,57 +1161,38 @@ window.addEventListener('mouseup',e=>{
   ui();
 });
 
-// Keyboard
+/* ── KEYBOARD ── */
 window.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight'&&cur<N-1)goTo(cur+1);
   if(e.key==='ArrowLeft'&&cur>0)goTo(cur-1);
 });
 
-// ── P8 PETISI LOGIC ──
-const p8checks = {1:false,2:false,3:false};
-
-function p8tick(row, n) {
-  p8checks[n] = !p8checks[n];
-  const box = document.getElementById('p8cb'+n);
-  box.classList.toggle('ticked', p8checks[n]);
-  p8validate();
+/* ── P8 PETISI ── */
+const p8c={1:false,2:false,3:false};
+function p8tick(n){
+  p8c[n]=!p8c[n];
+  document.getElementById('p8cb'+n).classList.toggle('on',p8c[n]);
+  p8val();
 }
-
-function p8selStance(el) {
-  document.querySelectorAll('.p8-stance').forEach(s => s.classList.remove('sel'));
+function p8sel(el){
+  document.querySelectorAll('.p8-stance').forEach(s=>s.classList.remove('sel'));
   el.classList.add('sel');
-  p8validate();
+  p8val();
 }
-
-function p8validate() {
-  const allChecked = p8checks[1] && p8checks[2] && p8checks[3];
-  const btn = document.getElementById('p8signBtn');
-  if (btn && !btn.classList.contains('done')) {
-    btn.style.opacity = allChecked ? '1' : '0.35';
-    btn.style.pointerEvents = allChecked ? 'auto' : 'none';
-  }
+function p8val(){
+  const ok=p8c[1]&&p8c[2]&&p8c[3];
+  const btn=document.getElementById('p8btn');
+  if(btn&&!btn.classList.contains('done'))btn.classList.toggle('locked',!ok);
 }
-
-function p8doSign(btn) {
-  if (!p8checks[1] || !p8checks[2] || !p8checks[3]) return;
-  btn.innerHTML = '<span>✦ &nbsp;Suara lo tercatat — terima kasih</span><span></span>';
+function p8sign(btn){
+  if(btn.classList.contains('locked')||btn.classList.contains('done'))return;
+  btn.innerHTML='<span>✦ &nbsp;Suara Lo Tercatat</span><span></span>';
   btn.classList.add('done');
-  btn.disabled = true;
-  const row = document.querySelector('.p8-sigs-row');
-  if (row) {
-    const chip = document.createElement('span');
-    chip.className = 'p8-sig r';
-    chip.textContent = 'kamu';
-    row.insertBefore(chip, row.firstChild);
-  }
+  const row=document.getElementById('p8srow');
+  if(row){const c=document.createElement('span');c.className='p8-sc r';c.textContent='kamu';row.insertBefore(c,row.firstChild);}
 }
 
-// init p8 btn state
-setTimeout(function(){
-  const btn = document.getElementById('p8signBtn');
-  if (btn) { btn.style.opacity = '0.35'; btn.style.pointerEvents = 'none'; }
-}, 100);
-
+/* init */
 ui();
 </script>
 </body>
