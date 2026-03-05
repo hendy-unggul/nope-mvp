@@ -1,4 +1,4 @@
-// api/chat.js — JEJAK AI Chat Backend (FULL VERSION dengan DISTRESS + MINIMAL INPUT HANDLER)
+// api/chat.js — JEJAK AI Chat Backend (FIXED VERSION - Selaras dengan spill.html v7)
 // Vercel Serverless Function
 
 const PERSONAS = {
@@ -279,17 +279,17 @@ function detectDistress(message) {
   return { isHigh, isLow };
 }
 
-// ==================== HANDLER INPUT MINIMAL ====================
+// ==================== HANDLER INPUT MINIMAL (FIXED - Threshold 2 karakter) ====================
 function handleMinimalInput(message) {
   const msg = message.toLowerCase().trim();
   
   // DETEKSI INPUT 1-2 KARAKTER ATAU REPETITIF
   const isMinimal = (
-    msg.length <= 2 ||
-    /^(hi+|he+|ha+|ho+|hu+|h[aeiou])+$/i.test(msg) || // hi, he, ha, ho
-    /^(ha|hi|he|ho|hu|ah|oh|eh)\s*(ha|hi|he|ho|hu|ah|oh|eh)*$/i.test(msg) || // hi hi, ho ho
-    /^[aeiou]{1,3}$/i.test(msg) || // a, i, u, e, o
-    /^(hehe|haha|hihi|hoho|wkwk|wk|kwk)+$/i.test(msg) // hehe, haha, wkwk
+    msg.length <= 2 ||  // Threshold diturunkan ke 2 karakter
+    /^(hi+|he+|ha+|ho+|hu+|h[aeiou])+$/i.test(msg) ||
+    /^(ha|hi|he|ho|hu|ah|oh|eh)\s*(ha|hi|he|ho|hu|ah|oh|eh)*$/i.test(msg) ||
+    /^[aeiou]{1,3}$/i.test(msg) ||
+    /^(hehe|haha|hihi|hoho|wkwk|wk|kwk)+$/i.test(msg)
   );
   
   if (!isMinimal) return null;
@@ -348,19 +348,8 @@ function handleMinimalInput(message) {
     return responses[Math.floor(Math.random() * responses.length)];
   }
   
-  // 5. RESPONS DEFAULT UNTUK INPUT MINIMAL
-  const defaultResponses = [
-    "hmm?",
-    "eh, ada apa?",
-    "iya?",
-    "lo manggil?",
-    "halo?",
-    "eh? gimana?",
-    "iya, gue dengerin",
-    "hm? ada yang mau diomongin?"
-  ];
-  
-  return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+  // 5. KALAU MASIH ADA YANG KENA TAPI GAK TERDETEKSI, RETURN NULL (biar AI yang handle)
+  return null;
 }
 
 // Fungsi untuk mendeteksi apakah user menyebut dirinya cowok
@@ -507,9 +496,16 @@ function cleanResponse(reply, userName, shortName, characterName, charGender, us
   return cleaned;
 }
 
-// SYSTEM PROMPT UTAMA
+// SYSTEM PROMPT UTAMA (FIXED - Validasi lastMessages)
 const SYSTEM = (name, style, lastMessages, userName, shortName, charGender, interactionCount, userGender = null) => {
-  const lastReplies = lastMessages.filter(m => m.role === 'assistant').slice(-5).map(m => m.content);
+  // VALIDASI: pastikan lastMessages adalah array
+  const validLastMessages = Array.isArray(lastMessages) ? lastMessages : [];
+  
+  const lastReplies = validLastMessages
+    .filter(m => m && m.role === 'assistant')
+    .slice(-5)
+    .map(m => m.content || '');
+    
   let repetitionWarning = '';
   const uniqueReplies = new Set(lastReplies);
   
@@ -564,8 +560,28 @@ ${earlyInteractionNote}
 ${repetitionWarning}`;
 };
 
+// ==================== VALIDASI LAST MESSAGES ====================
+function validateLastMessages(lastMessages) {
+  // Jika bukan array, return array kosong
+  if (!Array.isArray(lastMessages)) {
+    return [];
+  }
+  
+  // Filter hanya yang valid: object dengan role dan content
+  return lastMessages.filter(msg => {
+    return (
+      msg && 
+      typeof msg === 'object' && 
+      msg.role && 
+      (msg.role === 'user' || msg.role === 'assistant') &&
+      typeof msg.content === 'string'
+    );
+  });
+}
+
 // ==================== HANDLER UTAMA ====================
 export default async function handler(req, res) {
+  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -581,11 +597,16 @@ export default async function handler(req, res) {
   const persona = PERSONAS[characterName];
   if (!persona) return res.status(400).json({ error: 'Unknown character' });
 
+  // ===== VALIDASI LAST MESSAGES =====
+  // Pastikan lastMessages adalah array of objects dengan format yang benar
+  const validLastMessages = validateLastMessages(lastMessages);
+
   // ===== DETEKSI DISTRESS =====
   const { isHigh, isLow } = detectDistress(message);
   
-  // ===== HANDLER INPUT MINIMAL (TARO PALING ATAS) =====
-  if (message.length < 15) {
+  // ===== HANDLER INPUT MINIMAL (threshold 2 karakter) =====
+  // Hanya handle input yang sangat pendek, sisanya biar AI yang urus
+  if (message.trim().length <= 2) {
     const minimalResponse = handleMinimalInput(message);
     if (minimalResponse) {
       return res.status(200).json({
@@ -603,7 +624,7 @@ export default async function handler(req, res) {
     console.log(`User gender detected: ${userGender} from message: "${message}"`);
   }
 
-  const interactionCount = lastMessages.length || 0;
+  const interactionCount = validLastMessages.length || 0;
   const isTooPersonalMsg = isTooPersonal(message);
   const isEarlyInteraction = interactionCount < 4;
   
@@ -631,9 +652,9 @@ export default async function handler(req, res) {
     msgLower.includes('ceritain') ||
     msgLower.includes('kamu cerita') ||
     msgLower.includes('lo cerita') ||
-    (lastMessages.length > 0 && 
-     lastMessages[lastMessages.length-1].role === 'assistant' &&
-     lastMessages[lastMessages.length-1].content.toLowerCase().includes('lo yang cerita'))
+    (validLastMessages.length > 0 && 
+     validLastMessages[validLastMessages.length-1].role === 'assistant' &&
+     validLastMessages[validLastMessages.length-1].content.toLowerCase().includes('lo yang cerita'))
   );
 
   // DETEKSI TANYA AKTIVITAS / LOKASI
@@ -748,11 +769,12 @@ export default async function handler(req, res) {
   const charGender = persona.gender;
   const shortCharName = characterName.split('.')[0];
 
-  const history = lastMessages.slice(-8).map(m => ({ role: m.role, content: m.content }));
-  
+  // Gunakan validLastMessages yang sudah divalidasi
+  const history = validLastMessages.slice(-8);
+
   const isNameQuestion = /nama (kamu|lu|lo|kmu|luu)|kamu siapa|kenalan|nama lu|siapa nama/i.test(message);
   
-  let systemPrompt = SYSTEM(characterName, persona.style, lastMessages, userName, shortNameUser, charGender, interactionCount, userGender);
+  let systemPrompt = SYSTEM(characterName, persona.style, validLastMessages, userName, shortNameUser, charGender, interactionCount, userGender);
 
   if (isNameQuestion) {
     systemPrompt += `\n\n🔥 INSTRUKSI WAJIB: User nanya nama lo. JAWAB HARUS: "aku ${shortCharName}" atau "gue ${shortCharName}" atau "${shortCharName}". JANGAN PAKAI NAMA LENGKAP "${characterName}"! JANGAN PAKAI TITIK!`;
