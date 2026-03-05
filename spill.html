@@ -1367,6 +1367,45 @@ document.addEventListener('DOMContentLoaded', () => {
     if (radarRAF)      cancelAnimationFrame(radarRAF);
     if (fallbackTimer) clearTimeout(fallbackTimer);
     if (typingTimeout) clearTimeout(typingTimeout);
+     // ─── LOGOUT FUNCTION ─────────────────────────────────────────────
+function logoutUser() {
+  // Hapus semua data session dari localStorage
+  localStorage.removeItem('jejak_session');
+  localStorage.removeItem('jejak_user_id');
+  localStorage.removeItem('jejak_username');
+  localStorage.removeItem('user_id');
+  localStorage.removeItem('username');
+  localStorage.removeItem('uid');
+  
+  // Reset state
+  myUserId = null;
+  myUsername = null;
+  
+  // Update UI
+  const el = $('userNameDisplay');
+  if (el) el.textContent = '@guest';
+  
+  toast('Logged out', false);
+  
+  // Optional: redirect ke halaman login setelah 1 detik
+  setTimeout(() => {
+    window.location.replace('/index.html');
+  }, 1000);
+}
+
+// Tambahkan tombol logout di header (optional) - bisa diaktifkan dengan double tap
+let logoutTimer = null;
+function onUserNameDoubleClick() {
+  if (logoutTimer) clearTimeout(logoutTimer);
+  logoutTimer = setTimeout(() => {
+    if (confirm('Logout dari akun ini?')) {
+      logoutUser();
+    }
+  }, 500);
+}
+
+// Di bagian DOMContentLoaded, tambahkan:
+document.getElementById('userNameDisplay')?.addEventListener('dblclick', onUserNameDoubleClick);
   });
 });
 </script>
