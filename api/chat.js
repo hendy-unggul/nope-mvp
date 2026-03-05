@@ -280,7 +280,32 @@ function detectDistress(message) {
   
   return { isHigh, isLow };
 }
-
+// ==================== TAMBAHKAN FUNGSI INI DI SINI ====================
+function isTooRepetitive(reply, lastReplies) {
+  if (!lastReplies || lastReplies.length < 2) return false;
+  
+  // Cek apakah reply ini SAMA PERSIS dengan 2 reply terakhir
+  const lastTwo = lastReplies.slice(-2);
+  const exactMatch = lastTwo.some(last => last === reply);
+  
+  if (exactMatch) return true;
+  
+  // Cek greeting berulang (tapi bedakan dengan konteks)
+  const greetingPatterns = [
+    /^halo.*gue \w+,/i,
+    /^hai.*gue \w+,/i,
+    /^heyy, akhirnya ada yang nyapa/i,
+    /^halo halo! gue \w+,/i
+  ];
+  
+  const isGreeting = greetingPatterns.some(p => p.test(reply));
+  const lastWasGreeting = lastTwo.some(last => 
+    greetingPatterns.some(p => p.test(last))
+  );
+  
+  // Hanya blokir kalau greeting diulang DALAM 2 PESAN BERTURUT-TURUT
+  return isGreeting && lastWasGreeting;
+}
 // ==================== HANDLER INPUT MINIMAL (FIXED - Threshold 2 karakter) ====================
 function handleMinimalInput(message) {
   const msg = message.toLowerCase().trim();
