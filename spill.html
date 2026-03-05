@@ -1069,8 +1069,18 @@ function closeChat() {
   const sb = $('sendButton'); if (sb) sb.classList.remove('disabled');
   const inp = $('chatInput'); if (inp) inp.disabled = false;
   setChatStatus('');
+  
+  // ✅ FIX: Kembalikan nama user setelah chat selesai
+  const userEl = $('userNameDisplay');
+  if (userEl && userEl.dataset.original) {
+    // Kembalikan ke username asli
+    userEl.textContent = '@' + userEl.dataset.original;
+    // Hapus dataset biar ga numpuk
+    delete userEl.dataset.original;
+    // Kembalikan opacity ke normal
+    userEl.style.opacity = '1';
+  }
 }
-
 // ─── OFFLINE GREETING ─────────────────────────────────────────────
 // ✅ FIX: semua array pakai koma yang benar, pake rndOf
 function getOfflineGreeting(characterName, shortName) {
