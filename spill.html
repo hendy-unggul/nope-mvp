@@ -548,13 +548,13 @@ body::after{
 <div class="toast" id="toast"></div>
 
 <!-- ══════════════════════════════════════════════════════════════════
-     SCRIPTS
+     SCRIPTS (REVISED FULL VERSION - FIXED CHAT HISTORY & TYPING)
 ══════════════════════════════════════════════════════════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/shared-constants.js"></script>
 <script>
 'use strict';
-console.log('[SPILL] v6 — nav fix + spill generator fix');
+console.log('[SPILL] v7 FINAL — FIXED: chat history format, typing speed, context');
 
 // ─── AUTH GUARD ───────────────────────────────────────────────────
 if (!JEJAK.isLoggedIn()) {
@@ -563,7 +563,14 @@ if (!JEJAK.isLoggedIn()) {
 
 // ─── CONSTANTS ───────────────────────────────────────────────────
 const API_URL = 'https://jejak.space/api/chat';
-const SPILL_TARGET = 8; // selalu render 8 spill
+const SPILL_TARGET = 8;
+const MAX_HISTORY_LENGTH = 8;
+const TYPING_SPEED = {
+  minChar: 20,
+  maxChar: 40,
+  punctuation: 120,
+  sentence: 250
+};
 
 const AI_CHARS = {
   female: ['beby.manis','strawberry.shortcake','pretty.sad','little.fairy','cinnamon.girl'],
@@ -594,8 +601,8 @@ const SPILL_TEXTS  = [
 let sbClient      = null;
 let myUserId      = null;
 let myUsername    = null;
-let realEntries   = [];     // dari Supabase
-let fillerPool    = [];     // generated, persistent pool
+let realEntries   = [];
+let fillerPool    = [];
 let activeMood    = 'all';
 let currentGender = null;
 let chatPartner   = null;
@@ -608,6 +615,7 @@ let apiRetryCount = 0;
 let userSub       = { isActive: false, expiresAt: null, type: null };
 let radarRAF      = null;
 let radarInterval = null;
+let typingTimeout = null;
 
 // ─── HELPERS ─────────────────────────────────────────────────────
 const $  = id => document.getElementById(id);
@@ -656,7 +664,6 @@ function initSupabase() {
     myUserId   = sess.uid;
     myUsername = sess.username;
 
-    // fallback ke localStorage lama
     if (!myUserId) {
       for (const k of ['user_id','jejak_user_id','uid']) {
         const v = localStorage.getItem(k); if (v) { myUserId = v; break; }
@@ -679,7 +686,7 @@ function initSupabase() {
   }
 }
 
-// ─── LOAD REAL ENTRIES FROM SUPABASE ─────────────────────────────
+// ─── LOAD REAL ENTRIES ─────────────────────────────────────────────
 async function loadRealEntries() {
   if (!sbClient) { renderSpills(); return; }
   try {
@@ -723,8 +730,7 @@ async function loadRealEntries() {
   }
 }
 
-// ─── SPILL GENERATOR — FIXED ──────────────────────────────────────
-// FIX: generate sekali ke pool, render dari pool. Tidak duplicate per render.
+// ─── SPILL GENERATOR ──────────────────────────────────────
 function ensureFillerPool(needed) {
   const allAINames = [...AI_CHARS.female, ...AI_CHARS.male];
   const generated  = [];
@@ -734,7 +740,6 @@ function ensureFillerPool(needed) {
       ? allAINames[rnd(allAINames.length)]
       : NON_AI_NAMES[rnd(NON_AI_NAMES.length)];
     generated.push({
-      // FIX: ID unik pakai crypto.randomUUID jika ada, fallback kombinasi
       id:          typeof crypto !== 'undefined' && crypto.randomUUID
                      ? crypto.randomUUID()
                      : 'fl_' + Date.now() + '_' + Math.random().toString(36).slice(2),
@@ -746,41 +751,33 @@ function ensureFillerPool(needed) {
       content:     SPILL_TEXTS[rnd(SPILL_TEXTS.length)],
       reactions:   { skull: rnd(50), cry: rnd(100), fire: rnd(40), upside: rnd(30) },
       userReacted: null,
-      timestamp:   Date.now() - rnd(3600000) // acak dalam 1 jam terakhir
+      timestamp:   Date.now() - rnd(3600000)
     });
   }
-  // Tambahkan ke pool, buang yang terlalu lama (> 40 item)
   fillerPool = [...generated, ...fillerPool].slice(0, 40);
 }
 
-// ─── RENDER SPILLS — FIXED ────────────────────────────────────────
+// ─── RENDER SPILLS ────────────────────────────────────────
 function renderSpills() {
   const list = $('spillsList');
   if (!list) return;
 
-  // Gabungkan real + filler
   let combined = [...realEntries];
 
-  // FIX: Hitung kebutuhan filler berdasarkan yg sudah ada di pool
   const needed = Math.max(0, SPILL_TARGET - combined.length);
   if (needed > 0) {
-    // Generate ke pool jika pool kurang
     if (fillerPool.length < needed) {
       ensureFillerPool(needed - fillerPool.length + 4);
     }
-    // Ambil dari pool (tidak generate ulang setiap render)
     combined = [...combined, ...fillerPool.slice(0, needed)];
   }
 
-  // Sort by timestamp descending
   combined.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-  // Filter mood
   let filtered = activeMood === 'all'
     ? combined
     : combined.filter(s => s.mood === activeMood);
 
-  // Slice ke 8
   filtered = filtered.slice(0, SPILL_TARGET);
 
   if (!filtered.length) {
@@ -837,7 +834,6 @@ function reactLocal(fillerId, key) {
     if (entry.userReacted) {
       const old = entry.userReacted;
       entry.reactions[old] = Math.max(0, (entry.reactions[old] || 0) - 1);
-      // update old button UI
       const oldBtn = document.querySelector(`[data-fl-id="${fillerId}"][data-key="${old}"]`);
       const oldCnt = document.getElementById('rc-fl-' + fillerId + '-' + old);
       if (oldBtn) oldBtn.classList.remove('active');
@@ -879,7 +875,6 @@ async function reactDB(dbId, key) {
   if (btn) btn.classList.toggle('active', !wasActive);
   if (cnt) cnt.textContent = entry.reactions[key];
 
-  // Persist ke Supabase
   if (!sbClient) return;
   try {
     const { error } = await sbClient
@@ -888,7 +883,6 @@ async function reactDB(dbId, key) {
       .eq('id', dbId);
     if (error) {
       console.error('[SPILL] React DB error:', error.message);
-      // rollback
       if (wasActive) {
         entry.reactions[key] = Math.max(0, entry.reactions[key] + 1);
         entry.userReacted = key;
@@ -909,7 +903,6 @@ async function reactDB(dbId, key) {
 // ─── REFRESH ─────────────────────────────────────────────────────
 async function refreshSpills() {
   toast('Memuat spill terbaru ☕');
-  // FIX: reset pool agar konten segar, bukan duplikasi
   fillerPool = [];
   await loadRealEntries();
 }
@@ -919,13 +912,11 @@ function filterMood(btn) {
   document.querySelectorAll('.mood-chip').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   activeMood = btn.dataset.mood;
-  // FIX: Jika filter aktif dan pool kurang, generate tambahan yg sesuai mood
   const moodPool = activeMood === 'all'
     ? fillerPool
     : fillerPool.filter(s => s.mood === activeMood);
   if (moodPool.length < 4) {
     ensureFillerPool(8);
-    // Paksa beberapa entry baru pakai mood yang dipilih
     if (activeMood !== 'all') {
       for (let i = 0; i < 4; i++) {
         const allAINames = [...AI_CHARS.female, ...AI_CHARS.male];
@@ -939,7 +930,7 @@ function filterMood(btn) {
           isAI:        allAINames.includes(author),
           isReal:      false,
           isMe:        false,
-          mood:        activeMood,  // paksa mood yang dipilih
+          mood:        activeMood,
           content:     SPILL_TEXTS[rnd(SPILL_TEXTS.length)],
           reactions:   { skull: rnd(50), cry: rnd(100), fire: rnd(40), upside: rnd(30) },
           userReacted: null,
@@ -1043,7 +1034,6 @@ function radarLoop(cv) {
     ctx.fillStyle = 'rgba(2,10,2,.18)';
     ctx.fillRect(0, 0, W, H);
 
-    // sweep trail
     for (let i = 0; i < TRAIL_CAP - 1; i++) {
       const nw  = (trailPtr - 1 - i + TRAIL_CAP) % TRAIL_CAP;
       const ol  = (trailPtr - 2 - i + TRAIL_CAP) % TRAIL_CAP;
@@ -1062,7 +1052,6 @@ function radarLoop(cv) {
       ctx.fillStyle = `rgba(0,229,255,${alpha})`; ctx.fill(); ctx.restore();
     }
 
-    // needle
     ctx.save(); ctx.translate(cx, cy); ctx.rotate(needleA);
     ctx.shadowColor = 'rgba(0,229,255,.95)'; ctx.shadowBlur = 12;
     const lg = ctx.createLinearGradient(0,0,R,0);
@@ -1074,7 +1063,6 @@ function radarLoop(cv) {
     ctx.shadowBlur = 20; ctx.beginPath(); ctx.rect(-4,-4,8,8);
     ctx.fillStyle = '#00e5ff'; ctx.fill(); ctx.restore();
 
-    // dot glow
     rdots.forEach((d, di) => {
       const px = d.x / 100 * W, py = d.y / 100 * H;
       let da = Math.atan2(py - cy, px - cx); if (da < 0) da += Math.PI * 2;
@@ -1106,6 +1094,7 @@ function startVibeCheck() {
   chatHistory   = [];
   apiRetryCount = 0;
   isTyping      = false;
+  if (typingTimeout) clearTimeout(typingTimeout);
   if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
   setChatStatus('');
   $('genderModal').classList.add('on');
@@ -1133,7 +1122,6 @@ function confirmGender() {
   msgs.innerHTML = '';
   addSysMsg('⚡ mengaktifkan radar pencarian...');
 
-  // progress messages
   const steps = [
     { t: 3000,  m: '👀 masih memindai...' },
     { t: 6000,  m: '📡 lingkungan sepi, radar melebar' },
@@ -1174,7 +1162,6 @@ function fallbackToAI() {
   if (msgs) msgs.innerHTML = '';
   if ($('partnerLabel')) $('partnerLabel').textContent = '@' + chatPartner.name;
 
-  // show found message briefly, then clear and start
   const d = mk('div', 'chat-msg system-msg');
   d.innerHTML = `<div class="chat-bubble" style="background:rgba(0,229,255,.08);border:2px solid var(--as);padding:14px 20px;color:var(--as);font-weight:600">👤 seseorang ditemukan!</div>`;
   if (msgs) msgs.appendChild(d);
@@ -1235,54 +1222,114 @@ function closeChat() {
   $('chatRoom').classList.remove('on');
   clearInterval(timerInterval);
   if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
-  isTyping = false; apiRetryCount = 0;
+  if (typingTimeout) clearTimeout(typingTimeout);
+  isTyping = false; 
+  apiRetryCount = 0;
   const sb = $('sendButton'); if (sb) sb.classList.remove('disabled');
   const inp = $('chatInput'); if (inp) inp.disabled = false;
   setChatStatus('');
 }
 
-// ─── OFFLINE REPLIES ──────────────────────────────────────────────
-function getOfflineReply(userMsg) {
+// ─── OFFLINE REPLIES ──────────────────────────────────
+function getOfflineReply(userMsg, context = {}) {
   const msg = (userMsg || '').toLowerCase().trim();
-  if (/halo|hai|hey|hi\b/.test(msg)) {
-    const n = (chatPartner?.name || 'stranger').split('.')[0];
-    return [`hai juga! gue ${n}, lagi santai nih`, `heyy, akhirnya ada yang nyapa! gue ${n}`][rnd(2)];
+  const lastReply = context.lastReply || '';
+  const partnerName = chatPartner?.name?.split('.')[0] || 'anon';
+  
+  const isQuestion = msg.includes('?') || /apa|siapa|kenapa|gimana|kapan|dimana/.test(msg);
+  const isGreeting = /^halo|hai|hey|hi|helo|hy|hallo/.test(msg);
+  const isAskingActivity = /lagi (apa|ngapain|dimana)/.test(msg);
+  const isLongMessage = msg.length > 60;
+  
+  if (isGreeting) {
+    return [
+      `hai juga! gue ${partnerName}, lagi santai nih`,
+      `heyy, akhirnya ada yang nyapa! gue ${partnerName}`,
+      `halo halo! gue ${partnerName}, seneng kenal ya`
+    ][rnd(3)];
   }
-  if (/lagi (apa|ngapain|dimana)/.test(msg)) {
-    return ['lagi santai dengerin musik 🎵', 'lagi scroll sambil ngopi ☕', 'lagi rebahan mikirin hidup haha'][rnd(3)];
+  
+  if (isAskingActivity) {
+    return [
+      'lagi dengerin musik sambil scroll twitter. lo?',
+      'lagi rebahan sambil mikirin hidup. lo sibuk apa?',
+      'lagi ngopi sambil baca buku. lo dimana?'
+    ][rnd(3)];
   }
-  if (msg.includes('?') || /gimana|kenapa|apa|siapa/.test(msg)) {
-    return ['hmm, menarik pertanyaannya. lo sendiri gimana?', 'gue juga masih mikirin itu sih', 'susah juga ya jawabnya...'][rnd(3)];
+  
+  if (isQuestion) {
+    return [
+      'hmm, gue juga masih mikirin itu. kalo lo sendiri gimana?',
+      'pertanyaan bagus. gue belum nemu jawabannya sih',
+      'menarik. gue malah jadi penasaran sama lo'
+    ][rnd(3)];
   }
-  if (msg.length > 60) {
-    return ['wah, gue dengerin. terus gimana?', 'relate banget, pasti berat juga ya', 'iya ya, hidup emang gitu kadang'][rnd(3)];
+  
+  if (isLongMessage) {
+    return [
+      'wah, gue dengerin. lanjutin ceritanya dong',
+      'relate banget. gue juga pernah ngalamin hal serupa',
+      'berat ya. lo butuh temen cerita?'
+    ][rnd(3)];
   }
-  return ['iya, gue juga ngerasain hal yang sama', 'wah serius? cerita lebih lanjut dong 👀', 'relate banget sih...', 'hehe, sama dong!'][rnd(4)];
+  
+  return [
+    'iya, gue juga ngerasain hal yang sama',
+    'wah serius? cerita lebih lanjut dong 👀',
+    'relate banget sih...',
+    'hehe, sama dong!',
+    'gue ngerti banget perasaan lo'
+  ][rnd(5)];
 }
 
-// ─── TYPING EFFECT ────────────────────────────────────────────────
-async function typeMessage(el, text) {
+// ─── TYPING EFFECT ───────────────────────────────────
+async function typeMessage(el, text, skipTyping = false) {
+  if (skipTyping || apiRetryCount >= 2) {
+    el.textContent = text;
+    return Promise.resolve();
+  }
+  
   return new Promise(resolve => {
-    let i = 0, current = '';
+    let i = 0;
     const chars = text.split('');
     el.textContent = '';
+    
     const next = () => {
       if (i >= chars.length) return resolve();
-      current += chars[i]; el.textContent = current; i++;
-      let delay = 55 + Math.random() * 55;
-      const c = chars[i - 1];
-      if (c === '.' || c === '!' || c === '?') delay = 280 + Math.random() * 180;
-      else if (c === ',' || c === ';')          delay = 160 + Math.random() * 100;
-      else if (c === ' ')                        delay = 100 + Math.random() * 60;
+      
+      el.textContent += chars[i];
+      
+      let delay = TYPING_SPEED.minChar + Math.random() * (TYPING_SPEED.maxChar - TYPING_SPEED.minChar);
+      
+      const currentChar = chars[i];
+      const nextChar = chars[i + 1];
+      
+      if (currentChar === '.' || currentChar === '!' || currentChar === '?') {
+        delay = TYPING_SPEED.punctuation;
+      } 
+      else if (currentChar === ',' || currentChar === ';' || currentChar === ':') {
+        delay = TYPING_SPEED.punctuation * 0.7;
+      }
+      else if (currentChar === '.' && (!nextChar || nextChar === ' ')) {
+        delay = TYPING_SPEED.sentence;
+      }
+      
+      i++;
       setTimeout(next, delay);
     };
+    
     next();
   });
 }
 
-// ─── CHAT API ────────────────────────────────────────────────────
+// ─── CHAT API (FIXED) ────────────────────────────────────
 async function callChatAPI(userMsg, isFirst = false) {
-  if (!chatPartner || !chatPartner.isAI || isTyping) return;
+  if (!chatPartner || !chatPartner.isAI) return;
+  if (isTyping && !isFirst) {
+    toast('Tunggu partner selesai ngetik...', true);
+    return;
+  }
+  
   isTyping = true;
 
   const sb  = $('sendButton');
@@ -1293,42 +1340,77 @@ async function callChatAPI(userMsg, isFirst = false) {
   const msgs = $('chatMessages');
   const td   = mk('div', 'chat-msg other');
   td.innerHTML = '<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-  if (msgs) { msgs.appendChild(td); td.scrollIntoView({ behavior: 'smooth' }); }
+  if (msgs) { 
+    msgs.appendChild(td); 
+    setTimeout(() => td.scrollIntoView({ behavior: 'smooth', block: 'end' }), 10);
+  }
 
   let reply      = null;
   let useOffline = false;
+  let retryCount = 0;
+  const maxRetries = 2;
 
-  try {
-    const controller = new AbortController();
-    const tid = setTimeout(() => controller.abort(), 8000);
+  // FIX: Kirim history sebagai ARRAY of OBJECTS, bukan string
+  const historyForAPI = chatHistory
+    .slice(-MAX_HISTORY_LENGTH)
+    .map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }));
 
-    const res = await fetch(API_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message:       isFirst ? 'halo' : userMsg,
-        characterName: chatPartner.name,
-        userName:      myUsername || 'user',
-        lastMessages: chatHistory.slice(-6)
-// Sudah dalam format [{role, content}] - jangan di-join!
-      }),
-      signal: controller.signal
-    });
-    clearTimeout(tid);
+  while (retryCount <= maxRetries && !useOffline && !reply) {
+    try {
+      const controller = new AbortController();
+      const tid = setTimeout(() => controller.abort(), 6000);
 
-    if (res.ok) {
-      const data = await res.json();
-      if (data.reply) { reply = data.reply; apiRetryCount = 0; setChatStatus(''); }
-      else useOffline = true;
-    } else {
-      useOffline = true;
+      const res = await fetch(API_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message:       isFirst ? 'halo' : userMsg,
+          characterName: chatPartner.name,
+          userName:      myUsername || 'user',
+          lastMessages:  historyForAPI
+        }),
+        signal: controller.signal
+      });
+      clearTimeout(tid);
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.reply) { 
+          reply = data.reply; 
+          apiRetryCount = 0; 
+          setChatStatus('');
+          break;
+        }
+      }
+      
+      retryCount++;
+      if (retryCount <= maxRetries) {
+        setChatStatus(`⏳ Mencoba lagi (${retryCount}/${maxRetries})...`, 'info');
+        await sleep(1000 * Math.pow(2, retryCount - 1));
+      } else {
+        useOffline = true;
+      }
+      
+    } catch (e) {
+      console.warn('[API] Fetch error:', e);
+      retryCount++;
+      if (retryCount <= maxRetries) {
+        setChatStatus(`⏳ Koneksi bermasalah, coba lagi...`, 'info');
+        await sleep(1000 * Math.pow(2, retryCount - 1));
+      } else {
+        useOffline = true;
+      }
     }
-  } catch (e) {
-    useOffline = true;
   }
 
-  if (useOffline) {
+  if (td && td.parentNode) td.remove();
+
+  if (useOffline || !reply) {
     apiRetryCount++;
+    
     if (isFirst) {
       const name = (chatPartner.name || 'stranger').split('.')[0];
       reply = [
@@ -1337,32 +1419,50 @@ async function callChatAPI(userMsg, isFirst = false) {
         `eh halo! gue ${name}, akhirnya ada yang nyapa 😄`
       ][rnd(3)];
     } else {
-      reply = getOfflineReply(userMsg);
+      const lastAssistantMsg = chatHistory
+        .filter(m => m.role === 'assistant')
+        .pop()?.content || '';
+      
+      reply = getOfflineReply(userMsg, { lastReply: lastAssistantMsg });
     }
-    if (apiRetryCount >= 2) setChatStatus('⚡ mode offline aktif', 'info', 4000);
+    
+    if (apiRetryCount >= 2) {
+      setChatStatus('⚡ mode offline (respons mungkin kurang natural)', 'info', 5000);
+    }
   }
 
-  if (td && td.parentNode) td.remove();
-  await sleep(400 + Math.random() * 400);
+  await sleep(300 + Math.random() * 400);
 
   const msgDiv = mk('div', 'chat-msg other');
   const bubble = mk('div', 'chat-bubble');
   msgDiv.appendChild(bubble);
+  
   if (msgs) {
     msgs.appendChild(msgDiv);
     setTimeout(() => msgDiv.scrollIntoView({ behavior: 'smooth', block: 'end' }), 10);
   }
 
-  await typeMessage(bubble, reply);
+  await typeMessage(bubble, reply, apiRetryCount >= 2);
 
-  if (!isFirst) chatHistory.push({ role: 'user',      content: userMsg });
-  chatHistory.push(            { role: 'assistant',   content: reply });
+  // FIX: Push ke history dengan format yang benar
+  if (!isFirst) {
+    chatHistory.push({ role: 'user', content: userMsg });
+  }
+  chatHistory.push({ role: 'assistant', content: reply });
+
+  if (chatHistory.length > MAX_HISTORY_LENGTH * 2) {
+    chatHistory = chatHistory.slice(-MAX_HISTORY_LENGTH * 2);
+  }
 
   isTyping = false;
   if (sb)  sb.classList.remove('disabled');
-  if (inp) { inp.disabled = false; inp.focus(); }
+  if (inp) { 
+    inp.disabled = false; 
+    setTimeout(() => inp.focus(), 100);
+  }
 }
 
+// ─── SEND MESSAGE ─────────────────────────────────────────────────
 function sendMsg() {
   if (isTyping)      { toast('Tunggu partner selesai ngetik...', true); return; }
   if (!chatPartner)  { toast('Partner belum ditemukan', true); return; }
@@ -1376,14 +1476,19 @@ function sendMsg() {
   const b    = mk('div', 'chat-bubble');
   b.textContent = text;
   d.appendChild(b);
+  
   if (msgs) {
     msgs.appendChild(d);
     setTimeout(() => d.scrollIntoView({ behavior: 'smooth', block: 'end' }), 10);
   }
+  
   inp.value = '';
 
   chatHistory.push({ role: 'user', content: text });
-  if (chatPartner.isAI) callChatAPI(text, false);
+
+  if (chatPartner.isAI) {
+    callChatAPI(text, false);
+  }
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────
@@ -1391,35 +1496,37 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSub();
   initSupabase();
   initRadar();
-  loadRealEntries();     // load real + render (dengan filler jika kurang)
+  loadRealEntries();
   updateOnlineCount();
 
-  // slider
   $('vibeSlider')?.addEventListener('input', e => updateVibePct(e.target.value));
 
-  // mood chips — event delegation
   document.querySelector('.mood-scroll')?.addEventListener('click', e => {
     const btn = e.target.closest('.mood-chip');
     if (btn) filterMood(btn);
   });
 
-  // chat input enter
   $('chatInput')?.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+    if (e.key === 'Enter' && !e.shiftKey) { 
+      e.preventDefault(); 
+      sendMsg(); 
+    }
   });
 
-  // periodic refresh
+  $('chatInput')?.addEventListener('input', () => {
+    if (typingTimeout) clearTimeout(typingTimeout);
+  });
+
   setInterval(updateOnlineCount, 30000);
   setInterval(() => { if (realEntries.length > 0) loadRealEntries(); }, 30000);
-  // refresh filler pool setiap 5 menit (tambah yg baru ke pool, tidak replace)
   setInterval(() => { ensureFillerPool(4); }, 300000);
 
-  // cleanup
   window.addEventListener('beforeunload', () => {
     clearInterval(radarInterval);
     clearInterval(timerInterval);
     if (radarRAF)      cancelAnimationFrame(radarRAF);
     if (fallbackTimer) clearTimeout(fallbackTimer);
+    if (typingTimeout) clearTimeout(typingTimeout);
   });
 });
 </script>
