@@ -1218,6 +1218,17 @@ async function typeMessage(el, text, skipTyping = false) {
 // ─── CHAT API ─────────────────────────────────────────────────────
 // ✅ FIX: callChatAPI tidak push user message lagi — hanya push assistant reply
 // ✅ FIX: historyForAPI slice MAX_HISTORY_LEN (bukan *2)
+   // Di dalam callChatAPI(), sebelum fetch, tambahkan:
+try {
+  // Test CORS dulu
+  await fetch(API_URL.replace('/chat', '/health'), { 
+    method: 'HEAD',
+    mode: 'no-cors'
+  });
+} catch(e) {
+  console.error('[API] Health check failed:', e);
+  setChatStatus('⚠️ Gagal konek ke server', 'error', 5000);
+}
 async function callChatAPI(userMsg, isFirst = false) {
   if (!chatPartner?.isAI) return;
   if (isTyping && !isFirst) { toast('Tunggu partner selesai ngetik...', true); return; }
