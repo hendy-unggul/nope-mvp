@@ -944,9 +944,20 @@ function startVibeCheck() {
   if (typingTimeout) clearTimeout(typingTimeout);
   if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
   setChatStatus('');
+  
+  // ✅ FIX: Reset user display ke anonymous selama chat
+  const userEl = $('userNameDisplay');
+  if (userEl && myUsername) {
+    // Simpan username asli ke dataset
+    userEl.dataset.original = myUsername;
+    // Ganti tampilan menjadi @chat.mode
+    userEl.textContent = '@chat.mode';
+    // Opsional: kasih style beda biar tau ini mode chat
+    userEl.style.opacity = '0.7';
+  }
+  
   $('genderModal').classList.add('on');
-}
-function selectGender(el, g) {
+}function selectGender(el, g) {
   document.querySelectorAll('.gender-card').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   currentGender = g;
