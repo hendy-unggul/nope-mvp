@@ -1322,7 +1322,7 @@ async function typeMessage(el, text, skipTyping = false) {
   });
 }
 
-// ─── CHAT API (FIXED) ────────────────────────────────────
+// ─── CHAT API (FIXED - dengan context yang benar) ─────────────────
 async function callChatAPI(userMsg, isFirst = false) {
   if (!chatPartner || !chatPartner.isAI) return;
   if (isTyping && !isFirst) {
@@ -1345,18 +1345,28 @@ async function callChatAPI(userMsg, isFirst = false) {
     setTimeout(() => td.scrollIntoView({ behavior: 'smooth', block: 'end' }), 10);
   }
 
+  // ===== FIX: KALAU FIRST MESSAGE, BUAT HISTORY DUMMY =====
+  let historyForAPI = [];
+  
+  if (isFirst) {
+    // Untuk first message, kirim history kosong (backend akan handle)
+    historyForAPI = [];
+    console.log('[DEBUG] First message, sending empty history');
+  } else {
+    // Untuk pesan selanjutnya, kirim history yang sudah ada
+    historyForAPI = chatHistory
+      .slice(-MAX_HISTORY_LENGTH)
+      .map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+    console.log('[DEBUG] Sending history with', historyForAPI.length, 'messages');
+  }
+
   let reply      = null;
   let useOffline = false;
   let retryCount = 0;
   const maxRetries = 2;
-
-  // FIX: Kirim history sebagai ARRAY of OBJECTS, bukan string
-  const historyForAPI = chatHistory
-    .slice(-MAX_HISTORY_LENGTH)
-    .map(msg => ({
-      role: msg.role,
-      content: msg.content
-    }));
 
   while (retryCount <= maxRetries && !useOffline && !reply) {
     try {
@@ -1444,15 +1454,23 @@ async function callChatAPI(userMsg, isFirst = false) {
 
   await typeMessage(bubble, reply, apiRetryCount >= 2);
 
-  // FIX: Push ke history dengan format yang benar
+  // ===== FIX: PASTikan USER MESSAGE MASUK HISTORY =====
   if (!isFirst) {
-    chatHistory.push({ role: 'user', content: userMsg });
+    // User message sudah masuk dari sendMsg(), tapi pastikan
+    if (chatHistory.length === 0 || chatHistory[chatHistory.length-1].content !== userMsg) {
+      chatHistory.push({ role: 'user', content: userMsg });
+    }
   }
+  
+  // Push assistant reply
   chatHistory.push({ role: 'assistant', content: reply });
 
+  // Batasi panjang history
   if (chatHistory.length > MAX_HISTORY_LENGTH * 2) {
     chatHistory = chatHistory.slice(-MAX_HISTORY_LENGTH * 2);
   }
+
+  console.log('[DEBUG] Chat history now has', chatHistory.length, 'messages');
 
   isTyping = false;
   if (sb)  sb.classList.remove('disabled');
@@ -1461,7 +1479,6 @@ async function callChatAPI(userMsg, isFirst = false) {
     setTimeout(() => inp.focus(), 100);
   }
 }
-
 // ─── SEND MESSAGE ─────────────────────────────────────────────────
 function sendMsg() {
   if (isTyping)      { toast('Tunggu partner selesai ngetik...', true); return; }
