@@ -1488,6 +1488,7 @@ function sendMsg() {
   const text = inp.value.trim();
   if (!text) return;
 
+  // Tampilkan pesan user
   const msgs = $('chatMessages');
   const d    = mk('div', 'chat-msg own');
   const b    = mk('div', 'chat-bubble');
@@ -1501,8 +1502,11 @@ function sendMsg() {
   
   inp.value = '';
 
+  // ===== FIX: Push user message ke history SEBELUM panggil API =====
   chatHistory.push({ role: 'user', content: text });
+  console.log('[DEBUG] User message pushed, history length:', chatHistory.length);
 
+  // Panggil API
   if (chatPartner.isAI) {
     callChatAPI(text, false);
   }
