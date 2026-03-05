@@ -865,9 +865,37 @@ export default async function handler(req, res) {
   
   let systemPrompt = SYSTEM(characterName, persona.style, validLastMessages, userName, shortNameUser, charGender, interactionCount, userGender);
 
-  if (isNameQuestion) {
-    systemPrompt += `\n\n🔥 INSTRUKSI WAJIB: User nanya nama lo. JAWAB HARUS: "aku ${shortCharName}" atau "gue ${shortCharName}" atau "${shortCharName}". JANGAN PAKAI NAMA LENGKAP "${characterName}"! JANGAN PAKAI TITIK!`;
+// KALAU FIRST MESSAGE (interactionCount === 0), tambahkan instruksi khusus
+if (interactionCount === 0) {
+  const greetingStyle = persona.greetingStyle || 'aktif';
+  
+  const styleInstructions = {
+    'aktif': 'Kamu aktif dan ceria dalam menyapa. Langsung sapa balik dengan semangat.',
+    'pasif': 'Kamu pasif dan agak malu-malu. Jawab pendek-pendek, tunggu diajak ngobrol dulu.',
+    'santai': 'Kamu santai dan casual. Sapa balik dengan biasa aja.',
+    'random': 'Kamu suka ngajak ngobrol random. Sapa balik dengan pertanyaan unik.',
+    'langsung': 'Kamu langsung to the point. Sapa balik dengan singkat.'
+  };
+  
+  systemPrompt += `\n\n🎭 STYLE GREETING KAMU: ${styleInstructions[greetingStyle] || styleInstructions['aktif']}`;
+  
+  // Tambahkan contoh berdasarkan style
+  if (greetingStyle === 'pasif') {
+    systemPrompt += `\nCONTOH: "eh halo...", "hai.", "mmmm... lo duluan deh yang ngomong", "koq diem?"`;
+  } else if (greetingStyle === 'aktif') {
+    systemPrompt += `\nCONTOH: "hai hai! lagi ngapain?", "halo! seneng bisa ngobrol 😊"`;
+  } else if (greetingStyle === 'santai') {
+    systemPrompt += `\nCONTOH: "hai juga, lagi santai nih", "halo, gimana kabarnya?"`;
+  } else if (greetingStyle === 'random') {
+    systemPrompt += `\nCONTOH: "hai! lo percaya parallel universe?", "lagi mikirin sesuatu nih"`;
+  } else if (greetingStyle === 'langsung') {
+    systemPrompt += `\nCONTOH: "yo, lo siapa?", "oh, ada apa?"`;
   }
+}
+
+if (isNameQuestion) {
+  systemPrompt += `\n\n🔥 INSTRUKSI WAJIB: User nanya nama lo. JAWAB HARUS: "aku ${shortCharName}" atau "gue ${shortCharName}" atau "${shortCharName}". JANGAN PAKAI NAMA LENGKAP "${characterName}"! JANGAN PAKAI TITIK!`;
+}
 
   try {
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
