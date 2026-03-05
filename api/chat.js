@@ -213,12 +213,14 @@ const PERSONAS = {
   }
 };
 
-// Daftar kata/frasa yang harus dihindari
+// Daftar kata/frasa yang harus dihindari (HANYA YANG BENAR-BENAR BERBAHAYA)
 const FORBIDDEN_PHRASES = [
-  'haha iya nih', 'iya nih', 'iya banget', 'haha iya', 'haha gitu',
-  'wkwk iya', 'iya wkwk', 'eh gue juga', 'nggak nyangka', 'ngk nyangka'
+  // Hanya blokir yang benar-benar repetitif dan tidak natural
+  'sebagai asisten ai', 'saya adalah ai', 'saya adalah asisten',
+  'dibuat oleh deepseek', 'model bahasa', 'ai language model',
+  'saya tidak bisa menjawab', 'maaf saya tidak tahu'
+  // FRASA NATURAL SEPERTI 'iya nih', 'haha iya' TIDAK ADA DI SINI
 ];
-
 // Pattern untuk deteksi permintaan terlalu personal di awal kenal
 const TOO_PERSONAL_PATTERNS = [
   'minta (ig|instagram|line|wa|nomor|telepon|fb|tiktok|snap)',
