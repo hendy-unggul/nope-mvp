@@ -1468,28 +1468,28 @@ async function callChatAPI(userMsg, isFirst = false) {
 
   if (td && td.parentNode) td.remove();
 
-  if (useOffline || !reply) {
-    apiRetryCount++;
+ if (useOffline || !reply) {
+  apiRetryCount++;
+  
+  if (isFirst) {
+    const name = (chatPartner.name || 'stranger').split('.')[0];
+    // PAKAI FUNGSI GREETING YANG BARU
+    reply = getOfflineGreeting(chatPartner.name, name);
+  } else {
+    const lastAssistantMsg = chatHistory
+      .filter(m => m.role === 'assistant')
+      .pop()?.content || '';
     
-    if (isFirst) {
-      const name = (chatPartner.name || 'stranger').split('.')[0];
-      reply = [
-        `halo! gue ${name}. seneng bisa ngobrol sama lo 😊`,
-        `hai hai, gue ${name}. lagi ngapain?`,
-        `eh halo! gue ${name}, akhirnya ada yang nyapa 😄`
-      ][rnd(3)];
-    } else {
-      const lastAssistantMsg = chatHistory
-        .filter(m => m.role === 'assistant')
-        .pop()?.content || '';
-      
-      reply = getOfflineReply(userMsg, { lastReply: lastAssistantMsg });
-    }
-    
-    if (apiRetryCount >= 2) {
-      setChatStatus('⚡ mode offline (respons mungkin kurang natural)', 'info', 5000);
-    }
+    reply = getOfflineReply(userMsg, { 
+      lastReply: lastAssistantMsg,
+      chatHistory: chatHistory 
+    });
   }
+  
+  if (apiRetryCount >= 2) {
+    setChatStatus('⚡ mode offline (respons mungkin kurang natural)', 'info', 5000);
+  }
+}
 
   await sleep(300 + Math.random() * 400);
 
