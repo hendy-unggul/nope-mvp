@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<!-- ✅ CSP FIX - Ditambahkan untuk fix bottom nav freeze -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://api.deepseek.com; connect-src 'self' https://jejak.space https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://api.deepseek.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; manifest-src 'self' blob:; worker-src 'self' blob:;">
 <title>SPILL — vibe radar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -330,7 +332,7 @@ body::after{
 }
 .midtrans-badge span{color:var(--as);font-weight:bold}
 .payment-icons{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.payment-icons img{width:40px;height:24px;background:var(--bd2);padding:4px;border-radius:0}
+.payment-icons span{background:var(--bd2);padding:4px 8px;font-size:11px}
 .upgrade-footer{padding:24px 0;display:flex;flex-direction:column;gap:12px}
 .upgrade-footer .btn{width:100%;padding:16px;background:transparent;border:2px solid var(--bd2);font-family:'DM Mono',monospace;font-size:13px;color:var(--txs);cursor:pointer}
 .upgrade-footer .btn:hover{border-color:var(--ap);color:var(--ap)}
@@ -640,10 +642,10 @@ body::after{
       <span>MIDTRANS</span> — AMAN & TERPERCAYA
     </div>
     <div class="payment-icons">
-      <span style="background:var(--bd2);padding:4px 8px">Gopay</span>
-      <span style="background:var(--bd2);padding:4px 8px">OVO</span>
-      <span style="background:var(--bd2);padding:4px 8px">Dana</span>
-      <span style="background:var(--bd2);padding:4px 8px">QRIS</span>
+      <span>Gopay</span>
+      <span>OVO</span>
+      <span>Dana</span>
+      <span>QRIS</span>
     </div>
 
     <div class="upgrade-footer">
@@ -677,13 +679,13 @@ body::after{
 <div class="toast" id="toast"></div>
 
 <!-- ══════════════════════════════════════════════════════════════════
-     SCRIPTS — FIXED v10.0 (UPGRADE MODAL + SAY GOODBYE)
+     SCRIPTS — v10.1 FINAL (CSP FIX + ALL FEATURES)
 ══════════════════════════════════════════════════════════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/shared-constants.js"></script>
 <script>
 'use strict';
-console.log('[SPILL] v10.0 — Upgrade modal + Say goodbye');
+console.log('[SPILL] v10.1 FINAL — CSP fix + upgrade modal + say goodbye');
 
 if (!JEJAK.isLoggedIn()) window.location.replace('/index.html');
 
@@ -1082,7 +1084,6 @@ function radarLoop(cv) {
 function logoutUser() {
   if (!confirm('Logout dari akun ini?')) return;
   
-  // Hapus semua data session dari localStorage
   localStorage.removeItem('jejak_session');
   localStorage.removeItem('jejak_user_id');
   localStorage.removeItem('jejak_username');
@@ -1091,17 +1092,14 @@ function logoutUser() {
   localStorage.removeItem('uid');
   localStorage.removeItem('supabase.auth.token');
   
-  // Reset state
   myUserId = null;
   myUsername = null;
   
-  // Update UI
   const el = $('userNameDisplay');
   if (el) el.textContent = '@guest';
   
   toast('✅ Logout berhasil', false);
   
-  // Redirect ke halaman login setelah 1 detik
   setTimeout(() => {
     window.location.replace('/index.html');
   }, 1000);
@@ -1119,9 +1117,6 @@ function startVibeCheck() {
   if (typingTimeout) clearTimeout(typingTimeout);
   if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
   setChatStatus('');
-  
-  // ✅ Jangan ubah nama user — tetap tampil username asli
-  // Tapi kita kasih efek subtle kalo lagi chat mode
   
   $('genderModal').classList.add('on');
 }
@@ -1223,7 +1218,6 @@ function showTwoMinWarning() {
 function endChat() {
   clearInterval(timerInterval);
   
-  // Kalau user punya sub, reset timer
   if (checkSub()) { 
     chatTimeLeft=900; 
     const tel=$('chatTimer'); 
@@ -1231,7 +1225,6 @@ function endChat() {
     return; 
   }
   
-  // Tampilkan opsi upgrade / say goodbye (hanya sekali)
   if (endChatOptionsShown) return;
   endChatOptionsShown = true;
   
@@ -1257,22 +1250,18 @@ function sayGoodbye() {
   const msgs = $('chatMessages');
   if (!msgs) return;
   
-  // Hapus opsi yang ada
   const last = msgs.lastElementChild;
   if (last?.classList.contains('system-msg')) last.remove();
   
-  // Tambah pesan goodbye
   const goodbyeDiv = mk('div','chat-msg system-msg');
   goodbyeDiv.innerHTML = `<div class="chat-bubble" style="background:transparent;border-color:var(--txm);color:var(--txm)">👋 Obrolan selesai. Sampai jumpa lagi!</div>`;
   msgs.appendChild(goodbyeDiv);
   
-  // Disable input
   const inp = $('chatInput');
   const sb = $('sendButton');
   if (inp) inp.disabled = true;
   if (sb) sb.classList.add('disabled');
   
-  // Tutup chat setelah 3 detik
   setTimeout(() => {
     closeChat();
   }, 3000);
@@ -1289,8 +1278,6 @@ function closeChat() {
   const sb = $('sendButton'); if (sb) sb.classList.remove('disabled');
   const inp = $('chatInput'); if (inp) inp.disabled = false;
   setChatStatus('');
-  
-  // ✅ Nama user tetap seperti semula (sudah benar)
 }
 
 // ─── OFFLINE GREETING ─────────────────────────────────────────────
@@ -1337,11 +1324,9 @@ function getOfflineGreeting(characterName, shortName) {
   ]);
 }
 
-// ─── OFFLINE REPLIES ──────────────────────────────────────────────
 function getOfflineReply(userMsg) {
   const msg = (userMsg || '').toLowerCase().trim();
 
-  // 1. Sapaan murni
   if (/^(halo|hai|hey|hi|helo|hy|hallo)\b/.test(msg)) {
     return rndOf([
       'hai juga! lo gimana?',
@@ -1350,7 +1335,6 @@ function getOfflineReply(userMsg) {
     ]);
   }
 
-  // 2. Tanya kabar
   if (/\b(apa kabar|kabar lo|kabarnya|lo gimana|gimana kabar|lo baik|kabar kamu)\b/.test(msg)) {
     return rndOf([
       'baik baik aja sih, biasa. lo sendiri gimana?',
@@ -1359,7 +1343,6 @@ function getOfflineReply(userMsg) {
     ]);
   }
 
-  // 3. Tanya aktivitas
   if (/\b(lagi apa|ngapain|lagi sibuk|lg apa|lg ngapain)\b/.test(msg)) {
     return rndOf([
       'lagi dengerin musik sambil rebahan. lo?',
@@ -1368,7 +1351,6 @@ function getOfflineReply(userMsg) {
     ]);
   }
 
-  // 4. Tanya lokasi
   if (/\b(dimana|di mana|lagi mana|mana lo|mana lu)\b/.test(msg)) {
     return rndOf([
       'di rumah nih. lo?',
@@ -1377,7 +1359,6 @@ function getOfflineReply(userMsg) {
     ]);
   }
 
-  // 5. Ekspresi setuju / relate
   if (/^(iya|ya|yep|yup|betul|bener|emang|emg|iyaa+)\b/.test(msg)) {
     return rndOf([
       'haha iya kan? relate banget',
@@ -1386,7 +1367,6 @@ function getOfflineReply(userMsg) {
     ]);
   }
 
-  // 6. Ekspresi ketawa
   if (/\b(wkwk|haha|hehe|lol|xixi)\b/.test(msg)) {
     return rndOf([
       'haha ngapain lo ketawa',
@@ -1395,7 +1375,6 @@ function getOfflineReply(userMsg) {
     ]);
   }
 
-  // 7. Kata dongeng / cerita
   if (msg.includes('dongeng') || msg.includes('cerita')) {
     return rndOf([
       'haha mau dongeng? gue bukan tukang dongeng',
@@ -1404,7 +1383,6 @@ function getOfflineReply(userMsg) {
     ]);
   }
 
-  // 8. Curhat — threshold 120, kata emosional
   const isEmotional = /\b(sedih|nangis|bete|kesel|capek|cape|stress|baper|galau|kecewa|marah|takut|cemas|masalah|gendeng)\b/.test(msg);
   if (msg.length > 120 && isEmotional) {
     return rndOf([
@@ -1414,7 +1392,6 @@ function getOfflineReply(userMsg) {
     ]);
   }
 
-  // 9. Pertanyaan spesifik
   if (/\b(kenapa|gimana caranya|apa itu|apa sih|maksudnya apa|menurut lo)\b/.test(msg)) {
     return rndOf([
       'hmm, gue juga masih mikirin itu. lo punya pendapat?',
@@ -1423,7 +1400,6 @@ function getOfflineReply(userMsg) {
     ]);
   }
 
-  // 10. Default
   return rndOf([
     'hmm, cerita lebih dong',
     'oh gitu, lo gimana sekarang?',
@@ -1465,7 +1441,6 @@ async function callChatAPI(userMsg, isFirst = false) {
   if (sb)  sb.classList.add('disabled');
   if (inp) inp.disabled = true;
 
-  // Test koneksi (opsional)
   try {
     await fetch(API_URL.replace('/chat', '/health'), { 
       method: 'HEAD',
@@ -1475,7 +1450,6 @@ async function callChatAPI(userMsg, isFirst = false) {
     console.warn('[API] Health check failed:', e);
   }
 
-  // Tampilkan typing indicator
   const msgs = $('chatMessages');
   const td   = mk('div','chat-msg other');
   td.innerHTML = '<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
@@ -1524,7 +1498,6 @@ async function callChatAPI(userMsg, isFirst = false) {
 
   if (td?.parentNode) td.remove();
 
-  // Offline fallback
   if (useOffline || !reply) {
     apiRetryCount++;
     const shortName = (chatPartner.name || '').split('.')[0];
@@ -1536,7 +1509,6 @@ async function callChatAPI(userMsg, isFirst = false) {
 
   await sleep(300 + Math.random()*400);
 
-  // Render reply
   const msgDiv = mk('div','chat-msg other');
   const bubble = mk('div','chat-bubble');
   msgDiv.appendChild(bubble);
@@ -1544,10 +1516,8 @@ async function callChatAPI(userMsg, isFirst = false) {
 
   await typeMessage(bubble, reply, apiRetryCount >= 2);
 
-  // Hanya push assistant reply
   chatHistory.push({ role: 'assistant', content: reply });
 
-  // Trim
   const MAX_HIST_TOTAL = MAX_HISTORY_LEN * 2;
   if (chatHistory.length > MAX_HIST_TOTAL) {
     chatHistory = chatHistory.slice(-MAX_HIST_TOTAL);
@@ -1560,7 +1530,6 @@ async function callChatAPI(userMsg, isFirst = false) {
   if (inp) { inp.disabled = false; setTimeout(() => inp.focus(), 100); }
 }
 
-// ─── SEND MESSAGE ─────────────────────────────────────────────────
 function sendMsg() {
   if (isTyping)     { toast('Tunggu partner selesai ngetik...', true); return; }
   if (!chatPartner) { toast('Partner belum ditemukan', true); return; }
@@ -1569,7 +1538,6 @@ function sendMsg() {
   const text = inp.value.trim();
   if (!text) return;
 
-  // Render bubble user
   const msgs = $('chatMessages');
   const d    = mk('div','chat-msg own');
   const b    = mk('div','chat-bubble');
@@ -1579,7 +1547,6 @@ function sendMsg() {
 
   inp.value = '';
 
-  // Push user message ke history
   chatHistory.push({ role: 'user', content: text });
   console.log(`[HISTORY] User pushed → total: ${chatHistory.length}`);
 
@@ -1595,33 +1562,27 @@ document.addEventListener('DOMContentLoaded', () => {
   loadRealEntries();
   updateOnlineCount();
 
-  // Vibe slider
   $('vibeSlider')?.addEventListener('input', e => updateVibePct(e.target.value));
   
-  // Mood filter
   document.querySelector('.mood-scroll')?.addEventListener('click', e => {
     const btn = e.target.closest('.mood-chip');
     if (btn) filterMood(btn);
   });
   
-  // Chat input enter key
   $('chatInput')?.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
   });
 
-  // Double-click logout
   const userNameEl = $('userNameDisplay');
   if (userNameEl) {
     userNameEl.addEventListener('dblclick', logoutUser);
     userNameEl.title = 'Double-click untuk logout';
   }
 
-  // Interval updates
   setInterval(updateOnlineCount, 30000);
   setInterval(() => { if (realEntries.length > 0) loadRealEntries(); }, 30000);
   setInterval(() => { ensureFillerPool(4); }, 300000);
 
-  // Cleanup on unload
   window.addEventListener('beforeunload', () => {
     clearInterval(radarInterval);
     clearInterval(timerInterval);
