@@ -479,16 +479,12 @@ function setFb(type, msg){
 }
 
 function setSg(text){
-  var el = $sg();
-  if(!text){ el.className = 'suggest'; return; }
-  el.className = 'suggest show';
-  el.textContent = '→ maksud kamu: ' + text + '? klik untuk apply';
-  el.onclick = function(){
-    $u().value = text;
-    el.className = 'suggest';
-    $u().dispatchEvent(new Event('input'));
-  };
+  // Buat div dulu biar text di-escape otomatis
+  var safeText = document.createElement('div');
+  safeText.textContent = text;
+  el.textContent = '→ maksud kamu: ' + safeText.innerHTML + '? klik untuk apply';
 }
+
 
 function validate(raw){
   if(!raw || !raw.trim()) return { ok: false, msg: 'username tidak boleh kosong' };
