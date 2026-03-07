@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<!-- CSP FIX -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://fonts.googleapis.com https://jejak.space; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' *.supabase.co wss://*.supabase.co https://jejak.space https://cdn.jsdelivr.net; worker-src 'self' blob:; manifest-src 'self'; img-src 'self' data:; frame-src 'self';">
 <title>SPILL — vibe radar</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -320,14 +322,12 @@ body::after{
   margin-bottom:14px;overflow:hidden;box-shadow:4px 4px 0 #000;
   transition:transform .08s,box-shadow .08s;
 }
-.spill-card.is-mine{border-color:var(--as);box-shadow:4px 4px 0 rgba(0,229,255,.3)}
 .spill-card:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
 .spill-head{
   display:flex;justify-content:space-between;align-items:center;
   padding:12px 16px;border-bottom:2px solid var(--bd);background:var(--bg);
 }
 .spill-user{font-family:'DM Mono',monospace;font-size:11px;color:var(--txs);letter-spacing:.5px}
-.spill-user.mine{color:var(--as)}
 .spill-mood{font-family:'DM Mono',monospace;font-size:9px;padding:5px 10px;text-transform:uppercase;letter-spacing:1.5px;border:2px solid}
 .spill-mood.surviving{color:var(--ms);border-color:var(--ms);background:rgba(255,159,10,.08)}
 .spill-mood.thriving{color:var(--mt);border-color:var(--mt);background:rgba(191,255,0,.08)}
@@ -946,30 +946,50 @@ function initSupabase() {
   } catch (e) { console.warn('[SPILL] Supabase init error:', e); }
 }
 
-// LOAD REAL ENTRIES
+// LOAD REAL ENTRIES - HANYA ENTRY DARI USER LAIN
 async function loadRealEntries() {
   if (!sbClient) { renderSpills(); return; }
   try {
     const { data, error } = await sbClient
       .from('entries')
-      .select('id,user_id,content,mood,reactions,created_at')
+      .select('id,user_id,content,mood,reactions,created_at,profiles!inner(username)')
       .order('created_at', { ascending: false })
       .limit(20);
-    if (error) { console.warn('[SPILL] Query error:', error.message); renderSpills(); return; }
-    realEntries = (data || []).map(e => {
-      const isMe   = !!(myUserId && e.user_id && e.user_id === myUserId);
-      const author = isMe ? (myUsername || 'kamu') : ('anon.' + (e.user_id || '??????').substring(0,6));
-      return {
-        id: e.id, dbId: e.id, author, isMe, isAI: false, isReal: true,
-        mood: e.mood || 'chaotic', content: e.content || '',
-        reactions: e.reactions || { skull:0,cry:0,fire:0,upside:0 },
-        userReacted: null, timestamp: new Date(e.created_at).getTime()
-      };
-    });
+    
+    if (error) { 
+      console.warn('[SPILL] Query error:', error.message); 
+      renderSpills(); 
+      return; 
+    }
+    
+    // FILTER: Hanya entry dari user lain (bukan milik sendiri)
+    realEntries = (data || [])
+      .filter(e => !(myUserId && e.user_id && e.user_id === myUserId))
+      .map(e => {
+        const author = e.profiles?.username || 'anonymous';
+        
+        return {
+          id: e.id, 
+          dbId: e.id, 
+          author, 
+          isMe: false,
+          isAI: false, 
+          isReal: true,
+          mood: e.mood || 'chaotic', 
+          content: e.content || '',
+          reactions: e.reactions || { skull:0, cry:0, fire:0, upside:0 },
+          userReacted: null, 
+          timestamp: new Date(e.created_at).getTime()
+        };
+      });
+    
     const meta = $('feedMeta');
     if (meta) meta.textContent = realEntries.length > 0 ? realEntries.length + ' REAL' : 'FILLER';
     renderSpills();
-  } catch (err) { console.warn('[SPILL] loadRealEntries error:', err.message); renderSpills(); }
+  } catch (err) { 
+    console.warn('[SPILL] loadRealEntries error:', err.message); 
+    renderSpills(); 
+  }
 }
 
 // FILLER POOL
@@ -981,10 +1001,15 @@ function ensureFillerPool(needed) {
     const author = useAI ? allAI[rnd(allAI.length)] : NON_AI_NAMES[rnd(NON_AI_NAMES.length)];
     generated.push({
       id: crypto.randomUUID ? crypto.randomUUID() : 'fl_' + Date.now() + '_' + Math.random().toString(36).slice(2),
-      author, isAI: allAI.includes(author), isReal: false, isMe: false,
-      mood: MOODS[rnd(MOODS.length)], content: SPILL_TEXTS[rnd(SPILL_TEXTS.length)],
+      author, 
+      isAI: allAI.includes(author), 
+      isReal: false, 
+      isMe: false,
+      mood: MOODS[rnd(MOODS.length)], 
+      content: SPILL_TEXTS[rnd(SPILL_TEXTS.length)],
       reactions: { skull:rnd(50), cry:rnd(100), fire:rnd(40), upside:rnd(30) },
-      userReacted: null, timestamp: Date.now() - rnd(3600000)
+      userReacted: null, 
+      timestamp: Date.now() - rnd(3600000)
     });
   }
   fillerPool = [...generated, ...fillerPool].slice(0,40);
@@ -994,34 +1019,46 @@ function ensureFillerPool(needed) {
 function renderSpills() {
   const list = $('spillsList');
   if (!list) return;
+  
+  // AMBIL REAL ENTRIES (SUDAH TERFILTER)
   let combined = [...realEntries];
+  
   const needed = Math.max(0, SPILL_TARGET - combined.length);
   if (needed > 0) {
     if (fillerPool.length < needed) ensureFillerPool(needed - fillerPool.length + 4);
-    combined = [...combined, ...fillerPool.slice(0, needed)];
+    // FILTER FILLER POOL: Jangan tampilkan yang isMe = true
+    const availableFillers = fillerPool.filter(f => !f.isMe);
+    combined = [...combined, ...availableFillers.slice(0, needed)];
   }
+  
   combined.sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
+  
   let filtered = activeMood === 'all' ? combined : combined.filter(s => s.mood === activeMood);
   filtered = filtered.slice(0, SPILL_TARGET);
+  
   if (!filtered.length) {
     list.innerHTML = `<div class="empty-state"><span class="empty-icon">🍃</span><div class="empty-title">BELUM ADA SPILL</div><div class="empty-text">Coba filter lain</div></div>`;
     return;
   }
+  
+  // RENDER (HAPUS BAGIAN MINE LABEL KARENA SUDAH TIDAK ADA)
   list.innerHTML = filtered.map(s => {
-    const isMineClass = s.isMe ? ' is-mine' : '';
-    const userClass   = s.isMe ? 'spill-user mine' : 'spill-user';
-    const mineLabel   = s.isMe ? ` <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--as);padding:2px 6px;border:1px solid var(--as);margin-left:6px">KAMU</span>` : '';
-    const aiLabel     = (s.isAI && !s.isReal) ? ' 🤖' : '';
-    const reactAttr   = s.isReal ? 'data-db-id' : 'data-fl-id';
-    const reactFn     = s.isReal ? 'reactDB'    : 'reactLocal';
-    const reactId     = s.isReal ? s.dbId       : s.id;
-    const rcPrefix    = s.isReal ? 'rc-db-'+s.dbId : 'rc-fl-'+s.id;
-    const reactHtml   = Object.entries(REACT_EMO).map(([k,em]) => {
+    const aiLabel = (s.isAI && !s.isReal) ? ' 🤖' : '';
+    const reactAttr = s.isReal ? 'data-db-id' : 'data-fl-id';
+    const reactFn = s.isReal ? 'reactDB' : 'reactLocal';
+    const reactId = s.isReal ? s.dbId : s.id;
+    const rcPrefix = s.isReal ? 'rc-db-'+s.dbId : 'rc-fl-'+s.id;
+    
+    const reactHtml = Object.entries(REACT_EMO).map(([k,em]) => {
       const isAct = s.userReacted === k ? ' active' : '';
       return `<button class="react-btn${isAct}" ${reactAttr}="${reactId}" data-key="${k}" onclick="${reactFn}('${reactId}','${k}')">${em}<span class="react-count" id="${rcPrefix}-${k}">${s.reactions[k]||0}</span></button>`;
     }).join('');
-    return `<div class="spill-card${isMineClass}">
-      <div class="spill-head"><span class="${userClass}">@${esc(s.author)}${aiLabel}${mineLabel}</span><span class="spill-mood ${s.mood}">${s.mood.toUpperCase()}</span></div>
+    
+    return `<div class="spill-card">
+      <div class="spill-head">
+        <span class="spill-user">@${esc(s.author)}${aiLabel}</span>
+        <span class="spill-mood ${s.mood}">${s.mood.toUpperCase()}</span>
+      </div>
       <div class="spill-body">${esc(s.content)}</div>
       <div class="spill-actions">${reactHtml}</div>
     </div>`;
