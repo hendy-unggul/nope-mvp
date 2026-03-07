@@ -830,27 +830,14 @@ const API_URL          = 'https://jejak.space/api/chat';
 const SPILL_TARGET     = 8;
 const MAX_HISTORY_LEN  = 8;
 const TYPING_SPEED     = { min: 18, max: 38, punct: 110, sentence: 230 };
-const SPILL_POOL_MAX   = 27; // Maksimum pool size
-const SPILL_PER_BREW   = 9;  // Maksimum entries per seduh
 
-// AI CHARACTERS - 30 persona (15 cewek + 15 cowok)
 const AI_CHARS = {
-  female: [
-    'beby.manis', 'strawberry.shortcake', 'pretty.sad', 'little.fairy', 'cinnamon.girl',
-    'moonlight.poet', 'rainy.daydream', 'cloud.strudel', 'salted.caramel', 'midnight.bloom',
-    'petal.drift', 'silver.lining', 'velvet.sky', 'honey.latte', 'misty.morning'
-  ],
-  male: [
-    'sejuta.badai', 'satria.bajahitam', 'agak.koplak', 'chili.padi', 'bang.juned',
-    'kabut.kota', 'senja.gram', 'angkasa.malam', 'bara.api', 'hujan.maret',
-    'langit.runtuh', 'sajak.putus', 'ruang.hening', 'jalan.buntu', 'kertas.terbakar'
-  ]
+  female: ['beby.manis','strawberry.shortcake','pretty.sad','little.fairy','cinnamon.girl'],
+  male:   ['sejuta.badai','satria.bajahitam','agak.koplak','chili.padi','bang.juned']
 };
-
+const NON_AI_NAMES = ['anon.kucing','sleepy.head','chaos.queen','quiet.one','anon.gelap','anon.kabur'];
 const MOODS        = ['surviving','thriving','chaotic','doom'];
 const REACT_EMO    = { skull:'💀', cry:'😭', fire:'🔥', upside:'🙃' };
-
-// SPILL TEXTS - diperbanyak
 const SPILL_TEXTS  = [
   'hari ini gue liat mantan sama cewek baru, dan tau gak? rambutnya lebih bagus dari rambut gue 😭',
   'cape bener jadi cewek, setiap bulan harus nahan sakit perut sambil tetep senyum di depan client',
@@ -864,17 +851,7 @@ const SPILL_TEXTS  = [
   'overthinking jam 2 pagi itu ritual harian apa gimana ya?',
   'pengen healing tapi tabungan juga butuh healing dulu',
   'chat pertama setelah 2 tahun dan diread doang. klasik.',
-  'gue tipe orang yang senyum di grup tapi nangis pas sepi',
-  'hari ini gue sadar, kadang kita butuh sendiri buat denger suara diri sendiri',
-  'kenapa ya orang lebih peduli sama jumlah likes daripada isi kepala?',
-  'malam ini gue nulis puisi buat kenangan yang bahkan gak pernah terjadi',
-  'ada yang pernah ngerasa asing di rumah sendiri?',
-  'skripsi gue maju mundur kayak relationship status temen gue',
-  'kadang pengen teriak, tapi takut ganggu tetangga',
-  'hidup di jogja itu keras tapi lembut, kayak wedang jahe',
-  'orang bilang "jalani aja" — lah emang gue lagi jalan kemana?',
-  'hari ini gue nangis karena hujan. romantis? enggak, atap bocor.',
-  'kalau bahagia itu sederhana, kenapa otak gue selalu bikin ribet?'
+  'gue tipe orang yang senyum di grup tapi nangis pas sepi'
 ];
 
 // STATE
@@ -969,25 +946,6 @@ function initSupabase() {
   } catch (e) { console.warn('[SPILL] Supabase init error:', e); }
 }
 
-// GET RANDOM REAL USERS FROM DATABASE
-async function getRandomRealUsers(limit = 30) {
-  if (!sbClient) return [];
-  
-  try {
-    const { data, error } = await sbClient
-      .from('profiles')
-      .select('username')
-      .neq('id', myUserId)
-      .limit(limit);
-      
-    if (error || !data) return [];
-    return data;
-  } catch (err) {
-    console.warn('[SPILL] Gagal ambil random users:', err);
-    return [];
-  }
-}
-
 // LOAD REAL ENTRIES - HANYA ENTRY DARI USER LAIN
 async function loadRealEntries() {
   if (!sbClient) { renderSpills(); return; }
@@ -1034,83 +992,27 @@ async function loadRealEntries() {
   }
 }
 
-// FILLER POOL - 70% Real User, 30% AI Karakter (MAX 27, FIFO)
-async function ensureFillerPool(brewedCount = SPILL_PER_BREW) {
-  const allAI = [...AI_CHARS.female, ...AI_CHARS.male];
-  
-  // Ambil random real users dari database
-  const randomUsers = await getRandomRealUsers(30);
-  
-  // Hitung berapa banyak yang bisa ditambah (jangan melebihi SPILL_POOL_MAX)
-  const currentCount = fillerPool.length;
-  const maxNewEntries = SPILL_POOL_MAX - currentCount;
-  const newEntriesCount = Math.min(brewedCount, maxNewEntries, SPILL_PER_BREW);
-  
-  if (newEntriesCount <= 0) {
-    console.log(`[SPILL] Pool penuh (${currentCount}/${SPILL_POOL_MAX}), tidak menambah`);
-    return;
-  }
-  
-  // Catat author yang sudah ada di pool untuk hindari duplikasi beruntun
-  const recentAuthors = fillerPool.slice(0, 3).map(e => e.author);
-  
+// FILLER POOL
+function ensureFillerPool(needed) {
+  const allAI  = [...AI_CHARS.female, ...AI_CHARS.male];
   const generated = [];
-  
-  for (let i = 0; i < newEntriesCount; i++) {
-    // 70% real user, 30% AI
-    const useReal = Math.random() < 0.7;
-    
-    let author;
-    let isAI;
-    let attempts = 0;
-    const maxAttempts = 15;
-    
-    do {
-      if (!useReal) {
-        // Pilih dari AI karakter
-        author = allAI[Math.floor(Math.random() * allAI.length)];
-        isAI = true;
-      } else {
-        // Pilih dari real user database (infinite)
-        if (randomUsers && randomUsers.length > 0) {
-          const randomIndex = Math.floor(Math.random() * randomUsers.length);
-          author = randomUsers[randomIndex].username;
-          isAI = false;
-        } else {
-          author = 'anonymous';
-          isAI = false;
-        }
-      }
-      attempts++;
-      
-      // Hindari author yang sama dengan 3 entries terakhir
-    } while (recentAuthors.includes(author) && attempts < maxAttempts);
-    
+  for (let i = 0; i < needed; i++) {
+    const useAI  = Math.random() < 0.5;
+    const author = useAI ? allAI[rnd(allAI.length)] : NON_AI_NAMES[rnd(NON_AI_NAMES.length)];
     generated.push({
-      id: 'fl_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2),
+      id: crypto.randomUUID ? crypto.randomUUID() : 'fl_' + Date.now() + '_' + Math.random().toString(36).slice(2),
       author, 
-      isAI, 
-      isReal: false,
+      isAI: allAI.includes(author), 
+      isReal: false, 
       isMe: false,
-      mood: MOODS[Math.floor(Math.random() * MOODS.length)], 
-      content: SPILL_TEXTS[Math.floor(Math.random() * SPILL_TEXTS.length)],
-      reactions: { 
-        skull: Math.floor(Math.random() * 30), 
-        cry: Math.floor(Math.random() * 50), 
-        fire: Math.floor(Math.random() * 25), 
-        upside: Math.floor(Math.random() * 20) 
-      },
+      mood: MOODS[rnd(MOODS.length)], 
+      content: SPILL_TEXTS[rnd(SPILL_TEXTS.length)],
+      reactions: { skull:rnd(50), cry:rnd(100), fire:rnd(40), upside:rnd(30) },
       userReacted: null, 
-      timestamp: Date.now() - Math.floor(Math.random() * 86400000)
+      timestamp: Date.now() - rnd(3600000)
     });
   }
-  
-  // FIFO: baru masuk di DEPAN, lama keluar di BELAKANG jika melebihi batas
-  fillerPool = [...generated, ...fillerPool].slice(0, SPILL_POOL_MAX);
-  
-  console.log(`[SPILL] 🍵 Seduh ${new Date().toLocaleTimeString()}: +${generated.length} entries`);
-  console.log(`[SPILL] 📊 Pool: ${fillerPool.length}/${SPILL_POOL_MAX} | Real: ${generated.filter(g => !g.isAI).length} | AI: ${generated.filter(g => g.isAI).length}`);
-  console.log(`[SPILL] 👤 Authors baru: ${generated.map(g => g.author).join(', ')}`);
+  fillerPool = [...generated, ...fillerPool].slice(0,40);
 }
 
 // RENDER SPILLS
@@ -1123,13 +1025,10 @@ function renderSpills() {
   
   const needed = Math.max(0, SPILL_TARGET - combined.length);
   if (needed > 0) {
-    if (fillerPool.length < needed) {
-      // Jika pool kurang, langsung generate (tunggu async? Ini sinkron)
-      console.warn('[SPILL] Filler pool kurang, panggil ensureFillerPool dulu');
-      // Untuk sementara, kita lanjut dengan yang ada
-    }
-    // AMBIL DARI FILLER POOL (SUDAH TERISI)
-    combined = [...combined, ...fillerPool.slice(0, needed)];
+    if (fillerPool.length < needed) ensureFillerPool(needed - fillerPool.length + 4);
+    // FILTER FILLER POOL: Jangan tampilkan yang isMe = true
+    const availableFillers = fillerPool.filter(f => !f.isMe);
+    combined = [...combined, ...availableFillers.slice(0, needed)];
   }
   
   combined.sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
@@ -1142,6 +1041,7 @@ function renderSpills() {
     return;
   }
   
+  // RENDER (HAPUS BAGIAN MINE LABEL KARENA SUDAH TIDAK ADA)
   list.innerHTML = filtered.map(s => {
     const aiLabel = (s.isAI && !s.isReal) ? ' 🤖' : '';
     const reactAttr = s.isReal ? 'data-db-id' : 'data-fl-id';
@@ -1690,18 +1590,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initRadar();
   loadRealEntries();
   updateOnlineCount();
-  
-  // INITIAL BREW - isi pool pertama kali
-  setTimeout(() => {
-    ensureFillerPool(9);
-  }, 2000);
-  
-  // SCHEDULE BREW - setiap 4 jam (14400000 ms)
-  setInterval(async () => {
-    await ensureFillerPool(9);
-    renderSpills(); // Refresh tampilan setelah seduh
-  }, 14400000); // 4 jam
-  
   $('vibeSlider')?.addEventListener('input', e => updateVibePct(e.target.value));
   document.querySelector('.mood-scroll')?.addEventListener('click', e => {
     const btn = e.target.closest('.mood-chip');
@@ -1717,7 +1605,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   setInterval(updateOnlineCount, 30000);
   setInterval(() => { if (realEntries.length > 0) loadRealEntries(); }, 30000);
-  
+  setInterval(() => { ensureFillerPool(4); }, 300000);
   window.addEventListener('beforeunload', () => {
     clearInterval(radarInterval);
     clearInterval(timerInterval);
