@@ -7,7 +7,7 @@
     'use strict';
     
     const SPILL_CONFIG = {
-        API_BASE_URL: '/api/rants',
+        API_BASE_URL: '/api/brew',
         BREW_INTERVAL: 240000,
         POOL_MAX_SIZE: 27,
         BREW_COUNT: 9,
