@@ -1712,8 +1712,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Ganti fungsi loadRealEntries biar panggil updateFeedMeta
 const originalLoadRealEntries = loadRealEntries;
 window.loadRealEntries = async function() {
-  await originalLoadRealEntries();
-  if (typeof updateFeedMeta === 'function') {
+   if (typeof updateFeedMeta === 'function') {
     updateFeedMeta();
   }
 };
@@ -1722,10 +1721,9 @@ window.loadRealEntries = async function() {
 const originalRenderSpills = renderSpills;
 
 // Buat fungsi baru dengan nama beda
-window.renderSpillsFromGenerator = function() {
-  if (typeof window.renderSpillsFromGenerator === 'function') {
-    window.renderSpillsFromGenerator();
-  }
+window.refreshSpills = async function() {
+  await brewNewSpills(); // panggil dari spill-generator.js
+  originalRenderSpills(); // panggil render asli
 };
 
 // Panggil dari generator
