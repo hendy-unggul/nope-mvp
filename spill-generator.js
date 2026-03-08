@@ -1,28 +1,29 @@
 // ============================================
-// spill-generator.js - FIXED FOR BROWSER
-// NO ES6 MODULES - PURE BROWSER COMPATIBLE
+// spill-generator.js - SMART AI FILLER
+// Max 10% AI ketika native user sudah memadai
+// Seamless blend - no AI badge
 // ============================================
 
 (function() {
     'use strict';
     
     const SPILL_CONFIG = {
-        API_BASE_URL: '/api/brew',
-        BREW_INTERVAL: 240000,
-        POOL_MAX_SIZE: 27,
-        BREW_COUNT: 9,
-        SPILL_TARGET: 8
+        API_BASE_URL: '/api/rants',
+        BREW_INTERVAL: 300000,      // 5 menit
+        POOL_MAX_SIZE: 50,          // Pool besar untuk seleksi
+        BREW_COUNT: 9,              // Fetch 9 per brew
+        AI_MAX_PERCENTAGE: 0.1,     // Max 10% AI entries
+        MIN_NATIVE_THRESHOLD: 20    // Threshold: jika native >= 20, AI cuma 10%
     };
 
     // ✅ INTERNAL STATE
     let spillPool = [];
-    let activeMood = 'all';
     let isLoading = false;
 
-    // ✅ FALLBACK DATA - Jika API gagal
+    // ✅ FALLBACK DATA - Pakai username asli, bukan "AI"
     const FALLBACK_SPILLS = [
         {
-            id: 'fallback_1',
+            id: 'ai_1',
             author: 'beby.manis',
             mood: 'surviving',
             content: 'deadline tugas akhir makin deket, anxiety meningkat drastis 😮‍💨',
@@ -33,7 +34,7 @@
             userReacted: null
         },
         {
-            id: 'fallback_2',
+            id: 'ai_2',
             author: 'agak.koplak',
             mood: 'chaotic',
             content: 'client minta revisi jam 11 malem, deadline besok pagi. this is fine 🔥',
@@ -44,7 +45,7 @@
             userReacted: null
         },
         {
-            id: 'fallback_3',
+            id: 'ai_3',
             author: 'pretty.sad',
             mood: 'doom',
             content: 'HR minta masuk sabtu minggu. mau resign tapi tabungan tipis 🛌',
@@ -55,7 +56,7 @@
             userReacted: null
         },
         {
-            id: 'fallback_4',
+            id: 'ai_4',
             author: 'bang.juned',
             mood: 'surviving',
             content: 'skripsi bab 3 masih error, dosen ga bales email seminggu 😭',
@@ -66,7 +67,7 @@
             userReacted: null
         },
         {
-            id: 'fallback_5',
+            id: 'ai_5',
             author: 'strawberry.shortcake',
             mood: 'thriving',
             content: 'akhirnya dapet panggilan interview setelah ngelamar 50+ tempat ✨',
@@ -77,7 +78,7 @@
             userReacted: null
         },
         {
-            id: 'fallback_6',
+            id: 'ai_6',
             author: 'little.fairy',
             mood: 'chaotic',
             content: 'ortu ngomel terus disuruh kuliah, tapi gue lebih seneng freelance 🌀',
@@ -88,7 +89,7 @@
             userReacted: null
         },
         {
-            id: 'fallback_7',
+            id: 'ai_7',
             author: 'chili.padi',
             mood: 'thriving',
             content: 'orderan sneakers laku 15 pasang hari ini, rezeki lancar 💰😎',
@@ -99,7 +100,7 @@
             userReacted: null
         },
         {
-            id: 'fallback_8',
+            id: 'ai_8',
             author: 'satria.bajahitam',
             mood: 'doom',
             content: 'motor mogok, dompet tipis, pacar ngambek. triple combo 🫠',
@@ -108,27 +109,49 @@
             isAI: true,
             isReal: false,
             userReacted: null
+        },
+        {
+            id: 'ai_9',
+            author: 'cinnamon.girl',
+            mood: 'surviving',
+            content: 'murid TK nangis semua, pulang kepala pusing banget 😮‍💨',
+            timestamp: Date.now() - 2700000,
+            reactions: { skull: 8, cry: 19, fire: 2, upside: 11 },
+            isAI: true,
+            isReal: false,
+            userReacted: null
+        },
+        {
+            id: 'ai_10',
+            author: 'sejuta.badai',
+            mood: 'doom',
+            content: 'lagu baru gue dengerin sendiri doang. mungkin musik bukan jalan hidupku 🛌',
+            timestamp: Date.now() - 3000000,
+            reactions: { skull: 14, cry: 27, fire: 3, upside: 9 },
+            isAI: true,
+            isReal: false,
+            userReacted: null
         }
     ];
 
     function initSpillGenerator() {
-        console.log('[SpillGen] 🚀 Initializing...');
+        console.log('[AI Filler] 🚀 Initializing smart AI filler...');
         
         // Initial brew after 2 seconds
         setTimeout(() => brewNewSpills(), 2000);
         
-        // Auto-brew every 4 minutes
+        // Auto-brew every 5 minutes
         setInterval(() => brewNewSpills(), SPILL_CONFIG.BREW_INTERVAL);
     }
 
     async function brewNewSpills(count = SPILL_CONFIG.BREW_COUNT) {
         if (isLoading) {
-            console.log('[SpillGen] ⏳ Already loading, skipping...');
+            console.log('[AI Filler] ⏳ Already loading, skipping...');
             return;
         }
         
         isLoading = true;
-        console.log(`[SpillGen] 🍵 Brewing ${count} spills...`);
+        console.log(`[AI Filler] 🍵 Brewing ${count} AI entries...`);
         
         try {
             const response = await fetch(`${SPILL_CONFIG.API_BASE_URL}/brew`, {
@@ -142,36 +165,34 @@
             }
             
             const data = await response.json();
-            console.log('[SpillGen] 📦 API Response:', data);
             
             if (data.success && data.spills && data.spills.length > 0) {
                 const newSpills = data.spills.map(spill => ({
                     id: spill.id,
-                    author: spill.author,
+                    author: spill.author,           // Username asli dari persona
                     mood: spill.mood,
                     content: spill.content,
                     timestamp: spill.timestamp,
                     reactions: spill.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 },
-                    isAI: true,
+                    isAI: true,                     // Flag internal
                     isReal: false,
                     userReacted: null
                 }));
                 
-                // FIFO - prepend new, slice old
+                // FIFO
                 spillPool = [...newSpills, ...spillPool].slice(0, SPILL_CONFIG.POOL_MAX_SIZE);
                 
-                console.log(`[SpillGen] ✅ API Success: ${spillPool.length}/${SPILL_CONFIG.POOL_MAX_SIZE}`);
+                console.log(`[AI Filler] ✅ API Success: ${spillPool.length}/${SPILL_CONFIG.POOL_MAX_SIZE}`);
                 
-                // Render
-                renderSpills();
+                // Trigger render
+                triggerRender();
             } else {
-                throw new Error('Invalid response format');
+                throw new Error('Invalid response');
             }
         } catch (error) {
-            console.warn('[SpillGen] ⚠️ API failed:', error.message);
-            console.log('[SpillGen] 🔄 Using fallback data...');
+            console.warn('[AI Filler] ⚠️ API failed:', error.message);
+            console.log('[AI Filler] 🔄 Using fallback data...');
             
-            // Use fallback data
             useFallbackData();
         } finally {
             isLoading = false;
@@ -179,106 +200,33 @@
     }
 
     function useFallbackData() {
-        // Randomize fallback data
         const shuffled = [...FALLBACK_SPILLS].sort(() => Math.random() - 0.5);
         const selected = shuffled.slice(0, SPILL_CONFIG.BREW_COUNT);
         
-        // Update timestamps to be recent
         const now = Date.now();
         selected.forEach((spill, i) => {
-            spill.timestamp = now - (i * 300000); // 5 min apart
-            spill.id = 'fallback_' + now + '_' + i;
+            spill.timestamp = now - (i * 300000);
+            spill.id = 'ai_fb_' + now + '_' + i;
         });
         
-        // Add to pool
         spillPool = [...selected, ...spillPool].slice(0, SPILL_CONFIG.POOL_MAX_SIZE);
         
-        console.log(`[SpillGen] ✅ Fallback loaded: ${spillPool.length}/${SPILL_CONFIG.POOL_MAX_SIZE}`);
+        console.log(`[AI Filler] ✅ Fallback loaded: ${spillPool.length}`);
         
-        // Render
-        renderSpills();
+        triggerRender();
     }
 
-    function renderSpills() {
-        const spillsContainer = document.getElementById('spillsList');
-        
-        if (!spillsContainer) {
-            console.warn('[SpillGen] ⚠️ spillsList not found');
-            return;
+    function triggerRender() {
+        if (typeof window.renderMixedSpills === 'function') {
+            window.renderMixedSpills();
         }
-        
-        console.log('[SpillGen] 🎨 Rendering...');
-        
-        // Filter by mood
-        let filtered = spillPool;
-        if (activeMood !== 'all') {
-            filtered = spillPool.filter(s => s.mood === activeMood);
-            console.log(`[SpillGen] 🔍 Filtered ${activeMood}: ${filtered.length} items`);
-        }
-        
-        // Take only target amount
-        const toShow = filtered.slice(0, SPILL_CONFIG.SPILL_TARGET);
-        
-        // Update meta
-        const metaEl = document.getElementById('feedMeta');
-        if (metaEl) {
-            metaEl.textContent = `${toShow.length} (${spillPool.length} pool)`;
-        }
-        
-        // Render HTML
-        if (toShow.length === 0) {
-            spillsContainer.innerHTML = `
-                <div class="empty-state">
-                    <span class="empty-icon">🍃</span>
-                    <div class="empty-title">BELUM ADA SPILL</div>
-                    <div class="empty-text">Sedang memuat...</div>
-                </div>`;
-            console.log('[SpillGen] 📭 No spills to show');
-            return;
-        }
-        
-        spillsContainer.innerHTML = toShow.map(spill => `
-            <div class="spill-card">
-                <div class="spill-head">
-                    <span class="spill-user">@${escapeHtml(spill.author)}</span>
-                    <span class="spill-mood ${spill.mood}">${spill.mood}</span>
-                </div>
-                <div class="spill-body">${escapeHtml(spill.content)}</div>
-            </div>
-        `).join('');
-        
-        console.log(`[SpillGen] ✅ Rendered ${toShow.length} spills`);
-    }
-
-    function filterMood(mood) {
-        console.log('[SpillGen] 🎯 Filter mood:', mood);
-        activeMood = mood;
-        
-        // Update UI
-        document.querySelectorAll('.mood-chip').forEach(chip => {
-            if (chip.dataset.mood === mood) {
-                chip.classList.add('active');
-            } else {
-                chip.classList.remove('active');
-            }
-        });
-        
-        renderSpills();
-    }
-
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
 
     // ============================================
-    // PUBLIC API - EXPOSE TO WINDOW
+    // PUBLIC API
     // ============================================
     window.initSpillGenerator = initSpillGenerator;
     window.brewNewSpills = brewNewSpills;
-    window.filterMood = filterMood;
     window.getSpillPool = function() { return spillPool; };
 
     // ============================================
@@ -286,11 +234,11 @@
     // ============================================
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('[SpillGen] 📄 DOM ready, initializing...');
+            console.log('[AI Filler] 📄 DOM ready');
             setTimeout(initSpillGenerator, 1000);
         });
     } else {
-        console.log('[SpillGen] 📄 DOM already ready, initializing...');
+        console.log('[AI Filler] 📄 DOM already ready');
         setTimeout(initSpillGenerator, 1000);
     }
 
