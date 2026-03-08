@@ -787,7 +787,7 @@ body::after{
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/shared-constants.js"></script>
 
-<!-- SPILL GENERATOR - HANYA 1X INCLUDE -->
+<!-- SPILL GENERATOR - HARUS DULUAN! -->
 <script src="/spill-generator.js"></script>
 
 <script>
@@ -985,6 +985,9 @@ async function loadRealEntries() {
         userReacted: null, 
         timestamp: new Date(e.created_at).getTime()
       }));
+    
+    // ✅ EXPOSE KE WINDOW biar bisa diakses generator
+    window.realEntries = realEntries;
     
     if (typeof window.updateFeedMeta === 'function') window.updateFeedMeta();
     if (typeof window.renderSpills === 'function') window.renderSpills();
@@ -1713,8 +1716,8 @@ document.addEventListener('DOMContentLoaded', () => {
   $('vibeCheckBtn')?.addEventListener('click', startVibeCheck);
   $('whisperBtn')?.addEventListener('click', openWsModal);
   $('refreshBtn')?.addEventListener('click', () => {
-    if (typeof window.brewNewSpills === 'function') {
-      window.brewNewSpills();
+    if (typeof window.refreshSpills === 'function') {
+      window.refreshSpills();
     }
   });
   
