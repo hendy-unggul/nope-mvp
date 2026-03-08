@@ -1,5 +1,5 @@
 // ============================================
-// spill-generator.js - FINAL VERSION
+// spill-generator.js - FINAL CLEAN VERSION
 // BLENDS REAL USER ENTRIES + AI ENTRIES
 // ============================================
 
@@ -8,20 +8,18 @@
     
     const SPILL_CONFIG = {
         API_BASE_URL: '/api/brew',
-        BREW_INTERVAL: 240000,        // 4 menit
-        POOL_MAX_SIZE: 27,             // Max total entries di pool
-        BREW_COUNT: 9,                  // Jumlah AI baru setiap brew
-        SPILL_TARGET: 8,                // Jumlah yang ditampilkan
-        REAL_ENTRIES_LIMIT: 20          // Max real entries dari Supabase
+        BREW_INTERVAL: 240000,
+        POOL_MAX_SIZE: 27,
+        BREW_COUNT: 9,
+        SPILL_TARGET: 8,
+        REAL_ENTRIES_LIMIT: 20
     };
 
-    // ✅ INTERNAL STATE
     let spillPool = [];
     let activeMood = 'all';
     let isLoading = false;
     let supabaseClient = null;
 
-    // ✅ INITIALIZE SUPABASE
     function initSupabase() {
         try {
             if (typeof supabase !== 'undefined' && supabase.createClient) {
@@ -40,7 +38,6 @@
         }
     }
 
-    // ✅ FETCH REAL ENTRIES FROM SUPABASE
     async function fetchRealEntries() {
         if (!supabaseClient) {
             if (!initSupabase()) return [];
@@ -66,7 +63,6 @@
                 return [];
             }
             
-            // Get current user ID from localStorage/JEJAK
             let currentUserId = null;
             try {
                 if (typeof JEJAK !== 'undefined' && JEJAK.getSession) {
@@ -79,9 +75,8 @@
                 console.warn('[SpillGen] ⚠️ Could not get current user ID');
             }
             
-            // Format real entries
             const realEntries = (data || [])
-                .filter(entry => !(currentUserId && entry.user_id === currentUserId)) // Filter out current user's own posts
+                .filter(entry => !(currentUserId && entry.user_id === currentUserId))
                 .map(entry => ({
                     id: entry.id,
                     author: entry.profiles?.username || 'anonymous',
@@ -92,7 +87,7 @@
                     isAI: false,
                     isReal: true,
                     userReacted: null,
-                    dbId: entry.id  // Keep original ID for reactions
+                    dbId: entry.id
                 }));
             
             console.log(`[SpillGen] 📊 Fetched ${realEntries.length} real entries`);
@@ -104,10 +99,9 @@
         }
     }
 
-    // ✅ FETCH AI ENTRIES FROM API
     async function fetchAISpills(count = SPILL_CONFIG.BREW_COUNT) {
         try {
-            const response = await fetch(`${SPILL_CONFIG.API_BASE_URL}/brew`, {
+            const response = await fetch('/api/brew', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ count })
@@ -144,7 +138,6 @@
         }
     }
 
-    // ✅ BLEND REAL + AI ENTRIES
     async function blendEntries() {
         if (isLoading) {
             console.log('[SpillGen] ⏳ Already loading, skipping...');
@@ -155,21 +148,17 @@
         console.log('[SpillGen] 🔄 Blending real + AI entries...');
         
         try {
-            // Fetch both sources in parallel
             const [realEntries, aiSpills] = await Promise.all([
                 fetchRealEntries(),
                 fetchAISpills(SPILL_CONFIG.BREW_COUNT)
             ]);
             
-            // Combine and sort by timestamp (newest first)
             const allEntries = [...realEntries, ...aiSpills].sort((a, b) => b.timestamp - a.timestamp);
             
-            // Take only up to POOL_MAX_SIZE
             spillPool = allEntries.slice(0, SPILL_CONFIG.POOL_MAX_SIZE);
             
             console.log(`[SpillGen] ✅ Blended: ${realEntries.length} real + ${aiSpills.length} AI = ${spillPool.length} total`);
             
-            // Render
             renderSpills();
             
         } catch (error) {
@@ -180,41 +169,31 @@
         }
     }
 
-    // ✅ ENHANCED FALLBACK DATA (with varied lengths)
     const FALLBACK_SPILLS = [
-        // Pendek (7-10 kata)
         { author: 'beby.manis', mood: 'surviving', content: 'deadline skripsi makin deket, anxiety naik turun 😮‍💨' },
         { author: 'agak.koplak', mood: 'chaotic', content: 'client minta revisi jam 11 malem, this is fine 🔥' },
         { author: 'satria.bajahitam', mood: 'doom', content: 'motor mogok, dompet tipis, triple combo 🫠' },
-        
-        // Medium (15-20 kata)
         { author: 'pretty.sad', mood: 'surviving', content: 'HR minta masuk sabtu minggu, mau resign tapi tabungan tinggal 200rb. bingung jadinya 😭' },
         { author: 'strawberry.shortcake', mood: 'thriving', content: 'akhirnya dapet panggilan interview setelah ngelamar 50+ tempat, semoga lancar ya Allah ✨' },
         { author: 'chili.padi', mood: 'thriving', content: 'orderan sneakers laku 15 pasang hari ini, rezeki anak soleh kata emak 💰😎' },
-        
-        // Panjang (25-30 kata)
         { author: 'bang.juned', mood: 'doom', content: 'skripsi bab 3 masih error, dosen pembimbing ga bales chat seminggu, padahal deadline sidang tinggal 2 bulan. pengen mundur tapi udah di depan mata 🥲' },
         { author: 'little.fairy', mood: 'chaotic', content: 'ortu ngomel terus disuruh kuliah, tapi gue dapet project freelance 5 juta. antara nurutin ortu atau ngejar cuan, bingung sumpah 🌀' },
-        
-        // Sangat panjang (35-40 kata)
         { author: 'sejuta.badai', mood: 'chaotic', content: 'minggu pagi jam 3, ga bisa tidur karena overthinking masa depan. buka IG liat temen pada nikah, beli rumah, punya mobil, sementara gue masih struggle with skripsi dan dompet tipis. maybe this is my villain arc idk 🛌💔' }
     ];
 
     function useFallbackData() {
         console.log('[SpillGen] 🔄 Using enhanced fallback data...');
         
-        // Shuffle and take BREW_COUNT
         const shuffled = [...FALLBACK_SPILLS].sort(() => Math.random() - 0.5);
         const selected = shuffled.slice(0, SPILL_CONFIG.BREW_COUNT);
         
-        // Format with timestamps
         const now = Date.now();
         const newSpills = selected.map((spill, i) => ({
-            id: `fallback_${now}_${i}_${Math.random().toString(36).slice(2)}`,
+            id: 'fallback_' + now + '_' + i + '_' + Math.random().toString(36).slice(2),
             author: spill.author,
             mood: spill.mood,
             content: spill.content,
-            timestamp: now - (i * 300000), // 5 min apart
+            timestamp: now - (i * 300000),
             reactions: {
                 skull: Math.floor(Math.random() * 30),
                 cry: Math.floor(Math.random() * 50),
@@ -226,16 +205,13 @@
             userReacted: null
         }));
         
-        // Add to pool
         spillPool = [...newSpills, ...spillPool].slice(0, SPILL_CONFIG.POOL_MAX_SIZE);
         
-        console.log(`[SpillGen] ✅ Fallback loaded: ${spillPool.length}/${SPILL_CONFIG.POOL_MAX_SIZE}`);
+        console.log('[SpillGen] ✅ Fallback loaded: ' + spillPool.length + '/' + SPILL_CONFIG.POOL_MAX_SIZE);
         
-        // Render
         renderSpills();
     }
 
-    // ✅ RENDER SPILLS
     function renderSpills() {
         const spillsContainer = document.getElementById('spillsList');
         
@@ -244,24 +220,20 @@
             return;
         }
         
-        // Filter by mood
         let filtered = spillPool;
         if (activeMood !== 'all') {
             filtered = spillPool.filter(s => s.mood === activeMood);
         }
         
-        // Take only target amount
         const toShow = filtered.slice(0, SPILL_CONFIG.SPILL_TARGET);
         
-        // Update meta
         const metaEl = document.getElementById('feedMeta');
         if (metaEl) {
             const realCount = toShow.filter(s => s.isReal).length;
             const aiCount = toShow.filter(s => s.isAI).length;
-            metaEl.textContent = `${toShow.length} (👤${realCount} 🤖${aiCount})`;
+            metaEl.textContent = toShow.length + ' (👤' + realCount + ' 🤖' + aiCount + ')';
         }
         
-        // Render HTML
         if (toShow.length === 0) {
             spillsContainer.innerHTML = `
                 <div class="empty-state">
@@ -272,40 +244,40 @@
             return;
         }
         
-        spillsContainer.innerHTML = toShow.map(spill => `
-            <div class="spill-card">
-                <div class="spill-head">
-                    <span class="spill-user">
-                        ${spill.isReal ? '👤 ' : '🤖 '}@${escapeHtml(spill.author)}
-                    </span>
-                    <span class="spill-mood ${spill.mood}">${spill.mood}</span>
-                </div>
-                <div class="spill-body">${escapeHtml(spill.content)}</div>
-                <div class="spill-actions">
-                    ${Object.entries(spill.reactions).map(([key, val]) => `
-                        <button class="react-btn ${spill.userReacted === key ? 'active' : ''}" 
-                                onclick="window.reactToSpill('${spill.id}', '${key}')">
-                            ${getReactionEmoji(key)} <span class="react-count">${val}</span>
-                        </button>
-                    `).join('')}
-                </div>
-            </div>
-        `).join('');
+        let html = '';
+        for (let i = 0; i < toShow.length; i++) {
+            const spill = toShow[i];
+            let reactionsHtml = '';
+            
+            const reactionTypes = ['skull', 'cry', 'fire', 'upside'];
+            for (let j = 0; j < reactionTypes.length; j++) {
+                const key = reactionTypes[j];
+                const val = spill.reactions[key] || 0;
+                const activeClass = (spill.userReacted === key) ? 'active' : '';
+                const emoji = key === 'skull' ? '💀' : key === 'cry' ? '😭' : key === 'fire' ? '🔥' : '🙃';
+                
+                reactionsHtml += '<button class="react-btn ' + activeClass + '" onclick="window.reactToSpill(\'' + spill.id + '\', \'' + key + '\')">' + emoji + ' <span class="react-count">' + val + '</span></button>';
+            }
+            
+            const userIcon = spill.isReal ? '👤' : '🤖';
+            
+            html += '<div class="spill-card">' +
+                '<div class="spill-head">' +
+                '<span class="spill-user">' + userIcon + ' @' + escapeHtml(spill.author) + '</span>' +
+                '<span class="spill-mood ' + spill.mood + '">' + spill.mood + '</span>' +
+                '</div>' +
+                '<div class="spill-body">' + escapeHtml(spill.content) + '</div>' +
+                '<div class="spill-actions">' + reactionsHtml + '</div>' +
+                '</div>';
+        }
+        
+        spillsContainer.innerHTML = html;
     }
 
-    // Helper untuk emoji reactions
-    function getReactionEmoji(type) {
-        const emojis = { skull: '💀', cry: '😭', fire: '🔥', upside: '🙃' };
-        return emojis[type] || type;
-    }
-
-    // ✅ EXPOSE REACTION FUNCTION TO WINDOW
-    window.reactToSpill = async function(spillId, reactionType) {
-        // Cari spill di pool
+    window.reactToSpill = function(spillId, reactionType) {
         const spill = spillPool.find(s => s.id === spillId);
         if (!spill) return;
         
-        // Handle reaction logic (toggle)
         const wasActive = spill.userReacted === reactionType;
         
         if (wasActive) {
@@ -320,34 +292,30 @@
             spill.userReacted = reactionType;
         }
         
-        // Re-render
         renderSpills();
         
-        // If it's a real entry, update in Supabase
         if (spill.isReal && spill.dbId && supabaseClient) {
-            try {
-                await supabaseClient
-                    .from('entries')
-                    .update({ reactions: spill.reactions })
-                    .eq('id', spill.dbId);
-            } catch (e) {
-                console.warn('[SpillGen] Failed to update reaction in Supabase:', e);
-            }
+            supabaseClient
+                .from('entries')
+                .update({ reactions: spill.reactions })
+                .eq('id', spill.dbId)
+                .then()
+                .catch(e => console.warn('[SpillGen] Failed to update reaction:', e));
         }
     };
 
     function filterMood(mood) {
-        console.log('[SpillGen] 🎯 Filter mood:', mood);
         activeMood = mood;
         
-        // Update UI chips
-        document.querySelectorAll('.mood-chip').forEach(chip => {
+        const chips = document.querySelectorAll('.mood-chip');
+        for (let i = 0; i < chips.length; i++) {
+            const chip = chips[i];
             if (chip.dataset.mood === mood) {
                 chip.classList.add('active');
             } else {
                 chip.classList.remove('active');
             }
-        });
+        }
         
         renderSpills();
     }
@@ -359,30 +327,24 @@
         return div.innerHTML;
     }
 
-    // ✅ INITIALIZATION
     function initSpillGenerator() {
         console.log('[SpillGen] 🚀 Initializing...');
         
-        // Initialize Supabase
         initSupabase();
         
-        // Initial blend after 2 seconds
-        setTimeout(() => blendEntries(), 2000);
+        setTimeout(function() { blendEntries(); }, 2000);
         
-        // Auto-blend every 4 minutes
-        setInterval(() => blendEntries(), SPILL_CONFIG.BREW_INTERVAL);
+        setInterval(function() { blendEntries(); }, SPILL_CONFIG.BREW_INTERVAL);
     }
 
-    // ✅ EXPOSE TO WINDOW
     window.initSpillGenerator = initSpillGenerator;
     window.blendEntries = blendEntries;
     window.filterMood = filterMood;
-    window.getSpillPool = () => spillPool;
-    window.refreshFeed = blendEntries;  // Alias for refresh button
+    window.getSpillPool = function() { return spillPool; };
+    window.refreshFeed = blendEntries;
 
-    // ✅ AUTO INIT
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', function() {
             console.log('[SpillGen] 📄 DOM ready, initializing...');
             setTimeout(initSpillGenerator, 1000);
         });
