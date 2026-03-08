@@ -281,4 +281,65 @@
     function filterMood(mood) {
         activeMood = mood;
         
-       
+        // Update UI chips
+        document.querySelectorAll('.mood-chip').forEach(chip => {
+            if (chip.dataset.mood === mood) {
+                chip.classList.add('active');
+            } else {
+                chip.classList.remove('active');
+            }
+        });
+        
+        // Filter existing pool
+        if (spillPool.length > 0) {
+            let filtered = spillPool;
+            if (mood !== 'all') {
+                filtered = spillPool.filter(s => s.mood === mood);
+            }
+            
+            // Update meta
+            const metaEl = document.getElementById('feedMeta');
+            if (metaEl) {
+                metaEl.textContent = `${filtered.length} (🤖${filtered.length})`;
+            }
+        }
+        
+        refreshFeed();
+    }
+
+    // ============================================
+    // ESCAPE HTML
+    // ============================================
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ============================================
+    // INIT
+    // ============================================
+    function init() {
+        console.log('[SpillGen] 🚀 Initializing...');
+        initSupabase();
+        refreshFeed();
+        setInterval(refreshFeed, CONFIG.REFRESH_INTERVAL);
+    }
+
+    // ============================================
+    // EXPOSE TO WINDOW
+    // ============================================
+    window.initSpillGenerator = init;
+    window.refreshFeed = refreshFeed;
+    window.filterMood = filterMood;
+    window.getSpillPool = () => spillPool;
+
+    // Auto start
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => setTimeout(init, 1000));
+    } else {
+        setTimeout(init, 1000);
+    }
+
+})();
