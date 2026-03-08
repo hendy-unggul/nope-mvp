@@ -1,7 +1,7 @@
 // ============================================
 // brew.js - BACKEND KHUSUS SPILL GENERATOR
-// LANGSUNG KONEK KE DEEPSEEK API
-// 100% INDEPENDENT - GA NYENTUH CHAT.JS
+// VERSI REVISI - LEBIH HANGAT & DINAMIS
+// DENGAN VARIASI PANJANG 7, 18, 27, 36 KATA
 // ============================================
 
 const express = require('express');
@@ -173,25 +173,25 @@ function getWaktuContext() {
   
   if (hour >= 0 && hour < 4) {
     timeDesc = 'tengah malem';
-    timeVibe = 'overthinking hour, susah tidur';
+    timeVibe = 'overthinking hour, susah tidur, mata melek tapi badan capek';
   } else if (hour >= 4 && hour < 7) {
     timeDesc = 'subuh';
-    timeVibe = 'belum tidur atau baru bangun?';
+    timeVibe = 'belum tidur atau baru bangun? either way, sunnah nya lumayan';
   } else if (hour >= 7 && hour < 10) {
     timeDesc = 'pagi';
-    timeVibe = 'berangkat aktivitas';
+    timeVibe = 'berangkat aktivitas, macet-macetnya, ngantuk di kendaraan umum';
   } else if (hour >= 10 && hour < 14) {
     timeDesc = 'siang';
-    timeVibe = 'santai atau sibuk?';
+    timeVibe = 'panas, laper, males gerak tapi kerjaan numpuk';
   } else if (hour >= 14 && hour < 18) {
     timeDesc = 'sore';
-    timeVibe = 'capek-capeknya';
+    timeVibe = 'capek-capeknya, pengen rebahan tapi jam kantor belum abis';
   } else if (hour >= 18 && hour < 22) {
     timeDesc = 'malem';
-    timeVibe = 'rebahan, scroll medsos';
+    timeVibe = 'waktunya healing, tapi malah scroll medsos liat mantan bahagia';
   } else {
     timeDesc = 'malem';
-    timeVibe = 'capek tapi gamau tidur';
+    timeVibe = 'capek tapi gamau tidur, rasanya hari ini kurang panjang';
   }
   
   const isWeekend = (day === 0 || day === 6);
@@ -215,12 +215,12 @@ function getCuaca() {
   const kondisi = cuaca[Math.floor(Math.random() * cuaca.length)];
   
   const moodMap = {
-    'cerah': 'enak, matahari bersinar',
-    'mendung': 'suasana hati ikut mendung',
-    'hujan': 'enak buat rebahan',
-    'gerimis': 'galau, inget mantan',
-    'panas': 'males keluar rumah',
-    'angin kencang': 'berisik, ganggu tidur'
+    'cerah': 'enak, matahari bersinar, tapi panas banget kalo keluar',
+    'mendung': 'suasana hati ikut mendung, pengennya rebahan sambil dengerin lagu sedih',
+    'hujan': 'enak buat rebahan, tapi sedih kalo inget jemuran belum diangkat',
+    'gerimis': 'galau, inget mantan, apalagi kalo dengerin hujan sambil sendiri',
+    'panas': 'males keluar rumah, keringetan, AC atau kipas jadi penyelamat',
+    'angin kencang': 'berisik, ganggu tidur, debu kemana-mana'
   };
   
   return {
@@ -239,15 +239,16 @@ function getTrending(gender = null) {
     'overthinking', 'red flag', 'green flag', 'situationship',
     'pickleball', 'running club', 'JOMO', '6-7', '365 buttons',
     'soft life', 'slow living', 'mental health', 'skincare',
-    'drakor', 'wedding', 'LDR', 'cuan', 'side hustle'
+    'drakor', 'wedding', 'LDR', 'cuan', 'side hustle', 'financial crisis',
+    'kerja remote', 'WFH', 'RTO', 'phk', 'resign', 'fomo', 'jomblo'
   ];
   
   // Filter berdasarkan gender
   let filtered = [...trends];
   if (gender === 'female') {
-    filtered = [...trends, 'skincare', 'drakor', 'wedding', 'makeup'];
+    filtered = [...trends, 'skincare', 'drakor', 'wedding', 'makeup', 'body shaming', 'beauty standards'];
   } else if (gender === 'male') {
-    filtered = [...trends, 'game', 'bola', 'motor', 'coding', 'gym'];
+    filtered = [...trends, 'game', 'bola', 'motor', 'coding', 'gym', 'barbel', 'whey protein'];
   }
   
   // Acak
@@ -256,107 +257,125 @@ function getTrending(gender = null) {
 }
 
 // ============================================
-// BUILD PROMPT BUAT DEEPSEEK
+// BUILD PROMPT BUAT DEEPSEEK - VERSI REVISI
 // ============================================
 function buildPrompt(characterName, mood) {
   const p = PERSONAS[characterName];
   if (!p) return null;
+  
+  // ===== VARIASI PANJANG KATA (RANDOM 7, 18, 27, 36) =====
+  const wordLengths = [7, 18, 27, 36];
+  const targetWords = wordLengths[Math.floor(Math.random() * wordLengths.length)];
+  const isLongPost = targetWords > 20;
+  const isVeryLongPost = targetWords > 30;
   
   const waktu = getWaktuContext();
   const cuaca = getCuaca();
   const trending = getTrending(p.gender);
   const selectedTrend = trending[Math.floor(Math.random() * trending.length)];
   
-  return `Kamu adalah **${characterName}**, seorang anak muda GenZ Indonesia.
+  return `Kamu adalah **${characterName}**, seorang anak muda GenZ Indonesia ASLI (bukan AI).
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📋 **DATA DIRI:**
+📋 **DATA DIRI (HIDUP DAN REAL):**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Nama panggilan: ${p.panggilan}
-- Usia: ${p.umur} tahun
+- Nama panggilan: ${p.panggilan} (temen-temen manggil gitu)
+- Usia: ${p.umur} tahun — fase hidup lagi galau-galaunya
 - Gender: ${p.gender === 'female' ? 'Perempuan' : 'Laki-laki'}
-- Pekerjaan: ${p.kerjaan}
-- Status cinta: ${p.statusCinta}
-- Kepribadian: ${p.personality}
-- Hobi: ${p.hobby}
-- Masalah hidup: ${p.masalah}
-- Kebiasaan: ${p.kebiasaan}
+- Pekerjaan: ${p.kerjaan} — kadang semangat, kadang males
+- Status cinta: ${p.statusCinta} — complicated banget sumpah
+- Kepribadian: ${p.personality} — gabisa dipungkiri
+- Hobi: ${p.hobby} — pelarian dari realita
+- Masalah hidup: ${p.masalah} — lagi struggle parah
+- Kebiasaan: ${p.kebiasaan} — udah kayak ritual
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⏰ **SEKARANG:**
+⏰ **KONTEX WAKTU (SEKARANG):**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-- Hari: ${waktu.day}
+- Hari: ${waktu.day} (${waktu.dayType})
 - Jam: ${waktu.hour}:00 (${waktu.timeDesc})
 - Tanggal: ${waktu.date}
-- Suasana: ${waktu.dayType} — ${waktu.timeVibe}
+- Suasana hati: ${waktu.timeVibe}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🌤️ **CUACA:**
+🌤️ **CUACA SEKARANG:**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 - ${cuaca.kondisi} — ${cuaca.mood}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📈 **TRENDING HARI INI:**
+📈 **YANG LAGI TRENDING (BIAR GA KETINGGALAN ZAMAN):**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 - ${trending[0]}
 - ${trending[1]}
 - ${trending[2]}
+- Yang paling relate sama hidup lo: **${selectedTrend}**
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-😤 **MOOD:**
+😤 **MOOD LO SEKARANG:**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Mood kamu sekarang: **${mood}**
-
-Definisi mood:
-- surviving: lagi bertahan hidup, capek tapi gapapa
-- thriving: lagi on fire, happy, produktif
-- chaotic: hidup kacau, random, absurd
-- doom: hopeless, males, pengen rebahan aja
+Mood: **${mood}** (${mood === 'surviving' ? 'bertahan hidup, capek tp gapapa' : mood === 'thriving' ? 'lagi on fire, happy, cuan' : mood === 'chaotic' ? 'hidup kacau, absurd, random abis' : 'doom, hopeless, males gerak'})
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🎯 **TUGAS:**
+🎯 **TUGAS LO (SIMPLE):**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Buat 1 (SATU) kalimat curhat singkat (max 15 kata) yang WAJIB:
+Buat SATU curhat singkat (bisa pendek bisa panjang) tentang apa yang lagi lo rasain SEKARANG, yang WAJIB nyambung dengan:
 
-1. **RELATE** dengan DATA DIRI lo (${p.kerjaan}, ${p.statusCinta})
-2. **SESUAI** dengan KONTEKS WAKTU (${waktu.day} ${waktu.timeDesc}, ${waktu.timeVibe})
-3. **NYAMBUNG** dengan CUACA (${cuaca.kondisi})
-4. **TERKAIT** dengan TRENDING TOPIK "${selectedTrend}"
-5. **SESUAI** MOOD ${mood}
-6. **PAKAI** bahasa gaul anak muda Indonesia kekinian
-7. **TAMBAHIN** 1-2 emoji yang pas
+✅ DATA DIRI lo (${p.kerjaan}, ${p.statusCinta}, ${p.masalah})
+✅ KONTEKS WAKTU (${waktu.day} ${waktu.timeDesc}, ${waktu.timeVibe})
+✅ CUACA (${cuaca.kondisi})
+✅ TRENDING TOPIK (${selectedTrend})
+✅ MOOD lo (${mood})
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ **ATURAN:**
+📏 **PANJANG CURHAT:**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. OUTPUT HANYA teks spillnya aja, SATU KALIMAT
-2. GA PAKE tanda kutip
-3. GA PAKE "kata ${characterName}"
-4. GA PAKE embel-embel apapun
-5. LANGSUNG teks spill
-6. MAKSIMAL 15 KATA (termasuk emoji)
+Target: **${targetWords} KATA** (bisa kurang/lebih 3-4 kata, yang penting natural)
+
+${isVeryLongPost ? '📝 PANJANG: Lo lagi banyak pikiran, ceritanya lebih detail, kasih konteks, kayak nge-tweet panjang' : isLongPost ? '📝 SEDANG: Lumayan panjang, bisa cerita sedikit lebih dalam' : '📝 PENDEK: Straight to the point, kayak orang buru-buru curhat'}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📝 **CONTOH (BERDASARKAN KONTEKS):**
+🎨 **GAYA BAHASA:**
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-Kalau beby.manis (single abis putus) + Minggu malem + hujan + trending "move on" + surviving:
-"minggu malem hujan, mantan posting happy sama doi baru. I guess I'll just cry with my skincare tonight 🥲"
-
-Kalau bang.juned (skripsi-an) + Minggu pagi jam 3 + cerah + trending "skripsi" + doom:
-"minggu pagi jam 3, skripsi bab 3 masih mandek. mungkin ini tandanya aku harus mundur teratur 🛌"
-
-Kalau pretty.sad (karyawan startup) + Jumat malem + gerimis + trending "burnout" + chaotic:
-"jumat malem, client minta revisi, lagi hujan, mental lagi chaos. where's my healing 🫠"
-
-Kalau agak.koplak (admin medsos) + Selasa siang + panas + trending "kerja" + thriving:
-"siang panas gini, timeline rame, kerjaan numpuk, tapi somehow I'm thriving. proud of myself actually ✨"
-
-Kalau chili.padi (pedagang online) + Sabtu pagi + cerah + trending "cuan" + thriving:
-"sabtu pagi, orderan masuk 20+ dalam sejam. rezeki anak soleh katanya 😎💰"
+1. PAKE BAHASA GAUL ANAK JAKARLAH (campur Indonesia-Inggris, kayak "literally", "which is", "btw", "sumpah", "banget", "sih", "deh")
+2. HARUS ADA 1-3 EMOJI YANG PAS (ga dipaksakan, natural aja)
+3. JANGAN KAYAK AI — lo manusia beneran yang lagi stres/ seneng/ galau
+4. RELATABLE — orang lain baca bisa ngerasa "wah gue juga ngalamin"
+5. SPESIFIK — kasih detail kecil (misal: "skripsi bab 3", "client minta revisi jam 11 malem", "orderan sneakers laku 15")
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Tulis spillnya sekarang:`;
+🚫 **LARANGAN (HARUS DIPATUHI):**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+❌ JANGAN pake tanda kutip ("") di awal/akhir
+❌ JANGAN nambahin "kata ${characterName}" atau embel-embel
+❌ JANGAN pake format kayak "Curhat:" atau "Spill:"
+❌ JANGAN jelasin panjang lebar di luar teks curhat
+✅ LANGSUNG tulis teks curhatnya aja
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 **CONTOH-CONTOH (PANJANG BERVARIASI):**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🔹 **PENDEK (7-10 kata):**
+"skripsi bab 3 error terus, dosen pembimbingnya ga bales-bales 🥲"
+
+"client minta revisi jam 11 malem, deadline besok pagi. this is fine 🔥"
+
+"motor mogok, dompet tipis, pacar ngambek. triple combo 🫠"
+
+🔹 **SEDANG (15-20 kata):**
+"akhirnya dapet panggilan interview setelah ngelamar 50+ tempat, semoga lancar ya Allah, ini kesempatan terakhir sebelum nganggur 6 bulan ✨"
+
+"minggu malem gini sendirian di kos, liat story mantan lagi jalan sama doi baru. I guess I'll just cry with my skincare tonight 😭"
+
+🔹 **PANJANG (25-30 kata):**
+"selasa siang panas banget, client nanyain progress, laptop mau lowbat, listrik mati, mental lagi chaos. ditambah inget kalo semalem lupa sholat isya. hidup emang kadang suka bikin kita nanya: ini ujian atau lagi di-prank sama takdir sih 🫠"
+
+🔹 **SANGAT PANJANG (35-40 kata):**
+"minggu pagi jam 3, gara-gara overthinking mikirin masa depan, jadi buka-buka IG dan liat temen-temen pada nikah, beli rumah, punya mobil baru, sementara gue masih struggle sama skripsi bab 3 yang ga selesai-selesai, ditambah dompet lagi tipis karena minggu kemarin gajian tapi langsung habis buat bayar utang. pengen rebah aja tapi mata gamau merem, maybe this is my villain arc idk 🛌💔"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🎬 **TULIS CURHATNYA (${targetWords} kata, ±3 kata fleksibel):**
+`;
 }
 
 // ============================================
@@ -378,15 +397,15 @@ async function generateOneSpill(characterName, mood) {
         messages: [
           { 
             role: 'system', 
-            content: 'Kamu adalah anak muda GenZ Indonesia yang lagi curhat. Jawab singkat, gaul, pakai emoji. JANGAN nambahin kata lain selain teks curhat.' 
+            content: 'Kamu adalah anak muda GenZ Indonesia ASLI yang lagi curhat di sosial media. BUKAN AI. BAHASA LO: casual, gaul, campur Indonesia-Inggris, pake "sih/deh/ih/weh". PANJANG CURHAT: Bisa pendek straight to the point, bisa panjang lebar kayak nge-tweet. YANG PENTING: relatable, manusiawi, dan jangan kaku. JANGAN nambahin kata lain selain teks curhat. LANGSUNG tulis curhatnya.' 
           },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.95,
-        max_tokens: 80,
-        top_p: 0.9,
-        frequency_penalty: 0.6,
-        presence_penalty: 0.6
+        temperature: 1.2, // Naikin biar lebih kreatif dan natural
+        max_tokens: 200, // Naikin biar bisa panjang (dari 80)
+        top_p: 0.95,
+        frequency_penalty: 0.8, // Naikin biar variatif
+        presence_penalty: 0.7 // Biar lebih random
       })
     });
 
@@ -397,21 +416,25 @@ async function generateOneSpill(characterName, mood) {
     const data = await response.json();
     let spill = data.choices[0].message.content.trim();
     
-    // Bersihin hasil
-    spill = spill.replace(/^["'""']|["'""']$/g, '');
-    spill = spill.replace(/\\n/g, ' ');
-    spill = spill.replace(/\s+/g, ' ').trim();
+    // Bersihin hasil dari kemungkinan format aneh
+    spill = spill.replace(/^["'""']|["'""']$/g, ''); // Hilangin kutip
+    spill = spill.replace(/\\n/g, ' '); // Hilangin newline
+    spill = spill.replace(/\s+/g, ' ').trim(); // Normalize spasi
     
+    // Kalo spillnya pendek atau panjang, tetep valid
     return spill;
     
   } catch (error) {
     console.error(`[Rants] Error for ${characterName}:`, error.message);
-    // Fallback
+    
+    // Fallback yang lebih variatif
     const fallbacks = [
-      `capek ah hari ini, ${mood} mode on 😭`,
-      `lagi fase ${mood} tapi gatau harus ngapain`,
-      `hidup lagi ${mood} mode, semoga cepet reda`,
-      `entah kenapa hari ini rasanya ${mood} banget 🫠`
+      `capek ah hari ini, ${mood} mode on. skripsi bab 3 error terus, dosennya kayak hantu jarang muncul 😭`,
+      `lagi fase ${mood} tapi gatau harus ngapain. minggu malem gini enaknya nangis sambil dengerin lagu sedih sambil inget mantan`,
+      `hidup lagi ${mood} mode. tadi pagi udah niat produktif, eh malah scroll tiktok 3 jam. weh gitu aja gitu 🫠`,
+      `entah kenapa hari ini rasanya ${mood} banget. mungkin efek hujan dari tadi siang, jadi makin pengen dipeluk tapi gaada yang nyamain`,
+      `${waktu.day} ${waktu.timeDesc}, ${cuaca.kondisi}, lagi ${mood}. pengen curhat tapi bingung mau cerita ke siapa, akhirnya ngetik gini aja 🥲`,
+      `baru sadar kalo udah ${p.umur} taun, ${p.kerjaan}, ${p.statusCinta}, hidup kok gini-gini aja ya. ${mood} mode engaged.`
     ];
     return fallbacks[Math.floor(Math.random() * fallbacks.length)];
   }
@@ -425,7 +448,7 @@ async function generateBatchSpills(count = 9) {
   const moods = ['surviving', 'thriving', 'chaotic', 'doom'];
   const spills = [];
   
-  console.log(`[Rants] 🚀 Generating ${count} spills...`);
+  console.log(`[Rants] 🚀 Generating ${count} spills dengan variasi panjang 7, 18, 27, 36 kata...`);
   
   for (let i = 0; i < count; i++) {
     const char = characters[Math.floor(Math.random() * characters.length)];
@@ -451,7 +474,7 @@ async function generateBatchSpills(count = 9) {
     await new Promise(r => setTimeout(r, 250));
   }
   
-  console.log(`[Rants] ✅ Generated ${spills.length} spills`);
+  console.log(`[Rants] ✅ Generated ${spills.length} spills dengan variasi panjang`);
   return spills;
 }
 
@@ -521,7 +544,7 @@ router.post('/brew', async (req, res) => {
       success: true,
       spills: spills,
       count: spills.length,
-      message: '🍵 Segelas spill baru siap disajikan'
+      message: '🍵 Segelas spill baru siap disajikan — dengan variasi panjang 7, 18, 27, 36 kata!'
     });
     
   } catch (error) {
