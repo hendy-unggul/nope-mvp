@@ -1,6 +1,5 @@
 // ============================================
-// spill-generator.js - FRONTEND SPILL GENERATOR
-// FIXED VERSION - No duplicate declarations
+// spill-generator.js - VERSI FINAL
 // ============================================
 
 const SPILL_CONFIG = {
@@ -11,15 +10,15 @@ const SPILL_CONFIG = {
     SPILL_TARGET: 8
 };
 
-// ✅ HANYA 1 VARIABLE - spillPool (milik generator)
-let spillPool = [];
+// ✅ SEMUA VARIABLE ADA DI SINI
+let spillPool = [];  // ganti dari fillerPool
 let activeMood = 'all';
 let isLoading = false;
 
-// ❌ TIDAK ADA deklarasi realEntries di sini!
-
 function initSpillGenerator() {
     console.log('[SpillGen] 🚀 Initializing...');
+    
+    // HAPUS PANGGILAN ensureFillerPool
     setTimeout(() => brewNewSpills(), 2000);
     setInterval(() => brewNewSpills(), SPILL_CONFIG.BREW_INTERVAL);
 }
@@ -52,14 +51,13 @@ async function brewNewSpills(count = SPILL_CONFIG.BREW_COUNT) {
                 userReacted: null
             }));
             
+            // FIFO
             spillPool = [...newSpills, ...spillPool].slice(0, SPILL_CONFIG.POOL_MAX_SIZE);
             
             console.log(`[SpillGen] 🍵 +${newSpills.length} entries, pool: ${spillPool.length}/${SPILL_CONFIG.POOL_MAX_SIZE}`);
             
-            // ✅ Panggil render dari window (yang asli di spill.html)
-            if (typeof window.renderSpills === 'function') {
-                window.renderSpills();
-            }
+            // Render ulang
+            renderSpills();
         }
     } catch (error) {
         console.error('[SpillGen] ❌ Brew failed:', error);
@@ -68,39 +66,77 @@ async function brewNewSpills(count = SPILL_CONFIG.BREW_COUNT) {
     }
 }
 
-// ✅ Fungsi render yang pake realEntries dari window
 function renderSpills() {
-    const realEntriesFromWindow = window.realEntries || [];
-    const allSpills = [...realEntriesFromWindow, ...spillPool];
+    const spillsContainer = document.getElementById('spillsList');
+    if (!spillsContainer) return;
     
-    // Urutin berdasarkan timestamp
+    // Gabung realEntries (dari window) + spillPool
+    const realEntriesFromWindow = window.realEntries || [];
+    let allSpills = [...realEntriesFromWindow, ...spillPool];
+    
+    // Urutin berdasarkan timestamp (terbaru dulu)
     allSpills.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     
     // Filter mood
-    let filtered = activeMood === 'all' 
-        ? allSpills 
-        : allSpills.filter(s => s.mood === activeMood);
+    if (activeMood !== 'all') {
+        allSpills = allSpills.filter(s => s.mood === activeMood);
+    }
     
-    filtered = filtered.slice(0, SPILL_CONFIG.SPILL_TARGET);
+    // Ambil sesuai target
+    const toShow = allSpills.slice(0, SPILL_CONFIG.SPILL_TARGET);
     
     // Update meta
     const metaEl = document.getElementById('feedMeta');
     if (metaEl) {
         const realCount = realEntriesFromWindow.length;
         const aiCount = spillPool.length;
-        metaEl.textContent = `${filtered.length} (${realCount} real, ${aiCount} pool)`;
+        metaEl.textContent = `${toShow.length} (${realCount} real, ${aiCount} pool)`;
     }
     
-    // Render ke DOM (panggil fungsi asli spill.html)
-    if (typeof window.originalRenderSpills === 'function') {
-        window.originalRenderSpills();
+    // Render HTML
+    if (toShow.length === 0) {
+        spillsContainer.innerHTML = `<div class="empty-state">Belum ada spill</div>`;
+        return;
     }
+    
+    spillsContainer.innerHTML = toShow.map(spill => `
+        <div class="spill-card">
+            <div class="spill-head">
+                <span>@${escapeHtml(spill.author)}</span>
+                <span class="spill-mood ${spill.mood}">${spill.mood}</span>
+            </div>
+            <div class="spill-body">${escapeHtml(spill.content)}</div>
+        </div>
+    `).join('');
+}
+
+function filterMood(mood) {
+    activeMood = mood;
+    
+    // Update active class di chips
+    document.querySelectorAll('.mood-chip').forEach(chip => {
+        if (chip.dataset.mood === mood) {
+            chip.classList.add('active');
+        } else {
+            chip.classList.remove('active');
+        }
+    });
+    
+    renderSpills();
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // EXPOSE KE WINDOW
 window.initSpillGenerator = initSpillGenerator;
 window.brewNewSpills = brewNewSpills;
-window.spillPool = spillPool; // biar bisa diakses dari luar
+window.filterMood = filterMood;
+window.spillPool = spillPool;  // biar bisa diakses
 
 // AUTO INIT
 if (typeof window !== 'undefined') {
