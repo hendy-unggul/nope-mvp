@@ -1718,11 +1718,21 @@ window.loadRealEntries = async function() {
   }
 };
 
-// Ganti fungsi renderSpills panggil dari generator
+// Simpan fungsi original dengan nama beda
 const originalRenderSpills = renderSpills;
+
+// Buat fungsi baru dengan nama beda
+window.renderSpillsFromGenerator = function() {
+  if (typeof window.renderSpillsFromGenerator === 'function') {
+    window.renderSpillsFromGenerator();
+  }
+};
+
+// Panggil dari generator
 window.renderSpills = function() {
-  if (typeof window.renderSpills === 'function') {
-    window.renderSpills();
+  // Panggil fungsi generator, BUKAN dirinya sendiri
+  if (typeof window.renderSpillsFromGenerator === 'function') {
+    window.renderSpillsFromGenerator();
   } else {
     originalRenderSpills();
   }
