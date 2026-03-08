@@ -1701,5 +1701,52 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+   <!-- Spill Generator -->
+<script src="/spill-generator.js"></script>
+
+<script>
+// ============================================
+// OVERRIDE FUNGSI YANG UDAH ADA DI SPILL.HTML
+// ============================================
+
+// Ganti fungsi loadRealEntries biar panggil updateFeedMeta
+const originalLoadRealEntries = loadRealEntries;
+window.loadRealEntries = async function() {
+  await originalLoadRealEntries();
+  if (typeof updateFeedMeta === 'function') {
+    updateFeedMeta();
+  }
+};
+
+// Ganti fungsi renderSpills panggil dari generator
+const originalRenderSpills = renderSpills;
+window.renderSpills = function() {
+  if (typeof window.renderSpills === 'function') {
+    window.renderSpills();
+  } else {
+    originalRenderSpills();
+  }
+};
+
+// Hook untuk mood filter
+document.querySelectorAll('.mood-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    const mood = this.dataset.mood;
+    if (typeof filterSpillsByMood === 'function') {
+      filterSpillsByMood(mood);
+    }
+  });
+});
+
+// Hook untuk refresh button
+document.querySelector('.refresh-btn')?.addEventListener('click', function(e) {
+  e.preventDefault();
+  if (typeof manualBrew === 'function') {
+    manualBrew();
+  }
+});
+
+console.log('[SpillGen] 🔌 Integrated with spill.html');
+</script>
 </body>
 </html>
