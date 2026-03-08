@@ -120,7 +120,7 @@ body::after{
   box-shadow: 3px 3px 0 #000;
   transition: all .08s;
   line-height: 1;
-  transform: rotate(90deg); /* Membuat 3 titik vertikal */
+  transform: rotate(90deg);
 }
 
 .settings-icon:active {
@@ -190,7 +190,6 @@ body::after{
   border-bottom:2px solid var(--bd);
 }
 
-/* RADAR HEADER DENGAN ONLINE COUNT */
 .radar-header{
   display:flex;
   justify-content:space-between;
@@ -580,16 +579,15 @@ body::after{
     <div class="logo">SP<span class="x">✕</span>LL</div>
     <div class="user-menu">
       <span class="user-badge" id="userNameDisplay">@loading...</span>
-      <div class="settings-icon" id="settingsIcon" onclick="toggleSettingsMenu()">⋮</div>
+      <div class="settings-icon" id="settingsIcon">⋮</div>
       <div class="settings-menu" id="settingsMenu">
-        <div class="settings-item" onclick="logoutUser()">Logout</div>
+        <div class="settings-item" id="logoutItem">Logout</div>
       </div>
     </div>
   </div>
 
   <!-- SCROLL AREA -->
   <div class="scroll">
-
     <!-- RADAR -->
     <div class="radar-sect">
       <div class="radar-header">
@@ -612,10 +610,10 @@ body::after{
         </div>
       </div>
       <div class="radar-ctas">
-        <button class="btn-vibe-check" onclick="startVibeCheck()">
+        <button class="btn-vibe-check" id="vibeCheckBtn">
           <span>⬡</span><span>VIBE CHECK</span><span class="btn-chip">LIVE</span>
         </button>
-        <button class="btn-whisper" onclick="openWsModal()">
+        <button class="btn-whisper" id="whisperBtn">
           <div class="btn-whisper-left">
             <span class="btn-whisper-glyph">✦</span>
             <span>WHISPERER</span>
@@ -633,7 +631,7 @@ body::after{
       </div>
       <input type="range" class="vibe-slider" id="vibeSlider" min="0" max="100" value="87">
       <div class="slider-labels"><span>HOMIE</span><span>SEMI</span><span>ALL</span></div>
-      <div class="mood-scroll">
+      <div class="mood-scroll" id="moodScroll">
         <button class="mood-chip active" data-mood="all">SEMUA</button>
         <button class="mood-chip" data-mood="surviving">😮‍💨 SURVIVING</button>
         <button class="mood-chip" data-mood="thriving">✨ THRIVING</button>
@@ -654,41 +652,40 @@ body::after{
           <div class="empty-title">MEMUAT SPILL...</div>
         </div>
       </div>
-      <button class="refresh-btn" onclick="refreshSpills()">
+      <button class="refresh-btn" id="refreshBtn">
         <span>↻</span><span>SEDUH TEH BARU</span>
       </button>
     </div>
-
   </div><!-- /scroll -->
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <div class="nav-container">
-      <div class="nav-item active" onclick="window.location.href='spill.html'"><span class="nav-icon">✕</span><span>SPILL</span></div>
-      <div class="nav-item" onclick="window.location.href='jejak.html'"><span class="nav-icon">✦</span><span>JEJAK</span></div>
-      <div class="nav-item" onclick="window.location.href='glitch.html'"><span class="nav-icon">⚡</span><span>GLITCH</span></div>
-      <div class="nav-item" onclick="window.location.href='cocomeo.html'"><span class="nav-icon">〜</span><span>COCOMEO</span></div>
+      <div class="nav-item active" data-page="spill"><span class="nav-icon">✕</span><span>SPILL</span></div>
+      <div class="nav-item" data-page="jejak"><span class="nav-icon">✦</span><span>JEJAK</span></div>
+      <div class="nav-item" data-page="glitch"><span class="nav-icon">⚡</span><span>GLITCH</span></div>
+      <div class="nav-item" data-page="cocomeo"><span class="nav-icon">〜</span><span>COCOMEO</span></div>
     </div>
   </nav>
 </div>
 
-<!-- MODAL GENDER -->
+<!-- MODALS -->
 <div class="modal" id="genderModal">
   <div class="modal-header">
     <div class="modal-title">PILIH GENDER</div>
-    <button class="modal-close" onclick="closeModal('genderModal')">✕</button>
+    <button class="modal-close" id="closeGenderModal">✕</button>
   </div>
   <div class="modal-body">
     <span class="modal-tag">STEP 1/2</span>
     <div class="modal-h">VIBE CHECK BUTUH KONTEKS</div>
     <div class="modal-sub">biar algoritma bisa match kamu dengan vibe yang tepat</div>
     <div class="gender-grid">
-      <div class="gender-card" onclick="selectGender(this,'female')">
+      <div class="gender-card" data-gender="female">
         <span class="gender-icon">♀️</span>
         <span class="gender-label">CEWEK</span>
         <span class="gender-desc">mau ngobrol sama cowok</span>
       </div>
-      <div class="gender-card" onclick="selectGender(this,'male')">
+      <div class="gender-card" data-gender="male">
         <span class="gender-icon">♂️</span>
         <span class="gender-label">COWOK</span>
         <span class="gender-desc">mau ngobrol sama cewek</span>
@@ -698,25 +695,23 @@ body::after{
       <p>🔒 <strong>privacy first</strong> — gender cuma dipakai buat matching sesi, ga disimpan &amp; ga muncul di profil</p>
       <p style="margin-top:8px;color:var(--aq)">⚠️ <strong>Jangan pernah ungkap data pribadi — stay safe, stay anonim</strong></p>
     </div>
-    <button class="modal-action-btn" id="confirmGenderBtn" onclick="confirmGender()" disabled>GASKEUN →</button>
-    <div class="modal-hint">dengan lanjut, kamu setuju sama <button class="modal-hint-link" onclick="alert('kebijakan anonim: ga ada log, ga ada trace')">kebijakan anonim</button></div>
+    <button class="modal-action-btn" id="confirmGenderBtn" disabled>GASKEUN →</button>
+    <div class="modal-hint">dengan lanjut, kamu setuju sama <button class="modal-hint-link" id="policyLink">kebijakan anonim</button></div>
   </div>
 </div>
 
-<!-- MODAL WHISPERER -->
 <div class="modal" id="wsModal">
   <div class="modal-header">
     <div class="modal-title">WHISPERER</div>
-    <button class="modal-close" onclick="closeModal('wsModal')">✕</button>
+    <button class="modal-close" id="closeWsModal">✕</button>
   </div>
   <div class="modal-body" id="wsModalBody"></div>
 </div>
 
-<!-- UPGRADE MODAL -->
 <div class="upgrade-modal" id="upgradeModal">
   <div class="upgrade-header">
     <div class="modal-title">✦ UPGRADE ✦</div>
-    <button class="modal-close" onclick="closeUpgradeModal()">✕</button>
+    <button class="modal-close" id="closeUpgradeModal">✕</button>
   </div>
   <div class="upgrade-body">
     <div class="package-grid">
@@ -731,7 +726,7 @@ body::after{
           <div class="package-feature"><span class="check">✓</span> Tetap ketemu lawan jenis</div>
           <div class="package-feature"><span class="check">✓</span> Tanpa iklan</div>
         </div>
-        <button class="package-btn" onclick="selectPackage('regular')">PILIH PAKET 10K</button>
+        <button class="package-btn" data-package="regular">PILIH PAKET 10K</button>
       </div>
       <div class="package-card promo">
         <div class="package-badge" style="background:var(--aq);color:#000">PROMO</div>
@@ -748,7 +743,7 @@ body::after{
           <div class="package-feature"><span class="check">✓</span> <strong>Priority Match:</strong> Dapet lawan bicara lebih cepat</div>
           <div class="package-feature"><span class="check">✓</span> Stiker & GIF exclusive</div>
         </div>
-        <button class="package-btn promo" onclick="selectPackage('promo')">PILIH PAKET 20K</button>
+        <button class="package-btn promo" data-package="promo">PILIH PAKET 20K</button>
       </div>
     </div>
     <div class="midtrans-badge"><span>MIDTRANS</span> — AMAN & TERPERCAYA</div>
@@ -759,7 +754,7 @@ body::after{
       <span style="background:var(--bd2);padding:4px 8px">QRIS</span>
     </div>
     <div class="upgrade-footer">
-      <button class="btn" onclick="closeUpgradeModal()">NANTI DULU</button>
+      <button class="btn" id="cancelUpgrade">NANTI DULU</button>
     </div>
   </div>
 </div>
@@ -775,13 +770,13 @@ body::after{
       <span class="partner-label" id="partnerLabel">MENCARI...</span>
     </div>
     <div class="chat-timer" id="chatTimer">15:00</div>
-    <button class="chat-close" onclick="closeChat()">✕</button>
+    <button class="chat-close" id="closeChatBtn">✕</button>
   </div>
   <div class="chat-status-bar" id="chatStatusBar"></div>
   <div class="chat-messages" id="chatMessages"></div>
   <div class="chat-input-wrap">
     <input type="text" class="chat-input" id="chatInput" placeholder="ketik sesuatu..." maxlength="200">
-    <button class="chat-send" id="sendButton" onclick="sendMsg()">➤</button>
+    <button class="chat-send" id="sendButton">➤</button>
   </div>
 </div>
 
@@ -791,27 +786,33 @@ body::after{
 <!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/shared-constants.js"></script>
+
+<!-- SPILL GENERATOR - HANYA 1X INCLUDE -->
+<script src="/spill-generator.js"></script>
+
 <script>
 'use strict';
-console.log('[SPILL] v10.2 FINAL — CSP compliant + PWA');
+console.log('[SPILL] v10.2 FINAL — CLEAN VERSION');
 
-// Settings menu toggle
+// ============================================
+// SETTINGS MENU
+// ============================================
 function toggleSettingsMenu() {
   const menu = document.getElementById('settingsMenu');
   if (menu) menu.classList.toggle('show');
 }
 
-// Close settings menu when clicking outside
 document.addEventListener('click', function(event) {
   const menu = document.getElementById('settingsMenu');
   const icon = document.getElementById('settingsIcon');
-  
   if (menu && icon && !icon.contains(event.target) && !menu.contains(event.target)) {
     menu.classList.remove('show');
   }
 });
 
-// Simulasi JEJAK object kalau belum ada
+// ============================================
+// JEJAK FALLBACK
+// ============================================
 if (typeof JEJAK === 'undefined') {
   window.JEJAK = {
     isLoggedIn: () => true,
@@ -820,94 +821,92 @@ if (typeof JEJAK === 'undefined') {
       uid: localStorage.getItem('user_id') || 'test123', 
       username: localStorage.getItem('username') || 'testuser' 
     }),
-    SUPABASE_URL: 'https://your-supabase-url.supabase.co',
-    SUPABASE_KEY: 'your-anon-key'
+    SUPABASE_URL: 'https://fuovfrdicdhnlymnacpz.supabase.co',
+    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0'
   };
 }
 
+// ============================================
 // CONSTANTS
-const API_URL          = 'https://jejak.space/api/chat';
-const SPILL_TARGET     = 8;
-const MAX_HISTORY_LEN  = 8;
-const TYPING_SPEED     = { min: 18, max: 38, punct: 110, sentence: 230 };
-const SPILL_POOL_MAX   = 27; // Maksimum pool size
-const SPILL_PER_BREW   = 9;  // Maksimum entries per seduh
+// ============================================
+const API_URL = 'https://jejak.space/api/chat';
+const MAX_HISTORY_LEN = 8;
+const TYPING_SPEED = { min: 18, max: 38, punct: 110, sentence: 230 };
 
-// AI CHARACTERS - 10 karakter (5 cewek + 5 cowok) - KEMBALI KE AWAL
+// AI CHARACTERS
 const AI_CHARS = {
   female: ['beby.manis','strawberry.shortcake','pretty.sad','little.fairy','cinnamon.girl'],
   male:   ['sejuta.badai','satria.bajahitam','agak.koplak','chili.padi','bang.juned']
 };
 
-const MOODS        = ['surviving','thriving','chaotic','doom'];
-const REACT_EMO    = { skull:'💀', cry:'😭', fire:'🔥', upside:'🙃' };
-const SPILL_TEXTS  = [
-  'hari ini gue liat mantan sama cewek baru, dan tau gak? rambutnya lebih bagus dari rambut gue 😭',
-  'cape bener jadi cewek, setiap bulan harus nahan sakit perut sambil tetep senyum di depan client',
-  'kenapa sih cowok kalo ditanya "lagi apa" pasti jawabnya "lagi main"? ga ada variasi lain?',
-  'gue lagi fase pengen dimengerti tanpa harus jelasin panjang lebar',
-  'bete banget skincare gue habis, padahal baru kemarin beli. ada yang ngutil?',
-  'hari ini gue salah kirim chat pacar ke grup keluarga 😭',
-  'kenapa orangtua selalu curiga kalo kita lagi seneng?',
-  'gue lagi diet, tapi tiap liat roti, rotinya yang liat gue duluan',
-  'stress skripsi tapi yang keluar peluh dan air mata doang',
-  'overthinking jam 2 pagi itu ritual harian apa gimana ya?',
-  'pengen healing tapi tabungan juga butuh healing dulu',
-  'chat pertama setelah 2 tahun dan diread doang. klasik.',
-  'gue tipe orang yang senyum di grup tapi nangis pas sepi'
-];
+const MOODS = ['surviving','thriving','chaotic','doom'];
+const REACT_EMO = { skull:'💀', cry:'😭', fire:'🔥', upside:'🙃' };
 
+// ============================================
 // STATE
-let sbClient      = null;
-let myUserId      = null;
-let myUsername    = null;
-let realEntries   = [];
+// ============================================
+let sbClient = null;
+let myUserId = null;
+let myUsername = null;
+let realEntries = []; // Hanya entries dari database
 let currentGender = null;
-let chatPartner   = null;
-let chatHistory   = [];
-let isTyping      = false;
-let chatTimeLeft  = 900;
+let chatPartner = null;
+let chatHistory = [];
+let isTyping = false;
+let chatTimeLeft = 900;
 let timerInterval = null;
 let fallbackTimer = null;
 let apiRetryCount = 0;
-let userSub       = { isActive: false, expiresAt: null, type: null };
-let radarRAF      = null;
+let userSub = { isActive: false, expiresAt: null, type: null };
+let radarRAF = null;
 let radarInterval = null;
 let typingTimeout = null;
 let endChatOptionsShown = false;
 
+// ============================================
 // HELPERS
-const $     = id => document.getElementById(id);
-const rnd   = n  => Math.floor(Math.random() * n);
+// ============================================
+const $ = id => document.getElementById(id);
+const rnd = n => Math.floor(Math.random() * n);
 const rndOf = arr => arr[Math.floor(Math.random() * arr.length)];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const esc   = t  => { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; };
-const checkSub = () => userSub.isActive && userSub.expiresAt && new Date(userSub.expiresAt) > new Date();
-const mk = (tag, cls, style='') => {
+const esc = t => { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; };
+
+function mk(tag, cls, style='') {
   const el = document.createElement(tag);
-  if (cls)   el.className    = cls;
+  if (cls) el.className = cls;
   if (style) el.style.cssText = style;
   return el;
-};
+}
 
 function toast(msg, err = false) {
   const t = $('toast');
+  if (!t) return;
   t.textContent = msg;
-  t.className   = 'toast' + (err ? ' error' : '');
+  t.className = 'toast' + (err ? ' error' : '');
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2500);
 }
-const closeModal    = id => $(id).classList.remove('on');
-const closeUpgradeModal = () => $('upgradeModal').classList.remove('on');
-const updateVibePct = v  => $('vibePct').textContent = v + '%';
+
+function closeModal(id) {
+  const modal = $(id);
+  if (modal) modal.classList.remove('on');
+}
+
+function closeUpgradeModal() {
+  $('upgradeModal')?.classList.remove('on');
+}
 
 function setChatStatus(msg, type = 'error', duration = 0) {
   const bar = $('chatStatusBar');
   if (!bar) return;
-  if (!msg) { bar.classList.remove('show','info'); return; }
+  if (!msg) { 
+    bar.classList.remove('show', 'info'); 
+    return; 
+  }
   bar.textContent = msg;
-  bar.className   = 'chat-status-bar show' + (type === 'info' ? ' info' : '');
-  if (duration > 0) setTimeout(() => bar.classList.remove('show','info'), duration);
+  bar.className = 'chat-status-bar show' + (type === 'info' ? ' info' : '');
+  if (duration > 0) setTimeout(() => bar.classList.remove('show', 'info'), duration);
 }
 
 function loadSub() {
@@ -915,60 +914,51 @@ function loadSub() {
   if (s) userSub = s;
 }
 
-function selectPackage(type) {
-  closeUpgradeModal();
-  toast(`✅ Memproses pembayaran paket ${type === 'regular' ? '10K' : '20K'}...`, false);
-}
-
+// ============================================
 // SUPABASE INIT
+// ============================================
 function initSupabase() {
   try {
-    if (!window.supabase?.createClient) return;
+    if (!window.supabase?.createClient) return false;
     sbClient = window.supabase.createClient(JEJAK.SUPABASE_URL, JEJAK.SUPABASE_KEY);
     const sess = JEJAK.getSession();
-    myUserId   = sess.uid;
+    myUserId = sess.uid;
     myUsername = sess.username;
+    
     if (!myUserId) {
-      for (const k of ['user_id','jejak_user_id','uid']) {
-        const v = localStorage.getItem(k); if (v) { myUserId = v; break; }
+      for (const k of ['user_id', 'jejak_user_id', 'uid']) {
+        const v = localStorage.getItem(k); 
+        if (v) { myUserId = v; break; }
       }
     }
+    
     if (!myUsername) {
-      for (const k of ['jejak_username','username']) {
-        const v = localStorage.getItem(k); if (v) { myUsername = v; break; }
+      for (const k of ['jejak_username', 'username']) {
+        const v = localStorage.getItem(k); 
+        if (v) { myUsername = v; break; }
       }
     }
+    
     if (myUserId) {
       const el = $('userNameDisplay');
       if (el) el.textContent = '@' + (myUsername || 'anonymous');
-    } else {
-      console.warn('No user ID found');
     }
-  } catch (e) { console.warn('[SPILL] Supabase init error:', e); }
-}
-
-// GET RANDOM REAL USERS FROM DATABASE
-async function getRandomRealUsers(limit = 30) {
-  if (!sbClient) return [];
-  
-  try {
-    const { data, error } = await sbClient
-      .from('profiles')
-      .select('username')
-      .neq('id', myUserId)
-      .limit(limit);
-      
-    if (error || !data) return [];
-    return data;
-  } catch (err) {
-    console.warn('[SPILL] Gagal ambil random users:', err);
-    return [];
+    return true;
+  } catch (e) { 
+    console.warn('[SPILL] Supabase init error:', e); 
+    return false;
   }
 }
 
-// LOAD REAL ENTRIES - HANYA ENTRY DARI USER LAIN
+// ============================================
+// LOAD REAL ENTRIES (DARI DATABASE)
+// ============================================
 async function loadRealEntries() {
-  if (!sbClient) { renderSpills(); return; }
+  if (!sbClient) { 
+    if (typeof window.renderSpills === 'function') window.renderSpills();
+    return; 
+  }
+  
   try {
     const { data, error } = await sbClient
       .from('entries')
@@ -978,324 +968,71 @@ async function loadRealEntries() {
     
     if (error) { 
       console.warn('[SPILL] Query error:', error.message); 
-      renderSpills(); 
+      if (typeof window.renderSpills === 'function') window.renderSpills();
       return; 
     }
     
-    // FILTER: Hanya entry dari user lain (bukan milik sendiri)
     realEntries = (data || [])
       .filter(e => !(myUserId && e.user_id && e.user_id === myUserId))
-      .map(e => {
-        const author = e.profiles?.username || 'anonymous';
-        
-        return {
-          id: e.id, 
-          dbId: e.id, 
-          author, 
-          isMe: false,
-          isAI: false, 
-          isReal: true,
-          mood: e.mood || 'chaotic', 
-          content: e.content || '',
-          reactions: e.reactions || { skull:0, cry:0, fire:0, upside:0 },
-          userReacted: null, 
-          timestamp: new Date(e.created_at).getTime()
-        };
-      });
+      .map(e => ({
+        id: e.id, 
+        dbId: e.id, 
+        author: e.profiles?.username || 'anonymous', 
+        isReal: true,
+        mood: e.mood || 'chaotic', 
+        content: e.content || '',
+        reactions: e.reactions || { skull:0, cry:0, fire:0, upside:0 },
+        userReacted: null, 
+        timestamp: new Date(e.created_at).getTime()
+      }));
     
-    const meta = $('feedMeta');
-    if (meta) meta.textContent = realEntries.length > 0 ? realEntries.length + ' REAL' : 'FILLER';
-    renderSpills();
+    if (typeof window.updateFeedMeta === 'function') window.updateFeedMeta();
+    if (typeof window.renderSpills === 'function') window.renderSpills();
+    
   } catch (err) { 
     console.warn('[SPILL] loadRealEntries error:', err.message); 
-    renderSpills(); 
+    if (typeof window.renderSpills === 'function') window.renderSpills();
   }
 }
 
-// FILLER POOL - 70% Real User, 30% AI Karakter (MAX 27, FIFO)
- {
-  const allAI = [...AI_CHARS.female, ...AI_CHARS.male];
+// ============================================
+// REACTIONS (HANYA UNTUK REAL ENTRIES)
+// ============================================
+async function reactToSpill(spillId, reactionType) {
+  const spill = realEntries.find(e => e.id === spillId);
+  if (!spill) return;
   
-  // Ambil random real users dari database
-  const randomUsers = await getRandomRealUsers(30);
+  const wasActive = spill.userReacted === reactionType;
   
-  // Hitung berapa banyak yang bisa ditambah (jangan melebihi SPILL_POOL_MAX)
-  const currentCount = window.spillPool;
-  const maxNewEntries = SPILL_POOL_MAX - currentCount;
-  const newEntriesCount = Math.min(brewedCount, maxNewEntries, SPILL_PER_BREW);
-  
-  if (newEntriesCount <= 0) {
-    console.log(`[SPILL] Pool penuh (${currentCount}/${SPILL_POOL_MAX}), tidak menambah`);
-    return;
-  }
-  
-  // Catat author yang sudah ada di pool untuk hindari duplikasi beruntun
-  const recentAuthors = window.spillPool(0, 3).map(e => e.author);
-  
-  const generated = [];
-  
-  for (let i = 0; i < newEntriesCount; i++) {
-    // 70% real user, 30% AI
-    const useReal = Math.random() < 0.7;
-    
-    let author;
-    let isAI;
-    let attempts = 0;
-    const maxAttempts = 15;
-    
-    do {
-      if (!useReal) {
-        // Pilih dari AI karakter (30%)
-        author = allAI[Math.floor(Math.random() * allAI.length)];
-        isAI = true;
-      } else {
-        // Pilih dari real user database (70%)
-        if (randomUsers && randomUsers.length > 0) {
-          const randomIndex = Math.floor(Math.random() * randomUsers.length);
-          author = randomUsers[randomIndex].username;
-          isAI = false;
-        } else {
-          author = 'anonymous';
-          isAI = false;
-        }
-      }
-      attempts++;
-      
-      // Hindari author yang sama dengan 3 entries terakhir
-    } while (recentAuthors.includes(author) && attempts < maxAttempts);
-    
-    generated.push({
-      id: 'fl_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2),
-      author, 
-      isAI, 
-      isReal: false,
-      isMe: false,
-      mood: MOODS[Math.floor(Math.random() * MOODS.length)], 
-      content: SPILL_TEXTS[Math.floor(Math.random() * SPILL_TEXTS.length)],
-      reactions: { 
-        skull: Math.floor(Math.random() * 30), 
-        cry: Math.floor(Math.random() * 50), 
-        fire: Math.floor(Math.random() * 25), 
-        upside: Math.floor(Math.random() * 20) 
-      },
-      userReacted: null, 
-      timestamp: Date.now() - Math.floor(Math.random() * 86400000)
-    });
-  }
-  
-  // FIFO: baru masuk di DEPAN, lama keluar di BELAKANG jika melebihi batas
-  window.spillPool = [...generated, ...window.spillPool].slice(0, SPILL_POOL_MAX);
-  
-  console.log(`[SPILL] 🍵 Seduh ${new Date().toLocaleTimeString()}: +${generated.length} entries`);
-  console.log(`[SPILL] 📊 Pool: ${window.spillPool}/${SPILL_POOL_MAX} | Real: ${generated.filter(g => !g.isAI).length} | AI: ${generated.filter(g => g.isAI).length}`);
-}
-
-  // AMBIL REAL ENTRIES (SUDAH TERFILTER)
-  let combined = [...realEntries];
-  
-  const needed = Math.max(0, SPILL_TARGET - combined.length);
-  if (needed > 0) {
-    // Langsung ambil dari window.spillPool (yang sudah diisi oleh interval)
-    combined = [...combined, ...window.spillPool(0, needed)];
-  }
-  
-  combined.sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
-  
-  let filtered = activeMood === 'all' ? combined : combined.filter(s => s.mood === activeMood);
-  filtered = filtered.slice(0, SPILL_TARGET);
-  
-  if (!filtered.length) {
-    list.innerHTML = `<div class="empty-state"><span class="empty-icon">🍃</span><div class="empty-title">BELUM ADA SPILL</div><div class="empty-text">Coba filter lain</div></div>`;
-    return;
-  }
-  
-  list.innerHTML = filtered.map(s => {
-    const aiLabel = (s.isAI && !s.isReal) ? ' 🤖' : '';
-    const reactAttr = s.isReal ? 'data-db-id' : 'data-fl-id';
-    const reactFn = s.isReal ? 'reactDB' : 'reactLocal';
-    const reactId = s.isReal ? s.dbId : s.id;
-    const rcPrefix = s.isReal ? 'rc-db-'+s.dbId : 'rc-fl-'+s.id;
-    
-    const reactHtml = Object.entries(REACT_EMO).map(([k,em]) => {
-      const isAct = s.userReacted === k ? ' active' : '';
-      return `<button class="react-btn${isAct}" ${reactAttr}="${reactId}" data-key="${k}" onclick="${reactFn}('${reactId}','${k}')">${em}<span class="react-count" id="${rcPrefix}-${k}">${s.reactions[k]||0}</span></button>`;
-    }).join('');
-    
-    return `<div class="spill-card">
-      <div class="spill-head">
-        <span class="spill-user">@${esc(s.author)}${aiLabel}</span>
-        <span class="spill-mood ${s.mood}">${s.mood.toUpperCase()}</span>
-      </div>
-      <div class="spill-body">${esc(s.content)}</div>
-      <div class="spill-actions">${reactHtml}</div>
-    </div>`;
-  }).join('');
-}
-
-// REACTIONS
-function reactLocal(fillerId, key) {
-  const entry = window.spillPool(e => e.id === fillerId);
-  if (!entry) return;
-  const wasActive = entry.userReacted === key;
-  if (wasActive) { entry.reactions[key] = Math.max(0,(entry.reactions[key]||0)-1); entry.userReacted = null; }
-  else {
-    if (entry.userReacted) {
-      const old = entry.userReacted;
-      entry.reactions[old] = Math.max(0,(entry.reactions[old]||0)-1);
-      document.querySelector(`[data-fl-id="${fillerId}"][data-key="${old}"]`)?.classList.remove('active');
-      const oc = document.getElementById('rc-fl-'+fillerId+'-'+old);
-      if (oc) oc.textContent = entry.reactions[old];
+  if (wasActive) {
+    spill.reactions[reactionType] = Math.max(0, (spill.reactions[reactionType] || 0) - 1);
+    spill.userReacted = null;
+  } else {
+    if (spill.userReacted) {
+      const old = spill.userReacted;
+      spill.reactions[old] = Math.max(0, (spill.reactions[old] || 0) - 1);
     }
-    entry.reactions[key] = (entry.reactions[key]||0)+1; entry.userReacted = key;
+    spill.reactions[reactionType] = (spill.reactions[reactionType] || 0) + 1;
+    spill.userReacted = reactionType;
   }
-  document.querySelector(`[data-fl-id="${fillerId}"][data-key="${key}"]`)?.classList.toggle('active',!wasActive);
-  const cnt = document.getElementById('rc-fl-'+fillerId+'-'+key);
-  if (cnt) cnt.textContent = entry.reactions[key];
-}
-
-async function reactDB(dbId, key) {
-  const entry = realEntries.find(e => String(e.dbId) === String(dbId));
-  if (!entry) return;
-  const wasActive = entry.userReacted === key;
-  if (wasActive) { entry.reactions[key] = Math.max(0,(entry.reactions[key]||0)-1); entry.userReacted = null; }
-  else {
-    if (entry.userReacted) {
-      const old = entry.userReacted;
-      entry.reactions[old] = Math.max(0,(entry.reactions[old]||0)-1);
-      document.querySelector(`[data-db-id="${dbId}"][data-key="${old}"]`)?.classList.remove('active');
-      const oc = document.getElementById('rc-db-'+dbId+'-'+old);
-      if (oc) oc.textContent = entry.reactions[old];
-    }
-    entry.reactions[key] = (entry.reactions[key]||0)+1; entry.userReacted = key;
-  }
-  const btn = document.querySelector(`[data-db-id="${dbId}"][data-key="${key}"]`);
-  const cnt = document.getElementById('rc-db-'+dbId+'-'+key);
-  if (btn) btn.classList.toggle('active',!wasActive);
-  if (cnt) cnt.textContent = entry.reactions[key];
+  
+  if (typeof window.renderSpills === 'function') window.renderSpills();
+  
   if (!sbClient) return;
+  
   try {
-    const { error } = await sbClient.from('entries').update({ reactions: entry.reactions }).eq('id', dbId);
-    if (error) { toast('Gagal simpan reaksi', true); console.error('[reactDB]', error.message); }
-  } catch(e) { console.error('[reactDB exception]', e.message); }
-}
-
-async function refreshSpills() {
-  toast('Memuat spill terbaru ☕');
- window.spillPool  = [];
-  await loadRealEntries();
-}
-
-const updateOnlineCount = () => {
-  const el = $('onlineCount');
-  if (el) el.textContent = (rnd(25)+18) + ' ONLINE';
-};
-
-// WHISPERER
-function openWsModal() {
-  const isPrem = checkSub() && userSub.type === 'monthly';
-  $('wsModalBody').innerHTML = isPrem
-    ? `<p style="font-family:'DM Mono',monospace;padding:20px;color:var(--txs)">✦ fitur whisperer aktif</p>`
-    : `<div class="ws-premium-lock"><div class="icon">✦</div><div class="title">WHISPERER PREMIUM</div>
-       <div class="desc">fitur ini khusus untuk pengguna paket premium 30 hari</div>
-       <button class="ws-premium-btn" onclick="closeModal('wsModal');openUpgradeModal()">UPGRADE SEKARANG</button></div>`;
-  $('wsModal').classList.add('on');
-}
-
-function openUpgradeModal() {
-  $('upgradeModal').classList.add('on');
-}
-
-// RADAR
-let rdots = [], needleA = 0, needleO = 0, phA = Math.random()*Math.PI*2;
-const BASE_OM   = (60/4*Math.PI*2)/(60*60);
-const TRAIL_CAP = 120;
-const trail     = new Float32Array(TRAIL_CAP);
-let trailPtr    = 0;
-const dotGlow   = new Map();
-
-function initRadar() {
-  const cv = $('radarCanvas'), ct = $('radarCont');
-  if (!cv || !ct) return;
-  const resize = () => { const r = ct.getBoundingClientRect(); cv.width = r.width; cv.height = r.height; };
-  resize();
-  window.addEventListener('resize', resize, { passive: true });
-  spawnDots();
-  radarInterval = setInterval(() => {
-    rdots.forEach(d => {
-      d.vx = d.vx*0.88+(Math.random()-0.5)*0.3;
-      d.vy = d.vy*0.88+(Math.random()-0.5)*0.3;
-      d.x  = Math.max(9, Math.min(91, d.x+d.vx));
-      d.y  = Math.max(9, Math.min(91, d.y+d.vy));
-      if (d.el) { d.el.style.left = d.x+'%'; d.el.style.top = d.y+'%'; }
-    });
-  }, 100);
-  needleA = Math.random()*Math.PI*2; trail.fill(needleA);
-  radarLoop(cv);
-}
-
-function spawnDots() {
-  const c = $('radarDots'); if (!c) return;
-  c.innerHTML = ''; rdots = [];
-  const types = ['ai','purple','red','lime'];
-  for (let i = 0; i < 5+rnd(5)+2; i++) {
-    const a = Math.random()*Math.PI*2, d = 12+Math.random()*70;
-    const x = 50+Math.cos(a)*d/2, y = 50+Math.sin(a)*d/2;
-    const dot = document.createElement('div');
-    const type = types[rnd(types.length)];
-    dot.className = 'radar-dot ' + type;
-    dot.style.left = x+'%'; dot.style.top = y+'%';
-    c.appendChild(dot);
-    rdots.push({ el:dot, x, y, vx:0, vy:0, type, id:i });
+    await sbClient.from('entries').update({ reactions: spill.reactions }).eq('id', spillId);
+  } catch(e) { 
+    console.error('[React] Error:', e); 
   }
 }
 
-function radarLoop(cv) {
-  const ctx = cv.getContext('2d');
-  function draw() {
-    const W=cv.width, H=cv.height, cx=W/2, cy=H/2, R=Math.min(cx,cy)*0.88;
-    if (!W||!H) { radarRAF=requestAnimationFrame(draw); return; }
-    phA+=0.007;
-    needleO+=(BASE_OM*(1+Math.sin(phA)*0.35)-needleO)*0.028;
-    needleA=(needleA+needleO)%(Math.PI*2);
-    trail[trailPtr]=needleA; trailPtr=(trailPtr+1)%TRAIL_CAP;
-    ctx.fillStyle='rgba(2,10,2,.18)'; ctx.fillRect(0,0,W,H);
-    for (let i=0;i<TRAIL_CAP-1;i++) {
-      const alpha=Math.pow(1-i/TRAIL_CAP,2.2)*0.12;
-      if (alpha<0.002) break;
-      const s=needleA-(i+1)*needleO, e=needleA-i*needleO;
-      ctx.save(); ctx.translate(cx,cy);
-      ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,R,Math.min(s,e),Math.max(s,e),false); ctx.closePath();
-      ctx.fillStyle=`rgba(0,229,255,${alpha})`; ctx.fill(); ctx.restore();
-    }
-    ctx.save(); ctx.translate(cx,cy); ctx.rotate(needleA);
-    ctx.shadowColor='rgba(0,229,255,.95)'; ctx.shadowBlur=12;
-    const lg=ctx.createLinearGradient(0,0,R,0);
-    lg.addColorStop(0,'rgba(0,229,255,1)'); lg.addColorStop(0.8,'rgba(0,229,255,.4)'); lg.addColorStop(1,'rgba(0,229,255,0)');
-    ctx.beginPath(); ctx.moveTo(3,0); ctx.lineTo(R,0); ctx.strokeStyle=lg; ctx.lineWidth=2; ctx.stroke();
-    ctx.shadowBlur=20; ctx.beginPath(); ctx.rect(-4,-4,8,8); ctx.fillStyle='#00e5ff'; ctx.fill(); ctx.restore();
-    rdots.forEach((d,di) => {
-      const px=d.x/100*W, py=d.y/100*H;
-      let da=Math.atan2(py-cy,px-cx); if(da<0)da+=Math.PI*2;
-      let diff=needleA-da; if(diff<0)diff+=Math.PI*2;
-      const age=dotGlow.get(di)??999;
-      if(diff<0.18&&age>30){ dotGlow.set(di,0); if(d.el){d.el.classList.add('active'); setTimeout(()=>{if(d.el)d.el.classList.remove('active');},800);} }
-      else { dotGlow.set(di,age+1); }
-      if(age<55){
-        const t=age/55, ga=(1-t)*(1-t)*0.9; if(ga<0.01)return;
-        const col=d.type==='purple'?'191,90,242':d.type==='red'?'255,45,85':d.type==='lime'?'191,255,0':'0,229,255';
-        const gr=ctx.createRadialGradient(px,py,0,px,py,16*(1-t)+3);
-        gr.addColorStop(0,`rgba(${col},${ga})`); gr.addColorStop(1,`rgba(${col},0)`);
-        ctx.beginPath(); ctx.arc(px,py,16*(1-t)+3,0,Math.PI*2); ctx.fillStyle=gr; ctx.fill();
-      }
-    });
-    radarRAF=requestAnimationFrame(draw);
-  }
-  radarRAF=requestAnimationFrame(draw);
-}
-
+// ============================================
 // LOGOUT
+// ============================================
 function logoutUser() {
   if (!confirm('Logout dari akun ini?')) return;
+  
   localStorage.removeItem('jejak_session');
   localStorage.removeItem('jejak_user_id');
   localStorage.removeItem('jejak_username');
@@ -1303,25 +1040,198 @@ function logoutUser() {
   localStorage.removeItem('username');
   localStorage.removeItem('uid');
   localStorage.removeItem('supabase.auth.token');
+  
   myUserId = null;
   myUsername = null;
+  
   const el = $('userNameDisplay');
   if (el) el.textContent = '@guest';
+  
   toast('✅ Logout berhasil', false);
   setTimeout(() => { window.location.replace('/index.html'); }, 1000);
 }
 
-// VIBE CHECK
+// ============================================
+// RADAR
+// ============================================
+let rdots = [], needleA = 0, needleO = 0, phA = Math.random()*Math.PI*2;
+const BASE_OM = (60/4*Math.PI*2)/(60*60);
+const TRAIL_CAP = 120;
+const trail = new Float32Array(TRAIL_CAP);
+let trailPtr = 0;
+const dotGlow = new Map();
+
+function initRadar() {
+  const cv = $('radarCanvas'), ct = $('radarCont');
+  if (!cv || !ct) return;
+  
+  const resize = () => { 
+    const r = ct.getBoundingClientRect(); 
+    cv.width = r.width; 
+    cv.height = r.height; 
+  };
+  
+  resize();
+  window.addEventListener('resize', resize, { passive: true });
+  
+  spawnDots();
+  
+  radarInterval = setInterval(() => {
+    rdots.forEach(d => {
+      d.vx = d.vx*0.88+(Math.random()-0.5)*0.3;
+      d.vy = d.vy*0.88+(Math.random()-0.5)*0.3;
+      d.x = Math.max(9, Math.min(91, d.x+d.vx));
+      d.y = Math.max(9, Math.min(91, d.y+d.vy));
+      if (d.el) { d.el.style.left = d.x+'%'; d.el.style.top = d.y+'%'; }
+    });
+  }, 100);
+  
+  needleA = Math.random()*Math.PI*2; 
+  trail.fill(needleA);
+  radarLoop(cv);
+}
+
+function spawnDots() {
+  const c = $('radarDots'); 
+  if (!c) return;
+  
+  c.innerHTML = ''; 
+  rdots = [];
+  
+  const types = ['ai','purple','red','lime'];
+  
+  for (let i = 0; i < 5+rnd(5)+2; i++) {
+    const a = Math.random()*Math.PI*2, d = 12+Math.random()*70;
+    const x = 50+Math.cos(a)*d/2, y = 50+Math.sin(a)*d/2;
+    const dot = document.createElement('div');
+    const type = types[rnd(types.length)];
+    dot.className = 'radar-dot ' + type;
+    dot.style.left = x+'%'; 
+    dot.style.top = y+'%';
+    c.appendChild(dot);
+    rdots.push({ el:dot, x, y, vx:0, vy:0, type, id:i });
+  }
+}
+
+function radarLoop(cv) {
+  const ctx = cv.getContext('2d');
+  
+  function draw() {
+    const W=cv.width, H=cv.height, cx=W/2, cy=H/2, R=Math.min(cx,cy)*0.88;
+    
+    if (!W||!H) { 
+      radarRAF=requestAnimationFrame(draw); 
+      return; 
+    }
+    
+    phA+=0.007;
+    needleO+=(BASE_OM*(1+Math.sin(phA)*0.35)-needleO)*0.028;
+    needleA=(needleA+needleO)%(Math.PI*2);
+    trail[trailPtr]=needleA; 
+    trailPtr=(trailPtr+1)%TRAIL_CAP;
+    
+    ctx.fillStyle='rgba(2,10,2,.18)'; 
+    ctx.fillRect(0,0,W,H);
+    
+    for (let i=0;i<TRAIL_CAP-1;i++) {
+      const alpha=Math.pow(1-i/TRAIL_CAP,2.2)*0.12;
+      if (alpha<0.002) break;
+      
+      const s=needleA-(i+1)*needleO, e=needleA-i*needleO;
+      ctx.save(); 
+      ctx.translate(cx,cy);
+      ctx.beginPath(); 
+      ctx.moveTo(0,0); 
+      ctx.arc(0,0,R,Math.min(s,e),Math.max(s,e),false); 
+      ctx.closePath();
+      ctx.fillStyle=`rgba(0,229,255,${alpha})`; 
+      ctx.fill(); 
+      ctx.restore();
+    }
+    
+    ctx.save(); 
+    ctx.translate(cx,cy); 
+    ctx.rotate(needleA);
+    ctx.shadowColor='rgba(0,229,255,.95)'; 
+    ctx.shadowBlur=12;
+    
+    const lg=ctx.createLinearGradient(0,0,R,0);
+    lg.addColorStop(0,'rgba(0,229,255,1)'); 
+    lg.addColorStop(0.8,'rgba(0,229,255,.4)'); 
+    lg.addColorStop(1,'rgba(0,229,255,0)');
+    
+    ctx.beginPath(); 
+    ctx.moveTo(3,0); 
+    ctx.lineTo(R,0); 
+    ctx.strokeStyle=lg; 
+    ctx.lineWidth=2; 
+    ctx.stroke();
+    
+    ctx.shadowBlur=20; 
+    ctx.beginPath(); 
+    ctx.rect(-4,-4,8,8); 
+    ctx.fillStyle='#00e5ff'; 
+    ctx.fill(); 
+    ctx.restore();
+    
+    rdots.forEach((d,di) => {
+      const px=d.x/100*W, py=d.y/100*H;
+      let da=Math.atan2(py-cy,px-cx); 
+      if(da<0)da+=Math.PI*2;
+      
+      let diff=needleA-da; 
+      if(diff<0)diff+=Math.PI*2;
+      
+      const age=dotGlow.get(di)??999;
+      
+      if(diff<0.18&&age>30){ 
+        dotGlow.set(di,0); 
+        if(d.el){d.el.classList.add('active'); 
+          setTimeout(()=>{if(d.el)d.el.classList.remove('active');},800);
+        }
+      } else { 
+        dotGlow.set(di,age+1); 
+      }
+      
+      if(age<55){
+        const t=age/55, ga=(1-t)*(1-t)*0.9; 
+        if(ga<0.01)return;
+        
+        const col=d.type==='purple'?'191,90,242':d.type==='red'?'255,45,85':d.type==='lime'?'191,255,0':'0,229,255';
+        const gr=ctx.createRadialGradient(px,py,0,px,py,16*(1-t)+3);
+        gr.addColorStop(0,`rgba(${col},${ga})`); 
+        gr.addColorStop(1,`rgba(${col},0)`);
+        
+        ctx.beginPath(); 
+        ctx.arc(px,py,16*(1-t)+3,0,Math.PI*2); 
+        ctx.fillStyle=gr; 
+        ctx.fill();
+      }
+    });
+    
+    radarRAF=requestAnimationFrame(draw);
+  }
+  
+  radarRAF=requestAnimationFrame(draw);
+}
+
+// ============================================
+// VIBE CHECK (CHAT)
+// ============================================
 function startVibeCheck() {
-  console.log('[VibeCheck] Started');
-  chatPartner   = null;
-  chatTimeLeft  = 900;
-  chatHistory   = [];
+  chatPartner = null;
+  chatTimeLeft = 900;
+  chatHistory = [];
   apiRetryCount = 0;
-  isTyping      = false;
+  isTyping = false;
   endChatOptionsShown = false;
+  
   if (typingTimeout) clearTimeout(typingTimeout);
-  if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
+  if (fallbackTimer) { 
+    clearTimeout(fallbackTimer); 
+    fallbackTimer = null; 
+  }
+  
   setChatStatus('');
   $('genderModal').classList.add('on');
 }
@@ -1336,22 +1246,27 @@ function selectGender(el, g) {
 function confirmGender() {
   if (!currentGender) return;
   closeModal('genderModal');
+  
   const room = $('chatRoom');
   room.classList.add('on');
   $('chatTimer').textContent = '15:00';
   $('chatTimer').classList.remove('warn');
   $('partnerLabel').textContent = 'MENCARI...';
   setChatStatus('');
+  
   const msgs = $('chatMessages');
   msgs.innerHTML = '';
   addSysMsg('⚡ mengaktifkan radar pencarian...');
+  
   const steps = [
-    { t:3000,  m:'👀 masih memindai...' },
-    { t:6000,  m:'📡 lingkungan sepi, radar melebar' },
-    { t:9000,  m:'🌐 menjangkau radius 2km' },
+    { t:3000, m:'👀 masih memindai...' },
+    { t:6000, m:'📡 lingkungan sepi, radar melebar' },
+    { t:9000, m:'🌐 menjangkau radius 2km' },
     { t:12000, m:'⏳ hampir selesai...' }
   ];
+  
   steps.forEach(({ t, m }) => setTimeout(() => { if (!chatPartner) updateSysMsg(m); }, t));
+  
   fallbackTimer = setTimeout(() => {
     if (!chatPartner && room.classList.contains('on')) {
       $('chatMessages').innerHTML = '';
@@ -1361,31 +1276,44 @@ function confirmGender() {
 }
 
 function addSysMsg(text) {
-  const msgs = $('chatMessages'); if (!msgs) return;
+  const msgs = $('chatMessages'); 
+  if (!msgs) return;
+  
   const d = mk('div','chat-msg system-msg');
   d.innerHTML = `<div class="chat-bubble">${text}</div>`;
   msgs.appendChild(d);
   d.scrollIntoView({ behavior:'smooth' });
 }
+
 function updateSysMsg(text) {
-  const msgs = $('chatMessages'); if (!msgs) return;
+  const msgs = $('chatMessages'); 
+  if (!msgs) return;
+  
   const last = msgs.lastElementChild;
   if (last?.classList.contains('system-msg')) last.remove();
   addSysMsg(text);
 }
 
 function fallbackToAI() {
-  if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
+  if (fallbackTimer) { 
+    clearTimeout(fallbackTimer); 
+    fallbackTimer = null; 
+  }
+  
   const chars = AI_CHARS[currentGender === 'female' ? 'female' : 'male'];
-  chatPartner   = { name: chars[rnd(chars.length)], isAI: true };
-  chatHistory   = [];
+  chatPartner = { name: chars[rnd(chars.length)], isAI: true };
+  chatHistory = [];
   apiRetryCount = 0;
-  isTyping      = false;
+  isTyping = false;
+  
   const msgs = $('chatMessages');
   if (msgs) msgs.innerHTML = '';
+  
   const d = mk('div','chat-msg system-msg');
   d.innerHTML = `<div class="chat-bubble" style="background:rgba(0,229,255,.08);border:2px solid var(--as);padding:14px 20px;color:var(--as);font-weight:600">👤 seseorang ditemukan!</div>`;
+  
   if (msgs) msgs.appendChild(d);
+  
   setTimeout(() => {
     if (msgs) msgs.innerHTML = '';
     callChatAPI('', true);
@@ -1393,41 +1321,54 @@ function fallbackToAI() {
   }, 1200);
 }
 
-// TIMER
 function startTimer() {
   clearInterval(timerInterval);
+  
   timerInterval = setInterval(() => {
     if (chatTimeLeft <= 0) { 
       endChat(); 
       return; 
     }
+    
     chatTimeLeft--;
+    
     const m = Math.floor(chatTimeLeft/60), s = chatTimeLeft%60;
     const tel = $('chatTimer');
+    
     if (tel) tel.textContent = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    
     if (chatTimeLeft === 120) showTwoMinWarning();
     if (chatTimeLeft === 60 && tel) tel.classList.add('warn');
   }, 1000);
 }
+
 function showTwoMinWarning() {
   document.querySelector('.warning-popup')?.remove();
+  
   const p = document.createElement('div');
   p.className = 'warning-popup';
   p.innerHTML = `<div class="title">⚠️ 2 MENIT</div><div class="msg">Sesi chatting hampir habis!</div><button class="btn" onclick="this.closest('.warning-popup').remove()">OK</button>`;
+  
   document.body.appendChild(p);
 }
+
 function endChat() {
   clearInterval(timerInterval);
+  
   if (checkSub()) { 
     chatTimeLeft=900; 
     const tel=$('chatTimer'); 
     if(tel){tel.textContent='15:00';tel.classList.remove('warn');} 
     return; 
   }
+  
   if (endChatOptionsShown) return;
+  
   endChatOptionsShown = true;
+  
   const msgs = $('chatMessages');
   if (!msgs) return;
+  
   const optionsDiv = mk('div','chat-msg system-msg','align-self:center;margin:20px 0;max-width:90%');
   optionsDiv.innerHTML = `
     <div class="end-chat-options">
@@ -1439,6 +1380,7 @@ function endChat() {
       </div>
     </div>
   `;
+  
   msgs.appendChild(optionsDiv);
   optionsDiv.scrollIntoView({ behavior:'smooth' });
 }
@@ -1446,37 +1388,58 @@ function endChat() {
 function sayGoodbye() {
   const msgs = $('chatMessages');
   if (!msgs) return;
+  
   const last = msgs.lastElementChild;
   if (last?.classList.contains('system-msg')) last.remove();
+  
   const goodbyeDiv = mk('div','chat-msg system-msg');
   goodbyeDiv.innerHTML = `<div class="chat-bubble" style="background:transparent;border-color:var(--txm);color:var(--txm)">👋 Obrolan selesai. Sampai jumpa lagi!</div>`;
+  
   msgs.appendChild(goodbyeDiv);
+  
   const inp = $('chatInput');
   const sb = $('sendButton');
+  
   if (inp) inp.disabled = true;
   if (sb) sb.classList.add('disabled');
+  
   setTimeout(() => { closeChat(); }, 3000);
 }
 
 function closeChat() {
   $('chatRoom').classList.remove('on');
+  
   clearInterval(timerInterval);
   if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
   if (typingTimeout) clearTimeout(typingTimeout);
-  isTyping      = false;
+  
+  isTyping = false;
   apiRetryCount = 0;
   endChatOptionsShown = false;
-  const sb = $('sendButton'); if (sb) sb.classList.remove('disabled');
-  const inp = $('chatInput'); if (inp) inp.disabled = false;
+  
+  const sb = $('sendButton'); 
+  if (sb) sb.classList.remove('disabled');
+  
+  const inp = $('chatInput'); 
+  if (inp) inp.disabled = false;
+  
   setChatStatus('');
 }
 
-// OFFLINE GREETING
+function checkSub() {
+  return userSub.isActive && userSub.expiresAt && new Date(userSub.expiresAt) > new Date();
+}
+
+function openUpgradeModal() {
+  $('upgradeModal').classList.add('on');
+}
+
 function getOfflineGreeting(characterName, shortName) {
-  const passiveChars  = ['beby.manis', 'pretty.sad'];
-  const activeChars   = ['strawberry.shortcake', 'agak.koplak', 'bang.juned'];
-  const randomChars   = ['little.fairy'];
+  const passiveChars = ['beby.manis', 'pretty.sad'];
+  const activeChars = ['strawberry.shortcake', 'agak.koplak', 'bang.juned'];
+  const randomChars = ['little.fairy'];
   const langsungChars = ['sejuta.badai', 'satria.bajahitam', 'chili.padi'];
+  
   if (passiveChars.includes(characterName)) {
     return rndOf([`eh halo...`,`hai.`,`halo... lo diem aja?`,`mmmm... lo duluan deh yang ngomong`,`koq diem?`]);
   }
@@ -1492,9 +1455,9 @@ function getOfflineGreeting(characterName, shortName) {
   return rndOf([`hai juga! lagi santai nih`,`halo, gimana kabarnya?`,`hai! seneng kenal ya`]);
 }
 
-// OFFLINE REPLIES
 function getOfflineReply(userMsg) {
   const msg = (userMsg || '').toLowerCase().trim();
+  
   if (/^(halo|hai|hey|hi|helo|hy|hallo)\b/.test(msg)) {
     return rndOf(['hai juga! lo gimana?','heyy, ada apa nih?','halo halo! lagi santai?']);
   }
@@ -1513,9 +1476,7 @@ function getOfflineReply(userMsg) {
   if (/\b(wkwk|haha|hehe|lol|xixi)\b/.test(msg)) {
     return rndOf(['haha ngapain lo ketawa','wkwk ada apa?','loh kenapa ketawa? cerita dong']);
   }
-  if (msg.includes('dongeng') || msg.includes('cerita')) {
-    return rndOf(['haha mau dongeng? gue bukan tukang dongeng','eh, gue nggak bisa dongeng. lo aja yang cerita','dongeng? gue malah pengen denger cerita lo']);
-  }
+  
   const isEmotional = /\b(sedih|nangis|bete|kesel|capek|cape|stress|baper|galau|kecewa|marah|takut|cemas|masalah|gendeng)\b/.test(msg);
   if (msg.length > 120 && isEmotional) {
     return rndOf(['wah, pasti berat ya. lo mau cerita lebih?','gue dengerin. gimana sekarang?','relate banget. lo oke?']);
@@ -1523,55 +1484,76 @@ function getOfflineReply(userMsg) {
   if (/\b(kenapa|gimana caranya|apa itu|apa sih|maksudnya apa|menurut lo)\b/.test(msg)) {
     return rndOf(['hmm, gue juga masih mikirin itu. lo punya pendapat?','menarik. lo nanya karena ada masalah?','belum yakin juga sih. lo gimana?']);
   }
-  return rndOf(['hmm, cerita lebih dong','oh gitu, lo gimana sekarang?','wah beneran? lo oke?','gue dengerin. trus?','iya, relate sih. gimana lanjutannya?']);
+  
+  return rndOf(['hmm, cerita lebih dong','oh gitu, lo gimana sekarang?','wah beneran? lo oke?','gue dengerin. trus?']);
 }
 
-// TYPING EFFECT
 async function typeMessage(el, text, skipTyping = false) {
-  if (skipTyping) { el.textContent = text; return; }
+  if (skipTyping) { 
+    el.textContent = text; 
+    return; 
+  }
+  
   return new Promise(resolve => {
     let i = 0;
     const chars = text.split('');
     el.textContent = '';
+    
     const next = () => {
       if (i >= chars.length) return resolve();
+      
       el.textContent += chars[i];
+      
       let delay = TYPING_SPEED.min + Math.random()*(TYPING_SPEED.max-TYPING_SPEED.min);
       const c = chars[i], nc = chars[i+1];
+      
       if ('.!?'.includes(c) && (!nc || nc === ' ')) delay = TYPING_SPEED.sentence;
       else if (',:;'.includes(c)) delay = TYPING_SPEED.punct;
+      
       i++;
       setTimeout(next, delay);
     };
+    
     next();
   });
 }
 
-// CHAT API
 async function callChatAPI(userMsg, isFirst = false) {
   if (!chatPartner?.isAI) return;
-  if (isTyping && !isFirst) { toast('Tunggu partner selesai ngetik...', true); return; }
+  if (isTyping && !isFirst) { 
+    toast('Tunggu partner selesai ngetik...', true); 
+    return; 
+  }
+  
   isTyping = true;
-  const sb  = $('sendButton');
+  
+  const sb = $('sendButton');
   const inp = $('chatInput');
-  if (sb)  sb.classList.add('disabled');
+  
+  if (sb) sb.classList.add('disabled');
   if (inp) inp.disabled = true;
-  try {
-    await fetch(API_URL.replace('/chat', '/health'), { method: 'HEAD', mode: 'no-cors' });
-  } catch(e) { console.warn('[API] Health check failed:', e); }
+  
   const msgs = $('chatMessages');
-  const td   = mk('div','chat-msg other');
+  const td = mk('div','chat-msg other');
   td.innerHTML = '<div class="typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-  if (msgs) { msgs.appendChild(td); setTimeout(() => td.scrollIntoView({ behavior:'smooth', block:'end' }), 10); }
+  
+  if (msgs) { 
+    msgs.appendChild(td); 
+    setTimeout(() => td.scrollIntoView({ behavior:'smooth', block:'end' }), 10); 
+  }
+  
   const historyForAPI = isFirst ? [] : chatHistory.slice(-MAX_HISTORY_LEN).map(m => ({ role: m.role, content: m.content }));
+  
   let reply = null;
   let useOffline = false;
   let attempts = 0;
+  
   while (attempts <= 2 && !reply) {
     try {
       const ctrl = new AbortController();
-      const tid  = setTimeout(() => ctrl.abort(), 8000);
-      const res  = await fetch(API_URL, {
+      const tid = setTimeout(() => ctrl.abort(), 8000);
+      
+      const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1582,96 +1564,202 @@ async function callChatAPI(userMsg, isFirst = false) {
         }),
         signal: ctrl.signal
       });
+      
       clearTimeout(tid);
+      
       if (res.ok) {
         const data = await res.json();
-        if (data.reply) { reply = data.reply; apiRetryCount = 0; setChatStatus(''); break; }
+        if (data.reply) { 
+          reply = data.reply; 
+          apiRetryCount = 0; 
+          setChatStatus(''); 
+          break; 
+        }
       }
-    } catch(e) { console.warn(`[API] Attempt ${attempts+1} failed:`, e.message); }
+    } catch(e) { 
+      console.warn(`[API] Attempt ${attempts+1} failed:`, e.message); 
+    }
+    
     attempts++;
+    
     if (attempts <= 2) {
       setChatStatus(`⏳ Mencoba lagi (${attempts}/2)...`, 'info');
       await sleep(1000 * attempts);
-    } else { useOffline = true; }
+    } else { 
+      useOffline = true; 
+    }
   }
+  
   if (td?.parentNode) td.remove();
+  
   if (useOffline || !reply) {
     apiRetryCount++;
     const shortName = (chatPartner.name || '').split('.')[0];
     reply = isFirst ? getOfflineGreeting(chatPartner.name, shortName) : getOfflineReply(userMsg);
     if (apiRetryCount >= 2) setChatStatus('⚡ mode offline aktif', 'info', 6000);
   }
+  
   await sleep(300 + Math.random()*400);
+  
   const msgDiv = mk('div','chat-msg other');
   const bubble = mk('div','chat-bubble');
   msgDiv.appendChild(bubble);
-  if (msgs) { msgs.appendChild(msgDiv); setTimeout(() => msgDiv.scrollIntoView({ behavior:'smooth', block:'end' }), 10); }
+  
+  if (msgs) { 
+    msgs.appendChild(msgDiv); 
+    setTimeout(() => msgDiv.scrollIntoView({ behavior:'smooth', block:'end' }), 10); 
+  }
+  
   await typeMessage(bubble, reply, apiRetryCount >= 2);
+  
   chatHistory.push({ role: 'assistant', content: reply });
+  
   const MAX_HIST_TOTAL = MAX_HISTORY_LEN * 2;
   if (chatHistory.length > MAX_HIST_TOTAL) chatHistory = chatHistory.slice(-MAX_HIST_TOTAL);
+  
   isTyping = false;
+  
   if (sb) sb.classList.remove('disabled');
-  if (inp) { inp.disabled = false; setTimeout(() => inp.focus(), 100); }
+  if (inp) { 
+    inp.disabled = false; 
+    setTimeout(() => inp.focus(), 100); 
+  }
 }
 
-// SEND MESSAGE
 function sendMsg() {
-  if (isTyping) { toast('Tunggu partner selesai ngetik...', true); return; }
-  if (!chatPartner) { toast('Partner belum ditemukan', true); return; }
-  const inp  = $('chatInput');
+  if (isTyping) { 
+    toast('Tunggu partner selesai ngetik...', true); 
+    return; 
+  }
+  
+  if (!chatPartner) { 
+    toast('Partner belum ditemukan', true); 
+    return; 
+  }
+  
+  const inp = $('chatInput');
   const text = inp.value.trim();
+  
   if (!text) return;
+  
   const msgs = $('chatMessages');
-  const d    = mk('div','chat-msg own');
-  const b    = mk('div','chat-bubble');
+  const d = mk('div','chat-msg own');
+  const b = mk('div','chat-bubble');
   b.textContent = text;
   d.appendChild(b);
-  if (msgs) { msgs.appendChild(d); setTimeout(() => d.scrollIntoView({ behavior:'smooth', block:'end' }), 10); }
+  
+  if (msgs) { 
+    msgs.appendChild(d); 
+    setTimeout(() => d.scrollIntoView({ behavior:'smooth', block:'end' }), 10); 
+  }
+  
   inp.value = '';
   chatHistory.push({ role: 'user', content: text });
+  
   if (chatPartner.isAI) callChatAPI(text, false);
 }
 
-// SERVICE WORKER
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(err => {
-      console.log('SW registration failed:', err);
-    });
-  });
+// ============================================
+// ONLINE COUNT
+// ============================================
+function updateOnlineCount() {
+  const el = $('onlineCount');
+  if (el) el.textContent = (rnd(25)+18) + ' ONLINE';
 }
 
+// ============================================
+// WHISPERER
+// ============================================
+function openWsModal() {
+  const isPrem = checkSub() && userSub.type === 'monthly';
+  const body = $('wsModalBody');
+  
+  if (!body) return;
+  
+  body.innerHTML = isPrem
+    ? `<p style="font-family:'DM Mono',monospace;padding:20px;color:var(--txs)">✦ fitur whisperer aktif</p>`
+    : `<div class="ws-premium-lock"><div class="icon">✦</div><div class="title">WHISPERER PREMIUM</div>
+       <div class="desc">fitur ini khusus untuk pengguna paket premium 30 hari</div>
+       <button class="ws-premium-btn" onclick="closeModal('wsModal');openUpgradeModal()">UPGRADE SEKARANG</button></div>`;
+  
+  $('wsModal').classList.add('on');
+}
+
+function selectPackage(type) {
+  closeUpgradeModal();
+  toast(`✅ Memproses pembayaran paket ${type === 'regular' ? '10K' : '20K'}...`, false);
+}
+
+// ============================================
 // INIT
+// ============================================
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('[SPILL] v10.2 FINAL');
+  console.log('[SPILL] v10.2 FINAL — CLEAN VERSION');
+  
   loadSub();
   initSupabase();
   initRadar();
   loadRealEntries();
   updateOnlineCount();
-     
-  // SCHEDULE BREW - setiap 4 jam (14400000 ms)
-  setInterval(async () => {
-    await ensureFillerPool(9);
-    renderSpills(); // Refresh tampilan setelah seduh
-  }, 14400000); // 4 jam
   
-  $('vibeSlider')?.addEventListener('input', e => updateVibePct(e.target.value));
-  document.querySelector('.mood-scroll')?.addEventListener('click', e => {
-    const btn = e.target.closest('.mood-chip');
-    if (btn) filterMood(btn);
+  // SETUP EVENT LISTENERS
+  $('vibeSlider')?.addEventListener('input', e => {
+    const pct = $('vibePct');
+    if (pct) pct.textContent = e.target.value + '%';
   });
+  
+  $('settingsIcon')?.addEventListener('click', toggleSettingsMenu);
+  $('logoutItem')?.addEventListener('click', logoutUser);
+  $('vibeCheckBtn')?.addEventListener('click', startVibeCheck);
+  $('whisperBtn')?.addEventListener('click', openWsModal);
+  $('refreshBtn')?.addEventListener('click', () => {
+    if (typeof window.brewNewSpills === 'function') {
+      window.brewNewSpills();
+    }
+  });
+  
+  $('closeGenderModal')?.addEventListener('click', () => closeModal('genderModal'));
+  $('closeWsModal')?.addEventListener('click', () => closeModal('wsModal'));
+  $('closeUpgradeModal')?.addEventListener('click', closeUpgradeModal);
+  $('cancelUpgrade')?.addEventListener('click', closeUpgradeModal);
+  $('closeChatBtn')?.addEventListener('click', closeChat);
+  $('policyLink')?.addEventListener('click', () => alert('kebijakan anonim: ga ada log, ga ada trace'));
+  
+  document.querySelectorAll('.gender-card').forEach(card => {
+    card.addEventListener('click', function() {
+      selectGender(this, this.dataset.gender);
+    });
+  });
+  
+  $('confirmGenderBtn')?.addEventListener('click', confirmGender);
+  
+  document.querySelectorAll('.package-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const pkg = this.dataset.package || 'regular';
+      selectPackage(pkg);
+    });
+  });
+  
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', function() {
+      const page = this.dataset.page;
+      if (page) window.location.href = page + '.html';
+    });
+  });
+  
   $('chatInput')?.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+    if (e.key === 'Enter' && !e.shiftKey) { 
+      e.preventDefault(); 
+      sendMsg(); 
+    }
   });
-  const userNameEl = $('userNameDisplay');
-  if (userNameEl) {
-    userNameEl.addEventListener('dblclick', logoutUser);
-    userNameEl.title = 'Double-click untuk logout';
-  }
+  
+  $('userNameDisplay')?.addEventListener('dblclick', logoutUser);
+  
   setInterval(updateOnlineCount, 30000);
-  setInterval(() => { if (realEntries.length > 0) loadRealEntries(); }, 30000);
+  setInterval(() => { 
+    if (realEntries.length > 0) loadRealEntries(); 
+  }, 30000);
   
   window.addEventListener('beforeunload', () => {
     clearInterval(radarInterval);
@@ -1682,43 +1770,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
-   <!-- Spill Generator -->
-<script src="/spill-generator.js"></script>
 
-<script>
-// ============================================
-// OVERRIDE FUNGSI YANG UDAH ADA DI SPILL.HTML
-// ============================================
-
-// Ganti fungsi loadRealEntries biar panggil updateFeedMeta
-const originalLoadRealEntries = loadRealEntries;
-window.loadRealEntries = async function() {
-   if (typeof updateFeedMeta === 'function') {
-    updateFeedMeta();
-  }
-};
-
-// Hook untuk mood filter
-document.querySelectorAll('.mood-chip').forEach(chip => {
-  chip.addEventListener('click', function() {
-    const mood = this.dataset.mood;
-    if (typeof filterSpillsByMood === 'function') {
-      filterSpillsByMood(mood);
-    }
-  });
-});
-
-// Hook untuk refresh button
-document.querySelector('.refresh-btn')?.addEventListener('click', function(e) {
-  e.preventDefault();
-  if (typeof manualBrew === 'function') {
-    manualBrew();
-  }
-});
-
-console.log('[SpillGen] 🔌 Integrated with spill.html');
-</script>
-  <!-- Di bagian bawah spill.html, sebelum </body> -->
-<script src="/spill-generator.js"></script> 
 </body>
 </html>
