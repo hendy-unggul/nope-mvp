@@ -1,18 +1,16 @@
 // ============================================
-// spill-generator.js - FINAL CLEAN VERSION
-// BLENDS REAL USER ENTRIES + AI ENTRIES
+// spill-generator.js - FINAL VERSION
+// BLENDING 3 REAL + 5 AI UNTUK FEED
 // ============================================
 
 (function() {
     'use strict';
     
     const SPILL_CONFIG = {
-        API_BASE_URL: '/api/brew',
-        BREW_INTERVAL: 240000,
-        POOL_MAX_SIZE: 27,
-        BREW_COUNT: 9,
-        SPILL_TARGET: 8,
-        REAL_ENTRIES_LIMIT: 20
+        REFRESH_INTERVAL: 240000,  // 4 menit
+        FEED_TARGET: 8,
+        REAL_LIMIT: 3,    // 3 real entries di feed
+        AI_LIMIT: 5       // 5 AI entries di feed
     };
 
     let spillPool = [];
@@ -20,31 +18,53 @@
     let isLoading = false;
     let supabaseClient = null;
 
+    // ============================================
+    // INIT SUPABASE
+    // ============================================
     function initSupabase() {
         try {
-            if (typeof supabase !== 'undefined' && supabase.createClient) {
-                const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
-                const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
-                
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                console.log('[SpillGen] ✅ Supabase client initialized');
-                return true;
-            }
-            console.warn('[SpillGen] ⚠️ Supabase not available');
-            return false;
+            const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
+            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
+            
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            console.log('[SpillGen] ✅ Supabase connected');
+            return true;
         } catch (e) {
             console.warn('[SpillGen] ⚠️ Supabase init error:', e);
             return false;
         }
     }
 
-    async function fetchRealEntries() {
-        if (!supabaseClient) {
-            if (!initSupabase()) return [];
+    // ============================================
+    // GET CURRENT USER ID
+    // ============================================
+    function getCurrentUserId() {
+        try {
+            if (typeof JEJAK !== 'undefined' && JEJAK.getSession) {
+                const session = JEJAK.getSession();
+                return session?.uid;
+            }
+            return localStorage.getItem('user_id') || 
+                   localStorage.getItem('jejak_user_id');
+        } catch (e) {
+            return null;
+        }
+    }
+
+    // ============================================
+    // FETCH FEED ENTRIES (3 REAL + 5 AI)
+    // ============================================
+    async function fetchFeedEntries() {
+        if (!supabaseClient && !initSupabase()) {
+            console.log('[SpillGen] ⚠️ Pakai fallback feed');
+            return generateFallbackFeed();
         }
         
         try {
-            const { data, error } = await supabaseClient
+            console.log('[SpillGen] 📡 Mengambil entries untuk feed...');
+            
+            // Ambil 3 REAL entries terbaru (dari semua user)
+            const { data: realEntries, error: realError } = await supabaseClient
                 .from('entries')
                 .select(`
                     id,
@@ -55,187 +75,160 @@
                     created_at,
                     profiles!inner(username)
                 `)
+                .eq('is_ai', false)
                 .order('created_at', { ascending: false })
-                .limit(SPILL_CONFIG.REAL_ENTRIES_LIMIT);
+                .limit(SPILL_CONFIG.REAL_LIMIT);
             
-            if (error) {
-                console.warn('[SpillGen] ⚠️ Supabase query error:', error.message);
-                return [];
+            if (realError) {
+                console.warn('[SpillGen] Error real:', realError.message);
             }
             
-            let currentUserId = null;
-            try {
-                if (typeof JEJAK !== 'undefined' && JEJAK.getSession) {
-                    const session = JEJAK.getSession();
-                    currentUserId = session?.uid;
-                } else {
-                    currentUserId = localStorage.getItem('user_id') || localStorage.getItem('jejak_user_id');
-                }
-            } catch (e) {
-                console.warn('[SpillGen] ⚠️ Could not get current user ID');
+            // Ambil 5 AI entries terbaru
+            const { data: aiEntries, error: aiError } = await supabaseClient
+                .from('entries')
+                .select('*')
+                .eq('is_ai', true)
+                .order('created_at', { ascending: false })
+                .limit(SPILL_CONFIG.AI_LIMIT);
+            
+            if (aiError) {
+                console.warn('[SpillGen] Error AI:', aiError.message);
             }
             
-            const realEntries = (data || [])
-                .filter(entry => !(currentUserId && entry.user_id === currentUserId))
-                .map(entry => ({
-                    id: entry.id,
-                    author: entry.profiles?.username || 'anonymous',
-                    mood: entry.mood || 'chaotic',
-                    content: entry.content || '',
-                    timestamp: new Date(entry.created_at).getTime(),
-                    reactions: entry.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 },
-                    isAI: false,
-                    isReal: true,
-                    userReacted: null,
-                    dbId: entry.id
-                }));
+            const currentUserId = getCurrentUserId();
             
-            console.log(`[SpillGen] 📊 Fetched ${realEntries.length} real entries`);
-            return realEntries;
+            // Format real entries
+            const formattedReal = (realEntries || []).map(entry => ({
+                id: entry.id,
+                author: entry.profiles?.username || 'anonymous',
+                mood: entry.mood || 'chaotic',
+                content: entry.content || '',
+                timestamp: new Date(entry.created_at).getTime(),
+                reactions: entry.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 },
+                type: 'real',
+                isOwn: currentUserId ? entry.user_id === currentUserId : false,
+                userReacted: null,
+                dbId: entry.id
+            }));
+            
+            // Format AI entries
+            const formattedAI = (aiEntries || []).map(entry => ({
+                id: entry.id,
+                author: 'ai.' + (entry.mood || 'secret'),
+                mood: entry.mood || 'chaotic',
+                content: entry.content || '',
+                timestamp: new Date(entry.created_at).getTime(),
+                reactions: entry.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 },
+                type: 'ai',
+                isOwn: false,
+                userReacted: null,
+                dbId: entry.id
+            }));
+            
+            // Gabung dan urutkan berdasarkan timestamp
+            const blended = [...formattedReal, ...formattedAI]
+                .sort((a, b) => b.timestamp - a.timestamp);
+            
+            console.log(`[SpillGen] ✅ Feed: ${formattedReal.length} real + ${formattedAI.length} AI = ${blended.length} entries`);
+            
+            return blended;
             
         } catch (error) {
-            console.warn('[SpillGen] ⚠️ Error fetching real entries:', error.message);
-            return [];
+            console.error('[SpillGen] Error fetch:', error);
+            return generateFallbackFeed();
         }
     }
 
-    async function fetchAISpills(count = SPILL_CONFIG.BREW_COUNT) {
-        try {
-            const response = await fetch('/api/brew', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ count })
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            if (data.success && data.spills && data.spills.length > 0) {
-                const aiSpills = data.spills.map(spill => ({
-                    id: spill.id,
-                    author: spill.author,
-                    mood: spill.mood,
-                    content: spill.content,
-                    timestamp: spill.timestamp,
-                    reactions: spill.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 },
-                    isAI: true,
-                    isReal: false,
-                    userReacted: null
-                }));
-                
-                console.log(`[SpillGen] 🤖 Fetched ${aiSpills.length} AI spills`);
-                return aiSpills;
-            }
-            
-            throw new Error('Invalid response format');
-            
-        } catch (error) {
-            console.warn('[SpillGen] ⚠️ API failed:', error.message);
-            return [];
-        }
+    // ============================================
+    // FALLBACK FEED (KALO SUPABASE ERROR)
+    // ============================================
+    function generateFallbackFeed() {
+        console.log('[SpillGen] 🔄 Generate fallback feed...');
+        
+        const fallbackReal = [
+            { author: 'real.user1', mood: 'surviving', content: 'hari ini lagi berat, tapi harus kuat 😮‍💨' },
+            { author: 'real.user2', mood: 'thriving', content: 'akhirnya dapet kerja setelah 3 bulan nganggur! ✨' },
+            { author: 'real.user3', mood: 'chaotic', content: 'hidup emang ga pernah tebak-tebakan buah 🫠' }
+        ];
+        
+        const fallbackAI = [
+            { author: 'beby.manis', mood: 'surviving', content: 'deadline skripsi makin deket, anxiety naik turun 😮‍💨' },
+            { author: 'agak.koplak', mood: 'chaotic', content: 'client minta revisi jam 11 malem, this is fine 🔥' },
+            { author: 'pretty.sad', mood: 'doom', content: 'HR minta masuk sabtu minggu, mau resign tapi tabungan tipis 🛌' },
+            { author: 'bang.juned', mood: 'surviving', content: 'skripsi bab 3 masih error, dosen ga bales email seminggu 😭' },
+            { author: 'strawberry.shortcake', mood: 'thriving', content: 'akhirnya dapet panggilan interview setelah ngelamar 50+ tempat ✨' }
+        ];
+        
+        const now = Date.now();
+        const formattedReal = fallbackReal.map((item, i) => ({
+            ...item,
+            id: `fallback_real_${i}`,
+            timestamp: now - (i * 3600000),
+            reactions: { skull: 5, cry: 10, fire: 3, upside: 2 },
+            type: 'real',
+            userReacted: null
+        }));
+        
+        const formattedAI = fallbackAI.map((item, i) => ({
+            ...item,
+            id: `fallback_ai_${i}`,
+            timestamp: now - (i * 1800000) - 900000,
+            reactions: { skull: 8, cry: 15, fire: 5, upside: 3 },
+            type: 'ai',
+            userReacted: null
+        }));
+        
+        return [...formattedReal, ...formattedAI]
+            .sort((a, b) => b.timestamp - a.timestamp);
     }
 
-    async function blendEntries() {
+    // ============================================
+    // REFRESH FEED
+    // ============================================
+    async function refreshFeed() {
         if (isLoading) {
-            console.log('[SpillGen] ⏳ Already loading, skipping...');
+            console.log('[SpillGen] ⏳ Masih loading...');
             return;
         }
         
         isLoading = true;
-        console.log('[SpillGen] 🔄 Blending real + AI entries...');
+        console.log('[SpillGen] 🔄 Refresh feed...');
         
         try {
-            const [realEntries, aiSpills] = await Promise.all([
-                fetchRealEntries(),
-                fetchAISpills(SPILL_CONFIG.BREW_COUNT)
-            ]);
-            
-            const allEntries = [...realEntries, ...aiSpills].sort((a, b) => b.timestamp - a.timestamp);
-            
-            spillPool = allEntries.slice(0, SPILL_CONFIG.POOL_MAX_SIZE);
-            
-            console.log(`[SpillGen] ✅ Blended: ${realEntries.length} real + ${aiSpills.length} AI = ${spillPool.length} total`);
-            
+            spillPool = await fetchFeedEntries();
             renderSpills();
-            
         } catch (error) {
-            console.warn('[SpillGen] ⚠️ Blend error:', error.message);
-            useFallbackData();
+            console.error('[SpillGen] Error:', error);
         } finally {
             isLoading = false;
         }
     }
 
-    const FALLBACK_SPILLS = [
-        { author: 'beby.manis', mood: 'surviving', content: 'deadline skripsi makin deket, anxiety naik turun 😮‍💨' },
-        { author: 'agak.koplak', mood: 'chaotic', content: 'client minta revisi jam 11 malem, this is fine 🔥' },
-        { author: 'satria.bajahitam', mood: 'doom', content: 'motor mogok, dompet tipis, triple combo 🫠' },
-        { author: 'pretty.sad', mood: 'surviving', content: 'HR minta masuk sabtu minggu, mau resign tapi tabungan tinggal 200rb. bingung jadinya 😭' },
-        { author: 'strawberry.shortcake', mood: 'thriving', content: 'akhirnya dapet panggilan interview setelah ngelamar 50+ tempat, semoga lancar ya Allah ✨' },
-        { author: 'chili.padi', mood: 'thriving', content: 'orderan sneakers laku 15 pasang hari ini, rezeki anak soleh kata emak 💰😎' },
-        { author: 'bang.juned', mood: 'doom', content: 'skripsi bab 3 masih error, dosen pembimbing ga bales chat seminggu, padahal deadline sidang tinggal 2 bulan. pengen mundur tapi udah di depan mata 🥲' },
-        { author: 'little.fairy', mood: 'chaotic', content: 'ortu ngomel terus disuruh kuliah, tapi gue dapet project freelance 5 juta. antara nurutin ortu atau ngejar cuan, bingung sumpah 🌀' },
-        { author: 'sejuta.badai', mood: 'chaotic', content: 'minggu pagi jam 3, ga bisa tidur karena overthinking masa depan. buka IG liat temen pada nikah, beli rumah, punya mobil, sementara gue masih struggle with skripsi dan dompet tipis. maybe this is my villain arc idk 🛌💔' }
-    ];
-
-    function useFallbackData() {
-        console.log('[SpillGen] 🔄 Using enhanced fallback data...');
-        
-        const shuffled = [...FALLBACK_SPILLS].sort(() => Math.random() - 0.5);
-        const selected = shuffled.slice(0, SPILL_CONFIG.BREW_COUNT);
-        
-        const now = Date.now();
-        const newSpills = selected.map((spill, i) => ({
-            id: 'fallback_' + now + '_' + i + '_' + Math.random().toString(36).slice(2),
-            author: spill.author,
-            mood: spill.mood,
-            content: spill.content,
-            timestamp: now - (i * 300000),
-            reactions: {
-                skull: Math.floor(Math.random() * 30),
-                cry: Math.floor(Math.random() * 50),
-                fire: Math.floor(Math.random() * 25),
-                upside: Math.floor(Math.random() * 20)
-            },
-            isAI: true,
-            isReal: false,
-            userReacted: null
-        }));
-        
-        spillPool = [...newSpills, ...spillPool].slice(0, SPILL_CONFIG.POOL_MAX_SIZE);
-        
-        console.log('[SpillGen] ✅ Fallback loaded: ' + spillPool.length + '/' + SPILL_CONFIG.POOL_MAX_SIZE);
-        
-        renderSpills();
-    }
-
+    // ============================================
+    // RENDER SPILLS KE HTML
+    // ============================================
     function renderSpills() {
-        const spillsContainer = document.getElementById('spillsList');
+        const container = document.getElementById('spillsList');
+        if (!container) return;
         
-        if (!spillsContainer) {
-            console.warn('[SpillGen] ⚠️ spillsList not found');
-            return;
-        }
-        
+        // Filter by mood
         let filtered = spillPool;
         if (activeMood !== 'all') {
             filtered = spillPool.filter(s => s.mood === activeMood);
         }
         
-        const toShow = filtered.slice(0, SPILL_CONFIG.SPILL_TARGET);
+        const toShow = filtered.slice(0, SPILL_CONFIG.FEED_TARGET);
         
+        // Update meta
         const metaEl = document.getElementById('feedMeta');
         if (metaEl) {
-            const realCount = toShow.filter(s => s.isReal).length;
-            const aiCount = toShow.filter(s => s.isAI).length;
-            metaEl.textContent = toShow.length + ' (👤' + realCount + ' 🤖' + aiCount + ')';
+            const realCount = toShow.filter(s => s.type === 'real').length;
+            const aiCount = toShow.filter(s => s.type === 'ai').length;
+            metaEl.textContent = `${toShow.length} (👤${realCount} 🤖${aiCount})`;
         }
         
         if (toShow.length === 0) {
-            spillsContainer.innerHTML = `
+            container.innerHTML = `
                 <div class="empty-state">
                     <span class="empty-icon">🍃</span>
                     <div class="empty-title">BELUM ADA SPILL</div>
@@ -245,48 +238,49 @@
         }
         
         let html = '';
-        for (let i = 0; i < toShow.length; i++) {
-            const spill = toShow[i];
-            let reactionsHtml = '';
+        for (let s of toShow) {
+            const icon = s.type === 'real' ? '👤' : '🤖';
+            const ownClass = s.isOwn ? ' own-spill' : '';
             
-            const reactionTypes = ['skull', 'cry', 'fire', 'upside'];
-            for (let j = 0; j < reactionTypes.length; j++) {
-                const key = reactionTypes[j];
-                const val = spill.reactions[key] || 0;
-                const activeClass = (spill.userReacted === key) ? 'active' : '';
-                const emoji = key === 'skull' ? '💀' : key === 'cry' ? '😭' : key === 'fire' ? '🔥' : '🙃';
-                
-                reactionsHtml += '<button class="react-btn ' + activeClass + '" onclick="window.reactToSpill(\'' + spill.id + '\', \'' + key + '\')">' + emoji + ' <span class="react-count">' + val + '</span></button>';
-            }
-            
-            const userIcon = spill.isReal ? '👤' : '🤖';
-            
-            html += '<div class="spill-card">' +
-                '<div class="spill-head">' +
-                '<span class="spill-user">' + userIcon + ' @' + escapeHtml(spill.author) + '</span>' +
-                '<span class="spill-mood ' + spill.mood + '">' + spill.mood + '</span>' +
-                '</div>' +
-                '<div class="spill-body">' + escapeHtml(spill.content) + '</div>' +
-                '<div class="spill-actions">' + reactionsHtml + '</div>' +
-                '</div>';
+            html += `<div class="spill-card${ownClass}">
+                <div class="spill-head">
+                    <span class="spill-user">${icon} @${escapeHtml(s.author)}</span>
+                    <span class="spill-mood ${s.mood}">${s.mood}</span>
+                </div>
+                <div class="spill-body">${escapeHtml(s.content)}</div>
+                <div class="spill-actions">
+                    ${renderReactions(s)}
+                </div>
+            </div>`;
         }
         
-        spillsContainer.innerHTML = html;
+        container.innerHTML = html;
     }
 
-    window.reactToSpill = function(spillId, reactionType) {
+    function renderReactions(spill) {
+        const emojis = { skull: '💀', cry: '😭', fire: '🔥', upside: '🙃' };
+        return Object.entries(spill.reactions).map(([key, val]) => 
+            `<button class="react-btn ${spill.userReacted === key ? 'active' : ''}" 
+                    onclick="window.reactToSpill('${spill.id}', '${key}')">
+                ${emojis[key]} <span class="react-count">${val}</span>
+            </button>`
+        ).join('');
+    }
+
+    // ============================================
+    // REACTION HANDLER
+    // ============================================
+    window.reactToSpill = async function(spillId, reactionType) {
         const spill = spillPool.find(s => s.id === spillId);
         if (!spill) return;
         
-        const wasActive = spill.userReacted === reactionType;
-        
-        if (wasActive) {
+        // Update local
+        if (spill.userReacted === reactionType) {
             spill.reactions[reactionType] = Math.max(0, (spill.reactions[reactionType] || 0) - 1);
             spill.userReacted = null;
         } else {
             if (spill.userReacted) {
-                const old = spill.userReacted;
-                spill.reactions[old] = Math.max(0, (spill.reactions[old] || 0) - 1);
+                spill.reactions[spill.userReacted] = Math.max(0, (spill.reactions[spill.userReacted] || 0) - 1);
             }
             spill.reactions[reactionType] = (spill.reactions[reactionType] || 0) + 1;
             spill.userReacted = reactionType;
@@ -294,29 +288,27 @@
         
         renderSpills();
         
-        if (spill.isReal && spill.dbId && supabaseClient) {
-            supabaseClient
-                .from('entries')
-                .update({ reactions: spill.reactions })
-                .eq('id', spill.dbId)
-                .then()
-                .catch(e => console.warn('[SpillGen] Failed to update reaction:', e));
+        // Update ke Supabase (kalo real entry)
+        if (spill.type === 'real' && supabaseClient && spill.dbId) {
+            try {
+                await supabaseClient
+                    .from('entries')
+                    .update({ reactions: spill.reactions })
+                    .eq('id', spill.dbId);
+            } catch (e) {
+                console.warn('[SpillGen] Gagal update reaction:', e);
+            }
         }
     };
 
+    // ============================================
+    // FILTER MOOD
+    // ============================================
     function filterMood(mood) {
         activeMood = mood;
-        
-        const chips = document.querySelectorAll('.mood-chip');
-        for (let i = 0; i < chips.length; i++) {
-            const chip = chips[i];
-            if (chip.dataset.mood === mood) {
-                chip.classList.add('active');
-            } else {
-                chip.classList.remove('active');
-            }
-        }
-        
+        document.querySelectorAll('.mood-chip').forEach(chip => {
+            chip.classList.toggle('active', chip.dataset.mood === mood);
+        });
         renderSpills();
     }
 
@@ -327,30 +319,29 @@
         return div.innerHTML;
     }
 
-    function initSpillGenerator() {
+    // ============================================
+    // INIT
+    // ============================================
+    function init() {
         console.log('[SpillGen] 🚀 Initializing...');
-        
         initSupabase();
-        
-        setTimeout(function() { blendEntries(); }, 2000);
-        
-        setInterval(function() { blendEntries(); }, SPILL_CONFIG.BREW_INTERVAL);
+        refreshFeed();
+        setInterval(refreshFeed, SPILL_CONFIG.REFRESH_INTERVAL);
     }
 
-    window.initSpillGenerator = initSpillGenerator;
-    window.blendEntries = blendEntries;
+    // ============================================
+    // EXPOSE TO WINDOW
+    // ============================================
+    window.initSpillGenerator = init;
+    window.refreshFeed = refreshFeed;
     window.filterMood = filterMood;
-    window.getSpillPool = function() { return spillPool; };
-    window.refreshFeed = blendEntries;
+    window.getSpillPool = () => spillPool;
 
+    // Auto start
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('[SpillGen] 📄 DOM ready, initializing...');
-            setTimeout(initSpillGenerator, 1000);
-        });
+        document.addEventListener('DOMContentLoaded', () => setTimeout(init, 1000));
     } else {
-        console.log('[SpillGen] 📄 DOM already ready, initializing...');
-        setTimeout(initSpillGenerator, 1000);
+        setTimeout(init, 1000);
     }
 
 })();
