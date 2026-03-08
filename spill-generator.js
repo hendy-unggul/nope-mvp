@@ -1,16 +1,16 @@
 // ============================================
 // spill-generator.js - FINAL VERSION
-// BLENDING 3 REAL + 5 AI UNTUK FEED
+// FOCUS ON AI ENTRIES WITH VARIED LENGTHS
 // ============================================
 
 (function() {
     'use strict';
     
-    const SPILL_CONFIG = {
+    const CONFIG = {
         REFRESH_INTERVAL: 240000,  // 4 menit
         FEED_TARGET: 8,
-        REAL_LIMIT: 3,    // 3 real entries di feed
-        AI_LIMIT: 5       // 5 AI entries di feed
+        AI_LIMIT: 8,  // Tampilkan 8 AI entries
+        SHOW_REAL: false  // Set ke true kalo mau blending real + AI nanti
     };
 
     let spillPool = [];
@@ -23,163 +23,120 @@
     // ============================================
     function initSupabase() {
         try {
-            const SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co';
-            const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';
-            
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            supabaseClient = supabase.createClient(
+                'https://fuovfrdicdhnlymnacpz.supabase.co',
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0'
+            );
             console.log('[SpillGen] ✅ Supabase connected');
             return true;
         } catch (e) {
-            console.warn('[SpillGen] ⚠️ Supabase init error:', e);
+            console.warn('[SpillGen] ❌ Supabase init error:', e);
             return false;
         }
     }
 
     // ============================================
-    // GET CURRENT USER ID
+    // FETCH AI ENTRIES ONLY
     // ============================================
-    function getCurrentUserId() {
-        try {
-            if (typeof JEJAK !== 'undefined' && JEJAK.getSession) {
-                const session = JEJAK.getSession();
-                return session?.uid;
-            }
-            return localStorage.getItem('user_id') || 
-                   localStorage.getItem('jejak_user_id');
-        } catch (e) {
-            return null;
-        }
-    }
-
-    // ============================================
-    // FETCH FEED ENTRIES (3 REAL + 5 AI)
-    // ============================================
-    async function fetchFeedEntries() {
+    async function fetchAIEntries() {
         if (!supabaseClient && !initSupabase()) {
-            console.log('[SpillGen] ⚠️ Pakai fallback feed');
-            return generateFallbackFeed();
+            return generateFallbackAI();
         }
         
         try {
-            console.log('[SpillGen] 📡 Mengambil entries untuk feed...');
+            console.log('[SpillGen] 🤖 Mengambil AI entries...');
             
-            // Ambil 3 REAL entries terbaru (dari semua user)
-            const { data: realEntries, error: realError } = await supabaseClient
-                .from('entries')
-                .select(`
-                    id,
-                    user_id,
-                    content,
-                    mood,
-                    reactions,
-                    created_at,
-                    profiles!inner(username)
-                `)
-                .eq('is_ai', false)
-                .order('created_at', { ascending: false })
-                .limit(SPILL_CONFIG.REAL_LIMIT);
-            
-            if (realError) {
-                console.warn('[SpillGen] Error real:', realError.message);
-            }
-            
-            // Ambil 5 AI entries terbaru
-            const { data: aiEntries, error: aiError } = await supabaseClient
+            const { data, error } = await supabaseClient
                 .from('entries')
                 .select('*')
                 .eq('is_ai', true)
                 .order('created_at', { ascending: false })
-                .limit(SPILL_CONFIG.AI_LIMIT);
+                .limit(20);  // Ambil 20, nanti difilter
             
-            if (aiError) {
-                console.warn('[SpillGen] Error AI:', aiError.message);
+            if (error) {
+                console.warn('[SpillGen] Error:', error.message);
+                return generateFallbackAI();
             }
             
-            const currentUserId = getCurrentUserId();
-            
-            // Format real entries
-            const formattedReal = (realEntries || []).map(entry => ({
-                id: entry.id,
-                author: entry.profiles?.username || 'anonymous',
-                mood: entry.mood || 'chaotic',
-                content: entry.content || '',
-                timestamp: new Date(entry.created_at).getTime(),
-                reactions: entry.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 },
-                type: 'real',
-                isOwn: currentUserId ? entry.user_id === currentUserId : false,
-                userReacted: null,
-                dbId: entry.id
-            }));
-            
             // Format AI entries
-            const formattedAI = (aiEntries || []).map(entry => ({
+            const aiEntries = (data || []).map(entry => ({
                 id: entry.id,
-                author: 'ai.' + (entry.mood || 'secret'),
+                author: entry.user_id === 'ai_system' 
+                    ? getAIAuthor(entry.mood) 
+                    : 'ai.secret',
                 mood: entry.mood || 'chaotic',
                 content: entry.content || '',
                 timestamp: new Date(entry.created_at).getTime(),
                 reactions: entry.reactions || { skull: 0, cry: 0, fire: 0, upside: 0 },
                 type: 'ai',
-                isOwn: false,
                 userReacted: null,
                 dbId: entry.id
             }));
             
-            // Gabung dan urutkan berdasarkan timestamp
-            const blended = [...formattedReal, ...formattedAI]
-                .sort((a, b) => b.timestamp - a.timestamp);
+            console.log(`[SpillGen] 🤖 Mendapat ${aiEntries.length} AI entries`);
+            return aiEntries;
             
-            console.log(`[SpillGen] ✅ Feed: ${formattedReal.length} real + ${formattedAI.length} AI = ${blended.length} entries`);
-            
-            return blended;
-            
-        } catch (error) {
-            console.error('[SpillGen] Error fetch:', error);
-            return generateFallbackFeed();
+        } catch (e) {
+            console.error('[SpillGen] Error:', e);
+            return generateFallbackAI();
         }
+    }
+    
+    // Helper untuk author name berdasarkan mood
+    function getAIAuthor(mood) {
+        const authors = {
+            'surviving': ['beby.manis', 'bang.juned', 'cinnamon.girl'],
+            'thriving': ['strawberry.shortcake', 'chili.padi'],
+            'chaotic': ['agak.koplak', 'little.fairy', 'sejuta.badai'],
+            'doom': ['pretty.sad', 'satria.bajahitam']
+        };
+        const list = authors[mood] || ['ai.persona'];
+        return list[Math.floor(Math.random() * list.length)];
     }
 
     // ============================================
-    // FALLBACK FEED (KALO SUPABASE ERROR)
+    // FALLBACK AI - VARIASI PANJANG 7,18,27,36
     // ============================================
-    function generateFallbackFeed() {
-        console.log('[SpillGen] 🔄 Generate fallback feed...');
+    function generateFallbackAI() {
+        console.log('[SpillGen] 📝 Generate fallback AI with varied lengths');
         
-        const fallbackReal = [
-            { author: 'real.user1', mood: 'surviving', content: 'hari ini lagi berat, tapi harus kuat 😮‍💨' },
-            { author: 'real.user2', mood: 'thriving', content: 'akhirnya dapet kerja setelah 3 bulan nganggur! ✨' },
-            { author: 'real.user3', mood: 'chaotic', content: 'hidup emang ga pernah tebak-tebakan buah 🫠' }
-        ];
-        
-        const fallbackAI = [
-            { author: 'beby.manis', mood: 'surviving', content: 'deadline skripsi makin deket, anxiety naik turun 😮‍💨' },
-            { author: 'agak.koplak', mood: 'chaotic', content: 'client minta revisi jam 11 malem, this is fine 🔥' },
-            { author: 'pretty.sad', mood: 'doom', content: 'HR minta masuk sabtu minggu, mau resign tapi tabungan tipis 🛌' },
-            { author: 'bang.juned', mood: 'surviving', content: 'skripsi bab 3 masih error, dosen ga bales email seminggu 😭' },
-            { author: 'strawberry.shortcake', mood: 'thriving', content: 'akhirnya dapet panggilan interview setelah ngelamar 50+ tempat ✨' }
+        const aiSpills = [
+            // 7 KATA (pendek)
+            { author: 'beby.manis', mood: 'surviving', 
+              content: 'deadline skripsi makin deket, anxiety naik turun 😮‍💨' },
+            { author: 'agak.koplak', mood: 'chaotic', 
+              content: 'client minta revisi jam 11 malem, this is fine 🔥' },
+            { author: 'satria.bajahitam', mood: 'doom', 
+              content: 'motor mogok, dompet tipis, triple combo 🫠' },
+            
+            // 18 KATA (medium)
+            { author: 'pretty.sad', mood: 'doom', 
+              content: 'HR minta masuk sabtu minggu, mau resign tapi tabungan tinggal 200rb. bingung jadinya 😭' },
+            { author: 'strawberry.shortcake', mood: 'thriving', 
+              content: 'akhirnya dapet panggilan interview setelah ngelamar 50+ tempat, semoga lancar ya Allah ✨' },
+            { author: 'chili.padi', mood: 'thriving', 
+              content: 'orderan sneakers laku 15 pasang hari ini, rezeki anak soleh kata emak 💰😎' },
+            
+            // 27 KATA (panjang)
+            { author: 'bang.juned', mood: 'surviving', 
+              content: 'skripsi bab 3 masih error, dosen pembimbing ga bales chat seminggu, padahal deadline sidang tinggal 2 bulan. pengen mundur tapi udah di depan mata 🥲' },
+            { author: 'little.fairy', mood: 'chaotic', 
+              content: 'ortu ngomel terus disuruh kuliah, tapi gue dapet project freelance 5 juta. antara nurutin ortu atau ngejar cuan, bingung sumpah 🌀' },
+            
+            // 36 KATA (sangat panjang)
+            { author: 'sejuta.badai', mood: 'chaotic', 
+              content: 'minggu pagi jam 3, ga bisa tidur karena overthinking masa depan. buka IG liat temen pada nikah, beli rumah, punya mobil, sementara gue masih struggle with skripsi dan dompet tipis. maybe this is my villain arc idk 🛌💔' }
         ];
         
         const now = Date.now();
-        const formattedReal = fallbackReal.map((item, i) => ({
-            ...item,
-            id: `fallback_real_${i}`,
-            timestamp: now - (i * 3600000),
-            reactions: { skull: 5, cry: 10, fire: 3, upside: 2 },
-            type: 'real',
-            userReacted: null
-        }));
-        
-        const formattedAI = fallbackAI.map((item, i) => ({
-            ...item,
+        return aiSpills.map((spill, i) => ({
+            ...spill,
             id: `fallback_ai_${i}`,
-            timestamp: now - (i * 1800000) - 900000,
-            reactions: { skull: 8, cry: 15, fire: 5, upside: 3 },
+            timestamp: now - (i * 1800000),
+            reactions: { skull: 5 + i, cry: 10 + i, fire: 3 + i, upside: 2 + i },
             type: 'ai',
             userReacted: null
         }));
-        
-        return [...formattedReal, ...formattedAI]
-            .sort((a, b) => b.timestamp - a.timestamp);
     }
 
     // ============================================
@@ -195,56 +152,61 @@
         console.log('[SpillGen] 🔄 Refresh feed...');
         
         try {
-            spillPool = await fetchFeedEntries();
-            renderSpills();
+            const aiEntries = await fetchAIEntries();
+            
+            // Filter by mood
+            let filtered = aiEntries;
+            if (activeMood !== 'all') {
+                filtered = aiEntries.filter(s => s.mood === activeMood);
+            }
+            
+            // Take only target amount
+            spillPool = filtered.slice(0, CONFIG.FEED_TARGET);
+            
+            // Render
+            renderSpills(aiEntries.length);
+            
         } catch (error) {
             console.error('[SpillGen] Error:', error);
+            const fallback = generateFallbackAI();
+            spillPool = fallback.slice(0, CONFIG.FEED_TARGET);
+            renderSpills(fallback.length);
         } finally {
             isLoading = false;
         }
     }
 
     // ============================================
-    // RENDER SPILLS KE HTML
+    // RENDER SPILLS
     // ============================================
-    function renderSpills() {
+    function renderSpills(totalAI = 0) {
         const container = document.getElementById('spillsList');
         if (!container) return;
-        
-        // Filter by mood
-        let filtered = spillPool;
-        if (activeMood !== 'all') {
-            filtered = spillPool.filter(s => s.mood === activeMood);
-        }
-        
-        const toShow = filtered.slice(0, SPILL_CONFIG.FEED_TARGET);
         
         // Update meta
         const metaEl = document.getElementById('feedMeta');
         if (metaEl) {
-            const realCount = toShow.filter(s => s.type === 'real').length;
-            const aiCount = toShow.filter(s => s.type === 'ai').length;
-            metaEl.textContent = `${toShow.length} (👤${realCount} 🤖${aiCount})`;
+            metaEl.textContent = `${spillPool.length} (🤖${spillPool.length})`;
         }
         
-        if (toShow.length === 0) {
+        if (spillPool.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
                     <span class="empty-icon">🍃</span>
                     <div class="empty-title">BELUM ADA SPILL</div>
-                    <div class="empty-text">Sedang memuat...</div>
+                    <div class="empty-text">Generate AI entries dulu di console</div>
                 </div>`;
             return;
         }
         
         let html = '';
-        for (let s of toShow) {
-            const icon = s.type === 'real' ? '👤' : '🤖';
-            const ownClass = s.isOwn ? ' own-spill' : '';
+        for (let s of spillPool) {
+            // Count words untuk debugging
+            const wordCount = s.content.split(' ').length;
             
-            html += `<div class="spill-card${ownClass}">
+            html += `<div class="spill-card">
                 <div class="spill-head">
-                    <span class="spill-user">${icon} @${escapeHtml(s.author)}</span>
+                    <span class="spill-user">🤖 @${escapeHtml(s.author)} <span style="color:var(--txm); font-size:8px;">${wordCount} kata</span></span>
                     <span class="spill-mood ${s.mood}">${s.mood}</span>
                 </div>
                 <div class="spill-body">${escapeHtml(s.content)}</div>
@@ -255,6 +217,18 @@
         }
         
         container.innerHTML = html;
+        
+        // Kasih notifikasi kalo pake fallback
+        if (totalAI === 0) {
+            const notice = document.createElement('div');
+            notice.style.padding = '10px';
+            notice.style.textAlign = 'center';
+            notice.style.fontSize = '11px';
+            notice.style.color = 'var(--as)';
+            notice.style.marginTop = '10px';
+            notice.innerHTML = '⚠️ Mode offline - AI entries dari fallback';
+            container.appendChild(notice);
+        }
     }
 
     function renderReactions(spill) {
@@ -288,8 +262,8 @@
         
         renderSpills();
         
-        // Update ke Supabase (kalo real entry)
-        if (spill.type === 'real' && supabaseClient && spill.dbId) {
+        // Update ke Supabase (kalo ada koneksi)
+        if (supabaseClient && spill.dbId && !spill.id.startsWith('fallback')) {
             try {
                 await supabaseClient
                     .from('entries')
@@ -306,42 +280,5 @@
     // ============================================
     function filterMood(mood) {
         activeMood = mood;
-        document.querySelectorAll('.mood-chip').forEach(chip => {
-            chip.classList.toggle('active', chip.dataset.mood === mood);
-        });
-        renderSpills();
-    }
-
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
-
-    // ============================================
-    // INIT
-    // ============================================
-    function init() {
-        console.log('[SpillGen] 🚀 Initializing...');
-        initSupabase();
-        refreshFeed();
-        setInterval(refreshFeed, SPILL_CONFIG.REFRESH_INTERVAL);
-    }
-
-    // ============================================
-    // EXPOSE TO WINDOW
-    // ============================================
-    window.initSpillGenerator = init;
-    window.refreshFeed = refreshFeed;
-    window.filterMood = filterMood;
-    window.getSpillPool = () => spillPool;
-
-    // Auto start
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => setTimeout(init, 1000));
-    } else {
-        setTimeout(init, 1000);
-    }
-
-})();
+        
+       
