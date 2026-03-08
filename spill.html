@@ -1020,7 +1020,7 @@ async function ensureFillerPool(brewedCount = SPILL_PER_BREW) {
   const randomUsers = await getRandomRealUsers(30);
   
   // Hitung berapa banyak yang bisa ditambah (jangan melebihi SPILL_POOL_MAX)
-  const currentCount = fillerPool.length;
+  const currentCount = window.spillPool;
   const maxNewEntries = SPILL_POOL_MAX - currentCount;
   const newEntriesCount = Math.min(brewedCount, maxNewEntries, SPILL_PER_BREW);
   
@@ -1030,7 +1030,7 @@ async function ensureFillerPool(brewedCount = SPILL_PER_BREW) {
   }
   
   // Catat author yang sudah ada di pool untuk hindari duplikasi beruntun
-  const recentAuthors = fillerPool.slice(0, 3).map(e => e.author);
+  const recentAuthors = window.spillPool(0, 3).map(e => e.author);
   
   const generated = [];
   
@@ -1084,24 +1084,19 @@ async function ensureFillerPool(brewedCount = SPILL_PER_BREW) {
   }
   
   // FIFO: baru masuk di DEPAN, lama keluar di BELAKANG jika melebihi batas
-  fillerPool = [...generated, ...fillerPool].slice(0, SPILL_POOL_MAX);
+  window.spillPool = [...generated, ...window.spillPool].slice(0, SPILL_POOL_MAX);
   
   console.log(`[SPILL] 🍵 Seduh ${new Date().toLocaleTimeString()}: +${generated.length} entries`);
-  console.log(`[SPILL] 📊 Pool: ${fillerPool.length}/${SPILL_POOL_MAX} | Real: ${generated.filter(g => !g.isAI).length} | AI: ${generated.filter(g => g.isAI).length}`);
+  console.log(`[SPILL] 📊 Pool: ${window.spillPool}/${SPILL_POOL_MAX} | Real: ${generated.filter(g => !g.isAI).length} | AI: ${generated.filter(g => g.isAI).length}`);
 }
 
-// RENDER SPILLS
-function renderSpills() {
-  const list = $('spillsList');
-  if (!list) return;
-  
   // AMBIL REAL ENTRIES (SUDAH TERFILTER)
   let combined = [...realEntries];
   
   const needed = Math.max(0, SPILL_TARGET - combined.length);
   if (needed > 0) {
-    // Langsung ambil dari fillerPool (yang sudah diisi oleh interval)
-    combined = [...combined, ...fillerPool.slice(0, needed)];
+    // Langsung ambil dari window.spillPool (yang sudah diisi oleh interval)
+    combined = [...combined, ...window.spillPool(0, needed)];
   }
   
   combined.sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
@@ -1139,7 +1134,7 @@ function renderSpills() {
 
 // REACTIONS
 function reactLocal(fillerId, key) {
-  const entry = fillerPool.find(e => e.id === fillerId);
+  const entry = window.spillPool(e => e.id === fillerId);
   if (!entry) return;
   const wasActive = entry.userReacted === key;
   if (wasActive) { entry.reactions[key] = Math.max(0,(entry.reactions[key]||0)-1); entry.userReacted = null; }
@@ -1186,15 +1181,8 @@ async function reactDB(dbId, key) {
 
 async function refreshSpills() {
   toast('Memuat spill terbaru ☕');
-  fillerPool = [];
+ window.spillPool  = [];
   await loadRealEntries();
-}
-
-function filterMood(btn) {
-  document.querySelectorAll('.mood-chip').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  activeMood = btn.dataset.mood;
-  renderSpills();
 }
 
 const updateOnlineCount = () => {
