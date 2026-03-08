@@ -1717,25 +1717,6 @@ window.loadRealEntries = async function() {
   }
 };
 
-// Simpan fungsi original dengan nama beda
-const originalRenderSpills = renderSpills;
-
-// Buat fungsi baru dengan nama beda
-window.refreshSpills = async function() {
-  await brewNewSpills(); // panggil dari spill-generator.js
-  originalRenderSpills(); // panggil render asli
-};
-
-// Panggil dari generator
-window.renderSpills = function() {
-  // Panggil fungsi generator, BUKAN dirinya sendiri
-  if (typeof window.renderSpillsFromGenerator === 'function') {
-    window.renderSpillsFromGenerator();
-  } else {
-    originalRenderSpills();
-  }
-};
-
 // Hook untuk mood filter
 document.querySelectorAll('.mood-chip').forEach(chip => {
   chip.addEventListener('click', function() {
@@ -1756,5 +1737,7 @@ document.querySelector('.refresh-btn')?.addEventListener('click', function(e) {
 
 console.log('[SpillGen] 🔌 Integrated with spill.html');
 </script>
+  <!-- Di bagian bawah spill.html, sebelum </body> -->
+<script src="/spill-generator.js"></script> 
 </body>
 </html>
