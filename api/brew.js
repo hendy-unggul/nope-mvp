@@ -1,5 +1,5 @@
 // ============================================
-// rants.js - BACKEND KHUSUS SPILL GENERATOR
+// brew.js - BACKEND KHUSUS SPILL GENERATOR
 // LANGSUNG KONEK KE DEEPSEEK API
 // 100% INDEPENDENT - GA NYENTUH CHAT.JS
 // ============================================
