@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>JEJAK — masuk dulu bestie</title>
+<title>JEJAK — your space, your rules</title>
 
-<!-- ✅ FIX CSP: Tambahkan meta CSP yang proper -->
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
   script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
@@ -13,19 +12,39 @@
   font-src 'self' https://fonts.gstatic.com;
   connect-src 'self' https://*.supabase.co wss://*.supabase.co;
   img-src 'self' data: blob:;
-  worker-src 'self' blob:;
-  manifest-src 'self' blob:;
 ">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* ═══════════════════════════════════════════════════════════
+   NEO-BRUTALISM DESIGN SYSTEM
+   Color Palette: Fixed cyber theme (no vibe picker!)
+   ═══════════════════════════════════════════════════════════ */
 :root{
-  --bg:#080808;--sf:#0f0f0f;--sfe:#141414;--bd:#222;--bd2:#2e2e2e;
-  --tx:#f0ece6;--txs:#777;--txm:#444;
-  --ap:#ff2d55;--as:#00e5ff;--aq:#bfff00;--gold:#ffd60a;--purple:#bf5af2;
+  /* Background layers */
+  --bg:#080808;
+  --sf:#0f0f0f;
+  --sfe:#141414;
+  
+  /* Borders */
+  --bd:#222;
+  --bd2:#2e2e2e;
+  
+  /* Text */
+  --tx:#f0ece6;
+  --txs:#777;
+  --txm:#444;
+  
+  /* Accent colors - CYBER THEME (locked) */
+  --ap:#ff2d55;   /* Accent primary (hot pink) */
+  --as:#00e5ff;   /* Accent secondary (cyan) */
+  --aq:#bfff00;   /* Accent quaternary (lime) */
+  --gold:#ffd60a;
+  --purple:#bf5af2;
 }
+
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{height:100%}
 body{
@@ -35,19 +54,18 @@ body{
   padding:24px 20px 40px;overflow-x:hidden;position:relative;
 }
 
-/* GRAIN TEXTURE */
+/* Grain texture overlay */
 body::after{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.028;
   background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/200px 200px
 }
 
-/* SCANLINES BG */
+/* Scanline pattern */
 body::before{
   content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
   background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,229,255,.012) 2px,rgba(0,229,255,.012) 4px);
 }
 
-/* LOADING */
 .loading{
   position:fixed;inset:0;background:var(--bg);z-index:9998;
   display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;
@@ -61,21 +79,22 @@ body::before{
 @keyframes rot{to{transform:rotate(360deg)}}
 .l-txt{font-family:'DM Mono',monospace;font-size:11px;color:var(--txm);letter-spacing:3px;text-transform:uppercase}
 
-/* WRAPPER */
 .container{
   max-width:440px;width:100%;
   position:relative;z-index:1;
   display:flex;flex-direction:column;gap:0;
 }
 
-/* ACCENT BAR — top */
+/* Accent bar at top */
 .accent-bar{
   height:3px;
   background:linear-gradient(90deg,var(--ap),var(--as),var(--aq));
   margin-bottom:0;
 }
 
-/* HEADER / LOGO ZONE */
+/* ═══════════════════════════════════════════════════════════
+   HEADER / LOGO ZONE
+   ═══════════════════════════════════════════════════════════ */
 .logo-zone{
   background:var(--sf);
   border:2px solid var(--bd2);
@@ -85,7 +104,7 @@ body::before{
   box-shadow:6px 6px 0 #000;
 }
 
-/* Corner accents */
+/* Corner decorations */
 .logo-zone::before{
   content:'';position:absolute;top:-1px;left:-1px;
   width:20px;height:20px;
@@ -111,8 +130,14 @@ body::before{
   font-size:72px;line-height:.92;letter-spacing:3px;
   color:var(--tx);display:block;margin-bottom:4px;
 }
-.logo-big .x{color:var(--ap);display:inline-block;animation:spin-x 4s ease-in-out infinite}
-@keyframes spin-x{0%,90%,100%{transform:rotate(0) scale(1)}95%{transform:rotate(180deg) scale(1.2)}}
+.logo-big .x{
+  color:var(--ap);display:inline-block;
+  animation:spin-x 4s ease-in-out infinite;
+}
+@keyframes spin-x{
+  0%,90%,100%{transform:rotate(0) scale(1)}
+  95%{transform:rotate(180deg) scale(1.2)}
+}
 
 .logo-tagline{
   font-family:'DM Mono',monospace;font-size:11px;color:var(--txs);
@@ -128,35 +153,78 @@ body::before{
   box-shadow:2px 2px 0 #000;letter-spacing:.5px;text-transform:uppercase;
 }
 
-/* DEBUG BANNER */
-.debug-banner{
-  display:none;padding:10px 16px;
-  background:rgba(255,45,85,.08);border:2px solid var(--ap);border-top:none;
-  font-family:'DM Mono',monospace;font-size:10px;color:var(--ap);
-  text-align:center;line-height:1.6;letter-spacing:.5px;
-}
-.debug-banner.show{display:block}
-
-/* VIBE PICKER */
-.vibe-sect{
+/* ═══════════════════════════════════════════════════════════
+   MARKETING SECTION (was disclaimer, now selling point!)
+   ═══════════════════════════════════════════════════════════ */
+.marketing-box{
   margin-top:12px;
-  background:var(--sf);border:2px solid var(--bd2);
-  padding:14px 18px;box-shadow:4px 4px 0 #000;
-  display:flex;flex-direction:column;gap:10px;
+  background:var(--sf);
+  border:2px solid var(--bd2);
+  border-left:4px solid var(--as);
+  padding:20px 24px;
+  box-shadow:4px 4px 0 #000;
+  position:relative;
 }
-.vibe-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--txm);letter-spacing:3px;text-transform:uppercase}
-.vibe-row{display:flex;gap:8px;flex-wrap:wrap}
-.vibe-btn{
-  padding:7px 16px;background:var(--bg);border:2px solid var(--bd2);
-  font-family:'DM Mono',monospace;font-size:10px;font-weight:500;
-  color:var(--txs);text-transform:uppercase;letter-spacing:.5px;
-  white-space:nowrap;cursor:pointer;
-  box-shadow:3px 3px 0 #000;transition:all .08s;
-}
-.vibe-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
-.vibe-btn.active{background:var(--ap);border-color:#000;color:#fff;box-shadow:3px 3px 0 rgba(0,0,0,.5)}
 
-/* AUTH BOX */
+.marketing-hdr{
+  display:flex;align-items:center;gap:10px;margin-bottom:16px;
+}
+.marketing-hdr-icon{
+  width:10px;height:10px;background:var(--as);
+  transform:rotate(45deg);flex-shrink:0;
+}
+.marketing-hdr-title{
+  font-family:'Bebas Neue',sans-serif;font-size:20px;
+  color:var(--as);letter-spacing:2px;
+}
+
+.marketing-grid{
+  display:grid;grid-template-columns:1fr;gap:12px;
+}
+
+.marketing-item{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px;background:var(--bg);
+  border:2px solid var(--bd2);
+  transition:all .15s;
+}
+.marketing-item:hover{
+  border-color:var(--as);
+  transform:translate(-2px,-2px);
+  box-shadow:4px 4px 0 #000;
+}
+
+.marketing-item .icon{
+  flex-shrink:0;
+  font-size:24px;
+  width:32px;height:32px;
+  display:flex;align-items:center;justify-content:center;
+}
+
+.marketing-item .content{
+  flex:1;
+}
+
+.marketing-item .title{
+  font-family:'DM Mono',monospace;
+  font-size:12px;font-weight:700;
+  color:var(--tx);letter-spacing:.5px;
+  margin-bottom:4px;text-transform:uppercase;
+}
+
+.marketing-item .desc{
+  font-family:'DM Mono',monospace;
+  font-size:11px;color:var(--txs);
+  line-height:1.6;letter-spacing:.3px;
+}
+
+.marketing-item .desc b{
+  color:var(--as);font-weight:500;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AUTH BOX
+   ═══════════════════════════════════════════════════════════ */
 .auth-box{
   margin-top:12px;
   background:var(--sf);border:2px solid var(--bd2);
@@ -173,7 +241,6 @@ body::before{
 .ab-corner-tr{position:absolute;top:-1px;right:-1px;width:16px;height:16px;border-top:3px solid var(--aq);border-right:3px solid var(--aq)}
 .ab-corner-bl{position:absolute;bottom:-1px;left:-1px;width:16px;height:16px;border-bottom:3px solid var(--gold);border-left:3px solid var(--gold)}
 
-/* INPUT SECTION */
 .input-hdr{margin-bottom:6px}
 .input-title{
   font-family:'Bebas Neue',sans-serif;font-size:24px;
@@ -194,16 +261,31 @@ body::before{
   width:100%;background:var(--bg);border:2px solid var(--bd2);
   padding:16px 18px;color:var(--tx);
   font-family:'DM Mono',monospace;font-size:16px;font-weight:500;
-  text-align:left;text-transform:lowercase;
+  text-align:left;
   outline:none;letter-spacing:.08em;
   transition:border-color .15s,box-shadow .15s;
   box-shadow:3px 3px 0 #000;
 }
+.form-group input.lowercase{text-transform:lowercase}
 .form-group input:focus{border-color:var(--ap);box-shadow:3px 3px 0 #000,0 0 0 1px var(--ap)}
 .form-group input::placeholder{color:var(--txm);font-weight:400}
 .form-group input.is-valid{border-color:var(--aq)}
 .form-group input.is-invalid{border-color:var(--ap)}
-.form-group input.is-checking{border-color:var(--as)}
+
+/* PIN INPUT with dots */
+.pin-input{
+  text-align:center!important;
+  letter-spacing:1em!important;
+  font-size:24px!important;
+  font-weight:700!important;
+  -webkit-text-security:disc;
+  text-security:disc;
+}
+.pin-input::placeholder{
+  letter-spacing:1em;
+  -webkit-text-security:none;
+  text-security:none;
+}
 
 .feedback{
   margin-top:8px;padding:10px 14px;
@@ -213,18 +295,7 @@ body::before{
 .feedback.show{display:block}
 .feedback.error{background:rgba(255,45,85,.08);border-color:var(--ap);color:var(--ap)}
 .feedback.success{background:rgba(191,255,0,.06);border-color:var(--aq);color:var(--aq)}
-.feedback.checking{background:rgba(0,229,255,.06);border-color:var(--as);color:var(--as)}
 
-.suggest{
-  display:none;margin-top:8px;padding:10px 14px;
-  background:rgba(0,229,255,.06);border:2px solid var(--as);
-  font-family:'DM Mono',monospace;font-size:11px;color:var(--as);
-  cursor:pointer;transition:all .1s;letter-spacing:.5px;
-}
-.suggest.show{display:block}
-.suggest:active{background:rgba(0,229,255,.12)}
-
-/* SUBMIT BUTTON */
 .btn{
   width:100%;background:var(--ap);color:#fff;
   border:2px solid #000;padding:18px 24px;
@@ -233,47 +304,52 @@ body::before{
   box-shadow:5px 5px 0 #000;
   transition:transform .08s,box-shadow .08s;
   display:flex;align-items:center;justify-content:center;gap:12px;
-  position:relative;
 }
 .btn::before{content:'⬡';font-size:18px;opacity:.8}
 .btn:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 #000}
 .btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 #000}
 .btn:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:5px 5px 0 #000}
 
-/* SAFETY NOTIF */
-.notif{
-  margin-top:12px;background:var(--sfe);
-  border:2px solid var(--bd2);border-left:4px solid var(--as);
-  padding:16px 18px;
+.mode-toggle{
+  margin-top:12px;text-align:center;
 }
-.notif-hdr{
-  display:flex;align-items:center;gap:8px;margin-bottom:12px;
-}
-.notif-hdr-icon{
-  width:8px;height:8px;background:var(--as);
-  transform:rotate(45deg);flex-shrink:0;
-}
-.notif-hdr-title{
-  font-family:'DM Mono',monospace;font-size:10px;
-  color:var(--as);letter-spacing:2px;text-transform:uppercase;
-}
-.notif-list{display:flex;flex-direction:column;gap:8px}
-.notif-item{
-  display:flex;align-items:flex-start;gap:10px;
+.mode-toggle-btn{
+  background:none;border:none;
   font-family:'DM Mono',monospace;font-size:11px;
-  color:var(--txs);line-height:1.6;
+  color:var(--as);text-decoration:underline;
+  cursor:pointer;letter-spacing:.5px;
 }
-.notif-item .tag{
-  flex-shrink:0;padding:2px 8px;
-  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
-  text-transform:uppercase;border:2px solid;font-weight:500;
-}
-.notif-item .tag.red{color:var(--ap);border-color:var(--ap)}
-.notif-item .tag.cyan{color:var(--as);border-color:var(--as)}
-.notif-item .tag.lime{color:var(--aq);border-color:var(--aq)}
-.notif-item .tag.gold{color:var(--gold);border-color:var(--gold)}
+.mode-toggle-btn:hover{color:var(--aq)}
 
-/* FOOTER */
+/* ═══════════════════════════════════════════════════════════
+   DISCLAIMER (small, bottom of register form)
+   ═══════════════════════════════════════════════════════════ */
+.disclaimer-small{
+  margin-top:16px;padding:12px 16px;
+  background:rgba(255,45,85,.05);
+  border:2px solid var(--ap);border-left:4px solid var(--ap);
+}
+.disclaimer-small-text{
+  font-family:'DM Mono',monospace;font-size:10px;
+  color:var(--txs);line-height:1.6;letter-spacing:.3px;
+}
+.disclaimer-small-text b{
+  color:var(--ap);font-weight:700;
+}
+
+.agreement{
+  margin-top:16px;display:flex;align-items:flex-start;gap:12px;
+}
+.agreement input[type="checkbox"]{
+  margin-top:4px;width:18px;height:18px;
+  cursor:pointer;accent-color:var(--ap);
+}
+.agreement label{
+  font-family:'DM Mono',monospace;font-size:11px;
+  color:var(--tx);line-height:1.6;cursor:pointer;
+}
+.agreement label b{color:var(--ap)}
+
 .footer{
   margin-top:12px;padding:12px 16px;
   border:2px solid var(--bd);
@@ -289,9 +365,7 @@ body::before{
   .auth-box{padding:20px 18px}
 }
 
-/* ═══════════════════════════════════════════════════════════
-   PHONE FRAME — desktop only (>480px)
-   ═══════════════════════════════════════════════════════════ */
+/* Desktop phone frame */
 @media(min-width:481px){
   body{
     background:
@@ -301,660 +375,527 @@ body::before{
       repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(0,229,255,.015) 40px,rgba(0,229,255,.015) 41px),
       #030303!important;
     padding:40px 20px!important;
-    align-items:center!important;
-    justify-content:center!important;
-    min-height:100vh!important;
-  }
-  body::before{
-    content:'JEJAK.SPACE';
-    position:fixed;top:20px;left:24px;
-    font-family:'DM Mono',monospace;font-size:10px;
-    color:rgba(0,229,255,.25);letter-spacing:4px;text-transform:uppercase;
-    pointer-events:none;z-index:1;
   }
   .phone-shell{
-    width:390px!important;
-    min-height:844px!important;
-    border-radius:44px!important;
-    overflow:hidden!important;
-    position:relative!important;
-    background:var(--bg)!important;
+    width:390px!important;min-height:844px!important;
+    border-radius:44px!important;overflow:hidden!important;
+    position:relative!important;background:var(--bg)!important;
     box-shadow:
       0 0 0 1px rgba(255,255,255,.08),
       0 0 0 10px #111,
       0 0 0 11px rgba(255,255,255,.06),
       0 0 60px rgba(0,0,0,.8),
       0 0 120px rgba(0,229,255,.06)!important;
-    display:flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-    padding:72px 0 40px!important;
+    display:flex!important;padding:72px 0 40px!important;
   }
-  /* Dynamic island notch */
   .phone-shell::before{
-    content:'';
-    position:absolute;top:12px;left:50%;transform:translateX(-50%);
-    width:120px;height:34px;
-    background:#000;border-radius:20px;
-    z-index:10001;
+    content:'';position:absolute;top:12px;left:50%;transform:translateX(-50%);
+    width:120px;height:34px;background:#000;border-radius:20px;z-index:10001;
     box-shadow:0 0 0 1px rgba(255,255,255,.06);
   }
   .phone-shell::after{
-    content:'';
-    position:absolute;top:20px;left:calc(50% + 42px);
-    width:12px;height:12px;
-    background:#0a0a0a;border-radius:50%;
-    z-index:10002;
+    content:'';position:absolute;top:20px;left:calc(50% + 42px);
+    width:12px;height:12px;background:#0a0a0a;border-radius:50%;z-index:10002;
     box-shadow:inset 0 0 0 2px rgba(255,255,255,.04), 0 0 0 2px rgba(0,229,255,.1);
   }
-  .container{
-    max-width:100%!important;
-    width:100%!important;
-    padding:0 28px!important;
-  }
+  .container{padding:0 28px!important}
 }
 </style>
-
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="JEJAK">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#080808">
 </head>
 <body>
-<div class="loading" id="loading">
+<div class="loading hidden" id="loading">
   <div class="l-spin"></div>
-  <div class="l-txt">checking session...</div>
+  <div class="l-txt">loading...</div>
 </div>
 
 <div class="phone-shell"><div class="container">
   <div class="accent-bar"></div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════════ -->
   <div class="logo-zone">
     <span class="logo-corner-tr"></span>
     <span class="logo-corner-bl"></span>
     <span class="online-pill" id="onlinePill">21 ONLINE</span>
-    <div class="logo-eyebrow">vibe radar platform</div>
+    <div class="logo-eyebrow">zero-knowledge platform</div>
     <span class="logo-big">JE<span class="x">✕</span>AK</span>
-    <div class="logo-tagline">nyambat · aksi · solusi</div>
+    <div class="logo-tagline">your space · your rules</div>
   </div>
 
-  <!-- DEBUG BANNER: tampil hanya jika session rusak -->
-  <div class="debug-banner" id="debug-banner"></div>
-
-  <!-- VIBE PICKER -->
-  <div class="vibe-sect">
-    <span class="vibe-label">pilih vibe kamu</span>
-    <div class="vibe-row">
-      <button class="vibe-btn active" data-vibe="cyber">CYBER 💻</button>
-      <button class="vibe-btn" data-vibe="neon">NEON ✨</button>
-      <button class="vibe-btn" data-vibe="retro">RETRO 🎮</button>
-      <button class="vibe-btn" data-vibe="pastel">SOFT 🌸</button>
+  <!-- ═══════════════════════════════════════════════════════════
+       MARKETING BOX (Gen Z copy!)
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="marketing-box">
+    <div class="marketing-hdr">
+      <div class="marketing-hdr-icon"></div>
+      <span class="marketing-hdr-title">TRUE PRIVACY & ANONYMITY</span>
+    </div>
+    
+    <div class="marketing-grid">
+      <div class="marketing-item">
+        <div class="icon">❌</div>
+        <div class="content">
+          <div class="title">TIDAK ADA</div>
+          <div class="desc">Email, phone, recovery questions — <b>platform ga tau siapa lu</b></div>
+        </div>
+      </div>
+      
+      <div class="marketing-item">
+        <div class="icon">✅</div>
+        <div class="content">
+          <div class="title">HANYA ADA</div>
+          <div class="desc">Username + PIN + Device — <b>benar-benar anonymous</b></div>
+        </div>
+      </div>
+      
+      <div class="marketing-item">
+        <div class="icon">🔒</div>
+        <div class="content">
+          <div class="title">YOUR KEYS, YOUR ACCOUNT</div>
+          <div class="desc">Platform <b>TIDAK BISA</b> recover account — <b>TIDAK TAHU</b> siapa kamu</div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- AUTH BOX -->
+  <!-- ═══════════════════════════════════════════════════════════
+       AUTH FORMS
+       ═══════════════════════════════════════════════════════════ -->
   <div class="auth-box">
     <span class="ab-corner-tr"></span>
     <span class="ab-corner-bl"></span>
 
-    <form id="frm">
+    <!-- REGISTER FORM -->
+    <form id="register-form" style="display:none">
       <div class="input-hdr">
-        <div class="input-title">USERNAME VIBES</div>
-        <div class="input-hint">format: <b>kata.kata</b> &nbsp;—&nbsp; contoh: <b>over.thinker</b></div>
+        <div class="input-title">BUAT AKUN</div>
+        <div class="input-hint">username format: <b>kata.kata</b></div>
       </div>
 
       <div class="form-group">
-        <input type="text" id="uname" placeholder="over.thinker"
-          autocomplete="off" autofocus maxlength="30" spellcheck="false">
-        <div class="feedback" id="fb"></div>
-        <div class="suggest" id="sg"></div>
+        <input type="text" id="reg-username" class="lowercase" placeholder="over.thinker"
+          autocomplete="off" maxlength="30" spellcheck="false">
+        <div class="feedback" id="reg-username-fb"></div>
       </div>
 
-      <button type="submit" class="btn" id="btn" disabled>GASKEUN →</button>
+      <div class="input-hint" style="margin-bottom:8px">buat PIN 6 digit</div>
+      <div class="form-group">
+        <input type="text" id="reg-pin" class="pin-input" placeholder="● ● ● ● ● ●"
+          autocomplete="off" maxlength="6" inputmode="numeric" pattern="[0-9]*">
+        <div class="feedback" id="reg-pin-fb"></div>
+      </div>
+
+      <div class="input-hint" style="margin-bottom:8px">konfirmasi PIN</div>
+      <div class="form-group">
+        <input type="text" id="reg-pin-confirm" class="pin-input" placeholder="● ● ● ● ● ●"
+          autocomplete="off" maxlength="6" inputmode="numeric" pattern="[0-9]*">
+        <div class="feedback" id="reg-pin-confirm-fb"></div>
+      </div>
+
+      <!-- Small disclaimer at bottom -->
+      <div class="disclaimer-small">
+        <div class="disclaimer-small-text">
+          <b>⚠️ PENTING:</b> PIN hilang = akun hilang <b>PERMANENT</b>. No recovery, no reset. 
+          Kamu <b>100% bertanggung jawab</b>. Simpan PIN di tempat aman!
+        </div>
+      </div>
+
+      <div class="agreement">
+        <input type="checkbox" id="agree-checkbox">
+        <label for="agree-checkbox">
+          Saya paham dan <b>terima tanggung jawab penuh</b> atas akun ini
+        </label>
+      </div>
+
+      <button type="submit" class="btn" id="register-btn" disabled>DAFTAR →</button>
+      
+      <div class="mode-toggle">
+        <button type="button" class="mode-toggle-btn" id="to-login">Sudah punya akun? Masuk</button>
+      </div>
     </form>
 
-    <!-- SAFETY NOTIF -->
-    <div class="notif">
-      <div class="notif-hdr">
-        <div class="notif-hdr-icon"></div>
-        <span class="notif-hdr-title">real talk — stay safe bestie 🔒</span>
+    <!-- LOGIN FORM -->
+    <form id="login-form">
+      <div class="input-hdr">
+        <div class="input-title">MASUK</div>
+        <div class="input-hint">username + PIN kamu</div>
       </div>
-      <div class="notif-list">
-        <div class="notif-item"><span class="tag red">NO</span><span>real names, foto wajah, data pribadi — keep it <b style="color:var(--tx)">mysterious</b> ✨</span></div>
-        <div class="notif-item"><span class="tag cyan">ZERO</span><span>hoax, hate speech, content ilegal — obey the law fr fr 🚫</span></div>
-        <div class="notif-item"><span class="tag lime">STAY</span><span>accountable for everything you post — no cap, no excuses 💯</span></div>
-        <div class="notif-item"><span class="tag gold">FUN</span><span>have fun but keep it real — vibe check passed = bestie energy 🤝</span></div>
+
+      <div class="form-group">
+        <input type="text" id="login-username" class="lowercase" placeholder="over.thinker"
+          autocomplete="off" maxlength="30" spellcheck="false">
+        <div class="feedback" id="login-username-fb"></div>
       </div>
-    </div>
+
+      <div class="input-hint" style="margin-bottom:8px">PIN 6 digit</div>
+      <div class="form-group">
+        <input type="text" id="login-pin" class="pin-input" placeholder="● ● ● ● ● ●"
+          autocomplete="off" maxlength="6" inputmode="numeric" pattern="[0-9]*">
+        <div class="feedback" id="login-pin-fb"></div>
+      </div>
+
+      <button type="submit" class="btn" id="login-btn" disabled>MASUK →</button>
+      
+      <div class="mode-toggle">
+        <button type="button" class="mode-toggle-btn" id="to-register">Belum punya akun? Daftar</button>
+      </div>
+
+      <div class="disclaimer-small" style="margin-top:16px">
+        <div class="disclaimer-small-text">
+          Lupa PIN? <b>Ga bisa recovery</b> — harus buat akun baru (username berbeda)
+        </div>
+      </div>
+    </form>
   </div>
 
   <!-- FOOTER -->
   <div class="footer">
     <div class="footer-left"><span class="footer-dot"></span>soul by itsALrUdio</div>
-    <div class="footer-right">v2.3 · 2025</div>
+    <div class="footer-right">v3.0-final · 2025</div>
   </div>
-</div></div><!-- /phone-shell -->
+</div></div>
 
-<!-- ✅ LOAD EXTERNAL LIBRARIES FIRST -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@4/dist/fp.min.js"></script>
-
 <script>
 // ============================================
-// ✅ FIX: SHARED CONSTANTS INLINE (tanpa import/export)
+// CONFIG
 // ============================================
-window.JEJAK = window.JEJAK || {};
-
-// ⚠️ PENTING: ISI CREDENTIALS SUPABASE ANDA DI SINI!
-// Dapatkan dari: https://app.supabase.com/project/_/settings/api
-JEJAK.SUPABASE_URL = 'https://fuovfrdicdhnlymnacpz.supabase.co'; // ← GANTI INI!
-JEJAK.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0';           // ← GANTI INI!
-
-// Session keys
-JEJAK.SK = {
-  username: 'jejak_username',
-  sessionId: 'jejak_session_id',
-  loggedIn: 'jejak_logged_in',
-  vibe: 'jejak_vibe',
-  uid: 'jejak_uid'
+window.JEJAK = {
+  SUPABASE_URL: 'https://YOUR_PROJECT_ID.supabase.co',
+  SUPABASE_KEY: 'YOUR_ANON_PUBLIC_KEY_HERE',
+  SK: {
+    username: 'jejak_username',
+    uid: 'jejak_uid',
+    loggedIn: 'jejak_logged_in'
+  }
 };
 
-// Helper functions
-JEJAK.saveSession = function(username, userId, fingerprint){
-  localStorage.setItem(this.SK.username, username);
-  localStorage.setItem(this.SK.uid, userId);
-  localStorage.setItem(this.SK.loggedIn, 'true');
-  if(fingerprint) localStorage.setItem(this.SK.sessionId, fingerprint);
-  console.log('[JEJAK] Session saved:', username);
-};
-
-JEJAK.clearSession = function(reason){
-  Object.values(this.SK).forEach(function(k){ localStorage.removeItem(k); });
-  console.log('[JEJAK] Session cleared:', reason || 'manual');
-};
-
-// ============================================
-// SUPABASE CONFIG
-// ============================================
-var SUPABASE_URL = JEJAK.SUPABASE_URL;
-var SUPABASE_KEY = JEJAK.SUPABASE_KEY;
 var db = null;
-
-// Session keys
 var SK = JEJAK.SK;
 
 // ============================================
-// VIBE THEMES
+// SIMPLE HASH (demo only - production needs bcrypt server-side)
 // ============================================
-var VIBES = {
-  cyber:  { ac: '#ff2d55', as: '#00e5ff', aq: '#bfff00', gold: '#ffd60a' },
-  neon:   { ac: '#bf5af2', as: '#ff2d55', aq: '#ffd60a', gold: '#00e5ff' },
-  retro:  { ac: '#ffd60a', as: '#ff9f0a', aq: '#bfff00', gold: '#ff2d55' },
-  pastel: { ac: '#ff2d55', as: '#bf5af2', aq: '#00e5ff', gold: '#bfff00' }
-};
+async function hashPIN(pin){
+  var encoder = new TextEncoder();
+  var data = encoder.encode(pin + 'jejak_salt_2025');
+  var hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  var hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 
 // ============================================
-// ✅ FIX: VALIDATION (dengan semua bug fixes)
+// VALIDATION
 // ============================================
 var UN_PAT = /^[a-z][a-z0-9]*\.[a-z][a-z0-9]*$/;
 
 function $el(id){ return document.getElementById(id) }
-function $u(){  return $el('uname') }
-function $fb(){ return $el('fb') }
-function $sg(){ return $el('sg') }
-function $btn(){ return $el('btn') }
 
-function setFb(type, msg){
-  var el = $fb(), inp = $u();
+function setFb(elId, type, msg){
+  var el = $el(elId);
+  if(!el) return;
   if(!type || !msg){
-    el.className = 'feedback'; el.textContent = ''; inp.className = ''; return;
+    el.className = 'feedback'; el.textContent = ''; return;
   }
   el.className = 'feedback show ' + type;
   el.textContent = msg;
-  inp.className = type === 'success' ? 'is-valid' : type === 'checking' ? 'is-checking' : 'is-invalid';
 }
 
-function setSg(text){
-  var el = $sg();
-  if(!text){ el.className = 'suggest'; el.textContent = ''; return; }
-  el.textContent = '→ maksud kamu: ' + text + '? klik untuk apply';
-  el.className = 'suggest show';
-  el.onclick = function(){ $u().value = text; $u().dispatchEvent(new Event('input')); };
-}
-
-function validate(raw){
-  if(!raw || !raw.trim()) return { ok: false, msg: 'username tidak boleh kosong' };
-  
-  var v = raw.trim().toLowerCase();
-  
+function validateUsername(v){
+  if(!v || !v.trim()) return { ok: false, msg: 'username ga boleh kosong' };
+  v = v.trim().toLowerCase();
   if(v.length > 30) return { ok: false, msg: 'maksimal 30 karakter' };
-  
-  if(v.includes(' ')){
-    var s = v.trim().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '');
-    return { ok: false, msg: 'gunakan titik bukan spasi — format: kata.kata', suggest: s };
-  }
-  
-  if(!v.includes('.')) return { ok: false, msg: 'harus dua kata dipisah titik · contoh: over.thinker' };
-  
-  if((v.match(/\./g) || []).length > 1) return { ok: false, msg: 'hanya boleh satu titik pemisah' };
-  
-  if(!UN_PAT.test(v)) return { ok: false, msg: 'hanya huruf kecil a-z, angka, dan satu titik' };
-  
-  // ✅ FIX: Validasi parts dengan benar
+  if(v.includes(' ')) return { ok: false, msg: 'pake titik, bukan spasi' };
+  if(!v.includes('.')) return { ok: false, msg: 'harus dua kata pisah titik' };
+  if((v.match(/\./g) || []).length > 1) return { ok: false, msg: 'cuma boleh satu titik' };
+  if(!UN_PAT.test(v)) return { ok: false, msg: 'cuma huruf kecil a-z, angka, dan satu titik' };
   var parts = v.split('.');
   if(parts.length !== 2) return { ok: false, msg: 'format harus kata.kata' };
-  if(parts[0].length < 2) return { ok: false, msg: 'kata pertama minimal 2 huruf' };
-  if(parts[1].length < 2) return { ok: false, msg: 'kata kedua minimal 2 huruf' };
-  
+  if(parts[0].length < 2 || parts[1].length < 2) return { ok: false, msg: 'minimal 2 huruf per kata' };
   return { ok: true, value: v };
 }
 
-// ============================================
-// DEVICE FINGERPRINT
-// ============================================
-var _fpPromise = null;
-var _deviceFp  = null;
-
-function initFingerprint(){
-  if(!window.FingerprintJS) return Promise.resolve(null);
-  if(_fpPromise) return _fpPromise;
-  _fpPromise = FingerprintJS.load()
-    .then(function(fp){ return fp.get(); })
-    .then(function(result){
-      _deviceFp = result.visitorId;
-      console.log('[JEJAK] Device fingerprint:', _deviceFp.substring(0,8)+'...');
-      return _deviceFp;
-    })
-    .catch(function(e){
-      console.warn('[JEJAK] Fingerprint gagal, fallback ke localStorage sig:', e);
-      _deviceFp = getLocalSig();
-      return _deviceFp;
-    });
-  return _fpPromise;
-}
-
-function getLocalSig(){
-  var sig = localStorage.getItem(SK.sessionId);
-  if(!sig){
-    var raw = navigator.userAgent + screen.width + 'x' + screen.height
-            + (navigator.language||'') + (new Date().getTimezoneOffset())
-            + Date.now() + Math.random().toString(36).slice(2);
-    sig = btoa(unescape(encodeURIComponent(raw))).slice(0,32).replace(/[^a-zA-Z0-9]/g,'');
-    localStorage.setItem(SK.sessionId, sig);
-  }
-  return sig;
-}
-
-function getDeviceSignature(){
-  return _deviceFp || getLocalSig();
+function validatePIN(pin){
+  if(!/^\d{6}$/.test(pin)) return { ok: false, msg: 'PIN harus 6 digit angka' };
+  if(/(\d)\1{5}/.test(pin)) return { ok: false, msg: 'PIN terlalu lemah (semua digit sama)' };
+  if(pin === '123456' || pin === '654321') return { ok: false, msg: 'PIN terlalu lemah (sequential)' };
+  if(pin === '000000' || pin === '999999') return { ok: false, msg: 'PIN terlalu lemah' };
+  return { ok: true };
 }
 
 // ============================================
-// SESSION HELPERS
-// ============================================
-function clearSession(reason){
-  JEJAK.clearSession(reason);
-  if(reason){
-    var banner = $el('debug-banner');
-    if(banner){ 
-      banner.textContent = '⚠️ Session direset: ' + reason + ' — silakan login ulang'; 
-      banner.classList.add('show'); 
-    }
-  }
-}
-
-function saveSession(username, userId, fingerprint){
-  JEJAK.saveSession(username, userId, fingerprint);
-}
-
-// ============================================
-// ✅ FIX: SUPABASE INIT dengan Error Handling
+// DB INIT
 // ============================================
 function initDb(){
-  // Validasi URL dan Key dulu sebelum init
-  if(!SUPABASE_URL || SUPABASE_URL.includes('YOUR_PROJECT_ID')){
-    console.error('%c[JEJAK] ⚠️ SUPABASE_URL belum diisi!', 'color:#ff2d55;font-size:14px;font-weight:bold');
-    console.error('%c[JEJAK] Edit file ini dan ganti SUPABASE_URL + SUPABASE_KEY', 'color:#ffd60a');
-    setFb('error', '⚠️ Database belum dikonfigurasi — running in DEMO MODE');
+  if(!JEJAK.SUPABASE_URL || JEJAK.SUPABASE_URL.includes('YOUR_PROJECT_ID')){
+    console.error('[JEJAK] ⚠️ SUPABASE_URL belum diisi!');
     return false;
   }
-  
-  if(!SUPABASE_KEY || SUPABASE_KEY.includes('YOUR_ANON')){
-    console.error('%c[JEJAK] ⚠️ SUPABASE_KEY belum diisi!', 'color:#ff2d55;font-size:14px;font-weight:bold');
-    setFb('error', '⚠️ Database belum dikonfigurasi — running in DEMO MODE');
+  if(!window.supabase){
+    console.error('[JEJAK] Supabase SDK not loaded');
     return false;
   }
-  
-  if(!window.supabase || !window.supabase.createClient){
-    console.error('[JEJAK] Supabase SDK tidak berhasil dimuat!');
-    setFb('error', '❌ Gagal load Supabase SDK. Cek koneksi internet.');
-    return false;
-  }
-  
   try{
-    db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    console.log('%c[JEJAK] ✓ Supabase initialized', 'color:#00e5ff;font-weight:bold');
+    db = window.supabase.createClient(JEJAK.SUPABASE_URL, JEJAK.SUPABASE_KEY);
+    console.log('[JEJAK] ✓ DB initialized');
     return true;
   } catch(e){
-    console.error('[JEJAK] Supabase init error:', e);
-    setFb('error', '❌ Error: ' + e.message);
+    console.error('[JEJAK] DB init error:', e);
     return false;
   }
 }
 
 // ============================================
-// CHECK USERNAME AVAILABILITY
+// REGISTER
 // ============================================
-var _deb = null, _last = null;
-
-async function checkAvail(username){
-  if(username === _last) return;
-  _last = username;
-  $btn().disabled = true;
-  setFb('checking', '⏳ mengecek ketersediaan...');
+$el('register-form').addEventListener('submit', async function(e){
+  e.preventDefault();
   
-  // Demo mode jika tidak ada DB
-  if(!db){
-    setTimeout(function(){
-      setFb('success', '✓ ' + username + ' tersedia (demo mode — database tidak terhubung)');
-      $btn().disabled = false;
-    }, 500);
+  var username = $el('reg-username').value;
+  var pin = $el('reg-pin').value;
+  var pinConfirm = $el('reg-pin-confirm').value;
+  var agreed = $el('agree-checkbox').checked;
+  
+  setFb('reg-username-fb', '', '');
+  setFb('reg-pin-fb', '', '');
+  setFb('reg-pin-confirm-fb', '', '');
+  
+  var unValid = validateUsername(username);
+  if(!unValid.ok){
+    setFb('reg-username-fb', 'error', unValid.msg);
     return;
   }
   
-  try{
-    var result = await db.from('profiles').select('id, username').eq('username', username).limit(1);
-    if(result.error) throw result.error;
-    if(!result.data || result.data.length === 0) setFb('success', '✓ ' + username + ' tersedia — siap daftar!');
-    else setFb('success', '✓ ' + username + ' ditemukan — welcome back!');
-    $btn().disabled = false;
-  } catch(e){
-    console.warn('[JEJAK] Check avail error:', e);
-    setFb('checking', '⚠️ koneksi lambat — coba submit langsung');
-    $btn().disabled = false;
-  }
-}
-
-// ============================================
-// INPUT HANDLER
-// ============================================
-$u().addEventListener('input', function(e){
-  var v = e.target.value;
-  var fmt = v.toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '').replace(/\.{2,}/g, '.');
-  
-  if(fmt !== v){
-    var p = e.target.selectionStart;
-    e.target.value = fmt;
-    try{ e.target.setSelectionRange(p, p); } catch(_){}
-    v = fmt;
+  var pinValid = validatePIN(pin);
+  if(!pinValid.ok){
+    setFb('reg-pin-fb', 'error', pinValid.msg);
+    return;
   }
   
-  if(!v){ 
-    setFb('', ''); 
-    setSg(null); 
-    $btn().disabled = true; 
-    $u().className = ''; 
-    _last = null; 
-    return; 
+  if(pin !== pinConfirm){
+    setFb('reg-pin-confirm-fb', 'error', 'PIN ga cocok');
+    return;
   }
   
-  var r = validate(v);
-  
-  if(!r.ok){ 
-    setFb('error', r.msg); 
-    setSg(r.suggest || null); 
-    $btn().disabled = true; 
-    clearTimeout(_deb); 
-    _last = null; 
-    return; 
+  if(!agreed){
+    alert('⚠️ Lu harus terima tanggung jawab dulu sebelum daftar!');
+    return;
   }
   
-  setSg(null);
-  clearTimeout(_deb);
-  _deb = setTimeout(function(){ checkAvail(r.value); }, 600);
-});
-
-$u().addEventListener('paste', function(e){
-  e.preventDefault();
-  var p = (e.clipboardData || window.clipboardData).getData('text');
-  e.target.value = p.trim().toLowerCase()
-    .replace(/[\s_\-]+/g, '.')
-    .replace(/[^a-z0-9.]/g, '')
-    .replace(/\.{2,}/g, '.')
-    .slice(0, 30);
-  e.target.dispatchEvent(new Event('input'));
-});
-
-// ============================================
-// VIBE
-// ============================================
-function setVibe(v){
-  var c = VIBES[v]; if(!c) return;
-  var r = document.documentElement.style;
-  r.setProperty('--ap', c.ac);
-  r.setProperty('--as', c.as);
-  r.setProperty('--aq', c.aq);
-  r.setProperty('--gold', c.gold);
-  document.querySelectorAll('.vibe-btn').forEach(function(b){
-    b.classList.toggle('active', b.getAttribute('data-vibe') === v);
-  });
-  localStorage.setItem(SK.vibe, v);
-}
-
-document.querySelectorAll('.vibe-btn').forEach(function(btn){
-  btn.addEventListener('click', function(){ setVibe(this.getAttribute('data-vibe')); });
-});
-
-// ============================================
-// FORM SUBMIT
-// ============================================
-$el('frm').addEventListener('submit', async function(e){
-  e.preventDefault();
-  
-  var r = validate($u().value);
-  if(!r.ok){ 
-    setFb('error', r.msg); 
-    return; 
-  }
-
-  var username = r.value;
-  var btn = $btn();
+  var btn = $el('register-btn');
   btn.disabled = true;
-  btn.textContent = 'MASUK...';
-
+  btn.textContent = 'PROSES...';
+  
   try{
-    // Demo mode jika tidak ada database
-    if(!db){
-      console.warn('[JEJAK] Demo mode - database tidak terhubung');
-      setFb('success', '✓ Demo mode: login sebagai @' + username);
-      
-      var demoUserId = 'demo_' + Math.random().toString(36).substr(2, 16);
-      saveSession(username, demoUserId, getDeviceSignature());
-      
-      setTimeout(function(){
-        alert('✓ Login berhasil (demo mode)!\n\nUsername: ' + username + '\nUserID: ' + demoUserId + '\n\n⚠️ Untuk mode production, isi SUPABASE_URL dan SUPABASE_KEY di script.');
-      }, 700);
-      
-      btn.disabled = false;
-      btn.textContent = 'GASKEUN →';
-      return;
+    if(!db) throw new Error('Database ga terhubung');
+    
+    var pinHash = await hashPIN(pin);
+    
+    var { data, error } = await db
+      .from('profiles')
+      .insert({
+        username: unValid.value,
+        pin_hash: pinHash
+      })
+      .select('id, username');
+    
+    if(error){
+      if(error.code === '23505'){
+        throw new Error('Username udah dipake — coba yang lain');
+      }
+      throw error;
     }
-
-    // Real database flow
-    btn.textContent = 'VERIFIKASI DEVICE...';
-    var fp = await initFingerprint();
-    if(fp) localStorage.setItem(SK.sessionId, fp);
-
-    btn.textContent = 'NGECEK USERNAME...';
-    var existingResult = await db.from('profiles')
-      .select('id, username, device_fp')
-      .eq('username', username)
-      .limit(1);
-      
-    if(existingResult.error) throw existingResult.error;
-
-    var userId = null;
-    var isNewUser = !existingResult.data || existingResult.data.length === 0;
-
-    if(isNewUser){
-      if(fp){
-        var deviceCheck = await db.from('profiles')
-          .select('id, username')
-          .eq('device_fp', fp)
-          .limit(1);
-
-        if(!deviceCheck.error && deviceCheck.data && deviceCheck.data.length > 0){
-          var existingUsername = deviceCheck.data[0].username;
-          var existingId = deviceCheck.data[0].id;
-          setFb('success', '↩ Device ini sudah terdaftar sebagai @' + existingUsername + ' — masuk otomatis!');
-          saveSession(existingUsername, existingId);
-          $u().value = existingUsername;
-          setTimeout(function(){ window.location.href = 'spill.html'; }, 1200);
-          return;
-        }
-      }
-
-      btn.textContent = 'BIKIN AKUN...';
-      var insertData = { username: username };
-      if(fp) insertData.device_fp = fp;
-
-      var insertResult = await db.from('profiles')
-        .insert(insertData)
-        .select('id, username');
-
-      if(insertResult.error){
-        if(insertResult.error.code === '23505'){
-          var retryResult = await db.from('profiles')
-            .select('id, username')
-            .eq('username', username)
-            .limit(1);
-          if(!retryResult.error && retryResult.data && retryResult.data.length > 0){
-            userId = retryResult.data[0].id;
-          } else {
-            throw insertResult.error;
-          }
-        } else {
-          throw insertResult.error;
-        }
-      } else {
-        if(!insertResult.data || insertResult.data.length === 0 || !insertResult.data[0].id)
-          throw new Error('Profile dibuat tapi id tidak ada — cek RLS policy tabel profiles');
-        userId = insertResult.data[0].id;
-        setFb('success', '🎉 Welcome, @' + username + '! Akun baru dibuat ✓');
-      }
-
-    } else {
-      var storedFp = existingResult.data[0].device_fp;
-      userId = existingResult.data[0].id;
-
-      if(storedFp && fp && storedFp !== fp){
-        setFb('error', '🔒 @' + username + ' sudah dipakai device lain — coba username berbeda');
-        btn.disabled = false;
-        btn.textContent = 'GASKEUN →';
-        return;
-      }
-
-      if(!storedFp && fp){
-        try{
-          await db.from('profiles')
-            .update({ device_fp: fp, updated_at: new Date().toISOString() })
-            .eq('id', userId);
-        } catch(upErr){ console.warn('[JEJAK] Update fp non-fatal:', upErr); }
-      }
-
-      setFb('success', '✓ Welcome back, @' + username + '!');
-    }
-
-    saveSession(username, userId, fp);
-    setTimeout(function(){ window.location.href = 'spill.html'; }, 700);
-
+    
+    if(!data || !data[0]) throw new Error('Gagal buat akun');
+    
+    localStorage.setItem(SK.username, data[0].username);
+    localStorage.setItem(SK.uid, data[0].id);
+    localStorage.setItem(SK.loggedIn, 'true');
+    
+    setFb('reg-pin-confirm-fb', 'success', '🎉 Akun berhasil dibuat!');
+    
+    setTimeout(function(){
+      alert('✅ Akun dibuat!\n\n⚠️ SIMPAN PIN LU DI TEMPAT AMAN!\n\nUsername: ' + data[0].username + '\nPIN: ●●●●●● (jangan lupa!)');
+      window.location.href = 'spill.html';
+    }, 1000);
+    
   } catch(err){
-    console.error('[JEJAK] Submit error:', err);
-    setFb('error', '❌ ' + (err.message || JSON.stringify(err)));
+    console.error('[JEJAK] Register error:', err);
+    setFb('reg-username-fb', 'error', err.message || 'Gagal buat akun');
     btn.disabled = false;
-    btn.textContent = 'GASKEUN →';
+    btn.textContent = 'DAFTAR →';
   }
 });
 
 // ============================================
-// AUTO LOGIN CHECK
+// LOGIN
 // ============================================
-async function checkAutoLogin(){
-  var params = new URLSearchParams(window.location.search);
-  if(params.has('ref') || params.has('from') || params.has('invite') || params.has('i')){
-    console.log('[JEJAK] Invite link detected — skipping auto-login');
-    $el('loading').classList.add('hidden');
-    clearSession('opened via invite link — fresh login required');
-    return;
-  }
-
-  var username = localStorage.getItem(SK.username);
-  var userId = localStorage.getItem(SK.uid);
-  var loggedIn = localStorage.getItem(SK.loggedIn) === 'true';
-
-  if(!loggedIn || !username || !userId){
-    if(loggedIn || username || userId) clearSession('session tidak lengkap');
-    $el('loading').classList.add('hidden'); 
+$el('login-form').addEventListener('submit', async function(e){
+  e.preventDefault();
+  
+  var username = $el('login-username').value;
+  var pin = $el('login-pin').value;
+  
+  setFb('login-username-fb', '', '');
+  setFb('login-pin-fb', '', '');
+  
+  var unValid = validateUsername(username);
+  if(!unValid.ok){
+    setFb('login-username-fb', 'error', unValid.msg);
     return;
   }
   
-  if(userId.length < 10){
-    clearSession('user_id tidak valid (' + userId + ')');
-    $el('loading').classList.add('hidden'); 
+  var pinValid = validatePIN(pin);
+  if(!pinValid.ok){
+    setFb('login-pin-fb', 'error', pinValid.msg);
     return;
   }
-
+  
+  var btn = $el('login-btn');
+  btn.disabled = true;
+  btn.textContent = 'VERIFIKASI...';
+  
   try{
-    if(!db){ 
-      console.log('[JEJAK] Demo mode — skipping auto-login DB check');
-      $el('loading').classList.add('hidden'); 
-      return; 
+    if(!db) throw new Error('Database ga terhubung');
+    
+    var pinHash = await hashPIN(pin);
+    
+    var { data, error } = await db
+      .from('profiles')
+      .select('id, username, pin_hash')
+      .eq('username', unValid.value)
+      .eq('pin_hash', pinHash)
+      .single();
+    
+    if(error || !data){
+      throw new Error('Username atau PIN salah');
     }
     
-    var result = await db.from('profiles').select('id, username').eq('id', userId).limit(1);
-    if(result.error) throw result.error;
+    localStorage.setItem(SK.username, data.username);
+    localStorage.setItem(SK.uid, data.id);
+    localStorage.setItem(SK.loggedIn, 'true');
     
-    if(result.data && result.data.length > 0){
-      console.log('%c[JEJAK] Auto-login OK:', 'color:#bfff00', username);
-      window.location.href = 'spill.html'; 
-      return;
-    }
+    setFb('login-pin-fb', 'success', '✓ Login berhasil!');
     
-    clearSession('user tidak ditemukan di database');
-  } catch(e){
-    console.warn('[JEJAK] AutoLogin error (non-fatal):', e);
+    setTimeout(function(){
+      window.location.href = 'spill.html';
+    }, 700);
+    
+  } catch(err){
+    console.error('[JEJAK] Login error:', err);
+    setFb('login-pin-fb', 'error', err.message || 'Login gagal');
+    btn.disabled = false;
+    btn.textContent = 'MASUK →';
   }
-  
-  $el('loading').classList.add('hidden');
-}
+});
 
 // ============================================
-// ONLINE COUNT (cosmetic)
+// MODE TOGGLE
 // ============================================
-function updateOnline(){
-  var el = $el('onlinePill');
-  if(el) el.textContent = (Math.floor(Math.random()*25)+18) + ' ONLINE';
+$el('to-register').addEventListener('click', function(){
+  $el('login-form').style.display = 'none';
+  $el('register-form').style.display = 'block';
+  $el('reg-username').focus();
+});
+
+$el('to-login').addEventListener('click', function(){
+  $el('register-form').style.display = 'none';
+  $el('login-form').style.display = 'block';
+  $el('login-username').focus();
+});
+
+// ============================================
+// INPUT HANDLERS
+// ============================================
+function setupInput(id, onChange){
+  var el = $el(id);
+  if(!el) return;
+  
+  el.addEventListener('input', function(e){
+    var v = e.target.value;
+    var fmt = v.toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '').replace(/\.{2,}/g, '.');
+    if(fmt !== v){
+      var p = e.target.selectionStart;
+      e.target.value = fmt;
+      try{ e.target.setSelectionRange(p, p); } catch(_){}
+    }
+    if(onChange) onChange();
+  });
 }
+
+function setupPinInput(id, onChange){
+  var el = $el(id);
+  if(!el) return;
+  
+  el.addEventListener('input', function(e){
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    if(onChange) onChange();
+  });
+}
+
+setupInput('reg-username', function(){
+  var valid = validateUsername($el('reg-username').value).ok;
+  var pinOk = $el('reg-pin').value.length === 6;
+  var pinMatch = $el('reg-pin').value === $el('reg-pin-confirm').value;
+  var agreed = $el('agree-checkbox').checked;
+  $el('register-btn').disabled = !(valid && pinOk && pinMatch && agreed);
+});
+
+setupPinInput('reg-pin', function(){
+  var valid = validateUsername($el('reg-username').value).ok;
+  var pinOk = $el('reg-pin').value.length === 6;
+  var pinMatch = $el('reg-pin').value === $el('reg-pin-confirm').value;
+  var agreed = $el('agree-checkbox').checked;
+  $el('register-btn').disabled = !(valid && pinOk && pinMatch && agreed);
+});
+
+setupPinInput('reg-pin-confirm', function(){
+  var valid = validateUsername($el('reg-username').value).ok;
+  var pinOk = $el('reg-pin').value.length === 6;
+  var pinMatch = $el('reg-pin').value === $el('reg-pin-confirm').value;
+  var agreed = $el('agree-checkbox').checked;
+  $el('register-btn').disabled = !(valid && pinOk && pinMatch && agreed);
+});
+
+$el('agree-checkbox').addEventListener('change', function(){
+  var valid = validateUsername($el('reg-username').value).ok;
+  var pinOk = $el('reg-pin').value.length === 6;
+  var pinMatch = $el('reg-pin').value === $el('reg-pin-confirm').value;
+  var agreed = $el('agree-checkbox').checked;
+  $el('register-btn').disabled = !(valid && pinOk && pinMatch && agreed);
+});
+
+setupInput('login-username', function(){
+  var unOk = validateUsername($el('login-username').value).ok;
+  var pinOk = $el('login-pin').value.length === 6;
+  $el('login-btn').disabled = !(unOk && pinOk);
+});
+
+setupPinInput('login-pin', function(){
+  var unOk = validateUsername($el('login-username').value).ok;
+  var pinOk = $el('login-pin').value.length === 6;
+  $el('login-btn').disabled = !(unOk && pinOk);
+});
 
 // ============================================
 // INIT
 // ============================================
 document.addEventListener('DOMContentLoaded', function(){
-  console.log('%c[JEJAK] v2.3 — Initializing...', 'color:#00e5ff;font-size:16px;font-weight:bold');
+  console.log('%c[JEJAK] v3.0-final — Zero-Knowledge Auth', 'color:#00e5ff;font-weight:bold');
   
-  var dbOk = initDb();
-  if(!dbOk){
-    console.warn('%c[JEJAK] ⚠️ Running in DEMO MODE', 'color:#ffd60a;font-size:14px');
-    console.log('%c[JEJAK] Untuk production: Edit SUPABASE_URL dan SUPABASE_KEY di line 480-481', 'color:#777');
+  initDb();
+  
+  var loggedIn = localStorage.getItem(SK.loggedIn) === 'true';
+  if(loggedIn){
+    window.location.href = 'spill.html';
+    return;
   }
   
-  setVibe(localStorage.getItem(SK.vibe) || 'cyber');
-  initFingerprint();
-  checkAutoLogin();
-  updateOnline();
-  setInterval(updateOnline, 30000);
+  setInterval(function(){
+    var el = $el('onlinePill');
+    if(el) el.textContent = (Math.floor(Math.random()*25)+18) + ' ONLINE';
+  }, 30000);
 });
 </script>
 </body>
