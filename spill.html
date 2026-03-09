@@ -5,14 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SPILL — vibe radar</title>
     
-    <!-- CSP Permissive untuk development -->
-    <meta http-equiv="Content-Security-Policy" content="
-      default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;
-      script-src * 'unsafe-inline' 'unsafe-eval';
-      connect-src *;
-      img-src * data: blob:;
-      style-src * 'unsafe-inline';
-    ">
+    <!-- CSP Ultra-Permissive (Development) -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * wss: https:; img-src * data: blob:; style-src * 'unsafe-inline'; font-src *;">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -642,16 +636,23 @@
         // CONFIG
         // ============================================
         const JEJAK = {
-            SUPABASE_URL: 'https://fuovfrdicdhnlymnacpz.supabase.co',
-            SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0', // ← ISI INI!
+            SUPABASE_URL: 'https://ruovfrdicdnh1ysmacpz.supabase.co',
+            SUPABASE_KEY: 'YOUR_ANON_PUBLIC_KEY_HERE', // ← ISI INI!
         };
         
         let db = null;
         
         // ============================================
-        // INIT SUPABASE
+        // INIT SUPABASE (Check if already initialized by spill-generator.js)
         // ============================================
         function initDB() {
+            // Check if db already exists globally (from spill-generator.js)
+            if (window.db) {
+                console.log('[SPILL] ✓ Using existing DB instance from spill-generator');
+                db = window.db;
+                return true;
+            }
+            
             if (!JEJAK.SUPABASE_URL || JEJAK.SUPABASE_URL.includes('YOUR_PROJECT_ID')) {
                 console.error('[SPILL] Supabase URL belum diisi');
                 return false;
@@ -664,6 +665,7 @@
             
             try {
                 db = window.supabase.createClient(JEJAK.SUPABASE_URL, JEJAK.SUPABASE_KEY);
+                window.db = db; // Export globally
                 console.log('[SPILL] ✓ DB initialized');
                 return true;
             } catch (e) {
@@ -718,30 +720,42 @@
         // VIBE CHECK (Find Random Partner)
         // ============================================
         async function doVibeCheck() {
+            console.log('[VIBE CHECK] Starting...');
             showToast('🔍 Mencari partner...');
             
-            if (!db) {
+            // Check if db initialized
+            if (!db && !window.db) {
+                console.error('[VIBE CHECK] Database tidak terhubung');
                 showToast('❌ Database tidak terhubung', 3000);
                 return;
             }
             
+            // Use global db if available
+            const supabase = db || window.db;
             const currentUsername = localStorage.getItem('jejak_username') || 'anonymous';
             
+            console.log('[VIBE CHECK] Current user:', currentUsername);
+            console.log('[VIBE CHECK] DB instance:', !!supabase);
+            
             try {
-                // Get random user from database (exclude self)
-                const { data, error } = await db
+                // Get random users from database (exclude self)
+                console.log('[VIBE CHECK] Querying database...');
+                const { data, error } = await supabase
                     .from('profiles')
                     .select('username')
                     .neq('username', currentUsername)
                     .limit(10);
                 
+                console.log('[VIBE CHECK] Query result:', { data, error });
+                
                 if (error) {
-                    console.error('[VIBE CHECK] Error:', error);
-                    showToast('❌ Error mencari partner', 3000);
+                    console.error('[VIBE CHECK] Database error:', error);
+                    showToast('❌ Error: ' + error.message, 3000);
                     return;
                 }
                 
                 if (!data || data.length === 0) {
+                    console.warn('[VIBE CHECK] No other users found');
                     showToast('😔 Belum ada user lain online', 3000);
                     return;
                 }
@@ -750,14 +764,12 @@
                 const randomUser = data[Math.floor(Math.random() * data.length)];
                 const vibeScore = Math.floor(Math.random() * 30) + 70; // 70-100%
                 
+                console.log('[VIBE CHECK] Match found:', randomUser.username, vibeScore + '%');
                 showToast(`✨ ${vibeScore}% match dengan @${randomUser.username}!`, 3500);
-                
-                // Optional: Navigate to chat/profile
-                // window.location.href = `/chat.html?partner=${randomUser.username}`;
                 
             } catch (e) {
                 console.error('[VIBE CHECK] Catch error:', e);
-                showToast('❌ Error mencari partner', 3000);
+                showToast('❌ Error mencari partner: ' + e.message, 3000);
             }
         }
         
