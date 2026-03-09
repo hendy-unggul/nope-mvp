@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SPILL — vibe radar</title>
     
+    <!-- CSP Permissive untuk development -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;
+      script-src * 'unsafe-inline' 'unsafe-eval';
+      connect-src *;
+      img-src * data: blob:;
+      style-src * 'unsafe-inline';
+    ">
+    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,6 +35,7 @@
             --bd2: #2e2e2e;
             --tx: #f0ece6;
             --txs: #777;
+            --txm: #444;
             --ap: #ff2d55;
             --as: #00e5ff;
             --aq: #bfff00;
@@ -223,6 +233,12 @@
             justify-content: center;
             gap: 12px;
             margin-top: 16px;
+            transition: all 0.1s;
+        }
+        
+        .btn-vibe-check:active {
+            transform: translate(3px, 3px);
+            box-shadow: 2px 2px 0 #000;
         }
         
         /* FILTER SECTION */
@@ -452,7 +468,7 @@
         }
         
         /* BOTTOM NAV */
-        .bottom-nav {
+        .bnav {
             position: fixed;
             bottom: 0;
             left: 0;
@@ -462,16 +478,15 @@
             z-index: 100;
         }
         
-        .nav-container {
-            display: flex;
-            justify-content: space-around;
+        .bnav-c {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             height: 62px;
             max-width: 480px;
             margin: 0 auto;
         }
         
-        .nav-item {
-            flex: 1;
+        .ni {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -484,19 +499,23 @@
             letter-spacing: 1.5px;
             text-transform: uppercase;
             border-right: 2px solid var(--bd);
-            cursor: pointer;
+            transition: all 0.15s;
         }
         
-        .nav-item:last-child {
+        .ni:last-child {
             border-right: none;
         }
         
-        .nav-item.active {
+        .ni.act {
             color: var(--ap);
             background: rgba(255,45,85,0.06);
         }
         
-        .nav-icon {
+        .ni:active {
+            background: rgba(255,45,85,0.12);
+        }
+        
+        .nico {
             font-size: 20px;
         }
         
@@ -602,14 +621,12 @@
         </div>
         
         <!-- BOTTOM NAV -->
-        <nav class="bottom-nav">
-            <div class="nav-container">
-                <div class="nav-item active" data-page="spill">
-                    <span class="nav-icon">✕</span><span>SPILL</span>
-                </div>
-                <div class="nav-item" data-page="jejak">
-                    <span class="nav-icon">✦</span><span>JEJAK</span>
-                </div>
+        <nav class="bnav">
+            <div class="bnav-c">
+                <a href="/spill.html" class="ni act"><span class="nico">✕</span><span>Spill</span></a>
+                <a href="/jejak.html" class="ni"><span class="nico">✦</span><span>Jejak</span></a>
+                <a href="/glitch.html" class="ni"><span class="nico">⚡</span><span>Glitch</span></a>
+                <a href="/cocomeo.html" class="ni"><span class="nico">〜</span><span>Cocomeo</span></a>
             </div>
         </nav>
     </div>
@@ -621,28 +638,67 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="spill-generator.js"></script>
     <script>
-        // Toast helper
-        function showToast(msg, isError = false) {
+        // ============================================
+        // CONFIG
+        // ============================================
+        const JEJAK = {
+            SUPABASE_URL: 'https://ruovfrdicdnh1ysmacpz.supabase.co',
+            SUPABASE_KEY: 'YOUR_ANON_PUBLIC_KEY_HERE', // ← ISI INI!
+        };
+        
+        let db = null;
+        
+        // ============================================
+        // INIT SUPABASE
+        // ============================================
+        function initDB() {
+            if (!JEJAK.SUPABASE_URL || JEJAK.SUPABASE_URL.includes('YOUR_PROJECT_ID')) {
+                console.error('[SPILL] Supabase URL belum diisi');
+                return false;
+            }
+            
+            if (!JEJAK.SUPABASE_KEY || JEJAK.SUPABASE_KEY.includes('YOUR_ANON')) {
+                console.error('[SPILL] Supabase KEY belum diisi');
+                return false;
+            }
+            
+            try {
+                db = window.supabase.createClient(JEJAK.SUPABASE_URL, JEJAK.SUPABASE_KEY);
+                console.log('[SPILL] ✓ DB initialized');
+                return true;
+            } catch (e) {
+                console.error('[SPILL] DB init error:', e);
+                return false;
+            }
+        }
+        
+        // ============================================
+        // TOAST HELPER
+        // ============================================
+        function showToast(msg, duration = 2500) {
             const toast = document.getElementById('toast');
             if (!toast) return;
             toast.textContent = msg;
-            toast.className = 'toast' + (isError ? ' error' : '') + ' show';
-            setTimeout(() => toast.classList.remove('show'), 2500);
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), duration);
         }
         
-        // Online count randomizer
+        // ============================================
+        // ONLINE COUNT RANDOMIZER
+        // ============================================
         function updateOnlineCount() {
             const el = document.getElementById('onlineCount');
             if (el) el.textContent = (Math.floor(Math.random() * 25) + 18) + ' ONLINE';
         }
         
-        // Simple radar animation
+        // ============================================
+        // RADAR ANIMATION
+        // ============================================
         function initRadar() {
             const container = document.getElementById('radarCont');
             const dotsContainer = document.getElementById('radarDots');
             if (!container || !dotsContainer) return;
             
-            // Create random dots
             const colors = ['purple', 'red', 'lime'];
             for (let i = 0; i < 8; i++) {
                 const dot = document.createElement('div');
@@ -651,7 +707,6 @@
                 dot.style.top = (Math.random() * 80 + 10) + '%';
                 dotsContainer.appendChild(dot);
                 
-                // Random active animation
                 setInterval(() => {
                     dot.classList.add('active');
                     setTimeout(() => dot.classList.remove('active'), 500);
@@ -659,8 +714,62 @@
             }
         }
         
-        // DOM Ready
+        // ============================================
+        // VIBE CHECK (Find Random Partner)
+        // ============================================
+        async function doVibeCheck() {
+            showToast('🔍 Mencari partner...');
+            
+            if (!db) {
+                showToast('❌ Database tidak terhubung', 3000);
+                return;
+            }
+            
+            const currentUsername = localStorage.getItem('jejak_username') || 'anonymous';
+            
+            try {
+                // Get random user from database (exclude self)
+                const { data, error } = await db
+                    .from('profiles')
+                    .select('username')
+                    .neq('username', currentUsername)
+                    .limit(10);
+                
+                if (error) {
+                    console.error('[VIBE CHECK] Error:', error);
+                    showToast('❌ Error mencari partner', 3000);
+                    return;
+                }
+                
+                if (!data || data.length === 0) {
+                    showToast('😔 Belum ada user lain online', 3000);
+                    return;
+                }
+                
+                // Pick random from results
+                const randomUser = data[Math.floor(Math.random() * data.length)];
+                const vibeScore = Math.floor(Math.random() * 30) + 70; // 70-100%
+                
+                showToast(`✨ ${vibeScore}% match dengan @${randomUser.username}!`, 3500);
+                
+                // Optional: Navigate to chat/profile
+                // window.location.href = `/chat.html?partner=${randomUser.username}`;
+                
+            } catch (e) {
+                console.error('[VIBE CHECK] Catch error:', e);
+                showToast('❌ Error mencari partner', 3000);
+            }
+        }
+        
+        // ============================================
+        // DOM READY
+        // ============================================
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('[SPILL] Initializing...');
+            
+            // Init DB
+            const dbOk = initDB();
+            
             // Set username
             const username = localStorage.getItem('jejak_username') || 
                            localStorage.getItem('username') || 
@@ -691,26 +800,23 @@
             
             // Mood chips
             document.querySelectorAll('.mood-chip').forEach(chip => {
-                chip.addEventListener('click', () => {
-                    const mood = chip.dataset.mood;
+                chip.addEventListener('click', function() {
+                    // Remove active from all
+                    document.querySelectorAll('.mood-chip').forEach(c => c.classList.remove('active'));
+                    // Add active to clicked
+                    this.classList.add('active');
+                    
+                    const mood = this.dataset.mood;
                     if (window.filterMood) window.filterMood(mood);
                 });
             });
             
-            // Vibe check button
+            // ✅ VIBE CHECK BUTTON (FIXED!)
             document.getElementById('vibeCheckBtn').addEventListener('click', () => {
-                showToast('🔍 Mencari partner... (demo)');
+                doVibeCheck();
             });
             
-            // Bottom nav
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.addEventListener('click', () => {
-                    const page = item.dataset.page;
-                    if (page === 'jejak') {
-                        window.location.href = '/jejak.html';
-                    }
-                });
-            });
+            console.log('[SPILL] ✓ Initialization complete');
         });
     </script>
 </body>
