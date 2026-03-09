@@ -153,64 +153,66 @@
     }
 
     // ============================================
-    // RENDER SPILLS
-    // ============================================
-    function renderSpills() {
-        const container = document.getElementById('spillsList');
-        if (!container) return;
-        
-        if (spillPool.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <span class="empty-icon">🍃</span>
-                    <div class="empty-title">BELUM ADA SPILL</div>
-                </div>`;
-            return;
-        }
-        
-        // Hitung statistik panjang
-        const wordCounts = spillPool.map(s => s.words);
-        const stats = `7📝 | 18📝 | 27📝 | 36📝`;
-        
-        // Update meta
-        const metaEl = document.getElementById('feedMeta');
-        if (metaEl) {
-            metaEl.textContent = `${spillPool.length} (${stats})`;
-        }
-        
-        // Build HTML
-        let html = '';
-        for (let s of spillPool) {
-            html += `<div class="spill-card">
-                <div class="spill-head">
-                    <span class="spill-user">
-                        🤖 @${s.author} 
-                        <span style="color:var(--as); font-size:10px; margin-left:8px; background:var(--bd); padding:2px 6px;">
-                            ${s.words} kata
-                        </span>
-                    </span>
-                    <span class="spill-mood ${s.mood}">${s.mood}</span>
-                </div>
-                <div class="spill-body">${escapeHtml(s.content)}</div>
-                <div class="spill-actions">
-                    <button class="react-btn" onclick="window.reactToSpill('${s.author}', 'skull')">
-                        💀 <span class="react-count">${s.reactions.skull}</span>
-                    </button>
-                    <button class="react-btn" onclick="window.reactToSpill('${s.author}', 'cry')">
-                        😭 <span class="react-count">${s.reactions.cry}</span>
-                    </button>
-                    <button class="react-btn" onclick="window.reactToSpill('${s.author}', 'fire')">
-                        🔥 <span class="react-count">${s.reactions.fire}</span>
-                    </button>
-                    <button class="react-btn" onclick="window.reactToSpill('${s.author}', 'upside')">
-                        🙃 <span class="react-count">${s.reactions.upside}</span>
-                    </button>
-                </div>
+// RENDER SPILLS - HIDE WORD COUNTER
+// ============================================
+function renderSpills() {
+    const container = document.getElementById('spillsList');
+    if (!container) return;
+    
+    if (spillPool.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <span class="empty-icon">🍃</span>
+                <div class="empty-title">BELUM ADA SPILL</div>
             </div>`;
-        }
-        
-        container.innerHTML = html;
+        return;
     }
+    
+    // Hitung statistik panjang (untuk meta aja, ga ditampilkan ke user)
+    const wordGroups = spillPool.map(s => {
+        if (s.words <= 10) return '7';
+        if (s.words <= 20) return '18';
+        if (s.words <= 30) return '27';
+        return '36';
+    });
+    const stats = [...new Set(wordGroups)].sort().join(' | ');
+    
+    // Update meta (masih perlu buat dev, tapi ga terlalu mencolok)
+    const metaEl = document.getElementById('feedMeta');
+    if (metaEl) {
+        metaEl.textContent = `${spillPool.length}`; // Hanya jumlah, tanpa stats
+        metaEl.style.opacity = '0.6'; // Buat lebih subtle
+    }
+    
+    let html = '';
+    for (let s of spillPool) {
+        html += `<div class="spill-card">
+            <div class="spill-head">
+                <span class="spill-user">
+                    🤖 @${s.author}
+                </span>
+                <span class="spill-mood ${s.mood}">${s.mood}</span>
+            </div>
+            <div class="spill-body">${escapeHtml(s.content)}</div>
+            <div class="spill-actions">
+                <button class="react-btn" onclick="window.reactToSpill('${s.author}', 'skull')">
+                    💀 <span class="react-count">${s.reactions.skull}</span>
+                </button>
+                <button class="react-btn" onclick="window.reactToSpill('${s.author}', 'cry')">
+                    😭 <span class="react-count">${s.reactions.cry}</span>
+                </button>
+                <button class="react-btn" onclick="window.reactToSpill('${s.author}', 'fire')">
+                    🔥 <span class="react-count">${s.reactions.fire}</span>
+                </button>
+                <button class="react-btn" onclick="window.reactToSpill('${s.author}', 'upside')">
+                    🙃 <span class="react-count">${s.reactions.upside}</span>
+                </button>
+            </div>
+        </div>`;
+    }
+    
+    container.innerHTML = html;
+}
 
     // ============================================
     // REACTION HANDLER
