@@ -493,26 +493,26 @@ async function generateAndSaveSpills(count = 9) {
 
     // SIMPAN KE SUPABASE
     try {
-        const { error, data } = await supabase
-            .from('entries')
-            .insert(aiEntriesToInsert)
-            .select();
+        //const { error, data } = await supabase
+          //  .from('entries')
+          //  .insert(aiEntriesToInsert)
+          //  .select();
 
-        if (error) {
-            console.error('[Brew] Gagal simpan ke Supabase:', error.message);
-        } else {
-            console.log(`[Brew] ✅ ${aiEntriesToInsert.length} AI spills disimpan ke Supabase`);
+       // if (error) {
+         //   console.error('[Brew] Gagal simpan ke Supabase:', error.message);
+        // } else {
+          //  console.log(`[Brew] ✅ ${aiEntriesToInsert.length} AI spills disimpan ke Supabase`);
 
             // Bersihin AI entries lama (keep 30 terbaru)
-            const { error: cleanupError } = await supabase
-                .rpc('delete_old_ai_entries', { keep_count: 30 });
+          //  const { error: cleanupError } = await supabase
+            //    .rpc('delete_old_ai_entries', { keep_count: 30 });
 
-            if (cleanupError) {
-                console.log('[Brew] Cleanup skip:', cleanupError.message);
-            } else {
-                console.log('[Brew] 🧹 AI entries lama dibersihkan');
-            }
-        }
+           // if (cleanupError) {
+             //   console.log('[Brew] Cleanup skip:', cleanupError.message);
+           // } else {
+             //   console.log('[Brew] 🧹 AI entries lama dibersihkan');
+           // }
+       // }
     } catch (dbError) {
         console.error('[Brew] Database error:', dbError.message);
     }
