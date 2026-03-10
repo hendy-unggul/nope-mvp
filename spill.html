@@ -2,13 +2,11 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPILL — vibe radar</title>
     
-    <!-- CSP Ultra-Permissive (Development) -->
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * wss: https:; img-src * data: blob:; style-src * 'unsafe-inline'; font-src *;">
+    <!-- NO CSP - Let browser handle everything -->
     
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -24,7 +22,6 @@
         :root {
             --bg: #080808;
             --sf: #0f0f0f;
-            --sfe: #141414;
             --bd: #222;
             --bd2: #2e2e2e;
             --tx: #f0ece6;
@@ -43,17 +40,14 @@
             background: var(--bg);
             color: var(--tx);
             font-family: 'Syne', sans-serif;
-            font-size: 14px;
         }
         
         .app {
             height: 100%;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
         
-        /* HEADER */
         .header {
             display: flex;
             justify-content: space-between;
@@ -61,7 +55,6 @@
             padding: 14px 18px;
             border-bottom: 2px solid var(--bd);
             background: var(--bg);
-            flex-shrink: 0;
         }
         
         .logo {
@@ -88,128 +81,20 @@
             border: 2px solid var(--bd);
             padding: 4px 8px;
             background: #000;
-            max-width: 120px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
         
-        /* MAIN SCROLL AREA */
         .scroll {
             flex: 1;
             overflow-y: auto;
-            overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
             padding-bottom: 70px;
         }
         
-        /* RADAR SECTION */
         .radar-sect {
             background: var(--sf);
             border-bottom: 2px solid var(--bd);
+            padding: 18px;
         }
-        
-        .radar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 18px 12px;
-        }
-        
-        .radar-label {
-            font-family: 'DM Mono', monospace;
-            font-size: 10px;
-            color: var(--as);
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .radar-label-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--as);
-            transform: rotate(45deg);
-            animation: blink 1.2s step-end infinite;
-        }
-        
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.2; }
-        }
-        
-        .online-pill {
-            font-family: 'DM Mono', monospace;
-            font-size: 10px;
-            color: #000;
-            background: var(--aq);
-            padding: 5px 12px;
-            border: 2px solid #000;
-            box-shadow: 3px 3px 0 #000;
-        }
-        
-        .radar-wrapper {
-            padding: 0 18px 16px;
-        }
-        
-        .radar-bezel {
-            position: relative;
-            padding: 4px;
-            background: var(--bg);
-            border: 2px solid var(--bd2);
-            box-shadow: 6px 6px 0 #000;
-        }
-        
-        .radar-cont {
-            position: relative;
-            width: 100%;
-            aspect-ratio: 1/1;
-            background: #020a02;
-            overflow: hidden;
-        }
-        
-        .radar-grid {
-            position: absolute;
-            inset: 0;
-            background-image: 
-                repeating-linear-gradient(0deg, rgba(0,229,255,0.04) 0px, transparent 1px, transparent 28px),
-                repeating-linear-gradient(90deg, rgba(0,229,255,0.04) 0px, transparent 1px, transparent 28px);
-        }
-        
-        .radar-ring {
-            position: absolute;
-            inset: 8%;
-            border: 1px solid rgba(0,229,255,0.08);
-            border-radius: 50%;
-        }
-        
-        .radar-dots {
-            position: absolute;
-            inset: 0;
-            z-index: 10;
-        }
-        
-        .radar-dot {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            transform: translate(-50%, -50%);
-            background: var(--as);
-            opacity: 0.3;
-            transition: opacity 0.1s;
-        }
-        
-        .radar-dot.active {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(2);
-            filter: brightness(2);
-        }
-        
-        .radar-dot.purple { background: var(--purple); }
-        .radar-dot.red { background: var(--ap); }
-        .radar-dot.lime { background: var(--aq); }
         
         .btn-vibe-check {
             width: 100%;
@@ -222,12 +107,7 @@
             color: #fff;
             cursor: pointer;
             box-shadow: 5px 5px 0 #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 16px;
-            transition: all 0.1s;
+            margin-top: 20px;
         }
         
         .btn-vibe-check:active {
@@ -235,233 +115,16 @@
             box-shadow: 2px 2px 0 #000;
         }
         
-        /* FILTER SECTION */
-        .filter-sect {
-            padding: 18px;
-            border-bottom: 2px solid var(--bd);
-        }
-        
-        .filter-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-        
-        .filter-title {
-            font-family: 'DM Mono', monospace;
-            font-size: 9px;
-            color: var(--txs);
-            letter-spacing: 3px;
-        }
-        
-        .match-pct {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 26px;
-            color: var(--ap);
-        }
-        
-        .vibe-slider {
-            width: 100%;
-            height: 3px;
-            background: var(--bd2);
-            -webkit-appearance: none;
-            margin-bottom: 8px;
-        }
-        
-        .vibe-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            background: var(--ap);
-            border: 3px solid var(--bg);
-            box-shadow: 0 0 0 2px var(--ap), 3px 3px 0 #000;
-            cursor: pointer;
-        }
-        
-        .slider-labels {
-            display: flex;
-            justify-content: space-between;
-            font-family: 'DM Mono', monospace;
-            font-size: 9px;
-            color: var(--txm);
-            margin: 6px 0 16px;
-        }
-        
-        .mood-scroll {
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            margin: 0 -18px;
-            padding: 0 18px 4px;
-        }
-        
-        .mood-chip {
-            flex-shrink: 0;
-            padding: 8px 16px;
-            background: var(--bg);
-            border: 2px solid var(--bd2);
-            font-family: 'DM Mono', monospace;
-            font-size: 11px;
-            color: var(--txs);
-            cursor: pointer;
-            box-shadow: 3px 3px 0 #000;
-            transition: all 0.08s;
-        }
-        
-        .mood-chip.active {
-            background: var(--ap);
-            border-color: #000;
-            color: #fff;
-        }
-        
-        .mood-chip:active {
-            transform: translate(2px, 2px);
-            box-shadow: 1px 1px 0 #000;
-        }
-        
-        /* SPILLS SECTION */
         .spills-sect {
-            padding: 18px 18px 24px;
-        }
-        
-        .sect-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-bottom: 16px;
-        }
-        
-        .sect-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 28px;
-            letter-spacing: 2px;
-        }
-        
-        .sect-meta {
-            font-family: 'DM Mono', monospace;
-            font-size: 9px;
-            color: var(--txm);
-            letter-spacing: 2px;
-        }
-        
-        .spill-card {
-            background: var(--sf);
-            border: 2px solid var(--bd2);
-            margin-bottom: 14px;
-            box-shadow: 4px 4px 0 #000;
-        }
-        
-        .spill-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            border-bottom: 2px solid var(--bd);
-            background: var(--bg);
-        }
-        
-        .spill-user {
-            font-family: 'DM Mono', monospace;
-            font-size: 11px;
-            color: var(--txs);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .spill-mood {
-            font-family: 'DM Mono', monospace;
-            font-size: 9px;
-            padding: 5px 10px;
-            text-transform: uppercase;
-            border: 2px solid;
-        }
-        
-        .spill-mood.surviving { color: #ff9f0a; border-color: #ff9f0a; }
-        .spill-mood.thriving { color: #bfff00; border-color: #bfff00; }
-        .spill-mood.chaotic { color: #00e5ff; border-color: #00e5ff; }
-        .spill-mood.doom { color: #bf5af2; border-color: #bf5af2; }
-        
-        .spill-body {
-            padding: 16px;
-            font-size: 15px;
-            line-height: 1.65;
-            word-break: break-word;
-        }
-        
-        .spill-actions {
-            display: flex;
-            border-top: 2px solid var(--bd);
-            background: var(--bg);
-        }
-        
-        .react-btn {
-            flex: 1;
-            padding: 12px 8px;
-            background: transparent;
-            border: none;
-            border-right: 2px solid var(--bd);
-            font-size: 16px;
-            color: var(--txs);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            font-family: 'DM Mono', monospace;
-        }
-        
-        .react-btn:last-child {
-            border-right: none;
-        }
-        
-        .react-btn.active {
-            background: var(--ap);
-            color: #fff;
-        }
-        
-        .react-count {
-            font-family: 'DM Mono', monospace;
-            font-size: 11px;
-        }
-        
-        .refresh-btn {
-            width: 100%;
-            padding: 16px;
-            background: transparent;
-            border: 2px dashed var(--bd2);
-            color: var(--txs);
-            font-family: 'DM Mono', monospace;
-            font-size: 11px;
-            letter-spacing: 2px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 10px;
-            cursor: pointer;
+            padding: 18px;
         }
         
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-        }
-        
-        .empty-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-            opacity: 0.4;
-        }
-        
-        .empty-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 24px;
             color: var(--txs);
-            margin-bottom: 6px;
         }
         
-        /* BOTTOM NAV */
         .bnav {
             position: fixed;
             bottom: 0;
@@ -469,15 +132,12 @@
             right: 0;
             background: var(--bg);
             border-top: 2px solid var(--bd);
-            z-index: 100;
         }
         
         .bnav-c {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             height: 62px;
-            max-width: 480px;
-            margin: 0 auto;
         }
         
         .ni {
@@ -493,7 +153,6 @@
             letter-spacing: 1.5px;
             text-transform: uppercase;
             border-right: 2px solid var(--bd);
-            transition: all 0.15s;
         }
         
         .ni:last-child {
@@ -505,15 +164,10 @@
             background: rgba(255,45,85,0.06);
         }
         
-        .ni:active {
-            background: rgba(255,45,85,0.12);
-        }
-        
         .nico {
             font-size: 20px;
         }
         
-        /* TOAST */
         .toast {
             position: fixed;
             bottom: 90px;
@@ -527,7 +181,6 @@
             z-index: 600;
             opacity: 0;
             transition: all 0.25s;
-            pointer-events: none;
             border: 2px solid #000;
             box-shadow: 4px 4px 0 #000;
         }
@@ -540,81 +193,30 @@
 </head>
 <body>
     <div class="app">
-        <!-- HEADER -->
         <div class="header">
             <div class="logo">SP<span class="x">✕</span>LL</div>
-            <div class="user-badge" id="userNameDisplay">@anonymous</div>
+            <div class="user-badge" id="userNameDisplay">@loading...</div>
         </div>
         
-        <!-- MAIN SCROLL -->
         <div class="scroll">
-            <!-- RADAR SECTION -->
             <div class="radar-sect">
-                <div class="radar-header">
-                    <span class="radar-label">
-                        <span class="radar-label-dot"></span>VIBE RADAR
-                    </span>
-                    <span class="online-pill" id="onlineCount">21 ONLINE</span>
-                </div>
-                
-                <div class="radar-wrapper">
-                    <div class="radar-bezel">
-                        <div class="radar-cont" id="radarCont">
-                            <div class="radar-grid"></div>
-                            <div class="radar-ring"></div>
-                            <div class="radar-dots" id="radarDots"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="radar-ctas" style="padding: 0 18px 16px;">
-                    <button class="btn-vibe-check" id="vibeCheckBtn">
-                        <span>⬡</span><span>VIBE CHECK</span>
-                    </button>
-                </div>
-            </div>
-            
-            <!-- FILTER SECTION -->
-            <div class="filter-sect">
-                <div class="filter-top">
-                    <span class="filter-title">KESELARASAN</span>
-                    <span class="match-pct" id="vibePct">87%</span>
-                </div>
-                <input type="range" class="vibe-slider" id="vibeSlider" min="0" max="100" value="87">
-                <div class="slider-labels">
-                    <span>HOMIE</span><span>SEMI</span><span>ALL</span>
-                </div>
-                
-                <div class="mood-scroll" id="moodScroll">
-                    <button class="mood-chip active" data-mood="all">SEMUA</button>
-                    <button class="mood-chip" data-mood="surviving">😮‍💨 SURVIVING</button>
-                    <button class="mood-chip" data-mood="thriving">✨ THRIVING</button>
-                    <button class="mood-chip" data-mood="chaotic">🌀 CHAOTIC</button>
-                    <button class="mood-chip" data-mood="doom">🛌 DOOM</button>
-                </div>
-            </div>
-            
-            <!-- SPILLS SECTION -->
-            <div class="spills-sect">
-                <div class="sect-header">
-                    <span class="sect-title">SPILL TERKINI</span>
-                    <span class="sect-meta" id="feedMeta">MEMUAT...</span>
-                </div>
-                
-                <div id="spillsList">
-                    <div class="empty-state">
-                        <span class="empty-icon">🍃</span>
-                        <div class="empty-title">MEMUAT SPILL...</div>
-                    </div>
-                </div>
-                
-                <button class="refresh-btn" id="refreshBtn">
-                    <span>↻</span><span>SEDUH TEH BARU</span>
+                <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin-bottom: 12px;">VIBE RADAR</h2>
+                <p style="font-family: 'DM Mono', monospace; font-size: 11px; color: var(--txs); margin-bottom: 20px;">
+                    Temukan user dengan vibe yang sama
+                </p>
+                <button class="btn-vibe-check" id="vibeCheckBtn">
+                    <span>⬡ VIBE CHECK</span>
                 </button>
             </div>
+            
+            <div class="spills-sect" id="spillsList">
+                <div class="empty-state">
+                    <div style="font-size: 48px; margin-bottom: 16px;">🍃</div>
+                    <div style="font-family: 'Bebas Neue', sans-serif; font-size: 24px;">MEMUAT SPILL...</div>
+                </div>
+            </div>
         </div>
         
-        <!-- BOTTOM NAV -->
         <nav class="bnav">
             <div class="bnav-c">
                 <a href="/spill.html" class="ni act"><span class="nico">✕</span><span>Spill</span></a>
@@ -625,225 +227,82 @@
         </nav>
     </div>
     
-    <!-- TOAST -->
     <div class="toast" id="toast"></div>
     
-    <!-- SCRIPTS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="spill-generator.js"></script>
     <script>
-        // ============================================
-        // CONFIG (sama dengan spill-generator.js)
-        // ============================================
-        const JEJAK = {
-            SUPABASE_URL: 'https://ruovfrdicdnh1ysmacpz.supabase.co',
-            SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1b3ZmcmRpY2RuaDF5c21hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg1MDQ2NjEsImV4cCI6MjA1NDA4MDY2MX0.HbYlQkKFHLLWMmBJYNqn-OkdSR7VpZBsNIjYlPQ7-18',
-        };
+        console.log('[SPILL] Initializing ULTRA SIMPLE version...');
         
-        let db = null;
-        
-        // ============================================
-        // INIT SUPABASE (Check if already initialized by spill-generator.js)
-        // ============================================
-        function initDB() {
-            // Check if db already exists globally (from spill-generator.js)
-            if (window.db) {
-                console.log('[SPILL] ✓ Using existing DB instance from spill-generator');
-                db = window.db;
-                return true;
-            }
-            
-            if (!JEJAK.SUPABASE_URL || JEJAK.SUPABASE_URL.includes('YOUR_PROJECT_ID')) {
-                console.error('[SPILL] Supabase URL belum diisi');
-                return false;
-            }
-            
-            if (!JEJAK.SUPABASE_KEY || JEJAK.SUPABASE_KEY.includes('YOUR_ANON')) {
-                console.error('[SPILL] Supabase KEY belum diisi');
-                return false;
-            }
-            
-            try {
-                db = window.supabase.createClient(JEJAK.SUPABASE_URL, JEJAK.SUPABASE_KEY);
-                window.db = db; // Export globally
-                console.log('[SPILL] ✓ DB initialized');
-                return true;
-            } catch (e) {
-                console.error('[SPILL] DB init error:', e);
-                return false;
-            }
-        }
-        
-        // ============================================
-        // TOAST HELPER
-        // ============================================
+        // Toast helper
         function showToast(msg, duration = 2500) {
             const toast = document.getElementById('toast');
-            if (!toast) return;
             toast.textContent = msg;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), duration);
         }
         
-        // ============================================
-        // ONLINE COUNT RANDOMIZER
-        // ============================================
-        function updateOnlineCount() {
-            const el = document.getElementById('onlineCount');
-            if (el) el.textContent = (Math.floor(Math.random() * 25) + 18) + ' ONLINE';
-        }
-        
-        // ============================================
-        // RADAR ANIMATION
-        // ============================================
-        function initRadar() {
-            const container = document.getElementById('radarCont');
-            const dotsContainer = document.getElementById('radarDots');
-            if (!container || !dotsContainer) return;
-            
-            const colors = ['purple', 'red', 'lime'];
-            for (let i = 0; i < 8; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'radar-dot ' + colors[Math.floor(Math.random() * colors.length)];
-                dot.style.left = (Math.random() * 80 + 10) + '%';
-                dot.style.top = (Math.random() * 80 + 10) + '%';
-                dotsContainer.appendChild(dot);
-                
-                setInterval(() => {
-                    dot.classList.add('active');
-                    setTimeout(() => dot.classList.remove('active'), 500);
-                }, Math.random() * 5000 + 3000);
-            }
-        }
-        
-        // ============================================
-        // VIBE CHECK (Find Random Partner)
-        // ============================================
+        // VIBE CHECK - Ultra simple, use window.db from spill-generator.js
         async function doVibeCheck() {
             console.log('[VIBE CHECK] Starting...');
             showToast('🔍 Mencari partner...');
             
-            // Use global db (from spill-generator.js)
-            const supabase = window.db || db;
-            
-            if (!supabase) {
-                console.error('[VIBE CHECK] Database tidak terhubung');
-                showToast('❌ Database tidak terhubung', 3000);
+            // Wait for spill-generator to init
+            if (!window.db) {
+                console.warn('[VIBE CHECK] Waiting for DB...');
+                setTimeout(doVibeCheck, 500);
                 return;
             }
             
-            const currentUsername = localStorage.getItem('jejak_username') || 'test.user';
-            
-            console.log('[VIBE CHECK] Current user:', currentUsername);
-            console.log('[VIBE CHECK] DB instance:', !!supabase);
+            const currentUser = localStorage.getItem('jejak_username') || 'test.user';
+            console.log('[VIBE CHECK] Current:', currentUser);
             
             try {
-                // ✅ SIMPLIFIED: Get ALL users, filter in JS
-                console.log('[VIBE CHECK] Querying database...');
-                const { data, error } = await supabase
+                // SIMPLEST possible query
+                const response = await window.db
                     .from('profiles')
                     .select('username');
                 
-                console.log('[VIBE CHECK] Query result:', { data, error });
+                console.log('[VIBE CHECK] Response:', response);
                 
-                if (error) {
-                    console.error('[VIBE CHECK] Database error:', error);
-                    showToast('❌ Error: ' + error.message, 3000);
+                if (response.error) {
+                    throw new Error(response.error.message);
+                }
+                
+                const users = response.data || [];
+                console.log('[VIBE CHECK] Users:', users);
+                
+                // Filter out current user
+                const others = users.filter(u => u.username !== currentUser);
+                
+                if (others.length === 0) {
+                    showToast('😔 Belum ada user lain', 3000);
                     return;
                 }
                 
-                if (!data || data.length === 0) {
-                    console.warn('[VIBE CHECK] No users found');
-                    showToast('😔 Belum ada user di database', 3000);
-                    return;
-                }
+                // Random pick
+                const match = others[Math.floor(Math.random() * others.length)];
+                const score = Math.floor(Math.random() * 30) + 70;
                 
-                // Filter out current user in JavaScript
-                const otherUsers = data.filter(u => u.username !== currentUsername);
+                console.log('[VIBE CHECK] Match:', match.username, score + '%');
+                showToast(`✨ ${score}% match dengan @${match.username}!`, 3500);
                 
-                console.log('[VIBE CHECK] Other users:', otherUsers.length);
-                
-                if (otherUsers.length === 0) {
-                    console.warn('[VIBE CHECK] No other users');
-                    showToast('😔 Belum ada user lain online', 3000);
-                    return;
-                }
-                
-                // Pick random
-                const randomUser = otherUsers[Math.floor(Math.random() * otherUsers.length)];
-                const vibeScore = Math.floor(Math.random() * 30) + 70; // 70-100%
-                
-                console.log('[VIBE CHECK] Match found:', randomUser.username, vibeScore + '%');
-                showToast(`✨ ${vibeScore}% match dengan @${randomUser.username}!`, 3500);
-                
-            } catch (e) {
-                console.error('[VIBE CHECK] Catch error:', e);
-                showToast('❌ Error: ' + e.message, 3000);
-            }
-        }
-                
-            } catch (e) {
-                console.error('[VIBE CHECK] Catch error:', e);
-                showToast('❌ Error mencari partner: ' + e.message, 3000);
+            } catch (err) {
+                console.error('[VIBE CHECK] Error:', err);
+                showToast('❌ ' + err.message, 3000);
             }
         }
         
-        // ============================================
-        // DOM READY
-        // ============================================
+        // DOM Ready
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('[SPILL] Initializing...');
-            
-            // Init DB
-            const dbOk = initDB();
-            
             // Set username
-            const username = localStorage.getItem('jejak_username') || 
-                           localStorage.getItem('username') || 
-                           'anonymous';
+            const username = localStorage.getItem('jejak_username') || 'anonymous';
             document.getElementById('userNameDisplay').textContent = '@' + username;
             
-            // Init radar
-            initRadar();
+            // Vibe check button
+            document.getElementById('vibeCheckBtn').addEventListener('click', doVibeCheck);
             
-            // Online count
-            updateOnlineCount();
-            setInterval(updateOnlineCount, 30000);
-            
-            // Vibe slider
-            const slider = document.getElementById('vibeSlider');
-            const pct = document.getElementById('vibePct');
-            if (slider && pct) {
-                slider.addEventListener('input', (e) => {
-                    pct.textContent = e.target.value + '%';
-                });
-            }
-            
-            // Refresh button
-            document.getElementById('refreshBtn').addEventListener('click', () => {
-                if (window.refreshFeed) window.refreshFeed();
-                showToast('🔄 Menyeduh teh baru...');
-            });
-            
-            // Mood chips
-            document.querySelectorAll('.mood-chip').forEach(chip => {
-                chip.addEventListener('click', function() {
-                    // Remove active from all
-                    document.querySelectorAll('.mood-chip').forEach(c => c.classList.remove('active'));
-                    // Add active to clicked
-                    this.classList.add('active');
-                    
-                    const mood = this.dataset.mood;
-                    if (window.filterMood) window.filterMood(mood);
-                });
-            });
-            
-            // ✅ VIBE CHECK BUTTON (FIXED!)
-            document.getElementById('vibeCheckBtn').addEventListener('click', () => {
-                doVibeCheck();
-            });
-            
-            console.log('[SPILL] ✓ Initialization complete');
+            console.log('[SPILL] Ready!');
         });
     </script>
 </body>
