@@ -222,8 +222,15 @@
         }
         
         // Wait for DB with timeout
-        function waitForDB(timeout = 5000) {
+        function waitForDB(timeout = 10000) {
             return new Promise((resolve, reject) => {
+                // Check immediately first
+                if (window.db) {
+                    console.log('[VIBE CHECK] ✓ DB ready (immediate)');
+                    resolve(window.db);
+                    return;
+                }
+                
                 const startTime = Date.now();
                 
                 const check = () => {
@@ -231,6 +238,7 @@
                         console.log('[VIBE CHECK] ✓ DB ready');
                         resolve(window.db);
                     } else if (Date.now() - startTime > timeout) {
+                        console.warn('[VIBE CHECK] DB timeout after', timeout, 'ms');
                         reject(new Error('DB timeout'));
                     } else {
                         setTimeout(check, 100);
@@ -317,16 +325,24 @@
                 console.log('[VIBE CHECK] ✓ Real user match:', match.username);
                 showToast(`✨ Match! @${match.username} (Real User)`, 3500);
                 
-                // TODO: Navigate to chat
-                // window.location.href = `/chat.html?partner=${match.username}&type=real`;
+                // TODO: Navigate to real user chat (glitch.html)
+                setTimeout(() => {
+                    showToast('🚧 Real user chat coming soon! Redirecting to AI...', 2000);
+                    setTimeout(() => {
+                        const ai = getAIFallback(gender);
+                        window.location.href = `/cocomeo.html?character=${ai.username}`;
+                    }, 2000);
+                }, 3500);
             } else {
                 // Fallback to AI
                 const ai = getAIFallback(gender);
                 console.log('[VIBE CHECK] → AI fallback:', ai.username);
                 showToast(`🤖 Match! @${ai.username} (AI Partner)`, 3500);
                 
-                // TODO: Navigate to AI chat
-                // window.location.href = `/cocomeo.html?character=${ai.username}`;
+                // Navigate to AI chat
+                setTimeout(() => {
+                    window.location.href = `/cocomeo.html?character=${ai.username}`;
+                }, 3500);
             }
         }
         
