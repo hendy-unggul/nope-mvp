@@ -633,11 +633,11 @@
     <script src="spill-generator.js"></script>
     <script>
         // ============================================
-        // CONFIG
+        // CONFIG (sama dengan spill-generator.js)
         // ============================================
         const JEJAK = {
             SUPABASE_URL: 'https://ruovfrdicdnh1ysmacpz.supabase.co',
-            SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0', // ← ISI INI!
+            SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1b3ZmcmRpY2RuaDF5c21hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg1MDQ2NjEsImV4cCI6MjA1NDA4MDY2MX0.HbYlQkKFHLLWMmBJYNqn-OkdSR7VpZBsNIjYlPQ7-18',
         };
         
         let db = null;
@@ -723,28 +723,26 @@
             console.log('[VIBE CHECK] Starting...');
             showToast('🔍 Mencari partner...');
             
-            // Check if db initialized
-            if (!db && !window.db) {
+            // Use global db (from spill-generator.js)
+            const supabase = window.db || db;
+            
+            if (!supabase) {
                 console.error('[VIBE CHECK] Database tidak terhubung');
                 showToast('❌ Database tidak terhubung', 3000);
                 return;
             }
             
-            // Use global db if available
-            const supabase = db || window.db;
-            const currentUsername = localStorage.getItem('jejak_username') || 'anonymous';
+            const currentUsername = localStorage.getItem('jejak_username') || 'test.user';
             
             console.log('[VIBE CHECK] Current user:', currentUsername);
             console.log('[VIBE CHECK] DB instance:', !!supabase);
             
             try {
-                // Get random users from database (exclude self)
+                // ✅ SIMPLIFIED: Get ALL users, filter in JS
                 console.log('[VIBE CHECK] Querying database...');
                 const { data, error } = await supabase
                     .from('profiles')
-                    .select('username')
-                    .neq('username', currentUsername)
-                    .limit(10);
+                    .select('username');
                 
                 console.log('[VIBE CHECK] Query result:', { data, error });
                 
@@ -755,17 +753,34 @@
                 }
                 
                 if (!data || data.length === 0) {
-                    console.warn('[VIBE CHECK] No other users found');
+                    console.warn('[VIBE CHECK] No users found');
+                    showToast('😔 Belum ada user di database', 3000);
+                    return;
+                }
+                
+                // Filter out current user in JavaScript
+                const otherUsers = data.filter(u => u.username !== currentUsername);
+                
+                console.log('[VIBE CHECK] Other users:', otherUsers.length);
+                
+                if (otherUsers.length === 0) {
+                    console.warn('[VIBE CHECK] No other users');
                     showToast('😔 Belum ada user lain online', 3000);
                     return;
                 }
                 
-                // Pick random from results
-                const randomUser = data[Math.floor(Math.random() * data.length)];
+                // Pick random
+                const randomUser = otherUsers[Math.floor(Math.random() * otherUsers.length)];
                 const vibeScore = Math.floor(Math.random() * 30) + 70; // 70-100%
                 
                 console.log('[VIBE CHECK] Match found:', randomUser.username, vibeScore + '%');
                 showToast(`✨ ${vibeScore}% match dengan @${randomUser.username}!`, 3500);
+                
+            } catch (e) {
+                console.error('[VIBE CHECK] Catch error:', e);
+                showToast('❌ Error: ' + e.message, 3000);
+            }
+        }
                 
             } catch (e) {
                 console.error('[VIBE CHECK] Catch error:', e);
