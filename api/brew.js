@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-// ============================================
 // ENDPOINT TEST
-// ============================================
 router.get('/test', (req, res) => {
     res.json({ 
         success: true, 
@@ -12,36 +10,24 @@ router.get('/test', (req, res) => {
     });
 });
 
-// ============================================
-// ENDPOINT BREW - SIMPLE VERSION
-// ============================================
+// ENDPOINT BREW - VERSI SIMPLE
 router.post('/brew', (req, res) => {
-    try {
-        console.log('[BREW] POST /brew called');
-        
-        const dummySpills = [];
-        for (let i = 0; i < 3; i++) {
-            dummySpills.push({
-                id: `dummy_${Date.now()}_${i}`,
-                author: ['beby.manis', 'agak.koplak', 'pretty.sad'][Math.floor(Math.random() * 3)],
-                mood: ['surviving', 'thriving', 'chaotic', 'doom'][Math.floor(Math.random() * 4)],
-                content: 'test spill dari API - ' + new Date().toLocaleTimeString(),
-                timestamp: Date.now() - (i * 1000),
-                reactions: { skull: 3, cry: 5, fire: 2, upside: 4 }
-            });
-        }
-        
-        res.json({
-            success: true,
-            spills: dummySpills,
-            count: dummySpills.length,
-            source: 'dummy'
+    const dummySpills = [];
+    for (let i = 0; i < 3; i++) {
+        dummySpills.push({
+            id: `dummy_${Date.now()}_${i}`,
+            author: 'beby.manis',
+            mood: 'surviving',
+            content: `test spill #${i+1} dari API`,
+            timestamp: Date.now(),
+            reactions: { skull: 3, cry: 5, fire: 2, upside: 4 }
         });
-        
-    } catch (error) {
-        console.error('[BREW] Error:', error);
-        res.status(500).json({ error: error.message });
     }
+    res.json({
+        success: true,
+        spills: dummySpills,
+        count: dummySpills.length
+    });
 });
 
 module.exports = router;
