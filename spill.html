@@ -5,190 +5,119 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SPILL — vibe radar</title>
     
-    <!-- NO CSP - Let browser handle everything -->
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     
     <style>
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            margin: 0; padding: 0; box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
         }
         
         :root {
-            --bg: #080808;
-            --sf: #0f0f0f;
-            --bd: #222;
-            --bd2: #2e2e2e;
-            --tx: #f0ece6;
-            --txs: #777;
-            --txm: #444;
-            --ap: #ff2d55;
-            --as: #00e5ff;
-            --aq: #bfff00;
-            --gold: #ffd60a;
-            --purple: #bf5af2;
+            --bg: #080808; --sf: #0f0f0f; --bd: #222; --bd2: #2e2e2e;
+            --tx: #f0ece6; --txs: #777; --txm: #444;
+            --ap: #ff2d55; --as: #00e5ff; --aq: #bfff00;
         }
         
-        html, body {
-            height: 100%;
-            overflow: hidden;
-            background: var(--bg);
-            color: var(--tx);
-            font-family: 'Syne', sans-serif;
-        }
-        
-        .app {
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
+        html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--tx); font-family: 'Syne', sans-serif; }
+        .app { height: 100%; display: flex; flex-direction: column; }
         
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 18px;
-            border-bottom: 2px solid var(--bd);
-            background: var(--bg);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 14px 18px; border-bottom: 2px solid var(--bd); background: var(--bg);
         }
         
-        .logo {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 34px;
-            letter-spacing: 2px;
-        }
-        
-        .logo .x {
-            color: var(--ap);
-            display: inline-block;
-            animation: spinX 4s ease-in-out infinite;
-        }
-        
-        @keyframes spinX {
-            0%, 90%, 100% { transform: rotate(0); }
-            95% { transform: rotate(180deg) scale(1.2); }
-        }
+        .logo { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 2px; }
+        .logo .x { color: var(--ap); display: inline-block; animation: spinX 4s ease-in-out infinite; }
+        @keyframes spinX { 0%, 90%, 100% { transform: rotate(0); } 95% { transform: rotate(180deg) scale(1.2); } }
         
         .user-badge {
-            font-family: 'DM Mono', monospace;
-            font-size: 12px;
-            color: var(--as);
-            border: 2px solid var(--bd);
-            padding: 4px 8px;
-            background: #000;
+            font-family: 'DM Mono', monospace; font-size: 12px; color: var(--as);
+            border: 2px solid var(--bd); padding: 4px 8px; background: #000;
         }
         
-        .scroll {
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: 70px;
-        }
+        .scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 70px; }
         
-        .radar-sect {
-            background: var(--sf);
-            border-bottom: 2px solid var(--bd);
-            padding: 18px;
-        }
+        .radar-sect { background: var(--sf); border-bottom: 2px solid var(--bd); padding: 18px; }
         
         .btn-vibe-check {
-            width: 100%;
-            background: var(--ap);
-            border: 2px solid #000;
-            padding: 18px;
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 22px;
-            letter-spacing: 3px;
-            color: #fff;
-            cursor: pointer;
-            box-shadow: 5px 5px 0 #000;
-            margin-top: 20px;
+            width: 100%; background: var(--ap); border: 2px solid #000; padding: 18px;
+            font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px;
+            color: #fff; cursor: pointer; box-shadow: 5px 5px 0 #000; margin-top: 20px;
         }
+        .btn-vibe-check:active { transform: translate(3px, 3px); box-shadow: 2px 2px 0 #000; }
         
-        .btn-vibe-check:active {
-            transform: translate(3px, 3px);
-            box-shadow: 2px 2px 0 #000;
-        }
+        .spills-sect { padding: 18px; }
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--txs); }
         
-        .spills-sect {
-            padding: 18px;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--txs);
-        }
-        
-        .bnav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--bg);
-            border-top: 2px solid var(--bd);
-        }
-        
-        .bnav-c {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            height: 62px;
-        }
-        
+        .bnav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg); border-top: 2px solid var(--bd); }
+        .bnav-c { display: grid; grid-template-columns: repeat(4, 1fr); height: 62px; }
         .ni {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            color: var(--txm);
-            text-decoration: none;
-            font-family: 'DM Mono', monospace;
-            font-size: 9px;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            border-right: 2px solid var(--bd);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 4px; color: var(--txm); text-decoration: none;
+            font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px;
+            text-transform: uppercase; border-right: 2px solid var(--bd);
         }
+        .ni:last-child { border-right: none; }
+        .ni.act { color: var(--ap); background: rgba(255,45,85,0.06); }
+        .nico { font-size: 20px; }
         
-        .ni:last-child {
-            border-right: none;
+        /* GENDER MODAL */
+        .modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 1000;
+            display: none; align-items: center; justify-content: center; padding: 20px;
         }
-        
-        .ni.act {
-            color: var(--ap);
-            background: rgba(255,45,85,0.06);
+        .modal.show { display: flex; }
+        .modal-content {
+            background: var(--sf); border: 2px solid var(--bd2); padding: 28px;
+            max-width: 340px; width: 100%; box-shadow: 8px 8px 0 #000;
         }
+        .modal-title {
+            font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin-bottom: 12px;
+        }
+        .modal-desc {
+            font-family: 'DM Mono', monospace; font-size: 11px; color: var(--txs);
+            margin-bottom: 24px; line-height: 1.6;
+        }
+        .gender-btns {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+        }
+        .gender-btn {
+            padding: 16px; background: var(--bg); border: 2px solid var(--bd2);
+            font-family: 'DM Mono', monospace; font-size: 14px; color: var(--tx);
+            cursor: pointer; box-shadow: 3px 3px 0 #000; text-align: center;
+        }
+        .gender-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #000; }
         
-        .nico {
-            font-size: 20px;
+        /* MATCHING MODAL */
+        .matching-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 1001;
+            display: none; align-items: center; justify-content: center; flex-direction: column;
+        }
+        .matching-modal.show { display: flex; }
+        .matching-spinner {
+            width: 60px; height: 60px; border-radius: 50%;
+            border: 3px solid var(--bd2); border-top-color: var(--as);
+            animation: spin 1s linear infinite; margin-bottom: 24px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .matching-text {
+            font-family: 'Bebas Neue', sans-serif; font-size: 32px;
+            color: var(--tx); margin-bottom: 8px;
+        }
+        .matching-timer {
+            font-family: 'DM Mono', monospace; font-size: 14px; color: var(--txs);
         }
         
         .toast {
-            position: fixed;
-            bottom: 90px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--tx);
-            color: var(--bg);
-            padding: 12px 22px;
-            font-family: 'DM Mono', monospace;
-            font-size: 12px;
-            z-index: 600;
-            opacity: 0;
-            transition: all 0.25s;
-            border: 2px solid #000;
-            box-shadow: 4px 4px 0 #000;
+            position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--tx); color: var(--bg); padding: 12px 22px;
+            font-family: 'DM Mono', monospace; font-size: 12px; z-index: 600;
+            opacity: 0; transition: all 0.25s; border: 2px solid #000; box-shadow: 4px 4px 0 #000;
         }
-        
-        .toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
@@ -202,7 +131,7 @@
             <div class="radar-sect">
                 <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin-bottom: 12px;">VIBE RADAR</h2>
                 <p style="font-family: 'DM Mono', monospace; font-size: 11px; color: var(--txs); margin-bottom: 20px;">
-                    Temukan user dengan vibe yang sama
+                    Temukan teman ngobrol dengan vibe yang sama
                 </p>
                 <button class="btn-vibe-check" id="vibeCheckBtn">
                     <span>⬡ VIBE CHECK</span>
@@ -227,14 +156,47 @@
         </nav>
     </div>
     
+    <!-- GENDER MODAL -->
+    <div class="modal" id="genderModal">
+        <div class="modal-content">
+            <div class="modal-title">PILIH GENDER</div>
+            <div class="modal-desc">Mau ngobrol sama cowok atau cewek?</div>
+            <div class="gender-btns">
+                <button class="gender-btn" data-gender="male">👨 COWOK</button>
+                <button class="gender-btn" data-gender="female">👩 CEWEK</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- MATCHING MODAL -->
+    <div class="matching-modal" id="matchingModal">
+        <div class="matching-spinner"></div>
+        <div class="matching-text">MENCARI PARTNER...</div>
+        <div class="matching-timer" id="matchingTimer">15 detik</div>
+    </div>
+    
     <div class="toast" id="toast"></div>
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="spill-generator.js"></script>
     <script>
-        console.log('[SPILL] Initializing ULTRA SIMPLE version...');
+        console.log('[SPILL] Initializing VIBE CHECK system...');
         
-        // Toast helper
+        // AI Characters for fallback
+        const AI_CHARACTERS = [
+            'beby.manis', 'strawberry.shortcake', 'pretty.sad', 'little.fairy',
+            'cinnamon.girl', 'sejuta.badai', 'satria.bajahitam', 'agak.koplak',
+            'chili.padi', 'bang.juned'
+        ];
+        
+        const AI_GENDERS = {
+            'beby.manis': 'female', 'strawberry.shortcake': 'female',
+            'pretty.sad': 'female', 'little.fairy': 'female', 'cinnamon.girl': 'female',
+            'sejuta.badai': 'male', 'satria.bajahitam': 'male', 'agak.koplak': 'male',
+            'chili.padi': 'male', 'bang.juned': 'male'
+        };
+        
+        // Toast
         function showToast(msg, duration = 2500) {
             const toast = document.getElementById('toast');
             toast.textContent = msg;
@@ -242,54 +204,129 @@
             setTimeout(() => toast.classList.remove('show'), duration);
         }
         
-        // VIBE CHECK - Ultra simple, use window.db from spill-generator.js
-        async function doVibeCheck() {
-            console.log('[VIBE CHECK] Starting...');
-            showToast('🔍 Mencari partner...');
-            
-            // Wait for spill-generator to init
-            if (!window.db) {
-                console.warn('[VIBE CHECK] Waiting for DB...');
-                setTimeout(doVibeCheck, 500);
-                return;
-            }
-            
-            const currentUser = localStorage.getItem('jejak_username') || 'test.user';
-            console.log('[VIBE CHECK] Current:', currentUser);
+        // Show/Hide Modals
+        function showGenderModal() {
+            document.getElementById('genderModal').classList.add('show');
+        }
+        
+        function hideGenderModal() {
+            document.getElementById('genderModal').classList.remove('show');
+        }
+        
+        function showMatchingModal() {
+            document.getElementById('matchingModal').classList.add('show');
+        }
+        
+        function hideMatchingModal() {
+            document.getElementById('matchingModal').classList.remove('show');
+        }
+        
+        // Wait for DB with timeout
+        function waitForDB(timeout = 5000) {
+            return new Promise((resolve, reject) => {
+                const startTime = Date.now();
+                
+                const check = () => {
+                    if (window.db) {
+                        console.log('[VIBE CHECK] ✓ DB ready');
+                        resolve(window.db);
+                    } else if (Date.now() - startTime > timeout) {
+                        reject(new Error('DB timeout'));
+                    } else {
+                        setTimeout(check, 100);
+                    }
+                };
+                
+                check();
+            });
+        }
+        
+        // Find Real User Match
+        async function findRealUser(gender, timeout = 15000) {
+            console.log('[VIBE CHECK] Finding real user, gender:', gender);
             
             try {
-                // SIMPLEST possible query
-                const response = await window.db
+                const db = await waitForDB();
+                const currentUser = localStorage.getItem('jejak_username') || 'test.user';
+                
+                // Query for real users (exclude self and AI characters)
+                const { data, error } = await db
                     .from('profiles')
                     .select('username');
                 
-                console.log('[VIBE CHECK] Response:', response);
+                if (error) throw error;
                 
-                if (response.error) {
-                    throw new Error(response.error.message);
+                console.log('[VIBE CHECK] All users:', data);
+                
+                // Filter: exclude self and AI characters
+                const realUsers = data.filter(u => 
+                    u.username !== currentUser && 
+                    !AI_CHARACTERS.includes(u.username)
+                );
+                
+                console.log('[VIBE CHECK] Real users:', realUsers);
+                
+                if (realUsers.length > 0) {
+                    // Pick random
+                    const match = realUsers[Math.floor(Math.random() * realUsers.length)];
+                    return { type: 'real', username: match.username };
                 }
                 
-                const users = response.data || [];
-                console.log('[VIBE CHECK] Users:', users);
-                
-                // Filter out current user
-                const others = users.filter(u => u.username !== currentUser);
-                
-                if (others.length === 0) {
-                    showToast('😔 Belum ada user lain', 3000);
-                    return;
-                }
-                
-                // Random pick
-                const match = others[Math.floor(Math.random() * others.length)];
-                const score = Math.floor(Math.random() * 30) + 70;
-                
-                console.log('[VIBE CHECK] Match:', match.username, score + '%');
-                showToast(`✨ ${score}% match dengan @${match.username}!`, 3500);
+                return null;
                 
             } catch (err) {
-                console.error('[VIBE CHECK] Error:', err);
-                showToast('❌ ' + err.message, 3000);
+                console.error('[VIBE CHECK] Error finding real user:', err);
+                return null;
+            }
+        }
+        
+        // Get AI Fallback
+        function getAIFallback(gender) {
+            const aiByGender = AI_CHARACTERS.filter(char => AI_GENDERS[char] === gender);
+            const randomAI = aiByGender[Math.floor(Math.random() * aiByGender.length)];
+            return { type: 'ai', username: randomAI };
+        }
+        
+        // Main Vibe Check Flow
+        async function doVibeCheck(gender) {
+            console.log('[VIBE CHECK] Starting with gender:', gender);
+            hideGenderModal();
+            showMatchingModal();
+            
+            let secondsLeft = 15;
+            const timerEl = document.getElementById('matchingTimer');
+            
+            // Update timer
+            const timerInterval = setInterval(() => {
+                secondsLeft--;
+                timerEl.textContent = secondsLeft + ' detik';
+                
+                if (secondsLeft <= 0) {
+                    clearInterval(timerInterval);
+                }
+            }, 1000);
+            
+            // Try to find real user
+            const match = await findRealUser(gender, 15000);
+            
+            clearInterval(timerInterval);
+            hideMatchingModal();
+            
+            if (match) {
+                // Real user found!
+                console.log('[VIBE CHECK] ✓ Real user match:', match.username);
+                showToast(`✨ Match! @${match.username} (Real User)`, 3500);
+                
+                // TODO: Navigate to chat
+                // window.location.href = `/chat.html?partner=${match.username}&type=real`;
+            } else {
+                // Fallback to AI
+                const ai = getAIFallback(gender);
+                console.log('[VIBE CHECK] → AI fallback:', ai.username);
+                showToast(`🤖 Match! @${ai.username} (AI Partner)`, 3500);
+                
+                // TODO: Navigate to AI chat
+                // window.location.href = `/cocomeo.html?character=${ai.username}`;
             }
         }
         
@@ -299,8 +336,18 @@
             const username = localStorage.getItem('jejak_username') || 'anonymous';
             document.getElementById('userNameDisplay').textContent = '@' + username;
             
-            // Vibe check button
-            document.getElementById('vibeCheckBtn').addEventListener('click', doVibeCheck);
+            // Vibe Check button → Show gender modal
+            document.getElementById('vibeCheckBtn').addEventListener('click', () => {
+                showGenderModal();
+            });
+            
+            // Gender selection
+            document.querySelectorAll('.gender-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const gender = btn.dataset.gender;
+                    doVibeCheck(gender);
+                });
+            });
             
             console.log('[SPILL] Ready!');
         });
