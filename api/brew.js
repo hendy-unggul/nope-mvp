@@ -18,9 +18,15 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // ============================================
 // DEEPSEEK CONFIG
 // ============================================
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || 'sk-88746b93303b4e82998d680096d9bbe7';
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 
+// Tambahin error handling biar tau kalo env gak kebaca
+if (!DEEPSEEK_API_KEY) {
+    console.error('[BREW] ❌ DEEPSEEK_API_KEY not found in environment!');
+    // Bisa return error atau pake fallback generator
+}
+
+const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
 // ============================================
 // PERSONA LENGKAP - 10 KARAKTER
 // ============================================
