@@ -1,163 +1,283 @@
-// ============================================
-// spill-generator.js - FIXED VERSION
-// ============================================
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Blitz - Spill Your Chaos</title>
+    <style>
+        :root {
+            --bg: #0f0f23;
+            --card: #1a1a2e;
+            --tx: #e0e0e0;
+            --txm: #a0a0a0;
+            --accent: #667eea;
+            --surviving: #f59e0b;
+            --thriving: #10b981;
+            --chaotic: #ef4444;
+            --doom: #8b5cf6;
+        }
 
-(function() {
-    'use strict';
-    
-    const CONFIG = {
-        POOL_SIZE: 50,
-        WINDOW_SIZE: 8,
-        BREW_INTERVAL: 240000
-    };
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    let fullPool = [];
-    let windowStart = 0;
-    let activeMood = 'all';
-    let isLoading = false;
-    let nextId = 1;
+        body {
+            background: var(--bg);
+            color: var(--tx);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
 
-    // INITIAL SPILLS (50 entries)
-    const INITIAL_SPILLS = Array(50).fill().map((_, i) => ({
-        id: `spill_${String(i+1).padStart(3,'0')}`,
-        author: ['beby.manis','agak.koplak','pretty.sad','bang.juned','strawberry.shortcake','chili.padi','little.fairy','sejuta.badai','satria.bajahitam'][i % 9],
-        mood: ['surviving','thriving','chaotic','doom'][i % 4],
-        content: `spill awal #${i+1}: capek ah hari ini 😮‍💨`,
-        wordCount: 7,
-        timestamp: Date.now() - (i * 3600000),
-        reactions: { skull: i%10, cry: i%15, fire: i%8, upside: i%5 }
-    }));
+        .container {
+            max-width: 680px;
+            margin: 0 auto;
+        }
 
-    // INIT
-    function init() {
-        console.log('[SpillGen] 🚀 Initializing...');
-        fullPool = [...INITIAL_SPILLS].sort((a,b) => b.timestamp - a.timestamp);
-        windowStart = 0;
-        renderSpills();
-        setInterval(addNewEntry, CONFIG.BREW_INTERVAL);
-    }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
 
-    // ADD NEW ENTRY (API)
-    async function addNewEntry() {
-        console.log('[SpillGen] 🆕 Brewing...');
-        try {
-            const response = await fetch('/api/brew', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ count: 1 })
-            });
-            
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            
-            const data = await response.json();
-            if (data.success && data.spills?.[0]) {
-                const apiSpill = data.spills[0];
-                const wordCount = apiSpill.content.split(/\s+/).length;
-                
-                const newSpill = {
-                    id: `api_${Date.now()}`,
-                    author: apiSpill.author || 'ai.generator',
-                    mood: apiSpill.mood || 'surviving',
-                    content: apiSpill.content,
-                    wordCount: wordCount,
-                    timestamp: Date.now(),
-                    reactions: apiSpill.reactions || { skull:5, cry:5, fire:5, upside:5 }
-                };
-                
-                fullPool = [newSpill, ...fullPool.slice(0, CONFIG.POOL_SIZE - 1)];
-                console.log(`[SpillGen] ✅ API entry: ${wordCount} kata`);
-                renderSpills();
-                return;
+        .header h1 {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--txm);
+            font-size: 14px;
+        }
+
+        .controls {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .mood-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .mood-chip {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid var(--txm);
+            background: transparent;
+            color: var(--tx);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .mood-chip.active,
+        .mood-chip:hover {
+            border-color: var(--accent);
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--card);
+            color: var(--tx);
+            border: 2px solid var(--txm);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .feed-meta {
+            text-align: center;
+            color: var(--txm);
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+
+        #spillsList {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .spill-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid var(--accent);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
-        } catch (error) {
-            console.warn('[SpillGen] ⚠️ API error, using fallback');
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        addOfflineEntry();
-    }
 
-    // OFFLINE FALLBACK
-    function addOfflineEntry() {
-        const authors = ['beby.manis','agak.koplak','pretty.sad','bang.juned'];
-        const moods = ['surviving','thriving','chaotic','doom'];
-        const contents = [
-            'capek ah hari ini, pengen rebahan aja 🥲',
-            'deadline makin deket, anxiety naik turun 😮‍💨',
-            'hidup lagi chaos, bingung harus gimana',
-            'stress ngerjain skripsi, dosennya ga bales'
-        ];
-        
-        const newSpill = {
-            id: `offline_${Date.now()}`,
-            author: authors[Math.floor(Math.random() * authors.length)],
-            mood: moods[Math.floor(Math.random() * moods.length)],
-            content: contents[Math.floor(Math.random() * contents.length)],
-            wordCount: 7,
-            timestamp: Date.now(),
-            reactions: { skull:3, cry:5, fire:2, upside:4 }
-        };
-        
-        fullPool = [newSpill, ...fullPool.slice(0, CONFIG.POOL_SIZE - 1)];
-        console.log('[SpillGen] 📝 Offline entry');
-        renderSpills();
-    }
-
-    // SEDUH
-    window.seduhTehBaru = function() {
-        windowStart = (windowStart + 1) % CONFIG.POOL_SIZE;
-        renderSpills();
-    };
-
-    window.seduhKeAtas = function() {
-        windowStart = (windowStart - 1 + CONFIG.POOL_SIZE) % CONFIG.POOL_SIZE;
-        renderSpills();
-    };
-
-    // FILTER MOOD
-    window.filterMood = function(mood) {
-        activeMood = mood;
-        document.querySelectorAll('.mood-chip').forEach(chip => {
-            chip.classList.toggle('active', chip.dataset.mood === mood);
-        });
-        renderSpills();
-    };
-
-    // RENDER
-    function renderSpills() {
-        const container = document.getElementById('spillsList');
-        if (!container) return;
-        
-        let windowSpills = [];
-        for (let i = 0; i < CONFIG.WINDOW_SIZE; i++) {
-            windowSpills.push(fullPool[(windowStart + i) % CONFIG.POOL_SIZE]);
+        .spill-head {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
         }
-        
-        let toShow = activeMood === 'all' ? windowSpills : 
-                     windowSpills.filter(s => s.mood === activeMood);
-        if (toShow.length === 0) toShow = windowSpills;
-        
-        const metaEl = document.getElementById('feedMeta');
-        if (metaEl) {
-            metaEl.textContent = `Jendela ${windowStart+1}-${windowStart+CONFIG.WINDOW_SIZE} dari ${CONFIG.POOL_SIZE}`;
+
+        .spill-user {
+            font-weight: 600;
+            color: var(--accent);
         }
-        
-        container.innerHTML = toShow.map(s => `
-            <div class="spill-card">
-                <div class="spill-head">
-                    <span class="spill-user">@${escapeHtml(s.author)}</span>
-                    <span class="spill-mood ${s.mood}">${s.mood.toUpperCase()}</span>
-                </div>
-                <div class="spill-body">${escapeHtml(s.content)}</div>
+
+        .spill-mood {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .spill-mood.surviving {
+            background: var(--surviving);
+            color: #000;
+        }
+
+        .spill-mood.thriving {
+            background: var(--thriving);
+            color: #000;
+        }
+
+        .spill-mood.chaotic {
+            background: var(--chaotic);
+            color: #fff;
+        }
+
+        .spill-mood.doom {
+            background: var(--doom);
+            color: #fff;
+        }
+
+        .spill-words {
+            font-size: 9px;
+            color: var(--txm);
+        }
+
+        .spill-body {
+            margin-bottom: 16px;
+            line-height: 1.7;
+            color: var(--tx);
+        }
+
+        .spill-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .react-btn {
+            background: transparent;
+            border: 1px solid var(--txm);
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--tx);
+            font-size: 14px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .react-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+
+        .react-count {
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 640px) {
+            .header h1 {
+                font-size: 36px;
+            }
+            
+            .action-btns {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ Blitz</h1>
+            <p>Spill Your Chaos, Embrace The Void</p>
+        </div>
+
+        <div class="controls">
+            <div class="mood-filters">
+                <button class="mood-chip active" data-mood="all" onclick="window.filterMood('all')">ALL</button>
+                <button class="mood-chip" data-mood="surviving" onclick="window.filterMood('surviving')">SURVIVING</button>
+                <button class="mood-chip" data-mood="thriving" onclick="window.filterMood('thriving')">THRIVING</button>
+                <button class="mood-chip" data-mood="chaotic" onclick="window.filterMood('chaotic')">CHAOTIC</button>
+                <button class="mood-chip" data-mood="doom" onclick="window.filterMood('doom')">DOOM</button>
             </div>
-        `).join('');
-    }
 
-    function escapeHtml(text) {
-        if (!text) return '';
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-    }
+            <div class="action-btns">
+                <button class="btn btn-secondary" onclick="window.seduhKeAtas()">⬆️ Seduh Ke Atas</button>
+                <button class="btn btn-primary" onclick="window.seduhTehBaru()">🍵 Seduh Teh Baru</button>
+            </div>
+        </div>
 
-    // START
-    setTimeout(init, 1000);
-})();
+        <div class="feed-meta" id="feedMeta">
+            Loading...
+        </div>
+
+        <div id="spillsList">
+            <!-- Spills akan muncul di sini -->
+        </div>
+    </div>
+
+    <!-- Import spill-generator.js -->
+    <script src="spill-generator.js"></script>
+</body>
+</html>
