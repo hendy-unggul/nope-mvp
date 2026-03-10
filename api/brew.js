@@ -9,33 +9,53 @@ router.get('/test', (req, res) => {
     });
 });
 
-// ENDPOINT BREW (POST)
-router.post('/brew', (req, res) => {
+// ============================================
+// ENDPOINT BREW (POST) - VERSI AMAN
+// ============================================
+router.post('/brew', async (req, res) => {
     try {
-        console.log('[BREW] POST /brew called');
+        // Set timeout lebih panjang
+        req.setTimeout(30000); // 30 detik
         
-        const dummy = [];
+        // Ambil count dari body, default 3
+        const count = req.body?.count || 3;
+        
+        console.log('[BREW] 📥 POST /brew called with count:', count);
+        
+        // Batasi maksimal 5 biar ga overload
+        const safeCount = Math.min(count, 5);
+        
+        const spills = await generateAndSaveSpills(safeCount);
+        
+        return res.json({
+            success: true,
+            spills: spills,
+            count: spills.length
+        });
+        
+    } catch (error) {
+        console.error('[BREW] ❌ Error:', error);
+        
+        // Fallback: return dummy data
+        const dummySpills = [];
         for (let i = 0; i < 3; i++) {
-            dummy.push({
-                id: `test_${Date.now()}_${i}`,
+            dummySpills.push({
+                id: `fallback_${Date.now()}_${i}`,
                 author: 'beby.manis',
                 mood: 'surviving',
-                content: 'test api minimal',
+                content: 'fallback dari server',
                 timestamp: Date.now(),
                 wordCount: 3,
                 reactions: { skull: 5, cry: 3, fire: 2, upside: 1 }
             });
         }
         
-        res.json({
+        return res.json({
             success: true,
-            spills: dummy,
-            count: dummy.length
+            spills: dummySpills,
+            count: dummySpills.length,
+            fallback: true
         });
-        
-    } catch (error) {
-        console.error('[BREW] Error:', error);
-        res.status(500).json({ error: error.message });
     }
 });
 
