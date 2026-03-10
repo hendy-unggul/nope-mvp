@@ -1,5 +1,6 @@
 // ============================================
-// spill-generator.js - POOL 50, JENDELA 8, LOOP
+// spill-generator.js - FINAL VERSION
+// POOL 50, JENDELA 8, VARIASI PANJANG 7/15/25/40 KATA
 // ============================================
 
 (function() {
@@ -19,67 +20,191 @@
     let nextId = 1;
 
     // ============================================
-    // INITIAL POOL - 50 ENTRIES
+    // INITIAL POOL - 50 ENTRIES VARIATIF
     // ============================================
     const INITIAL_SPILLS = [
-        // 50 entries dengan variasi author, mood, content
-        { id: 'spill_001', author: 'beby.manis', mood: 'surviving', content: 'deadline skripsi makin deket, anxiety naik turun 😮‍💨', timestamp: Date.now() - 5000000, reactions: { skull:12, cry:23, fire:5, upside:3 } },
-        { id: 'spill_002', author: 'agak.koplak', mood: 'chaotic', content: 'client minta revisi jam 11 malem, this is fine 🔥', timestamp: Date.now() - 4900000, reactions: { skull:18, cry:31, fire:9, upside:7 } },
-        { id: 'spill_003', author: 'satria.bajahitam', mood: 'doom', content: 'motor mogok, dompet tipis, pacar ngambek. triple combo 🫠', timestamp: Date.now() - 4800000, reactions: { skull:22, cry:35, fire:1, upside:14 } },
-        { id: 'spill_004', author: 'pretty.sad', mood: 'doom', content: 'HR minta masuk sabtu minggu, mau resign tapi tabungan tinggal 200rb. bingung jadinya 😭', timestamp: Date.now() - 4700000, reactions: { skull:25, cry:42, fire:3, upside:12 } },
-        { id: 'spill_005', author: 'strawberry.shortcake', mood: 'thriving', content: 'akhirnya dapet panggilan interview setelah ngelamar 50+ tempat, semoga lancar ya Allah ✨', timestamp: Date.now() - 4600000, reactions: { skull:3, cry:8, fire:45, upside:12 } },
-        { id: 'spill_006', author: 'chili.padi', mood: 'thriving', content: 'orderan sneakers laku 15 pasang hari ini, rezeki lancar 💰😎', timestamp: Date.now() - 4500000, reactions: { skull:2, cry:4, fire:38, upside:9 } },
-        { id: 'spill_007', author: 'bang.juned', mood: 'surviving', content: 'skripsi bab 3 masih error, dosen pembimbing ga bales chat seminggu, padahal deadline sidang tinggal 2 bulan. pengen mundur tapi udah di depan mata 🥲', timestamp: Date.now() - 4400000, reactions: { skull:15, cry:28, fire:2, upside:8 } },
-        { id: 'spill_008', author: 'little.fairy', mood: 'chaotic', content: 'ortu ngomel terus disuruh kuliah, tapi gue dapet project freelance 5 juta. antara nurutin ortu atau ngejar cuan, bingung sumpah 🌀', timestamp: Date.now() - 4300000, reactions: { skull:9, cry:15, fire:7, upside:18 } },
-        { id: 'spill_009', author: 'sejuta.badai', mood: 'chaotic', content: 'minggu pagi jam 3, ga bisa tidur karena overthinking masa depan. buka IG liat temen pada nikah, beli rumah, punya mobil, sementara gue masih struggle with skripsi dan dompet tipis. maybe this is my villain arc idk 🛌💔', timestamp: Date.now() - 4200000, reactions: { skull:30, cry:45, fire:8, upside:20 } },
-        { id: 'spill_010', author: 'beby.manis', mood: 'chaotic', content: 'hari ini nangis karena liat mantan bahagia, padahal udah move on 3 bulan', timestamp: Date.now() - 4100000, reactions: { skull:15, cry:30, fire:2, upside:5 } },
-        { id: 'spill_011', author: 'agak.koplak', mood: 'thriving', content: 'akhirnya konten viral juga setelah setahun bikin TikTok', timestamp: Date.now() - 4000000, reactions: { skull:5, cry:2, fire:60, upside:15 } },
-        { id: 'spill_012', author: 'pretty.sad', mood: 'surviving', content: 'hari ini selamat dari meeting tanpa dimarahin boss, progress dikit', timestamp: Date.now() - 3900000, reactions: { skull:8, cry:12, fire:15, upside:7 } },
-        { id: 'spill_013', author: 'bang.juned', mood: 'doom', content: 'skripsi bab 4 error, debugging dari pagi ga ketemu', timestamp: Date.now() - 3800000, reactions: { skull:25, cry:30, fire:1, upside:3 } },
-        { id: 'spill_014', author: 'strawberry.shortcake', mood: 'surviving', content: 'interview hari ini, semoga lolos ya Allah', timestamp: Date.now() - 3700000, reactions: { skull:2, cry:5, fire:20, upside:8 } },
-        { id: 'spill_015', author: 'chili.padi', mood: 'chaotic', content: 'orderan batal, buyer ngilang. rugi waktu', timestamp: Date.now() - 3600000, reactions: { skull:20, cry:25, fire:2, upside:1 } },
-        { id: 'spill_016', author: 'little.fairy', mood: 'thriving', content: 'project freelance selesai, dapet bonus', timestamp: Date.now() - 3500000, reactions: { skull:1, cry:3, fire:35, upside:10 } },
-        { id: 'spill_017', author: 'sejuta.badai', mood: 'surviving', content: 'lagu baru dirilis, cuma didenger 50 orang', timestamp: Date.now() - 3400000, reactions: { skull:10, cry:15, fire:8, upside:5 } },
-        { id: 'spill_018', author: 'satria.bajahitam', mood: 'thriving', content: 'orderan bengkel rame, cuan lumayan', timestamp: Date.now() - 3300000, reactions: { skull:3, cry:2, fire:28, upside:7 } },
-        { id: 'spill_019', author: 'beby.manis', mood: 'doom', content: 'skripsi revisi, dosen nyuruh ganti tema', timestamp: Date.now() - 3200000, reactions: { skull:35, cry:40, fire:1, upside:2 } },
-        { id: 'spill_020', author: 'agak.koplak', mood: 'chaotic', content: 'boss minta kerja lembur tapi gaji masih sama, bodo amat ah', timestamp: Date.now() - 3100000, reactions: { skull:22, cry:15, fire:8, upside:12 } },
-        { id: 'spill_021', author: 'pretty.sad', mood: 'thriving', content: 'kerjaan kelar, weekend healing', timestamp: Date.now() - 3000000, reactions: { skull:2, cry:5, fire:30, upside:15 } },
-        { id: 'spill_022', author: 'bang.juned', mood: 'chaotic', content: 'coding error, minta tolong temen', timestamp: Date.now() - 2900000, reactions: { skull:12, cry:18, fire:5, upside:8 } },
-        { id: 'spill_023', author: 'strawberry.shortcake', mood: 'doom', content: 'interview ditolak lagi, ke-51 kalinya', timestamp: Date.now() - 2800000, reactions: { skull:30, cry:45, fire:1, upside:4 } },
-        { id: 'spill_024', author: 'chili.padi', mood: 'surviving', content: 'modal habis, orderan sepi', timestamp: Date.now() - 2700000, reactions: { skull:25, cry:30, fire:2, upside:3 } },
-        { id: 'spill_025', author: 'little.fairy', mood: 'doom', content: 'client kabur ga bayar', timestamp: Date.now() - 2600000, reactions: { skull:28, cry:35, fire:1, upside:2 } },
-        { id: 'spill_026', author: 'sejuta.badai', mood: 'thriving', content: 'gig kecil-kecilan, lumayan buat makan', timestamp: Date.now() - 2500000, reactions: { skull:5, cry:8, fire:20, upside:12 } },
-        { id: 'spill_027', author: 'satria.bajahitam', mood: 'chaotic', content: 'pelanggan komplain, harus garansi', timestamp: Date.now() - 2400000, reactions: { skull:18, cry:22, fire:3, upside:6 } },
-        { id: 'spill_028', author: 'beby.manis', mood: 'thriving', content: 'alhamdulillah skripsi ACC, sidang bulan depan', timestamp: Date.now() - 2300000, reactions: { skull:2, cry:5, fire:42, upside:15 } },
-        { id: 'spill_029', author: 'agak.koplak', mood: 'surviving', content: 'kerjaan numpuk, deadline mepet, bawaannya pengen resign', timestamp: Date.now() - 2200000, reactions: { skull:25, cry:30, fire:2, upside:5 } },
-        { id: 'spill_030', author: 'pretty.sad', mood: 'chaotic', content: 'lagi fase bucin, padahal baru kenal seminggu. gila bener', timestamp: Date.now() - 2100000, reactions: { skull:15, cry:20, fire:5, upside:12 } },
-        { id: 'spill_031', author: 'bang.juned', mood: 'thriving', content: 'akhirnya sidang, nilai A alhamdulillah', timestamp: Date.now() - 2000000, reactions: { skull:1, cry:2, fire:55, upside:20 } },
-        { id: 'spill_032', author: 'strawberry.shortcake', mood: 'chaotic', content: 'pacar ngambek karena lupa beli kado anniversary', timestamp: Date.now() - 1900000, reactions: { skull:15, cry:25, fire:3, upside:8 } },
-        { id: 'spill_033', author: 'chili.padi', mood: 'doom', content: 'orderan sepi, modal habis, galau', timestamp: Date.now() - 1800000, reactions: { skull:30, cry:35, fire:1, upside:2 } },
-        { id: 'spill_034', author: 'little.fairy', mood: 'surviving', content: 'client baru minta revisi, lagi-lagi deadline', timestamp: Date.now() - 1700000, reactions: { skull:12, cry:18, fire:5, upside:7 } },
-        { id: 'spill_035', author: 'sejuta.badai', mood: 'chaotic', content: 'inspirasi lagu dateng pas mau tidur, harus bangun buat nulis', timestamp: Date.now() - 1600000, reactions: { skull:8, cry:5, fire:25, upside:10 } },
-        { id: 'spill_036', author: 'satria.bajahitam', mood: 'surviving', content: 'bengkel lagi sepi, mikir buka usaha sampingan', timestamp: Date.now() - 1500000, reactions: { skull:10, cry:12, fire:15, upside:8 } },
-        { id: 'spill_037', author: 'beby.manis', mood: 'chaotic', content: 'bentar lagi sidang, deg-degan campur bahagia', timestamp: Date.now() - 1400000, reactions: { skull:8, cry:12, fire:25, upside:10 } },
-        { id: 'spill_038', author: 'agak.koplak', mood: 'thriving', content: 'promosi jabatan, gaji naik 30%', timestamp: Date.now() - 1300000, reactions: { skull:1, cry:2, fire:65, upside:18 } },
-        { id: 'spill_039', author: 'pretty.sad', mood: 'doom', content: 'ditolak investor lagi, usaha hampir bangkrut', timestamp: Date.now() - 1200000, reactions: { skull:35, cry:45, fire:1, upside:3 } },
-        { id: 'spill_040', author: 'bang.juned', mood: 'chaotic', content: 'ngoding seharian, error masih banyak', timestamp: Date.now() - 1100000, reactions: { skull:20, cry:25, fire:5, upside:5 } },
-        { id: 'spill_041', author: 'strawberry.shortcake', mood: 'surviving', content: 'kerjaan numpuk, pengen cuti tapi ga enak', timestamp: Date.now() - 1000000, reactions: { skull:15, cry:20, fire:8, upside:10 } },
-        { id: 'spill_042', author: 'chili.padi', mood: 'thriving', content: 'buka cabang baru, orderan makin banyak', timestamp: Date.now() - 900000, reactions: { skull:2, cry:3, fire:45, upside:12 } },
-        { id: 'spill_043', author: 'little.fairy', mood: 'doom', content: 'project deadline besok, client minta revisi', timestamp: Date.now() - 800000, reactions: { skull:28, cry:30, fire:2, upside:4 } },
-        { id: 'spill_044', author: 'sejuta.badai', mood: 'surviving', content: 'gig malem minggu, sepi pengunjung', timestamp: Date.now() - 700000, reactions: { skull:12, cry:15, fire:8, upside:7 } },
-        { id: 'spill_045', author: 'satria.bajahitam', mood: 'chaotic', content: 'bengkel rame, tapi banyak komplain', timestamp: Date.now() - 600000, reactions: { skull:18, cry:20, fire:5, upside:8 } },
-        { id: 'spill_046', author: 'beby.manis', mood: 'thriving', content: 'sidang kelar, lulus!', timestamp: Date.now() - 500000, reactions: { skull:0, cry:10, fire:70, upside:25 } },
-        { id: 'spill_047', author: 'agak.koplak', mood: 'doom', content: 'tiktok kena shadowban, engagement turun drastis', timestamp: Date.now() - 400000, reactions: { skull:30, cry:35, fire:2, upside:5 } },
-        { id: 'spill_048', author: 'pretty.sad', mood: 'thriving', content: 'dapet investor baru, bisnis selamat', timestamp: Date.now() - 300000, reactions: { skull:1, cry:3, fire:50, upside:15 } },
-        { id: 'spill_049', author: 'bang.juned', mood: 'chaotic', content: 'coding error, stress, tapi akhirnya nemu solusi', timestamp: Date.now() - 200000, reactions: { skull:15, cry:18, fire:12, upside:10 } },
-        { id: 'spill_050', author: 'strawberry.shortcake', mood: 'surviving', content: 'akhirnya dapet kerja, tapi gaji kecil', timestamp: Date.now() - 100000, reactions: { skull:8, cry:12, fire:20, upside:8 } }
+        // 7 KATA
+        { id: 'spill_001', author: 'beby.manis', mood: 'surviving', content: 'deadline skripsi makin deket, anxiety naik turun 😮‍💨', wordCount: 7, timestamp: Date.now() - 5000000, reactions: { skull:12, cry:23, fire:5, upside:3 } },
+        { id: 'spill_002', author: 'agak.koplak', mood: 'chaotic', content: 'client minta revisi jam 11 malem, this is fine 🔥', wordCount: 7, timestamp: Date.now() - 4900000, reactions: { skull:18, cry:31, fire:9, upside:7 } },
+        { id: 'spill_003', author: 'satria.bajahitam', mood: 'doom', content: 'motor mogok, dompet tipis, pacar ngambek. triple combo 🫠', wordCount: 7, timestamp: Date.now() - 4800000, reactions: { skull:22, cry:35, fire:1, upside:14 } },
+        
+        // 15 KATA
+        { id: 'spill_004', author: 'pretty.sad', mood: 'doom', content: 'HR minta masuk sabtu minggu, mau resign tapi tabungan tinggal 200rb. bingung jadinya 😭', wordCount: 15, timestamp: Date.now() - 4700000, reactions: { skull:25, cry:42, fire:3, upside:12 } },
+        { id: 'spill_005', author: 'strawberry.shortcake', mood: 'thriving', content: 'akhirnya dapet panggilan interview setelah ngelamar 50+ tempat, semoga lancar ya Allah ✨', wordCount: 15, timestamp: Date.now() - 4600000, reactions: { skull:3, cry:8, fire:45, upside:12 } },
+        { id: 'spill_006', author: 'chili.padi', mood: 'thriving', content: 'orderan sneakers laku 15 pasang hari ini, rezeki lancar 💰😎', wordCount: 15, timestamp: Date.now() - 4500000, reactions: { skull:2, cry:4, fire:38, upside:9 } },
+        
+        // 25 KATA
+        { id: 'spill_007', author: 'bang.juned', mood: 'surviving', content: 'skripsi bab 3 masih error, dosen pembimbing ga bales chat seminggu, padahal deadline sidang tinggal 2 bulan. pengen mundur tapi udah di depan mata 🥲', wordCount: 25, timestamp: Date.now() - 4400000, reactions: { skull:15, cry:28, fire:2, upside:8 } },
+        { id: 'spill_008', author: 'little.fairy', mood: 'chaotic', content: 'ortu ngomel terus disuruh kuliah, tapi gue dapet project freelance 5 juta. antara nurutin ortu atau ngejar cuan, bingung sumpah 🌀', wordCount: 25, timestamp: Date.now() - 4300000, reactions: { skull:9, cry:15, fire:7, upside:18 } },
+        
+        // 40 KATA
+        { id: 'spill_009', author: 'sejuta.badai', mood: 'chaotic', content: 'minggu pagi jam 3, ga bisa tidur karena overthinking masa depan. buka IG liat temen pada nikah, beli rumah, punya mobil, sementara gue masih struggle with skripsi dan dompet tipis. maybe this is my villain arc idk 🛌💔', wordCount: 40, timestamp: Date.now() - 4200000, reactions: { skull:30, cry:45, fire:8, upside:20 } },
+        
+        // 7 KATA (lagi)
+        { id: 'spill_010', author: 'beby.manis', mood: 'chaotic', content: 'hari ini nangis karena liat mantan bahagia, padahal udah move on 3 bulan', wordCount: 7, timestamp: Date.now() - 4100000, reactions: { skull:15, cry:30, fire:2, upside:5 } },
+        { id: 'spill_011', author: 'agak.koplak', mood: 'thriving', content: 'akhirnya konten viral juga setelah setahun bikin TikTok', wordCount: 7, timestamp: Date.now() - 4000000, reactions: { skull:5, cry:2, fire:60, upside:15 } },
+        
+        // 15 KATA (lagi)
+        { id: 'spill_012', author: 'pretty.sad', mood: 'surviving', content: 'hari ini selamat dari meeting tanpa dimarahin boss, progress dikit', wordCount: 15, timestamp: Date.now() - 3900000, reactions: { skull:8, cry:12, fire:15, upside:7 } },
+        { id: 'spill_013', author: 'bang.juned', mood: 'doom', content: 'skripsi bab 4 error, debugging dari pagi ga ketemu', wordCount: 15, timestamp: Date.now() - 3800000, reactions: { skull:25, cry:30, fire:1, upside:3 } },
+        
+        // 25 KATA (lagi)
+        { id: 'spill_014', author: 'strawberry.shortcake', mood: 'surviving', content: 'interview hari ini, semoga lolos ya Allah. udah 50x ngelamar, maybe this is the one', wordCount: 25, timestamp: Date.now() - 3700000, reactions: { skull:2, cry:5, fire:20, upside:8 } },
+        { id: 'spill_015', author: 'chili.padi', mood: 'chaotic', content: 'orderan batal, buyer ngilang. rugi waktu dan modal. dagang emang keras', wordCount: 25, timestamp: Date.now() - 3600000, reactions: { skull:20, cry:25, fire:2, upside:1 } },
+        
+        // 40 KATA (lagi)
+        { id: 'spill_016', author: 'little.fairy', mood: 'thriving', content: 'project freelance selesai, dapet bonus 3 juta. rasanya seneng banget bisa ngehasilin uang sendiri tanpa harus ngemis ke ortu. semoga terus berkah', wordCount: 40, timestamp: Date.now() - 3500000, reactions: { skull:1, cry:3, fire:35, upside:10 } },
+        { id: 'spill_017', author: 'sejuta.badai', mood: 'surviving', content: 'lagu baru dirilis, cuma didenger 50 orang. sedih sih tapi gapapa, yang penting berkarya. siapa tau next time bisa viral', wordCount: 40, timestamp: Date.now() - 3400000, reactions: { skull:10, cry:15, fire:8, upside:5 } },
+        
+        // Lanjut sampai 50 entries...
+        { id: 'spill_018', author: 'satria.bajahitam', mood: 'thriving', content: 'orderan bengkel rame, cuan lumayan buat bulan ini', wordCount: 15, timestamp: Date.now() - 3300000, reactions: { skull:3, cry:2, fire:28, upside:7 } },
+        { id: 'spill_019', author: 'beby.manis', mood: 'doom', content: 'skripsi revisi, dosen nyuruh ganti tema. semangat langsung drop', wordCount: 15, timestamp: Date.now() - 3200000, reactions: { skull:35, cry:40, fire:1, upside:2 } },
+        { id: 'spill_020', author: 'agak.koplak', mood: 'chaotic', content: 'boss minta kerja lembur tapi gaji masih sama, bodo amat ah', wordCount: 7, timestamp: Date.now() - 3100000, reactions: { skull:22, cry:15, fire:8, upside:12 } },
+        { id: 'spill_021', author: 'pretty.sad', mood: 'thriving', content: 'kerjaan kelar, weekend healing ke pantai', wordCount: 7, timestamp: Date.now() - 3000000, reactions: { skull:2, cry:5, fire:30, upside:15 } },
+        { id: 'spill_022', author: 'bang.juned', mood: 'chaotic', content: 'coding error, minta tolong temen. debugging rame-rame', wordCount: 7, timestamp: Date.now() - 2900000, reactions: { skull:12, cry:18, fire:5, upside:8 } },
+        { id: 'spill_023', author: 'strawberry.shortcake', mood: 'doom', content: 'interview ditolak lagi, ke-51 kalinya. mental udah ancur', wordCount: 25, timestamp: Date.now() - 2800000, reactions: { skull:30, cry:45, fire:1, upside:4 } },
+        { id: 'spill_024', author: 'chili.padi', mood: 'surviving', content: 'modal habis, orderan sepi. bingung mau usaha apa lagi', wordCount: 15, timestamp: Date.now() - 2700000, reactions: { skull:25, cry:30, fire:2, upside:3 } },
+        { id: 'spill_025', author: 'little.fairy', mood: 'doom', content: 'client kabur ga bayar, rugi 5 juta', wordCount: 7, timestamp: Date.now() - 2600000, reactions: { skull:28, cry:35, fire:1, upside:2 } },
+        { id: 'spill_026', author: 'sejuta.badai', mood: 'thriving', content: 'gig kecil-kecilan, lumayan buat makan seminggu', wordCount: 15, timestamp: Date.now() - 2500000, reactions: { skull:5, cry:8, fire:20, upside:12 } },
+        { id: 'spill_027', author: 'satria.bajahitam', mood: 'chaotic', content: 'pelanggan komplain, harus garansi. repot', wordCount: 7, timestamp: Date.now() - 2400000, reactions: { skull:18, cry:22, fire:3, upside:6 } },
+        { id: 'spill_028', author: 'beby.manis', mood: 'thriving', content: 'alhamdulillah skripsi ACC, sidang bulan depan', wordCount: 7, timestamp: Date.now() - 2300000, reactions: { skull:2, cry:5, fire:42, upside:15 } },
+        { id: 'spill_029', author: 'agak.koplak', mood: 'surviving', content: 'kerjaan numpuk, deadline mepet, bawaannya pengen resign', wordCount: 15, timestamp: Date.now() - 2200000, reactions: { skull:25, cry:30, fire:2, upside:5 } },
+        { id: 'spill_030', author: 'pretty.sad', mood: 'chaotic', content: 'lagi fase bucin, padahal baru kenal seminggu. gila bener', wordCount: 7, timestamp: Date.now() - 2100000, reactions: { skull:15, cry:20, fire:5, upside:12 } },
+        { id: 'spill_031', author: 'bang.juned', mood: 'thriving', content: 'akhirnya sidang, nilai A alhamdulillah', wordCount: 7, timestamp: Date.now() - 2000000, reactions: { skull:1, cry:2, fire:55, upside:20 } },
+        { id: 'spill_032', author: 'strawberry.shortcake', mood: 'chaotic', content: 'pacar ngambek karena lupa beli kado anniversary', wordCount: 7, timestamp: Date.now() - 1900000, reactions: { skull:15, cry:25, fire:3, upside:8 } },
+        { id: 'spill_033', author: 'chili.padi', mood: 'doom', content: 'orderan sepi, modal habis, galau', wordCount: 7, timestamp: Date.now() - 1800000, reactions: { skull:30, cry:35, fire:1, upside:2 } },
+        { id: 'spill_034', author: 'little.fairy', mood: 'surviving', content: 'client baru minta revisi, lagi-lagi deadline', wordCount: 15, timestamp: Date.now() - 1700000, reactions: { skull:12, cry:18, fire:5, upside:7 } },
+        { id: 'spill_035', author: 'sejuta.badai', mood: 'chaotic', content: 'inspirasi lagu dateng pas mau tidur, harus bangun buat nulis', wordCount: 15, timestamp: Date.now() - 1600000, reactions: { skull:8, cry:5, fire:25, upside:10 } },
+        { id: 'spill_036', author: 'satria.bajahitam', mood: 'surviving', content: 'bengkel lagi sepi, mikir buka usaha sampingan', wordCount: 15, timestamp: Date.now() - 1500000, reactions: { skull:10, cry:12, fire:15, upside:8 } },
+        { id: 'spill_037', author: 'beby.manis', mood: 'chaotic', content: 'bentar lagi sidang, deg-degan campur bahagia', wordCount: 7, timestamp: Date.now() - 1400000, reactions: { skull:8, cry:12, fire:25, upside:10 } },
+        { id: 'spill_038', author: 'agak.koplak', mood: 'thriving', content: 'promosi jabatan, gaji naik 30%', wordCount: 7, timestamp: Date.now() - 1300000, reactions: { skull:1, cry:2, fire:65, upside:18 } },
+        { id: 'spill_039', author: 'pretty.sad', mood: 'doom', content: 'ditolak investor lagi, usaha hampir bangkrut', wordCount: 7, timestamp: Date.now() - 1200000, reactions: { skull:35, cry:45, fire:1, upside:3 } },
+        { id: 'spill_040', author: 'bang.juned', mood: 'chaotic', content: 'ngoding seharian, error masih banyak', wordCount: 7, timestamp: Date.now() - 1100000, reactions: { skull:20, cry:25, fire:5, upside:5 } },
+        { id: 'spill_041', author: 'strawberry.shortcake', mood: 'surviving', content: 'kerjaan numpuk, pengen cuti tapi ga enak', wordCount: 7, timestamp: Date.now() - 1000000, reactions: { skull:15, cry:20, fire:8, upside:10 } },
+        { id: 'spill_042', author: 'chili.padi', mood: 'thriving', content: 'buka cabang baru, orderan makin banyak', wordCount: 15, timestamp: Date.now() - 900000, reactions: { skull:2, cry:3, fire:45, upside:12 } },
+        { id: 'spill_043', author: 'little.fairy', mood: 'doom', content: 'project deadline besok, client minta revisi', wordCount: 7, timestamp: Date.now() - 800000, reactions: { skull:28, cry:30, fire:2, upside:4 } },
+        { id: 'spill_044', author: 'sejuta.badai', mood: 'surviving', content: 'gig malem minggu, sepi pengunjung', wordCount: 7, timestamp: Date.now() - 700000, reactions: { skull:12, cry:15, fire:8, upside:7 } },
+        { id: 'spill_045', author: 'satria.bajahitam', mood: 'chaotic', content: 'bengkel rame, tapi banyak komplain', wordCount: 15, timestamp: Date.now() - 600000, reactions: { skull:18, cry:20, fire:5, upside:8 } },
+        { id: 'spill_046', author: 'beby.manis', mood: 'thriving', content: 'sidang kelar, lulus!', wordCount: 7, timestamp: Date.now() - 500000, reactions: { skull:0, cry:10, fire:70, upside:25 } },
+        { id: 'spill_047', author: 'agak.koplak', mood: 'doom', content: 'tiktok kena shadowban, engagement turun drastis', wordCount: 15, timestamp: Date.now() - 400000, reactions: { skull:30, cry:35, fire:2, upside:5 } },
+        { id: 'spill_048', author: 'pretty.sad', mood: 'thriving', content: 'dapet investor baru, bisnis selamat', wordCount: 15, timestamp: Date.now() - 300000, reactions: { skull:1, cry:3, fire:50, upside:15 } },
+        { id: 'spill_049', author: 'bang.juned', mood: 'chaotic', content: 'coding error, stress, tapi akhirnya nemu solusi', wordCount: 7, timestamp: Date.now() - 200000, reactions: { skull:15, cry:18, fire:12, upside:10 } },
+        { id: 'spill_050', author: 'strawberry.shortcake', mood: 'surviving', content: 'akhirnya dapet kerja, tapi gaji kecil', wordCount: 7, timestamp: Date.now() - 100000, reactions: { skull:8, cry:12, fire:20, upside:8 } }
     ];
+
+    // ============================================
+    // GENERATE VARIASI PANJANG (UNTUK ENTRIES BARU)
+    // ============================================
+    function generateVariedContent(mood) {
+        const panjangOptions = [7, 15, 25, 40];
+        const targetKata = panjangOptions[Math.floor(Math.random() * panjangOptions.length)];
+        
+        const templates = {
+            surviving: {
+                7: [
+                    'capek banget hari ini, pengen rebahan aja 🥲',
+                    'deadline makin deket, anxiety naik turun 😮‍💨',
+                    'kerjaan numpuk, bawaannya pengen resign',
+                    'hari ini selamat, besok belum tau'
+                ],
+                15: [
+                    'bangun tidur langsung overthinking masa depan, capek banget rasanya. semoga hari ini lebih baik',
+                    'kerja lembur sampe malem, tapi gapapa demi masa depan. yang penting sehat',
+                    'stress ngerjain skripsi bab 3, dosennya ga pernah bales chat. pengen nangis',
+                    'hari ini lumayan produktif, kerjaan kelar 5 task. proud of myself ✨'
+                ],
+                25: [
+                    'minggu pagi jam 3, ga bisa tidur karena overthinking masa depan. buka IG liat temen pada nikah, beli rumah, punya mobil, sementara gue masih struggle with skripsi dan dompet tipis. maybe this is my villain arc idk 🛌💔',
+                    'kerjaan numpuk, deadline mepet, client minta revisi mulu. capek fisik dan mental, tapi kalo berenti ga bisa makan. hidup keras banget sumpah',
+                    'hari ini nangis di toilet kantor gara-gara dimarahin boss. rasanya pengen resign aja tapi takut ga dapet kerjaan lain. bingung jadinya'
+                ],
+                40: [
+                    'selasa siang panas banget, client nanyain progress, laptop mau lowbat, listrik mati, mental lagi chaos. ditambah inget kalo semalem lupa sholat isya. hidup emang kadang suka bikin kita nanya: ini ujian atau lagi di-prank sama takdir sih 🫠. pengen marah tapi ga ada yang salah, pengen nangis tapi ga akan selesai masalah. yaudah jalanin aja dulu, semoga ada hikmahnya',
+                    'minggu malem anxiety attack, mikirin minggu depan ada meeting penting, presentasi, deadline. ditambah hubungan sama keluarga lagi ga baik. rasanya pengen lari dari semua ini, tapi ga tau mau lari kemana. akhirnya nulis disini biar lega dikit. semoga yang baca juga lagi struggle, semangat ya kita sama-sama'
+                ]
+            },
+            thriving: {
+                7: [
+                    'alhamdulillah hari ini cuan! 💰',
+                    'akhirnya sidang ACC, lulus! 🎉',
+                    'promosi jabatan, gaji naik!',
+                    'project kelar, client puas'
+                ],
+                15: [
+                    'akhirnya sidang kelar, nilai A alhamdulillah. perjuangan 4 tahun ga sia-sia',
+                    'promosi jabatan, gaji naik 30% plus bonus. kerja keras akhirnya dihargai',
+                    'project freelance selesai, dapet bonus 2 juta. rezeki anak soleh kata emak',
+                    'tiktok konten viral, followers nambah 10k dalam seminggu'
+                ],
+                25: [
+                    'hari ini closing 3 client dalam sehari, komisi lumayan buat bulan depan. rasanya seneng banget, kerja keras selama ini ga sia-sia. makasih buat diri sendiri yang ga pernah nyerah',
+                    'alhamdulillah dapet beasiswa S2 ke luar negeri. perjuangan ngurus berkas, ikut tes, wawancara, akhirnya berbuah manis. doain lancar ya semuanya',
+                    'akhirnya bisa beli mobil hasil jerih payah sendiri. inget dulu naik angkot tiap hari, sekarang udah punya kendaraan sendiri. bersyukur banget'
+                ],
+                40: [
+                    'setelah 2 tahun struggle cari kerja, akhirnya dapet panggilan interview dan langsung diterima di perusahaan impian. gaji 2x lipat dari sebelumnya, kerjaannya juga sesuai passion. rasaya campur aduk antara seneng, haru, dan ga percaya. ini semua karena ga pernah berhenti berusaha dan berdoa. makasih buat semua yang support, especially my mom yang ga pernah berhenti ngedoain. this is just the beginning',
+                    'bisa beli rumah pertama buat orang tua di usia 25. inget dulu mereka selalu ngontrak, pindah-pindah terus. sekarang udah punya tempat sendiri yang bisa ditempatin sampe tua. rasanya ga bisa diungkapin pake kata-kata. perjuangan 5 tahun kerja keras, nabung, investasi, akhirnya nyampe juga. makasih Tuhan, makasih diri sendiri'
+                ]
+            },
+            chaotic: {
+                7: [
+                    'hidup lagi kacau balau 🔥',
+                    'hari ini nangis, besok ketawa sendiri',
+                    'antara resign atau bertahan, bingung',
+                    'pacar ngambek, kerjaan deadline'
+                ],
+                15: [
+                    'client minta revisi jam 11 malem, deadline besok pagi. this is fine 🔥. tidur bisa kapan aja',
+                    'pacar ngambek karena lupa anniversary, kerjaan deadline, ortu nanyain nikah. triple combo',
+                    'boss minta kerja lembur tapi gaji masih sama. bodo amat ah, yolo',
+                    'tiktok kena shadowban, engagement turun, follower berkurang. pusing'
+                ],
+                25: [
+                    'hari ini chaotic banget: pagi dimarahin boss, siang motor mogok di jalan, malem pacar minta putus. sumpah ini hari apa coba. pengen marah-marah tapi ga ada yang salah',
+                    'hidup lagi absurd: semalem nangis mikirin masa depan, paginya dapet kabar baik. naik turun terus rasanya. maybe this is just how life works',
+                    'kadang semangat, kadang males. hari ini lagi males tapi kerjaan numpuk. bawaannya pengen rebahan terus tapi ga bisa. bingung jadinya'
+                ],
+                40: [
+                    'hari ini chaotic level dewa: bangun kesiangan, ketinggalan meeting penting, dimarahin boss di depan semua orang. pas mau balas dendam makan siang, e-wallet error, duit ga cukup. pulangnya motor mogok lagi, harus ngedorong sampe bengkel. sampe rumah langsung hujan deres. duduk di teras sambil nangis, tiba-tiba mantan chat "kangen". sumpah ini universe lagi ngetes batas kesabaran apa gimana sih 🫠. capek bener',
+                    'lagi fase dimana semua hal dateng bersamaan: kerjaan deadline, keluarga lagi konflik, hubungan sama pasangan lagi ga baik, temen pada sibuk sendiri. rasanya sendirian banget di dunia ini. pengen teriak tapi ga ada yang denger. maybe this is what adulting feels like. bingung harus gimana'
+                ]
+            },
+            doom: {
+                7: [
+                    'rasanya pengen rebahan aja selamanya 🛌',
+                    'capek fisik dan mental',
+                    'hidup keras banget sumpah',
+                    'ga semangat ngapa-ngapain'
+                ],
+                15: [
+                    'kerjaan ga kelar-kelar, mental udah di ujung tanduk. pengen resign tapi ga punya tabungan',
+                    'skripsi bab 4 error, debugging dari pagi ga ketemu. maybe this is the end',
+                    'orderan sepi, modal habis, bingung mau gimana. dagang kok susah',
+                    'ditolak investor lagi, usaha hampir bangkrut. capek'
+                ],
+                25: [
+                    'skripsi bab 3 error, dosen pembimbing ga bales chat seminggu, deadline sidang tinggal 2 bulan. pengen mundur tapi udah di depan mata. rasanya hopeless banget',
+                    'HR minta masuk sabtu minggu, mau resign tapi tabungan tinggal 200rb. bingung jadinya. hidup kok keras',
+                    'kerja lembur tiap hari, weekend juga, tapi gaji ga naik-naik. mental udah ga karuan. mau ngeluh takut dianggap ga bersyukur'
+                ],
+                40: [
+                    'udah 6 bulan nganggur, lamaran kerja ga ada yang dipanggil. tabungan habis, mulai jualin barang-barang. orang tua makin sering nanyain "kapan kerja?" rasanya pengen lari dari rumah tapi ga tau mau kemana. setiap hari cuma rebahan sambil scroll job portal, expectation vs reality jauh banget. sometimes i wonder apakah ini ada ujungnya. maybe i\'m not good enough for anything. hope is getting thinner each day',
+                    'terjebak di hubungan toxic selama 3 tahun, tapi susah banget buat keluar. takut sendiri, takut ga dapet yang lebih baik, takut nyakitin dia. padahal tau kalo ini ga sehat. mental makin drop tiap hari, temen pada jauhin karena capek denger curhatan yang itu-itu aja. rasanya pengen teriak tapi ga ada suara. maybe this is what doom feels like'
+                ]
+            }
+        };
+        
+        const moodTemplates = templates[mood]?.[targetKata] || templates.surviving[7];
+        const content = moodTemplates[Math.floor(Math.random() * moodTemplates.length)];
+        
+        return { content, wordCount: targetKata };
+    }
 
     // ============================================
     // INIT - SETUP POOL 50
     // ============================================
     function init() {
-        console.log('[SpillGen] 🚀 Initializing pool 50, window 8...');
+        console.log('[SpillGen] 🚀 Initializing pool 50, window 8, variasi panjang...');
         
         // Urutin berdasarkan timestamp (terbaru dulu)
         fullPool = [...INITIAL_SPILLS].sort((a, b) => b.timestamp - a.timestamp);
@@ -148,24 +273,29 @@
             if (response.ok) {
                 const data = await response.json();
                 if (data.success && data.spills && data.spills.length > 0) {
+                    // Hitung panjang kata
+                    const wordCount = data.spills[0].content.split(/\s+/).length;
+                    
                     const newSpill = {
                         id: `spill_${nextId++}`,
                         author: data.spills[0].author,
                         mood: data.spills[0].mood,
                         content: data.spills[0].content,
+                        wordCount: wordCount,
                         timestamp: Date.now(),
                         reactions: data.spills[0].reactions || {
                             skull: Math.floor(Math.random() * 20) + 5,
                             cry: Math.floor(Math.random() * 30) + 10,
-                            fire: Math.floor(Math.random() * 15) + 2,
-                            upside: Math.floor(Math.random() * 10) + 1
+                            fire: Math.floor(Math.random() * 25) + 3,
+                            upside: Math.floor(Math.random() * 15) + 2
                         }
                     };
                     
-                    // FIFO: tambah di depan, buang yang paling lama (index 49)
+                    console.log(`[SpillGen] ✅ API entry: ${wordCount} kata (${newSpill.mood})`);
+                    
+                    // FIFO: tambah di depan, buang yang paling lama
                     fullPool = [newSpill, ...fullPool.slice(0, CONFIG.POOL_SIZE - 1)];
                     
-                    console.log(`[SpillGen] ✅ Entries baru ditambahkan. Pool: ${fullPool.length}`);
                     renderSpills();
                     return;
                 }
@@ -181,45 +311,40 @@
     }
 
     // ============================================
-    // TAMBAH ENTRIES OFFLINE (FALLBACK)
+    // TAMBAH ENTRIES OFFLINE (FALLBACK) - VARIATIF
     // ============================================
     function addOfflineEntry() {
         const authors = ['beby.manis', 'agak.koplak', 'pretty.sad', 'bang.juned', 
-                         'strawberry.shortcake', 'chili.padi', 'little.fairy', 'sejuta.badai', 'satria.bajahitam'];
+                         'strawberry.shortcake', 'chili.padi', 'little.fairy', 'sejuta.badai', 
+                         'satria.bajahitam', 'cinnamon.girl'];
+        
         const moods = ['surviving', 'thriving', 'chaotic', 'doom'];
-        const templates = [
-            'capek banget hari ini, {mood} mode on 😮‍💨',
-            'lagi fase {mood}, gatau harus gimana',
-            'hari ini {mood}, semoga besok better',
-            'pengen cerita tapi bingung mulai dari mana',
-            'deadline makin deket, mental makin chaos',
-            'stress ngerjain {mood}, butuh healing',
-            'hidup lagi {mood}, semoga cepet reda'
-        ];
         
         const author = authors[Math.floor(Math.random() * authors.length)];
         const mood = moods[Math.floor(Math.random() * moods.length)];
-        const template = templates[Math.floor(Math.random() * templates.length)];
-        const content = template.replace('{mood}', mood);
+        
+        // Generate content variatif
+        const { content, wordCount } = generateVariedContent(mood);
         
         const newSpill = {
             id: `offline_${nextId++}`,
             author: author,
             mood: mood,
             content: content,
+            wordCount: wordCount,
             timestamp: Date.now(),
             reactions: {
-                skull: Math.floor(Math.random() * 10) + 2,
-                cry: Math.floor(Math.random() * 15) + 5,
-                fire: Math.floor(Math.random() * 8) + 1,
-                upside: Math.floor(Math.random() * 5) + 1
+                skull: Math.floor(Math.random() * 20) + 5,
+                cry: Math.floor(Math.random() * 30) + 10,
+                fire: Math.floor(Math.random() * 25) + 3,
+                upside: Math.floor(Math.random() * 15) + 2
             }
         };
         
         // FIFO: tambah di depan, buang yang paling lama
         fullPool = [newSpill, ...fullPool.slice(0, CONFIG.POOL_SIZE - 1)];
         
-        console.log(`[SpillGen] 📝 Offline entry added. Pool: ${fullPool.length}`);
+        console.log(`[SpillGen] 📝 Offline entry: ${wordCount} kata (${mood})`);
         renderSpills();
     }
 
@@ -246,21 +371,31 @@
             }
         }
         
-        // Update meta
+        // Update meta dengan info variasi panjang
         const metaEl = document.getElementById('feedMeta');
         if (metaEl) {
             const endPos = windowStart + CONFIG.WINDOW_SIZE - 1;
             const displayEnd = endPos >= CONFIG.POOL_SIZE ? endPos - CONFIG.POOL_SIZE + 1 : endPos + 1;
-            metaEl.textContent = `Jendela ${windowStart+1}-${displayEnd} dari ${CONFIG.POOL_SIZE}`;
+            
+            // Hitung statistik panjang kata
+            const wordCounts = toShow.map(s => s.wordCount || s.content.split(/\s+/).length);
+            const avgWords = Math.round(wordCounts.reduce((a, b) => a + b, 0) / wordCounts.length);
+            const minWords = Math.min(...wordCounts);
+            const maxWords = Math.max(...wordCounts);
+            
+            metaEl.textContent = `Jendela ${windowStart+1}-${displayEnd} | ${minWords}-${maxWords} kata (avg ${avgWords})`;
         }
         
         // Render HTML
         let html = '';
         for (let s of toShow) {
+            const wordCount = s.wordCount || s.content.split(/\s+/).length;
+            
             html += `<div class="spill-card" data-id="${s.id}">
                 <div class="spill-head">
                     <span class="spill-user">@${escapeHtml(s.author)}</span>
                     <span class="spill-mood ${s.mood}">${s.mood.toUpperCase()}</span>
+                    <span class="spill-words" style="font-size:9px; color:var(--txm); margin-left:8px;">${wordCount} kata</span>
                 </div>
                 <div class="spill-body">${escapeHtml(s.content)}</div>
                 <div class="spill-actions">
@@ -292,6 +427,8 @@
         
         spill.reactions[reactionType] = (spill.reactions[reactionType] || 0) + 1;
         renderSpills();
+        
+        console.log(`[SpillGen] 👍 ${reactionType} on ${spill.author}`);
     };
 
     // ============================================
