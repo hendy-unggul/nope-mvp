@@ -484,7 +484,7 @@ async function generateAndSaveSpills(count = 9) {
                 upside: Math.floor(Math.random() * 8) + 1
             },
             created_at: new Date().toISOString(),
-            is_ai: true
+            
         });
 
         // Delay biar ga overload API
