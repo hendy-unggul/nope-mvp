@@ -18,7 +18,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 // ============================================
 // DEEPSEEK CONFIG
 // ============================================
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || 'sk-f3c8a9b2e1d4f5g6h7i8j9k0l1m2n3o4p5q6r7s8t9u0v1w2x3y4z5';
+const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || 'sk-88746b93303b4e82998d680096d9bbe7';
 const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
 
 // ============================================
