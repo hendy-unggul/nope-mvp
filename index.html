@@ -4,964 +4,164 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>JEJAK — your space, your rules</title>
-
-<!-- ✅ ULTRA-PERMISSIVE CSP (for development/MVP) -->
-<meta http-equiv="Content-Security-Policy" content="
-  default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;
-  script-src * 'unsafe-inline' 'unsafe-eval';
-  connect-src *;
-  img-src * data: blob:;
-  frame-src *;
-  style-src * 'unsafe-inline';
-">
-
+<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;script-src * 'unsafe-inline' 'unsafe-eval';connect-src *;img-src * data: blob:;frame-src *;style-src * 'unsafe-inline';">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#080808;--sf:#0f0f0f;--sfe:#141414;
-  --bd:#222;--bd2:#2e2e2e;
-  --tx:#f0ece6;--txs:#777;--txm:#444;
-  --ap:#ff2d55;--as:#00e5ff;--aq:#bfff00;--gold:#ffd60a;--purple:#bf5af2;
-}
-
+:root{--bg:#080808;--sf:#0f0f0f;--sfe:#141414;--bd:#222;--bd2:#2e2e2e;--tx:#f0ece6;--txs:#777;--txm:#444;--ap:#ff2d55;--as:#00e5ff;--aq:#bfff00;--gold:#ffd60a;--purple:#bf5af2}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html{height:100%}
-body{
-  background:var(--bg);color:var(--tx);
-  font-family:'Syne',-apple-system,sans-serif;
-  min-height:100%;display:flex;align-items:center;justify-content:center;
-  padding:24px 20px 40px;overflow-x:hidden;position:relative;
-}
-
-body::after{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.028;
-  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/200px 200px
-}
-
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,229,255,.012) 2px,rgba(0,229,255,.012) 4px);
-}
-
-.loading{
-  position:fixed;inset:0;background:var(--bg);z-index:9998;
-  display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;
-}
+body{background:var(--bg);color:var(--tx);font-family:Syne,-apple-system,sans-serif;min-height:100%;display:flex;align-items:center;justify-content:center;padding:24px 20px 40px;overflow-x:hidden;position:relative}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.028;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/200px 200px}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,229,255,.012) 2px,rgba(0,229,255,.012) 4px)}
+.loading{position:fixed;inset:0;background:var(--bg);z-index:9998;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px}
 .loading.hidden{display:none}
-.l-spin{
-  width:28px;height:28px;border-radius:50%;
-  border:2px solid var(--bd2);border-top-color:var(--as);
-  animation:rot 1s linear infinite;
-}
+.l-spin{width:28px;height:28px;border-radius:50%;border:2px solid var(--bd2);border-top-color:var(--as);animation:rot 1s linear infinite}
 @keyframes rot{to{transform:rotate(360deg)}}
 .l-txt{font-family:'DM Mono',monospace;font-size:11px;color:var(--txm);letter-spacing:3px;text-transform:uppercase}
-
-.container{
-  max-width:440px;width:100%;
-  position:relative;z-index:1;
-  display:flex;flex-direction:column;gap:0;
-}
-
-.accent-bar{
-  height:3px;
-  background:linear-gradient(90deg,var(--ap),var(--as),var(--aq));
-  margin-bottom:0;
-}
-
-.logo-zone{
-  background:var(--sf);
-  border:2px solid var(--bd2);
-  border-top:none;
-  padding:32px 28px 24px;
-  position:relative;
-  box-shadow:6px 6px 0 #000;
-}
-
-.logo-zone::before{
-  content:'';position:absolute;top:-1px;left:-1px;
-  width:20px;height:20px;
-  border-top:3px solid var(--as);border-left:3px solid var(--as);
-}
-.logo-zone::after{
-  content:'';position:absolute;bottom:-1px;right:-1px;
-  width:20px;height:20px;
-  border-bottom:3px solid var(--ap);border-right:3px solid var(--ap);
-}
+.container{max-width:440px;width:100%;position:relative;z-index:1;display:flex;flex-direction:column;gap:0}
+.accent-bar{height:3px;background:linear-gradient(90deg,var(--ap),var(--as),var(--aq));margin-bottom:0}
+.logo-zone{background:var(--sf);border:2px solid var(--bd2);border-top:none;padding:32px 28px 24px;position:relative;box-shadow:6px 6px 0 #000}
+.logo-zone::before{content:'';position:absolute;top:-1px;left:-1px;width:20px;height:20px;border-top:3px solid var(--as);border-left:3px solid var(--as)}
+.logo-zone::after{content:'';position:absolute;bottom:-1px;right:-1px;width:20px;height:20px;border-bottom:3px solid var(--ap);border-right:3px solid var(--ap)}
 .logo-corner-tr{position:absolute;top:-1px;right:-1px;width:20px;height:20px;border-top:3px solid var(--aq);border-right:3px solid var(--aq)}
 .logo-corner-bl{position:absolute;bottom:-1px;left:-1px;width:20px;height:20px;border-bottom:3px solid var(--gold);border-left:3px solid var(--gold)}
-
-.logo-eyebrow{
-  font-family:'DM Mono',monospace;font-size:9px;color:var(--txm);
-  letter-spacing:4px;text-transform:uppercase;margin-bottom:12px;
-  display:flex;align-items:center;gap:8px;
-}
+.logo-eyebrow{font-family:'DM Mono',monospace;font-size:9px;color:var(--txm);letter-spacing:4px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .logo-eyebrow::before{content:'';display:inline-block;width:20px;height:2px;background:var(--as)}
-
-.logo-big{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:72px;line-height:.92;letter-spacing:3px;
-  color:var(--tx);display:block;margin-bottom:4px;
-}
-.logo-big .x{
-  color:var(--ap);display:inline-block;
-  animation:spin-x 4s ease-in-out infinite;
-}
-@keyframes spin-x{
-  0%,90%,100%{transform:rotate(0) scale(1)}
-  95%{transform:rotate(180deg) scale(1.2)}
-}
-
-.logo-tagline{
-  font-family:'DM Mono',monospace;font-size:11px;color:var(--txs);
-  letter-spacing:2px;text-transform:uppercase;margin-top:10px;
-  display:flex;align-items:center;gap:10px;
-}
+.logo-big{font-family:'Bebas Neue',sans-serif;font-size:72px;line-height:.92;letter-spacing:3px;color:var(--tx);display:block;margin-bottom:4px}
+.logo-big .x{color:var(--ap);display:inline-block;animation:spin-x 4s ease-in-out infinite}
+@keyframes spin-x{0%,90%,100%{transform:rotate(0) scale(1)}95%{transform:rotate(180deg) scale(1.2)}}
+.logo-tagline{font-family:'DM Mono',monospace;font-size:11px;color:var(--txs);letter-spacing:2px;text-transform:uppercase;margin-top:10px;display:flex;align-items:center;gap:10px}
 .logo-tagline::after{content:'';flex:1;height:1px;background:var(--bd2)}
-
-.online-pill{
-  position:absolute;top:20px;right:24px;
-  font-family:'DM Mono',monospace;font-size:9px;color:#000;
-  background:var(--aq);padding:4px 10px;border:2px solid #000;
-  box-shadow:2px 2px 0 #000;letter-spacing:.5px;text-transform:uppercase;
-}
-
-.config-warning{
-  margin-top:12px;
-  background:rgba(255,45,85,.1);
-  border:2px solid var(--ap);
-  padding:20px 24px;
-  display:none;
-  animation:pulse-border 2s ease-in-out infinite;
-}
+.online-pill{position:absolute;top:20px;right:24px;font-family:'DM Mono',monospace;font-size:9px;color:#000;background:var(--aq);padding:4px 10px;border:2px solid #000;box-shadow:2px 2px 0 #000;letter-spacing:.5px;text-transform:uppercase}
+.config-warning{margin-top:12px;background:rgba(255,45,85,.1);border:2px solid var(--ap);padding:20px 24px;display:none;animation:pulse-border 2s ease-in-out infinite}
 .config-warning.show{display:block}
-@keyframes pulse-border{
-  0%,100%{border-color:var(--ap)}
-  50%{border-color:var(--gold)}
-}
-.config-warning-title{
-  font-family:'Bebas Neue',sans-serif;font-size:20px;
-  color:var(--ap);letter-spacing:2px;margin-bottom:12px;
-}
-.config-warning-text{
-  font-family:'DM Mono',monospace;font-size:11px;
-  color:var(--tx);line-height:1.8;letter-spacing:.3px;
-}
-.config-warning-text b{
-  color:var(--ap);font-weight:700;
-}
-
-.marketing-box{
-  margin-top:12px;
-  background:var(--sf);
-  border:2px solid var(--bd2);
-  border-left:4px solid var(--as);
-  padding:20px 24px;
-  box-shadow:4px 4px 0 #000;
-}
-
-.marketing-hdr{
-  display:flex;align-items:center;gap:10px;margin-bottom:16px;
-}
-.marketing-hdr-icon{
-  width:10px;height:10px;background:var(--as);
-  transform:rotate(45deg);flex-shrink:0;
-}
-.marketing-hdr-title{
-  font-family:'Bebas Neue',sans-serif;font-size:20px;
-  color:var(--as);letter-spacing:2px;
-}
-
-.marketing-grid{
-  display:grid;grid-template-columns:1fr;gap:12px;
-}
-
-.marketing-item{
-  display:flex;align-items:flex-start;gap:12px;
-  padding:12px;background:var(--bg);
-  border:2px solid var(--bd2);
-  transition:all .15s;
-}
-.marketing-item:hover{
-  border-color:var(--as);
-  transform:translate(-2px,-2px);
-  box-shadow:4px 4px 0 #000;
-}
-
-.marketing-item .icon{
-  flex-shrink:0;font-size:24px;
-  width:32px;height:32px;
-  display:flex;align-items:center;justify-content:center;
-}
-
+@keyframes pulse-border{0%,100%{border-color:var(--ap)}50%{border-color:var(--gold)}}
+.config-warning-title{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--ap);letter-spacing:2px;margin-bottom:12px}
+.config-warning-text{font-family:'DM Mono',monospace;font-size:11px;color:var(--tx);line-height:1.8;letter-spacing:.3px}
+.config-warning-text b{color:var(--ap);font-weight:700}
+.marketing-box{margin-top:12px;background:var(--sf);border:2px solid var(--bd2);border-left:4px solid var(--as);padding:20px 24px;box-shadow:4px 4px 0 #000}
+.marketing-hdr{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.marketing-hdr-icon{width:10px;height:10px;background:var(--as);transform:rotate(45deg);flex-shrink:0}
+.marketing-hdr-title{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--as);letter-spacing:2px}
+.marketing-grid{display:grid;grid-template-columns:1fr;gap:12px}
+.marketing-item{display:flex;align-items:flex-start;gap:12px;padding:12px;background:var(--bg);border:2px solid var(--bd2);transition:all .15s}
+.marketing-item:hover{border-color:var(--as);transform:translate(-2px,-2px);box-shadow:4px 4px 0 #000}
+.marketing-item .icon{flex-shrink:0;font-size:24px;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
 .marketing-item .content{flex:1}
-
-.marketing-item .title{
-  font-family:'DM Mono',monospace;
-  font-size:12px;font-weight:700;
-  color:var(--tx);letter-spacing:.5px;
-  margin-bottom:4px;text-transform:uppercase;
-}
-
-.marketing-item .desc{
-  font-family:'DM Mono',monospace;
-  font-size:11px;color:var(--txs);
-  line-height:1.6;letter-spacing:.3px;
-}
-
-.marketing-item .desc b{
-  color:var(--as);font-weight:500;
-}
-
-.auth-box{
-  margin-top:12px;
-  background:var(--sf);border:2px solid var(--bd2);
-  padding:28px 24px;box-shadow:6px 6px 0 #000;position:relative;
-}
-.auth-box::before{
-  content:'';position:absolute;top:-1px;left:-1px;
-  width:16px;height:16px;border-top:3px solid var(--as);border-left:3px solid var(--as);
-}
-.auth-box::after{
-  content:'';position:absolute;bottom:-1px;right:-1px;
-  width:16px;height:16px;border-bottom:3px solid var(--ap);border-right:3px solid var(--ap);
-}
+.marketing-item .title{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:var(--tx);letter-spacing:.5px;margin-bottom:4px;text-transform:uppercase}
+.marketing-item .desc{font-family:'DM Mono',monospace;font-size:11px;color:var(--txs);line-height:1.6;letter-spacing:.3px}
+.marketing-item .desc b{color:var(--as);font-weight:500}
+.auth-box{margin-top:12px;background:var(--sf);border:2px solid var(--bd2);padding:28px 24px;box-shadow:6px 6px 0 #000;position:relative}
+.auth-box::before{content:'';position:absolute;top:-1px;left:-1px;width:16px;height:16px;border-top:3px solid var(--as);border-left:3px solid var(--as)}
+.auth-box::after{content:'';position:absolute;bottom:-1px;right:-1px;width:16px;height:16px;border-bottom:3px solid var(--ap);border-right:3px solid var(--ap)}
 .ab-corner-tr{position:absolute;top:-1px;right:-1px;width:16px;height:16px;border-top:3px solid var(--aq);border-right:3px solid var(--aq)}
 .ab-corner-bl{position:absolute;bottom:-1px;left:-1px;width:16px;height:16px;border-bottom:3px solid var(--gold);border-left:3px solid var(--gold)}
-
 .input-hdr{margin-bottom:6px}
-.input-title{
-  font-family:'Bebas Neue',sans-serif;font-size:24px;
-  letter-spacing:2px;color:var(--tx);display:flex;align-items:center;gap:10px;
-}
-.input-title::after{
-  content:'LIVE';font-family:'DM Mono',monospace;font-size:9px;
-  background:var(--ap);color:#fff;padding:3px 8px;letter-spacing:1px;
-}
-.input-hint{
-  font-family:'DM Mono',monospace;font-size:10px;color:var(--txs);
-  margin-bottom:16px;margin-top:6px;letter-spacing:.5px;
-}
+.input-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--tx);display:flex;align-items:center;gap:10px}
+.input-title::after{content:'LIVE';font-family:'DM Mono',monospace;font-size:9px;background:var(--ap);color:#fff;padding:3px 8px;letter-spacing:1px}
+.input-hint{font-family:'DM Mono',monospace;font-size:10px;color:var(--txs);margin-bottom:16px;margin-top:6px;letter-spacing:.5px}
 .input-hint b{color:var(--as)}
-
 .form-group{margin-bottom:16px;position:relative}
-.form-group input{
-  width:100%;background:var(--bg);border:2px solid var(--bd2);
-  padding:16px 18px;color:var(--tx);
-  font-family:'DM Mono',monospace;font-size:16px;font-weight:500;
-  text-align:left;outline:none;letter-spacing:.08em;
-  transition:border-color .15s,box-shadow .15s;
-  box-shadow:3px 3px 0 #000;
-}
+.form-group input{width:100%;background:var(--bg);border:2px solid var(--bd2);padding:16px 18px;color:var(--tx);font-family:'DM Mono',monospace;font-size:16px;font-weight:500;text-align:left;outline:none;letter-spacing:.08em;transition:border-color .15s,box-shadow .15s;box-shadow:3px 3px 0 #000}
 .form-group input.lowercase{text-transform:lowercase}
 .form-group input:focus{border-color:var(--ap);box-shadow:3px 3px 0 #000,0 0 0 1px var(--ap)}
 .form-group input::placeholder{color:var(--txm);font-weight:400}
 .form-group input.is-valid{border-color:var(--aq)}
 .form-group input.is-invalid{border-color:var(--ap)}
-
-.pin-input{
-  text-align:center!important;
-  letter-spacing:1em!important;
-  font-size:24px!important;
-  font-weight:700!important;
-  -webkit-text-security:disc;
-  text-security:disc;
-}
-.pin-input::placeholder{
-  letter-spacing:1em;
-  -webkit-text-security:none;
-  text-security:none;
-}
-
-.feedback{
-  margin-top:8px;padding:10px 14px;
-  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;
-  border:2px solid;display:none;line-height:1.5;
-}
+.pin-input{text-align:center!important;letter-spacing:1em!important;font-size:24px!important;font-weight:700!important;-webkit-text-security:disc;text-security:disc}
+.pin-input::placeholder{letter-spacing:1em;-webkit-text-security:none;text-security:none}
+.feedback{margin-top:8px;padding:10px 14px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;border:2px solid;display:none;line-height:1.5}
 .feedback.show{display:block}
 .feedback.error{background:rgba(255,45,85,.08);border-color:var(--ap);color:var(--ap)}
 .feedback.success{background:rgba(191,255,0,.06);border-color:var(--aq);color:var(--aq)}
-
-.btn{
-  width:100%;background:var(--ap);color:#fff;
-  border:2px solid #000;padding:18px 24px;
-  font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;
-  cursor:pointer;margin-top:4px;
-  box-shadow:5px 5px 0 #000;
-  transition:transform .08s,box-shadow .08s;
-  display:flex;align-items:center;justify-content:center;gap:12px;
-}
+.btn{width:100%;background:var(--ap);color:#fff;border:2px solid #000;padding:18px 24px;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;cursor:pointer;margin-top:4px;box-shadow:5px 5px 0 #000;transition:transform .08s,box-shadow .08s;display:flex;align-items:center;justify-content:center;gap:12px}
 .btn::before{content:'⬡';font-size:18px;opacity:.8}
 .btn:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 #000}
 .btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 #000}
 .btn:disabled{opacity:.3;cursor:not-allowed;transform:none;box-shadow:5px 5px 0 #000}
-
-.mode-toggle{
-  margin-top:12px;text-align:center;
-}
-.mode-toggle-btn{
-  background:none;border:none;
-  font-family:'DM Mono',monospace;font-size:11px;
-  color:var(--as);text-decoration:underline;
-  cursor:pointer;letter-spacing:.5px;
-}
+.mode-toggle{margin-top:12px;text-align:center}
+.mode-toggle-btn{background:none;border:none;font-family:'DM Mono',monospace;font-size:11px;color:var(--as);text-decoration:underline;cursor:pointer;letter-spacing:.5px}
 .mode-toggle-btn:hover{color:var(--aq)}
-
-.disclaimer-small{
-  margin-top:16px;padding:12px 16px;
-  background:rgba(255,45,85,.05);
-  border:2px solid var(--ap);border-left:4px solid var(--ap);
-}
-.disclaimer-small-text{
-  font-family:'DM Mono',monospace;font-size:10px;
-  color:var(--txs);line-height:1.6;letter-spacing:.3px;
-}
-.disclaimer-small-text b{
-  color:var(--ap);font-weight:700;
-}
-
-.agreement{
-  margin-top:16px;display:flex;align-items:flex-start;gap:12px;
-}
-.agreement input[type="checkbox"]{
-  margin-top:4px;width:18px;height:18px;
-  cursor:pointer;accent-color:var(--ap);
-}
-.agreement label{
-  font-family:'DM Mono',monospace;font-size:11px;
-  color:var(--tx);line-height:1.6;cursor:pointer;
-}
+.disclaimer-small{margin-top:16px;padding:12px 16px;background:rgba(255,45,85,.05);border:2px solid var(--ap);border-left:4px solid var(--ap)}
+.disclaimer-small-text{font-family:'DM Mono',monospace;font-size:10px;color:var(--txs);line-height:1.6;letter-spacing:.3px}
+.disclaimer-small-text b{color:var(--ap);font-weight:700}
+.agreement{margin-top:16px;display:flex;align-items:flex-start;gap:12px}
+.agreement input[type="checkbox"]{margin-top:4px;width:18px;height:18px;cursor:pointer;accent-color:var(--ap)}
+.agreement label{font-family:'DM Mono',monospace;font-size:11px;color:var(--tx);line-height:1.6;cursor:pointer}
 .agreement label b{color:var(--ap)}
-
-.footer{
-  margin-top:12px;padding:12px 16px;
-  border:2px solid var(--bd);
-  display:flex;justify-content:space-between;align-items:center;
-}
+.footer{margin-top:12px;padding:12px 16px;border:2px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
 .footer-left{font-family:'DM Mono',monospace;font-size:9px;color:var(--txm);letter-spacing:2px;text-transform:uppercase}
 .footer-right{font-family:'DM Mono',monospace;font-size:9px;color:var(--txm);letter-spacing:1px}
 .footer-dot{display:inline-block;width:6px;height:6px;background:var(--aq);transform:rotate(45deg);margin-right:6px;animation:blink-sq 2s step-end infinite}
 @keyframes blink-sq{0%,100%{opacity:1}50%{opacity:.2}}
-
-@media(max-width:440px){
-  .logo-big{font-size:56px}
-  .auth-box{padding:20px 18px}
-}
-
-@media(min-width:481px){
-  body{
-    background:
-      radial-gradient(ellipse at 20% 50%,rgba(0,229,255,.04) 0%,transparent 60%),
-      radial-gradient(ellipse at 80% 20%,rgba(255,45,85,.04) 0%,transparent 60%),
-      repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(0,229,255,.015) 40px,rgba(0,229,255,.015) 41px),
-      repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(0,229,255,.015) 40px,rgba(0,229,255,.015) 41px),
-      #030303!important;
-    padding:40px 20px!important;
-  }
-  .phone-shell{
-    width:390px!important;min-height:844px!important;
-    border-radius:44px!important;overflow:hidden!important;
-    position:relative!important;background:var(--bg)!important;
-    box-shadow:
-      0 0 0 1px rgba(255,255,255,.08),
-      0 0 0 10px #111,
-      0 0 0 11px rgba(255,255,255,.06),
-      0 0 60px rgba(0,0,0,.8),
-      0 0 120px rgba(0,229,255,.06)!important;
-    display:flex!important;padding:72px 0 40px!important;
-  }
-  .phone-shell::before{
-    content:'';position:absolute;top:12px;left:50%;transform:translateX(-50%);
-    width:120px;height:34px;background:#000;border-radius:20px;z-index:10001;
-    box-shadow:0 0 0 1px rgba(255,255,255,.06);
-  }
-  .phone-shell::after{
-    content:'';position:absolute;top:20px;left:calc(50% + 42px);
-    width:12px;height:12px;background:#0a0a0a;border-radius:50%;z-index:10002;
-    box-shadow:inset 0 0 0 2px rgba(255,255,255,.04), 0 0 0 2px rgba(0,229,255,.1);
-  }
-  .container{padding:0 28px!important}
-}
+@media(max-width:440px){.logo-big{font-size:56px}.auth-box{padding:20px 18px}}
+@media(min-width:481px){body{background:radial-gradient(ellipse at 20% 50%,rgba(0,229,255,.04) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(255,45,85,.04) 0%,transparent 60%),repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(0,229,255,.015) 40px,rgba(0,229,255,.015) 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(0,229,255,.015) 40px,rgba(0,229,255,.015) 41px),#030303!important;padding:40px 20px!important}.phone-shell{width:390px!important;min-height:844px!important;border-radius:44px!important;overflow:hidden!important;position:relative!important;background:var(--bg)!important;box-shadow:0 0 0 1px rgba(255,255,255,.08),0 0 0 10px #111,0 0 0 11px rgba(255,255,255,.06),0 0 60px rgba(0,0,0,.8),0 0 120px rgba(0,229,255,.06)!important;display:flex!important;padding:72px 0 40px!important}.phone-shell::before{content:'';position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:34px;background:#000;border-radius:20px;z-index:10001;box-shadow:0 0 0 1px rgba(255,255,255,.06)}.phone-shell::after{content:'';position:absolute;top:20px;left:calc(50% + 42px);width:12px;height:12px;background:#0a0a0a;border-radius:50%;z-index:10002;box-shadow:inset 0 0 0 2px rgba(255,255,255,.04),0 0 0 2px rgba(0,229,255,.1)}.container{padding:0 28px!important}}
 </style>
 </head>
 <body>
-<div class="loading hidden" id="loading">
-  <div class="l-spin"></div>
-  <div class="l-txt">loading...</div>
-</div>
-
+<div class="loading hidden" id="loading"><div class="l-spin"></div><div class="l-txt">loading...</div></div>
 <div class="phone-shell"><div class="container">
-  <div class="accent-bar"></div>
-
-  <div class="logo-zone">
-    <span class="logo-corner-tr"></span>
-    <span class="logo-corner-bl"></span>
-    <span class="online-pill" id="onlinePill">21 ONLINE</span>
-    <div class="logo-eyebrow">zero-knowledge platform</div>
-    <span class="logo-big">JE<span class="x">✕</span>AK</span>
-    <div class="logo-tagline">your space · your rules</div>
-  </div>
-
-  <div class="config-warning" id="config-warning">
-    <div class="config-warning-title">⚠️ KONFIGURASI DIPERLUKAN</div>
-    <div class="config-warning-text">
-      <b>SUPABASE_URL</b> dan <b>SUPABASE_KEY</b> belum diisi!<br><br>
-      Edit file ini (line ~550-551) dan isi kredensial Supabase kamu.<br>
-      Dapatkan dari: <b>Supabase Dashboard → Settings → API</b>
-    </div>
-  </div>
-
-  <div class="marketing-box">
-    <div class="marketing-hdr">
-      <div class="marketing-hdr-icon"></div>
-      <span class="marketing-hdr-title">TRUE PRIVACY & ANONYMITY</span>
-    </div>
-    
-    <div class="marketing-grid">
-      <div class="marketing-item">
-        <div class="icon">❌</div>
-        <div class="content">
-          <div class="title">TIDAK ADA</div>
-          <div class="desc">Email, phone, recovery questions — <b>platform ga tau siapa lu</b></div>
-        </div>
-      </div>
-      
-      <div class="marketing-item">
-        <div class="icon">✅</div>
-        <div class="content">
-          <div class="title">HANYA ADA</div>
-          <div class="desc">Username + PIN + Device — <b>benar-benar anonymous</b></div>
-        </div>
-      </div>
-      
-      <div class="marketing-item">
-        <div class="icon">🔒</div>
-        <div class="content">
-          <div class="title">YOUR KEYS, YOUR ACCOUNT</div>
-          <div class="desc">Platform <b>TIDAK BISA</b> recover account — <b>TIDAK TAHU</b> siapa kamu</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="auth-box">
-    <span class="ab-corner-tr"></span>
-    <span class="ab-corner-bl"></span>
-
-    <form id="register-form" style="display:none">
-      <div class="input-hdr">
-        <div class="input-title">BUAT AKUN</div>
-        <div class="input-hint">username format: <b>kata.kata</b></div>
-      </div>
-
-      <div class="form-group">
-        <input type="text" id="reg-username" class="lowercase" placeholder="over.thinker"
-          autocomplete="off" maxlength="30" spellcheck="false">
-        <div class="feedback" id="reg-username-fb"></div>
-      </div>
-
-      <div class="input-hint" style="margin-bottom:8px">buat PIN 6 digit</div>
-      <div class="form-group">
-        <input type="text" id="reg-pin" class="pin-input" placeholder="● ● ● ● ● ●"
-          autocomplete="off" maxlength="6" inputmode="numeric" pattern="[0-9]*">
-        <div class="feedback" id="reg-pin-fb"></div>
-      </div>
-
-      <div class="input-hint" style="margin-bottom:8px">konfirmasi PIN</div>
-      <div class="form-group">
-        <input type="text" id="reg-pin-confirm" class="pin-input" placeholder="● ● ● ● ● ●"
-          autocomplete="off" maxlength="6" inputmode="numeric" pattern="[0-9]*">
-        <div class="feedback" id="reg-pin-confirm-fb"></div>
-      </div>
-
-      <div class="disclaimer-small">
-        <div class="disclaimer-small-text">
-          <b>⚠️ PENTING:</b> PIN hilang = akun hilang <b>PERMANENT</b>. No recovery, no reset. 
-          Kamu <b>100% bertanggung jawab</b>. Simpan PIN di tempat aman!
-        </div>
-      </div>
-
-      <div class="agreement">
-        <input type="checkbox" id="agree-checkbox">
-        <label for="agree-checkbox">
-          Saya paham dan <b>terima tanggung jawab penuh</b> atas akun ini
-        </label>
-      </div>
-
-      <button type="submit" class="btn" id="register-btn" disabled>DAFTAR →</button>
-      
-      <div class="mode-toggle">
-        <button type="button" class="mode-toggle-btn" id="to-login">Sudah punya akun? Masuk</button>
-      </div>
-    </form>
-
-    <form id="login-form">
-      <div class="input-hdr">
-        <div class="input-title">MASUK</div>
-        <div class="input-hint">username + PIN kamu</div>
-      </div>
-
-      <div class="form-group">
-        <input type="text" id="login-username" class="lowercase" placeholder="over.thinker"
-          autocomplete="off" maxlength="30" spellcheck="false">
-        <div class="feedback" id="login-username-fb"></div>
-      </div>
-
-      <div class="input-hint" style="margin-bottom:8px">PIN 6 digit</div>
-      <div class="form-group">
-        <input type="text" id="login-pin" class="pin-input" placeholder="● ● ● ● ● ●"
-          autocomplete="off" maxlength="6" inputmode="numeric" pattern="[0-9]*">
-        <div class="feedback" id="login-pin-fb"></div>
-      </div>
-
-      <button type="submit" class="btn" id="login-btn" disabled>MASUK →</button>
-      
-      <div class="mode-toggle">
-        <button type="button" class="mode-toggle-btn" id="to-register">Belum punya akun? Daftar</button>
-      </div>
-
-      <div class="disclaimer-small" style="margin-top:16px">
-        <div class="disclaimer-small-text">
-          Lupa PIN? <b>Ga bisa recovery</b> — harus buat akun baru (username berbeda)
-        </div>
-      </div>
-    </form>
-  </div>
-
-  <div class="footer">
-    <div class="footer-left"><span class="footer-dot"></span>soul by itsALrUdio</div>
-    <div class="footer-right">v3.0-mvp · 2025</div>
-  </div>
+<div class="accent-bar"></div>
+<div class="logo-zone">
+<span class="logo-corner-tr"></span><span class="logo-corner-bl"></span><span class="online-pill" id="onlinePill">21 ONLINE</span>
+<div class="logo-eyebrow">zero-knowledge platform</div>
+<span class="logo-big">JE<span class="x">✕</span>AK</span>
+<div class="logo-tagline">your space · your rules</div>
+</div>
+<div class="config-warning" id="config-warning">
+<div class="config-warning-title">⚠️ KONFIGURASI DIPERLUKAN</div>
+<div class="config-warning-text"><b>SUPABASE_URL</b> dan <b>SUPABASE_KEY</b> belum diisi!<br><br>Edit file ini (line ~100-101) dan isi kredensial Supabase kamu.<br>Dapatkan dari: <b>Supabase Dashboard → Settings → API</b></div>
+</div>
+<div class="marketing-box">
+<div class="marketing-hdr"><div class="marketing-hdr-icon"></div><span class="marketing-hdr-title">TRUE PRIVACY & ANONYMITY</span></div>
+<div class="marketing-grid">
+<div class="marketing-item"><div class="icon">❌</div><div class="content"><div class="title">TIDAK ADA</div><div class="desc">Email, phone, recovery questions — <b>platform ga tau siapa lu</b></div></div></div>
+<div class="marketing-item"><div class="icon">✅</div><div class="content"><div class="title">HANYA ADA</div><div class="desc">Username + PIN + Device — <b>benar-benar anonymous</b></div></div></div>
+<div class="marketing-item"><div class="icon">🔒</div><div class="content"><div class="title">YOUR KEYS, YOUR ACCOUNT</div><div class="desc">Platform <b>TIDAK BISA</b> recover account — <b>TIDAK TAHU</b> siapa kamu</div></div></div>
+</div>
+</div>
+<div class="auth-box">
+<span class="ab-corner-tr"></span><span class="ab-corner-bl"></span>
+<form id="register-form" style="display:none">
+<div class="input-hdr"><div class="input-title">BUAT AKUN</div><div class="input-hint">username format: <b>kata.kata</b></div></div>
+<div class="form-group"><input type="text" id="reg-username" class="lowercase" placeholder="over.thinker" autocomplete="off" maxlength="30" spellcheck="false"><div class="feedback" id="reg-username-fb"></div></div>
+<div class="input-hint" style="margin-bottom:8px">buat PIN 6 digit</div>
+<div class="form-group"><input type="text" id="reg-pin" class="pin-input" placeholder="● ● ● ● ● ●" autocomplete="off" maxlength="6" inputmode="numeric" pattern="[0-9]*"><div class="feedback" id="reg-pin-fb"></div></div>
+<div class="input-hint" style="margin-bottom:8px">konfirmasi PIN</div>
+<div class="form-group"><input type="text" id="reg-pin-confirm" class="pin-input" placeholder="● ● ● ● ● ●" autocomplete="off" maxlength="6" inputmode="numeric" pattern="[0-9]*"><div class="feedback" id="reg-pin-confirm-fb"></div></div>
+<div class="disclaimer-small"><div class="disclaimer-small-text"><b>⚠️ PENTING:</b> PIN hilang = akun hilang <b>PERMANENT</b>. No recovery, no reset. Kamu <b>100% bertanggung jawab</b>. Simpan PIN di tempat aman!</div></div>
+<div class="agreement"><input type="checkbox" id="agree-checkbox"><label for="agree-checkbox">Saya paham dan <b>terima tanggung jawab penuh</b> atas akun ini</label></div>
+<button type="submit" class="btn" id="register-btn" disabled>DAFTAR →</button>
+<div class="mode-toggle"><button type="button" class="mode-toggle-btn" id="to-login">Sudah punya akun? Masuk</button></div>
+</form>
+<form id="login-form">
+<div class="input-hdr"><div class="input-title">MASUK</div><div class="input-hint">username + PIN kamu</div></div>
+<div class="form-group"><input type="text" id="login-username" class="lowercase" placeholder="over.thinker" autocomplete="off" maxlength="30" spellcheck="false"><div class="feedback" id="login-username-fb"></div></div>
+<div class="input-hint" style="margin-bottom:8px">PIN 6 digit</div>
+<div class="form-group"><input type="text" id="login-pin" class="pin-input" placeholder="● ● ● ● ● ●" autocomplete="off" maxlength="6" inputmode="numeric" pattern="[0-9]*"><div class="feedback" id="login-pin-fb"></div></div>
+<button type="submit" class="btn" id="login-btn" disabled>MASUK →</button>
+<div class="mode-toggle"><button type="button" class="mode-toggle-btn" id="to-register">Belum punya akun? Daftar</button></div>
+<div class="disclaimer-small" style="margin-top:16px"><div class="disclaimer-small-text">Lupa PIN? <b>Ga bisa recovery</b> — harus buat akun baru (username berbeda)</div></div>
+</form>
+</div>
+<div class="footer">
+<div class="footer-left"><span class="footer-dot"></span>soul by itsALrUdio</div>
+<div class="footer-right">v3.0-mvp · 2025</div>
+</div>
 </div></div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ============================================
-// ⚠️ KONFIGURASI — ISI DULU!
-// ============================================
-window.JEJAK = {
-  SUPABASE_URL: 'https://fuovfrdicdhnlymnacpz.supabase.co',  // ← ISI INI!
-  SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0',                  // ← ISI INI!
-  
-  SK: {
-    username: 'jejak_username',
-    uid: 'jejak_uid',
-    loggedIn: 'jejak_logged_in'
-  }
-};
-
-var db = null;
-var SK = JEJAK.SK;
-
-// ============================================
-// ✅ IMPROVED ERROR LOGGING
-// ============================================
-function logError(context, error){
-  console.error('%c[JEJAK] ' + context + ':', 'color:#ff2d55;font-weight:bold', error);
-  
-  // Log detailed error info
-  if(error && typeof error === 'object'){
-    console.error('Error details:', {
-      message: error.message,
-      code: error.code,
-      details: error.details,
-      hint: error.hint,
-      stack: error.stack
-    });
-  }
-}
-
-// ============================================
-// HASH PIN
-// ============================================
-async function hashPIN(pin){
-  try{
-    var encoder = new TextEncoder();
-    var data = encoder.encode(pin + 'jejak_salt_2025_v3');
-    var hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    var hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  } catch(e){
-    logError('hashPIN', e);
-    throw new Error('Gagal hash PIN');
-  }
-}
-
-// ============================================
-// VALIDATION
-// ============================================
-var UN_PAT = /^[a-z][a-z0-9]*\.[a-z][a-z0-9]*$/;
-
-function $el(id){ return document.getElementById(id) }
-
-function setFb(elId, type, msg){
-  var el = $el(elId);
-  if(!el) return;
-  if(!type || !msg){
-    el.className = 'feedback'; el.textContent = ''; return;
-  }
-  el.className = 'feedback show ' + type;
-  el.textContent = msg;
-}
-
-function validateUsername(v){
-  if(!v || !v.trim()) return { ok: false, msg: 'username ga boleh kosong' };
-  v = v.trim().toLowerCase();
-  if(v.length > 30) return { ok: false, msg: 'maksimal 30 karakter' };
-  if(v.includes(' ')) return { ok: false, msg: 'pake titik, bukan spasi' };
-  if(!v.includes('.')) return { ok: false, msg: 'harus dua kata pisah titik' };
-  if((v.match(/\./g) || []).length > 1) return { ok: false, msg: 'cuma boleh satu titik' };
-  if(!UN_PAT.test(v)) return { ok: false, msg: 'cuma huruf kecil a-z, angka, dan satu titik' };
-  var parts = v.split('.');
-  if(parts.length !== 2) return { ok: false, msg: 'format harus kata.kata' };
-  if(parts[0].length < 2 || parts[1].length < 2) return { ok: false, msg: 'minimal 2 huruf per kata' };
-  return { ok: true, value: v };
-}
-
-function validatePIN(pin){
-  if(!/^\d{6}$/.test(pin)) return { ok: false, msg: 'PIN harus 6 digit angka' };
-  if(/(\d)\1{5}/.test(pin)) return { ok: false, msg: 'PIN terlalu lemah (semua digit sama)' };
-  if(pin === '123456' || pin === '654321') return { ok: false, msg: 'PIN terlalu lemah (sequential)' };
-  if(pin === '000000' || pin === '999999') return { ok: false, msg: 'PIN terlalu lemah' };
-  return { ok: true };
-}
-
-// ============================================
-// ✅ DB INIT dengan Detailed Logging
-// ============================================
-function initDb(){
-  console.log('[JEJAK] Initializing database...');
-  
-  if(!JEJAK.SUPABASE_URL || JEJAK.SUPABASE_URL.includes('YOUR_PROJECT_ID')){
-    console.error('%c[JEJAK] ⚠️ SUPABASE_URL belum diisi!', 'color:#ff2d55;font-weight:bold');
-    $el('config-warning').classList.add('show');
-    return false;
-  }
-  
-  if(!JEJAK.SUPABASE_KEY || JEJAK.SUPABASE_KEY.includes('YOUR_ANON')){
-    console.error('%c[JEJAK] ⚠️ SUPABASE_KEY belum diisi!', 'color:#ff2d55;font-weight:bold');
-    $el('config-warning').classList.add('show');
-    return false;
-  }
-  
-  if(!window.supabase || !window.supabase.createClient){
-    console.error('[JEJAK] Supabase SDK not loaded');
-    return false;
-  }
-  
-  try{
-    console.log('[JEJAK] Creating Supabase client...');
-    console.log('[JEJAK] URL:', JEJAK.SUPABASE_URL);
-    console.log('[JEJAK] Key (first 20 chars):', JEJAK.SUPABASE_KEY.substring(0, 20) + '...');
-    
-    db = window.supabase.createClient(JEJAK.SUPABASE_URL, JEJAK.SUPABASE_KEY);
-    
-    console.log('%c[JEJAK] ✓ DB initialized successfully!', 'color:#00e5ff;font-weight:bold');
-    return true;
-  } catch(e){
-    logError('DB Init', e);
-    return false;
-  }
-}
-
-// ============================================
-// ✅ REGISTER dengan Detailed Error Handling
-// ============================================
-$el('register-form').addEventListener('submit', async function(e){
-  e.preventDefault();
-  
-  console.log('[JEJAK] Register form submitted');
-  
-  var username = $el('reg-username').value;
-  var pin = $el('reg-pin').value;
-  var pinConfirm = $el('reg-pin-confirm').value;
-  var agreed = $el('agree-checkbox').checked;
-  
-  setFb('reg-username-fb', '', '');
-  setFb('reg-pin-fb', '', '');
-  setFb('reg-pin-confirm-fb', '', '');
-  
-  var unValid = validateUsername(username);
-  if(!unValid.ok){
-    setFb('reg-username-fb', 'error', unValid.msg);
-    return;
-  }
-  
-  var pinValid = validatePIN(pin);
-  if(!pinValid.ok){
-    setFb('reg-pin-fb', 'error', pinValid.msg);
-    return;
-  }
-  
-  if(pin !== pinConfirm){
-    setFb('reg-pin-confirm-fb', 'error', 'PIN ga cocok');
-    return;
-  }
-  
-  if(!agreed){
-    alert('⚠️ Lu harus terima tanggung jawab dulu!');
-    return;
-  }
-  
-  var btn = $el('register-btn');
-  btn.disabled = true;
-  btn.textContent = 'PROSES...';
-  
-  try{
-    if(!db) throw new Error('Database ga terhubung');
-    
-    console.log('[JEJAK] Hashing PIN...');
-    var pinHash = await hashPIN(pin);
-    console.log('[JEJAK] PIN hashed (first 20 chars):', pinHash.substring(0, 20) + '...');
-    
-    console.log('[JEJAK] Inserting to database...');
-    console.log('[JEJAK] Username:', unValid.value);
-    
-    var { data, error } = await db
-      .from('profiles')
-      .insert({
-        username: unValid.value,
-        pin_hash: pinHash
-      })
-      .select('id, username');
-    
-    if(error){
-      logError('Register Insert', error);
-      
-      if(error.code === '23505'){
-        throw new Error('Username udah dipake — coba yang lain');
-      }
-      
-      // Detailed error message
-      var errMsg = error.message || 'Unknown error';
-      if(error.details) errMsg += ' | Details: ' + error.details;
-      if(error.hint) errMsg += ' | Hint: ' + error.hint;
-      
-      throw new Error(errMsg);
-    }
-    
-    console.log('[JEJAK] Register success!', data);
-    
-    if(!data || !data[0]){
-      throw new Error('Ga ada data returned — cek RLS policy di Supabase');
-    }
-    
-    localStorage.setItem(SK.username, data[0].username);
-    localStorage.setItem(SK.uid, data[0].id);
-    localStorage.setItem(SK.loggedIn, 'true');
-    
-    setFb('reg-pin-confirm-fb', 'success', '🎉 Akun berhasil dibuat!');
-    
-    setTimeout(function(){
-      alert('✅ Akun dibuat!\n\nUsername: ' + data[0].username + '\n\n⚠️ SIMPAN PIN LU!');
-      window.location.href = 'spill.html';
-    }, 1000);
-    
-  } catch(err){
-    logError('Register', err);
-    setFb('reg-username-fb', 'error', err.message || 'Gagal buat akun');
-    btn.disabled = false;
-    btn.textContent = 'DAFTAR →';
-  }
-});
-
-// ============================================
-// ✅ LOGIN dengan Detailed Error Handling
-// ============================================
-$el('login-form').addEventListener('submit', async function(e){
-  e.preventDefault();
-  
-  console.log('[JEJAK] Login form submitted');
-  
-  var username = $el('login-username').value;
-  var pin = $el('login-pin').value;
-  
-  setFb('login-username-fb', '', '');
-  setFb('login-pin-fb', '', '');
-  
-  var unValid = validateUsername(username);
-  if(!unValid.ok){
-    setFb('login-username-fb', 'error', unValid.msg);
-    return;
-  }
-  
-  var pinValid = validatePIN(pin);
-  if(!pinValid.ok){
-    setFb('login-pin-fb', 'error', pinValid.msg);
-    return;
-  }
-  
-  var btn = $el('login-btn');
-  btn.disabled = true;
-  btn.textContent = 'VERIFIKASI...';
-  
-  try{
-    if(!db) throw new Error('Database ga terhubung');
-    
-    console.log('[JEJAK] Hashing PIN for login...');
-    var pinHash = await hashPIN(pin);
-    
-    console.log('[JEJAK] Querying database...');
-    console.log('[JEJAK] Username:', unValid.value);
-    console.log('[JEJAK] PIN hash (first 20):', pinHash.substring(0, 20) + '...');
-    
-    var { data, error } = await db
-      .from('profiles')
-      .select('id, username, pin_hash')
-      .eq('username', unValid.value)
-      .eq('pin_hash', pinHash)
-      .single();
-    
-    if(error){
-      logError('Login Query', error);
-      
-      // Generic error for security
-      throw new Error('Username atau PIN salah');
-    }
-    
-    console.log('[JEJAK] Login query result:', data);
-    
-    if(!data){
-      throw new Error('Username atau PIN salah');
-    }
-    
-    localStorage.setItem(SK.username, data.username);
-    localStorage.setItem(SK.uid, data.id);
-    localStorage.setItem(SK.loggedIn, 'true');
-    
-    setFb('login-pin-fb', 'success', '✓ Login berhasil!');
-    
-    console.log('[JEJAK] Login success! Redirecting...');
-    
-    setTimeout(function(){
-      window.location.href = 'spill.html';
-    }, 700);
-    
-  } catch(err){
-    logError('Login', err);
-    setFb('login-pin-fb', 'error', err.message || 'Login gagal');
-    btn.disabled = false;
-    btn.textContent = 'MASUK →';
-  }
-});
-
-// ============================================
-// MODE TOGGLE
-// ============================================
-$el('to-register').addEventListener('click', function(){
-  $el('login-form').style.display = 'none';
-  $el('register-form').style.display = 'block';
-  $el('reg-username').focus();
-});
-
-$el('to-login').addEventListener('click', function(){
-  $el('register-form').style.display = 'none';
-  $el('login-form').style.display = 'block';
-  $el('login-username').focus();
-});
-
-// ============================================
-// INPUT HANDLERS
-// ============================================
-function setupInput(id, onChange){
-  var el = $el(id);
-  if(!el) return;
-  
-  el.addEventListener('input', function(e){
-    var v = e.target.value;
-    var fmt = v.toLowerCase().replace(/\s+/g, '.').replace(/[^a-z0-9.]/g, '').replace(/\.{2,}/g, '.');
-    if(fmt !== v){
-      var p = e.target.selectionStart;
-      e.target.value = fmt;
-      try{ e.target.setSelectionRange(p, p); } catch(_){}
-    }
-    if(onChange) onChange();
-  });
-}
-
-function setupPinInput(id, onChange){
-  var el = $el(id);
-  if(!el) return;
-  
-  el.addEventListener('input', function(e){
-    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
-    if(onChange) onChange();
-  });
-}
-
-setupInput('reg-username', function(){
-  var valid = validateUsername($el('reg-username').value).ok;
-  var pinOk = $el('reg-pin').value.length === 6;
-  var pinMatch = $el('reg-pin').value === $el('reg-pin-confirm').value;
-  var agreed = $el('agree-checkbox').checked;
-  $el('register-btn').disabled = !(valid && pinOk && pinMatch && agreed);
-});
-
-setupPinInput('reg-pin', function(){
-  var valid = validateUsername($el('reg-username').value).ok;
-  var pinOk = $el('reg-pin').value.length === 6;
-  var pinMatch = $el('reg-pin').value === $el('reg-pin-confirm').value;
-  var agreed = $el('agree-checkbox').checked;
-  $el('register-btn').disabled = !(valid && pinOk && pinMatch && agreed);
-});
-
-setupPinInput('reg-pin-confirm', function(){
-  var valid = validateUsername($el('reg-username').value).ok;
-  var pinOk = $el('reg-pin').value.length === 6;
-  var pinMatch = $el('reg-pin').value === $el('reg-pin-confirm').value;
-  var agreed = $el('agree-checkbox').checked;
-  $el('register-btn').disabled = !(valid && pinOk && pinMatch && agreed);
-});
-
-$el('agree-checkbox').addEventListener('change', function(){
-  var valid = validateUsername($el('reg-username').value).ok;
-  var pinOk = $el('reg-pin').value.length === 6;
-  var pinMatch = $el('reg-pin').value === $el('reg-pin-confirm').value;
-  var agreed = $el('agree-checkbox').checked;
-  $el('register-btn').disabled = !(valid && pinOk && pinMatch && agreed);
-});
-
-setupInput('login-username', function(){
-  var unOk = validateUsername($el('login-username').value).ok;
-  var pinOk = $el('login-pin').value.length === 6;
-  $el('login-btn').disabled = !(unOk && pinOk);
-});
-
-setupPinInput('login-pin', function(){
-  var unOk = validateUsername($el('login-username').value).ok;
-  var pinOk = $el('login-pin').value.length === 6;
-  $el('login-btn').disabled = !(unOk && pinOk);
-});
-
-// ============================================
-// ✅ INIT dengan Detailed Logging
-// ============================================
-document.addEventListener('DOMContentLoaded', function(){
-  console.log('%c[JEJAK] v3.0-mvp — Zero-Knowledge Auth', 'color:#00e5ff;font-size:14px;font-weight:bold');
-  console.log('[JEJAK] Timestamp:', new Date().toISOString());
-  console.log('[JEJAK] User Agent:', navigator.userAgent);
-  
-  var dbOk = initDb();
-  
-  if(!dbOk){
-    console.warn('%c[JEJAK] ⚠️ Database initialization failed', 'color:#ffd60a');
-  }
-  
-  var loggedIn = localStorage.getItem(SK.loggedIn) === 'true';
-  if(loggedIn && dbOk){
-    console.log('[JEJAK] User already logged in, redirecting...');
-    window.location.href = 'spill.html';
-    return;
-  }
-  
-  setInterval(function(){
-    var el = $el('onlinePill');
-    if(el) el.textContent = (Math.floor(Math.random()*25)+18) + ' ONLINE';
-  }, 30000);
-  
-  console.log('[JEJAK] Initialization complete. Ready for user input.');
-});
+const JEJAK={SUPABASE_URL:'https://fuovfrdicdhnlymnacpz.supabase.co',SUPABASE_KEY:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0',SK:{username:'jejak_username',uid:'jejak_uid',loggedIn:'jejak_logged_in'}};
+let db=null;
+const SK=JEJAK.SK,$=(id)=>document.getElementById(id),log=(ctx,err)=>{console.error(`[JEJAK] ${ctx}:`,err);err&&typeof err==='object'&&console.error('Details:',{message:err.message,code:err.code,details:err.details,hint:err.hint,stack:err.stack})},hashPIN=async pin=>{try{const data=new TextEncoder().encode(pin+'jejak_salt_2025_v3'),buf=await crypto.subtle.digest('SHA-256',data);return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')}catch(e){log('hashPIN',e);throw new Error('Gagal hash PIN')}},UN_PAT=/^[a-z][a-z0-9]*\.[a-z][a-z0-9]*$/,setFb=(id,type,msg)=>{const el=$(id);if(!el)return;if(!type||!msg){el.className='feedback';el.textContent='';return}el.className=`feedback show ${type}`;el.textContent=msg},validateUsername=v=>{if(!v||!v.trim())return{ok:false,msg:'username ga boleh kosong'};v=v.trim().toLowerCase();if(v.length>30)return{ok:false,msg:'maksimal 30 karakter'};if(v.includes(' '))return{ok:false,msg:'pake titik, bukan spasi'};if(!v.includes('.'))return{ok:false,msg:'harus dua kata pisah titik'};if((v.match(/\./g)||[]).length>1)return{ok:false,msg:'cuma boleh satu titik'};if(!UN_PAT.test(v))return{ok:false,msg:'cuma huruf kecil a-z, angka, dan satu titik'};const parts=v.split('.');if(parts.length!==2)return{ok:false,msg:'format harus kata.kata'};if(parts[0].length<2||parts[1].length<2)return{ok:false,msg:'minimal 2 huruf per kata'};return{ok:true,value:v}},validatePIN=pin=>{if(!/^\d{6}$/.test(pin))return{ok:false,msg:'PIN harus 6 digit angka'};if(/(\d)\1{5}/.test(pin))return{ok:false,msg:'PIN terlalu lemah (semua digit sama)'};if(pin==='123456'||pin==='654321')return{ok:false,msg:'PIN terlalu lemah (sequential)'};if(pin==='000000'||pin==='999999')return{ok:false,msg:'PIN terlalu lemah'};return{ok:true}},initDb=()=>{console.log('[JEJAK] Initializing database...');if(!JEJAK.SUPABASE_URL||JEJAK.SUPABASE_URL.includes('YOUR_PROJECT_ID')){console.error('[JEJAK] ⚠️ SUPABASE_URL belum diisi!');$('config-warning').classList.add('show');return false}if(!JEJAK.SUPABASE_KEY||JEJAK.SUPABASE_KEY.includes('YOUR_ANON')){console.error('[JEJAK] ⚠️ SUPABASE_KEY belum diisi!');$('config-warning').classList.add('show');return false}if(!window.supabase?.createClient){console.error('[JEJAK] Supabase SDK not loaded');return false}try{console.log('[JEJAK] Creating Supabase client...');db=window.supabase.createClient(JEJAK.SUPABASE_URL,JEJAK.SUPABASE_KEY);console.log('[JEJAK] ✓ DB initialized successfully!');return true}catch(e){log('DB Init',e);return false}},setupInput=(id,onChange)=>{const el=$(id);if(!el)return;el.addEventListener('input',e=>{const v=e.target.value,fmt=v.toLowerCase().replace(/\s+/g,'.').replace(/[^a-z0-9.]/g,'').replace(/\.{2,}/g,'.');if(fmt!==v){const p=e.target.selectionStart;e.target.value=fmt;try{e.target.setSelectionRange(p,p)}catch(_){}}onChange&&onChange()})},setupPinInput=(id,onChange)=>{const el=$(id);if(!el)return;el.addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,6);onChange&&onChange()})},updateRegBtn=()=>{const valid=validateUsername($('reg-username').value).ok,pinOk=$('reg-pin').value.length===6,pinMatch=$('reg-pin').value===$('reg-pin-confirm').value,agreed=$('agree-checkbox').checked;$('register-btn').disabled=!(valid&&pinOk&&pinMatch&&agreed)},updateLoginBtn=()=>{const unOk=validateUsername($('login-username').value).ok,pinOk=$('login-pin').value.length===6;$('login-btn').disabled=!(unOk&&pinOk)};
+$('register-form').addEventListener('submit',async e=>{e.preventDefault();console.log('[JEJAK] Register form submitted');const username=$('reg-username').value,pin=$('reg-pin').value,pinConfirm=$('reg-pin-confirm').value,agreed=$('agree-checkbox').checked;setFb('reg-username-fb','','');setFb('reg-pin-fb','','');setFb('reg-pin-confirm-fb','','');const unValid=validateUsername(username);if(!unValid.ok){setFb('reg-username-fb','error',unValid.msg);return}const pinValid=validatePIN(pin);if(!pinValid.ok){setFb('reg-pin-fb','error',pinValid.msg);return}if(pin!==pinConfirm){setFb('reg-pin-confirm-fb','error','PIN ga cocok');return}if(!agreed){alert('⚠️ Lu harus terima tanggung jawab dulu!');return}const btn=$('register-btn');btn.disabled=true;btn.textContent='PROSES...';try{if(!db)throw new Error('Database ga terhubung');console.log('[JEJAK] Hashing PIN...');const pinHash=await hashPIN(pin);console.log('[JEJAK] Inserting to database...');const{data,error}=await db.from('profiles').insert({username:unValid.value,pin_hash:pinHash}).select('id, username');if(error){log('Register Insert',error);if(error.code==='23505')throw new Error('Username udah dipake — coba yang lain');let errMsg=error.message||'Unknown error';if(error.details)errMsg+=' | Details: '+error.details;if(error.hint)errMsg+=' | Hint: '+error.hint;throw new Error(errMsg)}console.log('[JEJAK] Register success!',data);if(!data||!data[0])throw new Error('Ga ada data returned — cek RLS policy di Supabase');localStorage.setItem(SK.username,data[0].username);localStorage.setItem(SK.uid,data[0].id);localStorage.setItem(SK.loggedIn,'true');setFb('reg-pin-confirm-fb','success','🎉 Akun berhasil dibuat!');setTimeout(()=>{alert(`✅ Akun dibuat!\n\nUsername: ${data[0].username}\n\n⚠️ SIMPAN PIN LU!`);window.location.href='spill.html'},1000)}catch(err){log('Register',err);setFb('reg-username-fb','error',err.message||'Gagal buat akun');btn.disabled=false;btn.textContent='DAFTAR →'}});
+$('login-form').addEventListener('submit',async e=>{e.preventDefault();console.log('[JEJAK] Login form submitted');const username=$('login-username').value,pin=$('login-pin').value;setFb('login-username-fb','','');setFb('login-pin-fb','','');const unValid=validateUsername(username);if(!unValid.ok){setFb('login-username-fb','error',unValid.msg);return}const pinValid=validatePIN(pin);if(!pinValid.ok){setFb('login-pin-fb','error',pinValid.msg);return}const btn=$('login-btn');btn.disabled=true;btn.textContent='VERIFIKASI...';try{if(!db)throw new Error('Database ga terhubung');console.log('[JEJAK] Hashing PIN for login...');const pinHash=await hashPIN(pin);console.log('[JEJAK] Querying database...');const{data,error}=await db.from('profiles').select('id, username, pin_hash').eq('username',unValid.value).eq('pin_hash',pinHash).single();if(error){log('Login Query',error);throw new Error('Username atau PIN salah')}console.log('[JEJAK] Login query result:',data);if(!data)throw new Error('Username atau PIN salah');localStorage.setItem(SK.username,data.username);localStorage.setItem(SK.uid,data.id);localStorage.setItem(SK.loggedIn,'true');setFb('login-pin-fb','success','✓ Login berhasil!');console.log('[JEJAK] Login success! Redirecting...');setTimeout(()=>window.location.href='spill.html',700)}catch(err){log('Login',err);setFb('login-pin-fb','error',err.message||'Login gagal');btn.disabled=false;btn.textContent='MASUK →'}});
+$('to-register').addEventListener('click',()=>{$('login-form').style.display='none';$('register-form').style.display='block';$('reg-username').focus()});
+$('to-login').addEventListener('click',()=>{$('register-form').style.display='none';$('login-form').style.display='block';$('login-username').focus()});
+setupInput('reg-username',updateRegBtn);setupPinInput('reg-pin',updateRegBtn);setupPinInput('reg-pin-confirm',updateRegBtn);$('agree-checkbox').addEventListener('change',updateRegBtn);setupInput('login-username',updateLoginBtn);setupPinInput('login-pin',updateLoginBtn);
+document.addEventListener('DOMContentLoaded',()=>{console.log('[JEJAK] v3.0-mvp — Zero-Knowledge Auth');console.log('[JEJAK] Timestamp:',new Date().toISOString());const dbOk=initDb();if(!dbOk)console.warn('[JEJAK] ⚠️ Database initialization failed');const loggedIn=localStorage.getItem(SK.loggedIn)==='true';if(loggedIn&&dbOk){console.log('[JEJAK] User already logged in, redirecting...');window.location.href='spill.html';return}setInterval(()=>{const el=$('onlinePill');if(el)el.textContent=(Math.floor(Math.random()*25)+18)+' ONLINE'},30000);console.log('[JEJAK] Initialization complete. Ready for user input.')});
 </script>
 </body>
 </html>
