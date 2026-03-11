@@ -1,6 +1,6 @@
 // api/chat.js — JEJAK AI Chat Backend
-// v9.3 — FULL VERSION dengan CORS FIX, greetingStyle, dan semua perbaikan
-// Vercel Serverless Function
+// v9.4 — FIXED VERSION for Vercel
+// Dengan module.exports, bukan export default
 
 const PERSONAS = {
   'beby.manis': {
@@ -439,6 +439,8 @@ async function callDeepseek(systemPrompt, history, message, temperature = 0.9, f
   const tid = setTimeout(() => controller.abort(), 8000);
   
   try {
+    console.log('[Deepseek] Calling API...');
+    
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -462,9 +464,16 @@ async function callDeepseek(systemPrompt, history, message, temperature = 0.9, f
     });
     
     clearTimeout(tid);
-    if (!response.ok) return null;
+    
+    if (!response.ok) {
+      console.error('[Deepseek] API error:', response.status);
+      const errorText = await response.text();
+      console.error('[Deepseek] Error details:', errorText);
+      return null;
+    }
     
     const data = await response.json();
+    console.log('[Deepseek] Response received');
     return data.choices?.[0]?.message?.content?.trim() || null;
   } catch (error) {
     clearTimeout(tid);
@@ -474,7 +483,7 @@ async function callDeepseek(systemPrompt, history, message, temperature = 0.9, f
 }
 
 // ── MAIN HANDLER ───────────────────────────────────────────────────────────────
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   // ========== CORS HANDLER - WAJIB! ==========
   // Set CORS headers untuk semua response
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -507,12 +516,14 @@ export default async function handler(req, res) {
   }
   
   if (!process.env.DEEPSEEK_API_KEY) {
+    console.error('[BACKEND] API key missing');
     return res.status(500).json({ error: 'API key missing' });
   }
 
   // Get persona
   const persona = PERSONAS[characterName];
   if (!persona) {
+    console.error('[BACKEND] Unknown character:', characterName);
     return res.status(400).json({ error: 'Unknown character' });
   }
 
@@ -608,15 +619,18 @@ export default async function handler(req, res) {
     isHigh, isLow, customHints
   );
 
+  console.log('[BACKEND] System prompt built, length:', systemPrompt.length);
+
   // ── CALL DEEPSEEK ────────────────────────────────────────────────────────────
   let reply = await callDeepseek(systemPrompt, history, message, 1.0, 0.7, 0.5);
 
   if (!reply) {
-    // Fallback ke temperature lebih tinggi
+    console.log('[BACKEND] First attempt failed, retrying with higher temperature...');
     reply = await callDeepseek(systemPrompt, history, message, 1.1, 0.8, 0.6);
   }
 
   if (!reply) {
+    console.error('[BACKEND] Both DeepSeek attempts failed');
     return res.status(502).json({ error: 'Upstream error' });
   }
 
@@ -644,9 +658,10 @@ export default async function handler(req, res) {
   }
 
   // Final response
+  console.log('[BACKEND] Success, returning reply');
   return res.status(200).json({
     reply,
     character: characterName,
     distress: isHigh ? 'high' : isLow ? 'low' : null
   });
-}
+};
