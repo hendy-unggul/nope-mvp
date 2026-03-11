@@ -463,6 +463,17 @@
     window.filterMood = filterMood;
     window.getPool = () => fullPool;
     window.getWindowStart = () => windowStart;
+    
+    // TAMBAHAN FIX - Kompatibilitas dengan HTML
+window.brewNewSpills = seduhTehBaru;
+window.updateFeedMeta = function() {
+    const metaEl = document.getElementById('feedMeta');
+    if (metaEl) {
+        const endPos = windowStart + CONFIG.WINDOW_SIZE - 1;
+        const displayEnd = endPos >= CONFIG.POOL_SIZE ? endPos - CONFIG.POOL_SIZE + 1 : endPos + 1;
+        metaEl.textContent = (windowStart+1) + '-' + displayEnd + ' / ' + CONFIG.POOL_SIZE + ' SPILLS';
+    }
+};
 
     // Auto start
     if (document.readyState === 'loading') {
