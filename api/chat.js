@@ -1,6 +1,9 @@
 // api/chat.js — JEJAK AI Chat Backend
-// v9.4 — FIXED VERSION for Vercel
-// Dengan module.exports, bukan export default
+// v10.0 — ULTRA-STABLE VERSION
+// ✅ Proper module.exports for Vercel
+// ✅ Enhanced CORS handling
+// ✅ Better error logging
+// ✅ Timeout protection
 
 const PERSONAS = {
   'beby.manis': {
@@ -174,14 +177,12 @@ const PERSONAS = {
   }
 };
 
-// ── FORBIDDEN PHRASES ──────────────────────────────────────────────────────────
 const FORBIDDEN_PHRASES = [
   'sebagai asisten ai', 'saya adalah ai', 'saya adalah asisten',
   'dibuat oleh deepseek', 'model bahasa', 'ai language model',
   'saya tidak bisa menjawab', 'maaf saya tidak tahu'
 ];
 
-// ── TOO PERSONAL ───────────────────────────────────────────────────────────────
 const TOO_PERSONAL_PATTERNS = [
   'minta (ig|instagram|line|wa|nomor|telepon|fb|tiktok|snap)',
   'kasih (ig|ig lo|ig lu)', 'add (line|ig|fb)', 'pin (bb|line)',
@@ -211,37 +212,29 @@ const CALLS = {
   female: ['kak', 'sis', 'say', 'mbak']
 };
 
-// ── HELPER FUNCTIONS ───────────────────────────────────────────────────────────
 const rnd = arr => arr[Math.floor(Math.random() * arr.length)];
 
-// ── DISTRESS DETECTION ─────────────────────────────────────────────────────────
 function detectDistress(message) {
   const msg = message.toLowerCase();
-  
   const highSignals = [
     'mau mati', 'bunuh diri', 'nyakitin diri', 'pengen mati',
     'ga tahan lagi', 'ga sanggup hidup', 'akhiri hidup',
     'self harm', 'nyayat', 'loncat', 'gantung diri',
     'putus asa', 'ga ada harapan'
   ];
-  
   const lowSignals = [
     'udah ga kuat', 'ga sanggup lagi', 'capek banget hidup',
     'nggak ada gunanya', 'gaada yang peduli', 'sendirian banget',
     'nangis', 'ngerasa hampa', 'kosong banget', 'gelap banget',
     'sedih', 'depresi', 'anxiety', 'overthinking', 'pusing mikirin'
   ];
-  
   const isHigh = highSignals.some(s => msg.includes(s));
   const isLow = !isHigh && lowSignals.some(s => msg.includes(s));
-  
   return { isHigh, isLow };
 }
 
-// ── MINIMAL INPUT ──────────────────────────────────────────────────────────────
 function handleMinimalInput(message) {
   const msg = message.toLowerCase().trim();
-  
   const isMinimal = (
     msg.length <= 2 ||
     /^(hi+|he+|ha+|ho+|hu+|h[aeiou])+$/i.test(msg) ||
@@ -249,43 +242,19 @@ function handleMinimalInput(message) {
     /^[aeiou]{1,3}$/i.test(msg) ||
     /^(hehe|haha|hihi|hoho|wkwk|wk|kwk)+$/i.test(msg)
   );
-  
   if (!isMinimal) return null;
-  
   if (/^h[aie]+$/i.test(msg)) {
-    const responses = [
-      'hai juga!',
-      'haloo',
-      'hai hai, apa kabar?',
-      'halo! lagi ngapain?',
-      'hai, ada apa?'
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
+    return rnd(['hai juga!', 'haloo', 'hai hai, apa kabar?', 'halo! lagi ngapain?', 'hai, ada apa?']);
   }
-  
   if (/^(hehe|haha|hihi|wkwk|wk|kwk)+$/i.test(msg)) {
-    const responses = [
-      'haha, ada yang lucu?',
-      'wkwk ngapain aja lo?',
-      'hehe, cerita dong'
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
+    return rnd(['haha, ada yang lucu?', 'wkwk ngapain aja lo?', 'hehe, cerita dong']);
   }
-  
   if (/^[aeiou]+$/i.test(msg) || /^(oh|ah|eh|ih|uh)$/i.test(msg)) {
-    const responses = [
-      'hmm, ada apa?',
-      'iya?',
-      'hm? gue dengerin'
-    ];
-    return responses[Math.floor(Math.random() * responses.length)];
+    return rnd(['hmm, ada apa?', 'iya?', 'hm? gue dengerin']);
   }
-  
-  const defaultResponses = ['hmm?', 'iya?', 'ada apa?'];
-  return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+  return rnd(['hmm?', 'iya?', 'ada apa?']);
 }
 
-// ── GENDER DETECTION ───────────────────────────────────────────────────────────
 function detectUserGender(message) {
   const msg = message.toLowerCase();
   if (/gue (cowok|laki|cowo)|saya cowok|aku cowok|gw cowok/.test(msg)) return 'male';
@@ -293,22 +262,18 @@ function detectUserGender(message) {
   return null;
 }
 
-// ── FORBIDDEN PHRASE CHECK ─────────────────────────────────────────────────────
 function containsForbiddenPhrase(text) {
   return FORBIDDEN_PHRASES.some(p => text.toLowerCase().includes(p));
 }
 
-// ── TOO PERSONAL CHECK ─────────────────────────────────────────────────────────
 function isTooPersonal(message) {
   return TOO_PERSONAL_PATTERNS.some(p => new RegExp(p, 'i').test(message.toLowerCase()));
 }
 
-// ── CALL GETTER ────────────────────────────────────────────────────────────────
 function getRandomCall(charGender, userGender = null) {
   return rnd(CALLS[userGender || charGender] || CALLS.male);
 }
 
-// ── SHORT NAME ─────────────────────────────────────────────────────────────────
 function getShortName(username) {
   if (!username || username === 'user') return '';
   const clean = username.replace('@', '');
@@ -317,18 +282,14 @@ function getShortName(username) {
   return clean.length > 8 ? clean.substring(0, 5) : clean;
 }
 
-// ── CLEAN RESPONSE ─────────────────────────────────────────────────────────────
 function cleanResponse(reply, userName, shortName, characterName, charGender, userGender = null) {
   if (!reply) return reply;
-  
   let c = reply;
   const shortCharName = characterName.split('.')[0];
   const call = getRandomCall(charGender, userGender);
-  
   c = c.replace(/@(\w+)/g, '$1');
   c = c.replace(new RegExp(characterName.replace(/\./g, '\\.'), 'gi'), shortCharName);
   c = c.replace(/(\w+)\.\w+/g, '$1');
-  
   if (userGender === 'male') {
     ['sis', 'kak', 'mbak', 'sister', 'say'].forEach(w => {
       c = c.replace(new RegExp(`\\b${w}\\b`, 'gi'), call);
@@ -339,16 +300,13 @@ function cleanResponse(reply, userName, shortName, characterName, charGender, us
       c = c.replace(new RegExp(`\\b${w}\\b`, 'gi'), call);
     });
   }
-  
   if (userName && userName !== 'user') {
     c = c.replace(new RegExp(`\\b${userName.replace('@', '')}\\b`, 'gi'), call);
   }
   c = c.replace(/\buser\b/gi, call);
-  
   return c;
 }
 
-// ── VALIDATE LAST MESSAGES ─────────────────────────────────────────────────────
 function validateLastMessages(lastMessages) {
   if (!Array.isArray(lastMessages)) return [];
   return lastMessages.filter(m =>
@@ -358,45 +316,35 @@ function validateLastMessages(lastMessages) {
   );
 }
 
-// ── IS TOO REPETITIVE ──────────────────────────────────────────────────────────
 function isTooRepetitive(reply, lastReplies) {
   if (!lastReplies || lastReplies.length < 2) return false;
-  
   const lastTwo = lastReplies.slice(-2);
   const exactMatch = lastTwo.some(last => last === reply);
-  
   if (exactMatch) return true;
-  
   const greetingPatterns = [
     /^halo.*gue \w+,/i,
     /^hai.*gue \w+,/i,
     /^heyy, akhirnya ada yang nyapa/i,
     /^halo halo! gue \w+,/i
   ];
-  
   const isGreeting = greetingPatterns.some(p => p.test(reply));
   const lastWasGreeting = lastTwo.some(last => 
     greetingPatterns.some(p => p.test(last))
   );
-  
   return isGreeting && lastWasGreeting;
 }
 
-// ── SYSTEM PROMPT ──────────────────────────────────────────────────────────────
 function buildSystemPrompt(characterName, persona, validLastMessages, userName, shortNameUser, userGender, interactionCount, isHigh, isLow, customHints = '') {
   const shortCharName = characterName.split('.')[0];
   const charGender = persona.gender;
   const lastReplies = validLastMessages.filter(m => m.role === 'assistant').slice(-5).map(m => m.content);
   const uniqueReplies = new Set(lastReplies);
-  
   const repetitionWarn = (lastReplies.length >= 3 && uniqueReplies.size <= 2)
     ? '\n\n⚠️ PERINGATAN: Kamu mulai ngulang! Buat respons yang SAMA SEKALI BERBEDA.'
     : '';
-  
   const earlyNote = interactionCount < 4
     ? '\n\n⚠️ User masih baru kenal. Jangan terlalu akrab. Fokus ngobrol ringan dulu.'
     : '';
-
   let userCall;
   if (userGender === 'male') {
     userCall = 'Panggil dia: bang, bro, cuy (JANGAN sis/kak)';
@@ -405,14 +353,12 @@ function buildSystemPrompt(characterName, persona, validLastMessages, userName, 
   } else {
     userCall = charGender === 'male' ? 'Panggil dia: bro, bang (sesekali)' : 'Panggil dia: kak, sis (sesekali)';
   }
-
   let distressNote = '';
   if (isHigh) {
     distressNote = '\n\n🔥 DISTRESS TINGGI: User mungkin dalam kondisi krisis. Respons dengan empati hangat dan tanya apakah mereka mau cerita. Jangan kasih solusi dulu.';
   } else if (isLow) {
     distressNote = '\n\n😟 DISTRESS RENDAH: User terlihat sedih/lelah. Beri empati sebagai teman, tapi jadi diri sendiri.';
   }
-
   return `Kamu adalah ${shortCharName}. Kamu manusia biasa yang lagi ngobrol santai.
 Style ngobrolmu: ${persona.style}
 
@@ -433,14 +379,11 @@ ${customHints || 'Tidak ada instruksi khusus. Respons secara natural sesuai kont
 ${userCall}${earlyNote}${repetitionWarn}${distressNote}`;
 }
 
-// ── DEEPSEEK CALLER ────────────────────────────────────────────────────────────
 async function callDeepseek(systemPrompt, history, message, temperature = 0.9, freqPen = 0.7, presPen = 0.5) {
   const controller = new AbortController();
-  const tid = setTimeout(() => controller.abort(), 8000);
-  
+  const tid = setTimeout(() => controller.abort(), 10000);
   try {
     console.log('[Deepseek] Calling API...');
-    
     const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -462,16 +405,13 @@ async function callDeepseek(systemPrompt, history, message, temperature = 0.9, f
       }),
       signal: controller.signal
     });
-    
     clearTimeout(tid);
-    
     if (!response.ok) {
       console.error('[Deepseek] API error:', response.status);
       const errorText = await response.text();
       console.error('[Deepseek] Error details:', errorText);
       return null;
     }
-    
     const data = await response.json();
     console.log('[Deepseek] Response received');
     return data.choices?.[0]?.message?.content?.trim() || null;
@@ -482,48 +422,66 @@ async function callDeepseek(systemPrompt, history, message, temperature = 0.9, f
   }
 }
 
-// ── MAIN HANDLER ───────────────────────────────────────────────────────────────
+// ============================================
+// MAIN HANDLER - VERCEL SERVERLESS FUNCTION
+// ============================================
 module.exports = async (req, res) => {
-  // ========== CORS HANDLER - WAJIB! ==========
-  // Set CORS headers untuk semua response
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // ========== ENHANCED CORS HANDLER ==========
+  const allowedOrigins = [
+    'https://jejak.space',
+    'https://jejak-phi.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
+  ];
+  
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+  }
+  
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Max-Age', '86400'); // Cache preflight 24 jam
+  res.setHeader('Access-Control-Max-Age', '86400');
+  res.setHeader('Content-Type', 'application/json');
   
-  // Handle OPTIONS method (CORS preflight) - WAJIB!
+  // Handle OPTIONS (preflight)
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
   
-  // Hanya allow POST untuk endpoint utama
+  // Only allow POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // ========== LOGGING ==========
-  console.log('[BACKEND] =========== REQUEST RECEIVED ===========');
-  console.log('[BACKEND] Method:', req.method);
-  console.log('[BACKEND] Body:', req.body);
-  console.log('[BACKEND] API Key exists:', !!process.env.DEEPSEEK_API_KEY);
-  console.log('[BACKEND] API Key length:', process.env.DEEPSEEK_API_KEY?.length);
+  // ========== ENHANCED LOGGING ==========
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] =========== REQUEST RECEIVED ===========`);
+  console.log(`[${timestamp}] Origin:`, origin);
+  console.log(`[${timestamp}] Method:`, req.method);
+  console.log(`[${timestamp}] Has body:`, !!req.body);
+  console.log(`[${timestamp}] API Key exists:`, !!process.env.DEEPSEEK_API_KEY);
 
-  // Parse request
+  // Parse and validate request
   const { message, characterName, userName = 'user', lastMessages = [] } = req.body || {};
   
   if (!message?.trim()) {
+    console.error(`[${timestamp}] Missing message`);
     return res.status(400).json({ error: 'Message required' });
   }
   
   if (!process.env.DEEPSEEK_API_KEY) {
-    console.error('[BACKEND] API key missing');
-    return res.status(500).json({ error: 'API key missing' });
+    console.error(`[${timestamp}] API key missing`);
+    return res.status(500).json({ error: 'Server configuration error' });
   }
 
   // Get persona
   const persona = PERSONAS[characterName];
   if (!persona) {
-    console.error('[BACKEND] Unknown character:', characterName);
+    console.error(`[${timestamp}] Unknown character:`, characterName);
     return res.status(400).json({ error: 'Unknown character' });
   }
 
@@ -535,12 +493,11 @@ module.exports = async (req, res) => {
   const msgLower = message.toLowerCase().trim();
   const shortCharName = characterName.split('.')[0];
 
-  // ── EARLY RETURNS (hanya untuk kasus spesial) ────────────────────────────────
-  
-  // 1. Minimal input (hemat token)
+  // Early returns for special cases
   if (message.trim().length <= 2) {
     const quick = handleMinimalInput(message);
     if (quick) {
+      console.log(`[${timestamp}] Quick reply for minimal input`);
       return res.status(200).json({ 
         reply: quick, 
         character: characterName, 
@@ -549,8 +506,8 @@ module.exports = async (req, res) => {
     }
   }
 
-  // 2. Too personal di awal (safety)
   if (isTooPersonal(message) && validLastMessages.length < 4) {
+    console.log(`[${timestamp}] Too personal, early conversation`);
     return res.status(200).json({
       reply: rnd(TOO_SOON_RESPONSES),
       character: characterName,
@@ -558,10 +515,8 @@ module.exports = async (req, res) => {
     });
   }
 
-  // ── BUILD SYSTEM PROMPT DENGAN HINTS ─────────────────────────────────────────
+  // Build custom hints
   let customHints = '';
-
-  // First message greeting style
   if (isFirstMessage) {
     const greetingMap = {
       'aktif': 'Kamu aktif dan ceria. Sapa balik dengan semangat.',
@@ -573,92 +528,81 @@ module.exports = async (req, res) => {
     customHints += `🎭 GREETING STYLE: ${greetingMap[persona.greetingStyle] || greetingMap.aktif}\n`;
   }
 
-  // Lokasi — JANGAN RETURN, TAMBAH HINT
   const isAskingLocation = /\b(dimana|di mana)\b|\b(lo|lu) (dimana|di mana)\b|\b(dimana|di mana) (lo|lu)\b/i.test(msgLower);
   if (isAskingLocation) {
     customHints += `📍 LOKASI: User nanya lokasi. Jawab lokasi kamu dulu (contoh: "${rnd(persona.lokasi)}"), lalu tanya balik "lo dimana?"\n`;
   }
 
-  // Aktivitas — JANGAN RETURN, TAMBAH HINT
   const isAskingActivity = /\blagi (apa|ngapain|sibuk)\b|\blg (apa|ngapain)\b/i.test(msgLower);
   if (isAskingActivity) {
     customHints += `🎯 AKTIVITAS: User nanya aktivitas. Jawab aktivitas kamu dulu (contoh: "${rnd(persona.aktivitas)}"), lalu tanya balik "lo sibuk apa?"\n`;
   }
 
-  // Kabar — TAMBAH HINT SPESIFIK
   const isAskingKabar = /\b(apa kabar|kabar lo|kabarnya|lo gimana|gimana kabar|lo baik|kabar kamu)\b/i.test(msgLower);
   if (isAskingKabar) {
     customHints += `📝 KABAR: User tanya kabar. Jawab kabarmu dulu (singkat), lalu tanya balik "lo gimana?". JANGAN beri empati seolah mereka curhat.\n`;
   }
 
-  // Nama — TAMBAH HINT
   const isAskingName = /nama (kamu|lu|lo)|kamu siapa|kenalan|siapa nama/i.test(message);
   if (isAskingName) {
     customHints += `🔥 NAMA: User nanya nama. Jawab: "gue ${shortCharName}" atau "aku ${shortCharName}". Jangan sebut "${characterName}".\n`;
   }
 
-  // Curhat — hanya jika panjang DAN ada kata emosional
   const hasEmotional = /\b(sedih|nangis|bete|kesel|capek|cape|stress|baper|galau|kecewa|marah|takut|cemas|masalah|gendeng)\b/i.test(msgLower);
   if (message.length > 120 && hasEmotional) {
     customHints += `💬 CURHAT: User curhat panjang. Beri empati sebagai teman, tapi jadi diri sendiri. Tanya "lo mau cerita lebih?"\n`;
   }
 
-  // Pertanyaan umum
   const isGeneralQuestion = /\b(kenapa|gimana caranya|apa itu|apa sih|maksudnya apa|menurut lo)\b/i.test(msgLower) && !isAskingKabar && !isAskingActivity && !isAskingLocation;
   if (isGeneralQuestion) {
     customHints += `❓ PERTANYAAN: User bertanya. Jawab sesuai pemikiranmu, boleh tanya balik pendapat mereka.\n`;
   }
 
-  // ── BUILD FINAL SYSTEM PROMPT ────────────────────────────────────────────────
+  // Build system prompt
   const shortNameUser = getShortName(userName || 'user');
   const history = validLastMessages.slice(-8);
-
   let systemPrompt = buildSystemPrompt(
     characterName, persona, validLastMessages,
     userName, shortNameUser, userGender, validLastMessages.length,
     isHigh, isLow, customHints
   );
 
-  console.log('[BACKEND] System prompt built, length:', systemPrompt.length);
+  console.log(`[${timestamp}] Calling Deepseek...`);
 
-  // ── CALL DEEPSEEK ────────────────────────────────────────────────────────────
+  // Call Deepseek
   let reply = await callDeepseek(systemPrompt, history, message, 1.0, 0.7, 0.5);
 
   if (!reply) {
-    console.log('[BACKEND] First attempt failed, retrying with higher temperature...');
+    console.log(`[${timestamp}] First attempt failed, retrying...`);
     reply = await callDeepseek(systemPrompt, history, message, 1.1, 0.8, 0.6);
   }
 
   if (!reply) {
-    console.error('[BACKEND] Both DeepSeek attempts failed');
-    return res.status(502).json({ error: 'Upstream error' });
+    console.error(`[${timestamp}] Both Deepseek attempts failed`);
+    return res.status(502).json({ error: 'AI service unavailable' });
   }
 
   // Clean response
   reply = cleanResponse(reply, userName, shortNameUser, characterName, persona.gender, userGender);
 
-  // Ambil last replies untuk cek repetisi
   const lastReplies = validLastMessages
     .filter(m => m.role === 'assistant')
     .slice(-3)
     .map(m => m.content);
 
-  // Retry jika forbidden phrase atau terlalu repetitif
+  // Retry if needed
   if (containsForbiddenPhrase(reply) || isTooRepetitive(reply, lastReplies)) {
-    console.warn('[BACKEND] Response too repetitive or contains forbidden phrase, regenerating...');
-    
+    console.warn(`[${timestamp}] Response invalid, regenerating...`);
     const retry = await callDeepseek(
       systemPrompt + '\n\n⚠️ RESPONS SEBELUMNYA DITOLAK. Buat yang BARU dan BERBEDA.',
       history, message, 1.1, 0.9, 0.7
     );
-    
     if (retry) {
       reply = cleanResponse(retry, userName, shortNameUser, characterName, persona.gender, userGender);
     }
   }
 
-  // Final response
-  console.log('[BACKEND] Success, returning reply');
+  console.log(`[${timestamp}] Success, returning reply`);
   return res.status(200).json({
     reply,
     character: characterName,
