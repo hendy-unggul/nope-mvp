@@ -1,1068 +1,962 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>GLITCH — 001</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Serif:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-:root{
-  --k:#0A0806;
-  --w:#F0EBE0;
-  --r:#E8200A;
-  --y:#FFE600;
-  --c:#00E5FF;
-  --g:#1AFF5E;
-  --ant:'Anton',sans-serif;
-  --beb:'Bebas Neue',sans-serif;
-  --mono:'Space Mono',monospace;
-  --ser:'IBM Plex Serif',serif;
-}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;font-family:var(--mono);}
-
-/* NOISE */
-body::after{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.07'/%3E%3C/svg%3E");
-  mix-blend-mode:overlay;
-}
-
-/* ─── BOOK ─── */
-#book{
-  position:fixed;inset:0;bottom:52px;
-  display:flex;
-  transition:transform .48s cubic-bezier(.86,0,.07,1);
-  will-change:transform;
-  cursor:grab;
-}
-#book:active{cursor:grabbing;}
-.pg{width:100vw;height:100%;flex-shrink:0;position:relative;overflow:hidden;user-select:none;}
-
-/* ─── PHOTO PH ─── */
-.ph{
-  width:100%;height:100%;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
-}
-.ph-dk{background:#111;}
-.ph-md{background:#888070;}
-.ph-lt{background:#C8C0B0;}
-.ph svg{opacity:.2;}
-.ph-dk svg{stroke:rgba(255,255,255,.3);}
-.ph-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;}
-.ph-dk .ph-lbl{color:rgba(255,255,255,.2);}
-.ph-md .ph-lbl,.ph-lt .ph-lbl{color:rgba(0,0,0,.25);}
-
-/* ════════════════════════════
-   P1 — COVER
-════════════════════════════ */
-#p1{background:var(--k);}
-
-/* scan lines */
-#p1::before{
-  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.012) 3px,rgba(255,255,255,.012) 4px);
-}
-
-.cv-static{
-  position:absolute;top:0;left:0;right:0;height:6px;z-index:10;
-  background:repeating-linear-gradient(90deg,
-    var(--r) 0,var(--r) 6px,#0A0806 6px,#0A0806 10px,
-    var(--y) 10px,var(--y) 14px,#0A0806 14px,#0A0806 20px,
-    var(--c) 20px,var(--c) 23px,#0A0806 23px,#0A0806 30px
-  );
-}
-
-.cv-bg-g{
-  position:absolute;bottom:-120px;right:-60px;z-index:0;
-  font-family:var(--ant);font-size:clamp(300px,65vw,600px);
-  font-weight:900;line-height:1;letter-spacing:-.06em;
-  color:transparent;
-  -webkit-text-stroke:1px rgba(232,32,10,.12);
-  pointer-events:none;
-  animation:ghostpulse 4s ease-in-out infinite;
-}
-@keyframes ghostpulse{0%,100%{opacity:1}50%{opacity:.5}}
-
-.cv-grid{
-  position:absolute;inset:0;z-index:1;pointer-events:none;
-  background-image:
-    linear-gradient(rgba(232,32,10,.06) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(232,32,10,.06) 1px,transparent 1px);
-  background-size:44px 44px;
-}
-
-.cv-inner{position:relative;z-index:5;height:100%;display:flex;flex-direction:column;padding:clamp(20px,5vw,44px);}
-
-.cv-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:auto;}
-.cv-zine-id{display:flex;flex-direction:column;gap:5px;}
-.cv-zine-id span{
-  font-family:var(--mono);font-size:9px;letter-spacing:.22em;
-  color:rgba(255,255,255,.2);text-transform:uppercase;
-}
-.cv-badge{
-  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.15em;
-  color:var(--r);text-transform:uppercase;
-  border:1px solid rgba(232,32,10,.4);padding:5px 12px;
-  animation:badgepulse 2s ease-in-out infinite;
-}
-@keyframes badgepulse{0%,100%{border-color:rgba(232,32,10,.4)}50%{border-color:rgba(232,32,10,.9)}}
-
-.cv-headline{
-  position:relative;
-  margin-bottom:clamp(10px,2vh,20px);
-}
-
-.cv-glitch-wrap{position:relative;display:inline-block;}
-
-.cv-title{
-  font-family:var(--ant);
-  font-size:clamp(100px,26vw,220px);
-  font-weight:900;line-height:.82;
-  letter-spacing:-.02em;
-  color:var(--w);
-  display:block;
-}
-
-.cv-title::before{
-  content:'GLITCH';
-  position:absolute;inset:0;
-  font-family:var(--ant);font-size:inherit;font-weight:900;line-height:.82;letter-spacing:-.02em;
-  color:var(--r);
-  clip-path:polygon(0 30%,100% 28%,100% 38%,0 40%);
-  transform:translateX(5px);
-  animation:glitch1 3s infinite;
-}
-.cv-title::after{
-  content:'GLITCH';
-  position:absolute;inset:0;
-  font-family:var(--ant);font-size:inherit;font-weight:900;line-height:.82;letter-spacing:-.02em;
-  color:var(--c);
-  clip-path:polygon(0 60%,100% 62%,100% 68%,0 66%);
-  transform:translateX(-4px);
-  animation:glitch2 3s infinite .5s;
-}
-@keyframes glitch1{0%,90%,100%{transform:translateX(5px);opacity:1}92%{transform:translateX(12px);opacity:.8}94%{transform:translateX(-3px)}96%{transform:translateX(8px)}}
-@keyframes glitch2{0%,85%,100%{transform:translateX(-4px);opacity:1}87%{transform:translateX(-10px);opacity:.7}90%{transform:translateX(5px)}93%{transform:translateX(-6px)}}
-
-.cv-sub-row{display:flex;align-items:center;gap:14px;margin-top:10px;}
-.cv-sub-num{
-  font-family:var(--beb);font-size:clamp(48px,10vw,80px);
-  font-weight:400;color:var(--r);line-height:1;letter-spacing:.02em;
-}
-.cv-sub-div{width:1px;height:50px;background:rgba(255,255,255,.1);}
-.cv-sub-text{
-  font-family:var(--ser);font-size:clamp(12px,2vw,15px);font-style:italic;
-  color:rgba(255,255,255,.35);line-height:1.55;max-width:200px;
-}
-
-.cv-tape{
-  position:absolute;
-  background:rgba(255,230,0,.7);
-  height:18px;
-  left:-10px;right:-10px;
-  transform:rotate(-1.2deg);
-  z-index:8;
-}
-
-.cv-bottom{
-  padding-top:16px;border-top:1px solid rgba(255,255,255,.06);
-  display:flex;justify-content:space-between;align-items:flex-end;
-}
-.cv-contents{display:flex;flex-direction:column;gap:4px;}
-.cv-item{
-  font-family:var(--mono);font-size:10px;font-weight:700;
-  letter-spacing:.15em;text-transform:uppercase;
-  color:rgba(255,255,255,.2);
-  display:flex;align-items:center;gap:8px;
-}
-.cv-item::before{content:'';width:14px;height:2px;background:var(--r);}
-.cv-item:nth-child(2)::before{background:var(--y);}
-.cv-item:nth-child(3)::before{background:var(--c);}
-.cv-free{
-  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.2em;
-  text-transform:uppercase;color:rgba(255,255,255,.15);
-}
-
-/* ════════════════════════════
-   P2 — KOLASE A
-════════════════════════════ */
-#p2{background:var(--w);}
-
-.k2{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;height:100%;}
-.k2-tall{grid-row:1/3;position:relative;overflow:hidden;}
-
-/* torn edge on tall photo */
-.k2-tall::after{
-  content:'';position:absolute;right:0;top:0;bottom:0;width:12px;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='200'%3E%3Cpath d='M12 0 Q6 10 12 20 Q4 30 12 40 Q7 50 12 60 Q3 70 12 80 Q8 90 12 100 Q5 110 12 120 Q7 130 12 140 Q4 150 12 160 Q6 170 12 180 Q3 190 12 200 L12 200 Z' fill='%23F0EBE0'/%3E%3C/svg%3E") right center/12px 200px;
-  z-index:10;
-}
-
-.k2-ol{
-  position:absolute;inset:0;
-  background:linear-gradient(to top,rgba(10,8,6,.85) 0%,rgba(10,8,6,.2) 50%,transparent 75%);
-  display:flex;flex-direction:column;justify-content:flex-end;padding:20px;
-}
-.k2-ol-tag{
-  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.2em;
-  text-transform:uppercase;color:var(--r);margin-bottom:6px;
-  display:flex;align-items:center;gap:6px;
-}
-.k2-ol-tag::before{content:'';width:20px;height:1px;background:var(--r);}
-.k2-ol-q{
-  font-family:var(--ser);font-size:clamp(15px,3.5vw,20px);font-style:italic;
-  font-weight:300;color:var(--w);line-height:1.4;
-}
-.k2-ol-attr{font-family:var(--mono);font-size:8px;letter-spacing:.12em;color:rgba(255,255,255,.4);text-transform:uppercase;margin-top:6px;}
-
-/* top-right: yellow note */
-.k2-note{
-  background:var(--y);
-  display:flex;flex-direction:column;justify-content:center;
-  padding:clamp(14px,4vw,26px);
-  position:relative;overflow:hidden;
-}
-.k2-note::before{
-  content:'';position:absolute;bottom:-20px;right:-20px;
-  width:100px;height:100px;
-  background:rgba(0,0,0,.06);
-  border-radius:50%;
-}
-.k2-note-tag{
-  font-family:var(--mono);font-size:8px;font-weight:700;
-  letter-spacing:.2em;text-transform:uppercase;color:rgba(0,0,0,.45);
-  margin-bottom:10px;
-}
-.k2-note-body{
-  font-family:var(--ser);font-size:clamp(15px,3.5vw,21px);font-style:italic;
-  font-weight:400;color:var(--k);line-height:1.45;
-  transform:rotate(-1deg);
-}
-.k2-note-sig{
-  font-family:var(--mono);font-size:8px;letter-spacing:.12em;
-  text-transform:uppercase;color:rgba(0,0,0,.45);margin-top:12px;
-}
-
-/* bottom-right: black type block */
-.k2-type{
-  background:var(--k);
-  display:flex;align-items:flex-end;padding:16px;
-  position:relative;overflow:hidden;
-}
-.k2-type::before{
-  content:'';position:absolute;inset:0;
-  background:repeating-linear-gradient(90deg,transparent,transparent 10px,rgba(232,32,10,.04) 10px,rgba(232,32,10,.04) 11px);
-}
-.k2-big{
-  font-family:var(--ant);font-size:clamp(58px,14vw,110px);font-weight:900;
-  line-height:.8;letter-spacing:-.02em;color:var(--w);position:relative;z-index:2;
-}
-.k2-big .ol{color:transparent;-webkit-text-stroke:1.5px var(--r);}
-.k2-vert{
-  position:absolute;top:16px;right:14px;
-  font-family:var(--mono);font-size:8px;letter-spacing:.2em;text-transform:uppercase;
-  color:rgba(255,255,255,.15);writing-mode:vertical-rl;z-index:2;
-}
-
-/* ════════════════════════════
-   P3 — KOLASE B
-════════════════════════════ */
-#p3{background:#E8E3D8;}
-
-.k3{height:100%;display:flex;flex-direction:column;}
-.k3-top{flex:1.4;position:relative;overflow:hidden;}
-.k3-top .ph-lt{background:#C0B8A8;}
-
-/* diagonal rip at bottom of top photo */
-.k3-rip{
-  position:absolute;bottom:0;left:0;right:0;height:40px;z-index:5;
-  background:var(--w);
-  clip-path:polygon(0 100%,3% 40%,8% 80%,15% 20%,22% 70%,30% 10%,38% 60%,45% 5%,52% 55%,60% 15%,68% 65%,75% 8%,83% 58%,90% 10%,96% 50%,100% 0%,100% 100%);
-}
-
-.k3-mid{
-  flex:0 0 auto;padding:clamp(18px,4vw,30px);
-  display:grid;grid-template-columns:1fr auto;gap:18px;align-items:start;
-  background:var(--w);
-  border-top:3px solid var(--k);
-}
-.k3-quote{
-  font-family:var(--ant);font-size:clamp(26px,7vw,54px);font-weight:900;
-  letter-spacing:-.01em;line-height:.88;color:var(--k);text-transform:uppercase;
-}
-.k3-quote em{color:var(--r);font-style:normal;}
-.k3-aside{
-  font-family:var(--mono);font-size:9px;letter-spacing:.1em;
-  color:rgba(0,0,0,.35);line-height:1.65;max-width:120px;
-  padding-top:4px;text-transform:uppercase;
-}
-
-.k3-bot{flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;}
-
-.k3-cell{position:relative;overflow:hidden;}
-.k3-cell.red{background:var(--r);}
-.k3-cell.blk{background:var(--k);}
-
-.k3-cell-txt{
-  display:flex;align-items:center;justify-content:center;height:100%;
-  font-family:var(--ant);font-size:clamp(32px,8vw,64px);font-weight:900;
-  line-height:.82;color:rgba(255,255,255,.13);padding:12px;text-align:center;
-  letter-spacing:-.02em;
-}
-.k3-cell-txt.y{color:rgba(255,230,0,.25);}
-.k3-caption{
-  position:absolute;bottom:10px;left:10px;right:10px;
-  font-family:var(--mono);font-size:8px;letter-spacing:.15em;
-  text-transform:uppercase;color:rgba(255,255,255,.45);
-}
-
-/* ════════════════════════════
-   P4 — KOLASE C
-════════════════════════════ */
-#p4{background:var(--k);}
-.k4{height:100%;display:flex;flex-direction:column;}
-.k4-main{flex:2;position:relative;overflow:hidden;}
-.k4-main .ph-dk{background:#0D0B08;}
-
-/* glitch bars on big photo */
-.k4-glitch{
-  position:absolute;inset:0;z-index:4;pointer-events:none;
-  animation:gbars 5s infinite;
-}
-@keyframes gbars{
-  0%,88%,100%{opacity:0}
-  90%{opacity:1;background:linear-gradient(transparent 32%,rgba(232,32,10,.15) 32%,rgba(232,32,10,.15) 34%,transparent 34%,transparent 62%,rgba(0,229,255,.12) 62%,rgba(0,229,255,.12) 64%,transparent 64%)}
-  93%{opacity:0}
-  95%{opacity:1;background:linear-gradient(transparent 55%,rgba(255,230,0,.1) 55%,rgba(255,230,0,.1) 57%,transparent 57%)}
-  97%{opacity:0}
-}
-
-.k4-wm{
-  position:absolute;bottom:16px;right:18px;z-index:5;
-  font-family:var(--mono);font-size:9px;letter-spacing:.2em;
-  text-transform:uppercase;color:rgba(255,255,255,.18);
-}
-
-.k4-strip{
-  flex:0 0 auto;background:var(--w);
-  padding:clamp(16px,4vw,28px);
-  display:flex;gap:16px;align-items:flex-start;
-  border-top:4px solid var(--r);
-}
-.k4-num{
-  font-family:var(--ant);font-size:clamp(60px,14vw,96px);font-weight:900;
-  color:var(--r);line-height:.78;letter-spacing:-.04em;flex-shrink:0;
-}
-.k4-txt{}
-.k4-lbl{
-  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.22em;
-  text-transform:uppercase;color:rgba(0,0,0,.35);margin-bottom:6px;
-}
-.k4-body{
-  font-family:var(--ser);font-size:clamp(13px,3vw,18px);font-style:italic;
-  font-weight:300;color:var(--k);line-height:1.55;
-}
-.k4-cta{
-  display:inline-block;margin-top:8px;
-  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.15em;
-  text-transform:uppercase;color:var(--r);
-  border-bottom:1px solid var(--r);padding-bottom:2px;
-}
-
-/* ════════════════════════════
-   P5 — LOCAL PRIDE A
-════════════════════════════ */
-#p5{background:var(--w);}
-.r{height:100%;display:flex;flex-direction:column;}
-
-.r-bar{
-  flex:0 0 auto;
-  background:var(--k);
-  padding:10px clamp(18px,5vw,30px);
-  display:flex;align-items:center;gap:10px;
-}
-.r-bar-tag{
-  font-family:var(--mono);font-size:8px;font-weight:700;
-  letter-spacing:.25em;text-transform:uppercase;color:rgba(255,255,255,.4);
-}
-.r-bar-div{width:1px;height:12px;background:rgba(255,255,255,.2);}
-.r-bar-name{
-  font-family:var(--mono);font-size:10px;font-weight:700;
-  letter-spacing:.18em;text-transform:uppercase;color:var(--g);
-}
-
-.r-hero{flex:0 0 clamp(160px,30vh,250px);position:relative;overflow:hidden;}
-.r-hero .ph-md{background:#A09890;}
-.r-hero-ov{
-  position:absolute;inset:0;
-  background:linear-gradient(to top,rgba(10,8,6,.88) 0%,rgba(10,8,6,.2) 55%,transparent 80%);
-  display:flex;align-items:flex-end;padding:clamp(14px,4vw,22px);
-}
-.r-hl{
-  font-family:var(--ant);
-  font-size:clamp(48px,13vw,86px);font-weight:900;
-  line-height:.82;letter-spacing:-.01em;
-  color:var(--w);text-transform:uppercase;
-}
-.r-hl em{font-style:normal;color:var(--g);display:block;}
-
-/* stamp overlay on hero */
-.r-stamp{
-  position:absolute;top:16px;right:16px;z-index:8;
-  border:3px solid var(--y);
-  padding:6px 12px;
-  transform:rotate(4deg);
-  font-family:var(--ant);font-size:clamp(18px,4vw,28px);
-  letter-spacing:.08em;color:var(--y);
-  text-shadow:0 0 20px rgba(255,230,0,.3);
-}
-
-.r-body{
-  flex:1;overflow:hidden;display:flex;flex-direction:column;
-  padding:clamp(16px,4vw,22px);gap:12px;
-}
-.r-byline{
-  font-family:var(--mono);font-size:8px;letter-spacing:.18em;text-transform:uppercase;
-  color:rgba(0,0,0,.35);padding-bottom:10px;border-bottom:2px solid var(--k);
-  display:flex;gap:14px;flex-wrap:wrap;
-}
-.r-byline b{color:var(--k);}
-.r-text{
-  font-family:var(--ser);font-size:clamp(12px,2.5vw,14px);
-  font-weight:300;color:#2E2A24;line-height:1.7;flex:1;
-}
-.r-text::first-letter{
-  font-family:var(--ant);font-size:3.6em;font-weight:900;
-  float:left;line-height:.75;margin-right:6px;color:var(--k);padding-top:4px;
-}
-.r-pull{
-  padding:10px 14px;
-  border-left:3px solid var(--r);
-  background:rgba(232,32,10,.04);
-  flex-shrink:0;
-}
-.r-pull p{
-  font-family:var(--ser);font-size:clamp(13px,3vw,17px);font-style:italic;
-  font-weight:400;color:var(--k);line-height:1.5;
-}
-.r-pull cite{
-  display:block;font-family:var(--mono);font-size:8px;
-  letter-spacing:.14em;text-transform:uppercase;color:var(--r);margin-top:5px;
-}
-
-/* ════════════════════════════
-   P6 — LOCAL PRIDE B
-════════════════════════════ */
-#p6{background:var(--w);}
-.r2{height:100%;display:flex;flex-direction:column;}
-.r2-photos{flex:0 0 clamp(130px,26vh,210px);display:grid;grid-template-columns:1.3fr 1fr 1fr;}
-.r2-p{position:relative;overflow:hidden;}
-.r2-p:nth-child(1){background:#A8A098;}
-.r2-p:nth-child(2){background:#908880;}
-.r2-p:nth-child(3){background:#B8B2A8;}
-
-.r2-body{
-  flex:1;padding:clamp(14px,4vw,20px);display:flex;flex-direction:column;gap:10px;
-}
-.r2-text{
-  font-family:var(--ser);font-size:clamp(12px,2.5vw,13.5px);
-  font-weight:300;color:#2E2A24;line-height:1.7;
-}
-.r2-pull{padding:10px 14px;border-left:3px solid var(--r);flex-shrink:0;}
-.r2-pull p{font-family:var(--ser);font-size:clamp(13px,3vw,16px);font-style:italic;color:var(--k);line-height:1.5;}
-.r2-pull cite{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--r);margin-top:5px;display:block;}
-
-.r2-data{
-  background:var(--k);display:grid;grid-template-columns:1fr 1fr;
-  gap:1px;background-color:rgba(10,8,6,.12);margin-top:auto;flex-shrink:0;
-}
-.r2-stat{background:var(--k);padding:12px 14px;display:flex;flex-direction:column;gap:3px;}
-.r2-sn{
-  font-family:var(--ant);font-size:clamp(24px,6vw,36px);font-weight:900;
-  color:var(--w);line-height:1;letter-spacing:-.02em;
-}
-.r2-sn.r{color:var(--r);} .r2-sn.y{color:var(--y);} .r2-sn.g{color:var(--g);}
-.r2-sl{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.28);line-height:1.4;}
-
-/* ════════════════════════════
-   P7 — PETISI A
-════════════════════════════ */
-#p7{background:var(--k);}
-
-/* static TV noise at top */
-#p7::before{
-  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.008) 2px,rgba(255,255,255,.008) 3px);
-}
-
-.pt{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;}
-
-.pt-ticker{
-  background:var(--r);overflow:hidden;padding:7px 0;flex-shrink:0;position:relative;
-}
-.pt-ticker::after{
-  content:'';position:absolute;right:0;top:0;bottom:0;width:40px;
-  background:linear-gradient(90deg,transparent,var(--r));
-  pointer-events:none;z-index:2;
-}
-.pt-tick{
-  display:inline-block;white-space:nowrap;
-  font-family:var(--mono);font-size:9px;font-weight:700;
-  letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.9);
-  animation:tick 18s linear infinite;
-}
-@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-
-.pt-hero{padding:clamp(18px,4vw,32px) clamp(18px,4vw,32px) 0;flex-shrink:0;}
-.pt-over{
-  font-family:var(--mono);font-size:8px;font-weight:700;
-  letter-spacing:.25em;text-transform:uppercase;color:var(--r);margin-bottom:8px;
-  display:flex;align-items:center;gap:8px;
-}
-.pt-over::before{content:'';width:20px;height:1px;background:var(--r);}
-
-.pt-title{
-  font-family:var(--ant);
-  font-size:clamp(56px,15vw,110px);
-  font-weight:900;line-height:.82;letter-spacing:-.01em;
-  color:var(--w);text-transform:uppercase;
-  position:relative;
-}
-/* glitch offset on title */
-.pt-title::before{
-  content:attr(data-t);
-  position:absolute;inset:0;
-  font-family:var(--ant);font-size:inherit;font-weight:900;line-height:.82;letter-spacing:-.01em;
-  color:var(--r);
-  clip-path:polygon(0 40%,100% 38%,100% 48%,0 50%);
-  animation:ptglitch 4s infinite 1s;
-}
-@keyframes ptglitch{0%,90%,100%{transform:translateX(0)}92%{transform:translateX(8px)}95%{transform:translateX(-5px)}98%{transform:translateX(3px)}}
-
-.pt-sub{
-  font-family:var(--ser);font-size:clamp(12px,2.5vw,14px);font-style:italic;
-  font-weight:300;color:rgba(255,255,255,.38);line-height:1.55;margin-top:10px;
-  max-width:360px;
-}
-.pt-sub strong{color:rgba(255,255,255,.65);font-weight:400;}
-
-.pt-counter{
-  margin:clamp(14px,3vh,20px) clamp(18px,4vw,32px);
-  padding:14px 16px;
-  border:1px solid rgba(255,255,255,.07);
-  background:rgba(255,255,255,.02);
-  display:flex;align-items:center;gap:16px;flex-shrink:0;
-  position:relative;overflow:hidden;
-}
-.pt-counter::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--r),var(--y),var(--r));
-  background-size:200% 100%;animation:gradmove 2s linear infinite;
-}
-@keyframes gradmove{0%{background-position:0%}100%{background-position:200%}}
-.pt-cnum{
-  font-family:var(--ant);font-size:clamp(40px,10vw,68px);font-weight:900;
-  color:var(--w);line-height:1;letter-spacing:-.03em;flex-shrink:0;
-}
-.pt-cnum span{color:var(--r);}
-.pt-cinfo{flex:1;display:flex;flex-direction:column;gap:5px;}
-.pt-clbl{font-family:var(--mono);font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.2);}
-.pt-bar{height:3px;background:rgba(255,255,255,.08);overflow:hidden;}
-.pt-fill{height:100%;width:12.47%;background:linear-gradient(90deg,var(--r),var(--y));}
-.pt-blbl{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.18);}
-
-.pt-demands{padding:0 clamp(18px,4vw,32px);flex-shrink:0;}
-.pt-dlbl{
-  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.22em;
-  text-transform:uppercase;color:rgba(255,255,255,.18);
-  padding-bottom:9px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:12px;
-}
-.pt-d{display:flex;gap:12px;margin-bottom:11px;align-items:flex-start;}
-.pt-dn{
-  font-family:var(--ant);font-size:clamp(28px,7vw,46px);font-weight:900;
-  color:var(--r);line-height:.82;letter-spacing:-.02em;flex-shrink:0;min-width:38px;
-}
-.pt-dt strong{
-  display:block;font-family:var(--mono);font-size:clamp(10px,2vw,12px);font-weight:700;
-  letter-spacing:.05em;color:var(--w);margin-bottom:2px;line-height:1.3;
-}
-.pt-dt span{font-family:var(--ser);font-size:11px;font-style:italic;color:rgba(255,255,255,.32);line-height:1.5;}
-
-.pt-footer{
-  margin-top:auto;padding:10px clamp(18px,4vw,32px);
-  border-top:1px solid rgba(255,255,255,.05);
-  display:flex;gap:12px;align-items:center;flex-shrink:0;
-}
-.pt-flbl{font-family:var(--mono);font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.18);flex-shrink:0;}
-.pt-fchips{display:flex;gap:6px;flex-wrap:wrap;}
-.pt-fchip{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.3);border:1px solid rgba(255,255,255,.1);padding:3px 9px;}
-
-/* ════════════════════════════
-   P8 — PETISI B
-════════════════════════════ */
-#p8{background:var(--k);}
-#p8::before{
-  content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
-  background-image:linear-gradient(rgba(232,32,10,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(232,32,10,.05) 1px,transparent 1px);
-  background-size:38px 38px;
-}
-
-.ps{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;}
-
-.ps-top{
-  padding:clamp(15px,3.5vw,24px) clamp(18px,4vw,32px) clamp(11px,2.5vw,18px);
-  border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;
-}
-.ps-lbl{
-  font-family:var(--mono);font-size:8px;font-weight:700;
-  letter-spacing:.22em;text-transform:uppercase;color:var(--r);margin-bottom:7px;
-}
-.ps-ttl{
-  font-family:var(--ant);font-size:clamp(22px,6vw,38px);font-weight:900;
-  letter-spacing:.02em;color:var(--w);text-transform:uppercase;
-}
-
-.ps-stances{
-  padding:clamp(11px,2.5vh,16px) clamp(18px,4vw,32px);
-  display:flex;flex-direction:column;gap:5px;flex-shrink:0;
-}
-.ps-st{
-  display:flex;align-items:flex-start;gap:11px;padding:10px 13px;
-  border:1px solid rgba(255,255,255,.07);cursor:pointer;
-  transition:border-color .18s,background .18s;
-}
-.ps-st:hover{border-color:rgba(255,255,255,.18);background:rgba(255,255,255,.03);}
-.ps-st.sel{border-color:rgba(232,32,10,.55);background:rgba(232,32,10,.07);}
-.ps-dot{
-  width:13px;height:13px;border:1.5px solid rgba(255,255,255,.22);
-  border-radius:50%;flex-shrink:0;margin-top:2px;position:relative;transition:border-color .18s;
-}
-.ps-st.sel .ps-dot{border-color:var(--r);}
-.ps-st.sel .ps-dot::after{
-  content:'';position:absolute;width:5px;height:5px;background:var(--r);
-  border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);
-}
-.ps-st-t{
-  font-family:var(--mono);font-size:clamp(10px,2.2vw,12px);font-weight:700;
-  letter-spacing:.05em;color:var(--w);margin-bottom:2px;
-}
-.ps-st-d{
-  font-family:var(--ser);font-size:10px;font-style:italic;
-  color:rgba(255,255,255,.28);line-height:1.5;
-}
-.ps-st.sel .ps-st-d{color:rgba(255,255,255,.4);}
-
-.ps-checks{
-  padding:clamp(9px,2vh,14px) clamp(18px,4vw,32px) 0;
-  border-top:1px solid rgba(255,255,255,.05);flex-shrink:0;
-}
-.ps-cl{font-family:var(--mono);font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.18);margin-bottom:7px;}
-.ps-cr{display:flex;align-items:center;gap:9px;margin-bottom:5px;}
-.ps-cb{width:12px;height:12px;border:1px solid rgba(255,255,255,.14);flex-shrink:0;}
-.ps-ct{font-family:var(--mono);font-size:9px;font-weight:400;color:rgba(255,255,255,.3);line-height:1.4;}
-
-.ps-sigs{padding:clamp(9px,2vh,13px) clamp(18px,4vw,32px) 0;flex-shrink:0;}
-.ps-sl{font-family:var(--mono);font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.16);margin-bottom:6px;}
-.ps-sr{display:flex;flex-wrap:wrap;gap:4px;}
-.ps-sig{font-family:var(--mono);font-size:8px;letter-spacing:.1em;color:rgba(255,255,255,.26);border:1px solid rgba(255,255,255,.07);padding:3px 9px;}
-.ps-sig.r{color:rgba(232,32,10,.7);border-color:rgba(232,32,10,.2);}
-
-.ps-cta{margin-top:auto;padding:clamp(13px,3vw,18px) clamp(18px,4vw,32px);flex-shrink:0;}
-.ps-btn{
-  width:100%;background:var(--r);color:#fff;border:none;
-  padding:clamp(14px,3.5vh,20px) 22px;
-  font-family:var(--ant);font-size:clamp(18px,4.5vw,28px);font-weight:900;
-  letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
-  display:flex;align-items:center;justify-content:space-between;
-  position:relative;overflow:hidden;
-  transition:background .18s,transform .12s;
-}
-.ps-btn::before{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
-  transform:translateX(-100%);transition:transform .5s;
-}
-.ps-btn:hover::before{transform:translateX(100%);}
-.ps-btn:hover{background:#c01808;}
-.ps-btn:active{transform:scale(.99);}
-.ps-disc{
-  font-family:var(--mono);font-size:8px;font-weight:400;
-  color:rgba(255,255,255,.16);text-align:center;margin-top:7px;line-height:1.55;
-  letter-spacing:.06em;
-}
-
-/* ─── BOTTOM NAV ─── */
-#nav{
-  position:fixed;bottom:0;left:0;right:0;height:52px;
-  background:var(--k);border-top:1px solid rgba(255,255,255,.06);
-  display:flex;align-items:stretch;z-index:200;
-  padding-bottom:env(safe-area-inset-bottom);
-}
-.nv{
-  flex:1;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:4px;cursor:pointer;border:none;background:none;
-  position:relative;transition:background .15s;
-}
-.nv::after{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:var(--r);transform:scaleX(0);
-  transition:transform .25s cubic-bezier(.77,0,.175,1);
-}
-.nv.a::after{transform:scaleX(1);}
-.nv:hover{background:rgba(255,255,255,.03);}
-.nv-dot{
-  width:5px;height:5px;border-radius:50%;
-  background:rgba(255,255,255,.15);transition:background .2s,transform .2s;
-}
-.nv.a .nv-dot{background:var(--r);transform:scale(1.3);}
-.nv-lbl{
-  font-family:var(--mono);font-size:8px;font-weight:700;
-  letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.22);
-  transition:color .2s;white-space:nowrap;
-}
-.nv.a .nv-lbl{color:var(--w);}
-.nv-div{width:1px;background:rgba(255,255,255,.05);margin:10px 0;flex-shrink:0;}
-
-/* ─── INDICATOR ─── */
-#ind{
-  position:fixed;right:12px;top:50%;transform:translateY(-50%);
-  display:flex;flex-direction:column;gap:6px;z-index:150;
-}
-.id{
-  width:4px;height:4px;border-radius:50%;
-  background:rgba(255,255,255,.18);transition:all .3s;cursor:pointer;
-}
-.id.a{background:var(--r);height:16px;border-radius:2px;}
-
-/* ─── HINT ─── */
-#hint{
-  position:fixed;bottom:64px;left:50%;transform:translateX(-50%);
-  font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;
-  color:rgba(255,255,255,.2);display:flex;align-items:center;gap:8px;
-  animation:hf 5s ease forwards;pointer-events:none;z-index:150;white-space:nowrap;
-}
-@keyframes hf{0%{opacity:0}15%{opacity:1}80%{opacity:1}100%{opacity:0}}
-.ha{animation:ha 1.2s ease-in-out infinite;}
-@keyframes ha{0%,100%{transform:translateX(0)}50%{transform:translateX(7px)}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLITCH eZine — Kompetisi Digital Zine 2026</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --k: #0A0806;
+            --w: #F0EBE0;
+            --r: #E8200A;
+            --y: #FFE600;
+            --c: #00E5FF;
+            --g: #1AFF5E;
+            --ant: 'Anton', sans-serif;
+            --mono: 'Space Mono', monospace;
+            --ser: 'IBM Plex Serif', serif;
+        }
+        
+        body {
+            background: var(--k);
+            color: var(--w);
+            font-family: var(--mono);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-family: var(--ant);
+            font-size: clamp(48px, 10vw, 88px);
+            line-height: 0.9;
+            letter-spacing: -0.02em;
+            color: var(--w);
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        h1::before {
+            content: 'GLITCH';
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-family: var(--ant);
+            font-size: inherit;
+            color: var(--r);
+            clip-path: polygon(0 30%, 100% 28%, 100% 38%, 0 40%);
+            transform: translateX(5px);
+            animation: glitch1 3s infinite;
+            opacity: 0.5;
+        }
+        
+        h1::after {
+            content: 'GLITCH';
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-family: var(--ant);
+            font-size: inherit;
+            color: var(--c);
+            clip-path: polygon(0 60%, 100% 62%, 100% 68%, 0 66%);
+            transform: translateX(-4px);
+            animation: glitch2 3s infinite 0.5s;
+            opacity: 0.5;
+        }
+        
+        @keyframes glitch1 {
+            0%,90%,100% { transform: translateX(5px); opacity: 0.5; }
+            92% { transform: translateX(12px); opacity: 0.8; }
+            94% { transform: translateX(-3px); }
+            96% { transform: translateX(8px); }
+        }
+        
+        @keyframes glitch2 {
+            0%,85%,100% { transform: translateX(-4px); opacity: 0.5; }
+            87% { transform: translateX(-10px); opacity: 0.7; }
+            90% { transform: translateX(5px); }
+            93% { transform: translateX(-6px); }
+        }
+        
+        .subtitle {
+            font-family: var(--ser);
+            font-size: 18px;
+            font-style: italic;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 20px;
+            border-left: 3px solid var(--r);
+            padding-left: 20px;
+        }
+        
+        .meta {
+            font-size: 11px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.3);
+            margin-bottom: 30px;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .meta span {
+            color: var(--r);
+        }
+        
+        /* CTA KOMPETISI DIGITAL ZINE */
+        .cta-competition {
+            background: linear-gradient(145deg, rgba(0,229,255,0.15) 0%, rgba(10,8,6,0.95) 100%);
+            border: 2px solid var(--c);
+            padding: 50px 30px;
+            margin: 40px 0 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cta-competition::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 30px,
+                rgba(0,229,255,0.03) 30px,
+                rgba(0,229,255,0.03) 60px
+            );
+            animation: bgMove 25s linear infinite;
+            z-index: 1;
+        }
+        
+        @keyframes bgMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        .cta-tag {
+            font-family: var(--mono);
+            font-size: 12px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--c);
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .cta-title {
+            font-family: var(--ant);
+            font-size: clamp(58px, 10vw, 90px);
+            line-height: 0.85;
+            color: var(--w);
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+            text-transform: uppercase;
+        }
+        
+        .cta-title span {
+            color: var(--c);
+            display: inline-block;
+            animation: pulse 2s infinite;
+            text-shadow: 0 0 20px rgba(0,229,255,0.5);
+        }
+        
+        @keyframes pulse {
+            0%,100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        
+        .cta-sub {
+            font-family: var(--ser);
+            font-size: 20px;
+            font-style: italic;
+            color: var(--w);
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 2;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            border-top: 1px solid rgba(0,229,255,0.3);
+            border-bottom: 1px solid rgba(0,229,255,0.3);
+            padding: 15px 0;
+        }
+        
+        .cta-highlight {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 40px 0;
+            position: relative;
+            z-index: 2;
+            flex-wrap: wrap;
+        }
+        
+        .cta-item {
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .cta-number {
+            font-family: var(--ant);
+            font-size: 58px;
+            color: var(--c);
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+        
+        .cta-label {
+            font-family: var(--mono);
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.6);
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: var(--c);
+            color: var(--k);
+            font-family: var(--ant);
+            font-size: 28px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 20px 60px;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: 2px solid var(--c);
+            margin: 30px 0 20px;
+            box-shadow: 0 0 30px rgba(0,229,255,0.3);
+        }
+        
+        .cta-button:hover {
+            background: transparent;
+            color: var(--c);
+            transform: scale(1.05);
+            box-shadow: 0 0 50px rgba(0,229,255,0.5);
+        }
+        
+        .cta-button::before {
+            content: '✧';
+            margin-right: 15px;
+            font-size: 24px;
+        }
+        
+        .cta-button::after {
+            content: '✧';
+            margin-left: 15px;
+            font-size: 24px;
+        }
+        
+        .cta-deadline {
+            font-family: var(--mono);
+            font-size: 12px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--y);
+            margin-top: 20px;
+            position: relative;
+            z-index: 2;
+            background: rgba(0,0,0,0.5);
+            display: inline-block;
+            padding: 5px 20px;
+            border: 1px solid var(--y);
+        }
+        
+        .cta-note {
+            font-family: var(--ser);
+            font-size: 14px;
+            font-style: italic;
+            color: rgba(255,255,255,0.4);
+            margin-top: 30px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Sticker sebagai ultimate value (disebut, bukan highlight) */
+        .sticker-note {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0 40px;
+            padding: 15px;
+            background: rgba(255,255,255,0.02);
+            border: 1px dashed rgba(255,255,255,0.1);
+            font-family: var(--ser);
+            font-style: italic;
+            font-size: 14px;
+            color: rgba(255,255,255,0.5);
+        }
+        
+        .sticker-note strong {
+            color: var(--r);
+            font-style: normal;
+            font-family: var(--mono);
+        }
+        
+        /* Quote Pembuka */
+        .quote {
+            font-family: var(--ser);
+            font-size: 22px;
+            font-style: italic;
+            color: var(--w);
+            line-height: 1.4;
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            border-top: 1px solid var(--r);
+            border-bottom: 1px solid var(--r);
+        }
+        
+        /* Button Grid */
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin: 40px 0;
+        }
+        
+        .section-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.15);
+            color: var(--w);
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            padding: 16px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-btn:hover {
+            border-color: var(--c);
+            background: rgba(0,229,255,0.05);
+            transform: translateY(-2px);
+        }
+        
+        .section-btn.active {
+            border-color: var(--c);
+            background: rgba(0,229,255,0.1);
+            box-shadow: 0 0 15px rgba(0,229,255,0.2);
+        }
+        
+        .section-btn::before {
+            content: '✧';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--c);
+            opacity: 0.3;
+            font-size: 14px;
+        }
+        
+        .section-btn:hover::before {
+            opacity: 1;
+        }
+        
+        /* Content Sections */
+        .section-content {
+            display: none;
+            margin-top: 30px;
+            padding: 30px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 4px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .section-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Typography */
+        h2 {
+            font-family: var(--ant);
+            font-size: 32px;
+            letter-spacing: -0.02em;
+            color: var(--w);
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--c);
+            padding-bottom: 10px;
+        }
+        
+        h3 {
+            font-family: var(--mono);
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--c);
+            margin: 30px 0 15px;
+        }
+        
+        h4 {
+            font-family: var(--ser);
+            font-size: 18px;
+            font-style: italic;
+            color: var(--y);
+            margin: 20px 0 10px;
+        }
+        
+        p {
+            font-family: var(--ser);
+            font-size: 15px;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 20px;
+        }
+        
+        .highlight {
+            background: rgba(0,229,255,0.1);
+            border-left: 3px solid var(--c);
+            padding: 15px 20px;
+            margin: 20px 0;
+            font-style: italic;
+        }
+        
+        ul, ol {
+            margin: 15px 0 15px 25px;
+            font-family: var(--ser);
+            font-size: 15px;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        .box {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .table {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 10px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
+        
+        .table .header {
+            font-family: var(--mono);
+            font-weight: 700;
+            color: var(--c);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 5px;
+        }
+        
+        .code {
+            font-family: var(--mono);
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: var(--g);
+            border: 1px solid rgba(255,255,255,0.1);
+            margin: 20px 0;
+            white-space: pre-wrap;
+        }
+        
+        .pill {
+            display: inline-block;
+            padding: 3px 10px;
+            background: rgba(0,229,255,0.15);
+            border: 1px solid var(--c);
+            border-radius: 20px;
+            font-family: var(--mono);
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            color: var(--c);
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .checklist {
+            background: rgba(255,255,255,0.02);
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+            margin: 30px 0;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .checklist-item:last-child {
+            border-bottom: none;
+        }
+        
+        .checklist-box {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: transparent;
+            cursor: pointer;
+        }
+        
+        .footer {
+            margin-top: 60px;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            font-family: var(--ser);
+            font-style: italic;
+            color: rgba(255,255,255,0.3);
+            font-size: 14px;
+        }
+        
+        @media (max-width: 600px) {
+            .cta-title {
+                font-size: 48px;
+            }
+            
+            .cta-highlight {
+                gap: 20px;
+            }
+            
+            .cta-number {
+                font-size: 42px;
+            }
+            
+            .cta-button {
+                font-size: 22px;
+                padding: 15px 30px;
+            }
+        }
+    </style>
 </head>
 <body>
-
-<div id="book">
-
-<!-- ── P1: COVER ── -->
-<div class="pg" id="p1">
-  <div class="cv-static"></div>
-  <div class="cv-grid"></div>
-  <div class="cv-bg-g" aria-hidden="true">G</div>
-  <div class="cv-inner">
-    <div class="cv-top">
-      <div class="cv-zine-id">
-        <span>Zine Independen · Jakarta</span>
-        <span>Vol. 1 · 2025</span>
-      </div>
-      <div class="cv-badge">Edisi 001</div>
-    </div>
-    <div class="cv-headline">
-      <!-- yellow tape across title -->
-      <div class="cv-tape" style="top:42%;"></div>
-      <div class="cv-glitch-wrap">
-        <div class="cv-title">GLITCH</div>
-      </div>
-      <div class="cv-sub-row">
-        <span class="cv-sub-num">001</span>
-        <div class="cv-sub-div"></div>
-        <span class="cv-sub-text">Zine untuk lo yang lelah diam</span>
-      </div>
-    </div>
-    <div class="cv-bottom">
-      <div class="cv-contents">
-        <span class="cv-item">Art Kolase</span>
-        <span class="cv-item">Local Pride</span>
-        <span class="cv-item">Petisi MBG</span>
-      </div>
-      <span class="cv-free">Gratis · Bebas edar</span>
-    </div>
-  </div>
-</div>
-
-<!-- ── P2: KOLASE A ── -->
-<div class="pg" id="p2">
-  <div class="k2">
-    <div class="k2-tall">
-      <div class="ph ph-md" style="height:100%;">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span class="ph-lbl">Foto · Urban</span>
-      </div>
-      <div class="k2-ol">
-        <div class="k2-ol-tag">Jakarta · 2025</div>
-        <p class="k2-ol-q">"Kota ini bergerak lebih cepat dari kita bisa mengikutinya."</p>
-        <span class="k2-ol-attr">— Anonim, Jakarta Selatan</span>
-      </div>
-    </div>
-    <div class="k2-note">
-      <div class="k2-note-tag">Catatan Kolase</div>
-      <p class="k2-note-body">Tembok yang dicat bukan vandalisme — itu percakapan yang tidak bisa dibungkam.</p>
-      <span class="k2-note-sig">— Perupa komunitas, 2025</span>
-    </div>
-    <div class="k2-type">
-      <div class="k2-big"><div>SU</div><div class="ol">AR</div><div>A</div></div>
-      <div class="k2-vert">Glitch · 001</div>
-    </div>
-  </div>
-</div>
-
-<!-- ── P3: KOLASE B ── -->
-<div class="pg" id="p3">
-  <div class="k3">
-    <div class="k3-top">
-      <div class="ph ph-lt" style="height:100%;">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span class="ph-lbl">Foto · Komunitas / Aksi</span>
-      </div>
-      <div class="k3-rip"></div>
-    </div>
-    <div class="k3-mid">
-      <div class="k3-quote">SENI<br>ADALAH<br><em>ARGUMEN</em></div>
-      <p class="k3-aside">Kurasi dari 6 komunitas lintas kota. Bandung · Jakarta · Makassar · Yogya · Solo · Medan</p>
-    </div>
-    <div class="k3-bot">
-      <div class="k3-cell">
-        <div class="ph ph-md" style="height:100%;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    <div class="container">
+        <h1>GLITCH</h1>
+        <div class="subtitle">eZine — Kompetisi Digital Zine 2026</div>
+        <div class="meta">
+            <div><span>✧</span> Tangan yang Tak Digantikan</div>
+            <div><span>✧</span> 5 SMA · 5 Kampus</div>
+            <div><span>✧</span> 3 Jalur · Rp15 Juta</div>
         </div>
-        <span class="k3-caption">Bandung</span>
-      </div>
-      <div class="k3-cell red">
-        <div class="k3-cell-txt">BACA<br>PIKIR<br>AKSI</div>
-        <span class="k3-caption">Manifesto</span>
-      </div>
-      <div class="k3-cell blk">
-        <div class="k3-cell-txt y">⚡</div>
-        <span class="k3-caption">Glitch 001</span>
-      </div>
+        
+        <!-- CTA KOMPETISI DIGITAL ZINE (HIGHLIGHT UTAMA) -->
+        <div class="cta-competition">
+            <div class="cta-tag">━━  KOMPETISI  ━━</div>
+            <div class="cta-title">DIGITAL <span>ZINE</span></div>
+            <div class="cta-sub">Satu tim 5 orang · Satu tema · Tiga sudut pandang</div>
+            
+            <div class="cta-highlight">
+                <div class="cta-item">
+                    <div class="cta-number">3</div>
+                    <div class="cta-label">Jalur Apresiasi</div>
+                </div>
+                <div class="cta-item">
+                    <div class="cta-number">5+5</div>
+                    <div class="cta-label">SMA + Kampus</div>
+                </div>
+                <div class="cta-item">
+                    <div class="cta-number">15<small style="font-size: 28px;">JT</small></div>
+                    <div class="cta-label">Total Hadiah</div>
+                </div>
+            </div>
+            
+            <button class="cta-button" onclick="showSection(0); scrollToSection()">IKUT KOMPETISI</button>
+            
+            <div class="cta-deadline">PENDAFTARAN DITUTUP 31 AGUSTUS 2026</div>
+            <div class="cta-note">Terbuka untuk siswa SMA dan mahasiswa seluruh Indonesia</div>
+        </div>
+        
+        <!-- Sticker sebagai ultimate value (disebut secara elegan) -->
+        <div class="sticker-note">
+            <span>✧</span> Setiap karya yang lolos akan dicetak sebagai stiker A5 — ultimate value dari pergulatan pemikiran dan daya kreatifmu <span>✧</span>
+        </div>
+        
+        <!-- Quote Pembuka -->
+        <div class="quote">
+            "Kamu tidak sedang membuat zine biasa. Kamu sedang membangun opus magnum dalam satu lembar A5."
+        </div>
+        
+        <!-- Button Grid -->
+        <div class="button-grid">
+            <button class="section-btn active" onclick="showSection(0)">🌱 3 Nafas Awal</button>
+            <button class="section-btn" onclick="showSection(1)">🎯 Menemukan Tema</button>
+            <button class="section-btn" onclick="showSection(2)">🔍 3 Subtema</button>
+            <button class="section-btn" onclick="showSection(3)">📐 Teknis Eksekusi</button>
+            <button class="section-btn" onclick="showSection(4)">⚠️ Rambu-Rambu</button>
+            <button class="section-btn" onclick="showSection(5)">💡 9 Insight Penting</button>
+            <button class="section-btn" onclick="showSection(6)">🏁 Checklist Final</button>
+            <button class="section-btn" onclick="showSection(7)">📋 Manifesto</button>
+        </div>
+        
+        <!-- Section 0: 3 Nafas Awal -->
+        <div id="section-0" class="section-content active">
+            <h2>🌱 SEBELUM MEMULAI: TIGA NAFAS</h2>
+            
+            <h3>Nafas Pertama: Kenapa Ini Penting?</h3>
+            <p>Kamu lahir di era di mana AI bisa menggambar apa pun dalam 5 detik. Di era di mana konten membanjiri layar, tapi tidak ada yang ditempel di dinding. Di era di mana kita punya akses ke jutaan lagu, tapi tidak hafal satu pun lirik.</p>
+            <p><strong>Glitch eZine ada karena satu keyakinan: tangan manusia tidak bisa digantikan.</strong></p>
+            <p>Bukan karena kita anti teknologi. Tapi karena kita percaya: proses fisik, goresan tidak sempurna, warna yang luntur, bekas penghapus — semua itu adalah bukti bahwa kita manusia.</p>
+            
+            <div class="highlight">
+                Zine digital yang kamu buat akan dicetak sebagai stiker A5 — ditempel di ribuan laptop, dibawa ke kampus, ke kafe, ke kantor. Ia akan dilihat orang, memicu percakapan, mungkin menggerakkan sesuatu.
+            </div>
+            
+            <h3>Nafas Kedua: Siapa yang Bisa Ikut?</h3>
+            <p><strong>Satu tim = 5 orang.</strong> Bisa dari satu sekolah, satu kampus, satu komunitas. Lintas ekskul, lintas jurusan, lintas angkatan.</p>
+            
+            <div class="table">
+                <div class="header">Peran</div><div class="header">Tugas</div>
+                <div>Visioner</div><div>Menjaga arah besar, memastikan 3 subtema nyambung</div>
+                <div>Art Lead</div><div>Bertanggung jawab pada kualitas visual</div>
+                <div>Researcher</div><div>Mencari data, fakta, narasumber</div>
+                <div>Activator</div><div>Merumuskan aksi yang konkret</div>
+                <div>Koordinator</div><div>Menjaga komunikasi, deadline, integrasi</div>
+            </div>
+            
+            <h3>Nafas Ketiga: Satu Tema, Tiga Sudut Pandang</h3>
+            <div class="code">
+┌─────────────────────────────────────────────────┐
+│                    SATU TEMA                     │
+│                 (pilihan bebas)                   │
+├───────────────┬─────────────────┬───────────────┤
+│      ART      │    REPORTASE    │     AKSI      │
+│ Tangan yang   │  Tangan yang    │ Tangan yang   │
+│  menciptakan  │   mencatat      │  menggerakkan │
+└───────────────┴─────────────────┴───────────────┘
+            </div>
+        </div>
+        
+        <!-- Section 1: Menemukan Tema -->
+        <div id="section-1" class="section-content">
+            <h2>🎯 LANGKAH 1: MENEMUKAN TEMA BESAR</h2>
+            
+            <h3>Dari Mana Tema Bisa Datang?</h3>
+            
+            <h4>A. Dari Diri Sendiri</h4>
+            <ul>
+                <li>Apa yang paling mengganggumu akhir-akhir ini?</li>
+                <li>Apa yang paling ingin kamu ubah dari lingkunganmu?</li>
+                <li>Apa yang tidak dipahami orang dewasa tentang generasimu?</li>
+                <li>Apa yang paling kamu banggakan dari identitasmu?</li>
+                <li>Apa yang paling kamu takutkan tentang masa depan?</li>
+            </ul>
+            
+            <h4>B. Dari Lingkungan Terdekat</h4>
+            <ul>
+                <li>Keluarga: masalah atau keunikan apa yang kamu lihat?</li>
+                <li>Sekolah/Kampus: isu apa yang sedang hangat?</li>
+                <li>Pertemanan: apa yang sedang dirasakan teman-temanmu?</li>
+                <li>Lingkungan RT: apa yang terjadi di sekitarmu?</li>
+            </ul>
+            
+            <h4>C. Dari Masyarakat dan Dunia</h4>
+            <ul>
+                <li>Kota: transportasi, polusi, ruang publik, kesenjangan</li>
+                <li>Digital: pengalaman bermedsos, gaming, online learning</li>
+                <li>Global: iklim, perang, teknologi, gerakan sosial</li>
+            </ul>
+            
+            <h3>Filter "Layak Angkat"</h3>
+            <div class="box">
+                <p><strong>Q1: Apakah ini penting?</strong> — Relevan untuk banyak orang? Memengaruhi hidup orang lain?</p>
+                <p><strong>Q2: Apakah ini personal?</strong> — Ada koneksi emosional? Mengalami langsung?</p>
+                <p><strong>Q3: Apakah ini cukup spesifik?</strong> — Bukan "Polusi" tapi "Polusi di dekat pabrik rumahku"</p>
+            </div>
+        </div>
+        
+        <!-- Section 2: 3 Subtema -->
+        <div id="section-2" class="section-content">
+            <h2>🔍 LANGKAH 2: MEMBEDAH TEMA KE 3 SUBTEMA</h2>
+            
+            <div class="table">
+                <div class="header">Subtema</div><div class="header">Pertanyaan Kunci</div>
+                <div>ART</div><div>Bagaimana tema ini diekspresikan secara visual dengan sentuhan tangan?</div>
+                <div>REPORTASE</div><div>Fakta, data, atau cerita nyata apa yang memperkuat tema ini?</div>
+                <div>AKSI</div><div>Ajakan konkret apa yang bisa dilakukan oleh yang melihat karya?</div>
+            </div>
+            
+            <h3>Kotak ART</h3>
+            <ul>
+                <li>Warna apa yang mewakili tema ini?</li>
+                <li>Bentuk apa yang paling cocok?</li>
+                <li>Gaya visual apa yang paling kuat?</li>
+                <li>Metafora visual apa yang bisa dipakai?</li>
+                <li>Emosi apa yang ingin dibangkitkan?</li>
+            </ul>
+            
+            <h3>Kotak REPORTASE</h3>
+            <ul>
+                <li>Data apa yang tersedia? (BPS, jurnal, berita)</li>
+                <li>Fakta apa yang mengejutkan?</li>
+                <li>Siapa yang bisa diwawancarai?</li>
+                <li>Angka, statistik, timeline apa yang penting?</li>
+            </ul>
+            
+            <h3>Kotak AKSI</h3>
+            <ul>
+                <li>Apa yang bisa dilakukan oleh individu?</li>
+                <li>Apa yang bisa dilakukan oleh komunitas?</li>
+                <li>Siapa yang harus didorong untuk bertindak?</li>
+                <li>Solusi kecil apa yang langsung bisa diterapkan?</li>
+            </ul>
+            
+            <div class="highlight">
+                <strong>Yang perlu diingat:</strong> Di era AI, ketidaksempurnaan adalah perlawanan. Goresan yang sedikit miring, warna yang luntur — semua itu bukti bahwa kamu manusia.
+            </div>
+        </div>
+        
+        <!-- Section 3: Teknis Eksekusi -->
+        <div id="section-3" class="section-content">
+            <h2>📐 LANGKAH 3: TEKNIS EKSEKUSI</h2>
+            
+            <h3>A. Teknis Fisik (Craftsmanship)</h3>
+            <p><strong>Prinsip "Tangan Tak Tergantikan":</strong></p>
+            <ul>
+                <li>Tunjukkan jejak proses (bekas hapus, garis bantu, coretan)</li>
+                <li>Biarkan ketidaksempurnaan muncul</li>
+                <li>Dokumentasikan setiap tahap</li>
+            </ul>
+            
+            <h3>B. Teknis Digital</h3>
+            <ul>
+                <li>Resolusi minimal <strong>300 dpi</strong> — untuk cetak stiker A5</li>
+                <li>Ukuran: <strong>A5 (148mm × 210mm)</strong></li>
+                <li>Tambahkan <strong>bleed 3mm</strong> di setiap sisi</li>
+                <li>Warna: <strong>CMYK</strong> (untuk cetak)</li>
+            </ul>
+            
+            <h3>C. Teknis Desain Stickerable</h3>
+            <p><strong>Prinsip Stickerable:</strong> Satu lembar A5-mu akan dipotong menjadi 5-20 stiker. Setiap potongan harus punya nilai sendiri.</p>
+            <ul>
+                <li>Nilai estetika: ilustrasi, pola, ornamen</li>
+                <li>Nilai filosofis: kutipan, pernyataan</li>
+                <li>Nilai data: fakta, angka statistik</li>
+                <li>Nilai aksi: ajakan, QR code</li>
+                <li>Nilai personal: tanda tangan, sidik jari</li>
+            </ul>
+        </div>
+        
+        <!-- Section 4: Rambu-Rambu -->
+        <div id="section-4" class="section-content">
+            <h2>⚠️ LANGKAH 4: RAMBU-RAMBU</h2>
+            
+            <h3>A. Rambu Etis</h3>
+            <p><span class="pill">JANGAN</span></p>
+            <ul>
+                <li>❌ Menjiplak karya orang lain (diskualifikasi)</li>
+                <li>❌ Menggunakan AI sebagai pengganti craftsmanship</li>
+                <li>❌ Menyebar kebencian, SARA, konten negatif</li>
+                <li>❌ Memanipulasi voting dengan akun palsu</li>
+            </ul>
+            
+            <h3>B. Rambu Teknis</h3>
+            <p><span class="pill">PASTIKAN</span></p>
+            <ul>
+                <li>✅ Karya fisik benar-benar ada dan dikirim</li>
+                <li>✅ File digital sesuai spesifikasi (A5, 300 dpi, CMYK)</li>
+                <li>✅ Deadline dipatuhi</li>
+            </ul>
+            
+            <h3>C. Rambu Interaksi Tim</h3>
+            <ul>
+                <li>Semua anggota harus berkontribusi (tidak ada penumpang gelap)</li>
+                <li>Jika ada konflik, selesaikan dengan diskusi</li>
+                <li>Jika deadlock, minta bantuan kurator</li>
+            </ul>
+        </div>
+        
+        <!-- Section 5: 9 Insight Penting -->
+        <div id="section-5" class="section-content">
+            <h2>💡 9 INSIGHT PENTING</h2>
+            
+            <div class="box">
+                <h4>Insight #1: Tema Besar Ada di Sekitarmu</h4>
+                <p>Jangan berpikir terlalu jauh. Lihat ke dalam dirimu, ke lingkunganmu.</p>
+            </div>
+            
+            <div class="box">
+                <h4>Insight #2: Filter "Layak Angkat"</h4>
+                <p>Penting? Personal? Spesifik? Jika iya semua, lanjutkan.</p>
+            </div>
+            
+            <div class="box">
+                <h4>Insight #3: 3 Subtema Adalah Kerangka Wajib</h4>
+                <p>Art, Reportase, Aksi. Tidak boleh kosong satu pun.</p>
+            </div>
+            
+            <div class="box">
+                <h4>Insight #4: Adaptasi dengan Kekuatan Tim</h4>
+                <p>Si visual fokus Art, si jurnalis fokus Reportase, si aktivis fokus Aksi.</p>
+            </div>
+            
+            <div class="box">
+                <h4>Insight #5: Dokumentasikan Proses</h4>
+                <p>Prosesmu adalah inspirasi bagi orang lain.</p>
+            </div>
+            
+            <div class="box">
+                <h4>Insight #6: Jangan Takut Gagal</h4>
+                <p>Tidak apa-apa jika karyamu belum sempurna. Semester depan kamu bisa lebih baik.</p>
+            </div>
+            
+            <div class="box">
+                <h4>Insight #7: Stickerable Adalah Kunci</h4>
+                <p>Satu lembar A5 = 5-20 stiker potensial. Desainlah dengan gunting di tangan.</p>
+            </div>
+            
+            <div class="box">
+                <h4>Insight #8: Ini Bukan Kompetisi Biasa</h4>
+                <p>Ini laboratorium kolaborasi. Bukan siapa yang paling jago gambar.</p>
+            </div>
+            
+            <div class="box">
+                <h4>Insight #9: Setiap Stiker Adalah Opus Magnum</h4>
+                <p>Bukan karena ukuran, tapi karena kedalaman proses di baliknya.</p>
+            </div>
+        </div>
+        
+        <!-- Section 6: Checklist Final -->
+        <div id="section-6" class="section-content">
+            <h2>🏁 CHECKLIST FINAL SEBELUM KIRIM</h2>
+            
+            <div class="checklist">
+                <div class="checklist-item">
+                    <div class="checklist-box" onclick="this.innerHTML=this.innerHTML==='✓'?'': '✓'"> </div>
+                    <span>Tema sudah melewati filter layak angkat</span>
+                </div>
+                <div class="checklist-item">
+                    <div class="checklist-box" onclick="this.innerHTML=this.innerHTML==='✓'?'': '✓'"> </div>
+                    <span>3 subtema (Art, Reportase, Aksi) sudah terpenuhi</span>
+                </div>
+                <div class="checklist-item">
+                    <div class="checklist-box" onclick="this.innerHTML=this.innerHTML==='✓'?'': '✓'"> </div>
+                    <span>Karya fisik sudah dibuat dan difoto prosesnya</span>
+                </div>
+                <div class="checklist-item">
+                    <div class="checklist-box" onclick="this.innerHTML=this.innerHTML==='✓'?'': '✓'"> </div>
+                    <span>File digital: A5, 300 dpi, CMYK</span>
+                </div>
+                <div class="checklist-item">
+                    <div class="checklist-box" onclick="this.innerHTML=this.innerHTML==='✓'?'': '✓'"> </div>
+                    <span>Desain sudah stickerable (bisa dipotong jadi banyak stiker)</span>
+                </div>
+                <div class="checklist-item">
+                    <div class="checklist-box" onclick="this.innerHTML=this.innerHTML==='✓'?'': '✓'"> </div>
+                    <span>Semua anggota tim berkontribusi</span>
+                </div>
+                <div class="checklist-item">
+                    <div class="checklist-box" onclick="this.innerHTML=this.innerHTML==='✓'?'': '✓'"> </div>
+                    <span>Karya fisik siap dikirim ke alamat Glitch</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 7: Manifesto -->
+        <div id="section-7" class="section-content">
+            <h2>📋 MANIFESTO</h2>
+            
+            <div class="highlight" style="font-size: 20px; text-align: center;">
+                "SATU STIKER ADALAH OPUS MAGNUM"
+            </div>
+            
+            <p style="font-size: 18px; text-align: center; margin: 40px 0;">
+                Bukan karena ukurannya. Tapi karena di setiap goresan, ada pemikiran yang matang, riset yang dilakukan, diskusi yang alot, keberanian untuk menyatakan.
+            </p>
+            
+            <div class="code" style="text-align: center;">
+5 orang × 2 minggu diskusi<br>
+20 jam total berkarya<br>
+3 kali revisi besar<br>
+7 konflik kecil yang diselesaikan<br>
+Ratusan keputusan desain<br>
+1 pernyataan berani
+            </div>
+            
+            <p style="margin-top: 40px;">
+                Dan ketika stiker itu ditempel di laptop seseorang: jadi percakapan dengan teman, jadi pengingat di pagi hari, jadi pernyataan diam-diam tentang siapa pemiliknya.
+            </p>
+            
+            <div class="quote" style="margin: 40px 0;">
+                "Kamu tidak sedang membuat stiker. Kamu sedang membuat proklamasi versimu."
+            </div>
+            
+            <p style="text-align: right; font-style: italic;">
+                — Glitch eZine, Tangan yang Tak Digantikan
+            </p>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>Glitch eZine — 90% untuk kreator · On demand · Voting tanpa uang · Feedback untuk semua</p>
+            <p style="margin-top: 10px; font-size: 12px;">© 2026 · Tangan yang Tak Digantikan</p>
+        </div>
     </div>
-  </div>
-</div>
-
-<!-- ── P4: KOLASE C ── -->
-<div class="pg" id="p4">
-  <div class="k4">
-    <div class="k4-main">
-      <div class="ph ph-dk" style="height:100%;">
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span class="ph-lbl">Foto Panorama · Scene Lokal</span>
-      </div>
-      <div class="k4-glitch"></div>
-      <div class="k4-wm">Glitch Zine · Kolase</div>
-    </div>
-    <div class="k4-strip">
-      <div class="k4-num">04</div>
-      <div class="k4-txt">
-        <div class="k4-lbl">Kirim karya lo</div>
-        <p class="k4-body">Foto, kolase, tulisan tangan, mural — semua ada tempatnya di sini. Kolektif Glitch terbuka untuk semua.</p>
-        <span class="k4-cta">kolektif.glitch@jejak.id →</span>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── P5: LOCAL PRIDE A ── -->
-<div class="pg" id="p5">
-  <div class="r">
-    <div class="r-bar">
-      <span class="r-bar-tag">Reportase</span>
-      <div class="r-bar-div"></div>
-      <span class="r-bar-name">Local Pride</span>
-    </div>
-    <div class="r-hero">
-      <div class="ph ph-md" style="height:100%;">
-        <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span class="ph-lbl">Foto Utama · Scene Lokal</span>
-      </div>
-      <div class="r-stamp">LOCAL<br>PRIDE</div>
-      <div class="r-hero-ov">
-        <div class="r-hl">BANGGA<em>DARI SINI</em></div>
-      </div>
-    </div>
-    <div class="r-body">
-      <div class="r-byline"><span>Oleh <b>Redaksi Glitch</b></span><span>Jakarta · Mei 2025</span></div>
-      <p class="r-text">Ada yang berubah di kota ini — bukan karena rencana tata kota, tapi karena anak mudanya memutuskan untuk tidak pindah. Mereka membangun ekosistem budaya yang paling hidup: komunitas mural, koperasi kreatif, pasar rakyat tanpa investor asing.</p>
-      <div class="r-pull">
-        <p>"Bangga lokal bukan nostalgia — itu strategi. Kita yang tahu medan, kita yang tentukan arahnya."</p>
-        <cite>— Dani, penggiat komunitas kreatif, Yogyakarta</cite>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── P6: LOCAL PRIDE B ── -->
-<div class="pg" id="p6">
-  <div class="r2">
-    <div class="r2-photos">
-      <div class="r2-p"><div class="ph" style="height:100%;background:#A8A098;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div></div>
-      <div class="r2-p"><div class="ph" style="height:100%;background:#908880;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div></div>
-      <div class="r2-p"><div class="ph" style="height:100%;background:#B8B2A8;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div></div>
-    </div>
-    <div class="r2-body">
-      <p class="r2-text">Dari 17 komunitas yang ditemui, hampir semuanya lahir dari frustrasi yang sama: tidak ada ruang berkarya tanpa agenda korporat. Koperasi di Solo kini menggaji 12 anggotanya penuh waktu. Kolektif mural Makassar melatih 40 pelajar tiap semester.</p>
-      <div class="r2-pull">
-        <p>"Yang paling berbahaya adalah ketika penduduk aslinya jadi penonton di kotanya sendiri."</p>
-        <cite>— Ira, peneliti urban, UGM</cite>
-      </div>
-      <div class="r2-data">
-        <div class="r2-stat"><span class="r2-sn r">17</span><span class="r2-sl">komunitas dikunjungi tim Glitch</span></div>
-        <div class="r2-stat"><span class="r2-sn y">94%</span><span class="r2-sl">mandiri tanpa sponsor korporat</span></div>
-        <div class="r2-stat"><span class="r2-sn g">6</span><span class="r2-sl">kota: JKT · BDG · YOG · SLO · MKS · MDN</span></div>
-        <div class="r2-stat"><span class="r2-sn" style="color:rgba(255,255,255,.45);">↑</span><span class="r2-sl">semua tumbuh dalam 2 tahun terakhir</span></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── P7: PETISI A ── -->
-<div class="pg" id="p7">
-  <div class="pt">
-    <div class="pt-ticker">
-      <div class="pt-tick">✦ PETISI MBG &nbsp;·&nbsp; Bedah data dulu, baru bersuara &nbsp;·&nbsp; Rp71T anggaran publik &nbsp;·&nbsp; 27 juta siswa penerima &nbsp;·&nbsp; 43% yang sampai ke piring &nbsp;·&nbsp; Evaluasi Q2 2025 harus transparan &nbsp;·&nbsp; ✦ PETISI MBG &nbsp;·&nbsp; Bedah data dulu, baru bersuara &nbsp;·&nbsp; Rp71T anggaran publik &nbsp;·&nbsp; 27 juta siswa penerima &nbsp;·&nbsp; 43% yang sampai ke piring &nbsp;·&nbsp; Evaluasi Q2 2025 harus transparan &nbsp;·&nbsp;</div>
-    </div>
-    <div class="pt-hero">
-      <div class="pt-over">Petisi Kolektif · MBG 2025</div>
-      <div class="pt-title" data-t="KAMI MINTA TRANSPARANSI">KAMI<br>MINTA<br>TRANSPARAN<br>SI</div>
-      <p class="pt-sub">Program makan bergizi gratis untuk 27 juta siswa adalah niat yang kami hormati. Tapi <strong>Rp71T anggaran publik berhak dipertanggungjawabkan</strong> secara terbuka.</p>
-    </div>
-    <div class="pt-counter">
-      <div class="pt-cnum">1<span>.</span>247</div>
-      <div class="pt-cinfo">
-        <div class="pt-clbl">Total Penandatangan</div>
-        <div class="pt-bar"><div class="pt-fill"></div></div>
-        <div class="pt-blbl"><span>12.47%</span><span>Target 10.000</span></div>
-      </div>
-    </div>
-    <div class="pt-demands">
-      <div class="pt-dlbl">Tiga Tuntutan Kami</div>
-      <div class="pt-d"><span class="pt-dn">01</span><div class="pt-dt"><strong>Publikasi rincian anggaran per komponen</strong><span>Breakdown logistik, bahan pangan, tenaga, dan overhead dibuka ke publik.</span></div></div>
-      <div class="pt-d"><span class="pt-dn">02</span><div class="pt-dt"><strong>Audit independen Q2 2025 dengan indikator gizi</strong><span>Evaluasi harus mencakup angka stunting — bukan hanya laporan distribusi porsi.</span></div></div>
-      <div class="pt-d"><span class="pt-dn">03</span><div class="pt-dt"><strong>Mekanisme pengaduan terbuka bagi orang tua &amp; guru</strong><span>Kanal laporan kualitas makanan yang bisa diakses dan direspons terukur.</span></div></div>
-    </div>
-    <div class="pt-footer">
-      <span class="pt-flbl">Dikirim ke</span>
-      <div class="pt-fchips"><span class="pt-fchip">BGN</span><span class="pt-fchip">Komisi X DPR</span><span class="pt-fchip">BPK RI</span></div>
-    </div>
-  </div>
-</div>
-
-<!-- ── P8: PETISI B ── -->
-<div class="pg" id="p8">
-  <div class="ps">
-    <div class="ps-top">
-      <div class="ps-lbl">Fase 03 — Tanda Tangan</div>
-      <div class="ps-ttl">Pilih Posisimu</div>
-    </div>
-    <div class="ps-stances">
-      <div class="ps-st sel" onclick="selSt(this)"><div class="ps-dot"></div><div><div class="ps-st-t">Dukung program, tuntut transparansi</div><div class="ps-st-d">Rp71T butuh akuntabilitas penuh. Menandatangani untuk menuntut keterbukaan.</div></div></div>
-      <div class="ps-st" onclick="selSt(this)"><div class="ps-dot"></div><div><div class="ps-st-t">Dukung program, tuntut reformasi skema</div><div class="ps-st-d">Model distribusi perlu dirombak — terutama untuk daerah 3T.</div></div></div>
-      <div class="ps-st" onclick="selSt(this)"><div class="ps-dot"></div><div><div class="ps-st-t">Minta moratorium hingga audit selesai</div><div class="ps-st-d">Lebih baik lambat tapi tepat sasaran.</div></div></div>
-    </div>
-    <div class="ps-checks">
-      <div class="ps-cl">Konfirmasi deliberasi</div>
-      <div class="ps-cr"><div class="ps-cb"></div><span class="ps-ct">Sudah membaca infografis data MBG</span></div>
-      <div class="ps-cr"><div class="ps-cb"></div><span class="ps-ct">Memahami posisi saya — bukan sekedar ikut tren</span></div>
-      <div class="ps-cr"><div class="ps-cb"></div><span class="ps-ct">Siap mempertanggungjawabkan posisi ini jika ditanya</span></div>
-    </div>
-    <div class="ps-sigs">
-      <div class="ps-sl">Baru menandatangani</div>
-      <div class="ps-sr">
-        <span class="ps-sig r">embun.pagi</span><span class="ps-sig">siska.ipb</span>
-        <span class="ps-sig r">nalar.bebas</span><span class="ps-sig">bara.api</span>
-        <span class="ps-sig r">kota.kita</span><span class="ps-sig">angin.timur</span><span class="ps-sig">langit.sore</span>
-      </div>
-    </div>
-    <div class="ps-cta">
-      <button class="ps-btn" id="signBtn" onclick="doSign(this)">
-        <span>Tanda Tangani Sekarang</span><span>✊</span>
-      </button>
-      <p class="ps-disc">Suara lo tercatat dan dikirim ke BGN · Komisi X DPR · BPK RI setelah target tercapai.</p>
-    </div>
-  </div>
-</div>
-
-</div><!-- /book -->
-
-<div id="ind"></div>
-<div id="hint">Geser <span class="ha">→</span></div>
-
-<nav id="nav">
-  <button class="nv a" onclick="goTo(0)"><div class="nv-dot"></div><span class="nv-lbl">Cover</span></button>
-  <div class="nv-div"></div>
-  <button class="nv" onclick="goTo(1)"><div class="nv-dot"></div><span class="nv-lbl">Kolase</span></button>
-  <div class="nv-div"></div>
-  <button class="nv" onclick="goTo(4)"><div class="nv-dot"></div><span class="nv-lbl">Local Pride</span></button>
-  <div class="nv-div"></div>
-  <button class="nv" onclick="goTo(6)"><div class="nv-dot"></div><span class="nv-lbl">Petisi</span></button>
-</nav>
-
-<script>
-const N=8,BOOK=document.getElementById('book');
-let cur=0,sx=0,sy=0,drag=false,mv=false;
-
-// indicator
-const ind=document.getElementById('ind');
-for(let i=0;i<N;i++){const d=document.createElement('div');d.className='id';d.onclick=()=>goTo(i);ind.appendChild(d);}
-
-function goTo(n){
-  cur=Math.max(0,Math.min(N-1,n));
-  BOOK.style.transform=`translateX(-${cur*100}vw)`;
-  ui();
-}
-
-function ui(){
-  ind.querySelectorAll('.id').forEach((d,i)=>d.className='id'+(i===cur?' a':''));
-  const sec=[0,1,1,1,2,2,3,3];
-  document.querySelectorAll('.nv').forEach((b,i)=>b.classList.toggle('a',i===sec[cur]));
-}
-
-// touch
-BOOK.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;drag=true;mv=false;BOOK.style.transition='none';},{passive:true});
-BOOK.addEventListener('touchmove',e=>{
-  if(!drag)return;
-  const dx=e.touches[0].clientX-sx,dy=e.touches[0].clientY-sy;
-  if(!mv&&Math.abs(dy)>Math.abs(dx)){drag=false;return;}
-  mv=true;BOOK.style.transform=`translateX(${-cur*window.innerWidth+dx}px)`;
-},{passive:true});
-BOOK.addEventListener('touchend',e=>{
-  if(!drag||!mv)return;drag=false;BOOK.style.transition='';
-  const dx=e.changedTouches[0].clientX-sx;
-  if(dx<-52&&cur<N-1)cur++;else if(dx>52&&cur>0)cur--;
-  BOOK.style.transform=`translateX(-${cur*100}vw)`;ui();
-});
-
-// mouse
-BOOK.addEventListener('mousedown',e=>{sx=e.clientX;drag=true;mv=false;BOOK.style.transition='none';});
-window.addEventListener('mousemove',e=>{if(!drag)return;mv=true;BOOK.style.transform=`translateX(${-cur*window.innerWidth+e.clientX-sx}px)`;});
-window.addEventListener('mouseup',e=>{
-  if(!drag)return;drag=false;BOOK.style.transition='';
-  const dx=e.clientX-sx;
-  if(dx<-60&&cur<N-1)cur++;else if(dx>60&&cur>0)cur--;
-  BOOK.style.transform=`translateX(-${cur*100}vw)`;ui();
-});
-
-window.addEventListener('keydown',e=>{
-  if(e.key==='ArrowRight'&&cur<N-1)goTo(cur+1);
-  if(e.key==='ArrowLeft'&&cur>0)goTo(cur-1);
-});
-
-function selSt(el){document.querySelectorAll('.ps-st').forEach(s=>s.classList.remove('sel'));el.classList.add('sel');}
-
-function doSign(btn){
-  btn.innerHTML='<span>✦ &nbsp;Terima kasih — suara lo tercatat</span><span></span>';
-  btn.style.cssText='background:rgba(255,255,255,.06);cursor:default;color:rgba(255,255,255,.4);font-size:inherit;letter-spacing:.08em;';
-  btn.disabled=true;
-}
-
-ui();
-</script>
+    
+    <script>
+        function showSection(index) {
+            // Sembunyikan semua section
+            const sections = document.querySelectorAll('.section-content');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Tampilkan section yang dipilih
+            document.getElementById(`section-${index}`).classList.add('active');
+            
+            // Update active state pada button
+            const buttons = document.querySelectorAll('.section-btn');
+            buttons.forEach((btn, i) => {
+                if (i === index) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+        
+        function scrollToSection() {
+            setTimeout(() => {
+                document.querySelector('.button-grid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        }
+    </script>
 </body>
 </html>
