@@ -349,95 +349,75 @@
     }
 
     // ============================================
-// RENDER SPILLS - VERSI BARU (TANPA COUNTER KATA)
-// ============================================
-function renderSpills() {
-    const container = document.getElementById('spillsList');
-    if (!container) return;
-    
-    console.log('[SpillGen] 🎨 Rendering...');
-    
-    // Ambil realEntries dari window (kalau ada)
-    const realEntries = window.realEntries || [];
-    
-    // Gabung realEntries + fullPool
-    let allSpills = [...realEntries, ...fullPool];
-    
-    // Urutin berdasarkan timestamp (terbaru dulu)
-    allSpills.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-    
-    // Ambil 8 entries berdasarkan posisi jendela (dengan loop)
-    let windowSpills = [];
-    for (let i = 0; i < CONFIG.WINDOW_SIZE; i++) {
-        const index = (windowStart + i) % allSpills.length;
-        windowSpills.push(allSpills[index]);
-    }
-    
-    // Filter mood (opsional)
-    let toShow = windowSpills;
-    if (activeMood !== 'all') {
-        toShow = windowSpills.filter(s => s.mood === activeMood);
-        if (toShow.length === 0) {
-            toShow = windowSpills; // fallback
+    // RENDER SPILLS (BERDASARKAN POSISI JENDELA)
+    // ============================================
+    function renderSpills() {
+        const container = document.getElementById('spillsList');
+        if (!container) return;
+        
+        // Ambil 8 entries berdasarkan posisi jendela (dengan loop)
+        let windowSpills = [];
+        for (let i = 0; i < CONFIG.WINDOW_SIZE; i++) {
+            const index = (windowStart + i) % CONFIG.POOL_SIZE;
+            windowSpills.push(fullPool[index]);
         }
-    }
-    
-    // Update meta info (TANPA STATISTIK KATA)
-    const metaEl = document.getElementById('feedMeta');
-    if (metaEl) {
-        const endPos = windowStart + CONFIG.WINDOW_SIZE - 1;
-        const displayEnd = endPos >= CONFIG.POOL_SIZE ? endPos - CONFIG.POOL_SIZE + 1 : endPos + 1;
-        metaEl.textContent = `Jendela ${windowStart+1}-${displayEnd}`;
-    }
-    
-    // Update mood display di header
-    const moodDisplay = document.getElementById('activeMoodDisplay');
-    if (moodDisplay) {
-        moodDisplay.textContent = activeMood === 'all' ? 'ALL' : activeMood.toUpperCase();
-        moodDisplay.style.color = activeMood === 'all' ? 'var(--as)' : 
-            activeMood === 'surviving' ? 'var(--ms)' :
-            activeMood === 'thriving' ? 'var(--mt)' :
-            activeMood === 'chaotic' ? 'var(--mc)' : 'var(--md)';
-    }
-    
-    // Render HTML
-    if (toShow.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <span class="empty-icon">🍃</span>
-                <div class="empty-title">BELUM ADA SPILL</div>
-                <div class="empty-text">Sedang memuat...</div>
+        
+        // Filter mood (opsional)
+        let toShow = windowSpills;
+        if (activeMood !== 'all') {
+            toShow = windowSpills.filter(s => s.mood === activeMood);
+            if (toShow.length === 0) {
+                toShow = windowSpills; // fallback
+            }
+        }
+        
+        // Update meta dengan info variasi panjang
+        const metaEl = document.getElementById('feedMeta');
+        if (metaEl) {
+            const endPos = windowStart + CONFIG.WINDOW_SIZE - 1;
+            const displayEnd = endPos >= CONFIG.POOL_SIZE ? endPos - CONFIG.POOL_SIZE + 1 : endPos + 1;
+            
+            // Hitung statistik panjang kata
+            const wordCounts = toShow.map(s => s.wordCount || s.content.split(/\s+/).length);
+            const avgWords = Math.round(wordCounts.reduce((a, b) => a + b, 0) / wordCounts.length);
+            const minWords = Math.min(...wordCounts);
+            const maxWords = Math.max(...wordCounts);
+            
+            metaEl.textContent = `Jendela ${windowStart+1}-${displayEnd} | ${minWords}-${maxWords} kata (avg ${avgWords})`;
+        }
+        
+        // Render HTML
+        let html = '';
+        for (let s of toShow) {
+            const wordCount = s.wordCount || s.content.split(/\s+/).length;
+            
+            html += `<div class="spill-card" data-id="${s.id}">
+                <div class="spill-head">
+                    <span class="spill-user">@${escapeHtml(s.author)}</span>
+                    <span class="spill-mood ${s.mood}">${s.mood.toUpperCase()}</span>
+                    <span class="spill-words" style="font-size:9px; color:var(--txm); margin-left:8px;">${wordCount} kata</span>
+                </div>
+                <div class="spill-body">${escapeHtml(s.content)}</div>
+                <div class="spill-actions">
+                    <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'skull')">
+                        💀 <span class="react-count">${s.reactions.skull}</span>
+                    </button>
+                    <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'cry')">
+                        😭 <span class="react-count">${s.reactions.cry}</span>
+                    </button>
+                    <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'fire')">
+                        🔥 <span class="react-count">${s.reactions.fire}</span>
+                    </button>
+                    <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'upside')">
+                        🙃 <span class="react-count">${s.reactions.upside}</span>
+                    </button>
+                </div>
             </div>`;
-        return;
+        }
+        
+        container.innerHTML = html;
     }
-    
-    let html = '';
-    for (let s of toShow) {
-        html += `<div class="spill-card" data-id="${s.id}">
-            <div class="spill-head">
-                <span class="spill-user">@${escapeHtml(s.author)}</span>
-                <span class="spill-mood ${s.mood}">${s.mood.toUpperCase()}</span>
-            </div>
-            <div class="spill-body">${escapeHtml(s.content)}</div>
-            <div class="spill-actions">
-                <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'skull')">
-                    💀 <span class="react-count">${s.reactions.skull}</span>
-                </button>
-                <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'cry')">
-                    😭 <span class="react-count">${s.reactions.cry}</span>
-                </button>
-                <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'fire')">
-                    🔥 <span class="react-count">${s.reactions.fire}</span>
-                </button>
-                <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'upside')">
-                    🙃 <span class="react-count">${s.reactions.upside}</span>
-                </button>
-            </div>
-        </div>`;
-    }
-    
-    container.innerHTML = html;
-}
+
     // ============================================
     // REACTION HANDLER
     // ============================================
@@ -483,17 +463,6 @@ function renderSpills() {
     window.filterMood = filterMood;
     window.getPool = () => fullPool;
     window.getWindowStart = () => windowStart;
-    
-    // TAMBAHAN FIX - Kompatibilitas dengan HTML
-window.brewNewSpills = seduhTehBaru;
-window.updateFeedMeta = function() {
-    const metaEl = document.getElementById('feedMeta');
-    if (metaEl) {
-        const endPos = windowStart + CONFIG.WINDOW_SIZE - 1;
-        const displayEnd = endPos >= CONFIG.POOL_SIZE ? endPos - CONFIG.POOL_SIZE + 1 : endPos + 1;
-        metaEl.textContent = (windowStart+1) + '-' + displayEnd + ' / ' + CONFIG.POOL_SIZE + ' SPILLS';
-    }
-};
 
     // Auto start
     if (document.readyState === 'loading') {
