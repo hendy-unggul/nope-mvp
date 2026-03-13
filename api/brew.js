@@ -1,56 +1,63 @@
-const express = require('express');
-const router = express.Router();
+// api/brew.js - VERSI VERCEL SERVERLESS
+module.exports = async (req, res) => {
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-// ============================================
-// DEEPSEEK CONFIG
-// ============================================
-const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
-if (!DEEPSEEK_API_KEY) {
-    console.error('[BREW] ❌ DEEPSEEK_API_KEY not found in environment!');
-}
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
+  // Handle preflight (OPTIONS)
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
-// ============================================
-// ENDPOINT TEST
-// ============================================
-router.get('/test', (req, res) => {
-    res.json({ 
-        success: true, 
-        message: 'Brew API is alive!',
-        hasKey: !!DEEPSEEK_API_KEY
+  // DEEPSEEK CONFIG
+  const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
+  if (!DEEPSEEK_API_KEY) {
+    console.error('[BREW] ❌ API key missing');
+  }
+
+  // ========== ROUTING MANUAL ==========
+  
+  // GET /api/brew/test
+  if (req.method === 'GET' && req.url === '/api/brew/test') {
+    return res.json({ 
+      success: true, 
+      message: 'Brew API is alive!',
+      hasKey: !!DEEPSEEK_API_KEY,
+      timestamp: Date.now()
     });
-});
+  }
 
-// ============================================
-// ENDPOINT BREW - VERSI MINIMAL DULU
-// ============================================
-router.post('/brew', async (req, res) => {
+  // POST /api/brew
+  if (req.method === 'POST' && req.url === '/api/brew') {
     try {
-        console.log('[BREW] POST /brew called');
-        
-        const dummy = [];
-        for (let i = 0; i < 3; i++) {
-            dummy.push({
-                id: `test_${Date.now()}_${i}`,
-                author: 'beby.manis',
-                mood: 'surviving',
-                content: 'test api minimal',
-                timestamp: Date.now(),
-                wordCount: 3,
-                reactions: { skull: 5, cry: 3, fire: 2, upside: 1 }
-            });
-        }
-        
-        res.json({
-            success: true,
-            spills: dummy,
-            count: dummy.length
+      console.log('[BREW] POST /brew called');
+      
+      const dummy = [];
+      for (let i = 0; i < 3; i++) {
+        dummy.push({
+          id: `test_${Date.now()}_${i}`,
+          author: 'beby.manis',
+          mood: 'surviving',
+          content: 'test api minimal',
+          timestamp: Date.now(),
+          wordCount: 3,
+          reactions: { skull: 5, cry: 3, fire: 2, upside: 1 }
         });
-        
+      }
+      
+      return res.json({
+        success: true,
+        spills: dummy,
+        count: dummy.length
+      });
+      
     } catch (error) {
-        console.error('[BREW] Error:', error);
-        res.status(500).json({ error: error.message });
+      console.error('[BREW] Error:', error);
+      return res.status(500).json({ error: error.message });
     }
-});
+  }
 
-module.exports = router;  // ← INI JUGA PENTING!
+  // If no route matches
+  return res.status(404).json({ error: 'Endpoint not found' });
+};
