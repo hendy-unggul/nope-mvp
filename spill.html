@@ -64,9 +64,33 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 .radar-dot.ai{background:var(--as);box-shadow:0 0 6px var(--as)}
 .radar-dot.lime{background:var(--aq);box-shadow:0 0 6px var(--aq)}
 .radar-ctas{padding:16px 18px 18px;display:flex;flex-direction:column;gap:10px}
-.btn-vibe-check{width:100%;background:var(--ap);border:2px solid #000;padding:18px;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:#fff;cursor:pointer;box-shadow:5px 5px 0 #000;transition:transform .08s,box-shadow .08s;display:flex;align-items:center;justify-content:center;gap:12px;position:relative}
-.btn-vibe-check:active{transform:translate(3px,3px);box-shadow:2px 2px 0 #000}
-.btn-chip{position:absolute;right:18px;background:#000;color:var(--aq);font-family:'DM Mono',monospace;font-size:9px;padding:4px 8px;letter-spacing:1px}
+
+/* TOMBOL GENDER BARU */
+.btn-vibe-gender {
+    touch-action: manipulation;
+    transition: transform 0.08s, box-shadow 0.08s;
+    border: 2px solid #000;
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 2px;
+    cursor: pointer;
+}
+
+.btn-vibe-gender:active {
+    transform: translate(3px, 3px);
+    box-shadow: 2px 2px 0 #000 !important;
+}
+
+.btn-vibe-gender.female {
+    background: var(--ap);
+    color: #fff;
+}
+
+.btn-vibe-gender.male {
+    background: var(--as);
+    color: #000;
+}
+/* AKHIR TOMBOL GENDER BARU */
+
 .btn-whisper{width:100%;background:transparent;border:2px dashed var(--bd2);padding:14px 18px;font-family:Syne,sans-serif;font-size:13px;font-weight:600;color:var(--txs);cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:all .15s}
 .btn-whisper:hover,.btn-whisper:active{border-color:var(--as);color:var(--as)}
 .btn-whisper-left{display:flex;align-items:center;gap:10px}
@@ -272,8 +296,28 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
         </div>
       </div>
       <div class="radar-ctas">
-        <button class="btn-vibe-check" id="vibeCheckBtn"><span>⬡</span><span>VIBE CHECK</span><span class="btn-chip">LIVE</span></button>
-        <button class="btn-whisper" id="whisperBtn"><div class="btn-whisper-left"><span class="btn-whisper-glyph">✦</span><span>WHISPERER</span></div><span class="ws-new-badge" id="wsStealthBadge">NEW</span></button>
+        <!-- DUA TOMBOL GENDER LANGSUNG -->
+        <div style="display: flex; gap: 10px; width: 100%;">
+          <button class="btn-vibe-gender female" id="vibeFemaleBtn" style="flex:1; padding: 18px 8px; font-size: 18px; display:flex; flex-direction:column; align-items:center; gap:4px;">
+            <span style="font-size: 32px;">♀️</span>
+            <span>YUK NGROBOL</span>
+            <span style="font-family:'DM Mono',monospace; font-size:9px; background:#000; color:var(--aq); padding:4px 8px; margin-top:4px;">CEWEK</span>
+          </button>
+          <button class="btn-vibe-gender male" id="vibeMaleBtn" style="flex:1; padding: 18px 8px; font-size: 18px; display:flex; flex-direction:column; align-items:center; gap:4px;">
+            <span style="font-size: 32px;">♂️</span>
+            <span>YUK BIKIN RUSUH</span>
+            <span style="font-family:'DM Mono',monospace; font-size:9px; background:#000; color:var(--aq); padding:4px 8px; margin-top:4px;">COWOK</span>
+          </button>
+        </div>
+        
+        <!-- WHISPERER BUTTON -->
+        <button class="btn-whisper" id="whisperBtn">
+          <div class="btn-whisper-left">
+            <span class="btn-whisper-glyph">✦</span>
+            <span>WHISPERER</span>
+          </div>
+          <span class="ws-new-badge" id="wsStealthBadge">NEW</span>
+        </button>
       </div>
     </div>
     <div class="filter-sect">
@@ -309,25 +353,16 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
     </div>
   </nav>
 </div>
-<div class="modal" id="genderModal">
-  <div class="modal-header"><div class="modal-title">PILIH GENDER</div><button class="modal-close" id="closeGenderModal">✕</button></div>
-  <div class="modal-body">
-    <span class="modal-tag">STEP 1/2</span>
-    <div class="modal-h">VIBE CHECK BUTUH KONTEKS</div>
-    <div class="modal-sub">biar algoritma bisa match kamu dengan vibe yang tepat</div>
-    <div class="gender-grid">
-      <div class="gender-card" data-gender="female"><span class="gender-icon">♀️</span><span class="gender-label">TEMAN CEWEK</span><span class="gender-desc">Yuk ngobrol... </span></div>
-      <div class="gender-card" data-gender="male"><span class="gender-icon">♂️</span><span class="gender-label">TEMAN COWOK</span><span class="gender-desc">Yuk bikin rusuh...</span></div>
-    </div>
-    <div class="info-box"><p>🔒 <strong>privacy first</strong> — gender cuma dipakai buat matching sesi, ga disimpan &amp; ga muncul di profil</p><p style="margin-top:8px;color:var(--aq)">⚠️ <strong>Jangan pernah ungkap data pribadi — stay safe, stay anonim</strong></p></div>
-    <button class="modal-action-btn" id="confirmGenderBtn" disabled>GASKEUN →</button>
-    <div class="modal-hint">dengan lanjut, kamu setuju sama <button class="modal-hint-link" id="policyLink">kebijakan anonim</button></div>
-  </div>
-</div>
+
+<!-- MODAL GENDER TIDAK DIGUNAKAN LAGI - DIHAPUS -->
+
+<!-- WHISPERER MODAL -->
 <div class="modal" id="wsModal">
   <div class="modal-header"><div class="modal-title">WHISPERER</div><button class="modal-close" id="closeWsModal">✕</button></div>
   <div class="modal-body" id="wsModalBody"></div>
 </div>
+
+<!-- UPGRADE MODAL -->
 <div class="upgrade-modal" id="upgradeModal">
   <div class="upgrade-header"><div class="modal-title">✦ UPGRADE ✦</div><button class="modal-close" id="closeUpgradeModal">✕</button></div>
   <div class="upgrade-body">
@@ -370,6 +405,8 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
     <div class="upgrade-footer"><button class="btn" id="cancelUpgrade">NANTI DULU</button></div>
   </div>
 </div>
+
+<!-- CHAT ROOM -->
 <div class="chat-room" id="chatRoom">
   <div class="chat-head">
     <div class="chat-info">
@@ -386,7 +423,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
     <button class="chat-send" id="sendButton">➤</button>
   </div>
 </div>
+
 <div class="toast" id="toast"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/shared-constants.js"></script>
 <script src="/spill-generator.js"></script>
@@ -394,12 +433,12 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
 'use strict';
 
 // ============================================
-// KONFIGURASI API - PERBAIKAN UTAMA
+// KONFIGURASI API
 // ============================================
 const API_ENDPOINTS = [
-  'https://jejak-phi.vercel.app/api/chat',  // Primary Vercel endpoint
-  'https://jejak.space/api/chat',            // Fallback
-  '/api/chat'                                 // Local fallback
+  'https://jejak-phi.vercel.app/api/chat',
+  'https://jejak.space/api/chat',
+  '/api/chat'
 ];
 
 const $=id=>document.getElementById(id),rnd=n=>Math.floor(Math.random()*n),rndOf=arr=>arr[rnd(arr.length)],sleep=ms=>new Promise(r=>setTimeout(r,ms)),esc=t=>{const d=document.createElement('div');d.textContent=t;return d.innerHTML},mk=(tag,cls,style='')=>{const el=document.createElement(tag);if(cls)el.className=cls;if(style)el.style.cssText=style;return el};
@@ -429,14 +468,65 @@ function spawnDots(){const c=$('radarDots');if(!c)return;c.innerHTML='';rdots=[]
 
 function radarLoop(cv){const ctx=cv.getContext('2d');function draw(){const W=cv.width,H=cv.height,cx=W/2,cy=H/2,R=Math.min(cx,cy)*.88;if(!W||!H){radarRAF=requestAnimationFrame(draw);return}phA+=.007;needleO+=(BASE_OM*(1+Math.sin(phA)*.35)-needleO)*.028;needleA=(needleA+needleO)%(Math.PI*2);trail[trailPtr]=needleA;trailPtr=(trailPtr+1)%TRAIL_CAP;ctx.fillStyle='rgba(2,10,2,.18)';ctx.fillRect(0,0,W,H);for(let i=0;i<TRAIL_CAP-1;i++){const alpha=Math.pow(1-i/TRAIL_CAP,2.2)*.12;if(alpha<.002)break;const s=needleA-(i+1)*needleO,e=needleA-i*needleO;ctx.save();ctx.translate(cx,cy);ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,R,Math.min(s,e),Math.max(s,e),false);ctx.closePath();ctx.fillStyle=`rgba(0,229,255,${alpha})`;ctx.fill();ctx.restore()}ctx.save();ctx.translate(cx,cy);ctx.rotate(needleA);ctx.shadowColor='rgba(0,229,255,.95)';ctx.shadowBlur=12;const lg=ctx.createLinearGradient(0,0,R,0);lg.addColorStop(0,'rgba(0,229,255,1)');lg.addColorStop(.8,'rgba(0,229,255,.4)');lg.addColorStop(1,'rgba(0,229,255,0)');ctx.beginPath();ctx.moveTo(3,0);ctx.lineTo(R,0);ctx.strokeStyle=lg;ctx.lineWidth=2;ctx.stroke();ctx.shadowBlur=20;ctx.beginPath();ctx.rect(-4,-4,8,8);ctx.fillStyle='#00e5ff';ctx.fill();ctx.restore();rdots.forEach((d,di)=>{const px=d.x/100*W,py=d.y/100*H;let da=Math.atan2(py-cy,px-cx);if(da<0)da+=Math.PI*2;let diff=needleA-da;if(diff<0)diff+=Math.PI*2;const age=dotGlow.get(di)??999;if(diff<.18&&age>30){dotGlow.set(di,0);if(d.el){d.el.classList.add('active');setTimeout(()=>{if(d.el)d.el.classList.remove('active')},800)}}else{dotGlow.set(di,age+1)}if(age<55){const t=age/55,ga=(1-t)*(1-t)*.9;if(ga<.01)return;const col=d.type==='purple'?'191,90,242':d.type==='red'?'255,45,85':d.type==='lime'?'191,255,0':'0,229,255',gr=ctx.createRadialGradient(px,py,0,px,py,16*(1-t)+3);gr.addColorStop(0,`rgba(${col},${ga})`);gr.addColorStop(1,`rgba(${col},0)`);ctx.beginPath();ctx.arc(px,py,16*(1-t)+3,0,Math.PI*2);ctx.fillStyle=gr;ctx.fill()}});radarRAF=requestAnimationFrame(draw)}radarRAF=requestAnimationFrame(draw)}
 
-function startVibeCheck(){chatPartner=null;chatTimeLeft=900;chatHistory=[];apiRetryCount=0;currentAPIEndpoint=0;isTyping=false;endChatOptionsShown=false;if(typingTimeout)clearTimeout(typingTimeout);if(fallbackTimer){clearTimeout(fallbackTimer);fallbackTimer=null}setChatStatus('');$('genderModal').classList.add('on')}
-
-function selectGender(el,g){document.querySelectorAll('.gender-card').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');currentGender=g;$('confirmGenderBtn').disabled=false}
-
-function confirmGender(){if(!currentGender)return;closeModal('genderModal');const room=$('chatRoom');room.classList.add('on');$('chatTimer').textContent='15:00';$('chatTimer').classList.remove('warn');$('partnerLabel').textContent='MENCARI...';setChatStatus('');const msgs=$('chatMessages');msgs.innerHTML='';addSysMsg('⚡ mengaktifkan radar pencarian...');[{t:3e3,m:'👀 masih memindai...'},{t:6e3,m:'📡 lingkungan sepi, radar melebar'},{t:9e3,m:'🌐 menjangkau radius 2km'},{t:12e3,m:'⏳ hampir selesai...'}].forEach(({t,m})=>setTimeout(()=>{if(!chatPartner)updateSysMsg(m)},t));fallbackTimer=setTimeout(()=>{if(!chatPartner&&room.classList.contains('on')){$('chatMessages').innerHTML='';fallbackToAI()}},15e3)}
+// ============================================
+// VIBE CHECK LANGSUNG DENGAN GENDER
+// ============================================
+function startVibeCheck(gender) {
+    if (!gender) return;
+    
+    // Set gender langsung
+    currentGender = gender;
+    
+    // Reset state
+    chatPartner = null;
+    chatTimeLeft = 900;
+    chatHistory = [];
+    apiRetryCount = 0;
+    currentAPIEndpoint = 0;
+    isTyping = false;
+    endChatOptionsShown = false;
+    
+    if (typingTimeout) clearTimeout(typingTimeout);
+    if (fallbackTimer) {
+        clearTimeout(fallbackTimer);
+        fallbackTimer = null;
+    }
+    
+    setChatStatus('');
+    
+    // Buka chat room langsung
+    const room = $('chatRoom');
+    room.classList.add('on');
+    $('chatTimer').textContent = '15:00';
+    $('chatTimer').classList.remove('warn');
+    $('partnerLabel').textContent = 'MENCARI...';
+    setChatStatus('');
+    
+    const msgs = $('chatMessages');
+    msgs.innerHTML = '';
+    
+    addSysMsg(`⚡ mencari teman ${gender === 'female' ? 'cewek' : 'cowok'}...`);
+    
+    // Simulasi pencarian
+    [{t: 3000, m: '👀 masih memindai...'}, 
+     {t: 6000, m: '📡 lingkungan sepi, radar melebar'}, 
+     {t: 9000, m: '🌐 menjangkau radius 2km'}, 
+     {t: 12000, m: '⏳ hampir selesai...'}].forEach(({t, m}) => 
+        setTimeout(() => {
+            if (!chatPartner && room.classList.contains('on')) updateSysMsg(m);
+        }, t)
+    );
+    
+    // Fallback ke AI setelah 15 detik
+    fallbackTimer = setTimeout(() => {
+        if (!chatPartner && room.classList.contains('on')) {
+            $('chatMessages').innerHTML = '';
+            fallbackToAI();
+        }
+    }, 15000);
+}
 
 function addSysMsg(text){const msgs=$('chatMessages');if(!msgs)return;const d=mk('div','chat-msg system-msg');d.innerHTML=`<div class="chat-bubble">${text}</div>`;msgs.appendChild(d);d.scrollIntoView({behavior:'smooth'})}
-
 function updateSysMsg(text){const msgs=$('chatMessages');if(!msgs)return;const last=msgs.lastElementChild;if(last?.classList.contains('system-msg'))last.remove();addSysMsg(text)}
 
 function fallbackToAI(){if(fallbackTimer){clearTimeout(fallbackTimer);fallbackTimer=null}const chars=AI_CHARS[currentGender==='female'?'female':'male'];chatPartner={name:chars[rnd(chars.length)],isAI:true};chatHistory=[];apiRetryCount=0;currentAPIEndpoint=0;isTyping=false;const msgs=$('chatMessages');if(msgs)msgs.innerHTML='';const d=mk('div','chat-msg system-msg');d.innerHTML='<div class="chat-bubble" style="background:rgba(0,229,255,.08);border:2px solid var(--as);padding:14px 20px;color:var(--as);font-weight:600">👤 seseorang ditemukan!</div>';if(msgs)msgs.appendChild(d);setTimeout(()=>{if(msgs)msgs.innerHTML='';callChatAPI('',true);startTimer()},1200)}
@@ -486,7 +576,7 @@ async function callChatAPI(userMsg,isFirst=false){
     
     try {
       const ctrl=new AbortController();
-      const tid=setTimeout(()=>ctrl.abort(),12000); // Increased timeout
+      const tid=setTimeout(()=>ctrl.abort(),12000);
       
       const res=await fetch(apiUrl,{
         method:'POST',
@@ -575,17 +665,17 @@ document.addEventListener('DOMContentLoaded',()=>{
   $('vibeSlider')?.addEventListener('input',e=>{const pct=$('vibePct');if(pct)pct.textContent=e.target.value+'%'});
   $('settingsIcon')?.addEventListener('click',toggleSettingsMenu);
   $('logoutItem')?.addEventListener('click',logoutUser);
-  $('vibeCheckBtn')?.addEventListener('click',startVibeCheck);
+  
+  // EVENT LISTENER UNTUK TOMBOL GENDER BARU
+  $('vibeFemaleBtn')?.addEventListener('click', () => startVibeCheck('female'));
+  $('vibeMaleBtn')?.addEventListener('click', () => startVibeCheck('male'));
+  
   $('whisperBtn')?.addEventListener('click',openWsModal);
   $('refreshBtn')?.addEventListener('click',()=>{if(typeof window.seduhTehBaru==='function')window.seduhTehBaru()});
-  $('closeGenderModal')?.addEventListener('click',()=>closeModal('genderModal'));
   $('closeWsModal')?.addEventListener('click',()=>closeModal('wsModal'));
   $('closeUpgradeModal')?.addEventListener('click',closeUpgradeModal);
   $('cancelUpgrade')?.addEventListener('click',closeUpgradeModal);
   $('closeChatBtn')?.addEventListener('click',closeChat);
-  $('policyLink')?.addEventListener('click',()=>alert('kebijakan anonim: ga ada log, ga ada trace'));
-  document.querySelectorAll('.gender-card').forEach(card=>card.addEventListener('click',function(){selectGender(this,this.dataset.gender)}));
-  $('confirmGenderBtn')?.addEventListener('click',confirmGender);
   document.querySelectorAll('.package-btn').forEach(btn=>btn.addEventListener('click',function(){selectPackage(this.dataset.package||'regular')}));
   $('chatInput')?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg()}});
   $('sendButton')?.addEventListener('click',sendMsg);
