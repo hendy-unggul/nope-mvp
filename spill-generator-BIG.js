@@ -1,1765 +1,438 @@
-<!DOCTYPE html>
-<html lang="id" id="htmlRoot">
-<head>
-<meta charset="UTF-8">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://fonts.googleapis.com https://jejak-dun.vercel.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' *.supabase.co wss://*.supabase.co https://jejak-dun.vercel.app https://cdn.jsdelivr.net; worker-src 'self' blob:; manifest-src 'self'; img-src 'self' data:; frame-src 'self';">
-<title>SPILL — vibe radar</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="manifest" href="/manifest.json">
-<style>
-/* ==============================================
-   VARIABLES & RESET 
-============================================== */
-:root{
-  --bg:#080808;--sf:#0f0f0f;--sfe:#141414;--bd:#222;--bd2:#2e2e2e;
-  --tx:#f0ece6;--txs:#777;--txm:#444;
-  --ap:#ff2d55;--as:#00e5ff;--aq:#bfff00;--gold:#ffd60a;--purple:#bf5af2;
-  --ms:#ff9f0a;--mt:#bfff00;--mc:#00e5ff;--md:#bf5af2;
-  --sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px);
-}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
-html,body{height:100%;overflow:hidden}
-body{
-  background:var(--bg);color:var(--tx);
-  font-family:'Syne',-apple-system,sans-serif;
-  font-size:14px;line-height:1.4;
-  position:fixed;width:100%;overscroll-behavior:none;
-}
-body::after{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
-  opacity:.028;
-  background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0/200px 200px;
-}
-
-/* ==============================================
-   APP LAYOUT
-============================================== */
-.app{
-  height:100%;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
-
-/* ==============================================
-   HEADER LAYOUT BARU
-============================================== */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 18px;
-  padding-top: calc(14px + var(--st));
-  border-bottom: 2px solid var(--bd);
-  background: var(--bg);
-  flex-shrink: 0;
-  position: relative;
-}
-.header::before{
-  content:'';position:absolute;top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--ap),var(--as),var(--aq));
-}
-.logo{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:34px;
-  letter-spacing:2px;
-  line-height:1;
-}
-.logo .x{
-  color:var(--ap);
-  display:inline-block;
-  animation:spin-x 4s ease-in-out infinite;
-}
-@keyframes spin-x{
-  0%,90%,100%{transform:rotate(0) scale(1)}
-  95%{transform:rotate(180deg) scale(1.2)}
-}
-
-.user-menu {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  position: relative;
-}
-
-.user-badge{
-  font-family:'DM Mono',monospace;
-  font-size:12px;
-  color:var(--as);
-  border:2px solid var(--bd);
-  padding:4px 8px;
-  background:#000;
-  max-width:120px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  cursor:pointer;
-  transition:opacity 0.2s;
-}
-.user-badge:hover{opacity:0.8;}
-
-/* Icon 3 titik VERTIKAL */
-.settings-icon {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--sf);
-  border: 2px solid var(--bd2);
-  color: var(--txs);
-  font-size: 20px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 3px 3px 0 #000;
-  transition: all .08s;
-  line-height: 1;
-  transform: rotate(90deg);
-}
-
-.settings-icon:active {
-  transform: translate(2px, 2px) rotate(90deg);
-  box-shadow: 1px 1px 0 #000;
-}
-
-.settings-menu {
-  display: none;
-  position: absolute;
-  top: 100%;
-  right: 0;
-  margin-top: 8px;
-  background: var(--sf);
-  border: 2px solid var(--bd2);
-  box-shadow: 4px 4px 0 #000;
-  z-index: 1000;
-  min-width: 120px;
-}
-
-.settings-menu.show {
-  display: block;
-}
-
-.settings-item {
-  padding: 10px 16px;
-  font-family: 'DM Mono', monospace;
-  font-size: 11px;
-  color: var(--tx);
-  cursor: pointer;
-  border-bottom: 1px solid var(--bd);
-  transition: all .1s;
-}
-
-.settings-item:last-child {
-  border-bottom: none;
-}
-
-.settings-item:hover {
-  background: var(--ap);
-  color: #fff;
-}
-
-/* Online pill di header - DISEMBUNYIKAN */
-.header .online-pill {
-  display: none;
-}
-
-/* ==============================================
-   SCROLL AREA
-============================================== */
-.scroll{
-  flex:1;
-  overflow-y:auto;
-  overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;
-  overscroll-behavior-y:contain;
-  padding-bottom:62px;
-}
-.scroll::-webkit-scrollbar{display:none}
-
-/* ==============================================
-   RADAR SECTION 
-============================================== */
-.radar-sect{
-  background:var(--sf);
-  border-bottom:2px solid var(--bd);
-}
-
-.radar-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px 18px 12px;
-}
-
-.radar-header .online-pill {
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  color: #000;
-  background: var(--aq);
-  padding: 5px 12px;
-  border: 2px solid #000;
-  box-shadow: 3px 3px 0 #000;
-  letter-spacing: .5px;
-  white-space: nowrap;
-}
-
-.radar-label{
-  font-family:'DM Mono',monospace;
-  font-size:10px;
-  color:var(--as);
-  letter-spacing:3px;
-  text-transform:uppercase;
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.radar-label-dot{
-  width:8px;
-  height:8px;
-  background:var(--as);
-  transform:rotate(45deg);
-  animation:blink-sq 1.2s step-end infinite;
-}
-@keyframes blink-sq{
-  0%,100%{opacity:1;background:var(--as)}
-  50%{opacity:.2;background:transparent}
-}
-
-.radar-wrapper{padding:0 18px 16px}
-.radar-bezel{
-  position:relative;padding:4px;
-  background:var(--bg);border:2px solid var(--bd2);
-  box-shadow:6px 6px 0 #000;
-}
-.radar-bezel::before{content:'';position:absolute;top:-1px;left:-1px;width:20px;height:20px;border-top:3px solid var(--as);border-left:3px solid var(--as);z-index:5}
-.radar-bezel::after{content:'';position:absolute;bottom:-1px;right:-1px;width:20px;height:20px;border-bottom:3px solid var(--ap);border-right:3px solid var(--ap);z-index:5}
-.corner-tr{position:absolute;top:-1px;right:-1px;width:20px;height:20px;border-top:3px solid var(--aq);border-right:3px solid var(--aq);z-index:5}
-.corner-bl{position:absolute;bottom:-1px;left:-1px;width:20px;height:20px;border-bottom:3px solid var(--gold);border-left:3px solid var(--gold);z-index:5}
-.radar-bezel-label{position:absolute;top:-12px;left:30px;background:var(--bg);padding:0 8px;font-family:'DM Mono',monospace;font-size:8px;color:var(--txm);letter-spacing:3px;text-transform:uppercase;z-index:6}
-.radar-bezel-range{position:absolute;bottom:-10px;right:30px;background:var(--bg);padding:0 8px;font-family:'DM Mono',monospace;font-size:8px;color:var(--txm);letter-spacing:2px;z-index:6}
-.radar-cont{position:relative;width:100%;aspect-ratio:1/1;background:#020a02;overflow:hidden}
-.radar-grid{position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,rgba(0,229,255,.04)0px,transparent 1px,transparent 28px),repeating-linear-gradient(90deg,rgba(0,229,255,.04)0px,transparent 1px,transparent 28px)}
-.radar-ring{position:absolute;inset:8%;border:1px solid rgba(0,229,255,.08);border-radius:50%}
-.radar-ring::before{content:'';position:absolute;border-radius:50%;border:1px solid rgba(0,229,255,.05);inset:28%}
-.radar-ring::after{content:'';position:absolute;border-radius:50%;border:1px solid rgba(0,229,255,.03);inset:54%}
-.radar-cross{position:absolute;inset:0;background:linear-gradient(90deg,transparent calc(50% - .5px),rgba(0,229,255,.06) calc(50% - .5px),rgba(0,229,255,.06) calc(50% + .5px),transparent calc(50% + .5px)),linear-gradient(0deg,transparent calc(50% - .5px),rgba(0,229,255,.06) calc(50% - .5px),rgba(0,229,255,.06) calc(50% + .5px),transparent calc(50% + .5px))}
-.radar-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:5}
-.radar-dots{position:absolute;inset:0;z-index:10}
-.radar-dot{position:absolute;width:6px;height:6px;transform:translate(-50%,-50%) rotate(45deg);opacity:.3;transition:opacity .1s}
-.radar-dot.active{opacity:1;transform:translate(-50%,-50%) rotate(45deg) scale(2.5);filter:brightness(2) drop-shadow(0 0 6px currentColor)}
-.radar-dot.purple{background:var(--purple);box-shadow:0 0 6px var(--purple)}
-.radar-dot.red{background:var(--ap);box-shadow:0 0 6px var(--ap)}
-.radar-dot.ai{background:var(--as);box-shadow:0 0 6px var(--as)}
-.radar-dot.lime{background:var(--aq);box-shadow:0 0 6px var(--aq)}
-
-/* ==============================================
-   CTA BUTTONS 
-============================================== */
-.radar-ctas{padding:16px 18px 18px;display:flex;flex-direction:column;gap:10px}
-.btn-vibe-check{
-  width:100%;background:var(--ap);border:2px solid #000;
-  padding:18px;font-family:'Bebas Neue',sans-serif;font-size:22px;
-  letter-spacing:3px;color:#fff;cursor:pointer;
-  box-shadow:5px 5px 0 #000;
-  transition:transform .08s,box-shadow .08s;
-  display:flex;align-items:center;justify-content:center;gap:12px;position:relative;
-}
-.btn-vibe-check:active{transform:translate(3px,3px);box-shadow:2px 2px 0 #000}
-.btn-chip{position:absolute;right:18px;background:#000;color:var(--aq);font-family:'DM Mono',monospace;font-size:9px;padding:4px 8px;letter-spacing:1px}
-.btn-whisper{
-  width:100%;background:transparent;border:2px dashed var(--bd2);
-  padding:14px 18px;font-family:'Syne',sans-serif;font-size:13px;font-weight:600;
-  color:var(--txs);cursor:pointer;
-  display:flex;align-items:center;justify-content:space-between;transition:all .15s;
-}
-.btn-whisper:hover,.btn-whisper:active{border-color:var(--as);color:var(--as)}
-.btn-whisper-left{display:flex;align-items:center;gap:10px}
-.btn-whisper-glyph{font-size:16px;color:var(--as)}
-.ws-new-badge{
-  background:var(--as);color:#000;font-family:'DM Mono',monospace;
-  font-size:9px;padding:3px 8px;display:none;animation:pulse-b 2s ease-in-out infinite;
-}
-.ws-new-badge.show{display:inline-block}
-@keyframes pulse-b{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
-
-/* ==============================================
-   FILTER 
-============================================== */
-.filter-sect{padding:18px;border-bottom:2px solid var(--bd)}
-.filter-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-.filter-title{font-family:'DM Mono',monospace;font-size:9px;color:var(--txs);letter-spacing:3px;text-transform:uppercase}
-.match-pct{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--ap);letter-spacing:1px;line-height:1}
-.vibe-slider{width:100%;height:3px;background:var(--bd2);outline:none;-webkit-appearance:none;display:block;margin-bottom:8px}
-.vibe-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;background:var(--ap);border:3px solid var(--bg);border-radius:0;box-shadow:0 0 0 2px var(--ap),3px 3px 0 #000;cursor:pointer}
-.slider-labels{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:9px;color:var(--txm);margin:6px 0 16px;letter-spacing:1px}
-.mood-scroll{display:flex;gap:8px;overflow-x:auto;margin:0 -18px;padding:0 18px 4px;scrollbar-width:none}
-.mood-scroll::-webkit-scrollbar{display:none}
-.mood-chip{
-  flex-shrink:0;padding:8px 16px;background:var(--bg);border:2px solid var(--bd2);
-  font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--txs);
-  white-space:nowrap;touch-action:manipulation;cursor:pointer;
-  box-shadow:3px 3px 0 #000;transition:all .08s;letter-spacing:.5px;
-}
-.mood-chip.active{background:var(--ap);border-color:#000;color:#fff;box-shadow:3px 3px 0 rgba(0,0,0,.5)}
-.mood-chip:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
-
-/* ==============================================
-   SPILLS FEED - COUNTER KATA DIHAPUS, MOOD DI KANAN
-============================================== */
-.spills-sect{padding:18px 18px 24px}
-.sect-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-.sect-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;line-height:1}
-.sect-meta{font-family:'DM Mono',monospace;font-size:9px;color:var(--txm);letter-spacing:2px}
-.spill-card{
-  background:var(--sf);border:2px solid var(--bd2);
-  margin-bottom:14px;overflow:hidden;box-shadow:4px 4px 0 #000;
-  transition:transform .08s,box-shadow .08s;
-}
-.spill-card:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
-.spill-head{
-  display:flex;
-  justify-content:space-between;  /* INI YANG BIKIN MOOD KE KANAN */
-  align-items:center;
-  padding:12px 16px;
-  border-bottom:2px solid var(--bd);
-  background:var(--bg);
-}
-.spill-user{font-family:'DM Mono',monospace;font-size:11px;color:var(--txs);letter-spacing:.5px}
-.spill-mood{font-family:'DM Mono',monospace;font-size:9px;padding:5px 10px;text-transform:uppercase;letter-spacing:1.5px;border:2px solid}
-.spill-mood.surviving{color:var(--ms);border-color:var(--ms);background:rgba(255,159,10,.08)}
-.spill-mood.thriving{color:var(--mt);border-color:var(--mt);background:rgba(191,255,0,.08)}
-.spill-mood.chaotic{color:var(--mc);border-color:var(--mc);background:rgba(0,229,255,.08)}
-.spill-mood.doom{color:var(--md);border-color:var(--md);background:rgba(191,90,242,.08)}
-.spill-body{padding:16px;font-size:15px;line-height:1.65}
-.spill-actions{display:flex;border-top:2px solid var(--bd);overflow-x:auto;scrollbar-width:none;background:var(--bg)}
-.spill-actions::-webkit-scrollbar{display:none}
-.react-btn{
-  flex:1;min-width:60px;display:flex;align-items:center;justify-content:center;
-  gap:6px;padding:12px 8px;background:transparent;border:none;
-  border-right:2px solid var(--bd);font-size:16px;color:var(--txs);
-  cursor:pointer;touch-action:manipulation;transition:all .1s;
-  font-family:'DM Mono',monospace;
-}
-.react-btn:last-child{border-right:none}
-.react-btn.active{background:var(--ap);color:#fff}
-.react-btn:active{background:var(--bd2)}
-.react-count{font-family:'DM Mono',monospace;font-size:11px}
-.refresh-btn{
-  width:100%;padding:16px;background:transparent;border:2px dashed var(--bd2);
-  color:var(--txs);font-family:'DM Mono',monospace;font-size:11px;
-  letter-spacing:2px;text-transform:uppercase;
-  display:flex;align-items:center;justify-content:center;gap:10px;
-  margin-top:10px;cursor:pointer;touch-action:manipulation;transition:all .15s;
-}
-.refresh-btn:active{background:var(--sf);border-color:var(--aq);color:var(--aq)}
-.empty-state{text-align:center;padding:60px 20px}
-.empty-icon{font-size:48px;margin-bottom:16px;opacity:.4;display:block}
-.empty-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;color:var(--txs);margin-bottom:6px}
-.empty-text{font-size:13px;color:var(--txm)}
-
-/* ==============================================
-   BOTTOM NAV 
-============================================== */
-.bottom-nav{
-  position:fixed;bottom:0;left:0;right:0;
-  background:var(--bg);border-top:2px solid var(--bd);
-  padding-bottom:var(--sb);z-index:100;
-}
-.nav-container{
-  display:flex;justify-content:space-around;align-items:stretch;
-  height:62px;max-width:480px;margin:0 auto;
-}
-.nav-item{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;color:var(--txm);text-decoration:none;
-  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
-  position:relative;touch-action:manipulation;
-  border-right:2px solid var(--bd);transition:all .12s;
-  cursor:pointer;
-}
-.nav-item:last-child{border-right:none}
-.nav-item.active{color:var(--ap);background:rgba(255,45,85,.06)}
-.nav-item.active::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:var(--ap)}
-.nav-icon{font-size:20px;line-height:1}
-
-/* ==============================================
-   MODALS 
-============================================== */
-.modal{display:none;position:fixed;inset:0;background:var(--bg);z-index:200;flex-direction:column;overflow:hidden}
-.modal.on{display:flex}
-.modal-header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;padding-top:calc(16px + var(--st));border-bottom:2px solid var(--bd)}
-.modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px}
-.modal-close{width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:var(--sf);border:2px solid var(--bd2);color:var(--txs);font-size:16px;cursor:pointer;box-shadow:3px 3px 0 #000;transition:all .08s}
-.modal-close:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
-.modal-body{flex:1;overflow-y:auto;padding:24px 18px calc(24px + var(--sb));-webkit-overflow-scrolling:touch}
-.modal-tag{font-family:'DM Mono',monospace;font-size:9px;color:var(--ap);margin-bottom:10px;letter-spacing:3px;display:block;text-transform:uppercase}
-.modal-h{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:1px;margin-bottom:8px;line-height:1.1}
-.modal-sub{font-size:14px;color:var(--txs);margin-bottom:28px;line-height:1.6}
-.gender-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
-.gender-card{background:var(--sf);border:2px solid var(--bd2);padding:28px 16px;text-align:center;cursor:pointer;touch-action:manipulation;transition:all .08s;box-shadow:4px 4px 0 #000}
-.gender-card.selected{border-color:var(--ap);background:rgba(255,45,85,.08);box-shadow:4px 4px 0 var(--ap)}
-.gender-card:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
-.gender-icon{font-size:36px;margin-bottom:12px;display:block}
-.gender-label{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:4px}
-.gender-desc{font-size:12px;color:var(--txs)}
-.info-box{background:var(--sf);border:2px solid var(--bd2);border-left:4px solid var(--ap);padding:16px;margin-bottom:28px}
-.info-box p{font-family:'DM Mono',monospace;font-size:11px;color:var(--txs);line-height:1.8}
-.info-box strong{color:var(--ap)}
-.modal-action-btn{
-  width:100%;padding:18px;background:var(--ap);color:#fff;border:2px solid #000;
-  font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;
-  cursor:pointer;box-shadow:4px 4px 0 #000;transition:all .08s;text-transform:uppercase;margin-bottom:16px;
-}
-.modal-action-btn:disabled{opacity:.3;cursor:not-allowed;box-shadow:none}
-.modal-action-btn:not(:disabled):active{transform:translate(3px,3px);box-shadow:2px 2px 0 #000}
-.modal-hint{font-size:12px;color:var(--txm);text-align:center;line-height:1.6}
-.modal-hint-link{background:none;border:none;color:var(--as);font-size:12px;font-weight:600;cursor:pointer;text-decoration:underline;font-family:inherit;padding:0}
-
-/* ==============================================
-   UPGRADE MODAL 
-============================================== */
-.upgrade-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:400;flex-direction:column;overflow:hidden}
-.upgrade-modal.on{display:flex}
-.upgrade-header{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;padding-top:calc(16px + var(--st));border-bottom:2px solid var(--bd);background:var(--bg)}
-.upgrade-header .modal-title{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--aq);letter-spacing:2px}
-.upgrade-body{flex:1;overflow-y:auto;padding:24px 18px;background:var(--bg)}
-.package-grid{display:flex;flex-direction:column;gap:20px;margin-bottom:32px}
-.package-card{
-  background:var(--sf);border:2px solid var(--bd2);padding:24px 18px;
-  box-shadow:6px 6px 0 #000;position:relative;
-}
-.package-card.regular{border-left:6px solid var(--ap)}
-.package-card.promo{border-left:6px solid var(--aq)}
-.package-badge{
-  position:absolute;top:-12px;right:18px;
-  background:var(--ap);color:#fff;font-family:'DM Mono',monospace;
-  font-size:10px;padding:4px 12px;border:2px solid #000;
-  transform:rotate(2deg);
-}
-.package-name{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin-bottom:8px}
-.package-name.reg{color:var(--ap)}
-.package-name.pro{color:var(--aq)}
-.package-price{font-family:'DM Mono',monospace;font-size:16px;margin-bottom:8px}
-.package-price .original{color:var(--txm);text-decoration:line-through;margin-right:8px}
-.package-price .promo{color:var(--aq);font-size:22px;font-weight:bold}
-.package-price .regular{color:var(--ap);font-size:22px;font-weight:bold}
-.package-desc{font-size:13px;color:var(--txs);margin-bottom:16px;line-height:1.5}
-.package-features{margin-bottom:20px}
-.package-feature{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px dashed var(--bd2);font-size:13px}
-.package-feature:last-child{border-bottom:none}
-.package-feature .check{color:var(--aq);font-size:16px}
-.package-btn{
-  width:100%;padding:16px;background:var(--ap);color:#fff;border:2px solid #000;
-  font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;
-  cursor:pointer;box-shadow:4px 4px 0 #000;transition:all .08s;
-}
-.package-btn.promo{background:var(--aq);color:#000}
-.package-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
-.midtrans-badge{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  margin:24px 0;padding:12px;background:var(--sfe);border:2px solid var(--bd2);
-  font-family:'DM Mono',monospace;font-size:11px;color:var(--txs);
-}
-.midtrans-badge span{color:var(--as);font-weight:bold}
-.payment-icons{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.payment-icons img{width:40px;height:24px;background:var(--bd2);padding:4px;border-radius:0}
-.upgrade-footer{padding:24px 0;display:flex;flex-direction:column;gap:12px}
-.upgrade-footer .btn{width:100%;padding:16px;background:transparent;border:2px solid var(--bd2);font-family:'DM Mono',monospace;font-size:13px;color:var(--txs);cursor:pointer}
-.upgrade-footer .btn:hover{border-color:var(--ap);color:var(--ap)}
-
-/* ==============================================
-   CHAT ROOM 
-============================================== */
-.chat-room{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column}
-.chat-room.on{display:flex}
-.chat-head{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:12px 18px;padding-top:calc(12px + var(--st));
-  border-bottom:2px solid var(--bd);background:var(--sf);flex-shrink:0;
-}
-.chat-info{flex:1;display:flex;align-items:center;gap:10px}
-.eyes-container{display:flex;gap:6px;align-items:center}
-.eye{width:26px;height:26px;background:var(--bd2);border:2px solid var(--bd);display:flex;align-items:center;justify-content:center;position:relative;animation:eyeM 3s ease-in-out infinite}
-.eye::after{content:'';width:8px;height:8px;background:var(--as);position:absolute;animation:pupilM 3s ease-in-out infinite}
-@keyframes eyeM{0%,100%{transform:translateX(0)}25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
-@keyframes pupilM{0%,100%{transform:translate(0,0)}25%{transform:translate(-2px,-1px)}75%{transform:translate(2px,1px)}}
-.partner-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--txs);letter-spacing:1px}
-.chat-timer{
-  font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--aq);
-  background:var(--bg);padding:8px 14px;border:2px solid var(--bd);box-shadow:3px 3px 0 #000;
-}
-.chat-timer.warn{color:var(--ap);border-color:var(--ap);animation:blink-w 1s step-end infinite;background:rgba(255,45,85,.08)}
-@keyframes blink-w{0%,100%{opacity:1}50%{opacity:.5}}
-.chat-close{width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:var(--bg);border:2px solid var(--bd);color:var(--txs);margin-left:12px;font-size:18px;cursor:pointer;box-shadow:3px 3px 0 #000;transition:all .08s}
-.chat-close:active{transform:translate(2px,2px);box-shadow:none}
-.chat-status-bar{display:none;padding:6px 18px;background:rgba(255,45,85,.12);border-bottom:1px solid rgba(255,45,85,.3);font-family:'DM Mono',monospace;font-size:10px;color:var(--ap);letter-spacing:1px;text-align:center;flex-shrink:0}
-.chat-status-bar.show{display:block}
-.chat-status-bar.info{background:rgba(0,229,255,.08);border-bottom-color:rgba(0,229,255,.2);color:var(--as)}
-.chat-messages{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch}
-.chat-msg{display:flex;flex-direction:column;max-width:85%}
-.chat-msg.own{align-self:flex-end}
-.chat-msg.other{align-self:flex-start}
-.chat-msg.system-msg{align-self:center!important;max-width:90%!important}
-.chat-bubble{padding:12px 16px;font-size:15px;line-height:1.55;word-wrap:break-word;border:2px solid}
-.own .chat-bubble{background:var(--ap);color:#fff;border-color:#000;box-shadow:3px 3px 0 #000;font-weight:600}
-.other .chat-bubble{background:var(--sf);border-color:var(--bd2);box-shadow:3px 3px 0 rgba(0,0,0,.5)}
-.system-msg .chat-bubble{background:transparent;border:2px dashed var(--bd);color:var(--txs);font-style:italic;text-align:center}
-.typing{display:flex;gap:5px;padding:14px 18px;background:var(--sf);border:2px solid var(--bd2);align-self:flex-start;width:fit-content;box-shadow:3px 3px 0 rgba(0,0,0,.5)}
-.typing-dot{width:7px;height:7px;background:var(--as);transform:rotate(45deg);animation:typi 1.4s infinite}
-.typing-dot:nth-child(2){animation-delay:.2s}
-.typing-dot:nth-child(3){animation-delay:.4s}
-@keyframes typi{0%,60%,100%{transform:rotate(45deg) translateY(0)}30%{transform:rotate(45deg) translateY(-5px)}}
-.chat-input-wrap{
-  padding:12px 18px;padding-bottom:calc(12px + var(--sb));
-  border-top:2px solid var(--bd);background:var(--sf);
-  display:flex;gap:10px;align-items:center;flex-shrink:0;
-}
-.chat-input{
-  flex:1;background:var(--bg);border:2px solid var(--bd2);
-  padding:13px 16px;font-size:15px;color:var(--tx);outline:none;
-  -webkit-appearance:none;transition:border-color .15s;font-family:'Syne',sans-serif;
-}
-.chat-input:focus{border-color:var(--ap)}
-.chat-input:disabled{opacity:.4;cursor:not-allowed}
-.chat-send{
-  width:48px;height:48px;background:var(--ap);border:2px solid #000;
-  display:flex;align-items:center;justify-content:center;color:#fff;
-  font-size:20px;flex-shrink:0;cursor:pointer;box-shadow:3px 3px 0 #000;transition:all .08s;
-}
-.chat-send:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
-.chat-send.disabled{opacity:.3;pointer-events:none}
-.warning-popup{
-  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-  background:var(--bg);border:3px solid var(--ap);padding:24px 32px;
-  z-index:1000;box-shadow:8px 8px 0 #000;text-align:center;min-width:280px;animation:fadeIn .2s ease;
-}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.warning-popup .title{font-family:'Bebas Neue',sans-serif;font-size:32px;color:var(--ap);letter-spacing:2px;margin-bottom:12px}
-.warning-popup .msg{font-family:'DM Mono',monospace;font-size:14px;color:var(--tx);margin-bottom:20px;line-height:1.6}
-.warning-popup .btn{background:var(--ap);color:#fff;border:2px solid #000;padding:12px 24px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;cursor:pointer;box-shadow:3px 3px 0 #000;margin:4px}
-.end-chat-options{
-  background:var(--sfe);border:2px solid var(--bd2);padding:24px;margin:20px 0;
-  text-align:center;box-shadow:6px 6px 0 #000;
-}
-.end-chat-options .title{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--aq);margin-bottom:12px}
-.end-chat-options .desc{font-size:14px;color:var(--txs);margin-bottom:24px}
-.end-chat-btns{display:flex;gap:12px;justify-content:center}
-.end-chat-btn{
-  flex:1;padding:14px;font-family:'Bebas Neue',sans-serif;font-size:18px;
-  letter-spacing:2px;cursor:pointer;border:2px solid #000;transition:all .08s;
-}
-.end-chat-btn.continue{background:var(--ap);color:#fff;box-shadow:4px 4px 0 #000}
-.end-chat-btn.continue:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
-.end-chat-btn.goodbye{background:transparent;color:var(--txs);border:2px solid var(--bd2);box-shadow:4px 4px 0 #000}
-.end-chat-btn.goodbye:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
-.ws-premium-lock{background:var(--sf);border:2px solid var(--bd2);padding:32px 20px;text-align:center;margin:20px 0;box-shadow:4px 4px 0 #000}
-.ws-premium-lock .icon{font-size:48px;margin-bottom:12px;opacity:.5}
-.ws-premium-lock .title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;margin-bottom:8px}
-.ws-premium-lock .desc{font-size:13px;color:var(--txs);margin-bottom:20px;line-height:1.6}
-.ws-premium-btn{background:var(--as);color:#000;border:2px solid #000;padding:14px 28px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;cursor:pointer;box-shadow:3px 3px 0 #000;transition:all .08s}
-.ws-premium-btn:active{transform:translate(2px,2px);box-shadow:none}
-.toast{
-  position:fixed;bottom:90px;left:50%;
-  transform:translateX(-50%) translateY(100px);
-  background:var(--tx);color:var(--bg);padding:12px 22px;
-  font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.5px;
-  z-index:600;opacity:0;transition:all .25s cubic-bezier(.175,.885,.32,1.275);
-  pointer-events:none;white-space:nowrap;border:2px solid #000;box-shadow:4px 4px 0 #000;
-}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.error{background:var(--ap);color:#fff}
-</style>
-</head>
-<body>
-<div class="app">
-  <!-- HEADER -->
-  <div class="header">
-    <div class="logo">SP<span class="x">✕</span>LL</div>
-    <div class="user-menu">
-      <span class="user-badge" id="userNameDisplay">@loading...</span>
-      <div class="settings-icon" id="settingsIcon">⋮</div>
-      <div class="settings-menu" id="settingsMenu">
-        <div class="settings-item" id="logoutItem">Logout</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SCROLL AREA -->
-  <div class="scroll">
-    <!-- RADAR -->
-    <div class="radar-sect">
-      <div class="radar-header">
-        <span class="radar-label"><span class="radar-label-dot"></span>VIBE RADAR</span>
-        <span class="online-pill" id="onlineCount">21 ONLINE</span>
-      </div>
-      <div class="radar-wrapper">
-        <div class="radar-bezel">
-          <span class="corner-tr"></span>
-          <span class="corner-bl"></span>
-          <span class="radar-bezel-label">VIBE RADAR — SYS ACTIVE</span>
-          <span class="radar-bezel-range">0.5km / 50km</span>
-          <div class="radar-cont" id="radarCont">
-            <div class="radar-grid"></div>
-            <div class="radar-ring"></div>
-            <div class="radar-cross"></div>
-            <canvas class="radar-canvas" id="radarCanvas"></canvas>
-            <div class="radar-dots" id="radarDots"></div>
-          </div>
-        </div>
-      </div>
-      <div class="radar-ctas">
-        <button class="btn-vibe-check" id="vibeCheckBtn">
-          <span>⬡</span><span>VIBE CHECK</span><span class="btn-chip">LIVE</span>
-        </button>
-        <button class="btn-whisper" id="whisperBtn">
-          <div class="btn-whisper-left">
-            <span class="btn-whisper-glyph">✦</span>
-            <span>WHISPERER</span>
-          </div>
-          <span class="ws-new-badge" id="wsStealthBadge">NEW</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- FILTER -->
-    <div class="filter-sect">
-      <div class="filter-top">
-        <span class="filter-title">KESELARASAN</span>
-        <span class="match-pct" id="vibePct">87%</span>
-      </div>
-      <input type="range" class="vibe-slider" id="vibeSlider" min="0" max="100" value="87">
-      <div class="slider-labels"><span>HOMIE</span><span>SEMI</span><span>ALL</span></div>
-      <div class="mood-scroll" id="moodScroll">
-        <button class="mood-chip active" data-mood="all">SEMUA</button>
-        <button class="mood-chip" data-mood="surviving">😮‍💨 SURVIVING</button>
-        <button class="mood-chip" data-mood="thriving">✨ THRIVING</button>
-        <button class="mood-chip" data-mood="chaotic">🌀 CHAOTIC</button>
-        <button class="mood-chip" data-mood="doom">🛌 DOOM</button>
-      </div>
-    </div>
-
-    <!-- SPILLS - TANPA COUNTER KATA -->
-    <div class="spills-sect">
-      <div class="sect-header">
-        <span class="sect-title">SPILL TERKINI</span>
-        <span class="sect-meta" id="feedMeta">MEMUAT...</span>
-      </div>
-      <div id="spillsList">
-        <div class="empty-state">
-          <span class="empty-icon">🍃</span>
-          <div class="empty-title">MEMUAT SPILL...</div>
-        </div>
-      </div>
-      <button class="refresh-btn" id="refreshBtn">
-        <span>↻</span><span>SEDUH TEH BARU</span>
-      </button>
-    </div>
-  </div><!-- /scroll -->
-
-  <!-- BOTTOM NAV -->
-  <nav class="bottom-nav">
-    <div class="nav-container">
-      <div class="nav-item active" data-page="spill"><span class="nav-icon">✕</span><span>SPILL</span></div>
-      <div class="nav-item" data-page="jejak"><span class="nav-icon">✦</span><span>JEJAK</span></div>
-      <div class="nav-item" data-page="glitch"><span class="nav-icon">⚡</span><span>GLITCH</span></div>
-      <div class="nav-item" data-page="cocomeo"><span class="nav-icon">〜</span><span>COCOMEO</span></div>
-    </div>
-  </nav>
-</div>
-
-<!-- MODALS -->
-<div class="modal" id="genderModal">
-  <div class="modal-header">
-    <div class="modal-title">PILIH GENDER</div>
-    <button class="modal-close" id="closeGenderModal">✕</button>
-  </div>
-  <div class="modal-body">
-    <span class="modal-tag">STEP 1/2</span>
-    <div class="modal-h">VIBE CHECK BUTUH KONTEKS</div>
-    <div class="modal-sub">biar algoritma bisa match kamu dengan vibe yang tepat</div>
-    <div class="gender-grid">
-      <div class="gender-card" data-gender="female">
-        <span class="gender-icon">♀️</span>
-        <span class="gender-label">TEMAN CEWEK</span>
-        <span class="gender-desc">Yuk ngobrol...</span>
-      </div>
-      <div class="gender-card" data-gender="male">
-        <span class="gender-icon">♂️</span>
-        <span class="gender-label">TEMAN COWOK</span>
-        <span class="gender-desc">Yuk bikin rusuh...</span>
-      </div>
-    </div>
-    <div class="info-box">
-      <p>🔒 <strong>privacy first</strong> — gender cuma dipakai buat matching sesi, ga disimpan &amp; ga muncul di profil</p>
-      <p style="margin-top:8px;color:var(--aq)">⚠️ <strong>Jangan pernah ungkap data pribadi — stay safe, stay anonim</strong></p>
-    </div>
-    <button class="modal-action-btn" id="confirmGenderBtn" disabled>GASKEUN →</button>
-    <div class="modal-hint">dengan lanjut, kamu setuju sama <button class="modal-hint-link" id="policyLink">kebijakan anonim</button></div>
-  </div>
-</div>
-
-<div class="modal" id="wsModal">
-  <div class="modal-header">
-    <div class="modal-title">WHISPERER</div>
-    <button class="modal-close" id="closeWsModal">✕</button>
-  </div>
-  <div class="modal-body" id="wsModalBody"></div>
-</div>
-
-<div class="upgrade-modal" id="upgradeModal">
-  <div class="upgrade-header">
-    <div class="modal-title">✦ UPGRADE ✦</div>
-    <button class="modal-close" id="closeUpgradeModal">✕</button>
-  </div>
-  <div class="upgrade-body">
-    <div class="package-grid">
-      <div class="package-card regular">
-        <div class="package-badge" style="background:var(--ap)">REGULER</div>
-        <div class="package-name reg">FULL VIBE CHECK</div>
-        <div class="package-price"><span class="regular">Rp 10.000</span></div>
-        <div class="package-desc">Obrolan lancar, vibe match, tanpa batas</div>
-        <div class="package-features">
-          <div class="package-feature"><span class="check">✓</span> Bebas ngobrol 24/7</div>
-          <div class="package-feature"><span class="check">✓</span> Ganti lawan bicara kapan aja</div>
-          <div class="package-feature"><span class="check">✓</span> Tetap ketemu lawan jenis</div>
-          <div class="package-feature"><span class="check">✓</span> Tanpa iklan</div>
-        </div>
-        <button class="package-btn" data-package="regular">PILIH PAKET 10K</button>
-      </div>
-      <div class="package-card promo">
-        <div class="package-badge" style="background:var(--aq);color:#000">PROMO</div>
-        <div class="package-name pro">VIBE CHECK + WHISPERER</div>
-        <div class="package-price">
-          <span class="original">Rp 50.000</span>
-          <span class="promo">Rp 20.000</span>
-        </div>
-        <div class="package-desc">Semua fitur Vibe Check + fitur spesial</div>
-        <div class="package-features">
-          <div class="package-feature"><span class="check">✓</span> Semua fitur Paket Reguler</div>
-          <div class="package-feature"><span class="check">✓</span> <strong>Whisperer Mode:</strong> Kirim pesan rahasia</div>
-          <div class="package-feature"><span class="check">✓</span> <strong>Read Receipt Off:</strong> Baca tanpa ketahuan</div>
-          <div class="package-feature"><span class="check">✓</span> <strong>Priority Match:</strong> Dapet lawan bicara lebih cepat</div>
-          <div class="package-feature"><span class="check">✓</span> Stiker & GIF exclusive</div>
-        </div>
-        <button class="package-btn promo" data-package="promo">PILIH PAKET 20K</button>
-      </div>
-    </div>
-    <div class="midtrans-badge"><span>MIDTRANS</span> — AMAN & TERPERCAYA</div>
-    <div class="payment-icons">
-      <span style="background:var(--bd2);padding:4px 8px">Gopay</span>
-      <span style="background:var(--bd2);padding:4px 8px">OVO</span>
-      <span style="background:var(--bd2);padding:4px 8px">Dana</span>
-      <span style="background:var(--bd2);padding:4px 8px">QRIS</span>
-    </div>
-    <div class="upgrade-footer">
-      <button class="btn" id="cancelUpgrade">NANTI DULU</button>
-    </div>
-  </div>
-</div>
-
-<!-- CHAT ROOM -->
-<div class="chat-room" id="chatRoom">
-  <div class="chat-head">
-    <div class="chat-info">
-      <div class="eyes-container">
-        <div class="eye"></div>
-        <div class="eye"></div>
-      </div>
-      <span class="partner-label" id="partnerLabel">MENCARI...</span>
-    </div>
-    <div class="chat-timer" id="chatTimer">15:00</div>
-    <button class="chat-close" id="closeChatBtn">✕</button>
-  </div>
-  <div class="chat-status-bar" id="chatStatusBar"></div>
-  <div class="chat-messages" id="chatMessages"></div>
-  <div class="chat-input-wrap">
-    <input type="text" class="chat-input" id="chatInput" placeholder="ketik sesuatu..." maxlength="200">
-    <button class="chat-send" id="sendButton">➤</button>
-  </div>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
-<!-- SCRIPTS -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/shared-constants.js"></script>
-
-<!-- SPILL GENERATOR -->
-<script src="/spill-generator.js"></script>
-
-<script>
-'use strict';
-console.log('[SPILL] v10.2 FINAL — CLEAN VERSION');
-
 // ============================================
-// SETTINGS MENU
+// spill-generator.js - VERSI BIG (LENGKAP)
+// POOL 50, JENDELA 8, VARIASI PANJANG 7/15/25/40 KATA
 // ============================================
-function toggleSettingsMenu() {
-  const menu = document.getElementById('settingsMenu');
-  if (menu) menu.classList.toggle('show');
-}
 
-document.addEventListener('click', function(event) {
-  const menu = document.getElementById('settingsMenu');
-  const icon = document.getElementById('settingsIcon');
-  if (menu && icon && !icon.contains(event.target) && !menu.contains(event.target)) {
-    menu.classList.remove('show');
-  }
-});
-
-// ============================================
-// JEJAK FALLBACK
-// ============================================
-if (typeof JEJAK === 'undefined') {
-  window.JEJAK = {
-    isLoggedIn: () => true,
-    getSub: () => ({ isActive: false, expiresAt: null, type: null }),
-    getSession: () => ({ 
-      uid: localStorage.getItem('user_id') || 'test123', 
-      username: localStorage.getItem('username') || 'testuser' 
-    }),
-    SUPABASE_URL: 'https://fuovfrdicdhnlymnacpz.supabase.co',
-    SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ1b3ZmcmRpY2Robmx5bW5hY3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwMjYxMzEsImV4cCI6MjA4MjYwMjEzMX0.oX4fVTEIWiRG2NaNJJKOV8dTnSHWhicLVMIFzZUl1o0'
-  };
-}
-
-// ============================================
-// CONSTANTS
-// ============================================
-const API_URL = 'https://jejak-dun.vercel.app/api/chat';
-const MAX_HISTORY_LEN = 8;
-const TYPING_SPEED = { min: 80, max: 150, punct: 250, sentence: 500 };
-
-// AI CHARACTERS
-const AI_CHARS = {
-  female: ['beby.manis','strawberry.shortcake','pretty.sad','little.fairy','cinnamon.girl'],
-  male:   ['sejuta.badai','satria.bajahitam','agak.koplak','chili.padi','bang.juned']
-};
-
-const MOODS = ['surviving','thriving','chaotic','doom'];
-const REACT_EMO = { skull:'💀', cry:'😭', fire:'🔥', upside:'🙃' };
-
-// ============================================
-// STATE
-// ============================================
-let sbClient = null;
-let myUserId = null;
-let myUsername = null;
-let realEntries = [];
-let currentGender = null;
-let chatPartner = null;
-let chatHistory = [];
-let isTyping = false;
-let chatTimeLeft = 900;
-let timerInterval = null;
-let fallbackTimer = null;
-let apiRetryCount = 0;
-let userSub = { isActive: false, expiresAt: null, type: null };
-let radarRAF = null;
-let radarInterval = null;
-let typingTimeout = null;
-let endChatOptionsShown = false;
-
-// ============================================
-// HELPERS
-// ============================================
-const $ = id => document.getElementById(id);
-const rnd = n => Math.floor(Math.random() * n);
-const rndOf = arr => arr[Math.floor(Math.random() * arr.length)];
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-const esc = t => { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; };
-
-function mk(tag, cls, style='') {
-  const el = document.createElement(tag);
-  if (cls) el.className = cls;
-  if (style) el.style.cssText = style;
-  return el;
-}
-
-function toast(msg, err = false) {
-  const t = $('toast');
-  if (!t) return;
-  t.textContent = msg;
-  t.className = 'toast' + (err ? ' error' : '');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-function closeModal(id) {
-  const modal = $(id);
-  if (modal) modal.classList.remove('on');
-}
-
-function closeUpgradeModal() {
-  $('upgradeModal')?.classList.remove('on');
-}
-
-function setChatStatus(msg, type = 'error', duration = 0) {
-  const bar = $('chatStatusBar');
-  if (!bar) return;
-  if (!msg) { 
-    bar.classList.remove('show', 'info'); 
-    return; 
-  }
-  bar.textContent = msg;
-  bar.className = 'chat-status-bar show' + (type === 'info' ? ' info' : '');
-  if (duration > 0) setTimeout(() => bar.classList.remove('show', 'info'), duration);
-}
-
-function loadSub() {
-  const s = JEJAK.getSub();
-  if (s) userSub = s;
-}
-
-// ============================================
-// SUPABASE INIT
-// ============================================
-function initSupabase() {
-  try {
-    if (!window.supabase?.createClient) return false;
-    sbClient = window.supabase.createClient(JEJAK.SUPABASE_URL, JEJAK.SUPABASE_KEY);
-    const sess = JEJAK.getSession();
-    myUserId = sess.uid;
-    myUsername = sess.username;
+(function() {
+    'use strict';
     
-    if (!myUserId) {
-      for (const k of ['user_id', 'jejak_user_id', 'uid']) {
-        const v = localStorage.getItem(k); 
-        if (v) { myUserId = v; break; }
-      }
-    }
-    
-    if (!myUsername) {
-      for (const k of ['jejak_username', 'username']) {
-        const v = localStorage.getItem(k); 
-        if (v) { myUsername = v; break; }
-      }
-    }
-    
-    if (myUserId) {
-      const el = $('userNameDisplay');
-      if (el) el.textContent = '@' + (myUsername || 'anonymous');
-    }
-    return true;
-  } catch (e) { 
-    console.warn('[SPILL] Supabase init error:', e); 
-    return false;
-  }
-}
-
-// ============================================
-// LOAD REAL ENTRIES
-// ============================================
-async function loadRealEntries() {
-  if (!sbClient) { 
-    if (typeof window.renderSpills === 'function') window.renderSpills();
-    return; 
-  }
-  
-  try {
-    const { data, error } = await sbClient
-      .from('entries')
-      .select('id,user_id,content,mood,reactions,created_at,profiles!inner(username)')
-      .order('created_at', { ascending: false })
-      .limit(20);
-    
-    if (error) { 
-      console.warn('[SPILL] Query error:', error.message); 
-      if (typeof window.renderSpills === 'function') window.renderSpills();
-      return; 
-    }
-    
-    realEntries = (data || [])
-      .filter(e => !(myUserId && e.user_id && e.user_id === myUserId))
-      .map(e => ({
-        id: e.id, 
-        dbId: e.id, 
-        author: e.profiles?.username || 'anonymous', 
-        isReal: true,
-        mood: e.mood || 'chaotic', 
-        content: e.content || '',
-        reactions: e.reactions || { skull:0, cry:0, fire:0, upside:0 },
-        userReacted: null, 
-        timestamp: new Date(e.created_at).getTime()
-      }));
-    
-    window.realEntries = realEntries;
-    
-    if (typeof window.updateFeedMeta === 'function') window.updateFeedMeta();
-    if (typeof window.renderSpills === 'function') window.renderSpills();
-    
-  } catch (err) { 
-    console.warn('[SPILL] loadRealEntries error:', err.message); 
-    if (typeof window.renderSpills === 'function') window.renderSpills();
-  }
-}
-
-// ============================================
-// REACTIONS
-// ============================================
-async function reactToSpill(spillId, reactionType) {
-  const spill = realEntries.find(e => e.id === spillId);
-  if (!spill) return;
-  
-  const wasActive = spill.userReacted === reactionType;
-  
-  if (wasActive) {
-    spill.reactions[reactionType] = Math.max(0, (spill.reactions[reactionType] || 0) - 1);
-    spill.userReacted = null;
-  } else {
-    if (spill.userReacted) {
-      const old = spill.userReacted;
-      spill.reactions[old] = Math.max(0, (spill.reactions[old] || 0) - 1);
-    }
-    spill.reactions[reactionType] = (spill.reactions[reactionType] || 0) + 1;
-    spill.userReacted = reactionType;
-  }
-  
-  if (typeof window.renderSpills === 'function') window.renderSpills();
-  
-  if (!sbClient) return;
-  
-  try {
-    await sbClient.from('entries').update({ reactions: spill.reactions }).eq('id', spillId);
-  } catch(e) { 
-    console.error('[React] Error:', e); 
-  }
-}
-
-// ============================================
-// LOGOUT
-// ============================================
-function logoutUser() {
-  if (!confirm('Logout dari akun ini?')) return;
-  
-  localStorage.removeItem('jejak_session');
-  localStorage.removeItem('jejak_user_id');
-  localStorage.removeItem('jejak_username');
-  localStorage.removeItem('user_id');
-  localStorage.removeItem('username');
-  localStorage.removeItem('uid');
-  localStorage.removeItem('supabase.auth.token');
-  
-  myUserId = null;
-  myUsername = null;
-  
-  const el = $('userNameDisplay');
-  if (el) el.textContent = '@guest';
-  
-  toast('✅ Logout berhasil', false);
-  setTimeout(() => { window.location.replace('/index.html'); }, 1000);
-}
-
-// ============================================
-// RADAR
-// ============================================
-let rdots = [], needleA = 0, needleO = 0, phA = Math.random()*Math.PI*2;
-const BASE_OM = (60/4*Math.PI*2)/(60*60);
-const TRAIL_CAP = 120;
-const trail = new Float32Array(TRAIL_CAP);
-let trailPtr = 0;
-const dotGlow = new Map();
-
-function initRadar() {
-  const cv = $('radarCanvas'), ct = $('radarCont');
-  if (!cv || !ct) return;
-  
-  const resize = () => { 
-    const r = ct.getBoundingClientRect(); 
-    cv.width = r.width; 
-    cv.height = r.height; 
-  };
-  
-  resize();
-  window.addEventListener('resize', resize, { passive: true });
-  
-  spawnDots();
-  
-  radarInterval = setInterval(() => {
-    rdots.forEach(d => {
-      d.vx = d.vx*0.88+(Math.random()-0.5)*0.3;
-      d.vy = d.vy*0.88+(Math.random()-0.5)*0.3;
-      d.x = Math.max(9, Math.min(91, d.x+d.vx));
-      d.y = Math.max(9, Math.min(91, d.y+d.vy));
-      if (d.el) { d.el.style.left = d.x+'%'; d.el.style.top = d.y+'%'; }
-    });
-  }, 100);
-  
-  needleA = Math.random()*Math.PI*2; 
-  trail.fill(needleA);
-  radarLoop(cv);
-}
-
-function spawnDots() {
-  const c = $('radarDots'); 
-  if (!c) return;
-  
-  c.innerHTML = ''; 
-  rdots = [];
-  
-  const types = ['ai','purple','red','lime'];
-  
-  for (let i = 0; i < 5+rnd(5)+2; i++) {
-    const a = Math.random()*Math.PI*2, d = 12+Math.random()*70;
-    const x = 50+Math.cos(a)*d/2, y = 50+Math.sin(a)*d/2;
-    const dot = document.createElement('div');
-    const type = types[rnd(types.length)];
-    dot.className = 'radar-dot ' + type;
-    dot.style.left = x+'%'; 
-    dot.style.top = y+'%';
-    c.appendChild(dot);
-    rdots.push({ el:dot, x, y, vx:0, vy:0, type, id:i });
-  }
-}
-
-function radarLoop(cv) {
-  const ctx = cv.getContext('2d');
-  
-  function draw() {
-    const W=cv.width, H=cv.height, cx=W/2, cy=H/2, R=Math.min(cx,cy)*0.88;
-    
-    if (!W||!H) { 
-      radarRAF=requestAnimationFrame(draw); 
-      return; 
-    }
-    
-    phA+=0.007;
-    needleO+=(BASE_OM*(1+Math.sin(phA)*0.35)-needleO)*0.028;
-    needleA=(needleA+needleO)%(Math.PI*2);
-    trail[trailPtr]=needleA; 
-    trailPtr=(trailPtr+1)%TRAIL_CAP;
-    
-    ctx.fillStyle='rgba(2,10,2,.18)'; 
-    ctx.fillRect(0,0,W,H);
-    
-    for (let i=0;i<TRAIL_CAP-1;i++) {
-      const alpha=Math.pow(1-i/TRAIL_CAP,2.2)*0.12;
-      if (alpha<0.002) break;
-      
-      const s=needleA-(i+1)*needleO, e=needleA-i*needleO;
-      ctx.save(); 
-      ctx.translate(cx,cy);
-      ctx.beginPath(); 
-      ctx.moveTo(0,0); 
-      ctx.arc(0,0,R,Math.min(s,e),Math.max(s,e),false); 
-      ctx.closePath();
-      ctx.fillStyle=`rgba(0,229,255,${alpha})`; 
-      ctx.fill(); 
-      ctx.restore();
-    }
-    
-    ctx.save(); 
-    ctx.translate(cx,cy); 
-    ctx.rotate(needleA);
-    ctx.shadowColor='rgba(0,229,255,.95)'; 
-    ctx.shadowBlur=12;
-    
-    const lg=ctx.createLinearGradient(0,0,R,0);
-    lg.addColorStop(0,'rgba(0,229,255,1)'); 
-    lg.addColorStop(0.8,'rgba(0,229,255,.4)'); 
-    lg.addColorStop(1,'rgba(0,229,255,0)');
-    
-    ctx.beginPath(); 
-    ctx.moveTo(3,0); 
-    ctx.lineTo(R,0); 
-    ctx.strokeStyle=lg; 
-    ctx.lineWidth=2; 
-    ctx.stroke();
-    
-    ctx.shadowBlur=20; 
-    ctx.beginPath(); 
-    ctx.rect(-4,-4,8,8); 
-    ctx.fillStyle='#00e5ff'; 
-    ctx.fill(); 
-    ctx.restore();
-    
-    rdots.forEach((d,di) => {
-      const px=d.x/100*W, py=d.y/100*H;
-      let da=Math.atan2(py-cy,px-cx); 
-      if(da<0)da+=Math.PI*2;
-      
-      let diff=needleA-da; 
-      if(diff<0)diff+=Math.PI*2;
-      
-      const age=dotGlow.get(di)??999;
-      
-      if(diff<0.18&&age>30){ 
-        dotGlow.set(di,0); 
-        if(d.el){d.el.classList.add('active'); 
-          setTimeout(()=>{if(d.el)d.el.classList.remove('active');},800);
-        }
-      } else { 
-        dotGlow.set(di,age+1); 
-      }
-      
-      if(age<55){
-        const t=age/55, ga=(1-t)*(1-t)*0.9; 
-        if(ga<0.01)return;
-        
-        const col=d.type==='purple'?'191,90,242':d.type==='red'?'255,45,85':d.type==='lime'?'191,255,0':'0,229,255';
-        const gr=ctx.createRadialGradient(px,py,0,px,py,16*(1-t)+3);
-        gr.addColorStop(0,`rgba(${col},${ga})`); 
-        gr.addColorStop(1,`rgba(${col},0)`);
-        
-        ctx.beginPath(); 
-        ctx.arc(px,py,16*(1-t)+3,0,Math.PI*2); 
-        ctx.fillStyle=gr; 
-        ctx.fill();
-      }
-    });
-    
-    radarRAF=requestAnimationFrame(draw);
-  }
-  
-  radarRAF=requestAnimationFrame(draw);
-}
-
-// ============================================
-// VIBE CHECK (CHAT)
-// ============================================
-function startVibeCheck() {
-  chatPartner = null;
-  chatTimeLeft = 900;
-  chatHistory = [];
-  apiRetryCount = 0;
-  isTyping = false;
-  endChatOptionsShown = false;
-  
-  if (typingTimeout) clearTimeout(typingTimeout);
-  if (fallbackTimer) { 
-    clearTimeout(fallbackTimer); 
-    fallbackTimer = null; 
-  }
-  
-  setChatStatus('');
-  $('genderModal').classList.add('on');
-}
-
-function selectGender(el, g) {
-  document.querySelectorAll('.gender-card').forEach(c => c.classList.remove('selected'));
-  el.classList.add('selected');
-  currentGender = g;
-  $('confirmGenderBtn').disabled = false;
-}
-
-function confirmGender() {
-  if (!currentGender) return;
-  closeModal('genderModal');
-  
-  const room = $('chatRoom');
-  room.classList.add('on');
-  $('chatTimer').textContent = '15:00';
-  $('chatTimer').classList.remove('warn');
-  $('partnerLabel').textContent = 'MENCARI...';
-  setChatStatus('');
-  
-  const msgs = $('chatMessages');
-  msgs.innerHTML = '';
-  addSysMsg('⚡ mengaktifkan radar pencarian...');
-  
-  const steps = [
-    { t:3000, m:'👀 masih memindai...' },
-    { t:6000, m:'📡 lingkungan sepi, radar melebar' },
-    { t:9000, m:'🌐 menjangkau radius 2km' },
-    { t:12000, m:'⏳ hampir selesai...' }
-  ];
-  
-  steps.forEach(({ t, m }) => setTimeout(() => { if (!chatPartner) updateSysMsg(m); }, t));
-  
-  fallbackTimer = setTimeout(() => {
-    if (!chatPartner && room.classList.contains('on')) {
-      $('chatMessages').innerHTML = '';
-      fallbackToAI();
-    }
-  }, 15000);
-}
-
-function addSysMsg(text) {
-  const msgs = $('chatMessages'); 
-  if (!msgs) return;
-  
-  const d = mk('div','chat-msg system-msg');
-  d.innerHTML = `<div class="chat-bubble">${text}</div>`;
-  msgs.appendChild(d);
-  d.scrollIntoView({ behavior:'smooth' });
-}
-
-function updateSysMsg(text) {
-  const msgs = $('chatMessages'); 
-  if (!msgs) return;
-  
-  const last = msgs.lastElementChild;
-  if (last?.classList.contains('system-msg')) last.remove();
-  addSysMsg(text);
-}
-
-function fallbackToAI() {
-  if (fallbackTimer) { 
-    clearTimeout(fallbackTimer); 
-    fallbackTimer = null; 
-  }
-  
-  const chars = AI_CHARS[currentGender === 'female' ? 'female' : 'male'];
-  chatPartner = { name: chars[rnd(chars.length)], isAI: true };
-  chatHistory = [];
-  apiRetryCount = 0;
-  isTyping = false;
-  
-  const msgs = $('chatMessages');
-  if (msgs) msgs.innerHTML = '';
-  
-  const d = mk('div','chat-msg system-msg');
-  d.innerHTML = `<div class="chat-bubble" style="background:rgba(0,229,255,.08);border:2px solid var(--as);padding:14px 20px;color:var(--as);font-weight:600">👤 seseorang ditemukan!</div>`;
-  
-  if (msgs) msgs.appendChild(d);
-  
-  setTimeout(() => {
-    if (msgs) msgs.innerHTML = '';
-    callChatAPI('', true);
-    startTimer();
-  }, 1200);
-}
-
-function startTimer() {
-  clearInterval(timerInterval);
-  
-  timerInterval = setInterval(() => {
-    if (chatTimeLeft <= 0) { 
-      endChat(); 
-      return; 
-    }
-    
-    chatTimeLeft--;
-    
-    const m = Math.floor(chatTimeLeft/60), s = chatTimeLeft%60;
-    const tel = $('chatTimer');
-    
-    if (tel) tel.textContent = String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
-    
-    if (chatTimeLeft === 120) showTwoMinWarning();
-    if (chatTimeLeft === 60 && tel) tel.classList.add('warn');
-  }, 1000);
-}
-
-function showTwoMinWarning() {
-  document.querySelector('.warning-popup')?.remove();
-  
-  const p = document.createElement('div');
-  p.className = 'warning-popup';
-  p.innerHTML = `<div class="title">⚠️ 2 MENIT</div><div class="msg">Sesi chatting hampir habis!</div><button class="btn" onclick="this.closest('.warning-popup').remove()">OK</button>`;
-  
-  document.body.appendChild(p);
-}
-
-function endChat() {
-  clearInterval(timerInterval);
-  
-  if (checkSub()) { 
-    chatTimeLeft=900; 
-    const tel=$('chatTimer'); 
-    if(tel){tel.textContent='15:00';tel.classList.remove('warn');} 
-    return; 
-  }
-  
-  if (endChatOptionsShown) return;
-  
-  endChatOptionsShown = true;
-  
-  const msgs = $('chatMessages');
-  if (!msgs) return;
-  
-  const optionsDiv = mk('div','chat-msg system-msg','align-self:center;margin:20px 0;max-width:90%');
-  optionsDiv.innerHTML = `
-    <div class="end-chat-options">
-      <div class="title">⏰ WAKTU HABIS</div>
-      <div class="desc">Mau lanjut ngobrol sama orang ini?</div>
-      <div class="end-chat-btns">
-        <button class="end-chat-btn continue" onclick="openUpgradeModal()">LANJUTIN</button>
-        <button class="end-chat-btn goodbye" onclick="sayGoodbye()">SAY GOODBYE</button>
-      </div>
-    </div>
-  `;
-  
-  msgs.appendChild(optionsDiv);
-  optionsDiv.scrollIntoView({ behavior:'smooth' });
-}
-
-function sayGoodbye() {
-  const msgs = $('chatMessages');
-  if (!msgs) return;
-  
-  const last = msgs.lastElementChild;
-  if (last?.classList.contains('system-msg')) last.remove();
-  
-  const goodbyeDiv = mk('div','chat-msg system-msg');
-  goodbyeDiv.innerHTML = `<div class="chat-bubble" style="background:transparent;border-color:var(--txm);color:var(--txm)">👋 Obrolan selesai. Sampai jumpa lagi!</div>`;
-  
-  msgs.appendChild(goodbyeDiv);
-  
-  const inp = $('chatInput');
-  const sb = $('sendButton');
-  
-  if (inp) inp.disabled = true;
-  if (sb) sb.classList.add('disabled');
-  
-  setTimeout(() => { closeChat(); }, 3000);
-}
-
-function closeChat() {
-  $('chatRoom').classList.remove('on');
-  
-  clearInterval(timerInterval);
-  if (fallbackTimer) { clearTimeout(fallbackTimer); fallbackTimer = null; }
-  if (typingTimeout) clearTimeout(typingTimeout);
-  
-  isTyping = false;
-  apiRetryCount = 0;
-  endChatOptionsShown = false;
-  
-  const sb = $('sendButton'); 
-  if (sb) sb.classList.remove('disabled');
-  
-  const inp = $('chatInput'); 
-  if (inp) inp.disabled = false;
-  
-  setChatStatus('');
-}
-
-function checkSub() {
-  return userSub.isActive && userSub.expiresAt && new Date(userSub.expiresAt) > new Date();
-}
-
-function openUpgradeModal() {
-  $('upgradeModal').classList.add('on');
-}
-
-function getOfflineGreeting(characterName, shortName) {
-  const passiveChars = ['beby.manis', 'pretty.sad'];
-  const activeChars = ['strawberry.shortcake', 'agak.koplak', 'bang.juned'];
-  const randomChars = ['little.fairy'];
-  const langsungChars = ['sejuta.badai', 'satria.bajahitam', 'chili.padi'];
-  
-  if (passiveChars.includes(characterName)) {
-    return rndOf([`eh halo...`,`hai.`,`halo... lo diem aja?`,`mmmm... lo duluan deh yang ngomong`,`koq diem?`]);
-  }
-  if (activeChars.includes(characterName)) {
-    return rndOf([`hai hai! lagi ngapain?`,`halo! seneng bisa ngobrol 😊`,`heyy! akhirnya ada yang nyapa!`]);
-  }
-  if (randomChars.includes(characterName)) {
-    return rndOf([`hai! lo percaya parallel universe?`,`halo, lagi mikirin sesuatu`,`eh, lo tau gak, hari ini...`]);
-  }
-  if (langsungChars.includes(characterName)) {
-    return rndOf([`yo,`,`hai, lo siapa?`,`oh, ada apa?`]);
-  }
-  return rndOf([`hai juga! lagi santai nih`,`halo, gimana kabarnya?`,`hai! seneng kenal ya`]);
-}
-
-function getOfflineReply(userMsg) {
-  const msg = (userMsg || '').toLowerCase().trim();
-  
-  if (/^(halo|hai|hey|hi|helo|hy|hallo)\b/.test(msg)) {
-    return rndOf(['hai juga! lo gimana?','heyy, ada apa nih?','halo halo! lagi santai?']);
-  }
-  if (/\b(apa kabar|kabar lo|kabarnya|lo gimana|gimana kabar|lo baik|kabar kamu)\b/.test(msg)) {
-    return rndOf(['baik baik aja sih, biasa. lo sendiri gimana?','lumayan, lagi agak sibuk. lo kabarnya?','alhamdulillah baik. lo gimana, ada cerita?']);
-  }
-  if (/\b(lagi apa|ngapain|lagi sibuk|lg apa|lg ngapain)\b/.test(msg)) {
-    return rndOf(['lagi dengerin musik sambil rebahan. lo?','lagi scroll-scroll ga jelas wkwk. lo ngapain?','lagi ngopi santai. lo lagi apa?']);
-  }
-  if (/\b(dimana|di mana|lagi mana|mana lo|mana lu)\b/.test(msg)) {
-    return rndOf(['di rumah nih. lo?','lagi di kafe. lo dimana?','di kamar. lo?']);
-  }
-  if (/^(iya|ya|yep|yup|betul|bener|emang|emg|iyaa+)\b/.test(msg)) {
-    return rndOf(['haha iya kan? relate banget','nah bener banget sih','iya tuh, gue juga ngerasain']);
-  }
-  if (/\b(wkwk|haha|hehe|lol|xixi)\b/.test(msg)) {
-    return rndOf(['haha ngapain lo ketawa','wkwk ada apa?','loh kenapa ketawa? cerita dong']);
-  }
-  
-  const isEmotional = /\b(sedih|nangis|bete|kesel|capek|cape|stress|baper|galau|kecewa|marah|takut|cemas|masalah|gendeng)\b/.test(msg);
-  if (msg.length > 120 && isEmotional) {
-    return rndOf(['wah, pasti berat ya. lo mau cerita lebih?','gue dengerin. gimana sekarang?','relate banget. lo oke?']);
-  }
-  if (/\b(kenapa|gimana caranya|apa itu|apa sih|maksudnya apa|menurut lo)\b/.test(msg)) {
-    return rndOf(['hmm, gue juga masih mikirin itu. lo punya pendapat?','menarik. lo nanya karena ada masalah?','belum yakin juga sih. lo gimana?']);
-  }
-  
-  return rndOf(['hmm, cerita lebih dong','oh gitu, lo gimana sekarang?','wah beneran? lo oke?','gue dengerin. trus?']);
-}
-
-async function typeMessage(el, text, skipTyping = false) {
-  if (skipTyping) { 
-    el.textContent = text; 
-    return; 
-  }
-  
-  return new Promise(resolve => {
-    let i = 0;
-    const chars = text.split('');
-    el.textContent = '';
-    
-    const next = () => {
-      if (i >= chars.length) return resolve();
-      
-      el.textContent += chars[i];
-      
-      let delay = TYPING_SPEED.min + Math.random()*(TYPING_SPEED.max-TYPING_SPEED.min);
-      const c = chars[i], nc = chars[i+1];
-      
-      if ('.!?'.includes(c) && (!nc || nc === ' ')) delay = TYPING_SPEED.sentence;
-      else if (',:;'.includes(c)) delay = TYPING_SPEED.punct;
-      
-      i++;
-      setTimeout(next, delay);
+    const CONFIG = {
+        POOL_SIZE: 50,          // 50 entries di pool
+        WINDOW_SIZE: 8,          // 8 entries tampil
+        BREW_INTERVAL: 240000,   // 4 menit
+        LOOP_AFTER: 50           // loop setelah 50
     };
-    
-    next();
-  });
-}
 
-async function callChatAPI(userMsg, isFirst = false) {
-  if (!chatPartner?.isAI) return;
-  if (isTyping && !isFirst) { 
-    toast('Tunggu partner selesai ngetik...', true); 
-    return; 
-  }
-  
-  isTyping = true;
-  
-  const sb = $('sendButton');
-  const inp = $('chatInput');
-  
-  if (sb) sb.classList.add('disabled');
-  if (inp) inp.disabled = true;
-  
-  // Coba endpoint lokal dulu
-  const endpoints = ['/api/chat'];
-  
-  let reply = null;
-  let useOffline = false;
-  
-  for (const endpoint of endpoints) {
-    try {
-      console.log('[API] Trying endpoint:', endpoint);
-      
-      const ctrl = new AbortController();
-      const tid = setTimeout(() => ctrl.abort(), 5000);
-      
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: isFirst ? 'halo' : userMsg,
-          characterName: chatPartner.name,
-          userName: myUsername || 'user',
-          lastMessages: chatHistory.slice(-MAX_HISTORY_LEN)
-        }),
-        signal: ctrl.signal
-      });
-      
-      clearTimeout(tid);
-      
-      if (res.ok) {
-        const data = await res.json();
-        if (data.reply) { 
-          reply = data.reply; 
-          console.log('[API] Success from endpoint:', endpoint);
-          break; 
+    let fullPool = [];           // 50 entries
+    let windowStart = 0;          // posisi jendela (0-49)
+    let activeMood = 'all';
+    let isLoading = false;
+    let nextId = 1;
+
+    // ============================================
+    // INITIAL POOL - 50 ENTRIES VARIATIF
+    // ============================================
+    const INITIAL_SPILLS = [
+        // 7 KATA
+        { id: 'spill_001', author: 'beby.manis', mood: 'surviving', content: 'deadline skripsi makin deket, anxiety naik turun 😮‍💨', wordCount: 7, timestamp: Date.now() - 5000000, reactions: { skull:12, cry:23, fire:5, upside:3 } },
+        { id: 'spill_002', author: 'agak.koplak', mood: 'chaotic', content: 'client minta revisi jam 11 malem, this is fine 🔥', wordCount: 7, timestamp: Date.now() - 4900000, reactions: { skull:18, cry:31, fire:9, upside:7 } },
+        { id: 'spill_003', author: 'satria.bajahitam', mood: 'doom', content: 'motor mogok, dompet tipis, pacar ngambek. triple combo 🫠', wordCount: 7, timestamp: Date.now() - 4800000, reactions: { skull:22, cry:35, fire:1, upside:14 } },
+        
+        // 15 KATA
+        { id: 'spill_004', author: 'pretty.sad', mood: 'doom', content: 'HR minta masuk sabtu minggu, mau resign tapi tabungan tinggal 200rb. bingung jadinya 😭', wordCount: 15, timestamp: Date.now() - 4700000, reactions: { skull:25, cry:42, fire:3, upside:12 } },
+        { id: 'spill_005', author: 'strawberry.shortcake', mood: 'thriving', content: 'akhirnya dapet panggilan interview setelah ngelamar 50+ tempat, semoga lancar ya Allah ✨', wordCount: 15, timestamp: Date.now() - 4600000, reactions: { skull:3, cry:8, fire:45, upside:12 } },
+        { id: 'spill_006', author: 'chili.padi', mood: 'thriving', content: 'orderan sneakers laku 15 pasang hari ini, rezeki lancar 💰😎', wordCount: 15, timestamp: Date.now() - 4500000, reactions: { skull:2, cry:4, fire:38, upside:9 } },
+        
+        // 25 KATA
+        { id: 'spill_007', author: 'bang.juned', mood: 'surviving', content: 'skripsi bab 3 masih error, dosen pembimbing ga bales chat seminggu, padahal deadline sidang tinggal 2 bulan. pengen mundur tapi udah di depan mata 🥲', wordCount: 25, timestamp: Date.now() - 4400000, reactions: { skull:15, cry:28, fire:2, upside:8 } },
+        { id: 'spill_008', author: 'little.fairy', mood: 'chaotic', content: 'ortu ngomel terus disuruh kuliah, tapi gue dapet project freelance 5 juta. antara nurutin ortu atau ngejar cuan, bingung sumpah 🌀', wordCount: 25, timestamp: Date.now() - 4300000, reactions: { skull:9, cry:15, fire:7, upside:18 } },
+        
+        // 40 KATA
+        { id: 'spill_009', author: 'sejuta.badai', mood: 'chaotic', content: 'minggu pagi jam 3, ga bisa tidur karena overthinking masa depan. buka IG liat temen pada nikah, beli rumah, punya mobil, sementara gue masih struggle with skripsi dan dompet tipis. maybe this is my villain arc idk 🛌💔', wordCount: 40, timestamp: Date.now() - 4200000, reactions: { skull:30, cry:45, fire:8, upside:20 } },
+        
+        // 7 KATA (lagi)
+        { id: 'spill_010', author: 'beby.manis', mood: 'chaotic', content: 'hari ini nangis karena liat mantan bahagia, padahal udah move on 3 bulan', wordCount: 7, timestamp: Date.now() - 4100000, reactions: { skull:15, cry:30, fire:2, upside:5 } },
+        { id: 'spill_011', author: 'agak.koplak', mood: 'thriving', content: 'akhirnya konten viral juga setelah setahun bikin TikTok', wordCount: 7, timestamp: Date.now() - 4000000, reactions: { skull:5, cry:2, fire:60, upside:15 } },
+        
+        // 15 KATA (lagi)
+        { id: 'spill_012', author: 'pretty.sad', mood: 'surviving', content: 'hari ini selamat dari meeting tanpa dimarahin boss, progress dikit', wordCount: 15, timestamp: Date.now() - 3900000, reactions: { skull:8, cry:12, fire:15, upside:7 } },
+        { id: 'spill_013', author: 'bang.juned', mood: 'doom', content: 'skripsi bab 4 error, debugging dari pagi ga ketemu', wordCount: 15, timestamp: Date.now() - 3800000, reactions: { skull:25, cry:30, fire:1, upside:3 } },
+        
+        // 25 KATA (lagi)
+        { id: 'spill_014', author: 'strawberry.shortcake', mood: 'surviving', content: 'interview hari ini, semoga lolos ya Allah. udah 50x ngelamar, maybe this is the one', wordCount: 25, timestamp: Date.now() - 3700000, reactions: { skull:2, cry:5, fire:20, upside:8 } },
+        { id: 'spill_015', author: 'chili.padi', mood: 'chaotic', content: 'orderan batal, buyer ngilang. rugi waktu dan modal. dagang emang keras', wordCount: 25, timestamp: Date.now() - 3600000, reactions: { skull:20, cry:25, fire:2, upside:1 } },
+        
+        // 40 KATA (lagi)
+        { id: 'spill_016', author: 'little.fairy', mood: 'thriving', content: 'project freelance selesai, dapet bonus 3 juta. rasanya seneng banget bisa ngehasilin uang sendiri tanpa harus ngemis ke ortu. semoga terus berkah', wordCount: 40, timestamp: Date.now() - 3500000, reactions: { skull:1, cry:3, fire:35, upside:10 } },
+        { id: 'spill_017', author: 'sejuta.badai', mood: 'surviving', content: 'lagu baru dirilis, cuma didenger 50 orang. sedih sih tapi gapapa, yang penting berkarya. siapa tau next time bisa viral', wordCount: 40, timestamp: Date.now() - 3400000, reactions: { skull:10, cry:15, fire:8, upside:5 } },
+        
+        // Lanjut sampai 50 entries...
+        { id: 'spill_018', author: 'satria.bajahitam', mood: 'thriving', content: 'orderan bengkel rame, cuan lumayan buat bulan ini', wordCount: 15, timestamp: Date.now() - 3300000, reactions: { skull:3, cry:2, fire:28, upside:7 } },
+        { id: 'spill_019', author: 'beby.manis', mood: 'doom', content: 'skripsi revisi, dosen nyuruh ganti tema. semangat langsung drop', wordCount: 15, timestamp: Date.now() - 3200000, reactions: { skull:35, cry:40, fire:1, upside:2 } },
+        { id: 'spill_020', author: 'agak.koplak', mood: 'chaotic', content: 'boss minta kerja lembur tapi gaji masih sama, bodo amat ah', wordCount: 7, timestamp: Date.now() - 3100000, reactions: { skull:22, cry:15, fire:8, upside:12 } },
+        { id: 'spill_021', author: 'pretty.sad', mood: 'thriving', content: 'kerjaan kelar, weekend healing ke pantai', wordCount: 7, timestamp: Date.now() - 3000000, reactions: { skull:2, cry:5, fire:30, upside:15 } },
+        { id: 'spill_022', author: 'bang.juned', mood: 'chaotic', content: 'coding error, minta tolong temen. debugging rame-rame', wordCount: 7, timestamp: Date.now() - 2900000, reactions: { skull:12, cry:18, fire:5, upside:8 } },
+        { id: 'spill_023', author: 'strawberry.shortcake', mood: 'doom', content: 'interview ditolak lagi, ke-51 kalinya. mental udah ancur', wordCount: 25, timestamp: Date.now() - 2800000, reactions: { skull:30, cry:45, fire:1, upside:4 } },
+        { id: 'spill_024', author: 'chili.padi', mood: 'surviving', content: 'modal habis, orderan sepi. bingung mau usaha apa lagi', wordCount: 15, timestamp: Date.now() - 2700000, reactions: { skull:25, cry:30, fire:2, upside:3 } },
+        { id: 'spill_025', author: 'little.fairy', mood: 'doom', content: 'client kabur ga bayar, rugi 5 juta', wordCount: 7, timestamp: Date.now() - 2600000, reactions: { skull:28, cry:35, fire:1, upside:2 } },
+        { id: 'spill_026', author: 'sejuta.badai', mood: 'thriving', content: 'gig kecil-kecilan, lumayan buat makan seminggu', wordCount: 15, timestamp: Date.now() - 2500000, reactions: { skull:5, cry:8, fire:20, upside:12 } },
+        { id: 'spill_027', author: 'satria.bajahitam', mood: 'chaotic', content: 'pelanggan komplain, harus garansi. repot', wordCount: 7, timestamp: Date.now() - 2400000, reactions: { skull:18, cry:22, fire:3, upside:6 } },
+        { id: 'spill_028', author: 'beby.manis', mood: 'thriving', content: 'alhamdulillah skripsi ACC, sidang bulan depan', wordCount: 7, timestamp: Date.now() - 2300000, reactions: { skull:2, cry:5, fire:42, upside:15 } },
+        { id: 'spill_029', author: 'agak.koplak', mood: 'surviving', content: 'kerjaan numpuk, deadline mepet, bawaannya pengen resign', wordCount: 15, timestamp: Date.now() - 2200000, reactions: { skull:25, cry:30, fire:2, upside:5 } },
+        { id: 'spill_030', author: 'pretty.sad', mood: 'chaotic', content: 'lagi fase bucin, padahal baru kenal seminggu. gila bener', wordCount: 7, timestamp: Date.now() - 2100000, reactions: { skull:15, cry:20, fire:5, upside:12 } },
+        { id: 'spill_031', author: 'bang.juned', mood: 'thriving', content: 'akhirnya sidang, nilai A alhamdulillah', wordCount: 7, timestamp: Date.now() - 2000000, reactions: { skull:1, cry:2, fire:55, upside:20 } },
+        { id: 'spill_032', author: 'strawberry.shortcake', mood: 'chaotic', content: 'pacar ngambek karena lupa beli kado anniversary', wordCount: 7, timestamp: Date.now() - 1900000, reactions: { skull:15, cry:25, fire:3, upside:8 } },
+        { id: 'spill_033', author: 'chili.padi', mood: 'doom', content: 'orderan sepi, modal habis, galau', wordCount: 7, timestamp: Date.now() - 1800000, reactions: { skull:30, cry:35, fire:1, upside:2 } },
+        { id: 'spill_034', author: 'little.fairy', mood: 'surviving', content: 'client baru minta revisi, lagi-lagi deadline', wordCount: 15, timestamp: Date.now() - 1700000, reactions: { skull:12, cry:18, fire:5, upside:7 } },
+        { id: 'spill_035', author: 'sejuta.badai', mood: 'chaotic', content: 'inspirasi lagu dateng pas mau tidur, harus bangun buat nulis', wordCount: 15, timestamp: Date.now() - 1600000, reactions: { skull:8, cry:5, fire:25, upside:10 } },
+        { id: 'spill_036', author: 'satria.bajahitam', mood: 'surviving', content: 'bengkel lagi sepi, mikir buka usaha sampingan', wordCount: 15, timestamp: Date.now() - 1500000, reactions: { skull:10, cry:12, fire:15, upside:8 } },
+        { id: 'spill_037', author: 'beby.manis', mood: 'chaotic', content: 'bentar lagi sidang, deg-degan campur bahagia', wordCount: 7, timestamp: Date.now() - 1400000, reactions: { skull:8, cry:12, fire:25, upside:10 } },
+        { id: 'spill_038', author: 'agak.koplak', mood: 'thriving', content: 'promosi jabatan, gaji naik 30%', wordCount: 7, timestamp: Date.now() - 1300000, reactions: { skull:1, cry:2, fire:65, upside:18 } },
+        { id: 'spill_039', author: 'pretty.sad', mood: 'doom', content: 'ditolak investor lagi, usaha hampir bangkrut', wordCount: 7, timestamp: Date.now() - 1200000, reactions: { skull:35, cry:45, fire:1, upside:3 } },
+        { id: 'spill_040', author: 'bang.juned', mood: 'chaotic', content: 'ngoding seharian, error masih banyak', wordCount: 7, timestamp: Date.now() - 1100000, reactions: { skull:20, cry:25, fire:5, upside:5 } },
+        { id: 'spill_041', author: 'strawberry.shortcake', mood: 'surviving', content: 'kerjaan numpuk, pengen cuti tapi ga enak', wordCount: 7, timestamp: Date.now() - 1000000, reactions: { skull:15, cry:20, fire:8, upside:10 } },
+        { id: 'spill_042', author: 'chili.padi', mood: 'thriving', content: 'buka cabang baru, orderan makin banyak', wordCount: 15, timestamp: Date.now() - 900000, reactions: { skull:2, cry:3, fire:45, upside:12 } },
+        { id: 'spill_043', author: 'little.fairy', mood: 'doom', content: 'project deadline besok, client minta revisi', wordCount: 7, timestamp: Date.now() - 800000, reactions: { skull:28, cry:30, fire:2, upside:4 } },
+        { id: 'spill_044', author: 'sejuta.badai', mood: 'surviving', content: 'gig malem minggu, sepi pengunjung', wordCount: 7, timestamp: Date.now() - 700000, reactions: { skull:12, cry:15, fire:8, upside:7 } },
+        { id: 'spill_045', author: 'satria.bajahitam', mood: 'chaotic', content: 'bengkel rame, tapi banyak komplain', wordCount: 15, timestamp: Date.now() - 600000, reactions: { skull:18, cry:20, fire:5, upside:8 } },
+        { id: 'spill_046', author: 'beby.manis', mood: 'thriving', content: 'sidang kelar, lulus!', wordCount: 7, timestamp: Date.now() - 500000, reactions: { skull:0, cry:10, fire:70, upside:25 } },
+        { id: 'spill_047', author: 'agak.koplak', mood: 'doom', content: 'tiktok kena shadowban, engagement turun drastis', wordCount: 15, timestamp: Date.now() - 400000, reactions: { skull:30, cry:35, fire:2, upside:5 } },
+        { id: 'spill_048', author: 'pretty.sad', mood: 'thriving', content: 'dapet investor baru, bisnis selamat', wordCount: 15, timestamp: Date.now() - 300000, reactions: { skull:1, cry:3, fire:50, upside:15 } },
+        { id: 'spill_049', author: 'bang.juned', mood: 'chaotic', content: 'coding error, stress, tapi akhirnya nemu solusi', wordCount: 7, timestamp: Date.now() - 200000, reactions: { skull:15, cry:18, fire:12, upside:10 } },
+        { id: 'spill_050', author: 'strawberry.shortcake', mood: 'surviving', content: 'akhirnya dapet kerja, tapi gaji kecil', wordCount: 7, timestamp: Date.now() - 100000, reactions: { skull:8, cry:12, fire:20, upside:8 } }
+    ];
+
+    // ============================================
+    // GENERATE VARIASI PANJANG
+    // ============================================
+    function generateVariedContent(mood) {
+        const panjangOptions = [7, 15, 25, 40];
+        const targetKata = panjangOptions[Math.floor(Math.random() * panjangOptions.length)];
+        
+        const templates = {
+            surviving: {
+                7: [
+                    'capek banget hari ini, pengen rebahan aja 🥲',
+                    'deadline makin deket, anxiety naik turun 😮‍💨',
+                    'kerjaan numpuk, bawaannya pengen resign',
+                    'hari ini selamat, besok belum tau'
+                ],
+                15: [
+                    'bangun tidur langsung overthinking masa depan, capek banget rasanya. semoga hari ini lebih baik',
+                    'kerja lembur sampe malem, tapi gapapa demi masa depan. yang penting sehat',
+                    'stress ngerjain skripsi bab 3, dosennya ga pernah bales chat. pengen nangis',
+                    'hari ini lumayan produktif, kerjaan kelar 5 task. proud of myself ✨'
+                ],
+                25: [
+                    'minggu pagi jam 3, ga bisa tidur karena overthinking masa depan. buka IG liat temen pada nikah, beli rumah, punya mobil, sementara gue masih struggle with skripsi dan dompet tipis',
+                    'kerjaan numpuk, deadline mepet, client minta revisi mulu. capek fisik dan mental, tapi kalo berenti ga bisa makan. hidup keras banget sumpah',
+                    'hari ini nangis di toilet kantor gara-gara dimarahin boss. rasanya pengen resign aja tapi takut ga dapet kerjaan lain. bingung jadinya'
+                ],
+                40: [
+                    'selasa siang panas banget, client nanyain progress, laptop mau lowbat, listrik mati, mental lagi chaos. ditambah inget kalo semalem lupa sholat isya. hidup emang kadang suka bikin kita nanya: ini ujian atau lagi di-prank sama takdir sih 🫠',
+                    'minggu malem anxiety attack, mikirin minggu depan ada meeting penting, presentasi, deadline. ditambah hubungan sama keluarga lagi ga baik. rasanya pengen lari dari semua ini, tapi ga tau mau lari kemana'
+                ]
+            },
+            thriving: {
+                7: [
+                    'alhamdulillah hari ini cuan! 💰',
+                    'akhirnya sidang ACC, lulus! 🎉',
+                    'promosi jabatan, gaji naik!',
+                    'project kelar, client puas'
+                ],
+                15: [
+                    'akhirnya sidang kelar, nilai A alhamdulillah. perjuangan 4 tahun ga sia-sia',
+                    'promosi jabatan, gaji naik 30% plus bonus. kerja keras akhirnya dihargai',
+                    'project freelance selesai, dapet bonus 2 juta. rezeki anak soleh kata emak',
+                    'tiktok konten viral, followers nambah 10k dalam seminggu'
+                ],
+                25: [
+                    'hari ini closing 3 client dalam sehari, komisi lumayan buat bulan depan. rasanya seneng banget, kerja keras selama ini ga sia-sia. makasih buat diri sendiri yang ga pernah nyerah',
+                    'alhamdulillah dapet beasiswa S2 ke luar negeri. perjuangan ngurus berkas, ikut tes, wawancara, akhirnya berbuah manis. doain lancar ya semuanya',
+                    'akhirnya bisa beli mobil hasil jerih payah sendiri. inget dulu naik angkot tiap hari, sekarang udah punya kendaraan sendiri. bersyukur banget'
+                ],
+                40: [
+                    'setelah 2 tahun struggle cari kerja, akhirnya dapet panggilan interview dan langsung diterima di perusahaan impian. gaji 2x lipat dari sebelumnya, kerjaannya juga sesuai passion. rasaya campur aduk antara seneng, haru, dan ga percaya',
+                    'bisa beli rumah pertama buat orang tua di usia 25. inget dulu mereka selalu ngontrak, pindah-pindah terus. sekarang udah punya tempat sendiri yang bisa ditempatin sampe tua. rasanya ga bisa diungkapin pake kata-kata'
+                ]
+            },
+            chaotic: {
+                7: [
+                    'hidup lagi kacau balau 🔥',
+                    'hari ini nangis, besok ketawa sendiri',
+                    'antara resign atau bertahan, bingung',
+                    'pacar ngambek, kerjaan deadline'
+                ],
+                15: [
+                    'client minta revisi jam 11 malem, deadline besok pagi. this is fine 🔥. tidur bisa kapan aja',
+                    'pacar ngambek karena lupa anniversary, kerjaan deadline, ortu nanyain nikah. triple combo',
+                    'boss minta kerja lembur tapi gaji masih sama. bodo amat ah, yolo',
+                    'tiktok kena shadowban, engagement turun, follower berkurang. pusing'
+                ],
+                25: [
+                    'hari ini chaotic banget: pagi dimarahin boss, siang motor mogok di jalan, malem pacar minta putus. sumpah ini hari apa coba. pengen marah-marah tapi ga ada yang salah',
+                    'hidup lagi absurd: semalem nangis mikirin masa depan, paginya dapet kabar baik. naik turun terus rasanya. maybe this is just how life works',
+                    'kadang semangat, kadang males. hari ini lagi males tapi kerjaan numpuk. bawaannya pengen rebahan terus tapi ga bisa. bingung jadinya'
+                ],
+                40: [
+                    'hari ini chaotic level dewa: bangun kesiangan, ketinggalan meeting penting, dimarahin boss di depan semua orang. pas mau balas dendam makan siang, e-wallet error, duit ga cukup. pulangnya motor mogok lagi, harus ngedorong sampe bengkel. sampe rumah langsung hujan deres. duduk di teras sambil nangis, tiba-tiba mantan chat "kangen". sumpah ini universe lagi ngetes batas kesabaran apa gimana sih 🫠. capek bener',
+                    'lagi fase dimana semua hal dateng bersamaan: kerjaan deadline, keluarga lagi konflik, hubungan sama pasangan lagi ga baik, temen pada sibuk sendiri. rasanya sendirian banget di dunia ini. pengen teriak tapi ga ada yang denger. maybe this is what adulting feels like. bingung harus gimana'
+                ]
+            },
+            doom: {
+                7: [
+                    'rasanya pengen rebahan aja selamanya 🛌',
+                    'capek fisik dan mental',
+                    'hidup keras banget sumpah',
+                    'ga semangat ngapa-ngapain'
+                ],
+                15: [
+                    'kerjaan ga kelar-kelar, mental udah di ujung tanduk. pengen resign tapi ga punya tabungan',
+                    'skripsi bab 4 error, debugging dari pagi ga ketemu. maybe this is the end',
+                    'orderan sepi, modal habis, bingung mau gimana. dagang kok susah',
+                    'ditolak investor lagi, usaha hampir bangkrut. capek'
+                ],
+                25: [
+                    'skripsi bab 3 error, dosen pembimbing ga bales chat seminggu, deadline sidang tinggal 2 bulan. pengen mundur tapi udah di depan mata. rasanya hopeless banget',
+                    'HR minta masuk sabtu minggu, mau resign tapi tabungan tinggal 200rb. bingung jadinya. hidup kok keras',
+                    'kerja lembur tiap hari, weekend juga, tapi gaji ga naik-naik. mental udah ga karuan. mau ngeluh takut dianggap ga bersyukur'
+                ],
+                40: [
+                    'udah 6 bulan nganggur, lamaran kerja ga ada yang dipanggil. tabungan habis, mulai jualin barang-barang. orang tua makin sering nanyain "kapan kerja?" rasanya pengen lari dari rumah tapi ga tau mau kemana. setiap hari cuma rebahan sambil scroll job portal, expectation vs reality jauh banget. sometimes i wonder apakah ini ada ujungnya. maybe i\'m not good enough for anything. hope is getting thinner each day',
+                    'terjebak di hubungan toxic selama 3 tahun, tapi susah banget buat keluar. takut sendiri, takut ga dapet yang lebih baik, takut nyakitin dia. padahal tau kalo ini ga sehat. mental makin drop tiap hari, temen pada jauhin karena capek denger curhatan yang itu-itu aja. rasanya pengen teriak tapi ga ada suara. maybe this is what doom feels like'
+                ]
+            }
+        };
+        
+        const moodTemplates = templates[mood]?.[targetKata] || templates.surviving[7];
+        const content = moodTemplates[Math.floor(Math.random() * moodTemplates.length)];
+        
+        return { content, wordCount: targetKata };
+    }
+
+    // ============================================
+    // INIT
+    // ============================================
+    function init() {
+        console.log('[SpillGen] 🚀 Initializing pool 50, window 8, variasi panjang...');
+        
+        fullPool = [...INITIAL_SPILLS].sort((a, b) => b.timestamp - a.timestamp);
+        nextId = 51;
+        windowStart = 0;
+        
+        renderSpills();
+        
+        setInterval(() => {
+            addNewEntry();
+        }, CONFIG.BREW_INTERVAL);
+    }
+
+    // ============================================
+    // SEDUH TEH BARU
+    // ============================================
+    function seduhTehBaru() {
+        console.log('[SpillGen] 🍵 Seduh: geser jendela ke bawah...');
+        windowStart = (windowStart + 1) % CONFIG.POOL_SIZE;
+        renderSpills();
+    }
+
+    function seduhKeAtas() {
+        console.log('[SpillGen] ⬆️ Seduh: geser jendela ke atas...');
+        windowStart = (windowStart - 1 + CONFIG.POOL_SIZE) % CONFIG.POOL_SIZE;
+        renderSpills();
+    }
+
+    // ============================================
+    // TAMBAH ENTRIES BARU
+    // ============================================
+    async function addNewEntry() {
+        console.log('[SpillGen] 🆕 Menambah entries baru ke pool...');
+        
+        try {
+            const response = await fetch('/api/brew', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ count: 1 })
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.spills && data.spills.length > 0) {
+                    const apiSpill = data.spills[0];
+                    const wordCount = apiSpill.content.split(/\s+/).length;
+                    
+                    const newSpill = {
+                        id: `spill_${nextId++}`,
+                        author: apiSpill.author || 'ai.generator',
+                        mood: apiSpill.mood || 'surviving',
+                        content: apiSpill.content,
+                        wordCount: wordCount,
+                        timestamp: Date.now(),
+                        reactions: apiSpill.reactions || {
+                            skull: Math.floor(Math.random() * 20) + 5,
+                            cry: Math.floor(Math.random() * 30) + 10,
+                            fire: Math.floor(Math.random() * 25) + 3,
+                            upside: Math.floor(Math.random() * 15) + 2
+                        }
+                    };
+                    
+                    console.log(`[SpillGen] ✅ API entry: ${wordCount} kata (${newSpill.mood})`);
+                    
+                    fullPool = [newSpill, ...fullPool.slice(0, CONFIG.POOL_SIZE - 1)];
+                    renderSpills();
+                    return;
+                }
+            }
+            
+            // Fallback offline
+            addOfflineEntry();
+            
+        } catch (error) {
+            console.warn('[SpillGen] Gagal ambil dari API, pakai offline');
+            addOfflineEntry();
         }
-      }
-    } catch(e) { 
-      console.warn('[API] Endpoint failed:', endpoint, e.message); 
     }
-  }
-  
-  if (!reply) {
-    console.log('[API] All endpoints failed, using offline mode');
-    const shortName = (chatPartner.name || '').split('.')[0];
-    reply = isFirst ? getOfflineGreeting(chatPartner.name, shortName) : getOfflineReply(userMsg);
-    useOffline = true;
-  }
-  
-  // Simulasi typing dengan delay random
-  await sleep(300 + Math.random()*400);
-  
-  const msgs = $('chatMessages');
-  const msgDiv = mk('div','chat-msg other');
-  const bubble = mk('div','chat-bubble');
-  msgDiv.appendChild(bubble);
-  
-  if (msgs) { 
-    msgs.appendChild(msgDiv); 
-    setTimeout(() => msgDiv.scrollIntoView({ behavior:'smooth', block:'end' }), 10); 
-  }
-  
-  await typeMessage(bubble, reply, useOffline);
-  
-  chatHistory.push({ role: 'assistant', content: reply });
-  
-  const MAX_HIST_TOTAL = MAX_HISTORY_LEN * 2;
-  if (chatHistory.length > MAX_HIST_TOTAL) chatHistory = chatHistory.slice(-MAX_HIST_TOTAL);
-  
-  isTyping = false;
-  
-  if (sb) sb.classList.remove('disabled');
-  if (inp) { 
-    inp.disabled = false; 
-    setTimeout(() => inp.focus(), 100); 
-  }
-}
 
-// ============================================
-// SEND MESSAGE
-// ============================================
-function sendMsg() {
-  if (isTyping) { 
-    toast('Tunggu partner selesai ngetik...', true); 
-    return; 
-  }
-  
-  if (!chatPartner) { 
-    toast('Partner belum ditemukan', true); 
-    return; 
-  }
-  
-  const inp = $('chatInput');
-  const text = inp.value.trim();
-  
-  if (!text) return;
-  
-  const msgs = $('chatMessages');
-  const d = mk('div','chat-msg own');
-  const b = mk('div','chat-bubble');
-  b.textContent = text;
-  d.appendChild(b);
-  
-  if (msgs) { 
-    msgs.appendChild(d); 
-    setTimeout(() => d.scrollIntoView({ behavior:'smooth', block:'end' }), 10); 
-  }
-  
-  inp.value = '';
-  chatHistory.push({ role: 'user', content: text });
-  
-  if (chatPartner.isAI) callChatAPI(text, false);
-}
-
-// ============================================
-// ONLINE COUNT
-// ============================================
-function updateOnlineCount() {
-  const el = $('onlineCount');
-  if (el) el.textContent = (rnd(25)+18) + ' ONLINE';
-}
-
-// ============================================
-// WHISPERER
-// ============================================
-function openWsModal() {
-  const isPrem = checkSub() && userSub.type === 'monthly';
-  const body = $('wsModalBody');
-  
-  if (!body) return;
-  
-  body.innerHTML = isPrem
-    ? `<p style="font-family:'DM Mono',monospace;padding:20px;color:var(--txs)">✦ fitur whisperer aktif</p>`
-    : `<div class="ws-premium-lock"><div class="icon">✦</div><div class="title">WHISPERER PREMIUM</div>
-       <div class="desc">fitur ini khusus untuk pengguna paket premium 30 hari</div>
-       <button class="ws-premium-btn" onclick="closeModal('wsModal');openUpgradeModal()">UPGRADE SEKARANG</button></div>`;
-  
-  $('wsModal').classList.add('on');
-}
-
-function selectPackage(type) {
-  closeUpgradeModal();
-  toast(`✅ Memproses pembayaran paket ${type === 'regular' ? '10K' : '20K'}...`, false);
-}
-
-// ============================================
-// INIT
-// ============================================
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('[SPILL] v10.2 FINAL — CLEAN VERSION');
-  
-  loadSub();
-  initSupabase();
-  initRadar();
-  loadRealEntries();
-  updateOnlineCount();
-  
-  // SETUP EVENT LISTENERS
-  $('vibeSlider')?.addEventListener('input', e => {
-    const pct = $('vibePct');
-    if (pct) pct.textContent = e.target.value + '%';
-  });
-  
-  $('settingsIcon')?.addEventListener('click', toggleSettingsMenu);
-  $('logoutItem')?.addEventListener('click', logoutUser);
-  $('vibeCheckBtn')?.addEventListener('click', startVibeCheck);
-  $('whisperBtn')?.addEventListener('click', openWsModal);
-  $('refreshBtn')?.addEventListener('click', () => {
-    if (typeof window.seduhTehBaru === 'function') {
-      window.seduhTehBaru();
+    // ============================================
+    // TAMBAH ENTRIES OFFLINE
+    // ============================================
+    function addOfflineEntry() {
+        const authors = ['beby.manis', 'agak.koplak', 'pretty.sad', 'bang.juned', 
+                         'strawberry.shortcake', 'chili.padi', 'little.fairy', 'sejuta.badai', 
+                         'satria.bajahitam', 'cinnamon.girl'];
+        
+        const moods = ['surviving', 'thriving', 'chaotic', 'doom'];
+        
+        const author = authors[Math.floor(Math.random() * authors.length)];
+        const mood = moods[Math.floor(Math.random() * moods.length)];
+        
+        const { content, wordCount } = generateVariedContent(mood);
+        
+        const newSpill = {
+            id: `offline_${nextId++}`,
+            author: author,
+            mood: mood,
+            content: content,
+            wordCount: wordCount,
+            timestamp: Date.now(),
+            reactions: {
+                skull: Math.floor(Math.random() * 20) + 5,
+                cry: Math.floor(Math.random() * 30) + 10,
+                fire: Math.floor(Math.random() * 25) + 3,
+                upside: Math.floor(Math.random() * 15) + 2
+            }
+        };
+        
+        fullPool = [newSpill, ...fullPool.slice(0, CONFIG.POOL_SIZE - 1)];
+        
+        console.log(`[SpillGen] 📝 Offline entry: ${wordCount} kata (${mood})`);
+        renderSpills();
     }
-  });
-  
-  $('closeGenderModal')?.addEventListener('click', () => closeModal('genderModal'));
-  $('closeWsModal')?.addEventListener('click', () => closeModal('wsModal'));
-  $('closeUpgradeModal')?.addEventListener('click', closeUpgradeModal);
-  $('cancelUpgrade')?.addEventListener('click', closeUpgradeModal);
-  $('closeChatBtn')?.addEventListener('click', closeChat);
-  $('policyLink')?.addEventListener('click', () => alert('kebijakan anonim: ga ada log, ga ada trace'));
-  
-  document.querySelectorAll('.gender-card').forEach(card => {
-    card.addEventListener('click', function() {
-      selectGender(this, this.dataset.gender);
-    });
-  });
-  
-  $('confirmGenderBtn')?.addEventListener('click', confirmGender);
-  
-  document.querySelectorAll('.package-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const pkg = this.dataset.package || 'regular';
-      selectPackage(pkg);
-    });
-  });
-  
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.addEventListener('click', function() {
-      const page = this.dataset.page;
-      if (page) window.location.href = page + '.html';
-    });
-  });
-  
-  $('chatInput')?.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { 
-      e.preventDefault(); 
-      sendMsg(); 
+
+    // ============================================
+    // RENDER SPILLS
+    // ============================================
+    function renderSpills() {
+        const container = document.getElementById('spillsList');
+        if (!container) return;
+        
+        let windowSpills = [];
+        for (let i = 0; i < CONFIG.WINDOW_SIZE; i++) {
+            const index = (windowStart + i) % CONFIG.POOL_SIZE;
+            windowSpills.push(fullPool[index]);
+        }
+        
+        let toShow = windowSpills;
+        if (activeMood !== 'all') {
+            toShow = windowSpills.filter(s => s.mood === activeMood);
+            if (toShow.length === 0) {
+                toShow = windowSpills;
+            }
+        }
+        
+        const metaEl = document.getElementById('feedMeta');
+        if (metaEl) {
+            const endPos = windowStart + CONFIG.WINDOW_SIZE - 1;
+            const displayEnd = endPos >= CONFIG.POOL_SIZE ? endPos - CONFIG.POOL_SIZE + 1 : endPos + 1;
+            
+            const wordCounts = toShow.map(s => s.wordCount || s.content.split(/\s+/).length);
+            const avgWords = Math.round(wordCounts.reduce((a, b) => a + b, 0) / wordCounts.length);
+            const minWords = Math.min(...wordCounts);
+            const maxWords = Math.max(...wordCounts);
+            
+            metaEl.textContent = `Jendela ${windowStart+1}-${displayEnd} | ${minWords}-${maxWords} kata (avg ${avgWords})`;
+        }
+        
+        let html = '';
+        for (let s of toShow) {
+            const wordCount = s.wordCount || s.content.split(/\s+/).length;
+            
+            html += `<div class="spill-card" data-id="${s.id}">
+                <div class="spill-head">
+                    <span class="spill-user">@${escapeHtml(s.author)}</span>
+                    <span class="spill-mood ${s.mood}">${s.mood.toUpperCase()}</span>
+                    <span class="spill-words" style="font-size:9px; color:var(--txm); margin-left:8px;">${wordCount} kata</span>
+                </div>
+                <div class="spill-body">${escapeHtml(s.content)}</div>
+                <div class="spill-actions">
+                    <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'skull')">
+                        💀 <span class="react-count">${s.reactions.skull}</span>
+                    </button>
+                    <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'cry')">
+                        😭 <span class="react-count">${s.reactions.cry}</span>
+                    </button>
+                    <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'fire')">
+                        🔥 <span class="react-count">${s.reactions.fire}</span>
+                    </button>
+                    <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'upside')">
+                        🙃 <span class="react-count">${s.reactions.upside}</span>
+                    </button>
+                </div>
+            </div>`;
+        }
+        
+        container.innerHTML = html;
     }
-  });
-  
-  $('sendButton')?.addEventListener('click', sendMsg);
-  $('userNameDisplay')?.addEventListener('dblclick', logoutUser);
-  
-  setInterval(updateOnlineCount, 30000);
-  setInterval(() => { 
-    if (realEntries.length > 0) loadRealEntries(); 
-  }, 30000);
-  
-  window.addEventListener('beforeunload', () => {
-    clearInterval(radarInterval);
-    clearInterval(timerInterval);
-    if (radarRAF) cancelAnimationFrame(radarRAF);
-    if (fallbackTimer) clearTimeout(fallbackTimer);
-    if (typingTimeout) clearTimeout(typingTimeout);
-  });
-});
-</script>
-</body>
-</html>
+
+    // ============================================
+    // REACTION HANDLER
+    // ============================================
+    window.reactToSpill = function(spillId, reactionType) {
+        const spill = fullPool.find(s => s.id === spillId);
+        if (!spill) return;
+        
+        spill.reactions[reactionType] = (spill.reactions[reactionType] || 0) + 1;
+        renderSpills();
+    };
+
+    // ============================================
+    // FILTER MOOD
+    // ============================================
+    function filterMood(mood) {
+        activeMood = mood;
+        
+        document.querySelectorAll('.mood-chip').forEach(chip => {
+            chip.classList.toggle('active', chip.dataset.mood === mood);
+        });
+        
+        renderSpills();
+    }
+
+    // ============================================
+    // ESCAPE HTML
+    // ============================================
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // ============================================
+    // EXPOSE
+    // ============================================
+    window.initSpillGenerator = init;
+    window.seduhTehBaru = seduhTehBaru;
+    window.seduhKeAtas = seduhKeAtas;
+    window.filterMood = filterMood;
+    window.getPool = () => fullPool;
+    window.getWindowStart = () => windowStart;
+
+    // Auto start
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => setTimeout(init, 1000));
+    } else {
+        setTimeout(init, 1000);
+    }
+
+})();
