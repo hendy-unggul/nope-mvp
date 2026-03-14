@@ -148,71 +148,57 @@
     }
 
     // ============================================
-// RENDER SPILLS - DENGAN VALIDASI
-// ============================================
-function renderSpills() {
-    const container = document.getElementById('spillsList');
-    if (!container) return;
-    
-    // Validasi fullPool
-    if (!fullPool || fullPool.length === 0) {
-        container.innerHTML = `<div class="empty-state">Belum ada spill</div>`;
-        return;
-    }
-    
-    let windowSpills = [];
-    for (let i = 0; i < CONFIG.WINDOW_SIZE; i++) {
-        const index = (windowStart + i) % CONFIG.POOL_SIZE;
-        // Pastikan index valid
-        if (index < fullPool.length) {
+    // RENDER SPILLS - TANPA COUNTER KATA
+    // ============================================
+    function renderSpills() {
+        const container = document.getElementById('spillsList');
+        if (!container) return;
+        
+        let windowSpills = [];
+        for (let i = 0; i < CONFIG.WINDOW_SIZE; i++) {
+            const index = (windowStart + i) % CONFIG.POOL_SIZE;
             windowSpills.push(fullPool[index]);
         }
-    }
-    
-    // Filter mood
-    let toShow = windowSpills.filter(s => s !== undefined);
-    if (activeMood !== 'all') {
-        toShow = toShow.filter(s => s && s.mood === activeMood);
-    }
-    
-    if (toShow.length === 0) {
-        container.innerHTML = `<div class="empty-state">Tidak ada spill untuk mood ini</div>`;
-        return;
-    }
-    
-    // Meta
-    const metaEl = document.getElementById('feedMeta');
-    if (metaEl) {
-        const endPos = windowStart + CONFIG.WINDOW_SIZE - 1;
-        const displayEnd = endPos >= CONFIG.POOL_SIZE ? endPos - CONFIG.POOL_SIZE + 1 : endPos + 1;
-        metaEl.textContent = `Jendela ${windowStart+1}-${displayEnd}`;
-    }
-    
-    // Render
-    container.innerHTML = toShow.map(s => `
-        <div class="spill-card" data-id="${s.id}">
-            <div class="spill-head">
-                <span class="spill-user">@${escapeHtml(s.author)}</span>
-                <span class="spill-mood ${s.mood}">${s.mood.toUpperCase()}</span>
+        
+        let toShow = windowSpills;
+        if (activeMood !== 'all') {
+            toShow = windowSpills.filter(s => s.mood === activeMood);
+            if (toShow.length === 0) toShow = windowSpills;
+        }
+        
+        // Meta hanya jendela, tanpa statistik
+        const metaEl = document.getElementById('feedMeta');
+        if (metaEl) {
+            const endPos = windowStart + CONFIG.WINDOW_SIZE - 1;
+            const displayEnd = endPos >= CONFIG.POOL_SIZE ? endPos - CONFIG.POOL_SIZE + 1 : endPos + 1;
+            metaEl.textContent = `Jendela ${windowStart+1}-${displayEnd}`;
+        }
+        
+        // Render tanpa counter kata
+        container.innerHTML = toShow.map(s => `
+            <div class="spill-card" data-id="${s.id}">
+                <div class="spill-head">
+                    <span class="spill-user">@${escapeHtml(s.author)}</span>
+                    <span class="spill-mood ${s.mood}">${s.mood.toUpperCase()}</span>
+                </div>
+                <div class="spill-body">${escapeHtml(s.content)}</div>
+                <div class="spill-actions">
+                    <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'skull')">
+                        💀 <span class="react-count">${s.reactions?.skull || 0}</span>
+                    </button>
+                    <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'cry')">
+                        😭 <span class="react-count">${s.reactions?.cry || 0}</span>
+                    </button>
+                    <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'fire')">
+                        🔥 <span class="react-count">${s.reactions?.fire || 0}</span>
+                    </button>
+                    <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'upside')">
+                        🙃 <span class="react-count">${s.reactions?.upside || 0}</span>
+                    </button>
+                </div>
             </div>
-            <div class="spill-body">${escapeHtml(s.content)}</div>
-            <div class="spill-actions">
-                <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'skull')">
-                    💀 <span class="react-count">${s.reactions?.skull || 0}</span>
-                </button>
-                <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'cry')">
-                    😭 <span class="react-count">${s.reactions?.cry || 0}</span>
-                </button>
-                <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'fire')">
-                    🔥 <span class="react-count">${s.reactions?.fire || 0}</span>
-                </button>
-                <button class="react-btn" onclick="window.reactToSpill('${s.id}', 'upside')">
-                    🙃 <span class="react-count">${s.reactions?.upside || 0}</span>
-                </button>
-            </div>
-        </div>
-    `).join('');
-}
+        `).join('');
+    }
 
     // ============================================
     // REACTION HANDLER
