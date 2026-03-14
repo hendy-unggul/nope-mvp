@@ -108,4 +108,8 @@
     };
 
     setTimeout(init, 1000);
+    // EXPOSE FUNGSI PENTING
+window.renderSpills = renderSpills;
+window.getPool = () => fullPool;
+window.reactToSpill = reactToSpill;
 })();
