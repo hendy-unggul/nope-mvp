@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ============================================
-   STYLE LENGKAP
+   STYLE LENGKAP (SAMA SEPERTI SEBELUMNYA)
    ============================================ */
 :root {
     --bg: #080808;
@@ -408,6 +408,7 @@ body::after {
     width: 100%;
     height: 100%;
     z-index: 5;
+    display: block;
 }
 
 .radar-dots {
@@ -893,7 +894,7 @@ body::after {
 }
 
 /* ============================================
-   BOTTOM NAVIGATION - FIXED
+   BOTTOM NAVIGATION
    ============================================ */
 .bottom-nav {
     position: fixed;
@@ -1999,6 +2000,8 @@ function simulateOnlineUsers() {
 // VIBE CHECK
 // ============================================
 function startVibeCheck(requestType) {
+    console.log('[Vibe] Starting with type:', requestType);
+    
     simulateOnlineUsers();
     
     if (onlineUsers.length >= 5) {
@@ -2271,13 +2274,17 @@ function sendMsg() {
             $('#typingIndicator')?.remove();
             
             let reply = '';
+            const msg = text.toLowerCase();
+            
             if (chatPartner.context === 'heart') {
-                if (text.toLowerCase().includes('halo')) reply = 'Hai juga! Cerita dong.';
-                else if (text.toLowerCase().includes('lagi apa')) reply = 'Lagi santai. Kamu?';
+                if (msg.includes('halo') || msg.includes('hai')) reply = 'Hai juga! Cerita dong.';
+                else if (msg.includes('lagi apa')) reply = 'Lagi santai. Kamu?';
+                else if (msg.includes('capek')) reply = 'Iya, kadang capek banget ya. Ada yang bisa diceritain?';
                 else reply = 'Oh gitu... cerita lebih dong.';
             } else {
-                if (text.toLowerCase().includes('halo')) reply = 'Yo! Lagi apa?';
-                else if (text.toLowerCase().includes('lagi apa')) reply = 'Lagi bosen nih. Ada ide?';
+                if (msg.includes('halo') || msg.includes('hai')) reply = 'Yo! Lagi apa?';
+                else if (msg.includes('lagi apa')) reply = 'Lagi bosen nih. Ada ide?';
+                else if (msg.includes('rusuh')) reply = 'Wkwk siap! Mau bikin rusuh gimana?';
                 else reply = 'Haha iya. Lo gimana?';
             }
             
@@ -2378,7 +2385,7 @@ function selectPackage(type) {
 }
 
 // ============================================
-// RADAR FUNCTIONS - VISUAL JARUM KEMBALI SEPERTI SEMULA
+// RADAR FUNCTIONS - FIXED VERSION
 // ============================================
 let rdots = [];
 let needleA = 0;
@@ -2393,20 +2400,39 @@ let radarRAF = null;
 let radarInterval = null;
 
 function initRadar() {
+    console.log('[Radar] Initializing...');
+    
     const cv = $('#radarCanvas');
     const ct = $('#radarCont');
-    if (!cv || !ct) return;
     
+    if (!cv) {
+        console.error('[Radar] Canvas not found!');
+        return;
+    }
+    
+    if (!ct) {
+        console.error('[Radar] Container not found!');
+        return;
+    }
+    
+    // Set initial size
     const resize = () => {
         const r = ct.getBoundingClientRect();
-        cv.width = r.width;
-        cv.height = r.height;
+        if (r.width > 0 && r.height > 0) {
+            cv.width = r.width;
+            cv.height = r.height;
+            console.log('[Radar] Resized to:', cv.width, 'x', cv.height);
+        }
     };
+    
     resize();
     window.addEventListener('resize', resize, { passive: true });
     
+    // Spawn dots
     spawnDots();
     
+    // Start dot animation
+    if (radarInterval) clearInterval(radarInterval);
     radarInterval = setInterval(() => {
         rdots.forEach(d => {
             d.vx = d.vx * 0.88 + (Math.random() - 0.5) * 0.3;
@@ -2420,61 +2446,91 @@ function initRadar() {
         });
     }, 100);
     
+    // Initialize radar
     needleA = Math.random() * Math.PI * 2;
     trail.fill(needleA);
+    
+    // Start animation loop
+    if (radarRAF) cancelAnimationFrame(radarRAF);
     radarLoop(cv);
 }
 
 function spawnDots() {
     const c = $('#radarDots');
     if (!c) return;
+    
     c.innerHTML = '';
     rdots = [];
     const types = ['ai', 'purple', 'red', 'lime'];
+    
     for (let i = 0; i < 5 + rnd(5) + 2; i++) {
         const a = Math.random() * Math.PI * 2;
         const d = 12 + Math.random() * 70;
         const x = 50 + Math.cos(a) * d / 2;
         const y = 50 + Math.sin(a) * d / 2;
+        
         const dot = document.createElement('div');
         const type = types[rnd(types.length)];
         dot.className = 'radar-dot ' + type;
         dot.style.left = x + '%';
         dot.style.top = y + '%';
+        
         c.appendChild(dot);
-        rdots.push({ el: dot, x, y, vx: 0, vy: 0, type, id: i });
+        rdots.push({ 
+            el: dot, 
+            x, y, 
+            vx: (Math.random() - 0.5) * 0.5, 
+            vy: (Math.random() - 0.5) * 0.5, 
+            type, 
+            id: i 
+        });
     }
+    
+    console.log('[Radar] Spawned', rdots.length, 'dots');
 }
 
 function radarLoop(cv) {
     const ctx = cv.getContext('2d');
+    if (!ctx) {
+        console.error('[Radar] Could not get 2D context');
+        return;
+    }
     
     function draw() {
         const W = cv.width;
         const H = cv.height;
-        const cx = W / 2;
-        const cy = H / 2;
-        const R = Math.min(cx, cy) * 0.88;
         
-        if (!W || !H) {
+        // Skip if canvas has no size
+        if (!W || !H || W === 0 || H === 0) {
             radarRAF = requestAnimationFrame(draw);
             return;
         }
         
+        const cx = W / 2;
+        const cy = H / 2;
+        const R = Math.min(cx, cy) * 0.88;
+        
+        // Update radar rotation
         phA += 0.007;
         needleO += (BASE_OM * (1 + Math.sin(phA) * 0.35) - needleO) * 0.028;
         needleA = (needleA + needleO) % (Math.PI * 2);
+        
+        // Update trail
         trail[trailPtr] = needleA;
         trailPtr = (trailPtr + 1) % TRAIL_CAP;
         
+        // Clear canvas with slight fade
         ctx.fillStyle = 'rgba(2,10,2,0.18)';
         ctx.fillRect(0, 0, W, H);
         
+        // Draw trail (the sweeping effect)
         for (let i = 0; i < TRAIL_CAP - 1; i++) {
             const alpha = Math.pow(1 - i / TRAIL_CAP, 2.2) * 0.12;
             if (alpha < 0.002) break;
+            
             const s = needleA - (i + 1) * needleO;
             const e = needleA - i * needleO;
+            
             ctx.save();
             ctx.translate(cx, cy);
             ctx.beginPath();
@@ -2486,35 +2542,48 @@ function radarLoop(cv) {
             ctx.restore();
         }
         
+        // Draw the main radar needle
         ctx.save();
         ctx.translate(cx, cy);
         ctx.rotate(needleA);
+        
+        // Glow effect
         ctx.shadowColor = 'rgba(0,229,255,0.95)';
         ctx.shadowBlur = 12;
+        
+        // Gradient line
         const lg = ctx.createLinearGradient(0, 0, R, 0);
         lg.addColorStop(0, 'rgba(0,229,255,1)');
         lg.addColorStop(0.8, 'rgba(0,229,255,0.4)');
         lg.addColorStop(1, 'rgba(0,229,255,0)');
+        
         ctx.beginPath();
         ctx.moveTo(3, 0);
         ctx.lineTo(R, 0);
         ctx.strokeStyle = lg;
         ctx.lineWidth = 2;
         ctx.stroke();
+        
+        // Draw center dot
         ctx.shadowBlur = 20;
         ctx.beginPath();
         ctx.rect(-4, -4, 8, 8);
         ctx.fillStyle = '#00e5ff';
         ctx.fill();
+        
         ctx.restore();
         
+        // Draw dots glow effect when hit by radar
         rdots.forEach((d, di) => {
             const px = d.x / 100 * W;
             const py = d.y / 100 * H;
+            
             let da = Math.atan2(py - cy, px - cx);
             if (da < 0) da += Math.PI * 2;
+            
             let diff = needleA - da;
             if (diff < 0) diff += Math.PI * 2;
+            
             const age = dotGlow.get(di) ?? 999;
             
             if (diff < 0.18 && age > 30) {
@@ -2533,12 +2602,15 @@ function radarLoop(cv) {
                 const t = age / 55;
                 const ga = (1 - t) * (1 - t) * 0.9;
                 if (ga < 0.01) return;
+                
                 const col = d.type === 'purple' ? '191,90,242' :
                            d.type === 'red' ? '255,45,85' :
                            d.type === 'lime' ? '191,255,0' : '0,229,255';
+                
                 const gr = ctx.createRadialGradient(px, py, 0, px, py, 16 * (1 - t) + 3);
                 gr.addColorStop(0, `rgba(${col},${ga})`);
                 gr.addColorStop(1, `rgba(${col},0)`);
+                
                 ctx.beginPath();
                 ctx.arc(px, py, 16 * (1 - t) + 3, 0, Math.PI * 2);
                 ctx.fillStyle = gr;
@@ -2571,7 +2643,7 @@ function updateUserBadge() {
 }
 
 // ============================================
-// NAVIGATION HANDLER - FIXED
+// NAVIGATION HANDLER
 // ============================================
 function initNavigation() {
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -2579,16 +2651,12 @@ function initNavigation() {
             e.preventDefault();
             const page = this.dataset.page;
             if (page) {
-                // Hapus active class dari semua nav item
                 document.querySelectorAll('.nav-item').forEach(nav => {
                     nav.classList.remove('active');
                 });
-                // Tambah active class ke yang diklik
                 this.classList.add('active');
                 
-                // Navigasi ke halaman
                 if (page === 'spill') {
-                    // Sudah di halaman spill
                     window.location.href = 'spill.html';
                 } else {
                     window.location.href = page + '.html';
@@ -2602,6 +2670,8 @@ function initNavigation() {
 // INIT
 // ============================================
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('[App] Starting initialization...');
+    
     // Update user badge
     updateUserBadge();
     
@@ -2612,18 +2682,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     simulateOnlineUsers();
     setInterval(simulateOnlineUsers, 30000);
     
-    // Init radar
-    initRadar();
+    // Small delay to ensure DOM is ready
+    setTimeout(() => {
+        // Init radar
+        initRadar();
+    }, 100);
     
     // Panggil render spills dari spill-generator.js
     if (typeof window.renderSpills === 'function') {
         window.renderSpills();
+    } else {
+        console.warn('[App] renderSpills not available');
     }
     
-    // Event listeners
-    $('#vibeFemaleBtn')?.addEventListener('click', () => startVibeCheck('heart'));
-    $('#vibeMaleBtn')?.addEventListener('click', () => startVibeCheck('spade'));
+    // Event listeners for vibe buttons
+    const femaleBtn = $('#vibeFemaleBtn');
+    const maleBtn = $('#vibeMaleBtn');
     
+    if (femaleBtn) {
+        femaleBtn.addEventListener('click', () => startVibeCheck('heart'));
+        console.log('[App] Female button listener attached');
+    } else {
+        console.error('[App] Female button not found!');
+    }
+    
+    if (maleBtn) {
+        maleBtn.addEventListener('click', () => startVibeCheck('spade'));
+        console.log('[App] Male button listener attached');
+    } else {
+        console.error('[App] Male button not found!');
+    }
+    
+    // Other event listeners
     $('#whisperBtn')?.addEventListener('click', openWsModal);
     
     $('#refreshBtn')?.addEventListener('click', () => {
@@ -2694,6 +2784,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (timerInterval) clearInterval(timerInterval);
         if (waitingTimer) clearInterval(waitingTimer);
     });
+    
+    console.log('[App] Initialization complete');
 });
 
 // ============================================
